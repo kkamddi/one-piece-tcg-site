@@ -195,7 +195,6 @@ export default function App() {
             <aside className={`border ${panelClass} rounded-2xl p-3`}>
               <div className={`mb-3 border ${subtleClass} rounded-xl px-4 py-3`}>
                 <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Series</div>
-                <div className={`mt-2 text-sm ${textMuted}`}>원하는 시리즈를 고르면 카드 앨범처럼 볼 수 있어.</div>
               </div>
               <div className="space-y-2">
                 {seriesData.map((series) => {
