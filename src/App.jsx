@@ -4,6 +4,7 @@ import { fetchShopRegions, fetchShops } from './api/shops';
 import cardsData from './data/cards.json';
 import seriesData from './data/series.json';
 import shopsData from './data/shops.json';
+import topicsData from './data/topics.json';
 
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
@@ -172,11 +173,6 @@ export default function App() {
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
   const deckCount = useMemo(() => deckEntries.filter((entry) => entry.categoryKo !== '리더').reduce((sum, entry) => sum + entry.count, 0), [deckEntries]);
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
-  const homeFeaturedSeries = useMemo(() => seriesData.slice(0, 6), []);
-  const homeFeaturedCards = useMemo(
-    () => cardsData.filter((card) => ['SP', 'SEC', 'L', 'SR'].includes(card.rarity)).slice(0, 8),
-    []
-  );
   const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
   const homeShopCounts = useMemo(
     () => ({
@@ -425,25 +421,45 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className={`border ${panelClass} rounded-2xl p-5`}>
-                    <div className="mb-4 flex justify-end">
-                      <button type="button" onClick={() => setViewMode('archive')} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>전체 도감 보기</button>
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
-                      {homeFeaturedCards.map((card) => (
-                        <button key={card.id} type="button" onClick={() => openCard(card.id)} className={`overflow-hidden rounded-xl border text-left ${cardClass}`}>
-                          <div className={`aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
-                            <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain" />
-                          </div>
-                          <div className={`border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className={`text-[11px] font-bold ${textMuted}`}>{card.cardNo}</span>
-                              <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
+                  <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+                    <div className={`border ${panelClass} rounded-2xl p-5`}>
+                      <div className="space-y-3">
+                        {topicsData.map((topic) => (
+                          <a
+                            key={topic.id}
+                            href={topic.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`block rounded-xl border px-4 py-4 transition hover:-translate-y-0.5 ${cardClass}`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${subtleClass}`}>{topic.category}</span>
+                              <span className={`text-xs ${textMuted}`}>{topic.date}</span>
                             </div>
-                            <div className="mt-2 line-clamp-2 text-sm font-extrabold">{card.name}</div>
-                          </div>
+                            <div className="mt-3 text-sm font-extrabold leading-6">{topic.title}</div>
+                          </a>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        <a href="https://onepiece-cardgame.kr/topics.do" target="_blank" rel="noreferrer" className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>공식 소식 더보기</a>
+                      </div>
+                    </div>
+
+                    <div className={`border ${panelClass} rounded-2xl p-5`}>
+                      <div className="grid gap-3">
+                        <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">전체 도감 보기</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>시리즈 전체 카드 목록으로 이동</div>
                         </button>
-                      ))}
+                        <button type="button" onClick={() => openSeriesArchive('OP12')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">OP12 바로 보기</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>최신 관심 시리즈 빠르게 열기</div>
+                        </button>
+                        <button type="button" onClick={() => { setViewMode('shops'); setShopType('official'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">공식 점포 바로 찾기</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>오프라인 구매처 목록으로 이동</div>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </section>
