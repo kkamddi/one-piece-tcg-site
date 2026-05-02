@@ -32,12 +32,18 @@ export default function App() {
     setLoading(true);
 
     const load = async () => {
-      const nextCards = searchKeyword.trim()
+      const fetchedCards = searchKeyword.trim()
         ? await searchCards(searchKeyword)
         : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity });
 
+      const filteredCards = fetchedCards.filter((card) => {
+        const matchesSeries = card.series === selectedSeries;
+        const matchesRarity = activeRarity === 'ALL' || card.rarity === activeRarity;
+        return matchesSeries && matchesRarity;
+      });
+
       if (alive) {
-        setCards(nextCards);
+        setCards(filteredCards);
         setLoading(false);
       }
     };
@@ -58,17 +64,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="border-b border-slate-800 bg-slate-950/90 px-5 py-6 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r">
-          <div className="mb-6">
+      <div className="mx-auto grid min-h-screen max-w-[1800px] lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="border-b border-slate-800 bg-slate-950/95 px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r">
+          <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-300">ONE PIECE TCG</p>
-            <h1 className="mt-3 text-3xl font-bold">카드 도감</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-              좌측 시리즈 선택 → 우측 카드 확인. 시세는 우선 준비 중으로 표기.
-            </p>
+            <h1 className="mt-2 text-3xl font-bold">원피스 카드 도감</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-400">한글판 기준 시리즈 / 카드 리스트. 시세는 우선 준비 중.</p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {seriesData.map((series) => {
               const active = series.id === selectedSeries;
               return (
@@ -80,45 +84,47 @@ export default function App() {
                     setSearchKeyword('');
                     setActiveRarity('ALL');
                   }}
-                  className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
+                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
                     active
                       ? 'border-rose-400/70 bg-rose-500/10 shadow-[0_0_0_1px_rgba(251,113,133,0.18)]'
                       : 'border-slate-800 bg-slate-900/70 hover:border-slate-700 hover:bg-slate-900'
                   }`}
                 >
-                  <div className="text-sm font-semibold text-rose-200">{series.id}</div>
-                  <div className="mt-1 font-semibold text-white">{series.name}</div>
-                  <div className="mt-1 text-xs text-slate-400">{series.kind}</div>
+                  <div className="text-xs font-semibold tracking-wide text-rose-200">{series.id}</div>
+                  <div className="mt-1 text-base font-bold text-white">{series.koName}</div>
+                  <div className="mt-1 text-[11px] text-slate-400">{series.enName}</div>
+                  <div className="mt-1 text-[11px] text-slate-500">{series.kindKo}</div>
                 </button>
               );
             })}
           </div>
         </aside>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
-          <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-2xl shadow-black/20">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <main className="px-4 py-5 sm:px-6 lg:px-8">
+          <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-5 shadow-2xl shadow-black/20">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-300">선택된 시리즈</p>
-                <h2 className="mt-3 text-3xl font-bold text-white">{currentSeries?.id} · {currentSeries?.name}</h2>
+                <h2 className="mt-2 text-3xl font-bold text-white">{currentSeries?.koName}</h2>
+                <div className="mt-1 text-sm text-slate-400">{currentSeries?.enName}</div>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">{currentSeries?.description}</p>
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
-                <span className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-slate-200">총 {cards.length}장</span>
+                <span className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-slate-200">표시 카드 {cards.length}장</span>
                 <span className="rounded-full border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-rose-200">시세: 준비 중</span>
               </div>
             </div>
           </section>
 
-          <section className="mt-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-5">
-            <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+          <section className="mt-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
+            <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-300">카드 검색</span>
+                <span className="mb-2 block text-sm font-medium text-slate-300">현재 시리즈 내 카드 검색</span>
                 <input
                   value={searchKeyword}
                   onChange={(event) => setSearchKeyword(event.target.value)}
                   placeholder="카드명 또는 카드번호 검색"
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none ring-0 transition placeholder:text-slate-500 focus:border-rose-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-rose-400"
                 />
               </label>
 
@@ -132,7 +138,7 @@ export default function App() {
                         key={rarity}
                         type="button"
                         onClick={() => setActiveRarity(rarity)}
-                        className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                        className={`rounded-full border px-3.5 py-2 text-sm font-medium transition ${
                           active
                             ? 'border-rose-400/70 bg-rose-500/10 text-rose-100'
                             : 'border-slate-700 bg-slate-950 text-slate-300 hover:border-slate-500'
@@ -147,23 +153,23 @@ export default function App() {
             </div>
           </section>
 
-          <section className="mt-6 space-y-6">
+          <section className="mt-5 space-y-5">
             {loading ? (
               <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8 text-center text-slate-400">불러오는 중...</div>
             ) : groupedCards.length ? (
               groupedCards.map((group) => (
                 <div key={group.rarity} className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white">{group.rarity}</h3>
+                    <h3 className="text-lg font-bold text-white">{group.rarity}</h3>
                     <span className="text-sm text-slate-400">{group.cards.length}장</span>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                     {group.cards.map((card) => (
                       <button
                         key={card.id}
                         type="button"
                         onClick={() => openCard(card.id)}
-                        className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/80 text-left transition hover:-translate-y-1 hover:border-rose-400/50 hover:shadow-lg hover:shadow-rose-900/20"
+                        className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80 text-left transition hover:-translate-y-1 hover:border-rose-400/50 hover:shadow-lg hover:shadow-rose-900/20"
                       >
                         <div className="aspect-[5/7] overflow-hidden bg-slate-950">
                           <img
@@ -173,24 +179,22 @@ export default function App() {
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <div className="space-y-3 p-4">
+                        <div className="space-y-2.5 p-3.5">
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-xs font-semibold text-slate-400">{card.cardNo}</span>
-                            <span className="rounded-full bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200">{card.rarity}</span>
+                            <span className="text-[11px] font-semibold text-slate-400">{card.cardNo}</span>
+                            <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-rose-200">{card.rarity}</span>
                           </div>
                           <div>
-                            <div className="text-lg font-bold text-white">{card.name}</div>
-                            <div className="mt-1 text-sm text-slate-400">{card.category} · {card.color}</div>
+                            <div className="line-clamp-2 text-sm font-bold text-white">{card.name}</div>
+                            {card.nameEn ? <div className="mt-0.5 text-[11px] text-slate-500">{card.nameEn}</div> : null}
+                            <div className="mt-1 text-[11px] text-slate-400">{card.categoryKo} · {card.colorKo}</div>
                           </div>
-                          <dl className="grid grid-cols-2 gap-3 text-sm">
-                            <Stat label="비용" value={card.cost} />
-                            <Stat label="파워" value={card.power} />
-                            <Stat label="카운터" value={card.counter} />
-                            <Stat label="타입" value={card.type} compact />
+                          <dl className="grid grid-cols-2 gap-2 text-xs">
+                            <Stat label="비용" value={card.cost} compactSize />
+                            <Stat label="파워" value={card.power} compactSize />
+                            <Stat label="카운터" value={card.counter} compactSize />
+                            <Stat label="속성" value={card.attributeKo} compactSize />
                           </dl>
-                          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-400">
-                            시세: 준비 중
-                          </div>
                         </div>
                       </button>
                     ))}
@@ -204,18 +208,16 @@ export default function App() {
         </main>
       </div>
 
-      {selectedCard ? (
-        <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
-      ) : null}
+      {selectedCard ? <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} /> : null}
     </div>
   );
 }
 
-function Stat({ label, value, compact = false }) {
+function Stat({ label, value, compact = false, compactSize = false }) {
   return (
     <div className={`rounded-2xl border border-slate-800 bg-slate-950/80 px-3 py-2 ${compact ? 'col-span-2' : ''}`}>
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium text-slate-100">{value}</dd>
+      <dt className={`font-semibold uppercase tracking-[0.18em] text-slate-500 ${compactSize ? 'text-[10px]' : 'text-[11px]'}`}>{label}</dt>
+      <dd className={`mt-1 break-words font-medium text-slate-100 ${compactSize ? 'text-xs' : 'text-sm'}`}>{value}</dd>
     </div>
   );
 }
@@ -253,7 +255,8 @@ function CardModal({ card, onClose }) {
               <div>
                 <div className="text-sm font-semibold text-rose-300">{card.cardNo}</div>
                 <h3 className="mt-2 text-3xl font-bold text-white">{card.name}</h3>
-                <p className="mt-2 text-sm text-slate-400">{card.series} · {card.seriesName}</p>
+                {card.nameEn ? <div className="mt-1 text-sm text-slate-500">{card.nameEn}</div> : null}
+                <p className="mt-2 text-sm text-slate-400">{card.seriesName} · {card.seriesNameEn}</p>
               </div>
               <button
                 type="button"
@@ -266,12 +269,12 @@ function CardModal({ card, onClose }) {
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <Stat label="등급" value={card.rarity} />
-              <Stat label="분류" value={card.category} />
-              <Stat label="색상" value={card.color} />
+              <Stat label="종류" value={card.categoryKo} />
+              <Stat label="색상" value={card.colorKo} />
               <Stat label="비용" value={card.cost} />
               <Stat label="파워" value={card.power} />
               <Stat label="카운터" value={card.counter} />
-              <Stat label="속성" value={card.attribute} />
+              <Stat label="속성" value={card.attributeKo} />
               <Stat label="타입" value={card.type} compact />
             </div>
 
@@ -294,9 +297,6 @@ function CardModal({ card, onClose }) {
               >
                 공식 정보 보기
               </a>
-              <div className="inline-flex items-center rounded-full border border-slate-700 px-4 py-3 text-sm text-slate-300">
-                출처 링크 포함 / 이미지 없으면 placeholder 표시
-              </div>
             </div>
           </div>
         </div>

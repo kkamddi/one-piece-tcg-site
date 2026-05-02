@@ -1,107 +1,152 @@
 [
   {
     "id": "OP12",
-    "name": "LEGACY OF THE MASTER",
-    "kind": "BOOSTER PACK",
+    "koName": "사제의 연",
+    "enName": "LEGACY OF THE MASTER",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-12] 부스터 팩 사제의 연",
     "officialSeriesKeyword": "OP-12",
-    "description": "마스터 계보 테마 중심의 부스터 팩"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP11",
-    "name": "A FIST OF DIVINE SPEED",
-    "kind": "BOOSTER PACK",
+    "koName": "신속의 권",
+    "enName": "A FIST OF DIVINE SPEED",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-11] 부스터 팩 신속의 권",
     "officialSeriesKeyword": "OP-11",
-    "description": "고속 전개와 전투 카드가 두드러지는 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP10",
-    "name": "ROYAL BLOOD",
-    "kind": "BOOSTER PACK",
+    "koName": "왕족의 혈통",
+    "enName": "ROYAL BLOOD",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-10] 부스터 팩 왕족의 혈통",
     "officialSeriesKeyword": "OP-10",
-    "description": "왕가·혈통 테마 카드가 포함된 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP09",
-    "name": "EMPERORS IN THE NEW WORLD",
-    "kind": "BOOSTER PACK",
+    "koName": "새로운 황제",
+    "enName": "EMPERORS IN THE NEW WORLD",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-09] 부스터 팩 새로운 황제",
     "officialSeriesKeyword": "OP-09",
-    "description": "사황 중심 인기 카드가 많은 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP08",
-    "name": "TWO LEGENDS",
-    "kind": "BOOSTER PACK",
+    "koName": "두 전설",
+    "enName": "TWO LEGENDS",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-08] 부스터 팩 두 전설",
     "officialSeriesKeyword": "OP-08",
-    "description": "복수 리더와 전설 캐릭터 중심 확장팩"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP07",
-    "name": "500 YEARS IN THE FUTURE",
-    "kind": "BOOSTER PACK",
+    "koName": "500년 후의 미래",
+    "enName": "500 YEARS IN THE FUTURE",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-07] 부스터 팩 500년 후의 미래",
     "officialSeriesKeyword": "OP-07",
-    "description": "미래/에그헤드 테마가 반영된 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP06",
-    "name": "WINGS OF THE CAPTAIN",
-    "kind": "BOOSTER PACK",
+    "koName": "쌍벽의 패자",
+    "enName": "WINGS OF THE CAPTAIN",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-06] 부스터 팩 쌍벽의 패자",
     "officialSeriesKeyword": "OP-06",
-    "description": "선장 보조축 카드가 두드러지는 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP05",
-    "name": "AWAKENING OF THE NEW ERA",
-    "kind": "BOOSTER PACK",
+    "koName": "신시대의 주역",
+    "enName": "AWAKENING OF THE NEW ERA",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-05] 부스터 팩 신시대의 주역",
     "officialSeriesKeyword": "OP-05",
-    "description": "수집가 수요가 높은 인기 확장팩"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP04",
-    "name": "KINGDOMS OF INTRIGUE",
-    "kind": "BOOSTER PACK",
+    "koName": "모략의 왕국",
+    "enName": "KINGDOMS OF INTRIGUE",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-04] 부스터 팩 모략의 왕국",
     "officialSeriesKeyword": "OP-04",
-    "description": "알라바스타·드레스로자 중심 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP03",
-    "name": "PILLARS OF STRENGTH",
-    "kind": "BOOSTER PACK",
+    "koName": "강대한 적",
+    "enName": "PILLARS OF STRENGTH",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-03] 부스터 팩 강대한 적",
     "officialSeriesKeyword": "OP-03",
-    "description": "강한 축 카드가 다수 포함된 시리즈"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP02",
-    "name": "PARAMOUNT WAR",
-    "kind": "BOOSTER PACK",
+    "koName": "정상결전",
+    "enName": "PARAMOUNT WAR",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-02] 부스터 팩 정상결전",
     "officialSeriesKeyword": "OP-02",
-    "description": "정상결전 테마 중심 확장팩"
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "OP01",
-    "name": "ROMANCE DAWN",
-    "kind": "BOOSTER PACK",
+    "koName": "ROMANCE DAWN",
+    "enName": "ROMANCE DAWN",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-01] 부스터 팩 ROMANCE DAWN",
     "officialSeriesKeyword": "OP-01",
-    "description": "원피스 TCG 첫 번째 메인 부스터 팩"
+    "description": "공식 한글 카드 리스트 기준 첫 번째 메인 부스터 팩"
   },
   {
     "id": "ST01",
-    "name": "Straw Hat Crew",
-    "kind": "STARTER DECK",
+    "koName": "밀짚모자 일당",
+    "enName": "Straw Hat Crew",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-01] 스타트 덱 밀짚모자 일당",
     "officialSeriesKeyword": "ST-01",
-    "description": "입문용 스타터 덱 시리즈"
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
   },
   {
     "id": "ST02",
-    "name": "Worst Generation",
-    "kind": "STARTER DECK",
+    "koName": "최악의 세대",
+    "enName": "Worst Generation",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-02] 스타트 덱 최악의 세대",
     "officialSeriesKeyword": "ST-02",
-    "description": "초기 스타터 덱 라인업"
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
   },
   {
     "id": "ST03",
-    "name": "The Seven Warlords of the Sea",
-    "kind": "STARTER DECK",
+    "koName": "왕의 부하 칠무해",
+    "enName": "The Seven Warlords of the Sea",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-03] 스타트 덱 왕의 부하 칠무해",
     "officialSeriesKeyword": "ST-03",
-    "description": "칠무해 축 스타터 덱"
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
   }
 ]

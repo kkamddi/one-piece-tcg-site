@@ -8,9 +8,37 @@ const rootDir = path.resolve(__dirname, '..');
 const cardsPath = path.join(rootDir, 'src/data/cards.json');
 const seriesPath = path.join(rootDir, 'src/data/series.json');
 
-const OFFICIAL_BASE = 'https://en.onepiece-cardgame.com/cardlist/';
-const USER_AGENT = 'one-piece-tcg-site-sync/0.1 (+internal tooling)';
-const REQUEST_DELAY_MS = 1500;
+const OFFICIAL_BASE = 'https://onepiece-cardgame.kr';
+const CARD_LIST_URL = `${OFFICIAL_BASE}/cardlist.do`;
+const USER_AGENT = 'one-piece-tcg-site-sync/0.2 (+internal tooling)';
+const REQUEST_DELAY_MS = 1200;
+
+const colorMap = {
+  적색: 'Red',
+  녹색: 'Green',
+  청색: 'Blue',
+  자색: 'Purple',
+  흑색: 'Black',
+  황색: 'Yellow',
+  다색: 'Multicolor'
+};
+
+const categoryMap = {
+  리더: 'LEADER',
+  캐릭터: 'CHARACTER',
+  스테이지: 'STAGE',
+  이벤트: 'EVENT'
+};
+
+const attributeMap = {
+  특수: 'Special',
+  사격: 'Ranged',
+  참격: 'Slash',
+  타격: 'Strike',
+  지혜: 'Wisdom',
+  '': '-',
+  '-': '-'
+};
 
 async function delay(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -37,7 +65,7 @@ async function readJson(filePath) {
 }
 
 async function checkRobotsTxt() {
-  const robotsUrl = new URL('/robots.txt', OFFICIAL_BASE).toString();
+  const robotsUrl = `${OFFICIAL_BASE}/robots.txt`;
   try {
     const robots = await fetchText(robotsUrl);
     console.log('[sync] robots.txt fetched');
@@ -48,94 +76,103 @@ async function checkRobotsTxt() {
   }
 }
 
-function extractSeriesCandidates(html) {
-  const ids = [...new Set([...html.matchAll(/\[(OP-\d+|ST-\d+|EB-\d+|PRB-\d+)\]/g)].map((match) => match[1]))];
-
-  return ids.map((keyword) => ({
-    id: keyword.replace('-', ''),
-    officialSeriesKeyword: keyword,
-    name: '',
-    kind: 'UNKNOWN',
-    description: '공식 사이트에서 동기화 예정'
-  }));
+function decodeHtml(value) {
+  return value
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
 }
 
-function buildOfficialSearchUrl(cardNo) {
-  return `https://en.onepiece-cardgame.com/cardlist/?freewords=${encodeURIComponent(cardNo)}&search=true`;
+function extractField(block, className) {
+  const regex = new RegExp(`<p class="${className}">([\\s\\S]*?)(?=<p class=|</button>)`);
+  const match = block.match(regex);
+  if (!match) return '';
+
+  return decodeHtml(match[1])
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\r/g, '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join('\n')
+    .replace(/ +/g, ' ')
+    .trim();
 }
 
-function normalizeCard(raw) {
-  return {
-    id: raw.cardNo,
-    cardNo: raw.cardNo,
-    name: raw.name,
-    series: raw.series,
-    seriesName: raw.seriesName,
-    rarity: raw.rarity,
-    category: raw.category,
-    color: raw.color,
-    cost: raw.cost,
-    power: raw.power,
-    counter: raw.counter,
-    attribute: raw.attribute,
-    type: raw.type,
-    effect: raw.effect,
-    imageUrl: raw.imageUrl ?? null,
-    officialUrl: raw.officialUrl ?? buildOfficialSearchUrl(raw.cardNo),
-    marketPrice: null
-  };
+function parseCardsFromHtml(html, series) {
+  const blocks = [...html.matchAll(/<button class="item">([\s\S]*?)<\/button>/g)].map((match) => match[1]);
+  const seen = new Set();
+
+  return blocks
+    .map((block) => {
+      const rawCardNo = extractField(block, 'cardNumber');
+      const cardNo = rawCardNo.split('_')[0]?.trim();
+      if (!cardNo || seen.has(cardNo)) return null;
+      seen.add(cardNo);
+
+      const imageMatch = block.match(/<img class="image" src="([^"]+)"/);
+      const categoryKo = extractField(block, 'cardType');
+      const colorKo = extractField(block, 'cardColor');
+      const attributeKo = extractField(block, 'cardAttr') || '-';
+
+      return {
+        id: cardNo,
+        cardNo,
+        name: extractField(block, 'cardName'),
+        nameEn: null,
+        series: series.id,
+        seriesName: series.koName,
+        seriesNameEn: series.enName,
+        rarity: extractField(block, 'rarity'),
+        category: categoryMap[categoryKo] ?? categoryKo.toUpperCase(),
+        categoryKo,
+        color: colorMap[colorKo] ?? colorKo,
+        colorKo,
+        cost: extractField(block, 'life') || '-',
+        power: extractField(block, 'power') || '-',
+        counter: extractField(block, 'cardCounter') || '-',
+        attribute: attributeMap[attributeKo] ?? attributeKo,
+        attributeKo,
+        type: extractField(block, 'cardPoint') || '-',
+        effect: extractField(block, 'cardText') || '효과 정보 준비 중',
+        imageUrl: imageMatch ? `${OFFICIAL_BASE}${imageMatch[1]}` : null,
+        officialUrl: `${CARD_LIST_URL}?freewords=${encodeURIComponent(cardNo)}&search=true`,
+        marketPrice: null
+      };
+    })
+    .filter(Boolean);
 }
 
 async function fetchSeriesCards(series) {
-  const url = `${OFFICIAL_BASE}?freewords=${encodeURIComponent(series.officialSeriesKeyword)}&search=true`;
-  console.log(`[sync] fetch series ${series.id} -> ${url}`);
-  await fetchText(url);
+  const url = `${CARD_LIST_URL}?series=${encodeURIComponent(series.queryLabel)}&search=true`;
+  console.log(`[sync] fetch series ${series.id}`);
+  const html = await fetchText(url);
   await delay(REQUEST_DELAY_MS);
-
-  // TODO: replace scaffold with real parser after selector mapping is finalized.
-  const cards = [];
-
-  if (cards.length === 0) {
-    console.warn(`[sync] no parsed cards yet for ${series.id}; parser scaffold only`);
-  }
-
-  return cards.map(normalizeCard);
+  return parseCardsFromHtml(html, series);
 }
 
 async function main() {
-  console.log('[sync] starting official card sync scaffold');
+  console.log('[sync] starting official card sync');
   await checkRobotsTxt();
 
-  const existingSeries = await readJson(seriesPath);
-  const landingHtml = await fetchText(OFFICIAL_BASE);
-  await delay(REQUEST_DELAY_MS);
-
-  const discoveredSeries = extractSeriesCandidates(landingHtml);
-  console.log(`[sync] discovered series candidates: ${discoveredSeries.length}`);
-
-  const existingSeriesMap = new Map(existingSeries.map((item) => [item.officialSeriesKeyword, item]));
-  const mergedSeries = discoveredSeries.map((item) => existingSeriesMap.get(item.officialSeriesKeyword) ?? item);
-  const selectedSeries = mergedSeries.length ? mergedSeries : existingSeries;
-
+  const series = await readJson(seriesPath);
   const collectedCards = [];
-  for (const series of selectedSeries.slice(0, 3)) {
+
+  for (const item of series) {
     try {
-      const cards = await fetchSeriesCards(series);
+      const cards = await fetchSeriesCards(item);
       collectedCards.push(...cards);
+      console.log(`[sync] ${item.id}: ${cards.length} cards`);
     } catch (error) {
-      console.warn(`[sync] failed for ${series.id}:`, error.message);
+      console.warn(`[sync] failed for ${item.id}:`, error.message);
     }
   }
 
   await mkdir(path.dirname(cardsPath), { recursive: true });
-  await writeFile(seriesPath, `${JSON.stringify(selectedSeries, null, 2)}\n`, 'utf8');
-
-  if (collectedCards.length > 0) {
-    await writeFile(cardsPath, `${JSON.stringify(collectedCards, null, 2)}\n`, 'utf8');
-    console.log(`[sync] wrote ${collectedCards.length} cards`);
-  } else {
-    console.log('[sync] parser scaffold completed; existing cards.json kept as-is because no cards were parsed');
-  }
+  await writeFile(cardsPath, `${JSON.stringify(collectedCards, null, 2)}\n`, 'utf8');
+  console.log(`[sync] wrote ${collectedCards.length} cards`);
 }
 
 main().catch((error) => {
