@@ -4,7 +4,6 @@ import { fetchShopRegions, fetchShops } from './api/shops';
 import cardsData from './data/cards.json';
 import seriesData from './data/series.json';
 import shopsData from './data/shops.json';
-import topicsData from './data/topics.json';
 
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
@@ -421,45 +420,20 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
-                    <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="space-y-3">
-                        {topicsData.map((topic) => (
-                          <a
-                            key={topic.id}
-                            href={topic.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className={`block rounded-xl border px-4 py-4 transition hover:-translate-y-0.5 ${cardClass}`}
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${subtleClass}`}>{topic.category}</span>
-                              <span className={`text-xs ${textMuted}`}>{topic.date}</span>
-                            </div>
-                            <div className="mt-3 text-sm font-extrabold leading-6">{topic.title}</div>
-                          </a>
-                        ))}
-                      </div>
-                      <div className="mt-4 flex justify-end">
-                        <a href="https://onepiece-cardgame.kr/topics.do" target="_blank" rel="noreferrer" className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>공식 소식 더보기</a>
-                      </div>
-                    </div>
-
-                    <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="grid gap-3">
-                        <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">전체 도감 보기</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>시리즈 전체 카드 목록으로 이동</div>
-                        </button>
-                        <button type="button" onClick={() => openSeriesArchive('OP12')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">OP12 바로 보기</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>최신 관심 시리즈 빠르게 열기</div>
-                        </button>
-                        <button type="button" onClick={() => { setViewMode('shops'); setShopType('official'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">공식 점포 바로 찾기</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>오프라인 구매처 목록으로 이동</div>
-                        </button>
-                      </div>
+                  <div className={`border ${panelClass} rounded-2xl p-5`}>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                        <div className="text-base font-black">전체 도감 보기</div>
+                        <div className={`mt-1 text-sm ${textMuted}`}>시리즈 전체 카드 목록으로 이동</div>
+                      </button>
+                      <button type="button" onClick={() => openSeriesArchive('OP12')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                        <div className="text-base font-black">OP12 바로 보기</div>
+                        <div className={`mt-1 text-sm ${textMuted}`}>최신 관심 시리즈 빠르게 열기</div>
+                      </button>
+                      <button type="button" onClick={() => { setViewMode('shops'); setShopType('official'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                        <div className="text-base font-black">공식 점포 바로 찾기</div>
+                        <div className={`mt-1 text-sm ${textMuted}`}>오프라인 구매처 목록으로 이동</div>
+                      </button>
                     </div>
                   </div>
                 </section>

@@ -27,6 +27,17 @@ input {
   font: inherit;
 }
 
+button,
+a,
+[role='button'] {
+  cursor: pointer;
+}
+
+:disabled,
+[aria-disabled='true'] {
+  cursor: default;
+}
+
 ::selection {
   background: rgba(201, 77, 53, 0.18);
 }
