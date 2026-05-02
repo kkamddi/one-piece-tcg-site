@@ -376,11 +376,11 @@ export default function App() {
   return (
     <div className={isDark ? 'dark' : ''}>
       <div className={`min-h-screen ${shellClass}`}>
-        <div className="mx-auto max-w-[1880px] px-4 py-5 sm:px-6 lg:px-8">
-          <header className={`mb-5 border ${panelClass} rounded-2xl p-4`}>
+        <div className="mx-auto max-w-[1880px] px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
+          <header className={`mb-4 border ${panelClass} rounded-2xl p-4 sm:mb-5`}>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-4">
-                <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className={`h-14 w-auto object-contain ${isDark ? 'brightness-0 invert' : ''}`} onError={placeholderImage} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className={`h-10 w-auto object-contain sm:h-14 ${isDark ? 'brightness-0 invert' : ''}`} onError={placeholderImage} />
                 <div>
                   <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#b6422e]">One Piece TCG Archive</div>
                 </div>
@@ -393,7 +393,7 @@ export default function App() {
             </div>
           </header>
 
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:mb-5 sm:flex-wrap">
             <TopTab active={viewMode === 'home'} onClick={() => setViewMode('home')} label="메인" />
             <TopTab active={viewMode === 'archive'} onClick={() => setViewMode('archive')} label="카드 도감" />
             <TopTab active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
@@ -401,8 +401,8 @@ export default function App() {
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
           </div>
 
-          <div className={`grid gap-5 ${viewMode === 'home' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
-            {viewMode === 'home' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
+          <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
+            {viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
               <div className={`mb-3 border ${subtleClass} rounded-xl px-4 py-3`}>
                 <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Category</div>
               </div>
@@ -464,6 +464,11 @@ export default function App() {
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>오프라인 구매처</h1>
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>공식 사이트 점포 데이터를 내부 API로 가져와서 지역별로 바로 볼 수 있게 바꿔뒀어.</p>
                       </>
+                    ) : viewMode === 'deck' ? (
+                      <>
+                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>덱 시뮬레이터</h1>
+                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>전체 카드 풀에서 색상/등급/종류로 골라서 덱을 만들 수 있어.</p>
+                      </>
                     ) : (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
@@ -486,18 +491,23 @@ export default function App() {
                         <Metric label="구분" value={activeShopType.label} className={subtleClass} />
                         <Metric label="지역" value={selectedRegion === '전체' ? '전국' : selectedRegion} className={subtleClass} />
                       </>
+                    ) : viewMode === 'deck' ? (
+                      <>
+                        <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} />
+                        <Metric label="리더" value={leaderCard ? leaderCard.name : '미지정'} className={subtleClass} />
+                        <Metric label="검색 대상" value={`${deckFilterCards.length}장`} className={subtleClass} />
+                      </>
                     ) : (
                       <>
                         <Metric label="공식 카드" value={`${officialSeriesCount}장`} className={subtleClass} />
                         <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} className={subtleClass} />
-                        {viewMode === 'deck' ? <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} /> : null}
                       </>
                     )}
                   </div>
                 </div>
               </section>
 
-              {viewMode !== 'shops' && viewMode !== 'home' ? (
+              {viewMode === 'archive' || viewMode === 'collection' ? (
                 <section className={`border ${panelClass} rounded-2xl p-4`}>
                   <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
                     <label className="block">
@@ -663,16 +673,15 @@ export default function App() {
                   </div>
                 </section>
               ) : viewMode === 'deck' ? (
-                <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-                  <div className={`border ${panelClass} rounded-2xl p-5`}>
-                    <div className="mb-4 flex items-center justify-between gap-3">
+                <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_360px]">
+                  <div className={`order-2 border ${panelClass} rounded-2xl p-4 sm:p-5 lg:order-1`}>
+                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>덱 시뮬레이터</h3>
-                        <p className={`mt-1 text-sm ${textMuted}`}>전체 카드 풀에서 색상/등급/종류로 골라서 덱을 만들 수 있어.</p>
                       </div>
                       <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>초기화</button>
                     </div>
-                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px] xl:gap-4">
                       <label className="block xl:col-span-1">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 검색</div>
                         <input
@@ -686,7 +695,7 @@ export default function App() {
                       <FilterSelect label="등급" value={deckFilterRarity} onChange={setDeckFilterRarity} options={deckRarityOptions} subtleClass={subtleClass} isDark={isDark} />
                       <FilterSelect label="종류" value={deckFilterCategory} onChange={setDeckFilterCategory} options={deckCategoryOptions} subtleClass={subtleClass} isDark={isDark} />
                     </div>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                       <div className={`text-sm ${textMuted}`}>전체 {deckFilterCards.length}장 · {safeDeckPage}/{deckPageCount} 페이지</div>
                       <button type="button" onClick={resetDeckFilters} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>필터 초기화</button>
                     </div>
@@ -706,14 +715,14 @@ export default function App() {
                       ))}
                     </div>
                     {pagedDeckCards.length ? null : <div className={`mt-4 border ${subtleClass} rounded-xl p-5 text-center ${textMuted}`}>조건에 맞는 카드가 없어.</div>}
-                    <div className="mt-4 flex items-center justify-center gap-2">
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                       <button type="button" onClick={() => setDeckPage((prev) => Math.max(1, prev - 1))} disabled={safeDeckPage === 1} className={`rounded-full border px-3 py-1.5 text-sm font-bold ${subtleClass} disabled:opacity-45`}>이전</button>
                       <span className={`px-3 text-sm font-bold ${textMuted}`}>{safeDeckPage} / {deckPageCount}</span>
                       <button type="button" onClick={() => setDeckPage((prev) => Math.min(deckPageCount, prev + 1))} disabled={safeDeckPage === deckPageCount} className={`rounded-full border px-3 py-1.5 text-sm font-bold ${subtleClass} disabled:opacity-45`}>다음</button>
                     </div>
                   </div>
 
-                  <div className={`border ${panelClass} rounded-2xl p-5`}>
+                  <div className={`order-1 border ${panelClass} rounded-2xl p-4 sm:p-5 lg:order-2 lg:sticky lg:top-4 lg:self-start`}>
                     <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>내 덱</h3>
                     <div className="mt-4 space-y-3">
                       <div className={`border ${subtleClass} rounded-xl p-4`}>
@@ -726,7 +735,7 @@ export default function App() {
                           <span className={`text-sm font-black ${deckCount > DECK_SIZE ? 'text-red-500' : ''}`}>{deckCount}/{DECK_SIZE}</span>
                         </div>
                       </div>
-                      <div className="max-h-[560px] space-y-2 overflow-y-auto pr-1">
+                      <div className="space-y-2 lg:max-h-[560px] lg:overflow-y-auto lg:pr-1">
                         {deckCards.length ? deckCards.map((entry) => (
                           <div key={entry.id} className={`border ${subtleClass} rounded-xl p-3`}>
                             <div className="flex items-start justify-between gap-3">
@@ -755,7 +764,7 @@ export default function App() {
               ) : (
                 <section className="space-y-4">
                   <div className={`border ${panelClass} rounded-2xl p-4`}>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
                       {SHOP_TYPES.map((type) => (
                         <ModeChip
                           key={type.id}
@@ -770,7 +779,7 @@ export default function App() {
                         />
                       ))}
                     </div>
-                    <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px_220px]">
+                    <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_220px] xl:gap-4">
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>매장명/주소 검색</div>
                         <input
@@ -813,7 +822,7 @@ export default function App() {
                   </div>
 
                   <div className={`border ${panelClass} rounded-2xl p-4`}>
-                    <div className="flex justify-end">
+                    <div className="flex justify-start sm:justify-end">
                       <a href={activeShopType.pageUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">공식 페이지 열기</a>
                     </div>
                   </div>
@@ -823,7 +832,7 @@ export default function App() {
                   ) : shops.length ? (
                     <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
                       {shops.map((shop) => (
-                        <article key={shop.id} className={`border ${cardClass} rounded-xl p-5`}>
+                        <article key={shop.id} className={`border ${cardClass} rounded-xl p-4 sm:p-5`}>
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">{shop.sourceLabel}</div>
@@ -872,7 +881,7 @@ function TopTab({ active, onClick, label }) {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-4 py-2.5 text-sm font-bold transition ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700 hover:border-[#cbbba8]'}`}
+      className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-bold transition ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700 hover:border-[#cbbba8]'}`}
     >
       {label}
     </button>
@@ -884,7 +893,7 @@ function ModeChip({ active, onClick, label }) {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3.5 py-2 text-sm font-semibold ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700'}`}
+      className={`shrink-0 rounded-full border px-3.5 py-2 text-sm font-semibold ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700'}`}
     >
       {label}
     </button>
