@@ -111,8 +111,8 @@ function parseCardsFromHtml(html, sourceSeries, seriesMap, seen = new Set()) {
       seen.add(cardNo);
 
       const prefixMatch = cardNo.match(/^([A-Z]+\d+)-/);
-      const targetSeriesId = prefixMatch?.[1] ?? sourceSeries.id;
-      const targetSeries = seriesMap.get(targetSeriesId) ?? sourceSeries;
+      const originSeriesId = prefixMatch?.[1] ?? sourceSeries.id;
+      const originSeries = seriesMap.get(originSeriesId) ?? sourceSeries;
 
       const imageMatch = block.match(/<img class="image" src="([^"]+)"/);
       const categoryKo = extractField(block, 'cardType');
@@ -120,13 +120,16 @@ function parseCardsFromHtml(html, sourceSeries, seriesMap, seen = new Set()) {
       const attributeKo = extractField(block, 'cardAttr') || '-';
 
       return {
-        id: cardNo,
+        id: `${sourceSeries.id}::${cardNo}`,
         cardNo,
         name: extractField(block, 'cardName'),
         nameEn: null,
-        series: targetSeries.id,
-        seriesName: targetSeries.koName,
-        seriesNameEn: targetSeries.enName,
+        series: sourceSeries.id,
+        seriesName: sourceSeries.koName,
+        seriesNameEn: sourceSeries.enName,
+        originSeries: originSeries.id,
+        originSeriesName: originSeries.koName,
+        originSeriesNameEn: originSeries.enName,
         rarity: extractField(block, 'rarity'),
         category: categoryMap[categoryKo] ?? categoryKo.toUpperCase(),
         categoryKo,
@@ -194,7 +197,7 @@ async function main() {
   }
 
   for (const card of collectedCards) {
-    uniqueCards.set(card.cardNo, card);
+    uniqueCards.set(card.id, card);
   }
 
   const finalCards = [...uniqueCards.values()];

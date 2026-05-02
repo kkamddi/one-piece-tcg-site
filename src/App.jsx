@@ -55,10 +55,11 @@ export default function App() {
       const filteredCards = fetchedCards.filter((card) => {
         const matchesSeries = card.series === selectedSeries;
         const matchesRarity = activeRarity === 'ALL' || card.rarity === activeRarity;
+        const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
         const keyword = searchKeyword.trim().toLowerCase();
         const matchesSearch =
           !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value).toLowerCase().includes(keyword));
-        return matchesSeries && matchesRarity && matchesSearch;
+        return matchesSeries && matchesRarity && matchesSearch && !hideBaseLeader;
       });
 
       if (alive) {
@@ -228,7 +229,12 @@ export default function App() {
                               </div>
                               <div>
                                 <div className="line-clamp-2 text-sm font-extrabold text-slate-900">{card.name}</div>
-                                <div className="mt-1 text-[11px] text-slate-500">{card.categoryKo}</div>
+                                <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                                  <span>{card.categoryKo}</span>
+                                  {card.originSeries && card.originSeries !== card.series ? (
+                                    <span className="rounded-full bg-[#f3ede5] px-2 py-0.5 text-[10px] font-bold text-[#8a5a45]">원본 {card.originSeries}</span>
+                                  ) : null}
+                                </div>
                               </div>
                               <dl className="grid grid-cols-2 gap-2 text-xs">
                                 <Stat label="비용" value={card.cost} compactSize />
@@ -281,7 +287,7 @@ function CardModal({ card, onClose }) {
         className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[32px] border border-[#e4d7c7] bg-[#fffdf9] shadow-2xl shadow-black/20"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="grid gap-6 p-5 lg:grid-cols-[340px_minmax(0,1fr)] lg:p-6">
+        <div className="grid gap-6 p-5 lg:grid-cols-[360px_minmax(0,1fr)] lg:p-7">
           <div>
             <div className="overflow-hidden rounded-[24px] border border-[#ece0d4] bg-[#f8f5f0] p-2">
               <img
@@ -294,19 +300,30 @@ function CardModal({ card, onClose }) {
           </div>
 
           <div className="space-y-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-sm font-bold text-[#b6422e]">{card.cardNo}</div>
-                <h3 className="mt-2 text-3xl font-black text-slate-950">{card.name}</h3>
-                <p className="mt-2 text-sm text-slate-500">{card.seriesName} · {card.seriesNameEn}</p>
+            <div className="rounded-[28px] border border-[#ece0d4] bg-gradient-to-br from-white to-[#fff6ef] p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-bold text-[#b6422e]">{card.cardNo}</span>
+                    <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
+                    {card.originSeries && card.originSeries !== card.series ? (
+                      <span className="rounded-full border border-[#e7dccc] bg-[#faf7f2] px-2.5 py-1 text-xs font-bold text-slate-600">원본 {card.originSeries}</span>
+                    ) : null}
+                  </div>
+                  <h3 className="mt-3 text-3xl font-black text-slate-950">{card.name}</h3>
+                  <p className="mt-2 text-sm text-slate-500">현재 표시 시리즈: {card.seriesName} · {card.seriesNameEn}</p>
+                  {card.originSeries && card.originSeries !== card.series ? (
+                    <p className="mt-1 text-sm text-slate-400">원본 카드 계열: {card.originSeriesName} · {card.originSeriesNameEn}</p>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-full border border-[#e2d5c8] bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:border-[#cfb29e]"
+                >
+                  닫기
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-full border border-[#e2d5c8] bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:border-[#cfb29e]"
-              >
-                닫기
-              </button>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
