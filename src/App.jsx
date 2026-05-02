@@ -13,6 +13,64 @@ const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
 ];
+const SIDEBAR_CATEGORIES = [
+  { id: 'regular-booster', label: '정규 부스터' },
+  { id: 'extra-premium', label: '엑스트라 / 프리미엄' },
+  { id: 'starter-deck', label: '스타터덱' },
+  { id: 'promo-line', label: '프로모' },
+  { id: 'flagship-line', label: '플래그십' },
+  { id: 'championship-line', label: '챔피언십 / 시리얼' }
+];
+
+function getSeriesCategory(seriesId) {
+  if (/^OP\d+/.test(seriesId)) return 'regular-booster';
+  if (/^(EB|PRB)\d+/.test(seriesId)) return 'extra-premium';
+  if (/^ST\d+/.test(seriesId)) return 'starter-deck';
+  if (/^P/.test(seriesId)) return 'promo-line';
+  return 'regular-booster';
+}
+
+function buildSidebarSections() {
+  const regular = seriesData.filter((series) => /^OP\d+/.test(series.id));
+  const extraPremium = seriesData.filter((series) => /^(EB|PRB)\d+/.test(series.id));
+  const starter = seriesData.filter((series) => /^ST\d+/.test(series.id));
+
+  return [
+    { id: 'regular-booster', label: '정규 부스터', children: regular },
+    { id: 'extra-premium', label: '엑스트라 / 프리미엄', children: extraPremium },
+    { id: 'starter-deck', label: '스타터덱', children: starter },
+    {
+      id: 'promo-line',
+      label: '프로모',
+      children: [
+        { id: 'promo-p', koName: 'P Promo', enName: 'Promo', disabled: true },
+        { id: 'promo-magazine', koName: 'Magazine Promo', enName: 'Promo', disabled: true },
+        { id: 'promo-store', koName: 'Store Tournament', enName: 'Promo', disabled: true },
+        { id: 'promo-prerelease', koName: 'Pre-Release', enName: 'Promo', disabled: true },
+        { id: 'promo-event', koName: 'Event Pack', enName: 'Promo', disabled: true },
+        { id: 'promo-special', koName: 'Anniversary / Special Goods', enName: 'Promo', disabled: true }
+      ]
+    },
+    {
+      id: 'flagship-line',
+      label: '플래그십',
+      children: [
+        { id: 'flagship-participation', koName: 'Participation', enName: 'Flagship', disabled: true },
+        { id: 'flagship-topcut', koName: 'Top Cut', enName: 'Flagship', disabled: true },
+        { id: 'flagship-winner', koName: 'Winner', enName: 'Flagship', disabled: true }
+      ]
+    },
+    {
+      id: 'championship-line',
+      label: '챔피언십 / 시리얼',
+      children: [
+        { id: 'championship-main', koName: 'Championship', enName: 'Championship', disabled: true },
+        { id: 'championship-serial', koName: 'Serial Numbered', enName: 'Championship', disabled: true },
+        { id: 'championship-winner', koName: 'Winner Prize', enName: 'Championship', disabled: true }
+      ]
+    }
+  ];
+}
 
 function getOrderedRarities(cards) {
   const present = [...new Set(cards.map((card) => card.rarity).filter(Boolean))];
@@ -59,11 +117,21 @@ export default function App() {
   const [shops, setShops] = useState([]);
   const [shopLoading, setShopLoading] = useState(false);
   const [shopRegions, setShopRegions] = useState({ sidos: [], gungus: [] });
+  const [openSidebarCategories, setOpenSidebarCategories] = useState({
+    'regular-booster': true,
+    'extra-premium': false,
+    'starter-deck': false,
+    'promo-line': false,
+    'flagship-line': false,
+    'championship-line': false
+  });
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
     [selectedSeries]
   );
+  const sidebarSections = useMemo(() => buildSidebarSections(), []);
+  const activeSidebarCategory = useMemo(() => getSeriesCategory(selectedSeries), [selectedSeries]);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem('one-piece-tcg-theme');
@@ -116,6 +184,13 @@ export default function App() {
   useEffect(() => {
     setOpenRaritySections({});
   }, [selectedSeries, searchKeyword, activeRarity]);
+
+  useEffect(() => {
+    setOpenSidebarCategories((prev) => ({
+      ...prev,
+      [activeSidebarCategory]: true
+    }));
+  }, [activeSidebarCategory]);
 
   useEffect(() => {
     let alive = true;
@@ -230,6 +305,10 @@ export default function App() {
     setSelectedSeries(seriesId);
     setSearchKeyword('');
     setActiveRarity('ALL');
+    setOpenSidebarCategories((prev) => ({
+      ...prev,
+      [getSeriesCategory(seriesId)]: true
+    }));
     setViewMode('archive');
   }
 
@@ -270,22 +349,47 @@ export default function App() {
           <div className={`grid gap-5 ${viewMode === 'home' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
             {viewMode === 'home' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
               <div className={`mb-3 border ${subtleClass} rounded-xl px-4 py-3`}>
-                <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Series</div>
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Category</div>
               </div>
               <div className="space-y-2">
-                {seriesData.map((series) => {
-                  const active = series.id === selectedSeries;
+                {sidebarSections.map((section) => {
+                  const isOpen = openSidebarCategories[section.id] ?? false;
+                  const isActiveCategory = activeSidebarCategory === section.id;
                   return (
-                    <button
-                      key={series.id}
-                      type="button"
-                      onClick={() => openSeriesArchive(series.id)}
-                      className={`w-full rounded-xl border px-4 py-3 text-left ${active ? 'border-[#c94d35] bg-[#f7ede5] text-stone-900' : `${cardClass}`}`}
-                    >
-                      <div className="text-xs font-bold tracking-wide text-[#c94d35]">{series.id}</div>
-                      <div className={`mt-1 text-[15px] font-extrabold ${isDark && !active ? 'text-white' : 'text-stone-900'}`}>{series.koName}</div>
-                      <div className={`mt-1 text-[11px] ${textMuted}`}>{series.enName}</div>
-                    </button>
+                    <div key={section.id} className={`overflow-hidden rounded-xl border ${isActiveCategory ? 'border-[#c94d35]' : isDark ? 'border-[#34312e]' : 'border-[#e2d9cc]'}`}>
+                      <button
+                        type="button"
+                        onClick={() => setOpenSidebarCategories((prev) => ({ ...prev, [section.id]: !isOpen }))}
+                        className={`flex w-full items-center justify-between px-4 py-3 text-left ${isActiveCategory ? 'bg-[#f7ede5] text-stone-900' : cardClass}`}
+                      >
+                        <span className="text-sm font-extrabold">{section.label}</span>
+                        <span className={`text-xs ${isActiveCategory ? 'text-stone-700' : textMuted}`}>{isOpen ? '−' : '+'}</span>
+                      </button>
+                      {isOpen ? (
+                        <div className={`${isDark ? 'bg-[#171615]' : 'bg-[#f8f4ed]'} px-2 py-2`}>
+                          <div className="space-y-1">
+                            {section.children.map((series) => {
+                              const active = !series.disabled && series.id === selectedSeries;
+                              return (
+                                <button
+                                  key={series.id}
+                                  type="button"
+                                  onClick={() => {
+                                    if (series.disabled) return;
+                                    openSeriesArchive(series.id);
+                                  }}
+                                  className={`w-full rounded-lg border px-3 py-2 text-left ${series.disabled ? 'cursor-default opacity-55' : ''} ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : `${cardClass}`}`}
+                                >
+                                  <div className={`text-xs font-bold tracking-wide ${active ? 'text-white/80' : 'text-[#c94d35]'}`}>{series.disabled ? section.label : series.id}</div>
+                                  <div className={`mt-1 text-[14px] font-extrabold ${active ? 'text-white' : isDark ? 'text-white' : 'text-stone-900'}`}>{series.koName}</div>
+                                  <div className={`mt-1 text-[11px] ${active ? 'text-white/75' : textMuted}`}>{series.disabled ? '준비 중' : series.enName}</div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
                   );
                 })}
               </div>
