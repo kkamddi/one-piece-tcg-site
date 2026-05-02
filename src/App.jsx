@@ -1,41 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
+import { fetchShopRegions, fetchShops } from './api/shops';
 import seriesData from './data/series.json';
 
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
-const OFFLINE_SHOP_LINKS = [
-  {
-    id: 'general',
-    title: '공식 취급 점포',
-    description: '지역별 일반 취급 매장을 확인할 수 있어.',
-    url: 'https://onepiece-cardgame.kr/shoplist.do'
-  },
-  {
-    id: 'official',
-    title: '공인/공식 점포',
-    description: '공식 사이트의 공인 점포 페이지로 이동해.',
-    url: 'https://onepiece-cardgame.kr/officialshoplist.do'
-  }
-];
-const REGIONS = [
-  '전체',
-  '서울특별시',
-  '인천광역시',
-  '대전광역시',
-  '광주광역시',
-  '대구광역시',
-  '울산광역시',
-  '부산광역시',
-  '경기도',
-  '강원도',
-  '충청북도',
-  '충청남도',
-  '전라북도',
-  '전라남도',
-  '경상남도'
+const SHOP_TYPES = [
+  { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
+  { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
 ];
 
 function getOrderedRarities(cards) {
@@ -76,7 +50,13 @@ export default function App() {
   const [deckEntries, setDeckEntries] = useState([]);
   const [leaderCardId, setLeaderCardId] = useState(null);
   const [ownedCardIds, setOwnedCardIds] = useState([]);
+  const [shopType, setShopType] = useState('general');
   const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [selectedGungu, setSelectedGungu] = useState('전체');
+  const [shopSearchKeyword, setShopSearchKeyword] = useState('');
+  const [shops, setShops] = useState([]);
+  const [shopLoading, setShopLoading] = useState(false);
+  const [shopRegions, setShopRegions] = useState({ sidos: [], gungus: [] });
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -135,6 +115,48 @@ export default function App() {
     setOpenRaritySections({});
   }, [selectedSeries, searchKeyword, activeRarity]);
 
+  useEffect(() => {
+    let alive = true;
+
+    const loadRegions = async () => {
+      const next = await fetchShopRegions(shopType, selectedRegion === '전체' ? '' : selectedRegion);
+      if (!alive) return;
+      setShopRegions(next);
+      if (selectedRegion !== '전체' && selectedGungu !== '전체' && !next.gungus.includes(selectedGungu)) {
+        setSelectedGungu('전체');
+      }
+    };
+
+    loadRegions();
+    return () => {
+      alive = false;
+    };
+  }, [shopType, selectedRegion, selectedGungu]);
+
+  useEffect(() => {
+    let alive = true;
+    setShopLoading(true);
+
+    const loadShops = async () => {
+      const next = await fetchShops({
+        type: shopType,
+        sido: selectedRegion === '전체' ? '' : selectedRegion,
+        gungu: selectedGungu === '전체' ? '' : selectedGungu,
+        q: shopSearchKeyword.trim()
+      });
+
+      if (alive) {
+        setShops(next);
+        setShopLoading(false);
+      }
+    };
+
+    loadShops();
+    return () => {
+      alive = false;
+    };
+  }, [shopType, selectedRegion, selectedGungu, shopSearchKeyword]);
+
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const isDark = theme === 'dark';
@@ -145,6 +167,7 @@ export default function App() {
     () => [...deckEntries].sort((a, b) => (a.categoryKo === '리더' ? -1 : b.categoryKo === '리더' ? 1 : b.count - a.count)),
     [deckEntries]
   );
+  const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
   const deckCount = useMemo(() => deckEntries.filter((entry) => entry.categoryKo !== '리더').reduce((sum, entry) => sum + entry.count, 0), [deckEntries]);
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
 
@@ -242,6 +265,7 @@ export default function App() {
                         setSelectedSeries(series.id);
                         setSearchKeyword('');
                         setActiveRarity('ALL');
+                        setViewMode('archive');
                       }}
                       className={`w-full rounded-xl border px-4 py-3 text-left ${active ? 'border-[#c94d35] bg-[#f7ede5] text-stone-900' : `${cardClass}`}`}
                     >
@@ -258,40 +282,62 @@ export default function App() {
               <section className={`border ${panelClass} rounded-2xl p-5`}>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">{currentSeries?.id}</div>
-                    <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
-                    <div className={`mt-1 text-sm ${textMuted}`}>{currentSeries?.enName}</div>
-                    <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>{currentSeries?.description}</p>
+                    {viewMode === 'shops' ? (
+                      <>
+                        <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">Official Shop Sync</div>
+                        <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>오프라인 구매처</h1>
+                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>공식 사이트 점포 데이터를 내부 API로 가져와서 지역별로 바로 볼 수 있게 바꿔뒀어.</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">{currentSeries?.id}</div>
+                        <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
+                        <div className={`mt-1 text-sm ${textMuted}`}>{currentSeries?.enName}</div>
+                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>{currentSeries?.description}</p>
+                      </>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2 text-sm">
-                    <Metric label="표시 카드" value={`${cards.length}장`} className={subtleClass} />
-                    <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} className={subtleClass} />
-                    {viewMode === 'deck' ? <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} /> : null}
+                    {viewMode === 'shops' ? (
+                      <>
+                        <Metric label="표시 매장" value={`${shops.length}곳`} className={subtleClass} />
+                        <Metric label="구분" value={activeShopType.label} className={subtleClass} />
+                        <Metric label="지역" value={selectedRegion === '전체' ? '전국' : selectedRegion} className={subtleClass} />
+                      </>
+                    ) : (
+                      <>
+                        <Metric label="표시 카드" value={`${cards.length}장`} className={subtleClass} />
+                        <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} className={subtleClass} />
+                        {viewMode === 'deck' ? <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} /> : null}
+                      </>
+                    )}
                   </div>
                 </div>
               </section>
 
-              <section className={`border ${panelClass} rounded-2xl p-4`}>
-                <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
-                  <label className="block">
-                    <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
-                    <input
-                      value={searchKeyword}
-                      onChange={(event) => setSearchKeyword(event.target.value)}
-                      placeholder="카드명 또는 카드번호 검색"
-                      className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
-                    />
-                  </label>
-                  <div>
-                    <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
-                    <div className="flex flex-wrap gap-2">
-                      {rarityOptions.map((rarity) => (
-                        <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
-                      ))}
+              {viewMode !== 'shops' ? (
+                <section className={`border ${panelClass} rounded-2xl p-4`}>
+                  <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
+                    <label className="block">
+                      <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
+                      <input
+                        value={searchKeyword}
+                        onChange={(event) => setSearchKeyword(event.target.value)}
+                        placeholder="카드명 또는 카드번호 검색"
+                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
+                      />
+                    </label>
+                    <div>
+                      <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
+                      <div className="flex flex-wrap gap-2">
+                        {rarityOptions.map((rarity) => (
+                          <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              ) : null}
 
               {viewMode === 'archive' ? (
                 <section className="space-y-5">
@@ -442,34 +488,108 @@ export default function App() {
                 </section>
               ) : (
                 <section className="space-y-4">
-                  <div className={`border ${panelClass} rounded-2xl p-5`}>
-                    <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>오프라인 구매처</h3>
-                    <p className={`mt-1 text-sm ${textMuted}`}>공식 사이트 기준 지역별 점포 페이지로 바로 이동할 수 있게 정리했어.</p>
-                  </div>
                   <div className={`border ${panelClass} rounded-2xl p-4`}>
-                    <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>지역 선택</div>
                     <div className="flex flex-wrap gap-2">
-                      {REGIONS.map((region) => (
-                        <ModeChip key={region} active={selectedRegion === region} onClick={() => setSelectedRegion(region)} label={region} />
+                      {SHOP_TYPES.map((type) => (
+                        <ModeChip
+                          key={type.id}
+                          active={shopType === type.id}
+                          onClick={() => {
+                            setShopType(type.id);
+                            setSelectedRegion('전체');
+                            setSelectedGungu('전체');
+                            setShopSearchKeyword('');
+                          }}
+                          label={type.label}
+                        />
                       ))}
                     </div>
+                    <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px_220px]">
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>매장명/주소 검색</div>
+                        <input
+                          value={shopSearchKeyword}
+                          onChange={(event) => setShopSearchKeyword(event.target.value)}
+                          placeholder="매장명 또는 주소 검색"
+                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
+                        />
+                      </label>
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>시/도</div>
+                        <select
+                          value={selectedRegion}
+                          onChange={(event) => {
+                            setSelectedRegion(event.target.value);
+                            setSelectedGungu('전체');
+                          }}
+                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} focus:border-[#c94d35]`}
+                        >
+                          <option value="전체">전체</option>
+                          {shopRegions.sidos.map((region) => (
+                            <option key={region} value={region}>{region}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>군/구</div>
+                        <select
+                          value={selectedGungu}
+                          onChange={(event) => setSelectedGungu(event.target.value)}
+                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} focus:border-[#c94d35]`}
+                        >
+                          <option value="전체">전체</option>
+                          {shopRegions.gungus.map((gungu) => (
+                            <option key={gungu} value={gungu}>{gungu}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
                   </div>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {OFFLINE_SHOP_LINKS.map((shop) => (
-                      <a key={shop.id} href={shop.url} target="_blank" rel="noreferrer" className={`block border ${cardClass} rounded-xl p-5 hover:-translate-y-0.5 transition`}>
-                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">공식 링크</div>
-                        <h4 className={`mt-2 text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{shop.title}</h4>
-                        <p className={`mt-2 text-sm leading-6 ${textMuted}`}>{shop.description}</p>
-                        <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${subtleClass}`}>
-                          선택 지역: <strong>{selectedRegion}</strong>
-                        </div>
-                        <div className="mt-4 inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">공식 페이지 열기</div>
-                      </a>
-                    ))}
+
+                  <div className={`border ${panelClass} rounded-2xl p-4`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className={`text-sm ${textMuted}`}>공식 API 기준 동기화 결과를 바로 보여줘.</div>
+                      <a href={activeShopType.pageUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">공식 페이지 열기</a>
+                    </div>
                   </div>
-                  <div className={`border ${panelClass} rounded-2xl p-5 ${textMuted}`}>
-                    공식 사이트가 지역별 점포 정보를 직접 관리해서, 우선은 공식 링크 연결 방식으로 넣어뒀어. 원하면 다음엔 지역별 매장 리스트를 내부 API로 따로 정리해줄 수 있어.
-                  </div>
+
+                  {shopLoading ? (
+                    <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>매장 목록 불러오는 중...</div>
+                  ) : shops.length ? (
+                    <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+                      {shops.map((shop) => (
+                        <article key={shop.id} className={`border ${cardClass} rounded-xl p-5`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">{shop.sourceLabel}</div>
+                              <h4 className={`mt-2 text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{shop.name}</h4>
+                            </div>
+                            <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${subtleClass}`}>{shop.sido}</span>
+                          </div>
+                          <div className={`mt-3 text-sm leading-6 ${textMuted}`}>{shop.address}</div>
+                          <div className={`mt-4 flex flex-wrap gap-2 text-xs ${textMuted}`}>
+                            <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{shop.gungu || '군/구 정보 없음'}</span>
+                            {shop.lat && shop.lng ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>지도 좌표 있음</span> : null}
+                          </div>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {shop.lat && shop.lng ? (
+                              <a
+                                href={`https://map.kakao.com/link/map/${encodeURIComponent(shop.name)},${shop.lat},${shop.lng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex rounded-full border border-[#d8cebf] bg-[#f7f3ed] px-4 py-2 text-sm font-bold text-stone-700"
+                              >
+                                지도 보기
+                              </a>
+                            ) : null}
+                            <a href={shop.officialPageUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">공식 원문</a>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>조건에 맞는 매장이 없어.</div>
+                  )}
                 </section>
               )}
             </main>
