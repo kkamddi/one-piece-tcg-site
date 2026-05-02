@@ -5,6 +5,7 @@ import seriesData from './data/series.json';
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
+const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 
 function getOrderedRarities(cards) {
   const present = [...new Set(cards.map((card) => card.rarity).filter(Boolean))];
@@ -43,6 +44,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState('archive');
   const [deckEntries, setDeckEntries] = useState([]);
   const [leaderCardId, setLeaderCardId] = useState(null);
+  const [ownedCardIds, setOwnedCardIds] = useState([]);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -52,11 +54,20 @@ export default function App() {
   useEffect(() => {
     const savedTheme = window.localStorage.getItem('one-piece-tcg-theme');
     if (savedTheme === 'dark' || savedTheme === 'light') setTheme(savedTheme);
+
+    try {
+      const savedOwned = JSON.parse(window.localStorage.getItem('one-piece-tcg-owned') ?? '[]');
+      if (Array.isArray(savedOwned)) setOwnedCardIds(savedOwned);
+    } catch {}
   }, []);
 
   useEffect(() => {
     window.localStorage.setItem('one-piece-tcg-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    window.localStorage.setItem('one-piece-tcg-owned', JSON.stringify(ownedCardIds));
+  }, [ownedCardIds]);
 
   useEffect(() => {
     let alive = true;
@@ -96,6 +107,7 @@ export default function App() {
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const isDark = theme === 'dark';
+  const ownedSet = useMemo(() => new Set(ownedCardIds), [ownedCardIds]);
 
   const deckCards = useMemo(
     () => [...deckEntries].sort((a, b) => (a.categoryKo === '리더' ? -1 : b.categoryKo === '리더' ? 1 : b.count - a.count)),
@@ -106,6 +118,7 @@ export default function App() {
     [deckEntries]
   );
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
+  const ownedInSeries = useMemo(() => cards.filter((card) => ownedSet.has(card.id)).length, [cards, ownedSet]);
 
   async function openCard(id) {
     const detail = await fetchCardById(id);
@@ -154,22 +167,23 @@ export default function App() {
     setLeaderCardId(null);
   }
 
+  function toggleOwned(cardId) {
+    setOwnedCardIds((prev) => (prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]));
+  }
+
   const shellClass = isDark ? 'bg-[#161616] text-slate-100' : 'bg-[#f4f1ea] text-slate-900';
   const panelClass = isDark ? 'border-[#363636] bg-[#222222] text-slate-100' : 'border-[#e4d7c7] bg-white text-slate-900';
   const subPanelClass = isDark ? 'border-[#303030] bg-[#1b1b1b] text-slate-200' : 'border-[#ede3d8] bg-[#faf7f2] text-slate-900';
   const mutedClass = isDark ? 'text-slate-400' : 'text-slate-500';
 
   return (
-    <div className={`${isDark ? 'dark' : ''}`}>
+    <div className={isDark ? 'dark' : ''}>
       <div className={`min-h-screen ${shellClass}`}>
         <div className="mx-auto grid min-h-screen max-w-[1880px] lg:grid-cols-[310px_minmax(0,1fr)]">
           <aside className={`${panelClass} border-b px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r`}>
             <div className={`${panelClass} mb-5 rounded-[28px] border px-5 py-5 shadow-sm`}>
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#b6422e]">ONE PIECE TCG</p>
-                  <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-[#171717]'}`}>카드 아카이브</h1>
-                </div>
+                <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className="h-14 w-auto object-contain" onError={placeholderImage} />
                 <button
                   type="button"
                   onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
@@ -180,20 +194,27 @@ export default function App() {
               </div>
             </div>
 
-            <div className="mb-4 flex gap-2">
+            <div className="mb-4 grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setViewMode('archive')}
-                className={`flex-1 rounded-full border px-3 py-2 text-sm font-bold ${viewMode === 'archive' ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass}`}
+                className={`rounded-full border px-3 py-2 text-sm font-bold ${viewMode === 'archive' ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass}`}
               >
-                카드 도감
+                도감
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('collection')}
+                className={`rounded-full border px-3 py-2 text-sm font-bold ${viewMode === 'collection' ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass}`}
+              >
+                수집표
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('deck')}
-                className={`flex-1 rounded-full border px-3 py-2 text-sm font-bold ${viewMode === 'deck' ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass}`}
+                className={`rounded-full border px-3 py-2 text-sm font-bold ${viewMode === 'deck' ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass}`}
               >
-                덱 시뮬레이터
+                덱
               </button>
             </div>
 
@@ -234,6 +255,7 @@ export default function App() {
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">
                   <span className={`rounded-full border px-4 py-2 ${subPanelClass}`}>카드 {cards.length}장</span>
+                  <span className={`rounded-full border px-4 py-2 ${subPanelClass}`}>보유 {ownedInSeries}장</span>
                   {viewMode === 'deck' ? (
                     <span className={`rounded-full border px-4 py-2 ${deckCount > DECK_SIZE ? 'border-red-400 bg-red-50 text-red-600' : subPanelClass}`}>
                       덱 {deckCount}/{DECK_SIZE}
@@ -265,9 +287,7 @@ export default function App() {
                           key={rarity}
                           type="button"
                           onClick={() => setActiveRarity(rarity)}
-                          className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition ${
-                            active ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass
-                          }`}
+                          className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : subPanelClass}`}
                         >
                           {rarity}
                         </button>
@@ -314,13 +334,9 @@ export default function App() {
                                 onClick={() => openCard(card.id)}
                                 className={`${panelClass} overflow-hidden rounded-[26px] border text-left shadow-sm transition hover:-translate-y-1 hover:border-[#d4b7a7] hover:shadow-md`}
                               >
-                                <div className={`aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f8f5f0]'}`}>
-                                  <img
-                                    src={card.imageUrl || '/card-placeholder.svg'}
-                                    alt={card.name}
-                                    onError={placeholderImage}
-                                    className="h-full w-full object-contain [image-rendering:auto]"
-                                  />
+                                <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f8f5f0]'}`}>
+                                  <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
+                                  {ownedSet.has(card.id) ? <div className="absolute right-3 top-3 rounded-full bg-emerald-500 px-2 py-1 text-[10px] font-bold text-white">보유</div> : null}
                                 </div>
                                 <div className={`space-y-2.5 border-t p-3.5 ${isDark ? 'border-[#333333]' : 'border-[#f0e7dc]'}`}>
                                   <div className="flex items-center justify-between gap-3">
@@ -331,9 +347,7 @@ export default function App() {
                                     <div className={`line-clamp-2 text-sm font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{card.name}</div>
                                     <div className={`mt-1 flex items-center gap-1.5 text-[11px] ${mutedClass}`}>
                                       <span>{card.categoryKo}</span>
-                                      {card.originSeries && card.originSeries !== card.series ? (
-                                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${subPanelClass}`}>원본 {card.originSeries}</span>
-                                      ) : null}
+                                      {card.originSeries && card.originSeries !== card.series ? <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${subPanelClass}`}>원본 {card.originSeries}</span> : null}
                                     </div>
                                   </div>
                                   <dl className="grid grid-cols-2 gap-2 text-xs">
@@ -342,16 +356,10 @@ export default function App() {
                                     <Stat label="카운터" value={card.counter} compactSize dark={isDark} />
                                     <Stat label="속성" value={card.attributeKo} compactSize dark={isDark} />
                                   </dl>
-                                  <div className="flex gap-2 pt-1">
-                                    <button
-                                      type="button"
-                                      onClick={(event) => {
-                                        event.stopPropagation();
-                                        addToDeck(card);
-                                      }}
-                                      className="rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white"
-                                    >
-                                      덱 추가
+                                  <div className="flex flex-wrap gap-2 pt-1">
+                                    <button type="button" onClick={(event) => { event.stopPropagation(); addToDeck(card); }} className="rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white">덱 추가</button>
+                                    <button type="button" onClick={(event) => { event.stopPropagation(); toggleOwned(card.id); }} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${ownedSet.has(card.id) ? 'border-emerald-500 bg-emerald-500 text-white' : subPanelClass}`}>
+                                      {ownedSet.has(card.id) ? '보유중' : '미보유'}
                                     </button>
                                   </div>
                                 </div>
@@ -366,6 +374,43 @@ export default function App() {
                   <div className={`${panelClass} rounded-[32px] border p-8 text-center ${mutedClass}`}>검색 결과가 없습니다.</div>
                 )}
               </section>
+            ) : viewMode === 'collection' ? (
+              <section className="mt-5 space-y-5">
+                <div className={`${panelClass} rounded-[32px] border p-5 shadow-sm`}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>수집 도감</h3>
+                      <p className={`mt-1 text-sm ${mutedClass}`}>카드를 클릭해서 보유 여부를 체크해줘.</p>
+                    </div>
+                    <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subPanelClass}`}>{ownedInSeries} / {cards.length} 수집</div>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                  {cards.map((card) => {
+                    const owned = ownedSet.has(card.id);
+                    return (
+                      <button
+                        key={card.id}
+                        type="button"
+                        onClick={() => toggleOwned(card.id)}
+                        className={`${panelClass} overflow-hidden rounded-[24px] border text-left shadow-sm transition ${owned ? 'ring-2 ring-emerald-500' : ''}`}
+                      >
+                        <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f8f5f0]'}`}>
+                          <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className={`h-full w-full object-contain [image-rendering:auto] ${owned ? '' : 'opacity-60 grayscale-[0.15]'}`} />
+                          <div className={`absolute right-3 top-3 rounded-full px-2 py-1 text-[10px] font-bold ${owned ? 'bg-emerald-500 text-white' : 'bg-black/55 text-white'}`}>{owned ? 'CHECK' : 'EMPTY'}</div>
+                        </div>
+                        <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#f0e7dc]'}`}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`text-[11px] font-bold ${mutedClass}`}>{card.cardNo}</span>
+                            <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
+                          </div>
+                          <div className={`line-clamp-2 text-sm font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{card.name}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
             ) : (
               <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className={`${panelClass} rounded-[32px] border p-5 shadow-sm`}>
@@ -374,9 +419,7 @@ export default function App() {
                       <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>덱 시뮬레이터</h3>
                       <p className={`mt-1 text-sm ${mutedClass}`}>리더 1장 / 메인 덱 50장 / 동일 카드 최대 4장 기준</p>
                     </div>
-                    <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subPanelClass}`}>
-                      초기화
-                    </button>
+                    <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subPanelClass}`}>초기화</button>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {cards.slice(0, 60).map((card) => (
@@ -387,9 +430,7 @@ export default function App() {
                             <div className="truncate text-sm font-extrabold">{card.name}</div>
                             <div className={`mt-1 text-[11px] ${mutedClass}`}>{card.cardNo}</div>
                             <div className={`mt-1 text-[11px] ${mutedClass}`}>{card.categoryKo} · {card.rarity}</div>
-                            <button type="button" onClick={() => addToDeck(card)} className="mt-3 rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white">
-                              {card.categoryKo === '리더' ? '리더 지정' : '덱 추가'}
-                            </button>
+                            <button type="button" onClick={() => addToDeck(card)} className="mt-3 rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white">{card.categoryKo === '리더' ? '리더 지정' : '덱 추가'}</button>
                           </div>
                         </div>
                       </div>
@@ -518,12 +559,7 @@ function CardModal({ card, onClose, dark }) {
             </section>
 
             <div className="flex flex-wrap gap-3">
-              <a
-                href={card.officialUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b6422e]"
-              >
+              <a href={card.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b6422e]">
                 공식 정보 보기
               </a>
             </div>
