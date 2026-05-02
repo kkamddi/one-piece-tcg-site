@@ -6,6 +6,37 @@ const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
+const OFFLINE_SHOP_LINKS = [
+  {
+    id: 'general',
+    title: '공식 취급 점포',
+    description: '지역별 일반 취급 매장을 확인할 수 있어.',
+    url: 'https://onepiece-cardgame.kr/shoplist.do'
+  },
+  {
+    id: 'official',
+    title: '공인/공식 점포',
+    description: '공식 사이트의 공인 점포 페이지로 이동해.',
+    url: 'https://onepiece-cardgame.kr/officialshoplist.do'
+  }
+];
+const REGIONS = [
+  '전체',
+  '서울특별시',
+  '인천광역시',
+  '대전광역시',
+  '광주광역시',
+  '대구광역시',
+  '울산광역시',
+  '부산광역시',
+  '경기도',
+  '강원도',
+  '충청북도',
+  '충청남도',
+  '전라북도',
+  '전라남도',
+  '경상남도'
+];
 
 function getOrderedRarities(cards) {
   const present = [...new Set(cards.map((card) => card.rarity).filter(Boolean))];
@@ -45,6 +76,7 @@ export default function App() {
   const [deckEntries, setDeckEntries] = useState([]);
   const [leaderCardId, setLeaderCardId] = useState(null);
   const [ownedCardIds, setOwnedCardIds] = useState([]);
+  const [selectedRegion, setSelectedRegion] = useState('전체');
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -164,7 +196,7 @@ export default function App() {
   const shellClass = isDark ? 'bg-[#161514] text-stone-100' : 'bg-[#f3efe7] text-stone-900';
   const panelClass = isDark ? 'border-[#34312e] bg-[#211f1d]' : 'border-[#d9d0c2] bg-[#fbf8f2]';
   const cardClass = isDark ? 'border-[#34312e] bg-[#1a1918]' : 'border-[#e2d9cc] bg-white';
-  const subtleClass = isDark ? 'bg-[#191817] border-[#2e2b29]' : 'bg-[#f7f3ed] border-[#e7ddcf]';
+  const subtleClass = isDark ? 'bg-[#191817] border-[#2e2b29] text-stone-200' : 'bg-[#f7f3ed] border-[#e7ddcf] text-stone-900';
   const textMuted = isDark ? 'text-stone-400' : 'text-stone-500';
 
   return (
@@ -177,19 +209,23 @@ export default function App() {
                 <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className={`h-14 w-auto object-contain ${isDark ? 'brightness-0 invert' : ''}`} onError={placeholderImage} />
                 <div>
                   <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#b6422e]">One Piece TCG Archive</div>
-                  <div className={`mt-1 text-sm ${textMuted}`}>시리즈별 카드 도감 · 수집표 · 덱 시뮬레이터</div>
+                  <div className={`mt-1 text-sm ${textMuted}`}>시리즈별 카드 도감 · 수집표 · 덱 시뮬레이터 · 구매처</div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} className={`rounded-full border px-4 py-2 text-sm font-semibold ${subtleClass}`}>
                   {isDark ? '라이트모드' : '다크모드'}
                 </button>
-                <ModeButton active={viewMode === 'archive'} onClick={() => setViewMode('archive')} label="도감" />
-                <ModeButton active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
-                <ModeButton active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱" />
               </div>
             </div>
           </header>
+
+          <div className="mb-5 flex flex-wrap gap-2">
+            <TopTab active={viewMode === 'archive'} onClick={() => setViewMode('archive')} label="카드 도감" />
+            <TopTab active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
+            <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
+            <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
+          </div>
 
           <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
             <aside className={`border ${panelClass} rounded-2xl p-3`}>
@@ -229,9 +265,9 @@ export default function App() {
                     <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>{currentSeries?.description}</p>
                   </div>
                   <div className="flex flex-wrap gap-2 text-sm">
-                    <Metric label="표시 카드" value={`${cards.length}장`} subtleClass={subtleClass} />
-                    <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} subtleClass={subtleClass} />
-                    {viewMode === 'deck' ? <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} subtleClass={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} /> : null}
+                    <Metric label="표시 카드" value={`${cards.length}장`} className={subtleClass} />
+                    <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} className={subtleClass} />
+                    {viewMode === 'deck' ? <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} /> : null}
                   </div>
                 </div>
               </section>
@@ -251,7 +287,7 @@ export default function App() {
                     <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
                     <div className="flex flex-wrap gap-2">
                       {rarityOptions.map((rarity) => (
-                        <ModeButton key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} compact />
+                        <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
                       ))}
                     </div>
                   </div>
@@ -266,7 +302,6 @@ export default function App() {
                     groupedCards.map((group) => {
                       const defaultOpen = !['UC', 'C'].includes(group.rarity);
                       const isOpen = activeRarity === group.rarity ? true : (openRaritySections[group.rarity] ?? defaultOpen);
-
                       return (
                         <div key={group.rarity} className="space-y-3">
                           <button type="button" onClick={() => setOpenRaritySections((prev) => ({ ...prev, [group.rarity]: !isOpen }))} className={`flex w-full items-center justify-between border ${panelClass} rounded-xl px-4 py-3 text-left`}>
@@ -280,7 +315,6 @@ export default function App() {
                               <span className={textMuted}>{isOpen ? '−' : '+'}</span>
                             </div>
                           </button>
-
                           {isOpen ? (
                             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                               {group.cards.map((card) => (
@@ -341,7 +375,7 @@ export default function App() {
                     })}
                   </div>
                 </section>
-              ) : (
+              ) : viewMode === 'deck' ? (
                 <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
                   <div className={`border ${panelClass} rounded-2xl p-5`}>
                     <div className="mb-4 flex items-center justify-between gap-3">
@@ -407,6 +441,37 @@ export default function App() {
                     </div>
                   </div>
                 </section>
+              ) : (
+                <section className="space-y-4">
+                  <div className={`border ${panelClass} rounded-2xl p-5`}>
+                    <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>오프라인 구매처</h3>
+                    <p className={`mt-1 text-sm ${textMuted}`}>공식 사이트 기준 지역별 점포 페이지로 바로 이동할 수 있게 정리했어.</p>
+                  </div>
+                  <div className={`border ${panelClass} rounded-2xl p-4`}>
+                    <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>지역 선택</div>
+                    <div className="flex flex-wrap gap-2">
+                      {REGIONS.map((region) => (
+                        <ModeChip key={region} active={selectedRegion === region} onClick={() => setSelectedRegion(region)} label={region} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    {OFFLINE_SHOP_LINKS.map((shop) => (
+                      <a key={shop.id} href={shop.url} target="_blank" rel="noreferrer" className={`block border ${cardClass} rounded-xl p-5 hover:-translate-y-0.5 transition`}>
+                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">공식 링크</div>
+                        <h4 className={`mt-2 text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{shop.title}</h4>
+                        <p className={`mt-2 text-sm leading-6 ${textMuted}`}>{shop.description}</p>
+                        <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${subtleClass}`}>
+                          선택 지역: <strong>{selectedRegion}</strong>
+                        </div>
+                        <div className="mt-4 inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">공식 페이지 열기</div>
+                      </a>
+                    ))}
+                  </div>
+                  <div className={`border ${panelClass} rounded-2xl p-5 ${textMuted}`}>
+                    공식 사이트가 지역별 점포 정보를 직접 관리해서, 우선은 공식 링크 연결 방식으로 넣어뒀어. 원하면 다음엔 지역별 매장 리스트를 내부 API로 따로 정리해줄 수 있어.
+                  </div>
+                </section>
               )}
             </main>
           </div>
@@ -418,20 +483,32 @@ export default function App() {
   );
 }
 
-function ModeButton({ active, onClick, label, compact = false }) {
+function TopTab({ active, onClick, label }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border py-2 text-sm font-semibold ${compact ? 'px-3.5' : 'px-4'} ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700'}`}
+      className={`rounded-full border px-4 py-2.5 text-sm font-bold transition ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700 hover:border-[#cbbba8]'}`}
     >
       {label}
     </button>
   );
 }
 
-function Metric({ label, value, subtleClass }) {
-  return <span className={`rounded-full border px-4 py-2 ${subtleClass}`}><strong className="mr-2">{label}</strong>{value}</span>;
+function ModeChip({ active, onClick, label }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3.5 py-2 text-sm font-semibold ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : 'border-[#d8cebf] bg-[#f7f3ed] text-stone-700'}`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function Metric({ label, value, className }) {
+  return <span className={`rounded-full border px-4 py-2 ${className}`}><strong className="mr-2">{label}</strong>{value}</span>;
 }
 
 function Stat({ label, value, compact = false, compactSize = false, dark = false }) {
