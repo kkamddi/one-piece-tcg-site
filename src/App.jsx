@@ -751,8 +751,7 @@ export default function App() {
                   </div>
 
                   <div className={`border ${panelClass} rounded-2xl p-4`}>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className={`text-sm ${textMuted}`}>공식 API 기준 동기화 결과를 바로 보여줘.</div>
+                    <div className="flex justify-end">
                       <a href={activeShopType.pageUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">공식 페이지 열기</a>
                     </div>
                   </div>
