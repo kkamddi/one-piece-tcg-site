@@ -257,6 +257,11 @@ export default function App() {
     [deckEntries]
   );
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
+  const defaultCollapsedRarities = useMemo(() => {
+    if (cards.length < 30) return ['UC'];
+    if (cards.length >= 100) return ['R', 'UC', 'C'];
+    return ['UC', 'C'];
+  }, [cards.length]);
   const deckCount = useMemo(() => deckEntries.filter((entry) => entry.categoryKo !== '리더').reduce((sum, entry) => sum + entry.count, 0), [deckEntries]);
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
   const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
@@ -544,7 +549,7 @@ export default function App() {
                     <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>불러오는 중...</div>
                   ) : groupedCards.length ? (
                     groupedCards.map((group) => {
-                      const defaultOpen = !['UC', 'C'].includes(group.rarity);
+                      const defaultOpen = !defaultCollapsedRarities.includes(group.rarity);
                       const isOpen = activeRarity === group.rarity ? true : (openRaritySections[group.rarity] ?? defaultOpen);
                       return (
                         <div key={group.rarity} className="space-y-3">
@@ -552,7 +557,7 @@ export default function App() {
                             <div className="flex items-center gap-3">
                               <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{group.rarity}</h3>
                               <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${rarityTone(group.rarity)}`}>{group.rarity}</span>
-                              {['UC', 'C'].includes(group.rarity) ? <span className={`text-xs ${textMuted}`}>기본 숨김</span> : null}
+                              {defaultCollapsedRarities.includes(group.rarity) ? <span className={`text-xs ${textMuted}`}>기본 숨김</span> : null}
                             </div>
                             <div className="flex items-center gap-3">
                               <span className={`text-sm ${textMuted}`}>{group.cards.length}장</span>
