@@ -101,17 +101,18 @@ function extractField(block, className) {
     .trim();
 }
 
-function parseCardsFromHtml(html, series, seen = new Set()) {
+function parseCardsFromHtml(html, sourceSeries, seriesMap, seen = new Set()) {
   const blocks = [...html.matchAll(/<button class="item">([\s\S]*?)<\/button>/g)].map((match) => match[1]);
 
   return blocks
     .map((block) => {
       const cardNo = extractField(block, 'cardNumber').trim();
-      const cardGet = extractField(block, 'cardGet');
-      const isPrimarySeriesCard = cardNo.startsWith(series.id);
-      const isIncludedBonusCard = !cardNo.includes('_') && cardGet.includes(series.queryLabel);
-      if (!cardNo || (!isPrimarySeriesCard && !isIncludedBonusCard) || seen.has(cardNo)) return null;
+      if (!cardNo || seen.has(cardNo)) return null;
       seen.add(cardNo);
+
+      const prefixMatch = cardNo.match(/^([A-Z]+\d+)-/);
+      const targetSeriesId = prefixMatch?.[1] ?? sourceSeries.id;
+      const targetSeries = seriesMap.get(targetSeriesId) ?? sourceSeries;
 
       const imageMatch = block.match(/<img class="image" src="([^"]+)"/);
       const categoryKo = extractField(block, 'cardType');
@@ -123,9 +124,9 @@ function parseCardsFromHtml(html, series, seen = new Set()) {
         cardNo,
         name: extractField(block, 'cardName'),
         nameEn: null,
-        series: series.id,
-        seriesName: series.koName,
-        seriesNameEn: series.enName,
+        series: targetSeries.id,
+        seriesName: targetSeries.koName,
+        seriesNameEn: targetSeries.enName,
         rarity: extractField(block, 'rarity'),
         category: categoryMap[categoryKo] ?? categoryKo.toUpperCase(),
         categoryKo,
@@ -152,7 +153,7 @@ function getLastPageIndex(html) {
   return Math.max(...matches.filter((value) => Number.isFinite(value)));
 }
 
-async function fetchSeriesCards(series) {
+async function fetchSeriesCards(series, seriesMap) {
   console.log(`[sync] fetch series ${series.id}`);
   const seen = new Set();
   const firstUrl = `${CARD_LIST_URL}?page=0&size=20&series=${encodeURIComponent(series.queryLabel)}&search=true`;
@@ -160,13 +161,13 @@ async function fetchSeriesCards(series) {
   await delay(REQUEST_DELAY_MS);
 
   const lastPageIndex = getLastPageIndex(firstHtml);
-  const cards = parseCardsFromHtml(firstHtml, series, seen);
+  const cards = parseCardsFromHtml(firstHtml, series, seriesMap, seen);
 
   for (let page = 1; page <= lastPageIndex; page += 1) {
     const pageUrl = `${CARD_LIST_URL}?page=${page}&size=20&series=${encodeURIComponent(series.queryLabel)}&search=true`;
     const html = await fetchText(pageUrl);
     await delay(REQUEST_DELAY_MS);
-    cards.push(...parseCardsFromHtml(html, series, seen));
+    cards.push(...parseCardsFromHtml(html, series, seriesMap, seen));
   }
 
   return cards;
@@ -177,11 +178,14 @@ async function main() {
   await checkRobotsTxt();
 
   const series = await readJson(seriesPath);
+  const seriesMap = new Map(series.map((item) => [item.id, item]));
   const collectedCards = [];
+  const uniqueCards = new Map();
 
   for (const item of series) {
+    if (!item.queryLabel) continue;
     try {
-      const cards = await fetchSeriesCards(item);
+      const cards = await fetchSeriesCards(item, seriesMap);
       collectedCards.push(...cards);
       console.log(`[sync] ${item.id}: ${cards.length} cards`);
     } catch (error) {
@@ -189,9 +193,15 @@ async function main() {
     }
   }
 
+  for (const card of collectedCards) {
+    uniqueCards.set(card.cardNo, card);
+  }
+
+  const finalCards = [...uniqueCards.values()];
+
   await mkdir(path.dirname(cardsPath), { recursive: true });
-  await writeFile(cardsPath, `${JSON.stringify(collectedCards, null, 2)}\n`, 'utf8');
-  console.log(`[sync] wrote ${collectedCards.length} cards`);
+  await writeFile(cardsPath, `${JSON.stringify(finalCards, null, 2)}\n`, 'utf8');
+  console.log(`[sync] wrote ${finalCards.length} cards`);
 }
 
 main().catch((error) => {

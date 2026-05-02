@@ -120,6 +120,26 @@
     "description": "공식 한글 카드 리스트 기준 첫 번째 메인 부스터 팩"
   },
   {
+    "id": "PRB02",
+    "koName": "원피스 카드 더 베스트 Vol.2",
+    "enName": "ONE PIECE CARD THE BEST Vol.2",
+    "kindKo": "프리미엄 부스터",
+    "kindEn": "PREMIUM BOOSTER",
+    "queryLabel": "",
+    "officialSeriesKeyword": "PRB-02",
+    "description": "패러렐/재수록 카드가 포함된 프리미엄 부스터"
+  },
+  {
+    "id": "EB01",
+    "koName": "메모리얼 컬렉션",
+    "enName": "MEMORIAL COLLECTION",
+    "kindKo": "엑스트라 부스터",
+    "kindEn": "EXTRA BOOSTER",
+    "queryLabel": "",
+    "officialSeriesKeyword": "EB-01",
+    "description": "엑스트라 부스터 계열 카드"
+  },
+  {
     "id": "ST01",
     "koName": "밀짚모자 일당",
     "enName": "Straw Hat Crew",
@@ -147,6 +167,86 @@
     "kindEn": "STARTER DECK",
     "queryLabel": "[STK-03] 스타트 덱 왕의 부하 칠무해",
     "officialSeriesKeyword": "ST-03",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST04",
+    "koName": "백수 해적단",
+    "enName": "Animal Kingdom Pirates",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-04] 스타트 덱 백수 해적단",
+    "officialSeriesKeyword": "ST-04",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST06",
+    "koName": "해군",
+    "enName": "Absolute Justice",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-06] 스타트 덱 해군",
+    "officialSeriesKeyword": "ST-06",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST12",
+    "koName": "조로 & 상디",
+    "enName": "Zoro and Sanji",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-12] 스타트 덱 조로 & 상디",
+    "officialSeriesKeyword": "ST-12",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST13",
+    "koName": "3형제의 유대",
+    "enName": "The Three Brothers",
+    "kindKo": "울트라 덱",
+    "kindEn": "ULTRA DECK",
+    "queryLabel": "[STK-13] 스타트 덱 3형제의 유대",
+    "officialSeriesKeyword": "ST-13",
+    "description": "공식 한글 카드 리스트 기준 울트라 덱"
+  },
+  {
+    "id": "ST14",
+    "koName": "3D2Y",
+    "enName": "3D2Y",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-14] 스타트 덱 3D2Y",
+    "officialSeriesKeyword": "ST-14",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST15",
+    "koName": "적색 에드워드 뉴게이트",
+    "enName": "Red Edward.Newgate",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "",
+    "officialSeriesKeyword": "ST-15",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST16",
+    "koName": "녹색 우타",
+    "enName": "Green Uta",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "",
+    "officialSeriesKeyword": "ST-16",
+    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST18",
+    "koName": "자색 몽키 D. 루피",
+    "enName": "Purple Monkey.D.Luffy",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "",
+    "officialSeriesKeyword": "ST-18",
     "description": "공식 한글 카드 리스트 기준 스타트 덱"
   }
 ]
