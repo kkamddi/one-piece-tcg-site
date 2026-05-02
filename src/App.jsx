@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { fetchShopRegions, fetchShops } from './api/shops';
+import cardsData from './data/cards.json';
 import seriesData from './data/series.json';
+import shopsData from './data/shops.json';
 
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
@@ -46,7 +48,7 @@ export default function App() {
   const [activeRarity, setActiveRarity] = useState('ALL');
   const [openRaritySections, setOpenRaritySections] = useState({});
   const [theme, setTheme] = useState('light');
-  const [viewMode, setViewMode] = useState('archive');
+  const [viewMode, setViewMode] = useState('home');
   const [deckEntries, setDeckEntries] = useState([]);
   const [leaderCardId, setLeaderCardId] = useState(null);
   const [ownedCardIds, setOwnedCardIds] = useState([]);
@@ -170,6 +172,19 @@ export default function App() {
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
   const deckCount = useMemo(() => deckEntries.filter((entry) => entry.categoryKo !== '리더').reduce((sum, entry) => sum + entry.count, 0), [deckEntries]);
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
+  const homeFeaturedSeries = useMemo(() => seriesData.slice(0, 6), []);
+  const homeFeaturedCards = useMemo(
+    () => cardsData.filter((card) => ['SP', 'SEC', 'L', 'SR'].includes(card.rarity)).slice(0, 8),
+    []
+  );
+  const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
+  const homeShopCounts = useMemo(
+    () => ({
+      general: shopsData.filter((shop) => shop.sourceType === 'general').length,
+      official: shopsData.filter((shop) => shop.sourceType === 'official').length
+    }),
+    []
+  );
 
   async function openCard(id) {
     const detail = await fetchCardById(id);
@@ -216,6 +231,13 @@ export default function App() {
     setOwnedCardIds((prev) => (prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]));
   }
 
+  function openSeriesArchive(seriesId) {
+    setSelectedSeries(seriesId);
+    setSearchKeyword('');
+    setActiveRarity('ALL');
+    setViewMode('archive');
+  }
+
   const shellClass = isDark ? 'bg-[#161514] text-stone-100' : 'bg-[#f3efe7] text-stone-900';
   const panelClass = isDark ? 'border-[#34312e] bg-[#211f1d]' : 'border-[#d9d0c2] bg-[#fbf8f2]';
   const cardClass = isDark ? 'border-[#34312e] bg-[#1a1918]' : 'border-[#e2d9cc] bg-white';
@@ -243,6 +265,7 @@ export default function App() {
           </header>
 
           <div className="mb-5 flex flex-wrap gap-2">
+            <TopTab active={viewMode === 'home'} onClick={() => setViewMode('home')} label="메인" />
             <TopTab active={viewMode === 'archive'} onClick={() => setViewMode('archive')} label="카드 도감" />
             <TopTab active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
             <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
@@ -261,12 +284,7 @@ export default function App() {
                     <button
                       key={series.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedSeries(series.id);
-                        setSearchKeyword('');
-                        setActiveRarity('ALL');
-                        setViewMode('archive');
-                      }}
+                      onClick={() => openSeriesArchive(series.id)}
                       className={`w-full rounded-xl border px-4 py-3 text-left ${active ? 'border-[#c94d35] bg-[#f7ede5] text-stone-900' : `${cardClass}`}`}
                     >
                       <div className="text-xs font-bold tracking-wide text-[#c94d35]">{series.id}</div>
@@ -282,7 +300,13 @@ export default function App() {
               <section className={`border ${panelClass} rounded-2xl p-5`}>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                   <div>
-                    {viewMode === 'shops' ? (
+                    {viewMode === 'home' ? (
+                      <>
+                        <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">Home Hub</div>
+                        <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG 도감</h1>
+                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>도감, 수집표, 덱, 오프라인 구매처까지 한 번에 바로 들어갈 수 있는 시작 화면으로 바꿔봤어.</p>
+                      </>
+                    ) : viewMode === 'shops' ? (
                       <>
                         <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">Official Shop Sync</div>
                         <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>오프라인 구매처</h1>
@@ -298,7 +322,13 @@ export default function App() {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2 text-sm">
-                    {viewMode === 'shops' ? (
+                    {viewMode === 'home' ? (
+                      <>
+                        <Metric label="전체 카드" value={`${cardsData.length}장`} className={subtleClass} />
+                        <Metric label="시리즈" value={`${seriesData.length}개`} className={subtleClass} />
+                        <Metric label="내 수집" value={`${homeOwnedCount}장`} className={subtleClass} />
+                      </>
+                    ) : viewMode === 'shops' ? (
                       <>
                         <Metric label="표시 매장" value={`${shops.length}곳`} className={subtleClass} />
                         <Metric label="구분" value={activeShopType.label} className={subtleClass} />
@@ -315,7 +345,7 @@ export default function App() {
                 </div>
               </section>
 
-              {viewMode !== 'shops' ? (
+              {viewMode !== 'shops' && viewMode !== 'home' ? (
                 <section className={`border ${panelClass} rounded-2xl p-4`}>
                   <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
                     <label className="block">
@@ -339,7 +369,113 @@ export default function App() {
                 </section>
               ) : null}
 
-              {viewMode === 'archive' ? (
+              {viewMode === 'home' ? (
+                <section className="space-y-5">
+                  <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+                    <div className={`border ${panelClass} rounded-2xl p-5`}>
+                      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Quick Start</div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">카드 도감</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>시리즈별 카드 바로 보기</div>
+                        </button>
+                        <button type="button" onClick={() => setViewMode('collection')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">수집표</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>보유 카드 체크하기</div>
+                        </button>
+                        <button type="button" onClick={() => setViewMode('deck')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">덱 시뮬레이터</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>리더와 메인 덱 구성</div>
+                        </button>
+                        <button type="button" onClick={() => setViewMode('shops')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">오프라인 구매처</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>공식 점포 바로 찾기</div>
+                        </button>
+                      </div>
+                    </div>
+                    <div className={`border ${panelClass} rounded-2xl p-5`}>
+                      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">My Progress</div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
+                          <div className={`text-sm ${textMuted}`}>수집 진행</div>
+                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
+                        </div>
+                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
+                          <div className={`text-sm ${textMuted}`}>현재 덱</div>
+                          <div className="mt-2 text-2xl font-black">{deckCount} / {DECK_SIZE}</div>
+                        </div>
+                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
+                          <div className={`text-sm ${textMuted}`}>공식 점포</div>
+                          <div className="mt-2 text-2xl font-black">{homeShopCounts.official}곳</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                    <div className={`border ${panelClass} rounded-2xl p-5`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Featured Series</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>자주 보는 시리즈부터 바로 들어갈 수 있게.</div>
+                        </div>
+                      </div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {homeFeaturedSeries.map((series) => (
+                          <button key={series.id} type="button" onClick={() => openSeriesArchive(series.id)} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                            <div className="text-xs font-bold tracking-wide text-[#c94d35]">{series.id}</div>
+                            <div className="mt-2 text-base font-black">{series.koName}</div>
+                            <div className={`mt-1 text-xs ${textMuted}`}>{series.enName}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={`border ${panelClass} rounded-2xl p-5`}>
+                      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Shop Snapshot</div>
+                      <div className="mt-4 grid gap-3">
+                        <button type="button" onClick={() => { setShopType('official'); setSelectedRegion('서울특별시'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-sm font-black">서울 공식 점포 보기</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>공인/공식 점포 중심</div>
+                        </button>
+                        <button type="button" onClick={() => { setShopType('general'); setSelectedRegion('경기도'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-sm font-black">경기 취급 점포 보기</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>일반 취급 매장 중심</div>
+                        </button>
+                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
+                          <div className={`text-sm ${textMuted}`}>취급 점포 {homeShopCounts.general}곳 · 공인/공식 점포 {homeShopCounts.official}곳</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={`border ${panelClass} rounded-2xl p-5`}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Featured Cards</div>
+                        <div className={`mt-1 text-sm ${textMuted}`}>도감 첫 화면에서 바로 볼 만한 카드들.</div>
+                      </div>
+                      <button type="button" onClick={() => setViewMode('archive')} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>전체 도감 보기</button>
+                    </div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+                      {homeFeaturedCards.map((card) => (
+                        <button key={card.id} type="button" onClick={() => openCard(card.id)} className={`overflow-hidden rounded-xl border text-left ${cardClass}`}>
+                          <div className={`aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
+                            <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain" />
+                          </div>
+                          <div className={`border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`text-[11px] font-bold ${textMuted}`}>{card.cardNo}</span>
+                              <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
+                            </div>
+                            <div className="mt-2 line-clamp-2 text-sm font-extrabold">{card.name}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              ) : viewMode === 'archive' ? (
                 <section className="space-y-5">
                   {loading ? (
                     <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>불러오는 중...</div>
