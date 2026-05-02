@@ -105,7 +105,7 @@ function decodeHtml(value) {
 }
 
 function extractField(block, className) {
-  const regex = new RegExp(`<p class="${className}">([\\s\\S]*?)(?=<p class=|</button>)`);
+  const regex = new RegExp(`<p class="${className}">([\\s\\S]*?)(?=<p class=|</button>|$)`);
   const match = block.match(regex);
   if (!match) return '';
 
