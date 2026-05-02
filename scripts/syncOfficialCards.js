@@ -106,9 +106,11 @@ function parseCardsFromHtml(html, series, seen = new Set()) {
 
   return blocks
     .map((block) => {
-      const rawCardNo = extractField(block, 'cardNumber');
-      const cardNo = rawCardNo.split('_')[0]?.trim();
-      if (!cardNo || seen.has(cardNo)) return null;
+      const cardNo = extractField(block, 'cardNumber').trim();
+      const cardGet = extractField(block, 'cardGet');
+      const isPrimarySeriesCard = cardNo.startsWith(series.id);
+      const isIncludedBonusCard = !cardNo.includes('_') && cardGet.includes(series.queryLabel);
+      if (!cardNo || (!isPrimarySeriesCard && !isIncludedBonusCard) || seen.has(cardNo)) return null;
       seen.add(cardNo);
 
       const imageMatch = block.match(/<img class="image" src="([^"]+)"/);

@@ -69,7 +69,6 @@ export default function App() {
           <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-300">ONE PIECE TCG</p>
             <h1 className="mt-2 text-3xl font-bold">원피스 카드 도감</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-400">한글판 기준 시리즈 / 카드 리스트. 시세는 우선 준비 중.</p>
           </div>
 
           <div className="space-y-2.5">
