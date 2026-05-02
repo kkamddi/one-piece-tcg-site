@@ -272,8 +272,8 @@ export default function App() {
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]">
-            <aside className={`border ${panelClass} rounded-2xl p-3`}>
+          <div className={`grid gap-5 ${viewMode === 'home' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
+            {viewMode === 'home' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
               <div className={`mb-3 border ${subtleClass} rounded-xl px-4 py-3`}>
                 <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Series</div>
               </div>
@@ -294,7 +294,7 @@ export default function App() {
                   );
                 })}
               </div>
-            </aside>
+            </aside>}
 
             <main className="space-y-5">
               <section className={`border ${panelClass} rounded-2xl p-5`}>
@@ -302,20 +302,17 @@ export default function App() {
                   <div>
                     {viewMode === 'home' ? (
                       <>
-                        <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">Home Hub</div>
-                        <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG 도감</h1>
+                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG 도감</h1>
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>도감, 수집표, 덱, 오프라인 구매처까지 한 번에 바로 들어갈 수 있는 시작 화면으로 바꿔봤어.</p>
                       </>
                     ) : viewMode === 'shops' ? (
                       <>
-                        <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">Official Shop Sync</div>
-                        <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>오프라인 구매처</h1>
+                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>오프라인 구매처</h1>
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>공식 사이트 점포 데이터를 내부 API로 가져와서 지역별로 바로 볼 수 있게 바꿔뒀어.</p>
                       </>
                     ) : (
                       <>
-                        <div className="text-xs font-bold uppercase tracking-[0.22em] text-[#b6422e]">{currentSeries?.id}</div>
-                        <h1 className={`mt-2 text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
+                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
                         <div className={`mt-1 text-sm ${textMuted}`}>{currentSeries?.enName}</div>
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>{currentSeries?.description}</p>
                       </>
@@ -373,8 +370,7 @@ export default function App() {
                 <section className="space-y-5">
                   <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Quick Start</div>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="grid gap-3 sm:grid-cols-2">
                         <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">카드 도감</div>
                           <div className={`mt-1 text-sm ${textMuted}`}>시리즈별 카드 바로 보기</div>
@@ -394,8 +390,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">My Progress</div>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className={`text-sm ${textMuted}`}>수집 진행</div>
                           <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
@@ -412,28 +407,9 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                  <div className="grid gap-4 xl:grid-cols-1">
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Featured Series</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>자주 보는 시리즈부터 바로 들어갈 수 있게.</div>
-                        </div>
-                      </div>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                        {homeFeaturedSeries.map((series) => (
-                          <button key={series.id} type="button" onClick={() => openSeriesArchive(series.id)} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                            <div className="text-xs font-bold tracking-wide text-[#c94d35]">{series.id}</div>
-                            <div className="mt-2 text-base font-black">{series.koName}</div>
-                            <div className={`mt-1 text-xs ${textMuted}`}>{series.enName}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Shop Snapshot</div>
-                      <div className="mt-4 grid gap-3">
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                         <button type="button" onClick={() => { setShopType('official'); setSelectedRegion('서울특별시'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-sm font-black">서울 공식 점포 보기</div>
                           <div className={`mt-1 text-sm ${textMuted}`}>공인/공식 점포 중심</div>
@@ -450,14 +426,10 @@ export default function App() {
                   </div>
 
                   <div className={`border ${panelClass} rounded-2xl p-5`}>
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Featured Cards</div>
-                        <div className={`mt-1 text-sm ${textMuted}`}>도감 첫 화면에서 바로 볼 만한 카드들.</div>
-                      </div>
+                    <div className="mb-4 flex justify-end">
                       <button type="button" onClick={() => setViewMode('archive')} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>전체 도감 보기</button>
                     </div>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
                       {homeFeaturedCards.map((card) => (
                         <button key={card.id} type="button" onClick={() => openCard(card.id)} className={`overflow-hidden rounded-xl border text-left ${cardClass}`}>
                           <div className={`aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
