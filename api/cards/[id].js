@@ -9,6 +9,6 @@ export default async function handler(request, response) {
     return response.status(404).json({ message: 'Card not found' });
   }
 
-  response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  response.setHeader('Cache-Control', 'no-store, max-age=0');
   return response.status(200).json(card);
 }

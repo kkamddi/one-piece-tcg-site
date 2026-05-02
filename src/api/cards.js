@@ -17,7 +17,7 @@ function buildQuery(params = {}) {
 
 async function safeFetchJson(url, fallback) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`API ${response.status}`);
     }

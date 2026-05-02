@@ -5,6 +5,6 @@ export default async function handler(request, response) {
   const cards = await readCards();
   const results = filterCards(cards, { q });
 
-  response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  response.setHeader('Cache-Control', 'no-store, max-age=0');
   response.status(200).json(results);
 }

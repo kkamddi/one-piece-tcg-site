@@ -36,6 +36,7 @@ export default function App() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeRarity, setActiveRarity] = useState('ALL');
+  const [openRaritySections, setOpenRaritySections] = useState({});
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -75,6 +76,10 @@ export default function App() {
 
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
+
+  useEffect(() => {
+    setOpenRaritySections({});
+  }, [selectedSeries, searchKeyword, activeRarity]);
 
   async function openCard(id) {
     const detail = await fetchCardById(id);
@@ -175,52 +180,70 @@ export default function App() {
             {loading ? (
               <div className="rounded-[32px] border border-[#e4d7c7] bg-white p-8 text-center text-slate-500">불러오는 중...</div>
             ) : groupedCards.length ? (
-              groupedCards.map((group) => (
-                <div key={group.rarity} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-xl font-black text-slate-900">{group.rarity}</h3>
-                      <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${rarityTone(group.rarity)}`}>{group.rarity}</span>
-                    </div>
-                    <span className="text-sm text-slate-500">{group.cards.length}장</span>
+              groupedCards.map((group) => {
+                const defaultOpen = !['UC', 'C'].includes(group.rarity);
+                const isOpen = activeRarity === group.rarity ? true : (openRaritySections[group.rarity] ?? defaultOpen);
+
+                return (
+                  <div key={group.rarity} className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => setOpenRaritySections((prev) => ({ ...prev, [group.rarity]: !isOpen }))}
+                      className="flex w-full items-center justify-between rounded-[24px] border border-[#e4d7c7] bg-white px-4 py-3 text-left shadow-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-xl font-black text-slate-900">{group.rarity}</h3>
+                        <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${rarityTone(group.rarity)}`}>{group.rarity}</span>
+                        {['UC', 'C'].includes(group.rarity) ? (
+                          <span className="text-xs font-semibold text-slate-400">기본 숨김</span>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-slate-500">{group.cards.length}장</span>
+                        <span className="text-lg text-slate-400">{isOpen ? '−' : '+'}</span>
+                      </div>
+                    </button>
+
+                    {isOpen ? (
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                        {group.cards.map((card) => (
+                          <button
+                            key={card.id}
+                            type="button"
+                            onClick={() => openCard(card.id)}
+                            className="overflow-hidden rounded-[26px] border border-[#e4d7c7] bg-white text-left shadow-sm transition hover:-translate-y-1 hover:border-[#d4b7a7] hover:shadow-md"
+                          >
+                            <div className="aspect-[5/7] overflow-hidden bg-[#f8f5f0] p-2">
+                              <img
+                                src={card.imageUrl || '/card-placeholder.svg'}
+                                alt={card.name}
+                                onError={placeholderImage}
+                                className="h-full w-full object-contain [image-rendering:auto]"
+                              />
+                            </div>
+                            <div className="space-y-2.5 border-t border-[#f0e7dc] p-3.5">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="text-[11px] font-bold text-slate-500">{card.cardNo}</span>
+                                <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
+                              </div>
+                              <div>
+                                <div className="line-clamp-2 text-sm font-extrabold text-slate-900">{card.name}</div>
+                                <div className="mt-1 text-[11px] text-slate-500">{card.categoryKo}</div>
+                              </div>
+                              <dl className="grid grid-cols-2 gap-2 text-xs">
+                                <Stat label="비용" value={card.cost} compactSize />
+                                <Stat label="파워" value={card.power} compactSize />
+                                <Stat label="카운터" value={card.counter} compactSize />
+                                <Stat label="속성" value={card.attributeKo} compactSize />
+                              </dl>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                    {group.cards.map((card) => (
-                      <button
-                        key={card.id}
-                        type="button"
-                        onClick={() => openCard(card.id)}
-                        className="overflow-hidden rounded-[26px] border border-[#e4d7c7] bg-white text-left shadow-sm transition hover:-translate-y-1 hover:border-[#d4b7a7] hover:shadow-md"
-                      >
-                        <div className="aspect-[5/7] overflow-hidden bg-[#f8f5f0] p-2">
-                          <img
-                            src={card.imageUrl || '/card-placeholder.svg'}
-                            alt={card.name}
-                            onError={placeholderImage}
-                            className="h-full w-full object-contain [image-rendering:auto]"
-                          />
-                        </div>
-                        <div className="space-y-2.5 border-t border-[#f0e7dc] p-3.5">
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="text-[11px] font-bold text-slate-500">{card.cardNo}</span>
-                            <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
-                          </div>
-                          <div>
-                            <div className="line-clamp-2 text-sm font-extrabold text-slate-900">{card.name}</div>
-                            <div className="mt-1 text-[11px] text-slate-500">{card.categoryKo}</div>
-                          </div>
-                          <dl className="grid grid-cols-2 gap-2 text-xs">
-                            <Stat label="비용" value={card.cost} compactSize />
-                            <Stat label="파워" value={card.power} compactSize />
-                            <Stat label="카운터" value={card.counter} compactSize />
-                            <Stat label="속성" value={card.attributeKo} compactSize />
-                          </dl>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="rounded-[32px] border border-[#e4d7c7] bg-white p-8 text-center text-slate-500">검색 결과가 없습니다.</div>
             )}
