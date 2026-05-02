@@ -1,0 +1,107 @@
+[
+  {
+    "id": "OP12",
+    "name": "LEGACY OF THE MASTER",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-12",
+    "description": "마스터 계보 테마 중심의 부스터 팩"
+  },
+  {
+    "id": "OP11",
+    "name": "A FIST OF DIVINE SPEED",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-11",
+    "description": "고속 전개와 전투 카드가 두드러지는 시리즈"
+  },
+  {
+    "id": "OP10",
+    "name": "ROYAL BLOOD",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-10",
+    "description": "왕가·혈통 테마 카드가 포함된 시리즈"
+  },
+  {
+    "id": "OP09",
+    "name": "EMPERORS IN THE NEW WORLD",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-09",
+    "description": "사황 중심 인기 카드가 많은 시리즈"
+  },
+  {
+    "id": "OP08",
+    "name": "TWO LEGENDS",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-08",
+    "description": "복수 리더와 전설 캐릭터 중심 확장팩"
+  },
+  {
+    "id": "OP07",
+    "name": "500 YEARS IN THE FUTURE",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-07",
+    "description": "미래/에그헤드 테마가 반영된 시리즈"
+  },
+  {
+    "id": "OP06",
+    "name": "WINGS OF THE CAPTAIN",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-06",
+    "description": "선장 보조축 카드가 두드러지는 시리즈"
+  },
+  {
+    "id": "OP05",
+    "name": "AWAKENING OF THE NEW ERA",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-05",
+    "description": "수집가 수요가 높은 인기 확장팩"
+  },
+  {
+    "id": "OP04",
+    "name": "KINGDOMS OF INTRIGUE",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-04",
+    "description": "알라바스타·드레스로자 중심 시리즈"
+  },
+  {
+    "id": "OP03",
+    "name": "PILLARS OF STRENGTH",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-03",
+    "description": "강한 축 카드가 다수 포함된 시리즈"
+  },
+  {
+    "id": "OP02",
+    "name": "PARAMOUNT WAR",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-02",
+    "description": "정상결전 테마 중심 확장팩"
+  },
+  {
+    "id": "OP01",
+    "name": "ROMANCE DAWN",
+    "kind": "BOOSTER PACK",
+    "officialSeriesKeyword": "OP-01",
+    "description": "원피스 TCG 첫 번째 메인 부스터 팩"
+  },
+  {
+    "id": "ST01",
+    "name": "Straw Hat Crew",
+    "kind": "STARTER DECK",
+    "officialSeriesKeyword": "ST-01",
+    "description": "입문용 스타터 덱 시리즈"
+  },
+  {
+    "id": "ST02",
+    "name": "Worst Generation",
+    "kind": "STARTER DECK",
+    "officialSeriesKeyword": "ST-02",
+    "description": "초기 스타터 덱 라인업"
+  },
+  {
+    "id": "ST03",
+    "name": "The Seven Warlords of the Sea",
+    "kind": "STARTER DECK",
+    "officialSeriesKeyword": "ST-03",
+    "description": "칠무해 축 스타터 덱"
+  }
+]
