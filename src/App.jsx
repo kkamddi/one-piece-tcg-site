@@ -420,22 +420,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className={`border ${panelClass} rounded-2xl p-5`}>
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                      <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                        <div className="text-base font-black">전체 도감 보기</div>
-                        <div className={`mt-1 text-sm ${textMuted}`}>시리즈 전체 카드 목록으로 이동</div>
-                      </button>
-                      <button type="button" onClick={() => openSeriesArchive('OP12')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                        <div className="text-base font-black">OP12 바로 보기</div>
-                        <div className={`mt-1 text-sm ${textMuted}`}>최신 관심 시리즈 빠르게 열기</div>
-                      </button>
-                      <button type="button" onClick={() => { setViewMode('shops'); setShopType('official'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                        <div className="text-base font-black">공식 점포 바로 찾기</div>
-                        <div className={`mt-1 text-sm ${textMuted}`}>오프라인 구매처 목록으로 이동</div>
-                      </button>
-                    </div>
-                  </div>
                 </section>
               ) : viewMode === 'archive' ? (
                 <section className="space-y-5">
