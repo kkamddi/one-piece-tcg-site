@@ -181,12 +181,12 @@ export default function App() {
       <div className={`min-h-screen ${shellClass}`}>
         <div className="mx-auto grid min-h-screen max-w-[1880px] lg:grid-cols-[310px_minmax(0,1fr)]">
           <aside className={`${panelClass} border-b px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r`}>
-            <div className={`${panelClass} mb-5 rounded-[28px] border px-4 py-4 shadow-sm`}>
+            <div className={`${panelClass} mb-5 rounded-[20px] border px-4 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}>
               <div className="space-y-3">
                 <img
                   src={OFFICIAL_LOGO_URL}
                   alt="ONE PIECE CARD GAME"
-                  className={`h-auto w-full rounded-2xl object-contain ${isDark ? 'brightness-0 invert' : ''}`}
+                  className={`h-auto w-full rounded-xl object-contain ${isDark ? 'brightness-0 invert' : ''}`}
                   onError={placeholderImage}
                 />
                 <button
@@ -235,8 +235,8 @@ export default function App() {
                       setSearchKeyword('');
                       setActiveRarity('ALL');
                     }}
-                    className={`w-full rounded-[24px] border px-4 py-3 text-left transition ${
-                      active ? 'border-[#c94d35] bg-[#fff4ee] shadow-sm text-slate-900' : subPanelClass
+                    className={`w-full rounded-[16px] border px-4 py-3 text-left transition ${
+                      active ? 'border-[#c94d35] bg-[#fff4ee] shadow-[0_2px_10px_rgba(15,23,42,0.05)] text-slate-900' : subPanelClass
                     }`}
                   >
                     <div className="text-xs font-bold tracking-wide text-[#c94d35]">{series.id}</div>
@@ -250,7 +250,7 @@ export default function App() {
           </aside>
 
           <main className="px-4 py-5 sm:px-6 lg:px-8">
-            <section className={`${panelClass} rounded-[32px] border p-5 shadow-sm`}>
+            <section className={`${panelClass} rounded-[16px] border p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}>
               <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b6422e]">Series</p>
@@ -270,7 +270,7 @@ export default function App() {
               </div>
             </section>
 
-            <section className={`${panelClass} mt-4 rounded-[32px] border p-4 shadow-sm`}>
+            <section className={`${panelClass} mt-4 rounded-[16px] border p-4 shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}>
               <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
                 <label className="block">
                   <span className={`mb-2 block text-sm font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>시리즈 내 카드 검색</span>
@@ -278,7 +278,7 @@ export default function App() {
                     value={searchKeyword}
                     onChange={(event) => setSearchKeyword(event.target.value)}
                     placeholder="카드명 또는 카드번호 검색"
-                    className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition ${subPanelClass} ${isDark ? 'placeholder:text-slate-500' : 'placeholder:text-slate-400'} focus:border-[#c94d35]`}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${subPanelClass} ${isDark ? 'placeholder:text-slate-500' : 'placeholder:text-slate-400'} focus:border-[#c94d35]`}
                   />
                 </label>
 
@@ -306,7 +306,7 @@ export default function App() {
             {viewMode === 'archive' ? (
               <section className="mt-5 space-y-6">
                 {loading ? (
-                  <div className={`${panelClass} rounded-[32px] border p-8 text-center ${mutedClass}`}>불러오는 중...</div>
+                  <div className={`${panelClass} rounded-[16px] border p-8 text-center ${mutedClass}`}>불러오는 중...</div>
                 ) : groupedCards.length ? (
                   groupedCards.map((group) => {
                     const defaultOpen = !['UC', 'C'].includes(group.rarity);
@@ -317,7 +317,7 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => setOpenRaritySections((prev) => ({ ...prev, [group.rarity]: !isOpen }))}
-                          className={`${panelClass} flex w-full items-center justify-between rounded-[24px] border px-4 py-3 text-left shadow-sm`}
+                          className={`${panelClass} flex w-full items-center justify-between rounded-[16px] border px-4 py-3 text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}
                         >
                           <div className="flex items-center gap-3">
                             <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{group.rarity}</h3>
@@ -337,7 +337,7 @@ export default function App() {
                                 key={card.id}
                                 type="button"
                                 onClick={() => openCard(card.id)}
-                                className={`${panelClass} overflow-hidden rounded-[26px] border text-left shadow-sm transition hover:-translate-y-1 hover:border-[#d4b7a7] hover:shadow-md`}
+                                className={`${panelClass} overflow-hidden rounded-[18px] border text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:border-[#d4b7a7] hover:shadow-[0_8px_24px_rgba(15,23,42,0.10)]`}
                               >
                                 <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f8f5f0]'}`}>
                                   <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
@@ -376,12 +376,12 @@ export default function App() {
                     );
                   })
                 ) : (
-                  <div className={`${panelClass} rounded-[32px] border p-8 text-center ${mutedClass}`}>검색 결과가 없습니다.</div>
+                  <div className={`${panelClass} rounded-[16px] border p-8 text-center ${mutedClass}`}>검색 결과가 없습니다.</div>
                 )}
               </section>
             ) : viewMode === 'collection' ? (
               <section className="mt-5 space-y-5">
-                <div className={`${panelClass} rounded-[32px] border p-5 shadow-sm`}>
+                <div className={`${panelClass} rounded-[16px] border p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>수집 도감</h3>
@@ -398,7 +398,7 @@ export default function App() {
                         key={card.id}
                         type="button"
                         onClick={() => toggleOwned(card.id)}
-                        className={`${panelClass} overflow-hidden rounded-[24px] border text-left shadow-sm transition ${owned ? 'ring-2 ring-emerald-500' : ''}`}
+                        className={`${panelClass} overflow-hidden rounded-[16px] border text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)] transition ${owned ? 'ring-2 ring-emerald-500' : ''}`}
                       >
                         <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f8f5f0]'}`}>
                           <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className={`h-full w-full object-contain [image-rendering:auto] ${owned ? '' : 'opacity-60 grayscale-[0.15]'}`} />
@@ -418,7 +418,7 @@ export default function App() {
               </section>
             ) : (
               <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-                <div className={`${panelClass} rounded-[32px] border p-5 shadow-sm`}>
+                <div className={`${panelClass} rounded-[16px] border p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}>
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>덱 시뮬레이터</h3>
@@ -428,7 +428,7 @@ export default function App() {
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {cards.slice(0, 60).map((card) => (
-                      <div key={card.id} className={`${subPanelClass} rounded-[24px] border p-3`}>
+                      <div key={card.id} className={`${subPanelClass} rounded-[16px] border p-3`}>
                         <div className="flex gap-3">
                           <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-24 w-16 rounded-lg object-contain" />
                           <div className="min-w-0 flex-1">
@@ -443,14 +443,14 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className={`${panelClass} rounded-[32px] border p-5 shadow-sm`}>
+                <div className={`${panelClass} rounded-[16px] border p-5 shadow-[0_2px_10px_rgba(15,23,42,0.05)]`}>
                   <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>내 덱</h3>
                   <div className="mt-4 space-y-3">
-                    <div className={`${subPanelClass} rounded-[24px] border p-4`}>
+                    <div className={`${subPanelClass} rounded-[16px] border p-4`}>
                       <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Leader</div>
                       <div className={`mt-2 text-sm font-bold ${leaderCard ? '' : mutedClass}`}>{leaderCard ? leaderCard.name : '리더를 지정해줘'}</div>
                     </div>
-                    <div className={`${subPanelClass} rounded-[24px] border p-4`}>
+                    <div className={`${subPanelClass} rounded-[16px] border p-4`}>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold">메인 덱</span>
                         <span className={`text-sm font-black ${deckCount > DECK_SIZE ? 'text-red-500' : ''}`}>{deckCount}/{DECK_SIZE}</span>
@@ -459,7 +459,7 @@ export default function App() {
                     <div className="max-h-[560px] space-y-2 overflow-y-auto pr-1">
                       {deckCards.length ? (
                         deckCards.map((entry) => (
-                          <div key={entry.id} className={`${subPanelClass} rounded-[22px] border p-3`}>
+                          <div key={entry.id} className={`${subPanelClass} rounded-[14px] border p-3`}>
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <div className="truncate text-sm font-extrabold">{entry.name}</div>
@@ -480,7 +480,7 @@ export default function App() {
                           </div>
                         ))
                       ) : (
-                        <div className={`${subPanelClass} rounded-[24px] border p-5 text-center ${mutedClass}`}>아직 덱에 담긴 카드가 없어.</div>
+                        <div className={`${subPanelClass} rounded-[16px] border p-5 text-center ${mutedClass}`}>아직 덱에 담긴 카드가 없어.</div>
                       )}
                     </div>
                   </div>
@@ -498,7 +498,7 @@ export default function App() {
 
 function Stat({ label, value, compact = false, compactSize = false, dark = false }) {
   return (
-    <div className={`rounded-2xl border px-3 py-2 ${compact ? 'col-span-2' : ''} ${dark ? 'border-[#303030] bg-[#1b1b1b]' : 'border-[#ede3d8] bg-[#faf7f2]'}`}>
+    <div className={`rounded-xl border px-3 py-2 ${compact ? 'col-span-2' : ''} ${dark ? 'border-[#303030] bg-[#1b1b1b]' : 'border-[#ede3d8] bg-[#faf7f2]'}`}>
       <dt className={`font-bold uppercase tracking-[0.18em] ${compactSize ? 'text-[10px]' : 'text-[11px]'} ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</dt>
       <dd className={`mt-1 break-words font-semibold ${compactSize ? 'text-xs' : 'text-sm'} ${dark ? 'text-slate-100' : 'text-slate-900'}`}>{value}</dd>
     </div>
@@ -509,12 +509,12 @@ function CardModal({ card, onClose, dark }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className={`max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[32px] border shadow-2xl ${dark ? 'border-[#363636] bg-[#202020]' : 'border-[#e4d7c7] bg-[#fffdf9]'}`}
+        className={`max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[16px] border shadow-2xl ${dark ? 'border-[#363636] bg-[#202020]' : 'border-[#e4d7c7] bg-[#fffdf9]'}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="grid gap-6 p-5 lg:grid-cols-[360px_minmax(0,1fr)] lg:p-7">
           <div>
-            <div className={`overflow-hidden rounded-[24px] border p-2 ${dark ? 'border-[#333333] bg-[#111111]' : 'border-[#ece0d4] bg-[#f8f5f0]'}`}>
+            <div className={`overflow-hidden rounded-[16px] border p-2 ${dark ? 'border-[#333333] bg-[#111111]' : 'border-[#ece0d4] bg-[#f8f5f0]'}`}>
               <img
                 src={card.imageUrl || '/card-placeholder.svg'}
                 alt={card.name}
@@ -525,7 +525,7 @@ function CardModal({ card, onClose, dark }) {
           </div>
 
           <div className="space-y-5">
-            <div className={`rounded-[28px] border bg-gradient-to-br p-5 ${dark ? 'border-[#333333] from-[#242424] to-[#1d1d1d]' : 'border-[#ece0d4] from-white to-[#fff6ef]'}`}>
+            <div className={`rounded-[20px] border bg-gradient-to-br p-5 ${dark ? 'border-[#333333] from-[#242424] to-[#1d1d1d]' : 'border-[#ece0d4] from-white to-[#fff6ef]'}`}>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -558,7 +558,7 @@ function CardModal({ card, onClose, dark }) {
               <Stat label="타입" value={card.type} compact dark={dark} />
             </div>
 
-            <section className={`rounded-[24px] border p-4 ${dark ? 'border-[#333333] bg-[#1b1b1b]' : 'border-[#ece0d4] bg-white'}`}>
+            <section className={`rounded-[16px] border p-4 ${dark ? 'border-[#333333] bg-[#1b1b1b]' : 'border-[#ece0d4] bg-white'}`}>
               <div className={`text-sm font-bold ${dark ? 'text-slate-100' : 'text-slate-800'}`}>효과</div>
               <p className={`mt-3 whitespace-pre-line text-sm leading-7 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>{card.effect || '효과 정보 준비 중'}</p>
             </section>
