@@ -30,10 +30,14 @@ function getSeriesCategory(seriesId) {
   return 'regular-booster';
 }
 
+function sortDescByCode(items) {
+  return [...items].sort((a, b) => b.id.localeCompare(a.id, 'en', { numeric: true }));
+}
+
 function buildSidebarSections() {
-  const regular = seriesData.filter((series) => /^OP\d+/.test(series.id));
-  const extraPremium = seriesData.filter((series) => /^(EB|PRB)\d+/.test(series.id));
-  const starter = seriesData.filter((series) => /^ST\d+/.test(series.id));
+  const regular = sortDescByCode(seriesData.filter((series) => /^OP\d+/.test(series.id)));
+  const extraPremium = sortDescByCode(seriesData.filter((series) => /^(EB|PRB)\d+/.test(series.id)));
+  const starter = sortDescByCode(seriesData.filter((series) => /^ST\d+/.test(series.id)));
   const promo = seriesData.filter((series) => series.id === 'PROMO');
 
   return [
