@@ -183,7 +183,12 @@ export default function App() {
           <aside className={`${panelClass} border-b px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r`}>
             <div className={`${panelClass} mb-5 rounded-[28px] border px-4 py-4 shadow-sm`}>
               <div className="space-y-3">
-                <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className="h-auto w-full rounded-2xl object-contain" onError={placeholderImage} />
+                <img
+                  src={OFFICIAL_LOGO_URL}
+                  alt="ONE PIECE CARD GAME"
+                  className={`h-auto w-full rounded-2xl object-contain ${isDark ? 'brightness-0 invert' : ''}`}
+                  onError={placeholderImage}
+                />
                 <button
                   type="button"
                   onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
