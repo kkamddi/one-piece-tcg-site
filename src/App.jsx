@@ -209,7 +209,6 @@ export default function App() {
                 <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className={`h-14 w-auto object-contain ${isDark ? 'brightness-0 invert' : ''}`} onError={placeholderImage} />
                 <div>
                   <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#b6422e]">One Piece TCG Archive</div>
-                  <div className={`mt-1 text-sm ${textMuted}`}>시리즈별 카드 도감 · 수집표 · 덱 시뮬레이터 · 구매처</div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
