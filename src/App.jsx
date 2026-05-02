@@ -5,7 +5,7 @@ import seriesData from './data/series.json';
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
-const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
+const CUSTOM_LOGO_URL = '/custom-logo.png';
 
 function getOrderedRarities(cards) {
   const present = [...new Set(cards.map((card) => card.rarity).filter(Boolean))];
@@ -181,13 +181,13 @@ export default function App() {
       <div className={`min-h-screen ${shellClass}`}>
         <div className="mx-auto grid min-h-screen max-w-[1880px] lg:grid-cols-[310px_minmax(0,1fr)]">
           <aside className={`${panelClass} border-b px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r`}>
-            <div className={`${panelClass} mb-5 rounded-[28px] border px-5 py-5 shadow-sm`}>
-              <div className="flex items-start justify-between gap-3">
-                <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className="h-14 w-auto object-contain" onError={placeholderImage} />
+            <div className={`${panelClass} mb-5 rounded-[28px] border px-4 py-4 shadow-sm`}>
+              <div className="space-y-3">
+                <img src={CUSTOM_LOGO_URL} alt="원피스 카드도감" className="h-auto w-full rounded-2xl object-contain" onError={placeholderImage} />
                 <button
                   type="button"
                   onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-                  className={`rounded-full border px-3 py-2 text-xs font-bold ${subPanelClass}`}
+                  className={`w-full rounded-full border px-3 py-2 text-xs font-bold ${subPanelClass}`}
                 >
                   {isDark ? '라이트모드' : '다크모드'}
                 </button>
