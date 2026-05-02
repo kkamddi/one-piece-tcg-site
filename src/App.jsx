@@ -30,6 +30,11 @@ function getSeriesCategory(seriesId) {
   return 'regular-booster';
 }
 
+function getDisplaySeriesCode(series) {
+  const match = series?.queryLabel?.match(/^\[([^\]]+)\]/);
+  return match?.[1] ?? series?.id ?? '';
+}
+
 function sortDescByCode(items) {
   return [...items].sort((a, b) => b.id.localeCompare(a.id, 'en', { numeric: true }));
 }
@@ -245,6 +250,7 @@ export default function App() {
   const isDark = theme === 'dark';
   const ownedSet = useMemo(() => new Set(ownedCardIds), [ownedCardIds]);
   const ownedInSeries = useMemo(() => cards.filter((card) => ownedSet.has(card.id)).length, [cards, ownedSet]);
+  const officialSeriesCount = useMemo(() => cardsData.filter((card) => card.series === selectedSeries).length, [selectedSeries]);
 
   const deckCards = useMemo(
     () => [...deckEntries].sort((a, b) => (a.categoryKo === '리더' ? -1 : b.categoryKo === '리더' ? 1 : b.count - a.count)),
@@ -386,7 +392,7 @@ export default function App() {
                                   }}
                                   className={`w-full rounded-lg border px-3 py-2 text-left ${series.disabled ? 'cursor-default opacity-55' : ''} ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : `${cardClass}`}`}
                                 >
-                                  <div className={`text-xs font-bold tracking-wide ${active ? 'text-white/80' : 'text-[#c94d35]'}`}>{series.disabled ? section.label : series.id}</div>
+                                  <div className={`text-xs font-bold tracking-wide ${active ? 'text-white/80' : 'text-[#c94d35]'}`}>{series.disabled ? section.label : getDisplaySeriesCode(series)}</div>
                                   <div className={`mt-1 text-[14px] font-extrabold ${active ? 'text-white' : isDark ? 'text-white' : 'text-stone-900'}`}>{series.koName}</div>
                                   <div className={`mt-1 text-[11px] ${active ? 'text-white/75' : textMuted}`}>{series.disabled ? '준비 중' : series.enName}</div>
                                 </button>
@@ -419,6 +425,7 @@ export default function App() {
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
                         <div className={`mt-1 text-sm ${textMuted}`}>{currentSeries?.enName}</div>
+                        {officialSeriesCount !== cards.length ? <div className={`mt-2 text-sm ${textMuted}`}>현재 표시 {cards.length}장 · 공식 기준 {officialSeriesCount}장</div> : null}
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>{currentSeries?.description}</p>
                       </>
                     )}
@@ -438,7 +445,7 @@ export default function App() {
                       </>
                     ) : (
                       <>
-                        <Metric label="표시 카드" value={`${cards.length}장`} className={subtleClass} />
+                        <Metric label="공식 카드" value={`${officialSeriesCount}장`} className={subtleClass} />
                         <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} className={subtleClass} />
                         {viewMode === 'deck' ? <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} /> : null}
                       </>
