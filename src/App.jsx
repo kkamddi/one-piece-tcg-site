@@ -5,7 +5,7 @@ import seriesData from './data/series.json';
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
-const CUSTOM_LOGO_URL = '/custom-logo.png';
+const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 
 function getOrderedRarities(cards) {
   const present = [...new Set(cards.map((card) => card.rarity).filter(Boolean))];
@@ -183,7 +183,7 @@ export default function App() {
           <aside className={`${panelClass} border-b px-4 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r`}>
             <div className={`${panelClass} mb-5 rounded-[28px] border px-4 py-4 shadow-sm`}>
               <div className="space-y-3">
-                <img src={CUSTOM_LOGO_URL} alt="원피스 카드도감" className="h-auto w-full rounded-2xl object-contain" onError={placeholderImage} />
+                <img src={OFFICIAL_LOGO_URL} alt="ONE PIECE CARD GAME" className="h-auto w-full rounded-2xl object-contain" onError={placeholderImage} />
                 <button
                   type="button"
                   onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
