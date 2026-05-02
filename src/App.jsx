@@ -7,6 +7,7 @@ import shopsData from './data/shops.json';
 
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
+const DECK_PAGE_SIZE = 24;
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const SHOP_TYPES = [
@@ -136,6 +137,11 @@ export default function App() {
     'flagship-line': false,
     'championship-line': false
   });
+  const [deckSearchKeyword, setDeckSearchKeyword] = useState('');
+  const [deckFilterColor, setDeckFilterColor] = useState('ALL');
+  const [deckFilterRarity, setDeckFilterRarity] = useState('ALL');
+  const [deckFilterCategory, setDeckFilterCategory] = useState('ALL');
+  const [deckPage, setDeckPage] = useState(1);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -245,6 +251,14 @@ export default function App() {
     };
   }, [shopType, selectedRegion, selectedGungu, shopSearchKeyword]);
 
+  useEffect(() => {
+    setDeckPage(1);
+  }, [deckSearchKeyword, deckFilterColor, deckFilterRarity, deckFilterCategory]);
+
+  useEffect(() => {
+    if (deckPage > deckPageCount) setDeckPage(deckPageCount);
+  }, [deckPage, deckPageCount]);
+
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const isDark = theme === 'dark';
@@ -265,6 +279,25 @@ export default function App() {
   const deckCount = useMemo(() => deckEntries.filter((entry) => entry.categoryKo !== '리더').reduce((sum, entry) => sum + entry.count, 0), [deckEntries]);
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
   const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
+  const deckFilterCards = useMemo(() => {
+    const keyword = deckSearchKeyword.trim().toLowerCase();
+    return cardsData.filter((card) => {
+      const matchesKeyword = !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value ?? '').toLowerCase().includes(keyword));
+      const matchesColor = deckFilterColor === 'ALL' || card.colorKo === deckFilterColor;
+      const matchesRarity = deckFilterRarity === 'ALL' || card.rarity === deckFilterRarity;
+      const matchesCategory = deckFilterCategory === 'ALL' || card.categoryKo === deckFilterCategory;
+      const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
+      return matchesKeyword && matchesColor && matchesRarity && matchesCategory && !hideBaseLeader;
+    });
+  }, [deckSearchKeyword, deckFilterColor, deckFilterRarity, deckFilterCategory]);
+  const deckPageCount = useMemo(() => Math.max(1, Math.ceil(deckFilterCards.length / DECK_PAGE_SIZE)), [deckFilterCards.length]);
+  const pagedDeckCards = useMemo(() => {
+    const start = (deckPage - 1) * DECK_PAGE_SIZE;
+    return deckFilterCards.slice(start, start + DECK_PAGE_SIZE);
+  }, [deckFilterCards, deckPage]);
+  const deckColorOptions = useMemo(() => [...new Set(cardsData.map((card) => card.colorKo).filter(Boolean))], []);
+  const deckRarityOptions = useMemo(() => [...getOrderedRarities(cardsData)], []);
+  const deckCategoryOptions = useMemo(() => [...new Set(cardsData.map((card) => card.categoryKo).filter(Boolean))], []);
   const homeShopCounts = useMemo(
     () => ({
       general: shopsData.filter((shop) => shop.sourceType === 'general').length,
@@ -312,6 +345,14 @@ export default function App() {
   function clearDeck() {
     setDeckEntries([]);
     setLeaderCardId(null);
+  }
+
+  function resetDeckFilters() {
+    setDeckSearchKeyword('');
+    setDeckFilterColor('ALL');
+    setDeckFilterRarity('ALL');
+    setDeckFilterCategory('ALL');
+    setDeckPage(1);
   }
 
   function toggleOwned(cardId) {
@@ -630,24 +671,51 @@ export default function App() {
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>덱 시뮬레이터</h3>
-                        <p className={`mt-1 text-sm ${textMuted}`}>리더 1장 / 메인 덱 50장 / 동일 카드 최대 4장</p>
+                        <p className={`mt-1 text-sm ${textMuted}`}>전체 카드 풀에서 색상/등급/종류로 골라서 덱을 만들 수 있게 바꿨어.</p>
                       </div>
                       <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>초기화</button>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {cards.slice(0, 60).map((card) => (
+
+                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
+                      <label className="block xl:col-span-1">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 검색</div>
+                        <input
+                          value={deckSearchKeyword}
+                          onChange={(event) => setDeckSearchKeyword(event.target.value)}
+                          placeholder="카드명 또는 카드번호 검색"
+                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
+                        />
+                      </label>
+                      <FilterSelect label="색상" value={deckFilterColor} onChange={setDeckFilterColor} options={deckColorOptions} subtleClass={subtleClass} isDark={isDark} />
+                      <FilterSelect label="등급" value={deckFilterRarity} onChange={setDeckFilterRarity} options={deckRarityOptions} subtleClass={subtleClass} isDark={isDark} />
+                      <FilterSelect label="종류" value={deckFilterCategory} onChange={setDeckFilterCategory} options={deckCategoryOptions} subtleClass={subtleClass} isDark={isDark} />
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <div className={`text-sm ${textMuted}`}>전체 {deckFilterCards.length}장 · {deckPage}/{deckPageCount} 페이지</div>
+                      <button type="button" onClick={resetDeckFilters} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>필터 초기화</button>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {pagedDeckCards.map((card) => (
                         <div key={card.id} className={`border ${subtleClass} rounded-xl p-3`}>
                           <div className="flex gap-3">
                             <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-24 w-16 rounded-lg object-contain" />
                             <div className="min-w-0 flex-1">
                               <div className="truncate text-sm font-extrabold">{card.name}</div>
                               <div className={`mt-1 text-[11px] ${textMuted}`}>{card.cardNo}</div>
-                              <div className={`mt-1 text-[11px] ${textMuted}`}>{card.categoryKo} · {card.rarity}</div>
+                              <div className={`mt-1 text-[11px] ${textMuted}`}>{card.categoryKo} · {card.rarity} · {card.colorKo}</div>
                               <button type="button" onClick={() => addToDeck(card)} className="mt-3 rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white">{card.categoryKo === '리더' ? '리더 지정' : '덱 추가'}</button>
                             </div>
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-center gap-2">
+                      <button type="button" onClick={() => setDeckPage((prev) => Math.max(1, prev - 1))} disabled={deckPage === 1} className={`rounded-full border px-3 py-1.5 text-sm font-bold ${subtleClass} disabled:opacity-45`}>이전</button>
+                      <span className={`px-3 text-sm font-bold ${textMuted}`}>{deckPage} / {deckPageCount}</span>
+                      <button type="button" onClick={() => setDeckPage((prev) => Math.min(deckPageCount, prev + 1))} disabled={deckPage === deckPageCount} className={`rounded-full border px-3 py-1.5 text-sm font-bold ${subtleClass} disabled:opacity-45`}>다음</button>
                     </div>
                   </div>
 
@@ -670,7 +738,7 @@ export default function App() {
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <div className="truncate text-sm font-extrabold">{entry.name}</div>
-                                <div className={`mt-1 text-[11px] ${textMuted}`}>{entry.cardNo} · {entry.rarity}</div>
+                                <div className={`mt-1 text-[11px] ${textMuted}`}>{entry.cardNo} · {entry.rarity} · {entry.colorKo}</div>
                               </div>
                               <div className="flex items-center gap-2">
                                 {entry.categoryKo === '리더' ? (
