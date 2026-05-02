@@ -101,9 +101,8 @@ function extractField(block, className) {
     .trim();
 }
 
-function parseCardsFromHtml(html, series) {
+function parseCardsFromHtml(html, series, seen = new Set()) {
   const blocks = [...html.matchAll(/<button class="item">([\s\S]*?)<\/button>/g)].map((match) => match[1]);
-  const seen = new Set();
 
   return blocks
     .map((block) => {
@@ -145,12 +144,30 @@ function parseCardsFromHtml(html, series) {
     .filter(Boolean);
 }
 
+function getLastPageIndex(html) {
+  const matches = [...html.matchAll(/page=(\d+)/g)].map((match) => Number(match[1]));
+  if (!matches.length) return 0;
+  return Math.max(...matches.filter((value) => Number.isFinite(value)));
+}
+
 async function fetchSeriesCards(series) {
-  const url = `${CARD_LIST_URL}?series=${encodeURIComponent(series.queryLabel)}&search=true`;
   console.log(`[sync] fetch series ${series.id}`);
-  const html = await fetchText(url);
+  const seen = new Set();
+  const firstUrl = `${CARD_LIST_URL}?page=0&size=20&series=${encodeURIComponent(series.queryLabel)}&search=true`;
+  const firstHtml = await fetchText(firstUrl);
   await delay(REQUEST_DELAY_MS);
-  return parseCardsFromHtml(html, series);
+
+  const lastPageIndex = getLastPageIndex(firstHtml);
+  const cards = parseCardsFromHtml(firstHtml, series, seen);
+
+  for (let page = 1; page <= lastPageIndex; page += 1) {
+    const pageUrl = `${CARD_LIST_URL}?page=${page}&size=20&series=${encodeURIComponent(series.queryLabel)}&search=true`;
+    const html = await fetchText(pageUrl);
+    await delay(REQUEST_DELAY_MS);
+    cards.push(...parseCardsFromHtml(html, series, seen));
+  }
+
+  return cards;
 }
 
 async function main() {

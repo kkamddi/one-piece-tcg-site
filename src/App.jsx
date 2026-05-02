@@ -163,7 +163,7 @@ export default function App() {
                     <h3 className="text-lg font-bold text-white">{group.rarity}</h3>
                     <span className="text-sm text-slate-400">{group.cards.length}장</span>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                     {group.cards.map((card) => (
                       <button
                         key={card.id}
@@ -171,12 +171,12 @@ export default function App() {
                         onClick={() => openCard(card.id)}
                         className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80 text-left transition hover:-translate-y-1 hover:border-rose-400/50 hover:shadow-lg hover:shadow-rose-900/20"
                       >
-                        <div className="aspect-[5/7] overflow-hidden bg-slate-950">
+                        <div className="aspect-[5/7] overflow-hidden bg-slate-950 p-1">
                           <img
                             src={card.imageUrl || '/card-placeholder.svg'}
                             alt={card.name}
                             onError={placeholderImage}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain [image-rendering:auto]"
                           />
                         </div>
                         <div className="space-y-2.5 p-3.5">
@@ -187,7 +187,7 @@ export default function App() {
                           <div>
                             <div className="line-clamp-2 text-sm font-bold text-white">{card.name}</div>
                             {card.nameEn ? <div className="mt-0.5 text-[11px] text-slate-500">{card.nameEn}</div> : null}
-                            <div className="mt-1 text-[11px] text-slate-400">{card.categoryKo} · {card.colorKo}</div>
+                            <div className="mt-1 text-[11px] text-slate-400">{card.categoryKo}</div>
                           </div>
                           <dl className="grid grid-cols-2 gap-2 text-xs">
                             <Stat label="비용" value={card.cost} compactSize />
@@ -245,7 +245,7 @@ function CardModal({ card, onClose }) {
                 src={card.imageUrl || '/card-placeholder.svg'}
                 alt={card.name}
                 onError={placeholderImage}
-                className="aspect-[5/7] h-full w-full object-cover"
+                className="aspect-[5/7] h-full w-full object-contain [image-rendering:auto]"
               />
             </div>
           </div>
