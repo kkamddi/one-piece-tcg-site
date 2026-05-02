@@ -34,6 +34,7 @@ function buildSidebarSections() {
   const regular = seriesData.filter((series) => /^OP\d+/.test(series.id));
   const extraPremium = seriesData.filter((series) => /^(EB|PRB)\d+/.test(series.id));
   const starter = seriesData.filter((series) => /^ST\d+/.test(series.id));
+  const promo = seriesData.filter((series) => series.id === 'PROMO');
 
   return [
     { id: 'regular-booster', label: '정규 부스터', children: regular },
@@ -43,6 +44,7 @@ function buildSidebarSections() {
       id: 'promo-line',
       label: '프로모',
       children: [
+        ...promo,
         { id: 'promo-p', koName: 'P Promo', enName: 'Promo', disabled: true },
         { id: 'promo-magazine', koName: 'Magazine Promo', enName: 'Promo', disabled: true },
         { id: 'promo-store', koName: 'Store Tournament', enName: 'Promo', disabled: true },

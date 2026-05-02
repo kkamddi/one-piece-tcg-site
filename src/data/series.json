@@ -1,92 +1,22 @@
 [
   {
-    "id": "OP12",
-    "koName": "사제의 연",
-    "enName": "LEGACY OF THE MASTER",
+    "id": "OP01",
+    "koName": "ROMANCE DAWN",
+    "enName": "ROMANCE DAWN",
     "kindKo": "부스터 팩",
     "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-12] 부스터 팩 사제의 연",
-    "officialSeriesKeyword": "OP-12",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+    "queryLabel": "[OPK-01] 부스터 팩 ROMANCE DAWN",
+    "officialSeriesKeyword": "OP-01",
+    "description": "공식 한글 카드 리스트 기준 첫 번째 메인 부스터 팩"
   },
   {
-    "id": "OP11",
-    "koName": "신속의 권",
-    "enName": "A FIST OF DIVINE SPEED",
+    "id": "OP02",
+    "koName": "정상결전",
+    "enName": "PARAMOUNT WAR",
     "kindKo": "부스터 팩",
     "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-11] 부스터 팩 신속의 권",
-    "officialSeriesKeyword": "OP-11",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP10",
-    "koName": "왕족의 혈통",
-    "enName": "ROYAL BLOOD",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-10] 부스터 팩 왕족의 혈통",
-    "officialSeriesKeyword": "OP-10",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP09",
-    "koName": "새로운 황제",
-    "enName": "EMPERORS IN THE NEW WORLD",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-09] 부스터 팩 새로운 황제",
-    "officialSeriesKeyword": "OP-09",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP08",
-    "koName": "두 전설",
-    "enName": "TWO LEGENDS",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-08] 부스터 팩 두 전설",
-    "officialSeriesKeyword": "OP-08",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP07",
-    "koName": "500년 후의 미래",
-    "enName": "500 YEARS IN THE FUTURE",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-07] 부스터 팩 500년 후의 미래",
-    "officialSeriesKeyword": "OP-07",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP06",
-    "koName": "쌍벽의 패자",
-    "enName": "WINGS OF THE CAPTAIN",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-06] 부스터 팩 쌍벽의 패자",
-    "officialSeriesKeyword": "OP-06",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP05",
-    "koName": "신시대의 주역",
-    "enName": "AWAKENING OF THE NEW ERA",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-05] 부스터 팩 신시대의 주역",
-    "officialSeriesKeyword": "OP-05",
-    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
-  },
-  {
-    "id": "OP04",
-    "koName": "모략의 왕국",
-    "enName": "KINGDOMS OF INTRIGUE",
-    "kindKo": "부스터 팩",
-    "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-04] 부스터 팩 모략의 왕국",
-    "officialSeriesKeyword": "OP-04",
+    "queryLabel": "[OPK-02] 부스터 팩 정상결전",
+    "officialSeriesKeyword": "OP-02",
     "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
@@ -100,34 +30,94 @@
     "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
-    "id": "OP02",
-    "koName": "정상결전",
-    "enName": "PARAMOUNT WAR",
+    "id": "OP04",
+    "koName": "모략의 왕국",
+    "enName": "KINGDOMS OF INTRIGUE",
     "kindKo": "부스터 팩",
     "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-02] 부스터 팩 정상결전",
-    "officialSeriesKeyword": "OP-02",
+    "queryLabel": "[OPK-04] 부스터 팩 모략의 왕국",
+    "officialSeriesKeyword": "OP-04",
     "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
-    "id": "OP01",
-    "koName": "ROMANCE DAWN",
-    "enName": "ROMANCE DAWN",
+    "id": "OP05",
+    "koName": "신시대의 주역",
+    "enName": "AWAKENING OF THE NEW ERA",
     "kindKo": "부스터 팩",
     "kindEn": "BOOSTER PACK",
-    "queryLabel": "[OPK-01] 부스터 팩 ROMANCE DAWN",
-    "officialSeriesKeyword": "OP-01",
-    "description": "공식 한글 카드 리스트 기준 첫 번째 메인 부스터 팩"
+    "queryLabel": "[OPK-05] 부스터 팩 신시대의 주역",
+    "officialSeriesKeyword": "OP-05",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
-    "id": "PRB02",
-    "koName": "원피스 카드 더 베스트 Vol.2",
-    "enName": "ONE PIECE CARD THE BEST Vol.2",
-    "kindKo": "프리미엄 부스터",
-    "kindEn": "PREMIUM BOOSTER",
-    "queryLabel": "",
-    "officialSeriesKeyword": "PRB-02",
-    "description": "패러렐/재수록 카드가 포함된 프리미엄 부스터"
+    "id": "OP06",
+    "koName": "쌍벽의 패자",
+    "enName": "WINGS OF THE CAPTAIN",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-06] 부스터 팩 쌍벽의 패자",
+    "officialSeriesKeyword": "OP-06",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+  },
+  {
+    "id": "OP07",
+    "koName": "500년 후의 미래",
+    "enName": "500 YEARS IN THE FUTURE",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-07] 부스터 팩 500년 후의 미래",
+    "officialSeriesKeyword": "OP-07",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+  },
+  {
+    "id": "OP08",
+    "koName": "두 전설",
+    "enName": "TWO LEGENDS",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-08] 부스터 팩 두 전설",
+    "officialSeriesKeyword": "OP-08",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+  },
+  {
+    "id": "OP09",
+    "koName": "새로운 황제",
+    "enName": "EMPERORS IN THE NEW WORLD",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-09] 부스터 팩 새로운 황제",
+    "officialSeriesKeyword": "OP-09",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+  },
+  {
+    "id": "OP10",
+    "koName": "왕족의 혈통",
+    "enName": "ROYAL BLOOD",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-10] 부스터 팩 왕족의 혈통",
+    "officialSeriesKeyword": "OP-10",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+  },
+  {
+    "id": "OP11",
+    "koName": "신속의 권",
+    "enName": "A FIST OF DIVINE SPEED",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-11] 부스터 팩 신속의 권",
+    "officialSeriesKeyword": "OP-11",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
+  },
+  {
+    "id": "OP12",
+    "koName": "사제의 연",
+    "enName": "LEGACY OF THE MASTER",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-12] 부스터 팩 사제의 연",
+    "officialSeriesKeyword": "OP-12",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈"
   },
   {
     "id": "EB01",
@@ -135,8 +125,18 @@
     "enName": "MEMORIAL COLLECTION",
     "kindKo": "엑스트라 부스터",
     "kindEn": "EXTRA BOOSTER",
-    "queryLabel": "",
+    "queryLabel": "[EBK-01] 엑스트라 부스터 팩 메모리얼 컬렉션",
     "officialSeriesKeyword": "EB-01",
+    "description": "엑스트라 부스터 계열 카드"
+  },
+  {
+    "id": "EB02",
+    "koName": "엑스트라 부스터 팩 Anime 25th collection",
+    "enName": "Anime 25th Collection",
+    "kindKo": "엑스트라 부스터",
+    "kindEn": "EXTRA BOOSTER",
+    "queryLabel": "[EBK-02] 엑스트라 부스터 팩 Anime 25th collection",
+    "officialSeriesKeyword": "EB-02",
     "description": "엑스트라 부스터 계열 카드"
   },
   {
@@ -180,6 +180,16 @@
     "description": "공식 한글 카드 리스트 기준 스타트 덱"
   },
   {
+    "id": "ST05",
+    "koName": "스타트 덱 ONE PIECE FILM edition",
+    "enName": "스타트 덱 ONE PIECE FILM edition",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-05] 스타트 덱 ONE PIECE FILM edition",
+    "officialSeriesKeyword": "ST-05",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
+  },
+  {
     "id": "ST06",
     "koName": "해군",
     "enName": "Absolute Justice",
@@ -188,6 +198,56 @@
     "queryLabel": "[STK-06] 스타트 덱 해군",
     "officialSeriesKeyword": "ST-06",
     "description": "공식 한글 카드 리스트 기준 스타트 덱"
+  },
+  {
+    "id": "ST07",
+    "koName": "스타트 덱 빅 맘 해적단",
+    "enName": "스타트 덱 빅 맘 해적단",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-07] 스타트 덱 빅 맘 해적단",
+    "officialSeriesKeyword": "ST-07",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "ST08",
+    "koName": "스타트 덱 Side 몽키 D. 루피",
+    "enName": "스타트 덱 Side 몽키 D. 루피",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-08] 스타트 덱 Side 몽키 D. 루피",
+    "officialSeriesKeyword": "ST-08",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "ST09",
+    "koName": "스타트 덱 Side 야마토",
+    "enName": "스타트 덱 Side 야마토",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-09] 스타트 덱 Side 야마토",
+    "officialSeriesKeyword": "ST-09",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "ST10",
+    "koName": "얼티밋 덱 \"삼선장\" 집결",
+    "enName": "얼티밋 덱 \"삼선장\" 집결",
+    "kindKo": "얼티밋 덱",
+    "kindEn": "ULTIMATE DECK",
+    "queryLabel": "[STK-10] 얼티밋 덱 \"삼선장\" 집결",
+    "officialSeriesKeyword": "ST-10",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "ST11",
+    "koName": "스타트 덱 Side 우타",
+    "enName": "스타트 덱 Side 우타",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "[STK-11] 스타트 덱 Side 우타",
+    "officialSeriesKeyword": "ST-11",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
   },
   {
     "id": "ST12",
@@ -220,33 +280,33 @@
     "description": "공식 한글 카드 리스트 기준 스타트 덱"
   },
   {
-    "id": "ST15",
-    "koName": "적색 에드워드 뉴게이트",
-    "enName": "Red Edward.Newgate",
+    "id": "ST21",
+    "koName": "스타트 덱 기어5",
+    "enName": "스타트 덱 기어5",
     "kindKo": "스타트 덱",
     "kindEn": "STARTER DECK",
-    "queryLabel": "",
-    "officialSeriesKeyword": "ST-15",
-    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+    "queryLabel": "[STK-21] 스타트 덱 기어5",
+    "officialSeriesKeyword": "ST-21",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
   },
   {
-    "id": "ST16",
-    "koName": "녹색 우타",
-    "enName": "Green Uta",
+    "id": "ST22",
+    "koName": "스타트 덱 에이스 & 뉴게이트",
+    "enName": "스타트 덱 에이스 & 뉴게이트",
     "kindKo": "스타트 덱",
     "kindEn": "STARTER DECK",
-    "queryLabel": "",
-    "officialSeriesKeyword": "ST-16",
-    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+    "queryLabel": "[STK-22] 스타트 덱 에이스 & 뉴게이트",
+    "officialSeriesKeyword": "ST-22",
+    "description": "공식 한글 카드 리스트 기준 카드 라인"
   },
   {
-    "id": "ST18",
-    "koName": "자색 몽키 D. 루피",
-    "enName": "Purple Monkey.D.Luffy",
-    "kindKo": "스타트 덱",
-    "kindEn": "STARTER DECK",
-    "queryLabel": "",
-    "officialSeriesKeyword": "ST-18",
-    "description": "공식 한글 카드 리스트 기준 스타트 덱"
+    "id": "PROMO",
+    "koName": "프로모션",
+    "enName": "PROMOTION",
+    "kindKo": "프로모션",
+    "kindEn": "PROMOTION",
+    "queryLabel": "【프로모션】",
+    "officialSeriesKeyword": "PROMO",
+    "description": "공식 한글 사이트 프로모션 카드 라인"
   }
 ]

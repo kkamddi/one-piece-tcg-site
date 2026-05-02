@@ -10,7 +10,7 @@ const seriesPath = path.join(rootDir, 'src/data/series.json');
 
 const OFFICIAL_BASE = 'https://onepiece-cardgame.kr';
 const CARD_LIST_URL = `${OFFICIAL_BASE}/cardlist.do`;
-const USER_AGENT = 'one-piece-tcg-site-sync/0.2 (+internal tooling)';
+const USER_AGENT = 'one-piece-tcg-site-sync/0.3 (+internal tooling)';
 const REQUEST_DELAY_MS = 1200;
 
 const colorMap = {
@@ -38,6 +38,25 @@ const attributeMap = {
   지혜: 'Wisdom',
   '': '-',
   '-': '-'
+};
+
+const manualSeriesMeta = {
+  OP12: { enName: 'LEGACY OF THE MASTER', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP11: { enName: 'A FIST OF DIVINE SPEED', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP10: { enName: 'ROYAL BLOOD', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP09: { enName: 'EMPERORS IN THE NEW WORLD', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP08: { enName: 'TWO LEGENDS', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP07: { enName: '500 YEARS IN THE FUTURE', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP06: { enName: 'WINGS OF THE CAPTAIN', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP05: { enName: 'AWAKENING OF THE NEW ERA', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP04: { enName: 'KINGDOMS OF INTRIGUE', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP03: { enName: 'PILLARS OF STRENGTH', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP02: { enName: 'PARAMOUNT WAR', description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈' },
+  OP01: { enName: 'ROMANCE DAWN', description: '공식 한글 카드 리스트 기준 첫 번째 메인 부스터 팩' },
+  EB01: { enName: 'MEMORIAL COLLECTION', description: '엑스트라 부스터 계열 카드' },
+  EB02: { enName: 'Anime 25th Collection', description: '엑스트라 부스터 계열 카드' },
+  PRB02: { enName: 'ONE PIECE CARD THE BEST Vol.2', description: '패러렐/재수록 카드가 포함된 프리미엄 부스터' },
+  PROMO: { koName: '프로모션', enName: 'PROMOTION', kindKo: '프로모션', kindEn: 'PROMOTION', description: '공식 한글 사이트 프로모션 카드 라인' }
 };
 
 async function delay(ms) {
@@ -101,6 +120,80 @@ function extractField(block, className) {
     .trim();
 }
 
+function getLastPageIndex(html) {
+  const matches = [...html.matchAll(/page=(\d+)/g)].map((match) => Number(match[1]));
+  if (!matches.length) return 0;
+  return Math.max(...matches.filter((value) => Number.isFinite(value)));
+}
+
+function parseDropdownOptions(html) {
+  const options = [...html.matchAll(/<option value="([^"]*)"[^>]*>([^<\n]*)/g)]
+    .map((match) => ({ value: decodeHtml(match[1]).trim(), label: decodeHtml(match[2]).trim() }))
+    .filter((item) => item.value && item.value !== 'all');
+
+  const seen = new Set();
+  return options.filter((item) => {
+    if (seen.has(item.value)) return false;
+    seen.add(item.value);
+    return true;
+  });
+}
+
+function inferSeriesFromOption(option, existingMap) {
+  if (option.value === '【프로모션】') {
+    return {
+      id: 'PROMO',
+      koName: '프로모션',
+      enName: manualSeriesMeta.PROMO.enName,
+      kindKo: '프로모션',
+      kindEn: 'PROMOTION',
+      queryLabel: option.value,
+      officialSeriesKeyword: 'PROMO',
+      description: manualSeriesMeta.PROMO.description
+    };
+  }
+
+  const codeMatch = option.value.match(/\[([A-Z]+)K-(\d+)\]/);
+  if (!codeMatch) return null;
+
+  const [, prefix, number] = codeMatch;
+  const normalizedId = `${prefix}${number}`;
+  const existing = existingMap.get(normalizedId);
+  const rawName = option.label.replace(/^\[[^\]]+\]\s*/, '').trim();
+
+  const meta = manualSeriesMeta[normalizedId] ?? {};
+  const kindKo = option.label.includes('프리미엄')
+    ? '프리미엄 부스터'
+    : option.label.includes('엑스트라')
+      ? '엑스트라 부스터'
+      : option.label.includes('스타트 덱') || option.label.includes('얼티밋 덱') || option.label.includes('울트라 덱')
+        ? option.label.includes('얼티밋 덱') ? '얼티밋 덱' : option.label.includes('울트라 덱') ? '울트라 덱' : '스타트 덱'
+        : '부스터 팩';
+
+  const kindEn = kindKo === '프리미엄 부스터'
+    ? 'PREMIUM BOOSTER'
+    : kindKo === '엑스트라 부스터'
+      ? 'EXTRA BOOSTER'
+      : kindKo === '얼티밋 덱'
+        ? 'ULTIMATE DECK'
+        : kindKo === '울트라 덱'
+          ? 'ULTRA DECK'
+          : kindKo === '스타트 덱'
+            ? 'STARTER DECK'
+            : 'BOOSTER PACK';
+
+  return {
+    id: normalizedId,
+    koName: existing?.koName || meta.koName || rawName,
+    enName: existing?.enName || meta.enName || rawName,
+    kindKo: existing?.kindKo || kindKo,
+    kindEn: existing?.kindEn || kindEn,
+    queryLabel: option.value,
+    officialSeriesKeyword: existing?.officialSeriesKeyword || `${prefix}-${number}`,
+    description: existing?.description || meta.description || '공식 한글 카드 리스트 기준 카드 라인'
+  };
+}
+
 function parseCardsFromHtml(html, sourceSeries, seriesMap, seen = new Set()) {
   const blocks = [...html.matchAll(/<button class="item">([\s\S]*?)<\/button>/g)].map((match) => match[1]);
 
@@ -150,12 +243,6 @@ function parseCardsFromHtml(html, sourceSeries, seriesMap, seen = new Set()) {
     .filter(Boolean);
 }
 
-function getLastPageIndex(html) {
-  const matches = [...html.matchAll(/page=(\d+)/g)].map((match) => Number(match[1]));
-  if (!matches.length) return 0;
-  return Math.max(...matches.filter((value) => Number.isFinite(value)));
-}
-
 async function fetchSeriesCards(series, seriesMap) {
   console.log(`[sync] fetch series ${series.id}`);
   const seen = new Set();
@@ -176,16 +263,38 @@ async function fetchSeriesCards(series, seriesMap) {
   return cards;
 }
 
+function sortSeries(series) {
+  const weight = (item) => {
+    if (/^OP\d+/.test(item.id)) return 1;
+    if (/^(EB|PRB)\d+/.test(item.id)) return 2;
+    if (/^ST\d+/.test(item.id)) return 3;
+    if (item.id === 'PROMO') return 4;
+    return 9;
+  };
+
+  return [...series].sort((a, b) => {
+    const diff = weight(a) - weight(b);
+    if (diff !== 0) return diff;
+    return a.id.localeCompare(b.id, 'en', { numeric: true });
+  });
+}
+
 async function main() {
   console.log('[sync] starting official card sync');
   await checkRobotsTxt();
 
-  const series = await readJson(seriesPath);
-  const seriesMap = new Map(series.map((item) => [item.id, item]));
+  const existingSeries = await readJson(seriesPath);
+  const existingMap = new Map(existingSeries.map((item) => [item.id, item]));
+  const dropdownHtml = await fetchText(CARD_LIST_URL);
+  const options = parseDropdownOptions(dropdownHtml);
+  const parsedSeries = options.map((option) => inferSeriesFromOption(option, existingMap)).filter(Boolean);
+  const finalSeries = sortSeries(parsedSeries);
+  const seriesMap = new Map(finalSeries.map((item) => [item.id, item]));
+
   const collectedCards = [];
   const uniqueCards = new Map();
 
-  for (const item of series) {
+  for (const item of finalSeries) {
     if (!item.queryLabel) continue;
     try {
       const cards = await fetchSeriesCards(item, seriesMap);
@@ -203,8 +312,9 @@ async function main() {
   const finalCards = [...uniqueCards.values()];
 
   await mkdir(path.dirname(cardsPath), { recursive: true });
+  await writeFile(seriesPath, `${JSON.stringify(finalSeries, null, 2)}\n`, 'utf8');
   await writeFile(cardsPath, `${JSON.stringify(finalCards, null, 2)}\n`, 'utf8');
-  console.log(`[sync] wrote ${finalCards.length} cards`);
+  console.log(`[sync] wrote ${finalSeries.length} series / ${finalCards.length} cards`);
 }
 
 main().catch((error) => {
