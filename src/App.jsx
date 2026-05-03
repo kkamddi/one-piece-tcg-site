@@ -426,6 +426,30 @@ export default function App() {
     setViewMode('archive');
   }
 
+  function openLatestArchive() {
+    const latestSeriesId = getDefaultSeriesId();
+    setSelectedSeries(latestSeriesId);
+    setSearchKeyword('');
+    setActiveRarity('ALL');
+    setOpenSidebarCategories((prev) => ({
+      ...prev,
+      [getSeriesCategory(latestSeriesId)]: true
+    }));
+    setViewMode('archive');
+  }
+
+  function openLatestCollection() {
+    const latestSeriesId = getDefaultSeriesId();
+    setSelectedSeries(latestSeriesId);
+    setSearchKeyword('');
+    setActiveRarity('ALL');
+    setOpenSidebarCategories((prev) => ({
+      ...prev,
+      [getSeriesCategory(latestSeriesId)]: true
+    }));
+    setViewMode('collection');
+  }
+
   function submitCommunityPost(event) {
     event.preventDefault();
 
@@ -526,8 +550,8 @@ export default function App() {
 
           <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:mb-5 sm:flex-wrap">
             <TopTab active={viewMode === 'home'} onClick={() => setViewMode('home')} label="메인" />
-            <TopTab active={viewMode === 'archive'} onClick={() => setViewMode('archive')} label="카드 도감" />
-            <TopTab active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
+            <TopTab active={viewMode === 'archive'} onClick={openLatestArchive} label="카드 도감" />
+            <TopTab active={viewMode === 'collection'} onClick={openLatestCollection} label="수집표" />
             <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
             <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="커뮤니티" />
@@ -696,45 +720,36 @@ export default function App() {
                   <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <button type="button" onClick={() => setViewMode('archive')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                        <button type="button" onClick={openLatestArchive} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">카드 도감</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>시리즈별 카드 바로 보기</div>
                         </button>
-                        <button type="button" onClick={() => setViewMode('collection')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                        <button type="button" onClick={openLatestCollection} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">수집표</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>보유 카드 체크하기</div>
                         </button>
                         <button type="button" onClick={() => setViewMode('deck')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">덱 시뮬레이터</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>리더와 메인 덱 구성</div>
                         </button>
                         <button type="button" onClick={() => setViewMode('shops')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">오프라인 구매처</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>공식 점포 바로 찾기</div>
                         </button>
                         <button type="button" onClick={() => setViewMode('community')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">커뮤니티</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>게시판 구조 확장 준비</div>
                         </button>
                       </div>
                     </div>
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>수집 진행</div>
-                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
+                          <div className="text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>현재 덱</div>
-                          <div className="mt-2 text-2xl font-black">{deckCount} / {DECK_SIZE}</div>
+                          <div className="text-2xl font-black">{deckCount} / {DECK_SIZE}</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>공식 점포</div>
-                          <div className="mt-2 text-2xl font-black">{homeShopCounts.official}곳</div>
+                          <div className="text-2xl font-black">{homeShopCounts.official}곳</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>커뮤니티 글</div>
-                          <div className="mt-2 text-2xl font-black">{communityPostCount}개</div>
+                          <div className="text-2xl font-black">{communityPostCount}개</div>
                         </div>
                       </div>
                     </div>
@@ -745,14 +760,12 @@ export default function App() {
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                         <button type="button" onClick={() => { setShopType('official'); setSelectedRegion('서울특별시'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-sm font-black">서울 공식 점포 보기</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>공인/공식 점포 중심</div>
                         </button>
                         <button type="button" onClick={() => { setShopType('general'); setSelectedRegion('경기도'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-sm font-black">경기 취급 점포 보기</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>일반 취급 매장 중심</div>
                         </button>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>취급 점포 {homeShopCounts.general}곳 · 공인/공식 점포 {homeShopCounts.official}곳</div>
+                          <div className="text-sm font-black">취급 점포 {homeShopCounts.general}곳 · 공인/공식 점포 {homeShopCounts.official}곳</div>
                         </div>
                       </div>
                     </div>
