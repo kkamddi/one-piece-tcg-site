@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, resolveLoginEmail, signupWithProfile } from './api/auth';
-import { fetchMyState, saveMyState } from './api/me';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
@@ -14,7 +13,6 @@ const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const DECK_PAGE_SIZE = 24;
 const LAB_PACK_SIZE = 6;
-const GUEST_OWNED_KEY = 'one-piece-tcg-owned';
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
 const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
@@ -193,21 +191,6 @@ function drawLabPack(pool, size = LAB_PACK_SIZE) {
   return results;
 }
 
-function serializeDeckEntries(entries = []) {
-  return entries
-    .map((entry) => ({ id: String(entry?.id ?? '').trim(), count: Math.max(1, Number(entry?.count ?? 1) || 1) }))
-    .filter((entry) => entry.id);
-}
-
-function hydrateDeckEntries(entries = []) {
-  return serializeDeckEntries(entries)
-    .map((entry) => {
-      const card = cardsData.find((item) => item.id === entry.id);
-      return card ? { ...card, count: entry.count } : null;
-    })
-    .filter(Boolean);
-}
-
 export default function App() {
   const [selectedSeries, setSelectedSeries] = useState(getDefaultSeriesId);
   const [cards, setCards] = useState([]);
@@ -273,7 +256,6 @@ export default function App() {
   const [authCheckState, setAuthCheckState] = useState({ username: null, nickname: null });
   const [visitorToken, setVisitorToken] = useState('');
   const [adminStats, setAdminStats] = useState(null);
-  const [userStateReady, setUserStateReady] = useState(false);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -289,7 +271,7 @@ export default function App() {
     if (savedTheme === 'dark' || savedTheme === 'light') setTheme(savedTheme);
 
     try {
-      const savedOwned = JSON.parse(window.localStorage.getItem(GUEST_OWNED_KEY) ?? '[]');
+      const savedOwned = JSON.parse(window.localStorage.getItem('one-piece-tcg-owned') ?? '[]');
       if (Array.isArray(savedOwned)) setOwnedCardIds(savedOwned);
     } catch {}
 
@@ -340,14 +322,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (authUser) return;
-    window.localStorage.setItem(GUEST_OWNED_KEY, JSON.stringify(ownedCardIds));
-  }, [authUser, ownedCardIds]);
+    window.localStorage.setItem('one-piece-tcg-owned', JSON.stringify(ownedCardIds));
+  }, [ownedCardIds]);
 
   useEffect(() => {
-    if (authUser) return;
     window.localStorage.setItem(COMMUNITY_NICKNAME_KEY, communityNickname);
-  }, [authUser, communityNickname]);
+  }, [communityNickname]);
 
   useEffect(() => {
     if (!communityAuthorToken) return;
@@ -373,54 +353,6 @@ export default function App() {
       alive = false;
     };
   }, [communityAuthorToken]);
-
-  useEffect(() => {
-    if (!authUser?.id) {
-      setUserStateReady(false);
-      const guestAuthorToken = window.localStorage.getItem(COMMUNITY_AUTHOR_TOKEN_KEY);
-      const guestNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
-      if (guestAuthorToken) setCommunityAuthorToken(guestAuthorToken);
-      if (guestNickname) setCommunityNickname(guestNickname);
-      return;
-    }
-
-    let alive = true;
-    const authNicknameValue = authUser.user_metadata?.nickname || authUser.user_metadata?.username || authUser.email || '';
-    setCommunityAuthorToken(`user:${authUser.id}`);
-    setCommunityNickname(authNicknameValue);
-
-    fetchMyState()
-      .then((state) => {
-        if (!alive) return;
-        if (state?.hasState) {
-          setOwnedCardIds(Array.isArray(state.ownedCardIds) ? state.ownedCardIds : []);
-          setDeckEntries(hydrateDeckEntries(state.deckEntries));
-          setLeaderCardId(state.leaderCardId || null);
-        }
-      })
-      .catch((error) => console.error('Failed to load user state', error))
-      .finally(() => {
-        if (alive) setUserStateReady(true);
-      });
-
-    return () => {
-      alive = false;
-    };
-  }, [authUser]);
-
-  useEffect(() => {
-    if (!authUser?.id || !userStateReady) return undefined;
-
-    const timer = window.setTimeout(() => {
-      saveMyState({
-        ownedCardIds,
-        deckEntries: serializeDeckEntries(deckEntries),
-        leaderCardId
-      }).catch((error) => console.error('Failed to save user state', error));
-    }, 350);
-
-    return () => window.clearTimeout(timer);
-  }, [authUser, userStateReady, ownedCardIds, deckEntries, leaderCardId]);
 
   useEffect(() => {
     if (!visitorToken) return;
@@ -769,12 +701,6 @@ export default function App() {
 
   async function submitCommunityPost(event) {
     event.preventDefault();
-    if (!authUser) {
-      window.alert('로그인 후 글을 작성해줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
-      return;
-    }
 
     const nickname = communityNickname.trim();
     const title = communityTitle.trim();
@@ -845,12 +771,6 @@ export default function App() {
   }
 
   function openCommunityComposer(boardId = communityBoard) {
-    if (!authUser) {
-      window.alert('로그인 후 이용해줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
-      return;
-    }
     setCommunityBoard(boardId);
     setCommunityEditingId(null);
     setCommunityTitle('');
@@ -861,10 +781,6 @@ export default function App() {
   }
 
   async function deleteCommunityPost(postId) {
-    if (!authUser) {
-      window.alert('로그인 후 이용해줘.');
-      return;
-    }
     try {
       await deleteCommunityPostRequest(postId, communityAuthorToken);
       setCommunityPosts((prev) => prev.filter((post) => post.id !== postId));
@@ -888,12 +804,6 @@ export default function App() {
   }
 
   async function toggleCommunityLike(postId) {
-    if (!authUser) {
-      window.alert('로그인 후 좋아요를 눌러줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
-      return;
-    }
     try {
       const updatedPost = await toggleCommunityPostLike(postId, communityAuthorToken);
       setCommunityPosts((prev) => prev.map((post) => (post.id === postId ? updatedPost : post)));
@@ -1330,7 +1240,6 @@ export default function App() {
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>수집 도감</h3>
-                        <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됨' : '비로그인 상태에선 이 기기 브라우저에 저장됨'}</div>
                       </div>
                       <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>
                         {ownedInVisibleCollection} / {collectionVisibleCards.length || 0} · {collectionOwnedPercent}%
@@ -1390,7 +1299,6 @@ export default function App() {
                     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>덱 시뮬레이터</h3>
-                        <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됨' : '비로그인 상태에선 이 기기 브라우저에 저장됨'}</div>
                       </div>
                       <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>초기화</button>
                     </div>
@@ -1577,7 +1485,6 @@ export default function App() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <div className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label}</div>
-                          {!authUser ? <div className={`mt-1 text-sm ${textMuted}`}>로그인하면 계정 기준으로 글/좋아요가 저장돼.</div> : null}
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{communityPostCount}개</div>
@@ -1782,7 +1689,7 @@ export default function App() {
               <form onSubmit={submitCommunityPost} className="space-y-3 p-5">
                 <label className="block">
                   <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>닉네임</div>
-                  <input value={communityNickname} onChange={(event) => setCommunityNickname(event.target.value)} readOnly={Boolean(authUser)} placeholder="닉네임 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35] ${authUser ? 'opacity-70' : ''}`} />
+                  <input value={communityNickname} onChange={(event) => setCommunityNickname(event.target.value)} placeholder="닉네임 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                 </label>
                 <label className="block">
                   <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>제목</div>
@@ -1802,7 +1709,7 @@ export default function App() {
                   <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder={communityBoard === 'showoff' ? '자랑 한마디 적기' : communityBoard === 'feedback' ? '불편한 점이나 개선 의견 적기' : '자유롭게 글쓰기'} rows={6} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                 </label>
                 <div className="flex flex-wrap gap-2 pt-2">
-                  <button type="submit" disabled={!authUser || !communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
+                  <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
                   <button type="button" onClick={cancelEditCommunityPost} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>취소</button>
                 </div>
               </form>

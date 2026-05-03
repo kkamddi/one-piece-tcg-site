@@ -55,7 +55,7 @@ async function handleStats(request, response) {
 
   const rows = allRows ?? [];
   const visitRows = rows.filter((row) => row.board_id === '__visit__');
-  const postRows = rows.filter((row) => row.board_id !== '__visit__');
+  const postRows = rows.filter((row) => !String(row.board_id ?? '').startsWith('__'));
   const todayVisitRows = visitRows.filter((row) => row.created_at >= todayStart);
   const todayUniqueVisitors = new Set(todayVisitRows.map((row) => row.author_token)).size;
   const todaySignups = users.filter((user) => String(user.created_at ?? '') >= todayStart).length;
