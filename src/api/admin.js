@@ -15,9 +15,9 @@ async function requestJson(url, options = {}) {
 }
 
 export function trackVisit(visitorToken, path) {
-  return requestJson('/api/admin/visit', { method: 'POST', body: { visitorToken, path } });
+  return requestJson('/api/admin?action=visit', { method: 'POST', body: { visitorToken, path } });
 }
 
 export function fetchAdminStats(username) {
-  return requestJson('/api/admin/stats', { headers: { 'x-admin-username': username } });
+  return requestJson('/api/admin?action=stats', { headers: { 'x-admin-username': username } });
 }
