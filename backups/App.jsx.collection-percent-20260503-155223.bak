@@ -367,8 +367,6 @@ export default function App() {
   const deckRarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cardsData)], []);
   const deckCategoryOptions = useMemo(() => ['ALL', ...new Set(cardsData.map((card) => card.categoryKo).filter(Boolean))], []);
   const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
-  const homeOwnedPercent = useMemo(() => (cardsData.length ? ((homeOwnedCount / cardsData.length) * 100).toFixed(1) : '0.0'), [homeOwnedCount]);
-  const collectionOwnedPercent = useMemo(() => (cards.length ? ((ownedInSeries / cards.length) * 100).toFixed(1) : '0.0'), [ownedInSeries, cards.length]);
   const homeShopCounts = useMemo(
     () => ({
       general: shopsData.filter((shop) => shop.sourceType === 'general').length,
@@ -814,7 +812,6 @@ export default function App() {
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className={`text-sm ${textMuted}`}>수집 진행</div>
                           <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>{homeOwnedPercent}%</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className={`text-sm ${textMuted}`}>현재 덱</div>
@@ -899,15 +896,8 @@ export default function App() {
               ) : viewMode === 'collection' ? (
                 <section className="space-y-4">
                   <div className={`border ${panelClass} rounded-2xl p-5`}>
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>수집 도감</h3>
-                        <p className={`mt-1 text-sm ${textMuted}`}>카드를 눌러 보유 여부를 체크하면 도감처럼 관리할 수 있어.</p>
-                      </div>
-                      <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>
-                        {ownedInSeries} / {cards.length} · {collectionOwnedPercent}%
-                      </div>
-                    </div>
+                    <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>수집 도감</h3>
+                    <p className={`mt-1 text-sm ${textMuted}`}>카드를 눌러 보유 여부를 체크하면 도감처럼 관리할 수 있어.</p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                     {cards.map((card) => {
