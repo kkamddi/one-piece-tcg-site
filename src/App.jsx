@@ -997,7 +997,6 @@ export default function App() {
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>수집 도감</h3>
-                        <p className={`mt-1 text-sm ${textMuted}`}>카드를 눌러 보유 여부를 체크하면 도감처럼 관리할 수 있어.</p>
                       </div>
                       <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>
                         {ownedInSeries} / {cards.length} · {collectionOwnedPercent}%
@@ -1138,7 +1137,6 @@ export default function App() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <div className="text-lg font-black">{activeLabSeries?.koName ?? '시리즈 선택'}</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>선택한 시리즈 카드로 가상 팩을 개봉해볼 수 있어.</div>
                         </div>
                         <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{labSeriesCards.length}장 풀</div>
                       </div>
