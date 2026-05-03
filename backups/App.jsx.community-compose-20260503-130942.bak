@@ -181,7 +181,6 @@ export default function App() {
   const [communityContent, setCommunityContent] = useState('');
   const [communityEditingId, setCommunityEditingId] = useState(null);
   const [communityBoard, setCommunityBoard] = useState('free');
-  const [communityComposerOpen, setCommunityComposerOpen] = useState(false);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -478,7 +477,6 @@ export default function App() {
           : post
       )));
       setCommunityEditingId(null);
-      setCommunityComposerOpen(false);
     } else {
       const nextPost = {
         id: `${Date.now()}`,
@@ -492,7 +490,6 @@ export default function App() {
       };
 
       setCommunityPosts((prev) => [nextPost, ...prev]);
-      setCommunityComposerOpen(false);
     }
 
     setCommunityTitle('');
@@ -502,7 +499,6 @@ export default function App() {
   }
 
   function startEditCommunityPost(post) {
-    setCommunityComposerOpen(true);
     setCommunityEditingId(post.id);
     setCommunityBoard(post.boardId ?? 'free');
     setCommunityNickname(post.nickname || '');
@@ -513,22 +509,11 @@ export default function App() {
   }
 
   function cancelEditCommunityPost() {
-    setCommunityComposerOpen(false);
     setCommunityEditingId(null);
     setCommunityTitle('');
     setCommunityCardName('');
     setCommunityImageUrl('');
     setCommunityContent('');
-  }
-
-  function openCommunityComposer(boardId = communityBoard) {
-    setCommunityBoard(boardId);
-    setCommunityEditingId(null);
-    setCommunityTitle('');
-    setCommunityCardName('');
-    setCommunityImageUrl('');
-    setCommunityContent('');
-    setCommunityComposerOpen(true);
   }
 
   function deleteCommunityPost(postId) {
@@ -994,6 +979,38 @@ export default function App() {
                     </div>
                   </div>
 
+                  <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
+                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5 xl:sticky xl:top-4 xl:self-start`}>
+                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label} 글 올리기</h3>
+                    <form onSubmit={submitCommunityPost} className="mt-4 space-y-3">
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>닉네임</div>
+                        <input value={communityNickname} onChange={(event) => setCommunityNickname(event.target.value)} placeholder="닉네임 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                      </label>
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>제목</div>
+                        <input value={communityTitle} onChange={(event) => setCommunityTitle(event.target.value)} placeholder="제목 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                      </label>
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드명</div>
+                        <input value={communityCardName} onChange={(event) => setCommunityCardName(event.target.value)} placeholder="카드명 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                      </label>
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이미지 파일 (선택)</div>
+                        <input type="file" accept="image/*" onChange={handleCommunityImageFile} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} file:mr-3 file:rounded-full file:border-0 file:bg-[#c94d35] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-white`} />
+                      </label>
+                      {communityImageUrl ? <div className={`rounded-xl border p-3 ${subtleClass}`}><img src={communityImageUrl} alt="preview" className="max-h-64 w-full rounded-lg object-contain" /></div> : null}
+                      <label className="block">
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>내용</div>
+                        <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder={communityBoard === 'showoff' ? '자랑 한마디 적기' : '자유롭게 글쓰기'} rows={5} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
+                        {communityEditingId ? <button type="button" onClick={cancelEditCommunityPost} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>수정 취소</button> : null}
+                      </div>
+                    </form>
+                  </div>
+
                   <div className="space-y-4">
                     <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1001,10 +1018,7 @@ export default function App() {
                           <div className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label}</div>
                           <div className={`mt-1 text-sm ${textMuted}`}>최신순으로 정렬돼 있어.</div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{communityPostCount}개</div>
-                          <button type="button" onClick={() => openCommunityComposer(activeCommunityBoard.id)} className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">글쓰기</button>
-                        </div>
+                        <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{communityPostCount}개</div>
                       </div>
                     </div>
                     {boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
@@ -1028,6 +1042,7 @@ export default function App() {
                         <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
                       </article>
                     )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 {activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.</div>}
+                  </div>
                   </div>
                 </section>
               ) : (
@@ -1139,43 +1154,6 @@ export default function App() {
           </div>
         </div>
 
-        {communityComposerOpen ? (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={cancelEditCommunityPost}>
-            <div className={`w-full max-w-2xl rounded-2xl border shadow-2xl ${isDark ? 'border-[#363636] bg-[#202020]' : 'border-[#e4d7c7] bg-[#fffdf9]'}`} onClick={(event) => event.stopPropagation()}>
-              <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
-                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{communityEditingId ? `${activeCommunityBoard.label} 수정` : `${activeCommunityBoard.label} 글쓰기`}</h3>
-                <button type="button" onClick={cancelEditCommunityPost} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${isDark ? 'border-[#444] bg-[#262626] text-stone-200' : 'border-[#e2d5c8] bg-white text-stone-600'}`}>닫기</button>
-              </div>
-              <form onSubmit={submitCommunityPost} className="space-y-3 p-5">
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>닉네임</div>
-                  <input value={communityNickname} onChange={(event) => setCommunityNickname(event.target.value)} placeholder="닉네임 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                </label>
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>제목</div>
-                  <input value={communityTitle} onChange={(event) => setCommunityTitle(event.target.value)} placeholder="제목 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                </label>
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드명</div>
-                  <input value={communityCardName} onChange={(event) => setCommunityCardName(event.target.value)} placeholder="카드명 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                </label>
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이미지 파일 (선택)</div>
-                  <input type="file" accept="image/*" onChange={handleCommunityImageFile} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} file:mr-3 file:rounded-full file:border-0 file:bg-[#c94d35] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-white`} />
-                </label>
-                {communityImageUrl ? <div className={`rounded-xl border p-3 ${subtleClass}`}><img src={communityImageUrl} alt="preview" className="max-h-64 w-full rounded-lg object-contain" /></div> : null}
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>내용</div>
-                  <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder={communityBoard === 'showoff' ? '자랑 한마디 적기' : '자유롭게 글쓰기'} rows={6} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                </label>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
-                  <button type="button" onClick={cancelEditCommunityPost} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>취소</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        ) : null}
         {selectedCard ? <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} dark={isDark} /> : null}
       </div>
     </div>
