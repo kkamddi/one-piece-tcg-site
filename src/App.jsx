@@ -399,7 +399,9 @@ export default function App() {
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const isDark = theme === 'dark';
   const ownedSet = useMemo(() => new Set(ownedCardIds), [ownedCardIds]);
+  const collectionVisibleCards = useMemo(() => (activeRarity === 'ALL' ? cards : cards.filter((card) => card.rarity === activeRarity)), [cards, activeRarity]);
   const ownedInSeries = useMemo(() => cards.filter((card) => ownedSet.has(card.id)).length, [cards, ownedSet]);
+  const ownedInVisibleCollection = useMemo(() => collectionVisibleCards.filter((card) => ownedSet.has(card.id)).length, [collectionVisibleCards, ownedSet]);
   const officialSeriesCount = useMemo(() => cardsData.filter((card) => card.series === selectedSeries).length, [selectedSeries]);
 
   const deckCards = useMemo(
@@ -436,7 +438,7 @@ export default function App() {
   const deckCategoryOptions = useMemo(() => ['ALL', ...new Set(cardsData.map((card) => card.categoryKo).filter(Boolean))], []);
   const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
   const homeOwnedPercent = useMemo(() => (cardsData.length ? ((homeOwnedCount / cardsData.length) * 100).toFixed(1) : '0.0'), [homeOwnedCount]);
-  const collectionOwnedPercent = useMemo(() => (cards.length ? ((ownedInSeries / cards.length) * 100).toFixed(1) : '0.0'), [ownedInSeries, cards.length]);
+  const collectionOwnedPercent = useMemo(() => (collectionVisibleCards.length ? ((ownedInVisibleCollection / collectionVisibleCards.length) * 100).toFixed(1) : '0.0'), [ownedInVisibleCollection, collectionVisibleCards.length]);
   const homeShopCounts = useMemo(
     () => ({
       general: shopsData.filter((shop) => shop.sourceType === 'general').length,
@@ -914,7 +916,7 @@ export default function App() {
                     ) : (
                       <>
                         <Metric label="공식 카드" value={`${officialSeriesCount}장`} className={subtleClass} />
-                        <Metric label="수집" value={`${ownedInSeries}/${cards.length}`} className={subtleClass} />
+                        <Metric label="수집" value={`${ownedInVisibleCollection}/${collectionVisibleCards.length || 0}`} className={subtleClass} />
                       </>
                     )}
                   </div>
@@ -1081,7 +1083,7 @@ export default function App() {
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>수집 도감</h3>
                       </div>
                       <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>
-                        {ownedInSeries} / {cards.length} · {collectionOwnedPercent}%
+                        {ownedInVisibleCollection} / {collectionVisibleCards.length || 0} · {collectionOwnedPercent}%
                       </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -1112,7 +1114,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                    {cards.map((card) => {
+                    {collectionVisibleCards.map((card) => {
                       const owned = ownedSet.has(card.id);
                       return (
                         <button key={card.id} type="button" onClick={() => toggleOwned(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left ${owned ? 'ring-1 ring-emerald-500' : ''}`}>
