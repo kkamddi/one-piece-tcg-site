@@ -803,10 +803,12 @@ export default function App() {
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className="text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
+                          <div className={`text-sm ${textMuted}`}>수집 진행</div>
+                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className="text-2xl font-black">{deckCount} / {DECK_SIZE}</div>
+                          <div className={`text-sm ${textMuted}`}>현재 덱</div>
+                          <div className="mt-2 text-2xl font-black">{deckCount} / {DECK_SIZE}</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className="text-2xl font-black">{homeShopCounts.official}곳</div>
