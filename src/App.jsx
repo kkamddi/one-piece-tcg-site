@@ -910,7 +910,6 @@ export default function App() {
                       <>
                         <Metric label="게시판" value={activeCommunityBoard.label} className={subtleClass} />
                         <Metric label="게시물" value={`${communityPostCount}개`} className={subtleClass} />
-                        <Metric label="저장 방식" value={communityStorageMode === 'supabase' ? 'Supabase 공용 저장' : '공용 API 저장'} className={subtleClass} />
                       </>
                     ) : isGlobalSearch ? (
                       <>
