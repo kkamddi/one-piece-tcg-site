@@ -10,7 +10,6 @@ const MAX_COPIES = 4;
 const DECK_PAGE_SIZE = 24;
 const COMMUNITY_STORAGE_KEY = 'one-piece-tcg-community-posts';
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
-const COMMUNITY_LIKES_KEY = 'one-piece-tcg-community-liked-posts';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const SHOP_TYPES = [
@@ -145,7 +144,6 @@ export default function App() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [selectedCommunityPost, setSelectedCommunityPost] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchScope, setSearchScope] = useState('series');
   const [activeRarity, setActiveRarity] = useState('ALL');
@@ -184,7 +182,6 @@ export default function App() {
   const [communityEditingId, setCommunityEditingId] = useState(null);
   const [communityBoard, setCommunityBoard] = useState('free');
   const [communityComposerOpen, setCommunityComposerOpen] = useState(false);
-  const [likedCommunityPostIds, setLikedCommunityPostIds] = useState([]);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -209,11 +206,6 @@ export default function App() {
       if (Array.isArray(savedPosts)) setCommunityPosts(savedPosts);
     } catch {}
 
-    try {
-      const savedLikedPosts = JSON.parse(window.localStorage.getItem(COMMUNITY_LIKES_KEY) ?? '[]');
-      if (Array.isArray(savedLikedPosts)) setLikedCommunityPostIds(savedLikedPosts);
-    } catch {}
-
     const savedNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
     if (savedNickname) setCommunityNickname(savedNickname);
   }, []);
@@ -233,10 +225,6 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem(COMMUNITY_NICKNAME_KEY, communityNickname);
   }, [communityNickname]);
-
-  useEffect(() => {
-    window.localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify(likedCommunityPostIds));
-  }, [likedCommunityPostIds]);
 
   useEffect(() => {
     let alive = true;
@@ -382,12 +370,6 @@ export default function App() {
     () => communityPosts.filter((post) => (post.boardId ?? 'free') === communityBoard),
     [communityPosts, communityBoard]
   );
-  const popularCommunityPosts = useMemo(
-    () => [...boardCommunityPosts]
-      .sort((a, b) => ((b.likes ?? 0) * 10 + (b.views ?? 0)) - ((a.likes ?? 0) * 10 + (a.views ?? 0)))
-      .slice(0, 3),
-    [boardCommunityPosts]
-  );
   const communityPostCount = boardCommunityPosts.length;
 
   async function openCard(id) {
@@ -506,8 +488,6 @@ export default function App() {
         cardName,
         imageUrl,
         content,
-        likes: 0,
-        views: 0,
         createdAt: new Date().toISOString()
       };
 
@@ -554,23 +534,6 @@ export default function App() {
   function deleteCommunityPost(postId) {
     setCommunityPosts((prev) => prev.filter((post) => post.id !== postId));
     if (communityEditingId === postId) cancelEditCommunityPost();
-    if (selectedCommunityPost?.id === postId) setSelectedCommunityPost(null);
-  }
-
-  function openCommunityPost(post) {
-    setCommunityPosts((prev) => prev.map((item) => item.id === post.id ? { ...item, views: (item.views ?? 0) + 1 } : item));
-    setSelectedCommunityPost({ ...post, views: (post.views ?? 0) + 1 });
-  }
-
-  function toggleCommunityLike(postId) {
-    const liked = likedCommunityPostIds.includes(postId);
-    setLikedCommunityPostIds((prev) => liked ? prev.filter((id) => id !== postId) : [...prev, postId]);
-    setCommunityPosts((prev) => prev.map((post) => post.id === postId
-      ? { ...post, likes: Math.max(0, (post.likes ?? 0) + (liked ? -1 : 1)) }
-      : post));
-    if (selectedCommunityPost?.id === postId) {
-      setSelectedCommunityPost((prev) => prev ? { ...prev, likes: Math.max(0, (prev.likes ?? 0) + (liked ? -1 : 1)) } : prev);
-    }
   }
 
   function handleCommunityImageFile(event) {
@@ -1044,42 +1007,19 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                    {popularCommunityPosts.length ? (
-                      <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                        <div className="mb-3 text-lg font-black">인기글</div>
-                        <div className="grid gap-3 md:grid-cols-3">
-                          {popularCommunityPosts.map((post, index) => (
-                            <button key={post.id} type="button" onClick={() => openCommunityPost(post)} className={`rounded-xl border p-4 text-left ${cardClass}`}>
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs font-black text-[#c94d35]">TOP {index + 1}</span>
-                                <span className={`text-xs ${textMuted}`}>조회 {(post.views ?? 0)}</span>
-                              </div>
-                              <div className="mt-2 line-clamp-2 text-sm font-black">{post.title}</div>
-                              <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
-                                <span>❤️ {(post.likes ?? 0)}</span>
-                                <span>{post.nickname}</span>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
                     {boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
                       <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 shadow-sm sm:p-5`}>
                         <div className="flex flex-wrap items-start justify-between gap-3">
-                          <button type="button" onClick={() => openCommunityPost(post)} className="min-w-0 text-left">
+                          <div>
                             <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{post.title}</h3>
                             <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
                               <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.nickname}</span>
                               {post.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.cardName}</span> : null}
                               <span>{formatCommunityDate(post.createdAt)}</span>
                               {post.updatedAt ? <span>수정 {formatCommunityDate(post.updatedAt)}</span> : null}
-                              <span>조회 {(post.views ?? 0)}</span>
-                              <span>좋아요 {(post.likes ?? 0)}</span>
                             </div>
-                          </button>
+                          </div>
                           <div className="flex gap-2">
-                            <button type="button" onClick={() => toggleCommunityLike(post.id)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${likedCommunityPostIds.includes(post.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(post.likes ?? 0)}</button>
                             <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button>
                             <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button>
                           </div>
@@ -1233,31 +1173,6 @@ export default function App() {
                   <button type="button" onClick={cancelEditCommunityPost} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>취소</button>
                 </div>
               </form>
-            </div>
-          </div>
-        ) : null}
-        {selectedCommunityPost ? (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setSelectedCommunityPost(null)}>
-            <div className={`max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border shadow-2xl ${isDark ? 'border-[#363636] bg-[#202020]' : 'border-[#e4d7c7] bg-[#fffdf9]'}`} onClick={(event) => event.stopPropagation()}>
-              <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
-                <div>
-                  <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{selectedCommunityPost.title}</h3>
-                  <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
-                    <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{selectedCommunityPost.nickname}</span>
-                    {selectedCommunityPost.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{selectedCommunityPost.cardName}</span> : null}
-                    <span>조회 {selectedCommunityPost.views ?? 0}</span>
-                    <span>좋아요 {selectedCommunityPost.likes ?? 0}</span>
-                  </div>
-                </div>
-                <button type="button" onClick={() => setSelectedCommunityPost(null)} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${isDark ? 'border-[#444] bg-[#262626] text-stone-200' : 'border-[#e2d5c8] bg-white text-stone-600'}`}>닫기</button>
-              </div>
-              <div className="space-y-4 p-5">
-                {selectedCommunityPost.imageUrl ? <img src={selectedCommunityPost.imageUrl} alt={selectedCommunityPost.title} onError={placeholderImage} className="max-h-[520px] w-full rounded-xl border object-contain p-2" /> : null}
-                <p className={`whitespace-pre-line text-sm leading-7 ${textMuted}`}>{selectedCommunityPost.content}</p>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => toggleCommunityLike(selectedCommunityPost.id)} className={`rounded-full px-4 py-2 text-sm font-bold ${likedCommunityPostIds.includes(selectedCommunityPost.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(selectedCommunityPost.likes ?? 0)}</button>
-                </div>
-              </div>
             </div>
           </div>
         ) : null}
