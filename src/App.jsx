@@ -842,14 +842,22 @@ export default function App() {
   }
 
   async function checkDuplicate(type) {
+    const label = type === 'username' ? '아이디' : '닉네임';
     const value = (type === 'username' ? authUsername : authNickname).trim();
-    if (!value) return;
+    if (!value) {
+      window.alert(`${label}를 먼저 입력해줘.`);
+      return;
+    }
     try {
       const result = await checkAuthAvailability(type, value);
+      const message = result.available ? `${label} 사용 가능` : `${label} 중복됨`;
       setAuthCheckState((prev) => ({ ...prev, [type]: result.available }));
-      setAuthMessage(result.available ? `${type === 'username' ? '아이디' : '닉네임'} 사용 가능` : `${type === 'username' ? '아이디' : '닉네임'} 중복됨`);
+      setAuthMessage(message);
+      window.alert(message);
     } catch (error) {
-      setAuthMessage(error?.message || '중복확인에 실패했어.');
+      const message = error?.message || '중복확인에 실패했어.';
+      setAuthMessage(message);
+      window.alert(message);
     }
   }
 
