@@ -445,7 +445,7 @@ export default function App() {
     setOwnedCardIds((prev) => (prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]));
   }
 
-  function openSeriesArchive(seriesId) {
+  function openSeriesView(seriesId, nextViewMode = 'archive') {
     setSelectedSeries(seriesId);
     setSearchKeyword('');
     setActiveRarity('ALL');
@@ -453,7 +453,11 @@ export default function App() {
       ...prev,
       [getSeriesCategory(seriesId)]: true
     }));
-    setViewMode('archive');
+    setViewMode(nextViewMode);
+  }
+
+  function openSeriesArchive(seriesId) {
+    openSeriesView(seriesId, 'archive');
   }
 
   function openLatestArchive() {
@@ -470,14 +474,7 @@ export default function App() {
 
   function openLatestCollection() {
     const latestSeriesId = getDefaultSeriesId();
-    setSelectedSeries(latestSeriesId);
-    setSearchKeyword('');
-    setActiveRarity('ALL');
-    setOpenSidebarCategories((prev) => ({
-      ...prev,
-      [getSeriesCategory(latestSeriesId)]: true
-    }));
-    setViewMode('collection');
+    openSeriesView(latestSeriesId, 'collection');
   }
 
   function submitCommunityPost(event) {
@@ -652,7 +649,7 @@ export default function App() {
                                   type="button"
                                   onClick={() => {
                                     if (series.disabled) return;
-                                    openSeriesArchive(series.id);
+                                    openSeriesView(series.id, viewMode === 'collection' ? 'collection' : 'archive');
                                   }}
                                   className={`w-full rounded-lg border px-3 py-2 text-left ${series.disabled ? 'cursor-default opacity-55' : ''} ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : `${cardClass}`}`}
                                 >
