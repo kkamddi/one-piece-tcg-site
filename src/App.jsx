@@ -18,8 +18,7 @@ const SHOP_TYPES = [
 ];
 const COMMUNITY_BOARDS = [
   { id: 'showoff', label: '카드자랑', description: '희귀 카드, 사인 카드, 수집 자랑용 게시판' },
-  { id: 'deck-talk', label: '덱 상담', description: '준비 중', disabled: true },
-  { id: 'trade-talk', label: '교환/매입', description: '준비 중', disabled: true }
+  { id: 'deck-talk', label: '덱 상담', description: '준비 중', disabled: true }
 ];
 const SIDEBAR_CATEGORIES = [
   { id: 'regular-booster', label: '정규 부스터' },
