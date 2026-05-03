@@ -50,3 +50,11 @@ npm run sync:cards
 ## 배포
 - GitHub 저장소: `kkamddi/one-piece-tcg-site`
 - Vercel에서 별도 신규 프로젝트로 연결해서 기존 배포와 분리 가능
+
+## 커뮤니티 공용 저장 (Supabase)
+- Vercel 환경변수
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `SUPABASE_COMMUNITY_TABLE` (선택, 기본값 `community_posts`)
+- 테이블 생성 SQL: `docs/community-supabase.sql`
+- 환경변수가 없으면 로컬/개발용 파일 저장(`data/community-posts.json`) fallback 사용

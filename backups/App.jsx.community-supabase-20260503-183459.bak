@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
-import { createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import cardsData from './data/cards.json';
 import seriesData from './data/series.json';
@@ -10,8 +9,9 @@ const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const DECK_PAGE_SIZE = 24;
 const LAB_PACK_SIZE = 6;
+const COMMUNITY_STORAGE_KEY = 'one-piece-tcg-community-posts';
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
-const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
+const COMMUNITY_LIKES_KEY = 'one-piece-tcg-community-liked-posts';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const SHOP_TYPES = [
@@ -231,9 +231,7 @@ export default function App() {
   const [communityEditingId, setCommunityEditingId] = useState(null);
   const [communityBoard, setCommunityBoard] = useState('free');
   const [communityComposerOpen, setCommunityComposerOpen] = useState(false);
-  const [communityAuthorToken, setCommunityAuthorToken] = useState('');
-  const [communityLoading, setCommunityLoading] = useState(false);
-  const [communityStorageMode, setCommunityStorageMode] = useState('shared');
+  const [likedCommunityPostIds, setLikedCommunityPostIds] = useState([]);
   const [labSeriesId, setLabSeriesId] = useState(getDefaultSeriesId);
   const [labOpenedPack, setLabOpenedPack] = useState([]);
   const [labRevealCount, setLabRevealCount] = useState(0);
@@ -257,17 +255,18 @@ export default function App() {
       if (Array.isArray(savedOwned)) setOwnedCardIds(savedOwned);
     } catch {}
 
+    try {
+      const savedPosts = JSON.parse(window.localStorage.getItem(COMMUNITY_STORAGE_KEY) ?? '[]');
+      if (Array.isArray(savedPosts)) setCommunityPosts(savedPosts);
+    } catch {}
+
+    try {
+      const savedLikedPosts = JSON.parse(window.localStorage.getItem(COMMUNITY_LIKES_KEY) ?? '[]');
+      if (Array.isArray(savedLikedPosts)) setLikedCommunityPostIds(savedLikedPosts);
+    } catch {}
+
     const savedNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
     if (savedNickname) setCommunityNickname(savedNickname);
-
-    const savedAuthorToken = window.localStorage.getItem(COMMUNITY_AUTHOR_TOKEN_KEY);
-    if (savedAuthorToken) {
-      setCommunityAuthorToken(savedAuthorToken);
-    } else {
-      const nextAuthorToken = `community-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      window.localStorage.setItem(COMMUNITY_AUTHOR_TOKEN_KEY, nextAuthorToken);
-      setCommunityAuthorToken(nextAuthorToken);
-    }
   }, []);
 
   useEffect(() => {
@@ -279,33 +278,16 @@ export default function App() {
   }, [ownedCardIds]);
 
   useEffect(() => {
+    window.localStorage.setItem(COMMUNITY_STORAGE_KEY, JSON.stringify(communityPosts));
+  }, [communityPosts]);
+
+  useEffect(() => {
     window.localStorage.setItem(COMMUNITY_NICKNAME_KEY, communityNickname);
   }, [communityNickname]);
 
   useEffect(() => {
-    if (!communityAuthorToken) return;
-
-    let alive = true;
-    setCommunityLoading(true);
-
-    const loadCommunityPosts = async () => {
-      try {
-        const response = await fetchCommunityPosts(communityAuthorToken);
-        if (!alive) return;
-        setCommunityPosts(response?.posts ?? []);
-        setCommunityStorageMode(response?.storage ?? 'shared');
-      } catch (error) {
-        console.error('Failed to load community posts', error);
-      } finally {
-        if (alive) setCommunityLoading(false);
-      }
-    };
-
-    loadCommunityPosts();
-    return () => {
-      alive = false;
-    };
-  }, [communityAuthorToken]);
+    window.localStorage.setItem(COMMUNITY_LIKES_KEY, JSON.stringify(likedCommunityPostIds));
+  }, [likedCommunityPostIds]);
 
   useEffect(() => {
     let alive = true;
@@ -465,10 +447,6 @@ export default function App() {
     () => communityPosts.filter((post) => (post.boardId ?? 'free') === communityBoard),
     [communityPosts, communityBoard]
   );
-  const likedCommunityPostIds = useMemo(
-    () => communityPosts.filter((post) => post.likedByMe).map((post) => post.id),
-    [communityPosts]
-  );
   const popularCommunityPosts = useMemo(
     () => [...boardCommunityPosts]
       .sort((a, b) => ((b.likes ?? 0) * 10 + (b.views ?? 0)) - ((a.likes ?? 0) * 10 + (a.views ?? 0)))
@@ -583,7 +561,7 @@ export default function App() {
     setLabOpening(nextPack.length > 0);
   }
 
-  async function submitCommunityPost(event) {
+  function submitCommunityPost(event) {
     event.preventDefault();
 
     const nickname = communityNickname.trim();
@@ -594,38 +572,30 @@ export default function App() {
 
     if (!nickname || !title || !content) return;
 
-    try {
-      if (communityEditingId) {
-        const updatedPost = await updateCommunityPostRequest(communityEditingId, {
-          boardId: communityBoard,
-          nickname,
-          title,
-          cardName,
-          imageUrl,
-          content
-        }, communityAuthorToken);
-
-        setCommunityPosts((prev) => prev.map((post) => (post.id === communityEditingId ? updatedPost : post)));
-        if (selectedCommunityPost?.id === communityEditingId) setSelectedCommunityPost(updatedPost);
-        setCommunityEditingId(null);
-      } else {
-        const createdPost = await createCommunityPost({
-          boardId: communityBoard,
-          nickname,
-          title,
-          cardName,
-          imageUrl,
-          content
-        }, communityAuthorToken);
-
-        setCommunityPosts((prev) => [createdPost, ...prev]);
-      }
-
+    if (communityEditingId) {
+      setCommunityPosts((prev) => prev.map((post) => (
+        post.id === communityEditingId
+          ? { ...post, boardId: communityBoard, nickname, title, cardName, imageUrl, content, updatedAt: new Date().toISOString() }
+          : post
+      )));
+      setCommunityEditingId(null);
       setCommunityComposerOpen(false);
-    } catch (error) {
-      console.error('Failed to save community post', error);
-      window.alert('게시글 저장에 실패했어. 잠시 후 다시 시도해줘.');
-      return;
+    } else {
+      const nextPost = {
+        id: `${Date.now()}`,
+        boardId: communityBoard,
+        nickname,
+        title,
+        cardName,
+        imageUrl,
+        content,
+        likes: 0,
+        views: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      setCommunityPosts((prev) => [nextPost, ...prev]);
+      setCommunityComposerOpen(false);
     }
 
     setCommunityTitle('');
@@ -664,36 +634,25 @@ export default function App() {
     setCommunityComposerOpen(true);
   }
 
-  async function deleteCommunityPost(postId) {
-    try {
-      await deleteCommunityPostRequest(postId, communityAuthorToken);
-      setCommunityPosts((prev) => prev.filter((post) => post.id !== postId));
-      if (communityEditingId === postId) cancelEditCommunityPost();
-      if (selectedCommunityPost?.id === postId) setSelectedCommunityPost(null);
-    } catch (error) {
-      console.error('Failed to delete community post', error);
-      window.alert('삭제 권한이 없거나 삭제에 실패했어.');
-    }
+  function deleteCommunityPost(postId) {
+    setCommunityPosts((prev) => prev.filter((post) => post.id !== postId));
+    if (communityEditingId === postId) cancelEditCommunityPost();
+    if (selectedCommunityPost?.id === postId) setSelectedCommunityPost(null);
   }
 
-  async function openCommunityPost(post) {
-    try {
-      const updatedPost = await incrementCommunityPostView(post.id, communityAuthorToken);
-      setCommunityPosts((prev) => prev.map((item) => (item.id === post.id ? updatedPost : item)));
-      setSelectedCommunityPost(updatedPost);
-    } catch (error) {
-      console.error('Failed to open community post', error);
-      setSelectedCommunityPost(post);
-    }
+  function openCommunityPost(post) {
+    setCommunityPosts((prev) => prev.map((item) => item.id === post.id ? { ...item, views: (item.views ?? 0) + 1 } : item));
+    setSelectedCommunityPost({ ...post, views: (post.views ?? 0) + 1 });
   }
 
-  async function toggleCommunityLike(postId) {
-    try {
-      const updatedPost = await toggleCommunityPostLike(postId, communityAuthorToken);
-      setCommunityPosts((prev) => prev.map((post) => (post.id === postId ? updatedPost : post)));
-      if (selectedCommunityPost?.id === postId) setSelectedCommunityPost(updatedPost);
-    } catch (error) {
-      console.error('Failed to toggle community like', error);
+  function toggleCommunityLike(postId) {
+    const liked = likedCommunityPostIds.includes(postId);
+    setLikedCommunityPostIds((prev) => liked ? prev.filter((id) => id !== postId) : [...prev, postId]);
+    setCommunityPosts((prev) => prev.map((post) => post.id === postId
+      ? { ...post, likes: Math.max(0, (post.likes ?? 0) + (liked ? -1 : 1)) }
+      : post));
+    if (selectedCommunityPost?.id === postId) {
+      setSelectedCommunityPost((prev) => prev ? { ...prev, likes: Math.max(0, (prev.likes ?? 0) + (liked ? -1 : 1)) } : prev);
     }
   }
 
@@ -862,7 +821,7 @@ export default function App() {
                       <>
                         <Metric label="게시판" value={activeCommunityBoard.label} className={subtleClass} />
                         <Metric label="게시물" value={`${communityPostCount}개`} className={subtleClass} />
-                        <Metric label="저장 방식" value={communityStorageMode === 'supabase' ? 'Supabase 공용 저장' : '공용 API 저장'} className={subtleClass} />
+                        <Metric label="저장 방식" value="브라우저 로컬" className={subtleClass} />
                       </>
                     ) : isGlobalSearch ? (
                       <>
@@ -1284,7 +1243,7 @@ export default function App() {
                         </div>
                       </div>
                     ) : null}
-                    {communityLoading ? <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>게시글 불러오는 중...</div> : boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
+                    {boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
                       <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 shadow-sm sm:p-5`}>
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <button type="button" onClick={() => openCommunityPost(post)} className="min-w-0 text-left">
@@ -1300,8 +1259,8 @@ export default function App() {
                           </button>
                           <div className="flex gap-2">
                             <button type="button" onClick={() => toggleCommunityLike(post.id)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${likedCommunityPostIds.includes(post.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(post.likes ?? 0)}</button>
-                            {post.canEdit ? <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button> : null}
-                            {post.canEdit ? <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button> : null}
+                            <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button>
+                            <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button>
                           </div>
                         </div>
                         {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
