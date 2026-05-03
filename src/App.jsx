@@ -780,9 +780,9 @@ export default function App() {
 
               {viewMode === 'home' ? (
                 <section className="space-y-5">
-                  <div className="grid gap-4 xl:grid-cols-[1.15fr_0.9fr_0.55fr] xl:items-stretch">
+                  <div className="grid gap-4 xl:grid-cols-[0.72fr_1.18fr_0.5fr] xl:items-stretch">
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="grid gap-3">
                         <button type="button" onClick={openLatestArchive} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">카드 도감</div>
                         </button>
@@ -803,7 +803,7 @@ export default function App() {
 
                     <div className={`overflow-hidden border ${panelClass} rounded-2xl p-3 sm:p-4`}>
                       <div className={`flex h-full items-center justify-center overflow-hidden rounded-xl border ${cardClass}`}>
-                        <img src="/uploads/home-main.jpg" alt="ONE PIECE CARD GAME 메인 이미지" className="h-full max-h-[420px] w-full object-cover" />
+                        <img src="/uploads/home-main.jpg" alt="ONE PIECE CARD GAME 메인 이미지" className="h-full max-h-[560px] w-full object-cover" />
                       </div>
                     </div>
 
