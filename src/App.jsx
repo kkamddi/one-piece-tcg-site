@@ -90,6 +90,15 @@ function buildSidebarSections() {
   ];
 }
 
+function getDefaultSeriesId() {
+  const sections = buildSidebarSections();
+  for (const section of sections) {
+    const firstSeries = section.children.find((series) => !series.disabled && series.id);
+    if (firstSeries) return firstSeries.id;
+  }
+  return seriesData[0]?.id ?? '';
+}
+
 function getOrderedRarities(cards) {
   const present = [...new Set(cards.map((card) => card.rarity).filter(Boolean))];
   const prioritized = rarityPriority.filter((rarity) => present.includes(rarity));
@@ -130,7 +139,7 @@ function formatCommunityDate(value) {
 }
 
 export default function App() {
-  const [selectedSeries, setSelectedSeries] = useState(seriesData[0]?.id ?? '');
+  const [selectedSeries, setSelectedSeries] = useState(getDefaultSeriesId);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -173,7 +182,7 @@ export default function App() {
   const [communityBoard, setCommunityBoard] = useState('showoff');
 
   const currentSeries = useMemo(
-    () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
+    () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
     [selectedSeries]
   );
   const trimmedSearchKeyword = searchKeyword.trim();
