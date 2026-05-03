@@ -445,30 +445,6 @@ export default function App() {
     }),
     []
   );
-  const currentRarityCardIds = useMemo(
-    () => (activeRarity === 'ALL' ? [] : cards.filter((card) => card.rarity === activeRarity).map((card) => card.id)),
-    [cards, activeRarity]
-  );
-  const currentSeriesCardIds = useMemo(
-    () => cardsData.filter((card) => card.series === selectedSeries).map((card) => card.id),
-    [selectedSeries]
-  );
-  const allCollectionCardIds = useMemo(
-    () => cardsData.map((card) => card.id),
-    []
-  );
-  const isCurrentRarityFullyOwned = useMemo(
-    () => currentRarityCardIds.length > 0 && currentRarityCardIds.every((id) => ownedSet.has(id)),
-    [currentRarityCardIds, ownedSet]
-  );
-  const isCurrentSeriesFullyOwned = useMemo(
-    () => currentSeriesCardIds.length > 0 && currentSeriesCardIds.every((id) => ownedSet.has(id)),
-    [currentSeriesCardIds, ownedSet]
-  );
-  const isAllCollectionFullyOwned = useMemo(
-    () => allCollectionCardIds.length > 0 && allCollectionCardIds.every((id) => ownedSet.has(id)),
-    [allCollectionCardIds, ownedSet]
-  );
   const activeCommunityBoard = useMemo(
     () => COMMUNITY_BOARDS.find((board) => board.id === communityBoard) ?? COMMUNITY_BOARDS[0],
     [communityBoard]
@@ -566,21 +542,6 @@ export default function App() {
 
   function toggleOwned(cardId) {
     setOwnedCardIds((prev) => (prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]));
-  }
-
-  function setOwnedForIds(cardIds, shouldOwn) {
-    const uniqueIds = [...new Set(cardIds.filter(Boolean))];
-    if (!uniqueIds.length) return;
-
-    setOwnedCardIds((prev) => {
-      const prevSet = new Set(prev);
-      if (shouldOwn) {
-        uniqueIds.forEach((id) => prevSet.add(id));
-      } else {
-        uniqueIds.forEach((id) => prevSet.delete(id));
-      }
-      return [...prevSet];
-    });
   }
 
   function openSeriesView(seriesId, nextViewMode = 'archive') {
@@ -1081,32 +1042,6 @@ export default function App() {
                       <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>
                         {ownedInSeries} / {cards.length} · {collectionOwnedPercent}%
                       </div>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        disabled={activeRarity === 'ALL' || !currentRarityCardIds.length}
-                        onClick={() => setOwnedForIds(currentRarityCardIds, !isCurrentRarityFullyOwned)}
-                        className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass} disabled:opacity-45`}
-                      >
-                        {activeRarity === 'ALL' ? '등급 선택 필요' : `등급 ${isCurrentRarityFullyOwned ? '해제' : '체크'}`}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!currentSeriesCardIds.length}
-                        onClick={() => setOwnedForIds(currentSeriesCardIds, !isCurrentSeriesFullyOwned)}
-                        className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass} disabled:opacity-45`}
-                      >
-                        시리즈 {isCurrentSeriesFullyOwned ? '해제' : '체크'}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!allCollectionCardIds.length}
-                        onClick={() => setOwnedForIds(allCollectionCardIds, !isAllCollectionFullyOwned)}
-                        className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass} disabled:opacity-45`}
-                      >
-                        전체 {isAllCollectionFullyOwned ? '해제' : '체크'}
-                      </button>
                     </div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
