@@ -17,6 +17,7 @@ const SHOP_TYPES = [
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
 ];
 const COMMUNITY_BOARDS = [
+  { id: 'free', label: '자유게시판', description: '잡담, 질문, 후기, 소소한 이야기' },
   { id: 'showoff', label: '카드자랑', description: '희귀 카드, 사인 카드, 수집 자랑용 게시판' },
   { id: 'deck-talk', label: '덱 상담', description: '준비 중', disabled: true }
 ];
@@ -179,7 +180,7 @@ export default function App() {
   const [communityImageUrl, setCommunityImageUrl] = useState('');
   const [communityContent, setCommunityContent] = useState('');
   const [communityEditingId, setCommunityEditingId] = useState(null);
-  const [communityBoard, setCommunityBoard] = useState('showoff');
+  const [communityBoard, setCommunityBoard] = useState('free');
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -360,7 +361,15 @@ export default function App() {
     }),
     []
   );
-  const communityPostCount = communityPosts.length;
+  const activeCommunityBoard = useMemo(
+    () => COMMUNITY_BOARDS.find((board) => board.id === communityBoard) ?? COMMUNITY_BOARDS[0],
+    [communityBoard]
+  );
+  const boardCommunityPosts = useMemo(
+    () => communityPosts.filter((post) => (post.boardId ?? 'free') === communityBoard),
+    [communityPosts, communityBoard]
+  );
+  const communityPostCount = boardCommunityPosts.length;
 
   async function openCard(id) {
     const detail = await fetchCardById(id);
@@ -464,13 +473,14 @@ export default function App() {
     if (communityEditingId) {
       setCommunityPosts((prev) => prev.map((post) => (
         post.id === communityEditingId
-          ? { ...post, nickname, title, cardName, imageUrl, content, updatedAt: new Date().toISOString() }
+          ? { ...post, boardId: communityBoard, nickname, title, cardName, imageUrl, content, updatedAt: new Date().toISOString() }
           : post
       )));
       setCommunityEditingId(null);
     } else {
       const nextPost = {
         id: `${Date.now()}`,
+        boardId: communityBoard,
         nickname,
         title,
         cardName,
@@ -490,6 +500,7 @@ export default function App() {
 
   function startEditCommunityPost(post) {
     setCommunityEditingId(post.id);
+    setCommunityBoard(post.boardId ?? 'free');
     setCommunityNickname(post.nickname || '');
     setCommunityTitle(post.title || '');
     setCommunityCardName(post.cardName || '');
@@ -553,8 +564,8 @@ export default function App() {
             <TopTab active={viewMode === 'archive'} onClick={openLatestArchive} label="카드 도감" />
             <TopTab active={viewMode === 'collection'} onClick={openLatestCollection} label="수집표" />
             <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
-            <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
             <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="커뮤니티" />
+            <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
           </div>
 
           <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
@@ -662,7 +673,7 @@ export default function App() {
                       </>
                     ) : viewMode === 'community' ? (
                       <>
-                        <Metric label="게시판" value={COMMUNITY_BOARDS.find((board) => board.id === communityBoard)?.label || '카드자랑'} className={subtleClass} />
+                        <Metric label="게시판" value={activeCommunityBoard.label} className={subtleClass} />
                         <Metric label="게시물" value={`${communityPostCount}개`} className={subtleClass} />
                         <Metric label="저장 방식" value="브라우저 로컬" className={subtleClass} />
                       </>
@@ -960,13 +971,13 @@ export default function App() {
                       ))}
                     </div>
                     <div className={`mt-3 text-sm ${textMuted}`}>
-                      {COMMUNITY_BOARDS.find((board) => board.id === communityBoard)?.description}
+                      {activeCommunityBoard.description}
                     </div>
                   </div>
 
                   <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
                   <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>카드자랑 글 올리기</h3>
+                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label} 글 올리기</h3>
                     <form onSubmit={submitCommunityPost} className="mt-4 space-y-3">
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>닉네임</div>
@@ -987,7 +998,7 @@ export default function App() {
                       {communityImageUrl ? <div className={`rounded-xl border p-3 ${subtleClass}`}><img src={communityImageUrl} alt="preview" className="max-h-64 w-full rounded-lg object-contain" /></div> : null}
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>내용</div>
-                        <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder="자랑 한마디 적기" rows={5} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                        <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder={communityBoard === 'showoff' ? '자랑 한마디 적기' : '자유롭게 글쓰기'} rows={5} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                       </label>
                       <div className="flex flex-wrap gap-2">
                         <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
@@ -997,7 +1008,7 @@ export default function App() {
                   </div>
 
                   <div className="space-y-4">
-                    {communityPosts.length ? communityPosts.map((post) => (
+                    {boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
                       <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 sm:p-5`}>
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
@@ -1017,7 +1028,7 @@ export default function App() {
                         {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
                         <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
                       </article>
-                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 카드자랑 글이 없어. 첫 글을 남겨봐.</div>}
+                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 {activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.</div>}
                   </div>
                   </div>
                 </section>
