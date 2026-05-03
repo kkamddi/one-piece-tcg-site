@@ -810,12 +810,6 @@ export default function App() {
                           <div className={`text-sm ${textMuted}`}>현재 덱</div>
                           <div className="mt-2 text-2xl font-black">{deckCount} / {DECK_SIZE}</div>
                         </div>
-                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className="text-2xl font-black">{homeShopCounts.official}곳</div>
-                        </div>
-                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className="text-2xl font-black">{communityPostCount}개</div>
-                        </div>
                       </div>
                     </div>
                   </div>
