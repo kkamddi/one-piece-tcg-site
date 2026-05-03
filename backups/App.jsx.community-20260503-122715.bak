@@ -8,8 +8,6 @@ import shopsData from './data/shops.json';
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const DECK_PAGE_SIZE = 24;
-const COMMUNITY_STORAGE_KEY = 'one-piece-tcg-community-posts';
-const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const SHOP_TYPES = [
@@ -111,20 +109,6 @@ function rarityTone(rarity) {
   return 'bg-stone-50 text-stone-700 border-stone-200';
 }
 
-function formatCommunityDate(value) {
-  try {
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
 export default function App() {
   const [selectedSeries, setSelectedSeries] = useState(seriesData[0]?.id ?? '');
   const [cards, setCards] = useState([]);
@@ -159,12 +143,6 @@ export default function App() {
   const [deckFilterRarity, setDeckFilterRarity] = useState('ALL');
   const [deckFilterCategory, setDeckFilterCategory] = useState('ALL');
   const [deckPage, setDeckPage] = useState(1);
-  const [communityPosts, setCommunityPosts] = useState([]);
-  const [communityNickname, setCommunityNickname] = useState('');
-  const [communityTitle, setCommunityTitle] = useState('');
-  const [communityCardName, setCommunityCardName] = useState('');
-  const [communityImageUrl, setCommunityImageUrl] = useState('');
-  const [communityContent, setCommunityContent] = useState('');
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -183,14 +161,6 @@ export default function App() {
       const savedOwned = JSON.parse(window.localStorage.getItem('one-piece-tcg-owned') ?? '[]');
       if (Array.isArray(savedOwned)) setOwnedCardIds(savedOwned);
     } catch {}
-
-    try {
-      const savedPosts = JSON.parse(window.localStorage.getItem(COMMUNITY_STORAGE_KEY) ?? '[]');
-      if (Array.isArray(savedPosts)) setCommunityPosts(savedPosts);
-    } catch {}
-
-    const savedNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
-    if (savedNickname) setCommunityNickname(savedNickname);
   }, []);
 
   useEffect(() => {
@@ -200,14 +170,6 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem('one-piece-tcg-owned', JSON.stringify(ownedCardIds));
   }, [ownedCardIds]);
-
-  useEffect(() => {
-    window.localStorage.setItem(COMMUNITY_STORAGE_KEY, JSON.stringify(communityPosts));
-  }, [communityPosts]);
-
-  useEffect(() => {
-    window.localStorage.setItem(COMMUNITY_NICKNAME_KEY, communityNickname);
-  }, [communityNickname]);
 
   useEffect(() => {
     let alive = true;
@@ -345,7 +307,6 @@ export default function App() {
     }),
     []
   );
-  const communityPostCount = communityPosts.length;
 
   async function openCard(id) {
     const detail = await fetchCardById(id);
@@ -411,34 +372,6 @@ export default function App() {
     setViewMode('archive');
   }
 
-  function submitCommunityPost(event) {
-    event.preventDefault();
-
-    const nickname = communityNickname.trim();
-    const title = communityTitle.trim();
-    const cardName = communityCardName.trim();
-    const imageUrl = communityImageUrl.trim();
-    const content = communityContent.trim();
-
-    if (!nickname || !title || !content) return;
-
-    const nextPost = {
-      id: `${Date.now()}`,
-      nickname,
-      title,
-      cardName,
-      imageUrl,
-      content,
-      createdAt: new Date().toISOString()
-    };
-
-    setCommunityPosts((prev) => [nextPost, ...prev]);
-    setCommunityTitle('');
-    setCommunityCardName('');
-    setCommunityImageUrl('');
-    setCommunityContent('');
-  }
-
   const shellClass = isDark ? 'bg-[#161514] text-stone-100' : 'bg-[#f3efe7] text-stone-900';
   const panelClass = isDark ? 'border-[#34312e] bg-[#211f1d]' : 'border-[#d9d0c2] bg-[#fbf8f2]';
   const cardClass = isDark ? 'border-[#34312e] bg-[#1a1918]' : 'border-[#e2d9cc] bg-white';
@@ -471,11 +404,10 @@ export default function App() {
             <TopTab active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
             <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
-            <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="카드자랑" />
           </div>
 
-          <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
-            {viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
+          <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
+            {viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
               <div className={`mb-3 border ${subtleClass} rounded-xl px-4 py-3`}>
                 <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Category</div>
               </div>
@@ -542,11 +474,6 @@ export default function App() {
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>덱 시뮬레이터</h1>
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>전체 카드 풀에서 색상/등급/종류로 골라서 덱을 만들 수 있어.</p>
                       </>
-                    ) : viewMode === 'community' ? (
-                      <>
-                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>카드자랑</h1>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>로그인 없이 닉네임만 정해서 카드 자랑 글을 올리는 가벼운 게시판이야. 지금은 브라우저 로컬 저장 방식이야.</p>
-                      </>
                     ) : isGlobalSearch ? (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>전체 카드 검색</h1>
@@ -580,12 +507,6 @@ export default function App() {
                         <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} />
                         <Metric label="리더" value={leaderCard ? leaderCard.name : '미지정'} className={subtleClass} />
                         <Metric label="검색 대상" value={`${deckFilterCards.length}장`} className={subtleClass} />
-                      </>
-                    ) : viewMode === 'community' ? (
-                      <>
-                        <Metric label="게시물" value={`${communityPostCount}개`} className={subtleClass} />
-                        <Metric label="작성자" value={communityNickname || '미설정'} className={subtleClass} />
-                        <Metric label="저장 방식" value="브라우저 로컬" className={subtleClass} />
                       </>
                     ) : isGlobalSearch ? (
                       <>
@@ -657,10 +578,6 @@ export default function App() {
                           <div className="text-base font-black">오프라인 구매처</div>
                           <div className={`mt-1 text-sm ${textMuted}`}>공식 점포 바로 찾기</div>
                         </button>
-                        <button type="button" onClick={() => setViewMode('community')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">카드자랑</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>닉네임으로 간단 글쓰기</div>
-                        </button>
                       </div>
                     </div>
                     <div className={`border ${panelClass} rounded-2xl p-5`}>
@@ -676,10 +593,6 @@ export default function App() {
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className={`text-sm ${textMuted}`}>공식 점포</div>
                           <div className="mt-2 text-2xl font-black">{homeShopCounts.official}곳</div>
-                        </div>
-                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>카드자랑 글</div>
-                          <div className="mt-2 text-2xl font-black">{communityPostCount}개</div>
                         </div>
                       </div>
                     </div>
@@ -873,55 +786,6 @@ export default function App() {
                         )) : <div className={`border ${subtleClass} rounded-xl p-5 text-center ${textMuted}`}>아직 덱에 담긴 카드가 없어.</div>}
                       </div>
                     </div>
-                  </div>
-                </section>
-              ) : viewMode === 'community' ? (
-                <section className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
-                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>글 올리기</h3>
-                    <p className={`mt-1 text-sm ${textMuted}`}>닉네임만 정해서 바로 올릴 수 있어. 지금은 이 기기 브라우저에만 저장돼.</p>
-                    <form onSubmit={submitCommunityPost} className="mt-4 space-y-3">
-                      <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>닉네임</div>
-                        <input value={communityNickname} onChange={(event) => setCommunityNickname(event.target.value)} placeholder="닉네임 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                      </label>
-                      <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>제목</div>
-                        <input value={communityTitle} onChange={(event) => setCommunityTitle(event.target.value)} placeholder="예: 드디어 SP 나미 뽑음" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                      </label>
-                      <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드명</div>
-                        <input value={communityCardName} onChange={(event) => setCommunityCardName(event.target.value)} placeholder="예: 나미 OP01-016" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                      </label>
-                      <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이미지 URL (선택)</div>
-                        <input value={communityImageUrl} onChange={(event) => setCommunityImageUrl(event.target.value)} placeholder="https://..." className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                      </label>
-                      <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>내용</div>
-                        <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder="자랑 한마디 적기" rows={5} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                      </label>
-                      <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">게시물 올리기</button>
-                    </form>
-                  </div>
-
-                  <div className="space-y-4">
-                    {communityPosts.length ? communityPosts.map((post) => (
-                      <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 sm:p-5`}>
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{post.title}</h3>
-                            <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
-                              <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.nickname}</span>
-                              {post.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.cardName}</span> : null}
-                              <span>{formatCommunityDate(post.createdAt)}</span>
-                            </div>
-                          </div>
-                        </div>
-                        {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
-                        <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
-                      </article>
-                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 자랑 글이 없어. 첫 글을 남겨봐.</div>}
                   </div>
                 </section>
               ) : (
