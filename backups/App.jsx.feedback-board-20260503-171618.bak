@@ -19,7 +19,6 @@ const SHOP_TYPES = [
 ];
 const COMMUNITY_BOARDS = [
   { id: 'free', label: '자유게시판', description: '잡담, 질문, 후기, 소소한 이야기' },
-  { id: 'feedback', label: '피드백', description: '사이트 개선점, 오류 제보, 건의사항' },
   { id: 'showoff', label: '카드자랑', description: '희귀 카드, 사인 카드, 수집 자랑용 게시판' },
   { id: 'deck-talk', label: '덱 상담', description: '준비 중', disabled: true }
 ];
@@ -1236,7 +1235,7 @@ export default function App() {
                 {communityImageUrl ? <div className={`rounded-xl border p-3 ${subtleClass}`}><img src={communityImageUrl} alt="preview" className="max-h-64 w-full rounded-lg object-contain" /></div> : null}
                 <label className="block">
                   <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>내용</div>
-                  <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder={communityBoard === 'showoff' ? '자랑 한마디 적기' : communityBoard === 'feedback' ? '불편한 점이나 개선 의견 적기' : '자유롭게 글쓰기'} rows={6} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                  <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder={communityBoard === 'showoff' ? '자랑 한마디 적기' : '자유롭게 글쓰기'} rows={6} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                 </label>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
