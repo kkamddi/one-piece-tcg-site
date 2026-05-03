@@ -957,26 +957,30 @@ export default function App() {
               ) : viewMode === 'community' ? (
                 <section className="space-y-5">
                   <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <div className="flex flex-wrap gap-2">
-                      {COMMUNITY_BOARDS.map((board) => (
-                        <button
-                          key={board.id}
-                          type="button"
-                          disabled={board.disabled}
-                          onClick={() => setCommunityBoard(board.id)}
-                          className={`rounded-full border px-4 py-2 text-sm font-bold ${board.disabled ? 'cursor-default opacity-50' : ''} ${communityBoard === board.id ? 'border-[#c94d35] bg-[#c94d35] text-white' : subtleClass}`}
-                        >
-                          {board.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className={`mt-3 text-sm ${textMuted}`}>
-                      {activeCommunityBoard.description}
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                      {COMMUNITY_BOARDS.map((board) => {
+                        const active = communityBoard === board.id;
+                        return (
+                          <button
+                            key={board.id}
+                            type="button"
+                            disabled={board.disabled}
+                            onClick={() => setCommunityBoard(board.id)}
+                            className={`rounded-2xl border px-4 py-4 text-left transition ${board.disabled ? 'cursor-default opacity-50' : 'hover:-translate-y-0.5'} ${active ? 'border-[#c94d35] bg-[#fff3ee]' : cardClass}`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className={`text-base font-black ${active ? 'text-[#c94d35]' : isDark ? 'text-white' : 'text-stone-900'}`}>{board.label}</div>
+                              {active ? <span className="rounded-full bg-[#c94d35] px-2.5 py-1 text-[11px] font-bold text-white">선택됨</span> : null}
+                            </div>
+                            <div className={`mt-2 text-sm leading-6 ${textMuted}`}>{board.description}</div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
                   <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
-                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
+                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5 xl:sticky xl:top-4 xl:self-start`}>
                     <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label} 글 올리기</h3>
                     <form onSubmit={submitCommunityPost} className="mt-4 space-y-3">
                       <label className="block">
@@ -985,11 +989,11 @@ export default function App() {
                       </label>
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>제목</div>
-                        <input value={communityTitle} onChange={(event) => setCommunityTitle(event.target.value)} placeholder="예: 드디어 SP 나미 뽑음" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                        <input value={communityTitle} onChange={(event) => setCommunityTitle(event.target.value)} placeholder="제목 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                       </label>
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드명</div>
-                        <input value={communityCardName} onChange={(event) => setCommunityCardName(event.target.value)} placeholder="예: 나미 OP01-016" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
+                        <input value={communityCardName} onChange={(event) => setCommunityCardName(event.target.value)} placeholder="카드명 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                       </label>
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이미지 파일 (선택)</div>
@@ -1008,8 +1012,17 @@ export default function App() {
                   </div>
 
                   <div className="space-y-4">
+                    <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <div className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label}</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>최신순으로 정렬돼 있어.</div>
+                        </div>
+                        <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{communityPostCount}개</div>
+                      </div>
+                    </div>
                     {boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
-                      <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 sm:p-5`}>
+                      <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 shadow-sm sm:p-5`}>
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{post.title}</h3>
