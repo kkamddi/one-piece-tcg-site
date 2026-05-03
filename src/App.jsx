@@ -945,7 +945,6 @@ export default function App() {
                   <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
                   <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
                     <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>카드자랑 글 올리기</h3>
-                    <p className={`mt-1 text-sm ${textMuted}`}>닉네임만 정해서 바로 올릴 수 있어. 지금은 이 기기 브라우저에만 저장돼.</p>
                     <form onSubmit={submitCommunityPost} className="mt-4 space-y-3">
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>닉네임</div>
