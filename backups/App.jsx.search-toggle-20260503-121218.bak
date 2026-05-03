@@ -115,7 +115,6 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchScope, setSearchScope] = useState('series');
   const [activeRarity, setActiveRarity] = useState('ALL');
   const [openRaritySections, setOpenRaritySections] = useState({});
   const [theme, setTheme] = useState('light');
@@ -148,8 +147,6 @@ export default function App() {
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
     [selectedSeries]
   );
-  const trimmedSearchKeyword = searchKeyword.trim();
-  const isGlobalSearch = searchScope === 'all' && Boolean(trimmedSearchKeyword);
   const sidebarSections = useMemo(() => buildSidebarSections(), []);
   const activeSidebarCategory = useMemo(() => getSeriesCategory(selectedSeries), [selectedSeries]);
 
@@ -176,17 +173,15 @@ export default function App() {
     setLoading(true);
 
     const load = async () => {
-      const fetchedCards = trimmedSearchKeyword
-        ? isGlobalSearch
-          ? await searchCards(trimmedSearchKeyword)
-          : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity })
+      const fetchedCards = searchKeyword.trim()
+        ? await searchCards(searchKeyword)
         : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity });
 
       const filteredCards = fetchedCards.filter((card) => {
-        const matchesSeries = isGlobalSearch || card.series === selectedSeries;
+        const matchesSeries = card.series === selectedSeries;
         const matchesRarity = activeRarity === 'ALL' || card.rarity === activeRarity;
         const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
-        const keyword = trimmedSearchKeyword.toLowerCase();
+        const keyword = searchKeyword.trim().toLowerCase();
         const matchesSearch = !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value).toLowerCase().includes(keyword));
         return matchesSeries && matchesRarity && matchesSearch && !hideBaseLeader;
       });
@@ -201,11 +196,11 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [selectedSeries, activeRarity, trimmedSearchKeyword, isGlobalSearch]);
+  }, [selectedSeries, activeRarity, searchKeyword]);
 
   useEffect(() => {
     setOpenRaritySections({});
-  }, [selectedSeries, searchKeyword, searchScope, activeRarity]);
+  }, [selectedSeries, searchKeyword, activeRarity]);
 
   useEffect(() => {
     setOpenSidebarCategories((prev) => ({
@@ -474,12 +469,6 @@ export default function App() {
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>덱 시뮬레이터</h1>
                         <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>전체 카드 풀에서 색상/등급/종류로 골라서 덱을 만들 수 있어.</p>
                       </>
-                    ) : isGlobalSearch ? (
-                      <>
-                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>전체 카드 검색</h1>
-                        <div className={`mt-1 text-sm ${textMuted}`}>"{trimmedSearchKeyword}" 검색 결과</div>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>현재 시리즈에 묶지 않고 전체 카드에서 결과를 보여줘.</p>
-                      </>
                     ) : (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
@@ -508,12 +497,6 @@ export default function App() {
                         <Metric label="리더" value={leaderCard ? leaderCard.name : '미지정'} className={subtleClass} />
                         <Metric label="검색 대상" value={`${deckFilterCards.length}장`} className={subtleClass} />
                       </>
-                    ) : isGlobalSearch ? (
-                      <>
-                        <Metric label="검색 결과" value={`${cards.length}장`} className={subtleClass} />
-                        <Metric label="검색 범위" value="전체 카드" className={subtleClass} />
-                        <Metric label="수집" value={`${cards.filter((card) => ownedSet.has(card.id)).length}/${cards.length}`} className={subtleClass} />
-                      </>
                     ) : (
                       <>
                         <Metric label="공식 카드" value={`${officialSeriesCount}장`} className={subtleClass} />
@@ -526,7 +509,7 @@ export default function App() {
 
               {viewMode === 'archive' || viewMode === 'collection' ? (
                 <section className={`border ${panelClass} rounded-2xl p-4`}>
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+                  <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
                     <label className="block">
                       <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
                       <input
@@ -536,22 +519,13 @@ export default function App() {
                         className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
                       />
                     </label>
-                    <div className="space-y-4">
-                      <div>
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>검색 범위</div>
-                        <div className="flex flex-wrap gap-2">
-                          <ModeChip active={searchScope === 'series'} onClick={() => setSearchScope('series')} label="현재 시리즈" />
-                          <ModeChip active={searchScope === 'all'} onClick={() => setSearchScope('all')} label="전체 카드" />
-                        </div>
-                      </div>
-                      <div>
+                    <div>
                       <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
                       <div className="flex flex-wrap gap-2">
                         {rarityOptions.map((rarity) => (
                           <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
                         ))}
                       </div>
-                    </div>
                     </div>
                   </div>
                 </section>
@@ -652,7 +626,6 @@ export default function App() {
                                       <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
                                     </div>
                                     <div className={`line-clamp-2 text-sm font-extrabold ${isDark ? 'text-white' : 'text-stone-900'}`}>{card.name}</div>
-                                    {isGlobalSearch ? <div className={`text-[11px] font-bold text-[#c94d35]`}>{card.seriesName || card.series}</div> : null}
                                     <div className={`text-[11px] ${textMuted}`}>{card.categoryKo}</div>
                                     <div className="flex flex-wrap gap-2 pt-1">
                                       <button type="button" onClick={(event) => { event.stopPropagation(); addToDeck(card); }} className="rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white">덱 추가</button>
