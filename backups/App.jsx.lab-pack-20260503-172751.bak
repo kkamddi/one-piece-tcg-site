@@ -8,7 +8,6 @@ import shopsData from './data/shops.json';
 const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const DECK_PAGE_SIZE = 24;
-const LAB_PACK_SIZE = 6;
 const COMMUNITY_STORAGE_KEY = 'one-piece-tcg-community-posts';
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
 const COMMUNITY_LIKES_KEY = 'one-piece-tcg-community-liked-posts';
@@ -18,8 +17,6 @@ const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
 ];
-const LAB_BASE_RARITY_WEIGHTS = { C: 40, UC: 26, R: 16, SR: 8, SEC: 4, SP: 3, L: 2, P: 1 };
-const LAB_RARE_RARITY_WEIGHTS = { R: 46, SR: 24, SEC: 12, SP: 9, L: 6, P: 3 };
 const COMMUNITY_BOARDS = [
   { id: 'free', label: '자유게시판', description: '잡담, 질문, 후기, 소소한 이야기' },
   { id: 'feedback', label: '피드백', description: '사이트 개선점, 오류 제보, 건의사항' },
@@ -144,49 +141,6 @@ function formatCommunityDate(value) {
   }
 }
 
-function shuffleArray(items) {
-  const next = [...items];
-  for (let index = next.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
-  }
-  return next;
-}
-
-function pickWeightedRarity(pool, weights) {
-  const entries = Object.entries(weights).filter(([rarity]) => pool.some((card) => card.rarity === rarity));
-  if (!entries.length) return null;
-  const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
-  let cursor = Math.random() * totalWeight;
-  for (const [rarity, weight] of entries) {
-    cursor -= weight;
-    if (cursor <= 0) return rarity;
-  }
-  return entries[entries.length - 1][0];
-}
-
-function drawLabPack(pool, size = LAB_PACK_SIZE) {
-  const available = shuffleArray(pool.filter((card) => card.imageUrl));
-  if (!available.length) return [];
-
-  const usedIds = new Set();
-  const results = [];
-
-  for (let index = 0; index < size; index += 1) {
-    const weights = index === size - 1 ? LAB_RARE_RARITY_WEIGHTS : LAB_BASE_RARITY_WEIGHTS;
-    const rarity = pickWeightedRarity(available.filter((card) => !usedIds.has(card.id)), weights);
-    const rarityPool = available.filter((card) => !usedIds.has(card.id) && (!rarity || card.rarity === rarity));
-    const fallbackPool = available.filter((card) => !usedIds.has(card.id));
-    const nextCard = shuffleArray(rarityPool.length ? rarityPool : fallbackPool)[0];
-    if (!nextCard) break;
-    usedIds.add(nextCard.id);
-    results.push(nextCard);
-    if (usedIds.size >= available.length) break;
-  }
-
-  return results;
-}
-
 export default function App() {
   const [selectedSeries, setSelectedSeries] = useState(getDefaultSeriesId);
   const [cards, setCards] = useState([]);
@@ -232,10 +186,6 @@ export default function App() {
   const [communityBoard, setCommunityBoard] = useState('free');
   const [communityComposerOpen, setCommunityComposerOpen] = useState(false);
   const [likedCommunityPostIds, setLikedCommunityPostIds] = useState([]);
-  const [labSeriesId, setLabSeriesId] = useState(getDefaultSeriesId);
-  const [labOpenedPack, setLabOpenedPack] = useState([]);
-  const [labRevealCount, setLabRevealCount] = useState(0);
-  const [labOpening, setLabOpening] = useState(false);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -431,18 +381,6 @@ export default function App() {
     () => COMMUNITY_BOARDS.find((board) => board.id === communityBoard) ?? COMMUNITY_BOARDS[0],
     [communityBoard]
   );
-  const labSeriesOptions = useMemo(
-    () => seriesData.filter((series) => cardsData.some((card) => card.series === series.id)),
-    []
-  );
-  const activeLabSeries = useMemo(
-    () => labSeriesOptions.find((series) => series.id === labSeriesId) ?? labSeriesOptions[0] ?? null,
-    [labSeriesOptions, labSeriesId]
-  );
-  const labSeriesCards = useMemo(
-    () => cardsData.filter((card) => card.series === (activeLabSeries?.id ?? labSeriesId)),
-    [activeLabSeries, labSeriesId]
-  );
   const boardCommunityPosts = useMemo(
     () => communityPosts.filter((post) => (post.boardId ?? 'free') === communityBoard),
     [communityPosts, communityBoard]
@@ -454,20 +392,6 @@ export default function App() {
     [boardCommunityPosts]
   );
   const communityPostCount = boardCommunityPosts.length;
-
-  useEffect(() => {
-    if (!labOpening || !labOpenedPack.length) return undefined;
-    if (labRevealCount >= labOpenedPack.length) {
-      setLabOpening(false);
-      return undefined;
-    }
-
-    const timer = window.setTimeout(() => {
-      setLabRevealCount((prev) => prev + 1);
-    }, 180);
-
-    return () => window.clearTimeout(timer);
-  }, [labOpening, labOpenedPack, labRevealCount]);
 
   async function openCard(id) {
     const detail = await fetchCardById(id);
@@ -552,13 +476,6 @@ export default function App() {
   function openLatestCollection() {
     const latestSeriesId = getDefaultSeriesId();
     openSeriesView(latestSeriesId, 'collection');
-  }
-
-  function openLabPack() {
-    const nextPack = drawLabPack(labSeriesCards);
-    setLabOpenedPack(nextPack);
-    setLabRevealCount(0);
-    setLabOpening(nextPack.length > 0);
   }
 
   function submitCommunityPost(event) {
@@ -700,12 +617,11 @@ export default function App() {
             <TopTab active={viewMode === 'collection'} onClick={openLatestCollection} label="수집표" />
             <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
             <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="커뮤니티" />
-            <TopTab active={viewMode === 'lab'} onClick={() => setViewMode('lab')} label="실험실" />
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
           </div>
 
-          <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' || viewMode === 'lab' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
-            {viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' || viewMode === 'lab' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
+          <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
+            {viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' ? null : <aside className={`border ${panelClass} rounded-2xl p-3`}>
               <div className={`mb-3 border ${subtleClass} rounded-xl px-4 py-3`}>
                 <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#b6422e]">Category</div>
               </div>
@@ -769,10 +685,6 @@ export default function App() {
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>덱 시뮬레이터</h1>
                       </>
-                    ) : viewMode === 'lab' ? (
-                      <>
-                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>실험실</h1>
-                      </>
                     ) : viewMode === 'community' ? (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>커뮤니티</h1>
@@ -810,12 +722,6 @@ export default function App() {
                         <Metric label="덱" value={`${deckCount}/${DECK_SIZE}`} className={deckCount > DECK_SIZE ? 'border-red-300 bg-red-50 text-red-700' : subtleClass} />
                         <Metric label="리더" value={leaderCard ? leaderCard.name : '미지정'} className={subtleClass} />
                         <Metric label="검색 대상" value={`${deckFilterCards.length}장`} className={subtleClass} />
-                      </>
-                    ) : viewMode === 'lab' ? (
-                      <>
-                        <Metric label="시리즈" value={activeLabSeries?.koName ?? '없음'} className={subtleClass} />
-                        <Metric label="대상 카드" value={`${labSeriesCards.length}장`} className={subtleClass} />
-                        <Metric label="팩 구성" value={`${LAB_PACK_SIZE}장`} className={subtleClass} />
                       </>
                     ) : viewMode === 'community' ? (
                       <>
@@ -891,9 +797,6 @@ export default function App() {
                         </button>
                         <button type="button" onClick={() => setViewMode('community')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">커뮤니티</div>
-                        </button>
-                        <button type="button" onClick={() => setViewMode('lab')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">실험실</div>
                         </button>
                       </div>
                     </div>
@@ -1111,80 +1014,6 @@ export default function App() {
                           </div>
                         )) : <div className={`border ${subtleClass} rounded-xl p-5 text-center ${textMuted}`}>아직 덱에 담긴 카드가 없어.</div>}
                       </div>
-                    </div>
-                  </div>
-                </section>
-              ) : viewMode === 'lab' ? (
-                <section className="space-y-5">
-                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_200px] xl:items-end">
-                      <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>팩 시리즈</div>
-                        <select
-                          value={activeLabSeries?.id ?? ''}
-                          onChange={(event) => setLabSeriesId(event.target.value)}
-                          className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} focus:border-[#c94d35]`}
-                        >
-                          {labSeriesOptions.map((series) => (
-                            <option key={series.id} value={series.id}>{series.koName}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <button type="button" onClick={openLabPack} disabled={!labSeriesCards.length || labOpening} className="inline-flex items-center justify-center rounded-xl bg-[#c94d35] px-5 py-3 text-sm font-black text-white disabled:opacity-50">
-                        {labOpening ? '개봉 중...' : '카드팩 개봉'}
-                      </button>
-                    </div>
-                    <div className={`mt-4 rounded-2xl border p-4 ${isDark ? 'border-[#333333] bg-[#171717]' : 'border-[#eadfce] bg-[#fff8f2]'}`}>
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <div className="text-lg font-black">{activeLabSeries?.koName ?? '시리즈 선택'}</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>선택한 시리즈 카드로 가상 팩을 개봉해볼 수 있어.</div>
-                        </div>
-                        <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{labSeriesCards.length}장 풀</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <div className="text-xl font-black">가상 카드깡</div>
-                      {labOpenedPack.length ? <button type="button" onClick={openLabPack} disabled={labOpening} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass} disabled:opacity-50`}>다시 뽑기</button> : null}
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-                      {(labOpenedPack.length ? labOpenedPack : Array.from({ length: LAB_PACK_SIZE }, () => null)).map((card, index) => {
-                        const revealed = index < labRevealCount && card;
-                        return (
-                          <button
-                            key={card?.id ?? `placeholder-${index}`}
-                            type="button"
-                            disabled={!revealed}
-                            onClick={() => revealed ? openCard(card.id) : null}
-                            className={`overflow-hidden rounded-2xl border text-left transition duration-300 ${revealed ? `${cardClass} translate-y-0 opacity-100` : `${isDark ? 'border-[#333333] bg-[#161616]' : 'border-[#eadfce] bg-[#fff8f2]'} translate-y-2 opacity-80`} ${revealed ? 'hover:-translate-y-1' : ''}`}
-                          >
-                            {revealed ? (
-                              <>
-                                <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
-                                  <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
-                                  <span className={`absolute right-2 top-2 rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
-                                </div>
-                                <div className={`border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
-                                  <div className={`text-[11px] font-bold ${textMuted}`}>{card.cardNo}</div>
-                                  <div className={`mt-1 line-clamp-2 text-sm font-extrabold ${isDark ? 'text-white' : 'text-stone-900'}`}>{card.name}</div>
-                                </div>
-                              </>
-                            ) : (
-                              <div className="flex aspect-[5/7] items-center justify-center p-4">
-                                <div className={`flex h-full w-full items-center justify-center rounded-xl border-2 border-dashed ${isDark ? 'border-[#4a4a4a] bg-[#1d1d1d] text-stone-500' : 'border-[#d8c8b6] bg-[#fbf5ed] text-stone-400'}`}>
-                                  <div className="text-center">
-                                    <div className="text-3xl font-black">?</div>
-                                    <div className="mt-2 text-xs font-bold tracking-[0.18em]">PACK</div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
                     </div>
                   </div>
                 </section>
