@@ -839,10 +839,7 @@ export default function App() {
                   <div>
                     {viewMode === 'home' ? (
                       <>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG</h1>
-                          <a href="https://cafe.naver.com/onepiecetcg" target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-black text-[#c94d35]">공식카페</a>
-                        </div>
+                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG 도감</h1>
                       </>
                     ) : viewMode === 'shops' ? (
                       <>
