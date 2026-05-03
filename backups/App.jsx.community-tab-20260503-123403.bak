@@ -16,11 +16,6 @@ const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
 ];
-const COMMUNITY_BOARDS = [
-  { id: 'showoff', label: '카드자랑', description: '희귀 카드, 사인 카드, 수집 자랑용 게시판' },
-  { id: 'deck-talk', label: '덱 상담', description: '준비 중', disabled: true },
-  { id: 'trade-talk', label: '교환/매입', description: '준비 중', disabled: true }
-];
 const SIDEBAR_CATEGORIES = [
   { id: 'regular-booster', label: '정규 부스터' },
   { id: 'extra-premium', label: '엑스트라 / 프리미엄' },
@@ -171,7 +166,6 @@ export default function App() {
   const [communityImageUrl, setCommunityImageUrl] = useState('');
   const [communityContent, setCommunityContent] = useState('');
   const [communityEditingId, setCommunityEditingId] = useState(null);
-  const [communityBoard, setCommunityBoard] = useState('showoff');
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -522,7 +516,7 @@ export default function App() {
             <TopTab active={viewMode === 'collection'} onClick={() => setViewMode('collection')} label="수집표" />
             <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
-            <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="커뮤니티" />
+            <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="카드자랑" />
           </div>
 
           <div className={`grid gap-5 ${viewMode === 'home' || viewMode === 'deck' || viewMode === 'shops' || viewMode === 'community' ? 'xl:grid-cols-1' : 'xl:grid-cols-[280px_minmax(0,1fr)]'}`}>
@@ -595,8 +589,8 @@ export default function App() {
                       </>
                     ) : viewMode === 'community' ? (
                       <>
-                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>커뮤니티</h1>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>여러 게시판이 들어갈 커뮤니티 허브야. 지금은 카드자랑 게시판부터 먼저 열어뒀어.</p>
+                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>카드자랑</h1>
+                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>로그인 없이 닉네임만 정해서 카드 자랑 글을 올리는 가벼운 게시판이야. 지금은 브라우저 로컬 저장 방식이야.</p>
                       </>
                     ) : isGlobalSearch ? (
                       <>
@@ -634,8 +628,8 @@ export default function App() {
                       </>
                     ) : viewMode === 'community' ? (
                       <>
-                        <Metric label="게시판" value={COMMUNITY_BOARDS.find((board) => board.id === communityBoard)?.label || '카드자랑'} className={subtleClass} />
                         <Metric label="게시물" value={`${communityPostCount}개`} className={subtleClass} />
+                        <Metric label="작성자" value={communityNickname || '미설정'} className={subtleClass} />
                         <Metric label="저장 방식" value="브라우저 로컬" className={subtleClass} />
                       </>
                     ) : isGlobalSearch ? (
@@ -709,8 +703,8 @@ export default function App() {
                           <div className={`mt-1 text-sm ${textMuted}`}>공식 점포 바로 찾기</div>
                         </button>
                         <button type="button" onClick={() => setViewMode('community')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">커뮤니티</div>
-                          <div className={`mt-1 text-sm ${textMuted}`}>게시판 구조 확장 준비</div>
+                          <div className="text-base font-black">카드자랑</div>
+                          <div className={`mt-1 text-sm ${textMuted}`}>닉네임으로 간단 글쓰기</div>
                         </button>
                       </div>
                     </div>
@@ -729,7 +723,7 @@ export default function App() {
                           <div className="mt-2 text-2xl font-black">{homeShopCounts.official}곳</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className={`text-sm ${textMuted}`}>커뮤니티 글</div>
+                          <div className={`text-sm ${textMuted}`}>카드자랑 글</div>
                           <div className="mt-2 text-2xl font-black">{communityPostCount}개</div>
                         </div>
                       </div>
@@ -927,29 +921,9 @@ export default function App() {
                   </div>
                 </section>
               ) : viewMode === 'community' ? (
-                <section className="space-y-5">
+                <section className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
                   <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <div className="flex flex-wrap gap-2">
-                      {COMMUNITY_BOARDS.map((board) => (
-                        <button
-                          key={board.id}
-                          type="button"
-                          disabled={board.disabled}
-                          onClick={() => setCommunityBoard(board.id)}
-                          className={`rounded-full border px-4 py-2 text-sm font-bold ${board.disabled ? 'cursor-default opacity-50' : ''} ${communityBoard === board.id ? 'border-[#c94d35] bg-[#c94d35] text-white' : subtleClass}`}
-                        >
-                          {board.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className={`mt-3 text-sm ${textMuted}`}>
-                      {COMMUNITY_BOARDS.find((board) => board.id === communityBoard)?.description}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
-                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>카드자랑 글 올리기</h3>
+                    <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>글 올리기</h3>
                     <p className={`mt-1 text-sm ${textMuted}`}>닉네임만 정해서 바로 올릴 수 있어. 지금은 이 기기 브라우저에만 저장돼.</p>
                     <form onSubmit={submitCommunityPost} className="mt-4 space-y-3">
                       <label className="block">
@@ -1001,8 +975,7 @@ export default function App() {
                         {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
                         <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
                       </article>
-                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 카드자랑 글이 없어. 첫 글을 남겨봐.</div>}
-                  </div>
+                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 자랑 글이 없어. 첫 글을 남겨봐.</div>}
                   </div>
                 </section>
               ) : (
