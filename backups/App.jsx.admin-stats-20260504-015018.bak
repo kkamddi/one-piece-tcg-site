@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, resolveLoginEmail, signupWithProfile } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
@@ -15,7 +14,6 @@ const DECK_PAGE_SIZE = 24;
 const LAB_PACK_SIZE = 6;
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
 const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
-const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const SHOP_TYPES = [
@@ -254,8 +252,6 @@ export default function App() {
   const [authMessage, setAuthMessage] = useState('');
   const [authUser, setAuthUser] = useState(null);
   const [authCheckState, setAuthCheckState] = useState({ username: null, nickname: null });
-  const [visitorToken, setVisitorToken] = useState('');
-  const [adminStats, setAdminStats] = useState(null);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -285,15 +281,6 @@ export default function App() {
       const nextAuthorToken = `community-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
       window.localStorage.setItem(COMMUNITY_AUTHOR_TOKEN_KEY, nextAuthorToken);
       setCommunityAuthorToken(nextAuthorToken);
-    }
-
-    const savedVisitorToken = window.localStorage.getItem(VISITOR_TOKEN_KEY);
-    if (savedVisitorToken) {
-      setVisitorToken(savedVisitorToken);
-    } else {
-      const nextVisitorToken = `visitor-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      window.localStorage.setItem(VISITOR_TOKEN_KEY, nextVisitorToken);
-      setVisitorToken(nextVisitorToken);
     }
   }, []);
 
@@ -353,30 +340,6 @@ export default function App() {
       alive = false;
     };
   }, [communityAuthorToken]);
-
-  useEffect(() => {
-    if (!visitorToken) return;
-    trackVisit(visitorToken, window.location.pathname).catch((error) => console.error('Failed to track visit', error));
-  }, [visitorToken]);
-
-  useEffect(() => {
-    const username = authUser?.user_metadata?.username;
-    if (username !== 'admin') {
-      setAdminStats(null);
-      return;
-    }
-
-    let alive = true;
-    fetchAdminStats(username)
-      .then((stats) => {
-        if (alive) setAdminStats(stats);
-      })
-      .catch((error) => console.error('Failed to load admin stats', error));
-
-    return () => {
-      alive = false;
-    };
-  }, [authUser]);
 
   useEffect(() => {
     let alive = true;
@@ -1644,34 +1607,6 @@ export default function App() {
                 </section>
               )}
             </main>
-
-            {authUser?.user_metadata?.username === 'admin' && adminStats ? (
-              <section className={`mt-5 border ${panelClass} rounded-2xl p-5`}>
-                <div className="mb-3 text-lg font-black">관리자 통계</div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                  <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>오늘 방문</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.todayVisits}</div>
-                  </div>
-                  <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>오늘 순방문</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.todayUniqueVisitors}</div>
-                  </div>
-                  <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>전체 회원</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.totalUsers}</div>
-                  </div>
-                  <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>오늘 가입</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.todaySignups}</div>
-                  </div>
-                  <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>전체 게시글</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.totalPosts}</div>
-                  </div>
-                </div>
-              </section>
-            ) : null}
 
             <section className={`mt-5 border ${panelClass} rounded-2xl p-5 text-center`}>
               <div className="text-lg font-black">배너문의 주세요</div>
