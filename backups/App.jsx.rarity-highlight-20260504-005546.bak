@@ -315,15 +315,16 @@ export default function App() {
       const fetchedCards = trimmedSearchKeyword
         ? isGlobalSearch
           ? await searchCards(trimmedSearchKeyword)
-          : await fetchCards({ series: selectedSeries })
-        : await fetchCards({ series: selectedSeries });
+          : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity })
+        : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity });
 
       const filteredCards = fetchedCards.filter((card) => {
         const matchesSeries = isGlobalSearch || card.series === selectedSeries;
+        const matchesRarity = activeRarity === 'ALL' || card.rarity === activeRarity;
         const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
         const keyword = trimmedSearchKeyword.toLowerCase();
         const matchesSearch = !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value).toLowerCase().includes(keyword));
-        return matchesSeries && matchesSearch && !hideBaseLeader;
+        return matchesSeries && matchesRarity && matchesSearch && !hideBaseLeader;
       });
 
       if (alive) {
