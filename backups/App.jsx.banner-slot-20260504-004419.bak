@@ -1484,10 +1484,6 @@ export default function App() {
                 </section>
               )}
             </main>
-
-            <section className={`mt-5 border ${panelClass} rounded-2xl p-5 text-center`}>
-              <div className="text-lg font-black">배너문의 주세요</div>
-            </section>
           </div>
         </div>
 
