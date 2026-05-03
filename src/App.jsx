@@ -208,6 +208,30 @@ function hydrateDeckEntries(entries = []) {
     .filter(Boolean);
 }
 
+function hydrateSavedDecks(decks = []) {
+  return Array.isArray(decks)
+    ? decks
+        .map((deck) => ({
+          id: String(deck?.id ?? '').trim(),
+          name: String(deck?.name ?? '').trim() || '내 덱',
+          deckEntries: hydrateDeckEntries(deck?.deckEntries ?? []),
+          leaderCardId: deck?.leaderCardId ? String(deck.leaderCardId) : null,
+          updatedAt: deck?.updatedAt ?? null
+        }))
+        .filter((deck) => deck.id)
+    : [];
+}
+
+function serializeSavedDecks(decks = []) {
+  return (Array.isArray(decks) ? decks : []).map((deck) => ({
+    id: String(deck?.id ?? '').trim(),
+    name: String(deck?.name ?? '').trim() || '내 덱',
+    deckEntries: serializeDeckEntries(deck?.deckEntries ?? []),
+    leaderCardId: deck?.leaderCardId ? String(deck.leaderCardId) : null,
+    updatedAt: deck?.updatedAt ?? null
+  })).filter((deck) => deck.id);
+}
+
 export default function App() {
   const [selectedSeries, setSelectedSeries] = useState(getDefaultSeriesId);
   const [cards, setCards] = useState([]);
@@ -222,6 +246,8 @@ export default function App() {
   const [viewMode, setViewMode] = useState('home');
   const [deckEntries, setDeckEntries] = useState([]);
   const [leaderCardId, setLeaderCardId] = useState(null);
+  const [savedDecks, setSavedDecks] = useState([]);
+  const [activeDeckId, setActiveDeckId] = useState(null);
   const [ownedCardIds, setOwnedCardIds] = useState([]);
   const [shopType, setShopType] = useState('general');
   const [selectedRegion, setSelectedRegion] = useState('전체');
@@ -386,7 +412,7 @@ export default function App() {
 
     let alive = true;
     const authNicknameValue = authUser.user_metadata?.nickname || authUser.user_metadata?.username || authUser.email || '';
-    setCommunityAuthorToken(`user:${authUser.id}`);
+    setCommunityAuthorToken(authUser.id);
     setCommunityNickname(authNicknameValue);
 
     fetchMyState()
@@ -396,6 +422,8 @@ export default function App() {
           setOwnedCardIds(Array.isArray(state.ownedCardIds) ? state.ownedCardIds : []);
           setDeckEntries(hydrateDeckEntries(state.deckEntries));
           setLeaderCardId(state.leaderCardId || null);
+          setSavedDecks(hydrateSavedDecks(state.savedDecks));
+          setActiveDeckId(state.activeDeckId || null);
         }
       })
       .catch((error) => console.error('Failed to load user state', error))
@@ -415,12 +443,14 @@ export default function App() {
       saveMyState({
         ownedCardIds,
         deckEntries: serializeDeckEntries(deckEntries),
-        leaderCardId
+        leaderCardId,
+        savedDecks: serializeSavedDecks(savedDecks),
+        activeDeckId
       }).catch((error) => console.error('Failed to save user state', error));
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [authUser, userStateReady, ownedCardIds, deckEntries, leaderCardId]);
+  }, [authUser, userStateReady, ownedCardIds, deckEntries, leaderCardId, savedDecks, activeDeckId]);
 
   useEffect(() => {
     if (!visitorToken) return;
@@ -552,6 +582,7 @@ export default function App() {
     () => [...deckEntries].sort((a, b) => (a.categoryKo === '리더' ? -1 : b.categoryKo === '리더' ? 1 : b.count - a.count)),
     [deckEntries]
   );
+  const activeSavedDeck = useMemo(() => savedDecks.find((deck) => deck.id === activeDeckId) ?? null, [savedDecks, activeDeckId]);
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
   const defaultCollapsedRarities = useMemo(() => {
     if (cards.length < 30) return ['UC'];
@@ -699,6 +730,59 @@ export default function App() {
   function clearDeck() {
     setDeckEntries([]);
     setLeaderCardId(null);
+  }
+
+  function saveCurrentDeck() {
+    if (!authUser) {
+      window.alert('로그인 후 덱을 저장해줘.');
+      setAuthMode('login');
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const nextName = window.prompt('덱 이름 입력', activeSavedDeck?.name || `내 덱 ${savedDecks.length + 1}`)?.trim();
+    if (!nextName) return;
+
+    const nextDeckId = activeDeckId || `deck-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const nextDeck = {
+      id: nextDeckId,
+      name: nextName,
+      deckEntries,
+      leaderCardId,
+      updatedAt: new Date().toISOString()
+    };
+
+    setSavedDecks((prev) => {
+      const exists = prev.some((deck) => deck.id === nextDeckId);
+      return exists ? prev.map((deck) => (deck.id === nextDeckId ? nextDeck : deck)) : [nextDeck, ...prev];
+    });
+    setActiveDeckId(nextDeckId);
+  }
+
+  function loadSavedDeck(deckId) {
+    const targetDeck = savedDecks.find((deck) => deck.id === deckId);
+    if (!targetDeck) return;
+    setDeckEntries(targetDeck.deckEntries);
+    setLeaderCardId(targetDeck.leaderCardId || null);
+    setActiveDeckId(targetDeck.id);
+  }
+
+  function createNewDeck() {
+    setDeckEntries([]);
+    setLeaderCardId(null);
+    setActiveDeckId(null);
+  }
+
+  function deleteSavedDeck(deckId) {
+    const targetDeck = savedDecks.find((deck) => deck.id === deckId);
+    if (!targetDeck) return;
+    if (!window.confirm(`'${targetDeck.name}' 덱을 삭제할까?`)) return;
+    setSavedDecks((prev) => prev.filter((deck) => deck.id !== deckId));
+    if (activeDeckId === deckId) {
+      setActiveDeckId(null);
+      setDeckEntries([]);
+      setLeaderCardId(null);
+    }
   }
 
   function resetDeckFilters() {
@@ -1392,7 +1476,11 @@ export default function App() {
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>덱 시뮬레이터</h3>
                         <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됨' : '비로그인 상태에선 이 기기 브라우저에 저장됨'}</div>
                       </div>
-                      <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>초기화</button>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={saveCurrentDeck} className="rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">덱 저장</button>
+                        <button type="button" onClick={createNewDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>새 덱</button>
+                        <button type="button" onClick={clearDeck} className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>초기화</button>
+                      </div>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px] xl:gap-4">
                       <label className="block xl:col-span-1">
@@ -1439,12 +1527,29 @@ export default function App() {
                     <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>내 덱</h3>
                     <div className="mt-4 space-y-3">
                       <div className={`border ${subtleClass} rounded-xl p-4`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-bold">저장된 덱</span>
+                          <span className={`text-xs ${textMuted}`}>{savedDecks.length}개</span>
+                        </div>
+                        <div className="mt-3 space-y-2">
+                          {savedDecks.length ? savedDecks.map((deck) => (
+                            <div key={deck.id} className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${activeDeckId === deck.id ? 'border-[#c94d35] bg-[#fff3ee] text-stone-900' : subtleClass}`}>
+                              <button type="button" onClick={() => loadSavedDeck(deck.id)} className="min-w-0 flex-1 text-left">
+                                <div className="truncate text-sm font-black">{deck.name}</div>
+                                <div className={`text-[11px] ${textMuted}`}>{deck.updatedAt ? formatCommunityDate(deck.updatedAt) : ''}</div>
+                              </button>
+                              <button type="button" onClick={() => deleteSavedDeck(deck.id)} className="rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">삭제</button>
+                            </div>
+                          )) : <div className={`text-sm ${textMuted}`}>저장된 덱이 없어.</div>}
+                        </div>
+                      </div>
+                      <div className={`border ${subtleClass} rounded-xl p-4`}>
                         <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Leader</div>
                         <div className={`mt-2 text-sm font-bold ${leaderCard ? '' : textMuted}`}>{leaderCard ? leaderCard.name : '리더를 지정해줘'}</div>
                       </div>
                       <div className={`border ${subtleClass} rounded-xl p-4`}>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-bold">메인 덱</span>
+                          <span className="text-sm font-bold">{activeSavedDeck?.name || '현재 덱'}</span>
                           <span className={`text-sm font-black ${deckCount > DECK_SIZE ? 'text-red-500' : ''}`}>{deckCount}/{DECK_SIZE}</span>
                         </div>
                       </div>
