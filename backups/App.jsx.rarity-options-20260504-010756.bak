@@ -397,11 +397,7 @@ export default function App() {
   }, [deckSearchKeyword, deckFilterColor, deckFilterRarity, deckFilterCategory]);
 
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
-  const rarityOptionSourceCards = useMemo(
-    () => (isGlobalSearch ? cardsData : cardsData.filter((card) => card.series === selectedSeries)),
-    [isGlobalSearch, selectedSeries]
-  );
-  const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(rarityOptionSourceCards)], [rarityOptionSourceCards]);
+  const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const isDark = theme === 'dark';
   const ownedSet = useMemo(() => new Set(ownedCardIds), [ownedCardIds]);
   const collectionVisibleCards = useMemo(() => (activeRarity === 'ALL' ? cards : cards.filter((card) => card.rarity === activeRarity)), [cards, activeRarity]);
