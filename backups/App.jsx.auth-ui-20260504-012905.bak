@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
-import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import cardsData from './data/cards.json';
 import seriesData from './data/series.json';
@@ -239,13 +238,6 @@ export default function App() {
   const [labOpenedPack, setLabOpenedPack] = useState([]);
   const [labRevealCount, setLabRevealCount] = useState(0);
   const [labOpening, setLabOpening] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authMessage, setAuthMessage] = useState('');
-  const [authUser, setAuthUser] = useState(null);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
@@ -281,26 +273,6 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem('one-piece-tcg-theme', theme);
   }, [theme]);
-
-  useEffect(() => {
-    if (!supabase) return undefined;
-
-    let alive = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (!alive) return;
-      setAuthUser(data.session?.user ?? null);
-    });
-
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user ?? null);
-    });
-
-    return () => {
-      alive = false;
-      data.subscription.unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     window.localStorage.setItem('one-piece-tcg-owned', JSON.stringify(ownedCardIds));
@@ -782,45 +754,6 @@ export default function App() {
     event.target.value = '';
   }
 
-  async function submitAuth(event) {
-    event.preventDefault();
-    if (!supabase) {
-      setAuthMessage('인증 설정이 아직 연결되지 않았어.');
-      return;
-    }
-
-    const email = authEmail.trim();
-    const password = authPassword.trim();
-    if (!email || !password) return;
-
-    setAuthLoading(true);
-    setAuthMessage('');
-
-    try {
-      if (authMode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        setAuthMessage('회원가입 요청 완료. 이메일 확인 후 로그인해줘.');
-        setAuthMode('login');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        setAuthModalOpen(false);
-        setAuthEmail('');
-        setAuthPassword('');
-      }
-    } catch (error) {
-      setAuthMessage(error?.message || '인증 처리에 실패했어.');
-    } finally {
-      setAuthLoading(false);
-    }
-  }
-
-  async function logoutAuth() {
-    if (!supabase) return;
-    await supabase.auth.signOut();
-  }
-
   const shellClass = isDark ? 'bg-[#161514] text-stone-100' : 'bg-[#f3efe7] text-stone-900';
   const panelClass = isDark ? 'border-[#34312e] bg-[#211f1d]' : 'border-[#d9d0c2] bg-[#fbf8f2]';
   const cardClass = isDark ? 'border-[#34312e] bg-[#1a1918]' : 'border-[#e2d9cc] bg-white';
@@ -839,18 +772,7 @@ export default function App() {
                   <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#b6422e]">One Piece TCG Archive</div>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {authUser ? (
-                  <div className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${subtleClass}`}>
-                    <span className="max-w-[150px] truncate font-bold">{authUser.email}</span>
-                    <button type="button" onClick={logoutAuth} className="rounded-full bg-[#c94d35] px-3 py-1 text-xs font-bold text-white">로그아웃</button>
-                  </div>
-                ) : (
-                  <div className={`flex items-center gap-2 rounded-full border px-2 py-2 ${subtleClass}`}>
-                    <button type="button" onClick={() => { setAuthMode('login'); setAuthMessage(''); setAuthModalOpen(true); }} className="rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">로그인</button>
-                    <button type="button" onClick={() => { setAuthMode('signup'); setAuthMessage(''); setAuthModalOpen(true); }} className="rounded-full border border-[#c94d35] px-4 py-2 text-sm font-bold text-[#c94d35]">회원가입</button>
-                  </div>
-                )}
+              <div className="flex flex-wrap gap-2">
                 <button type="button" aria-label={isDark ? '라이트모드' : '다크모드'} onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))} className={`rounded-full border px-4 py-2 text-xl font-semibold ${subtleClass}`}>
                   {isDark ? '☀️' : '🌙'}
                 </button>
@@ -1606,32 +1528,6 @@ export default function App() {
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
                   <button type="button" onClick={cancelEditCommunityPost} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>취소</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        ) : null}
-        {authModalOpen ? (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setAuthModalOpen(false)}>
-            <div className={`w-full max-w-md rounded-2xl border shadow-2xl ${isDark ? 'border-[#363636] bg-[#202020]' : 'border-[#e4d7c7] bg-[#fffdf9]'}`} onClick={(event) => event.stopPropagation()}>
-              <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
-                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{authMode === 'signup' ? '회원가입' : '로그인'}</h3>
-                <button type="button" onClick={() => setAuthModalOpen(false)} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${isDark ? 'border-[#444] bg-[#262626] text-stone-200' : 'border-[#e2d5c8] bg-white text-stone-600'}`}>닫기</button>
-              </div>
-              <form onSubmit={submitAuth} className="space-y-3 p-5">
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이메일</div>
-                  <input value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} type="email" placeholder="이메일 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                </label>
-                <label className="block">
-                  <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>비밀번호</div>
-                  <input value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} type="password" placeholder="비밀번호 입력" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
-                </label>
-                {authMessage ? <div className={`text-sm ${textMuted}`}>{authMessage}</div> : null}
-                {!hasSupabaseAuthConfig ? <div className={`text-sm ${textMuted}`}>인증 환경변수가 아직 연결되지 않았어.</div> : null}
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <button type="submit" disabled={authLoading || !authEmail.trim() || !authPassword.trim() || !hasSupabaseAuthConfig} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{authLoading ? '처리 중...' : authMode === 'signup' ? '회원가입' : '로그인'}</button>
-                  <button type="button" onClick={() => { setAuthMode((prev) => prev === 'signup' ? 'login' : 'signup'); setAuthMessage(''); }} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>{authMode === 'signup' ? '로그인으로' : '회원가입으로'}</button>
                 </div>
               </form>
             </div>
