@@ -165,7 +165,6 @@ export default function App() {
   const [communityCardName, setCommunityCardName] = useState('');
   const [communityImageUrl, setCommunityImageUrl] = useState('');
   const [communityContent, setCommunityContent] = useState('');
-  const [communityEditingId, setCommunityEditingId] = useState(null);
 
   const currentSeries = useMemo(
     () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData[0],
@@ -423,65 +422,21 @@ export default function App() {
 
     if (!nickname || !title || !content) return;
 
-    if (communityEditingId) {
-      setCommunityPosts((prev) => prev.map((post) => (
-        post.id === communityEditingId
-          ? { ...post, nickname, title, cardName, imageUrl, content, updatedAt: new Date().toISOString() }
-          : post
-      )));
-      setCommunityEditingId(null);
-    } else {
-      const nextPost = {
-        id: `${Date.now()}`,
-        nickname,
-        title,
-        cardName,
-        imageUrl,
-        content,
-        createdAt: new Date().toISOString()
-      };
-
-      setCommunityPosts((prev) => [nextPost, ...prev]);
-    }
-
-    setCommunityTitle('');
-    setCommunityCardName('');
-    setCommunityImageUrl('');
-    setCommunityContent('');
-  }
-
-  function startEditCommunityPost(post) {
-    setCommunityEditingId(post.id);
-    setCommunityNickname(post.nickname || '');
-    setCommunityTitle(post.title || '');
-    setCommunityCardName(post.cardName || '');
-    setCommunityImageUrl(post.imageUrl || '');
-    setCommunityContent(post.content || '');
-  }
-
-  function cancelEditCommunityPost() {
-    setCommunityEditingId(null);
-    setCommunityTitle('');
-    setCommunityCardName('');
-    setCommunityImageUrl('');
-    setCommunityContent('');
-  }
-
-  function deleteCommunityPost(postId) {
-    setCommunityPosts((prev) => prev.filter((post) => post.id !== postId));
-    if (communityEditingId === postId) cancelEditCommunityPost();
-  }
-
-  function handleCommunityImageFile(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') setCommunityImageUrl(reader.result);
+    const nextPost = {
+      id: `${Date.now()}`,
+      nickname,
+      title,
+      cardName,
+      imageUrl,
+      content,
+      createdAt: new Date().toISOString()
     };
-    reader.readAsDataURL(file);
-    event.target.value = '';
+
+    setCommunityPosts((prev) => [nextPost, ...prev]);
+    setCommunityTitle('');
+    setCommunityCardName('');
+    setCommunityImageUrl('');
+    setCommunityContent('');
   }
 
   const shellClass = isDark ? 'bg-[#161514] text-stone-100' : 'bg-[#f3efe7] text-stone-900';
@@ -939,18 +894,14 @@ export default function App() {
                         <input value={communityCardName} onChange={(event) => setCommunityCardName(event.target.value)} placeholder="예: 나미 OP01-016" className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                       </label>
                       <label className="block">
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이미지 파일 (선택)</div>
-                        <input type="file" accept="image/*" onChange={handleCommunityImageFile} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} file:mr-3 file:rounded-full file:border-0 file:bg-[#c94d35] file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-white`} />
+                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>이미지 URL (선택)</div>
+                        <input value={communityImageUrl} onChange={(event) => setCommunityImageUrl(event.target.value)} placeholder="https://..." className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                       </label>
-                      {communityImageUrl ? <div className={`rounded-xl border p-3 ${subtleClass}`}><img src={communityImageUrl} alt="preview" className="max-h-64 w-full rounded-lg object-contain" /></div> : null}
                       <label className="block">
                         <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>내용</div>
                         <textarea value={communityContent} onChange={(event) => setCommunityContent(event.target.value)} placeholder="자랑 한마디 적기" rows={5} className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`} />
                       </label>
-                      <div className="flex flex-wrap gap-2">
-                        <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{communityEditingId ? '수정 저장' : '게시물 올리기'}</button>
-                        {communityEditingId ? <button type="button" onClick={cancelEditCommunityPost} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>수정 취소</button> : null}
-                      </div>
+                      <button type="submit" disabled={!communityNickname.trim() || !communityTitle.trim() || !communityContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">게시물 올리기</button>
                     </form>
                   </div>
 
@@ -964,12 +915,7 @@ export default function App() {
                               <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.nickname}</span>
                               {post.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.cardName}</span> : null}
                               <span>{formatCommunityDate(post.createdAt)}</span>
-                              {post.updatedAt ? <span>수정 {formatCommunityDate(post.updatedAt)}</span> : null}
                             </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button>
-                            <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button>
                           </div>
                         </div>
                         {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
