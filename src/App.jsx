@@ -580,22 +580,18 @@ export default function App() {
                     {viewMode === 'home' ? (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG 도감</h1>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>도감, 수집표, 덱, 오프라인 구매처까지 한 번에 바로 들어갈 수 있는 시작 화면으로 바꿔봤어.</p>
                       </>
                     ) : viewMode === 'shops' ? (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>오프라인 구매처</h1>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>공식 사이트 점포 데이터를 내부 API로 가져와서 지역별로 바로 볼 수 있게 바꿔뒀어.</p>
                       </>
                     ) : viewMode === 'deck' ? (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>덱 시뮬레이터</h1>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>전체 카드 풀에서 색상/등급/종류로 골라서 덱을 만들 수 있어.</p>
                       </>
                     ) : viewMode === 'community' ? (
                       <>
                         <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>커뮤니티</h1>
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>여러 게시판이 들어갈 커뮤니티 허브야. 지금은 카드자랑 게시판부터 먼저 열어뒀어.</p>
                       </>
                     ) : isGlobalSearch ? (
                       <>
