@@ -20,6 +20,7 @@ const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
+const DONATION_URL = '';
 const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
@@ -56,6 +57,15 @@ function getDisplaySeriesCode(series) {
 
 function sortDescByCode(items) {
   return [...items].sort((a, b) => b.id.localeCompare(a.id, 'en', { numeric: true }));
+}
+
+function normalizeMultiValue(value) {
+  return String(value ?? '').split(',').map((item) => item.trim()).filter(Boolean);
+}
+
+function matchesMultiValue(cardValue, selectedValue) {
+  if (selectedValue === 'ALL') return true;
+  return normalizeMultiValue(cardValue).includes(selectedValue);
 }
 
 function getFriendlyAuthErrorMessage(error, mode = 'login') {
@@ -261,6 +271,9 @@ export default function App() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchScope, setSearchScope] = useState('series');
   const [activeRarity, setActiveRarity] = useState('ALL');
+  const [activeColor, setActiveColor] = useState('ALL');
+  const [activeCost, setActiveCost] = useState('ALL');
+  const [activeAttribute, setActiveAttribute] = useState('ALL');
   const [openRaritySections, setOpenRaritySections] = useState({});
   const [theme, setTheme] = useState('light');
   const [viewMode, setViewMode] = useState('home');
@@ -512,10 +525,13 @@ export default function App() {
       const filteredCards = fetchedCards.filter((card) => {
         const matchesSeries = isGlobalSearch || card.series === selectedSeries;
         const matchesRarity = activeRarity === 'ALL' || card.rarity === activeRarity;
+        const matchesColor = matchesMultiValue(card.colorKo, activeColor);
+        const matchesCost = activeCost === 'ALL' || String(card.cost ?? '').trim() === activeCost;
+        const matchesAttribute = matchesMultiValue(card.attributeKo || card.attribute, activeAttribute);
         const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
         const keyword = trimmedSearchKeyword.toLowerCase();
         const matchesSearch = !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value).toLowerCase().includes(keyword));
-        return matchesSeries && matchesRarity && matchesSearch && !hideBaseLeader;
+        return matchesSeries && matchesRarity && matchesColor && matchesCost && matchesAttribute && matchesSearch && !hideBaseLeader;
       });
 
       if (alive) {
@@ -528,11 +544,11 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [selectedSeries, activeRarity, trimmedSearchKeyword, isGlobalSearch]);
+  }, [selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch]);
 
   useEffect(() => {
     setOpenRaritySections({});
-  }, [selectedSeries, searchKeyword, searchScope, activeRarity]);
+  }, [selectedSeries, searchKeyword, searchScope, activeRarity, activeColor, activeCost, activeAttribute]);
 
   useEffect(() => {
     setOpenSidebarCategories((prev) => ({
@@ -593,6 +609,9 @@ export default function App() {
     [isGlobalSearch, selectedSeries]
   );
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(rarityOptionSourceCards)], [rarityOptionSourceCards]);
+  const colorOptions = useMemo(() => ['ALL', ...new Set(rarityOptionSourceCards.flatMap((card) => normalizeMultiValue(card.colorKo)))], [rarityOptionSourceCards]);
+  const costOptions = useMemo(() => ['ALL', ...[...new Set(rarityOptionSourceCards.map((card) => String(card.cost ?? '').trim()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))], [rarityOptionSourceCards]);
+  const attributeOptions = useMemo(() => ['ALL', ...new Set(rarityOptionSourceCards.flatMap((card) => normalizeMultiValue(card.attributeKo || card.attribute)))], [rarityOptionSourceCards]);
   const isDark = theme === 'dark';
   const ownedSet = useMemo(() => new Set(ownedCardIds), [ownedCardIds]);
   const collectionVisibleCards = useMemo(() => (activeRarity === 'ALL' ? cards : cards.filter((card) => card.rarity === activeRarity)), [cards, activeRarity]);
@@ -1365,6 +1384,11 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <FilterSelect label="컬러" value={activeColor} onChange={setActiveColor} options={colorOptions} subtleClass={subtleClass} isDark={isDark} />
+                      <FilterSelect label="코스트" value={activeCost} onChange={setActiveCost} options={costOptions} subtleClass={subtleClass} isDark={isDark} />
+                      <FilterSelect label="속성" value={activeAttribute} onChange={setActiveAttribute} options={attributeOptions} subtleClass={subtleClass} isDark={isDark} />
+                    </div>
                     </div>
                   </div>
                 </section>
@@ -1419,7 +1443,7 @@ export default function App() {
 
                   <div className="grid gap-4 xl:grid-cols-1">
                     <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                         <button type="button" onClick={() => { setShopType('official'); setSelectedRegion('서울특별시'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-sm font-black">서울 공식 점포 보기</div>
                         </button>
@@ -1429,6 +1453,20 @@ export default function App() {
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className="text-sm font-black">취급 점포 {homeShopCounts.general}곳 · 공인/공식 점포 {homeShopCounts.official}곳</div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (DONATION_URL) {
+                              window.open(DONATION_URL, '_blank', 'noopener,noreferrer');
+                              return;
+                            }
+                            window.alert('후원 링크만 넣으면 바로 열리게 해둘게. 링크 보내줘.');
+                          }}
+                          className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}
+                        >
+                          <div className="text-sm font-black">커피 한 잔 후원</div>
+                          <div className={`mt-2 text-xs leading-5 ${textMuted}`}>사이트 운영과 업데이트에 도움이 됩니다.</div>
+                        </button>
                       </div>
                     </div>
                   </div>
