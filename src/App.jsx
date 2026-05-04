@@ -20,7 +20,7 @@ const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
-const DONATION_URL = '';
+const DONATION_URL = 'https://acoffee.shop/d/573d0164-c9c5-45e7-84ce-ed432026517c';
 const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
@@ -836,11 +836,25 @@ export default function App() {
     setDeckPage(1);
   }
 
+  function promptLoginRequired(message = '로그인 후 이용해줘.') {
+    window.alert(message);
+    setAuthMode('login');
+    setAuthModalOpen(true);
+  }
+
   function toggleOwned(cardId) {
+    if (!authUser) {
+      promptLoginRequired('카드 체크는 로그인 후 이용할 수 있어.');
+      return;
+    }
     setOwnedCardIds((prev) => (prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]));
   }
 
   function setOwnedForIds(cardIds, shouldOwn) {
+    if (!authUser) {
+      promptLoginRequired('수집표 체크는 로그인 후 이용할 수 있어.');
+      return;
+    }
     const uniqueIds = [...new Set(cardIds.filter(Boolean))];
     if (!uniqueIds.length) return;
 
@@ -897,9 +911,7 @@ export default function App() {
   async function submitCommunityPost(event) {
     event.preventDefault();
     if (!authUser) {
-      window.alert('로그인 후 글을 작성해줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
+      promptLoginRequired('게시글 작성은 로그인 후 이용할 수 있어.');
       return;
     }
 
@@ -973,9 +985,7 @@ export default function App() {
 
   function openCommunityComposer(boardId = communityBoard) {
     if (!authUser) {
-      window.alert('로그인 후 이용해줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
+      promptLoginRequired('게시글 작성은 로그인 후 이용할 수 있어.');
       return;
     }
     setCommunityBoard(boardId);
@@ -1193,11 +1203,13 @@ export default function App() {
               <div className="flex flex-wrap items-center gap-2">
                 {authUser ? (
                   <div className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${subtleClass}`}>
+                    <a href={DONATION_URL} target="_blank" rel="noreferrer" className="rounded-full bg-[#ffde59] px-4 py-2 text-sm font-black text-[#6f3d00]">후원하기</a>
                     <span className="max-w-[150px] truncate font-bold">{authUser.user_metadata?.nickname || authUser.user_metadata?.username || authUser.email}</span>
                     <button type="button" onClick={logoutAuth} className="rounded-full bg-[#c94d35] px-3 py-1 text-xs font-bold text-white">로그아웃</button>
                   </div>
                 ) : (
                   <div className={`flex items-center gap-2 rounded-full border px-2 py-2 ${subtleClass}`}>
+                    <a href={DONATION_URL} target="_blank" rel="noreferrer" className="rounded-full bg-[#ffde59] px-4 py-2 text-sm font-black text-[#6f3d00]">후원하기</a>
                     <button type="button" onClick={() => { setAuthMode('login'); setAuthMessage(''); setAuthModalOpen(true); }} className="rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">로그인</button>
                     <button type="button" onClick={() => { setAuthMode('signup'); setAuthMessage(''); setAuthModalOpen(true); }} className="rounded-full border border-[#c94d35] px-4 py-2 text-sm font-bold text-[#c94d35]">회원가입</button>
                   </div>
@@ -1389,6 +1401,23 @@ export default function App() {
                       <FilterSelect label="코스트" value={activeCost} onChange={setActiveCost} options={costOptions} subtleClass={subtleClass} isDark={isDark} />
                       <FilterSelect label="속성" value={activeAttribute} onChange={setActiveAttribute} options={attributeOptions} subtleClass={subtleClass} isDark={isDark} />
                     </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      {!authUser ? <div className={`text-sm ${textMuted}`}>카드 체크와 수집표 저장은 로그인 후 이용할 수 있어.</div> : <div />}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchKeyword('');
+                          setSearchScope('series');
+                          setActiveRarity('ALL');
+                          setActiveColor('ALL');
+                          setActiveCost('ALL');
+                          setActiveAttribute('ALL');
+                        }}
+                        className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}
+                      >
+                        필터 초기화
+                      </button>
+                    </div>
                     </div>
                   </div>
                 </section>
@@ -1453,20 +1482,9 @@ export default function App() {
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className="text-sm font-black">취급 점포 {homeShopCounts.general}곳 · 공인/공식 점포 {homeShopCounts.official}곳</div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (DONATION_URL) {
-                              window.open(DONATION_URL, '_blank', 'noopener,noreferrer');
-                              return;
-                            }
-                            window.alert('후원 링크만 넣으면 바로 열리게 해둘게. 링크 보내줘.');
-                          }}
-                          className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}
-                        >
-                          <div className="text-sm font-black">커피 한 잔 후원</div>
-                          <div className={`mt-2 text-xs leading-5 ${textMuted}`}>사이트 운영과 업데이트에 도움이 됩니다.</div>
-                        </button>
+                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
+                          <div className="text-sm font-black">사이트 운영과 업데이트 계속 진행 중</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1533,7 +1551,7 @@ export default function App() {
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>수집 도감</h3>
-                        <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됨' : '비로그인 상태에선 이 기기 브라우저에 저장됨'}</div>
+                        <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됨' : '로그인 후 체크/저장이 가능해.'}</div>
                       </div>
                       <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>
                         {ownedInVisibleCollection} / {collectionVisibleCards.length || 0} · {collectionOwnedPercent}%
