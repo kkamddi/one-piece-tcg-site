@@ -2125,7 +2125,7 @@ export default function App() {
                 {!hasSupabaseAuthConfig ? <div className={`text-sm ${textMuted}`}>인증 환경변수가 아직 연결되지 않았습니다.</div> : null}
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button type="submit" disabled={authLoading || !authPassword.trim() || !hasSupabaseAuthConfig || (authMode === 'login' ? !authIdentifier.trim() : !authEmail.trim() || !authUsername.trim() || !authNickname.trim() || !authPasswordConfirm.trim())} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{authLoading ? '처리 중...' : authMode === 'signup' ? '회원가입' : '로그인'}</button>
-                  <button type="button" onClick={() => { setAuthMode((prev) => prev === 'signup' ? 'login' : 'signup'); setAuthMessage(''); }} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>{authMode === 'signup' ? '로그인으로' : '회원가입으로'}</button>
+                  <button type="button" onClick={() => { setAuthMode((prev) => prev === 'signup' ? 'login' : 'signup'); setAuthMessage(''); }} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>{authMode === 'signup' ? '로그인' : '회원가입'}</button>
                 </div>
                 <div className="relative py-1">
                   <div className={`border-t ${isDark ? 'border-[#333333]' : 'border-[#e8ddd0]'}`} />
