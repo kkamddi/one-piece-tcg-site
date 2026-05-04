@@ -3,7 +3,7 @@ import { fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, resolveLoginEmail, signupWithProfile } from './api/auth';
 import { fetchMyState, saveMyState } from './api/me';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
-import { createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
+import { addCommunityComment, createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityComments, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import cardsData from './data/cards.json';
@@ -301,6 +301,8 @@ export default function App() {
   const [communityAuthorToken, setCommunityAuthorToken] = useState('');
   const [communityLoading, setCommunityLoading] = useState(false);
   const [communityStorageMode, setCommunityStorageMode] = useState('shared');
+  const [communityCommentContent, setCommunityCommentContent] = useState('');
+  const [communityCommentLoading, setCommunityCommentLoading] = useState(false);
   const [labSeriesId, setLabSeriesId] = useState(getDefaultSeriesId);
   const [labOpenedPack, setLabOpenedPack] = useState([]);
   const [labRevealCount, setLabRevealCount] = useState(0);
@@ -982,14 +984,67 @@ export default function App() {
     }
   }
 
+  async function loadCommunityComments(postId, basePost = null) {
+    try {
+      const response = await fetchCommunityComments(postId, communityAuthorToken);
+      const comments = response?.comments ?? [];
+      setSelectedCommunityPost((prev) => {
+        const source = prev?.id === postId ? prev : basePost;
+        return source ? { ...source, comments, commentCount: comments.length } : prev;
+      });
+      setCommunityPosts((prev) => prev.map((post) => (post.id === postId ? { ...post, commentCount: comments.length } : post)));
+    } catch (error) {
+      console.error('Failed to load community comments', error);
+    }
+  }
+
   async function openCommunityPost(post) {
     try {
       const updatedPost = await incrementCommunityPostView(post.id, communityAuthorToken);
-      setCommunityPosts((prev) => prev.map((item) => (item.id === post.id ? updatedPost : item)));
-      setSelectedCommunityPost(updatedPost);
+      const nextPost = { ...updatedPost, comments: [] };
+      setCommunityPosts((prev) => prev.map((item) => (item.id === post.id ? nextPost : item)));
+      setSelectedCommunityPost(nextPost);
+      loadCommunityComments(post.id, nextPost);
     } catch (error) {
       console.error('Failed to open community post', error);
-      setSelectedCommunityPost(post);
+      const fallbackPost = { ...post, comments: post.comments ?? [] };
+      setSelectedCommunityPost(fallbackPost);
+      loadCommunityComments(post.id, fallbackPost);
+    }
+  }
+
+  async function submitCommunityComment() {
+    if (!authUser) {
+      window.alert('로그인 후 댓글을 작성해줘.');
+      setAuthMode('login');
+      setAuthModalOpen(true);
+      return;
+    }
+    if (!selectedCommunityPost?.id) return;
+
+    const nickname = communityNickname.trim();
+    const content = communityCommentContent.trim();
+    if (!nickname || !content) return;
+
+    try {
+      setCommunityCommentLoading(true);
+      const comment = await addCommunityComment(selectedCommunityPost.id, { nickname, content }, communityAuthorToken);
+      setSelectedCommunityPost((prev) => prev ? {
+        ...prev,
+        comments: [...(prev.comments ?? []), comment],
+        commentCount: Number(prev.commentCount ?? prev.comments?.length ?? 0) + 1
+      } : prev);
+      setCommunityPosts((prev) => prev.map((post) => (
+        post.id === selectedCommunityPost.id
+          ? { ...post, commentCount: Number(post.commentCount ?? 0) + 1 }
+          : post
+      )));
+      setCommunityCommentContent('');
+    } catch (error) {
+      console.error('Failed to save community comment', error);
+      window.alert('댓글 저장에 실패했어. 잠시 후 다시 시도해줘.');
+    } finally {
+      setCommunityCommentLoading(false);
     }
   }
 
@@ -1756,6 +1811,7 @@ export default function App() {
                               {post.updatedAt ? <span>수정 {formatCommunityDate(post.updatedAt)}</span> : null}
                               <span>조회 {(post.views ?? 0)}</span>
                               <span>좋아요 {(post.likes ?? 0)}</span>
+                              <span>댓글 {(post.commentCount ?? 0)}</span>
                             </div>
                           </button>
                           <div className="flex gap-2">
@@ -2015,6 +2071,7 @@ export default function App() {
                     {selectedCommunityPost.locked ? <span className="rounded-full bg-stone-900 px-3 py-1 text-white">🔒 관리자 전용</span> : null}
                     <span>조회 {selectedCommunityPost.views ?? 0}</span>
                     <span>좋아요 {selectedCommunityPost.likes ?? 0}</span>
+                    <span>댓글 {selectedCommunityPost.commentCount ?? selectedCommunityPost.comments?.length ?? 0}</span>
                   </div>
                 </div>
                 <button type="button" onClick={() => setSelectedCommunityPost(null)} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${isDark ? 'border-[#444] bg-[#262626] text-stone-200' : 'border-[#e2d5c8] bg-white text-stone-600'}`}>닫기</button>
@@ -2027,6 +2084,41 @@ export default function App() {
                     <button type="button" onClick={() => toggleCommunityLike(selectedCommunityPost.id)} className={`rounded-full px-4 py-2 text-sm font-bold ${likedCommunityPostIds.includes(selectedCommunityPost.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(selectedCommunityPost.likes ?? 0)}</button>
                   </div>
                 ) : null}
+                <div className={`rounded-2xl border p-4 ${cardClass}`}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="text-base font-black">댓글</div>
+                    <div className={`text-xs ${textMuted}`}>{selectedCommunityPost.commentCount ?? selectedCommunityPost.comments?.length ?? 0}개</div>
+                  </div>
+                  <div className="space-y-3">
+                    {(selectedCommunityPost.comments ?? []).length ? (
+                      selectedCommunityPost.comments.map((comment) => (
+                        <div key={comment.id} className={`rounded-xl border px-4 py-3 ${subtleClass}`}>
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <span className="font-bold">{comment.nickname}</span>
+                            <span className={textMuted}>{formatCommunityDate(comment.createdAt)}</span>
+                          </div>
+                          <p className={`mt-2 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{comment.content}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className={`rounded-xl border px-4 py-6 text-center text-sm ${subtleClass}`}>아직 댓글이 없어.</div>
+                    )}
+                  </div>
+                  {selectedCommunityPost.canInteract ? (
+                    <div className="mt-4 space-y-3">
+                      <textarea
+                        value={communityCommentContent}
+                        onChange={(event) => setCommunityCommentContent(event.target.value)}
+                        placeholder="댓글 입력"
+                        rows={3}
+                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
+                      />
+                      <div className="flex justify-end">
+                        <button type="button" onClick={submitCommunityComment} disabled={communityCommentLoading || !communityCommentContent.trim()} className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white disabled:opacity-45">{communityCommentLoading ? '등록 중...' : '댓글 등록'}</button>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>

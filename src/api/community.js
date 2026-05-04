@@ -48,3 +48,11 @@ export function incrementCommunityPostView(id, token) {
 export function toggleCommunityPostLike(id, token) {
   return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=like`, { method: 'POST', token });
 }
+
+export function fetchCommunityComments(id, token) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=comments`, { token });
+}
+
+export function addCommunityComment(id, payload, token) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=comment`, { method: 'POST', body: payload, token });
+}
