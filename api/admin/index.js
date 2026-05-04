@@ -5,8 +5,14 @@ const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts
 
 function getTodayStartIso() {
   const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
-  return start.toISOString();
+  const koreaNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const startKstUtcMs = Date.UTC(
+    koreaNow.getUTCFullYear(),
+    koreaNow.getUTCMonth(),
+    koreaNow.getUTCDate(),
+    -9, 0, 0, 0
+  );
+  return new Date(startKstUtcMs).toISOString();
 }
 
 function getClientIp(request) {
