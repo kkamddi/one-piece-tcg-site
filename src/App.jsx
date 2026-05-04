@@ -1774,7 +1774,7 @@ export default function App() {
                     {isFeedbackBoard ? (
                       <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
                         <div className={`text-sm leading-6 ${textMuted}`}>
-                          {isAdminUser ? '피드백 게시판 글은 잠금 상태로 관리자에게만 보여져.' : '피드백 게시판 글은 잠금 처리되어 관리자 로그인 시에만 보여져. 작성한 내용은 관리자만 확인할 수 있어.'}
+                          {isAdminUser ? '피드백 게시판 글은 잠금 상태지만 관리자에게는 내용까지 보여져.' : '피드백 게시판은 글 제목과 작성 여부는 보이지만, 본문 내용은 관리자만 확인할 수 있어.'}
                         </div>
                       </div>
                     ) : null}
@@ -1820,10 +1820,10 @@ export default function App() {
                             {post.canEdit ? <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button> : null}
                           </div>
                         </div>
-                        {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
+                        {post.canReadContent && post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
                         <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
                       </article>
-                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>{isFeedbackBoard && !isAdminUser ? '피드백 글은 관리자만 확인할 수 있어.' : `아직 올라온 ${activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.`}</div>}
+                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 {activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.</div>}
                   </div>
                 </section>
               ) : (
@@ -2077,7 +2077,7 @@ export default function App() {
                 <button type="button" onClick={() => setSelectedCommunityPost(null)} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${isDark ? 'border-[#444] bg-[#262626] text-stone-200' : 'border-[#e2d5c8] bg-white text-stone-600'}`}>닫기</button>
               </div>
               <div className="space-y-4 p-5">
-                {selectedCommunityPost.imageUrl ? <img src={selectedCommunityPost.imageUrl} alt={selectedCommunityPost.title} onError={placeholderImage} className="max-h-[520px] w-full rounded-xl border object-contain p-2" /> : null}
+                {selectedCommunityPost.canReadContent && selectedCommunityPost.imageUrl ? <img src={selectedCommunityPost.imageUrl} alt={selectedCommunityPost.title} onError={placeholderImage} className="max-h-[520px] w-full rounded-xl border object-contain p-2" /> : null}
                 <p className={`whitespace-pre-line text-sm leading-7 ${textMuted}`}>{selectedCommunityPost.content}</p>
                 {selectedCommunityPost.canInteract ? (
                   <div className="flex gap-2">
