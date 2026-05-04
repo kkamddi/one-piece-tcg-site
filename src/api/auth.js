@@ -1,3 +1,12 @@
+function normalizeAuthApiError(message) {
+  const raw = String(message ?? '').trim();
+  if (!raw) return raw;
+  if (raw === 'not_found' || raw === 'invalid_credentials' || /invalid login credentials/i.test(raw)) {
+    return '아이디 또는 비밀번호가 잘못되었습니다. 입력한 정보를 다시 확인해 주세요.';
+  }
+  return raw;
+}
+
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {
     cache: 'no-store',
@@ -10,8 +19,15 @@ async function requestJson(url, options = {}) {
   });
 
   const text = await response.text();
-  const payload = text ? JSON.parse(text) : null;
-  if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
+  let payload = null;
+
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = { error: text };
+  }
+
+  if (!response.ok) throw new Error(normalizeAuthApiError(payload?.error || payload?.message || `API ${response.status}`));
   return payload;
 }
 

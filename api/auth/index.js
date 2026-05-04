@@ -27,7 +27,7 @@ export default async function handler(request, response) {
       if (identifier.includes('@')) return response.status(200).json({ email: identifier });
       const users = await listAllAuthUsers();
       const found = users.find((user) => String(user.user_metadata?.username ?? '').toLowerCase() === identifier.toLowerCase());
-      if (!found?.email) return response.status(404).json({ error: 'not_found' });
+      if (!found?.email) return response.status(404).json({ error: 'invalid_credentials' });
       return response.status(200).json({ email: found.email });
     }
 

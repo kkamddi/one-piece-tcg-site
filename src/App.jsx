@@ -58,6 +58,26 @@ function sortDescByCode(items) {
   return [...items].sort((a, b) => b.id.localeCompare(a.id, 'en', { numeric: true }));
 }
 
+function getFriendlyAuthErrorMessage(error, mode = 'login') {
+  const rawMessage = String(error?.message ?? '').trim();
+  if (mode === 'login') {
+    if (
+      rawMessage === 'not_found'
+      || rawMessage === 'invalid_credentials'
+      || /invalid login credentials/i.test(rawMessage)
+      || rawMessage.includes('아이디 또는 비밀번호가 잘못되었습니다')
+    ) {
+      return '아이디 또는 비밀번호가 잘못되었습니다. 입력한 정보를 다시 확인해 주세요.';
+    }
+  }
+
+  if (rawMessage === 'email_taken') return '이미 사용 중인 이메일입니다.';
+  if (rawMessage === 'username_taken') return '이미 사용 중인 아이디입니다.';
+  if (rawMessage === 'nickname_taken') return '이미 사용 중인 닉네임입니다.';
+
+  return rawMessage || '인증 처리에 실패했어.';
+}
+
 function buildSidebarSections() {
   const regular = sortDescByCode(seriesData.filter((series) => /^OP\d+/.test(series.id)));
   const extraPremium = sortDescByCode(seriesData.filter((series) => /^(EB|PRB)\d+/.test(series.id)));
@@ -1041,7 +1061,11 @@ export default function App() {
         setAuthCheckState({ username: null, nickname: null });
       }
     } catch (error) {
-      setAuthMessage(error?.message || '인증 처리에 실패했어.');
+      const message = getFriendlyAuthErrorMessage(error, authMode);
+      setAuthMessage(message);
+      if (authMode === 'login' && message.includes('아이디 또는 비밀번호가 잘못되었습니다')) {
+        window.alert(message);
+      }
     } finally {
       setAuthLoading(false);
     }
