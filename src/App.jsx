@@ -1161,6 +1161,25 @@ export default function App() {
     await supabase.auth.signOut();
   }
 
+  async function loginWithKakao() {
+    if (!supabase) {
+      setAuthMessage('인증 설정이 아직 연결되지 않았습니다.');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      setAuthMessage(error?.message || '카카오 로그인 연결에 실패했습니다.');
+    }
+  }
+
   async function checkDuplicate(type) {
     const label = type === 'username' ? '아이디' : '닉네임';
     const value = (type === 'username' ? authUsername : authNickname).trim();
@@ -2102,11 +2121,18 @@ export default function App() {
                   </label>
                 ) : null}
                 {authMessage ? <div className={`text-sm ${textMuted}`}>{authMessage}</div> : null}
-                {!hasSupabaseAuthConfig ? <div className={`text-sm ${textMuted}`}>인증 환경변수가 아직 연결되지 않았어.</div> : null}
+                {!hasSupabaseAuthConfig ? <div className={`text-sm ${textMuted}`}>인증 환경변수가 아직 연결되지 않았습니다.</div> : null}
                 <div className="flex flex-wrap gap-2 pt-2">
                   <button type="submit" disabled={authLoading || !authPassword.trim() || !hasSupabaseAuthConfig || (authMode === 'login' ? !authIdentifier.trim() : !authEmail.trim() || !authUsername.trim() || !authNickname.trim() || !authPasswordConfirm.trim())} className="inline-flex rounded-full bg-[#c94d35] px-5 py-3 text-sm font-bold text-white disabled:opacity-45">{authLoading ? '처리 중...' : authMode === 'signup' ? '회원가입' : '로그인'}</button>
                   <button type="button" onClick={() => { setAuthMode((prev) => prev === 'signup' ? 'login' : 'signup'); setAuthMessage(''); }} className={`inline-flex rounded-full border px-5 py-3 text-sm font-bold ${subtleClass}`}>{authMode === 'signup' ? '로그인으로' : '회원가입으로'}</button>
                 </div>
+                <div className="relative py-1">
+                  <div className={`border-t ${isDark ? 'border-[#333333]' : 'border-[#e8ddd0]'}`} />
+                  <span className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-3 text-xs font-bold ${isDark ? 'bg-[#202020] text-stone-400' : 'bg-[#fffdf9] text-stone-400'}`}>간편 로그인</span>
+                </div>
+                <button type="button" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig} className="inline-flex w-full items-center justify-center rounded-xl bg-[#FEE500] px-5 py-3 text-sm font-black text-[#3b1e1e] disabled:opacity-45">
+                  카카오로 계속하기
+                </button>
               </form>
             </div>
           </div>
