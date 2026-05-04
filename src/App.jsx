@@ -24,8 +24,8 @@ const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
 ];
-const LAB_BASE_RARITY_WEIGHTS = { C: 40, UC: 26, R: 16, SR: 8, SEC: 4, SP: 3, L: 2, P: 1 };
-const LAB_RARE_RARITY_WEIGHTS = { R: 46, SR: 24, SEC: 12, SP: 9, L: 6, P: 3 };
+const LAB_COMMON_RARITY_WEIGHTS = { C: 64, UC: 28, R: 8 };
+const LAB_HIT_RARITY_WEIGHTS = { R: 40, SR: 32, SEC: 12, SP: 8, L: 5, P: 3 };
 const COMMUNITY_BOARDS = [
   { id: 'free', label: '자유게시판', description: '잡담, 질문, 후기, 소소한 이야기' },
   { id: 'feedback', label: '피드백', description: '사이트 개선점, 오류 제보, 건의사항' },
@@ -188,8 +188,22 @@ function shuffleArray(items) {
   return next;
 }
 
-function pickWeightedRarity(pool, weights) {
-  const entries = Object.entries(weights).filter(([rarity]) => pool.some((card) => card.rarity === rarity));
+function isSpecialPrint(card) {
+  return String(card?.attribute ?? '').toLowerCase() === 'special';
+}
+
+function isLabHitCard(card) {
+  const rarity = String(card?.rarity ?? '');
+  if (rarity === 'SR' || rarity === 'SEC' || rarity === 'SP') return true;
+  if (rarity === 'R') return true;
+  if (rarity === 'L') return isSpecialPrint(card);
+  if (rarity === 'P') return true;
+  return false;
+}
+
+function pickWeightedRarity(pool, weights, predicate = null) {
+  const scopedPool = predicate ? pool.filter(predicate) : pool;
+  const entries = Object.entries(weights).filter(([rarity]) => scopedPool.some((card) => card.rarity === rarity));
   if (!entries.length) return null;
   const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
   let cursor = Math.random() * totalWeight;
@@ -200,23 +214,54 @@ function pickWeightedRarity(pool, weights) {
   return entries[entries.length - 1][0];
 }
 
+function pickCardFromPool(pool, usedIds, weights, predicate = null) {
+  const unused = pool.filter((card) => !usedIds.has(card.id));
+  const scoped = predicate ? unused.filter(predicate) : unused;
+  const rarity = pickWeightedRarity(scoped, weights);
+  const rarityPool = scoped.filter((card) => !rarity || card.rarity === rarity);
+  const nextCard = shuffleArray(rarityPool.length ? rarityPool : scoped)[0];
+  if (!nextCard) return null;
+  usedIds.add(nextCard.id);
+  return nextCard;
+}
+
 function drawLabPack(pool, size = LAB_PACK_SIZE) {
   const available = shuffleArray(pool.filter((card) => card.imageUrl));
   if (!available.length) return [];
 
   const usedIds = new Set();
   const results = [];
+  const commonSlotCount = Math.max(0, size - 1);
 
-  for (let index = 0; index < size; index += 1) {
-    const weights = index === size - 1 ? LAB_RARE_RARITY_WEIGHTS : LAB_BASE_RARITY_WEIGHTS;
-    const rarity = pickWeightedRarity(available.filter((card) => !usedIds.has(card.id)), weights);
-    const rarityPool = available.filter((card) => !usedIds.has(card.id) && (!rarity || card.rarity === rarity));
-    const fallbackPool = available.filter((card) => !usedIds.has(card.id));
-    const nextCard = shuffleArray(rarityPool.length ? rarityPool : fallbackPool)[0];
+  for (let index = 0; index < commonSlotCount; index += 1) {
+    const nextCard = pickCardFromPool(
+      available,
+      usedIds,
+      LAB_COMMON_RARITY_WEIGHTS,
+      (card) => !isLabHitCard(card)
+    );
     if (!nextCard) break;
-    usedIds.add(nextCard.id);
     results.push(nextCard);
-    if (usedIds.size >= available.length) break;
+  }
+
+  const hitCard = pickCardFromPool(
+    available,
+    usedIds,
+    LAB_HIT_RARITY_WEIGHTS,
+    (card) => isLabHitCard(card)
+  );
+
+  if (hitCard) {
+    results.push(hitCard);
+  } else {
+    const fallbackCard = pickCardFromPool(available, usedIds, LAB_COMMON_RARITY_WEIGHTS);
+    if (fallbackCard) results.push(fallbackCard);
+  }
+
+  while (results.length < size) {
+    const fallbackCard = pickCardFromPool(available, usedIds, LAB_COMMON_RARITY_WEIGHTS);
+    if (!fallbackCard) break;
+    results.push(fallbackCard);
   }
 
   return results;
