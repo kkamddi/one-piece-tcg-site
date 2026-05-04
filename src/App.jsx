@@ -14,7 +14,6 @@ const DECK_SIZE = 50;
 const MAX_COPIES = 4;
 const DECK_PAGE_SIZE = 24;
 const LAB_PACK_SIZE = 6;
-const GUEST_OWNED_KEY = 'one-piece-tcg-owned';
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
 const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
@@ -85,7 +84,7 @@ function getFriendlyAuthErrorMessage(error, mode = 'login') {
   if (rawMessage === 'username_taken') return '이미 사용 중인 아이디입니다.';
   if (rawMessage === 'nickname_taken') return '이미 사용 중인 닉네임입니다.';
 
-  return rawMessage || '인증 처리에 실패했어.';
+  return rawMessage || '인증 처리에 실패했습니다.';
 }
 
 function buildSidebarSections() {
@@ -349,11 +348,6 @@ export default function App() {
     const savedTheme = window.localStorage.getItem('one-piece-tcg-theme');
     if (savedTheme === 'dark' || savedTheme === 'light') setTheme(savedTheme);
 
-    try {
-      const savedOwned = JSON.parse(window.localStorage.getItem(GUEST_OWNED_KEY) ?? '[]');
-      if (Array.isArray(savedOwned)) setOwnedCardIds(savedOwned);
-    } catch {}
-
     const savedNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
     if (savedNickname) setCommunityNickname(savedNickname);
 
@@ -402,11 +396,6 @@ export default function App() {
 
   useEffect(() => {
     if (authUser) return;
-    window.localStorage.setItem(GUEST_OWNED_KEY, JSON.stringify(ownedCardIds));
-  }, [authUser, ownedCardIds]);
-
-  useEffect(() => {
-    if (authUser) return;
     window.localStorage.setItem(COMMUNITY_NICKNAME_KEY, communityNickname);
   }, [authUser, communityNickname]);
 
@@ -438,6 +427,12 @@ export default function App() {
   useEffect(() => {
     if (!authUser?.id) {
       setUserStateReady(false);
+      setOwnedCardIds([]);
+      setDeckEntries([]);
+      setLeaderCardId(null);
+      setSavedDecks([]);
+      setActiveDeckId(null);
+      if (viewMode === 'deck') setViewMode('home');
       const guestAuthorToken = window.localStorage.getItem(COMMUNITY_AUTHOR_TOKEN_KEY);
       const guestNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
       if (guestAuthorToken) setCommunityAuthorToken(guestAuthorToken);
@@ -469,7 +464,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [authUser]);
+  }, [authUser, viewMode]);
 
   useEffect(() => {
     if (!authUser?.id || !userStateReady) return undefined;
@@ -777,7 +772,7 @@ export default function App() {
 
   function saveCurrentDeck() {
     if (!authUser) {
-      window.alert('로그인 후 덱을 저장해줘.');
+      window.alert('덱 저장은 로그인 후 이용해 주세요.');
       setAuthMode('login');
       setAuthModalOpen(true);
       return;
@@ -836,15 +831,23 @@ export default function App() {
     setDeckPage(1);
   }
 
-  function promptLoginRequired(message = '로그인 후 이용해줘.') {
+  function promptLoginRequired(message = '로그인 후 이용해 주세요.') {
     window.alert(message);
     setAuthMode('login');
     setAuthModalOpen(true);
   }
 
+  function openDeckSimulator() {
+    if (!authUser) {
+      promptLoginRequired('덱 시뮬레이터는 로그인 후 이용하실 수 있습니다.');
+      return;
+    }
+    setViewMode('deck');
+  }
+
   function toggleOwned(cardId) {
     if (!authUser) {
-      promptLoginRequired('카드 체크는 로그인 후 이용할 수 있어.');
+      promptLoginRequired('카드 체크는 로그인 후 이용하실 수 있습니다.');
       return;
     }
     setOwnedCardIds((prev) => (prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]));
@@ -852,7 +855,7 @@ export default function App() {
 
   function setOwnedForIds(cardIds, shouldOwn) {
     if (!authUser) {
-      promptLoginRequired('수집표 체크는 로그인 후 이용할 수 있어.');
+      promptLoginRequired('수집표 체크는 로그인 후 이용하실 수 있습니다.');
       return;
     }
     const uniqueIds = [...new Set(cardIds.filter(Boolean))];
@@ -911,7 +914,7 @@ export default function App() {
   async function submitCommunityPost(event) {
     event.preventDefault();
     if (!authUser) {
-      promptLoginRequired('게시글 작성은 로그인 후 이용할 수 있어.');
+      promptLoginRequired('게시글 작성은 로그인 후 이용하실 수 있습니다.');
       return;
     }
 
@@ -953,7 +956,7 @@ export default function App() {
       setCommunityComposerOpen(false);
     } catch (error) {
       console.error('Failed to save community post', error);
-      window.alert('게시글 저장에 실패했어. 잠시 후 다시 시도해줘.');
+      window.alert('게시글 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
 
@@ -985,7 +988,7 @@ export default function App() {
 
   function openCommunityComposer(boardId = communityBoard) {
     if (!authUser) {
-      promptLoginRequired('게시글 작성은 로그인 후 이용할 수 있어.');
+      promptLoginRequired('게시글 작성은 로그인 후 이용하실 수 있습니다.');
       return;
     }
     setCommunityBoard(boardId);
@@ -999,7 +1002,7 @@ export default function App() {
 
   async function deleteCommunityPost(postId) {
     if (!authUser) {
-      window.alert('로그인 후 이용해줘.');
+      promptLoginRequired('로그인 후 이용해 주세요.');
       return;
     }
     try {
@@ -1009,7 +1012,7 @@ export default function App() {
       if (selectedCommunityPost?.id === postId) setSelectedCommunityPost(null);
     } catch (error) {
       console.error('Failed to delete community post', error);
-      window.alert('삭제 권한이 없거나 삭제에 실패했어.');
+      window.alert('삭제 권한이 없거나 삭제에 실패했습니다.');
     }
   }
 
@@ -1044,9 +1047,7 @@ export default function App() {
 
   async function submitCommunityComment() {
     if (!authUser) {
-      window.alert('로그인 후 댓글을 작성해줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
+      promptLoginRequired('댓글 작성은 로그인 후 이용하실 수 있습니다.');
       return;
     }
     if (!selectedCommunityPost?.id) return;
@@ -1071,7 +1072,7 @@ export default function App() {
       setCommunityCommentContent('');
     } catch (error) {
       console.error('Failed to save community comment', error);
-      window.alert('댓글 저장에 실패했어. 잠시 후 다시 시도해줘.');
+      window.alert('댓글 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     } finally {
       setCommunityCommentLoading(false);
     }
@@ -1079,9 +1080,7 @@ export default function App() {
 
   async function toggleCommunityLike(postId) {
     if (!authUser) {
-      window.alert('로그인 후 좋아요를 눌러줘.');
-      setAuthMode('login');
-      setAuthModalOpen(true);
+      promptLoginRequired('좋아요는 로그인 후 이용하실 수 있습니다.');
       return;
     }
     try {
@@ -1124,10 +1123,10 @@ export default function App() {
 
     try {
       if (authMode === 'signup') {
-        if (!email || !username || !nickname) throw new Error('입력값을 확인해줘.');
-        if (password !== authPasswordConfirm.trim()) throw new Error('비밀번호 확인이 일치하지 않아.');
-        if (authCheckState.username !== true) throw new Error('아이디 중복확인을 해줘.');
-        if (authCheckState.nickname !== true) throw new Error('닉네임 중복확인을 해줘.');
+        if (!email || !username || !nickname) throw new Error('입력값을 확인해 주세요.');
+        if (password !== authPasswordConfirm.trim()) throw new Error('비밀번호 확인이 일치하지 않습니다.');
+        if (authCheckState.username !== true) throw new Error('아이디 중복확인을 해주세요.');
+        if (authCheckState.nickname !== true) throw new Error('닉네임 중복확인을 해주세요.');
 
         await signupWithProfile({ email, password, username, nickname });
         setAuthMessage('회원가입 완료. 이제 바로 로그인하면 돼.');
@@ -1166,7 +1165,7 @@ export default function App() {
     const label = type === 'username' ? '아이디' : '닉네임';
     const value = (type === 'username' ? authUsername : authNickname).trim();
     if (!value) {
-      window.alert(`${label}를 먼저 입력해줘.`);
+      window.alert(`${label}를 먼저 입력해 주세요.`);
       return;
     }
     try {
@@ -1176,7 +1175,7 @@ export default function App() {
       setAuthMessage(message);
       window.alert(message);
     } catch (error) {
-      const message = error?.message || '중복확인에 실패했어.';
+      const message = error?.message || '중복확인에 실패했습니다.';
       setAuthMessage(message);
       window.alert(message);
     }
@@ -1225,7 +1224,7 @@ export default function App() {
             <TopTab active={viewMode === 'home'} onClick={() => setViewMode('home')} label="메인" />
             <TopTab active={viewMode === 'archive'} onClick={openLatestArchive} label="카드 도감" />
             <TopTab active={viewMode === 'collection'} onClick={openLatestCollection} label="수집표" />
-            <TopTab active={viewMode === 'deck'} onClick={() => setViewMode('deck')} label="덱 시뮬레이터" />
+            <TopTab active={viewMode === 'deck'} onClick={openDeckSimulator} label="덱 시뮬레이터" />
             <TopTab active={viewMode === 'community'} onClick={() => setViewMode('community')} label="커뮤니티" />
             <TopTab active={viewMode === 'lab'} onClick={() => setViewMode('lab')} label="실험실" />
             <TopTab active={viewMode === 'shops'} onClick={() => setViewMode('shops')} label="오프라인 구매처" />
@@ -1402,7 +1401,7 @@ export default function App() {
                       <FilterSelect label="속성" value={activeAttribute} onChange={setActiveAttribute} options={attributeOptions} subtleClass={subtleClass} isDark={isDark} />
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      {!authUser ? <div className={`text-sm ${textMuted}`}>카드 체크와 수집표 저장은 로그인 후 이용할 수 있어.</div> : <div />}
+                      {!authUser ? <div className={`text-sm ${textMuted}`}>카드 체크와 수집표 저장은 로그인 후 이용하실 수 있습니다.</div> : <div />}
                       <button
                         type="button"
                         onClick={() => {
@@ -1434,7 +1433,7 @@ export default function App() {
                         <button type="button" onClick={openLatestCollection} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">수집표</div>
                         </button>
-                        <button type="button" onClick={() => setViewMode('deck')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                        <button type="button" onClick={openDeckSimulator} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">덱 시뮬레이터</div>
                         </button>
                         <button type="button" onClick={() => setViewMode('shops')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
@@ -1517,7 +1516,7 @@ export default function App() {
                                 <button key={card.id} type="button" onClick={() => openCard(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left transition hover:-translate-y-0.5`}>
                                   <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
                                     <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
-                                    {ownedSet.has(card.id) ? <div className="absolute right-2 top-2 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white">보유</div> : null}
+                                    <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${ownedSet.has(card.id) ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{ownedSet.has(card.id) ? '보유중' : '미보유'}</div>
                                   </div>
                                   <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
                                     <div className="flex items-center justify-between gap-2">
@@ -1528,9 +1527,8 @@ export default function App() {
                                     {isGlobalSearch ? <div className={`text-[11px] font-bold text-[#c94d35]`}>{card.seriesName || card.series}</div> : null}
                                     <div className={`text-[11px] ${textMuted}`}>{card.categoryKo}</div>
                                     <div className="flex flex-wrap gap-2 pt-1">
-                                      <button type="button" onClick={(event) => { event.stopPropagation(); addToDeck(card); }} className="rounded-full bg-[#c94d35] px-3 py-1.5 text-xs font-bold text-white">덱 추가</button>
-                                      <button type="button" onClick={(event) => { event.stopPropagation(); toggleOwned(card.id); }} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${ownedSet.has(card.id) ? 'border-emerald-600 bg-emerald-600 text-white' : subtleClass}`}>
-                                        {ownedSet.has(card.id) ? '보유중' : '체크'}
+                                      <button type="button" onClick={(event) => { event.stopPropagation(); toggleOwned(card.id); }} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${ownedSet.has(card.id) ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-stone-300 bg-stone-100 text-stone-700'}`}>
+                                        {ownedSet.has(card.id) ? '보유중' : '미보유'}
                                       </button>
                                     </div>
                                   </div>
@@ -1591,7 +1589,7 @@ export default function App() {
                         <button key={card.id} type="button" onClick={() => toggleOwned(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left ${owned ? 'ring-1 ring-emerald-500' : ''}`}>
                           <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
                             <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className={`h-full w-full object-contain [image-rendering:auto] ${owned ? '' : 'opacity-65 grayscale-[0.15]'}`} />
-                            <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${owned ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{owned ? 'CHECK' : 'EMPTY'}</div>
+                            <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${owned ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{owned ? '보유중' : '미보유'}</div>
                           </div>
                           <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
                             <div className="flex items-center justify-between gap-2">
@@ -1611,7 +1609,7 @@ export default function App() {
                     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>덱 시뮬레이터</h3>
-                        <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됨' : '비로그인 상태에선 이 기기 브라우저에 저장됨'}</div>
+                        <div className={`mt-1 text-sm ${textMuted}`}>{authUser ? '계정에 자동 저장됩니다.' : '로그인 후 이용하실 수 있습니다.'}</div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button type="button" onClick={saveCurrentDeck} className="rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">덱 저장</button>
@@ -1682,7 +1680,7 @@ export default function App() {
                       </div>
                       <div className={`border ${subtleClass} rounded-xl p-4`}>
                         <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6422e]">Leader</div>
-                        <div className={`mt-2 text-sm font-bold ${leaderCard ? '' : textMuted}`}>{leaderCard ? leaderCard.name : '리더를 지정해줘'}</div>
+                        <div className={`mt-2 text-sm font-bold ${leaderCard ? '' : textMuted}`}>{leaderCard ? leaderCard.name : '리더를 지정해 주세요'}</div>
                       </div>
                       <div className={`border ${subtleClass} rounded-xl p-4`}>
                         <div className="flex items-center justify-between">
@@ -1807,7 +1805,6 @@ export default function App() {
                               <div className={`text-base font-black ${active ? 'text-[#c94d35]' : isDark ? 'text-white' : 'text-stone-900'}`}>{board.label}</div>
                               {active ? <span className="rounded-full bg-[#c94d35] px-2.5 py-1 text-[11px] font-bold text-white">선택됨</span> : null}
                             </div>
-                            <div className={`mt-2 text-sm leading-6 ${textMuted}`}>{board.description}</div>
                           </button>
                         );
                       })}
