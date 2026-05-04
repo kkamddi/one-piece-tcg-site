@@ -2073,12 +2073,12 @@ export default function App() {
                 <div className="mb-3 text-lg font-black">관리자 통계</div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                   <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>오늘 방문</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.todayVisits}</div>
+                    <div className={`text-sm ${textMuted}`}>총 방문</div>
+                    <div className="mt-2 text-2xl font-black">{adminStats.totalVisits ?? 0}</div>
                   </div>
                   <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                    <div className={`text-sm ${textMuted}`}>오늘 순방문</div>
-                    <div className="mt-2 text-2xl font-black">{adminStats.todayUniqueVisitors}</div>
+                    <div className={`text-sm ${textMuted}`}>오늘 방문</div>
+                    <div className="mt-2 text-2xl font-black">{adminStats.todayVisits}</div>
                   </div>
                   <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                     <div className={`text-sm ${textMuted}`}>전체 회원</div>

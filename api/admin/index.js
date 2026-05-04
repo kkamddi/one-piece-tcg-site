@@ -86,6 +86,7 @@ async function handleStats(request, response) {
   const todaySignups = users.filter((user) => String(user.created_at ?? '') >= todayStart).length;
 
   return response.status(200).json({
+    totalVisits: visitRows.length,
     todayVisits: todayUniqueVisitors,
     todayUniqueVisitors,
     totalUsers: users.length,
