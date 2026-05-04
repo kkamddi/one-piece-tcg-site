@@ -1810,6 +1810,12 @@ export default function App() {
               ) : viewMode === 'community' ? (
                 <section className="space-y-5">
                   <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div>
+                        <div className={`text-sm font-bold ${textMuted}`}>게시판 선택</div>
+                        <div className={`mt-1 text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>원하는 게시판으로 바로 이동하세요.</div>
+                      </div>
+                    </div>
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                       {COMMUNITY_BOARDS.map((board) => {
                         const active = communityBoard === board.id;
@@ -1819,7 +1825,7 @@ export default function App() {
                             type="button"
                             disabled={board.disabled}
                             onClick={() => setCommunityBoard(board.id)}
-                            className={`rounded-2xl border px-4 py-4 text-left transition ${board.disabled ? 'cursor-default opacity-50' : 'hover:-translate-y-0.5'} ${active ? 'border-[#c94d35] bg-[#fff3ee]' : cardClass}`}
+                            className={`rounded-2xl border px-4 py-4 text-left transition ${board.disabled ? 'cursor-default opacity-50' : 'hover:-translate-y-0.5 hover:shadow-md'} ${active ? 'border-[#c94d35] bg-[#fff3ee] shadow-md shadow-[#c94d35]/10' : `${cardClass} shadow-sm`}`}
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className={`text-base font-black ${active ? 'text-[#c94d35]' : isDark ? 'text-white' : 'text-stone-900'}`}>{board.label}</div>
@@ -1832,14 +1838,15 @@ export default function App() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
+                    <div className={`rounded-2xl border border-[#c94d35] bg-gradient-to-r ${isDark ? 'from-[#2a1d18] to-[#1f1a18]' : 'from-[#fff4ee] to-[#fffaf7]'} p-4 shadow-sm sm:p-5`}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <div className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label}</div>
+                          <div className={`text-sm font-bold ${isDark ? 'text-orange-200' : 'text-[#c94d35]'}`}>현재 게시판</div>
+                          <div className={`mt-1 text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label}</div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{communityPostCount}개</div>
-                          <button type="button" onClick={() => openCommunityComposer(activeCommunityBoard.id)} className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">글쓰기</button>
+                          <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>게시글 {communityPostCount}개</div>
+                          <button type="button" onClick={() => openCommunityComposer(activeCommunityBoard.id)} className="inline-flex rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white shadow-sm">글쓰기</button>
                         </div>
                       </div>
                     </div>
@@ -1852,10 +1859,13 @@ export default function App() {
                     ) : null}
                     {!isFeedbackBoard && popularCommunityPosts.length ? (
                       <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                        <div className="mb-3 text-lg font-black">인기글</div>
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <div className="text-lg font-black">인기글</div>
+                          <div className={`text-xs font-bold ${textMuted}`}>좋아요와 조회수가 높은 글</div>
+                        </div>
                         <div className="grid gap-3 md:grid-cols-3">
                           {popularCommunityPosts.map((post, index) => (
-                            <button key={post.id} type="button" onClick={() => openCommunityPost(post)} className={`rounded-xl border p-4 text-left ${cardClass}`}>
+                            <button key={post.id} type="button" onClick={() => openCommunityPost(post)} className={`rounded-xl border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${cardClass}`}>
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-xs font-black text-[#c94d35]">TOP {index + 1}</span>
                                 <span className={`text-xs ${textMuted}`}>조회 {(post.views ?? 0)}</span>
@@ -1870,32 +1880,40 @@ export default function App() {
                         </div>
                       </div>
                     ) : null}
-                    {communityLoading ? <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>게시글 불러오는 중...</div> : boardCommunityPosts.length ? boardCommunityPosts.map((post) => (
-                      <article key={post.id} className={`border ${cardClass} rounded-2xl p-4 shadow-sm sm:p-5`}>
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <button type="button" onClick={() => openCommunityPost(post)} className="min-w-0 text-left">
-                            <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{post.title}</h3>
-                            <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
-                              <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.nickname}</span>
-                              {post.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.cardName}</span> : null}
-                              {post.locked ? <span className="rounded-full bg-stone-900 px-3 py-1 text-white">🔒 관리자 전용</span> : null}
-                              <span>{formatCommunityDate(post.createdAt)}</span>
-                              {post.updatedAt ? <span>수정 {formatCommunityDate(post.updatedAt)}</span> : null}
-                              <span>조회 {(post.views ?? 0)}</span>
-                              <span>좋아요 {(post.likes ?? 0)}</span>
-                              <span>댓글 {(post.commentCount ?? 0)}</span>
+                    <div className={`border ${panelClass} rounded-2xl overflow-hidden`}>
+                      <div className={`flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-5 ${isDark ? 'border-[#34312e] bg-[#191817]' : 'border-[#e7ddcf] bg-[#f8f1e6]'}`}>
+                        <div className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>최신글</div>
+                        <div className={`text-xs font-bold ${textMuted}`}>제목을 누르면 바로 열립니다.</div>
+                      </div>
+                      {communityLoading ? <div className={`p-10 text-center ${textMuted}`}>게시글 불러오는 중...</div> : boardCommunityPosts.length ? <div className="divide-y divide-[#e7ddcf] dark:divide-[#34312e]">{boardCommunityPosts.map((post) => (
+                        <article key={post.id} className={`border-l-4 ${post.locked ? 'border-l-stone-500' : 'border-l-[#c94d35]'} p-4 transition sm:p-5 ${isDark ? 'bg-[#1a1918] hover:bg-[#201f1d]' : 'bg-white hover:bg-[#fffaf5]'}`}>
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <button type="button" onClick={() => openCommunityPost(post)} className="min-w-0 flex-1 text-left">
+                              <h3 className={`text-lg font-black sm:text-xl ${isDark ? 'text-white' : 'text-stone-900'}`}>{post.title}</h3>
+                              <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
+                                <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.nickname}</span>
+                                {post.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.cardName}</span> : null}
+                                {post.locked ? <span className="rounded-full bg-stone-900 px-3 py-1 text-white">🔒 관리자 전용</span> : null}
+                                <span>{formatCommunityDate(post.createdAt)}</span>
+                                {post.updatedAt ? <span>수정 {formatCommunityDate(post.updatedAt)}</span> : null}
+                              </div>
+                              <div className={`mt-3 flex flex-wrap gap-3 text-sm font-medium ${textMuted}`}>
+                                <span>조회 {(post.views ?? 0)}</span>
+                                <span>좋아요 {(post.likes ?? 0)}</span>
+                                <span>댓글 {(post.commentCount ?? 0)}</span>
+                              </div>
+                              <p className={`mt-3 line-clamp-2 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
+                            </button>
+                            <div className="flex gap-2">
+                              {post.canInteract ? <button type="button" onClick={() => toggleCommunityLike(post.id)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${likedCommunityPostIds.includes(post.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(post.likes ?? 0)}</button> : null}
+                              {post.canEdit ? <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button> : null}
+                              {post.canEdit ? <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button> : null}
                             </div>
-                          </button>
-                          <div className="flex gap-2">
-                            {post.canInteract ? <button type="button" onClick={() => toggleCommunityLike(post.id)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${likedCommunityPostIds.includes(post.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(post.likes ?? 0)}</button> : null}
-                            {post.canEdit ? <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button> : null}
-                            {post.canEdit ? <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button> : null}
                           </div>
-                        </div>
-                        {post.canReadContent && post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
-                        <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
-                      </article>
-                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 {activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.</div>}
+                          {post.canReadContent && post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[320px] w-full rounded-xl border object-contain p-2" /> : null}
+                        </article>
+                      ))}</div> : <div className={`p-10 text-center ${textMuted}`}>아직 올라온 {activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.</div>}
+                    </div>
                   </div>
                 </section>
               ) : (
