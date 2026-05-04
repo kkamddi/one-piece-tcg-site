@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { listAllAuthUsers, supabaseAdmin } from '../../lib/supabase-admin.js';
 
 const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
@@ -8,17 +9,41 @@ function getTodayStartIso() {
   return start.toISOString();
 }
 
+function getClientIp(request) {
+  const forwarded = String(
+    request.headers['cf-connecting-ip']
+      ?? request.headers['x-forwarded-for']
+      ?? request.headers['x-real-ip']
+      ?? request.headers['x-vercel-forwarded-for']
+      ?? ''
+  ).trim();
+
+  if (!forwarded) return '';
+  return forwarded.split(',')[0].trim();
+}
+
+function buildVisitIdentity(request, visitorToken = '') {
+  const clientIp = getClientIp(request);
+  if (clientIp) {
+    const hashedIp = createHash('sha256').update(clientIp).digest('hex');
+    return `ip:${hashedIp}`;
+  }
+
+  const safeToken = String(visitorToken ?? '').trim();
+  return safeToken ? `token:${safeToken}` : '';
+}
+
 async function handleVisit(request, response) {
   const { visitorToken, path = '/' } = request.body ?? {};
-  const safeToken = String(visitorToken ?? '').trim();
-  if (!safeToken) return response.status(400).json({ error: 'invalid_request' });
+  const visitIdentity = buildVisitIdentity(request, visitorToken);
+  if (!visitIdentity) return response.status(400).json({ error: 'invalid_request' });
 
   const todayStart = getTodayStartIso();
   const { data: existing, error: existingError } = await supabaseAdmin
     .from(COMMUNITY_TABLE)
     .select('id')
     .eq('board_id', '__visit__')
-    .eq('author_token', safeToken)
+    .eq('author_token', visitIdentity)
     .gte('created_at', todayStart)
     .limit(1);
 
@@ -35,7 +60,7 @@ async function handleVisit(request, response) {
       content: String(path).slice(0, 200),
       likes: 0,
       views: 0,
-      author_token: safeToken,
+      author_token: visitIdentity,
       liked_tokens: []
     });
     if (error) throw error;
@@ -61,7 +86,7 @@ async function handleStats(request, response) {
   const todaySignups = users.filter((user) => String(user.created_at ?? '') >= todayStart).length;
 
   return response.status(200).json({
-    todayVisits: todayVisitRows.length,
+    todayVisits: todayUniqueVisitors,
     todayUniqueVisitors,
     totalUsers: users.length,
     todaySignups,
