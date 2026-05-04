@@ -20,7 +20,6 @@ const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const DONATION_URL = 'https://acoffee.shop/d/573d0164-c9c5-45e7-84ce-ed432026517c';
-const DONATION_BUTTON_IMAGE_URL = 'https://acoffee.shop/img/ko/png/Button_L705.png';
 const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
   { id: 'official', label: '공인/공식 점포', pageUrl: 'https://onepiece-cardgame.kr/officialshoplist.do' }
@@ -1223,17 +1222,13 @@ export default function App() {
               <div className="flex flex-wrap items-center gap-2">
                 {authUser ? (
                   <div className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${subtleClass}`}>
-                    <a href={DONATION_URL} target="_blank" rel="noreferrer" className="inline-flex items-center" aria-label="후원하기">
-                      <img src={DONATION_BUTTON_IMAGE_URL} alt="후원하기" className="h-10 w-auto rounded-full object-contain" onError={placeholderImage} />
-                    </a>
+                    <a href={DONATION_URL} target="_blank" rel="noreferrer" className="rounded-full bg-[#ffde59] px-4 py-2 text-sm font-black text-[#6f3d00]">후원하기</a>
                     <span className="max-w-[150px] truncate font-bold">{authUser.user_metadata?.nickname || authUser.user_metadata?.username || authUser.email}</span>
                     <button type="button" onClick={logoutAuth} className="rounded-full bg-[#c94d35] px-3 py-1 text-xs font-bold text-white">로그아웃</button>
                   </div>
                 ) : (
                   <div className={`flex items-center gap-2 rounded-full border px-2 py-2 ${subtleClass}`}>
-                    <a href={DONATION_URL} target="_blank" rel="noreferrer" className="inline-flex items-center" aria-label="후원하기">
-                      <img src={DONATION_BUTTON_IMAGE_URL} alt="후원하기" className="h-10 w-auto rounded-full object-contain" onError={placeholderImage} />
-                    </a>
+                    <a href={DONATION_URL} target="_blank" rel="noreferrer" className="rounded-full bg-[#ffde59] px-4 py-2 text-sm font-black text-[#6f3d00]">후원하기</a>
                     <button type="button" onClick={() => { setAuthMode('login'); setAuthMessage(''); setAuthModalOpen(true); }} className="rounded-full bg-[#c94d35] px-4 py-2 text-sm font-bold text-white">로그인</button>
                     <button type="button" onClick={() => { setAuthMode('signup'); setAuthMessage(''); setAuthModalOpen(true); }} className="rounded-full border border-[#c94d35] px-4 py-2 text-sm font-bold text-[#c94d35]">회원가입</button>
                   </div>
