@@ -604,6 +604,7 @@ export default function App() {
   );
   const activeSavedDeck = useMemo(() => savedDecks.find((deck) => deck.id === activeDeckId) ?? null, [savedDecks, activeDeckId]);
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
+  const isAdminUser = authUser?.user_metadata?.username === 'admin';
   const defaultCollapsedRarities = useMemo(() => {
     if (cards.length < 30) return ['UC'];
     if (cards.length >= 100) return ['R', 'UC', 'C'];
@@ -685,6 +686,7 @@ export default function App() {
     () => communityPosts.filter((post) => (post.boardId ?? 'free') === communityBoard),
     [communityPosts, communityBoard]
   );
+  const isFeedbackBoard = communityBoard === 'feedback';
   const likedCommunityPostIds = useMemo(
     () => communityPosts.filter((post) => post.likedByMe).map((post) => post.id),
     [communityPosts]
@@ -1714,7 +1716,14 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                    {popularCommunityPosts.length ? (
+                    {isFeedbackBoard ? (
+                      <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
+                        <div className={`text-sm leading-6 ${textMuted}`}>
+                          {isAdminUser ? '피드백 게시판 글은 잠금 상태로 관리자에게만 보여져.' : '피드백 게시판 글은 잠금 처리되어 관리자 로그인 시에만 보여져. 작성한 내용은 관리자만 확인할 수 있어.'}
+                        </div>
+                      </div>
+                    ) : null}
+                    {!isFeedbackBoard && popularCommunityPosts.length ? (
                       <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
                         <div className="mb-3 text-lg font-black">인기글</div>
                         <div className="grid gap-3 md:grid-cols-3">
@@ -1742,6 +1751,7 @@ export default function App() {
                             <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
                               <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.nickname}</span>
                               {post.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{post.cardName}</span> : null}
+                              {post.locked ? <span className="rounded-full bg-stone-900 px-3 py-1 text-white">🔒 관리자 전용</span> : null}
                               <span>{formatCommunityDate(post.createdAt)}</span>
                               {post.updatedAt ? <span>수정 {formatCommunityDate(post.updatedAt)}</span> : null}
                               <span>조회 {(post.views ?? 0)}</span>
@@ -1749,7 +1759,7 @@ export default function App() {
                             </div>
                           </button>
                           <div className="flex gap-2">
-                            <button type="button" onClick={() => toggleCommunityLike(post.id)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${likedCommunityPostIds.includes(post.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(post.likes ?? 0)}</button>
+                            {post.canInteract ? <button type="button" onClick={() => toggleCommunityLike(post.id)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${likedCommunityPostIds.includes(post.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(post.likes ?? 0)}</button> : null}
                             {post.canEdit ? <button type="button" onClick={() => startEditCommunityPost(post)} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${subtleClass}`}>수정</button> : null}
                             {post.canEdit ? <button type="button" onClick={() => deleteCommunityPost(post.id)} className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white">삭제</button> : null}
                           </div>
@@ -1757,7 +1767,7 @@ export default function App() {
                         {post.imageUrl ? <img src={post.imageUrl} alt={post.title} onError={placeholderImage} className="mt-4 max-h-[420px] w-full rounded-xl border object-contain p-2" /> : null}
                         <p className={`mt-4 whitespace-pre-line text-sm leading-6 ${textMuted}`}>{post.content}</p>
                       </article>
-                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>아직 올라온 {activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.</div>}
+                    )) : <div className={`border ${panelClass} rounded-2xl p-10 text-center ${textMuted}`}>{isFeedbackBoard && !isAdminUser ? '피드백 글은 관리자만 확인할 수 있어.' : `아직 올라온 ${activeCommunityBoard.label} 글이 없어. 첫 글을 남겨봐.`}</div>}
                   </div>
                 </section>
               ) : (
@@ -2002,6 +2012,7 @@ export default function App() {
                   <div className={`mt-2 flex flex-wrap gap-2 text-xs ${textMuted}`}>
                     <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{selectedCommunityPost.nickname}</span>
                     {selectedCommunityPost.cardName ? <span className={`rounded-full border px-3 py-1 ${subtleClass}`}>{selectedCommunityPost.cardName}</span> : null}
+                    {selectedCommunityPost.locked ? <span className="rounded-full bg-stone-900 px-3 py-1 text-white">🔒 관리자 전용</span> : null}
                     <span>조회 {selectedCommunityPost.views ?? 0}</span>
                     <span>좋아요 {selectedCommunityPost.likes ?? 0}</span>
                   </div>
@@ -2011,9 +2022,11 @@ export default function App() {
               <div className="space-y-4 p-5">
                 {selectedCommunityPost.imageUrl ? <img src={selectedCommunityPost.imageUrl} alt={selectedCommunityPost.title} onError={placeholderImage} className="max-h-[520px] w-full rounded-xl border object-contain p-2" /> : null}
                 <p className={`whitespace-pre-line text-sm leading-7 ${textMuted}`}>{selectedCommunityPost.content}</p>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => toggleCommunityLike(selectedCommunityPost.id)} className={`rounded-full px-4 py-2 text-sm font-bold ${likedCommunityPostIds.includes(selectedCommunityPost.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(selectedCommunityPost.likes ?? 0)}</button>
-                </div>
+                {selectedCommunityPost.canInteract ? (
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => toggleCommunityLike(selectedCommunityPost.id)} className={`rounded-full px-4 py-2 text-sm font-bold ${likedCommunityPostIds.includes(selectedCommunityPost.id) ? 'bg-pink-500 text-white' : `${subtleClass}`}`}>❤️ {(selectedCommunityPost.likes ?? 0)}</button>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
