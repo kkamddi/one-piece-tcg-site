@@ -1816,7 +1816,6 @@ export default function App() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <div className={`text-lg font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>{activeCommunityBoard.label}</div>
-                          {!authUser ? <div className={`mt-1 text-sm ${textMuted}`}>로그인하면 계정 기준으로 글/좋아요가 저장돼.</div> : null}
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <div className={`rounded-full border px-4 py-2 text-sm font-bold ${subtleClass}`}>{communityPostCount}개</div>
