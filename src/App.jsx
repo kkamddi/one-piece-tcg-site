@@ -1436,14 +1436,14 @@ export default function App() {
                         <button type="button" onClick={openDeckSimulator} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">덱 시뮬레이터</div>
                         </button>
-                        <button type="button" onClick={() => setViewMode('shops')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
-                          <div className="text-base font-black">오프라인 구매처</div>
-                        </button>
                         <button type="button" onClick={() => setViewMode('community')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">커뮤니티</div>
                         </button>
                         <button type="button" onClick={() => setViewMode('lab')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-base font-black">실험실</div>
+                        </button>
+                        <button type="button" onClick={() => setViewMode('shops')} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
+                          <div className="text-base font-black">오프라인 구매처</div>
                         </button>
                       </div>
                     </div>
