@@ -17,6 +17,10 @@ const LAB_PACK_SIZE = 6;
 const COMMUNITY_NICKNAME_KEY = 'one-piece-tcg-community-nickname';
 const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
+const CARD_LOCALES = [
+  { id: 'KR', label: '한글판' },
+  { id: 'JP', label: '일본판' }
+];
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const OFFICIAL_SITE_URL = 'https://onepiece-cardgame.kr/';
@@ -42,21 +46,27 @@ const SIDEBAR_CATEGORIES = [
   { id: 'championship-line', label: '챔피언십 / 시리얼' }
 ];
 
-function getSeriesCategory(seriesId) {
-  if (/^OP\d+/.test(seriesId)) return 'regular-booster';
-  if (/^(EB|PRB)\d+/.test(seriesId)) return 'extra-premium';
-  if (/^ST\d+/.test(seriesId)) return 'starter-deck';
-  if (/^P/.test(seriesId)) return 'promo-line';
+function getBaseSeriesId(seriesOrId) {
+  if (typeof seriesOrId === 'object' && seriesOrId) return seriesOrId.baseSeriesId ?? seriesOrId.id ?? '';
+  return String(seriesOrId ?? '').replace(/^(KR|JP)-/, '');
+}
+
+function getSeriesCategory(seriesOrId) {
+  const baseSeriesId = getBaseSeriesId(seriesOrId);
+  if (/^OP\d+/.test(baseSeriesId)) return 'regular-booster';
+  if (/^(EB|PRB)\d+/.test(baseSeriesId)) return 'extra-premium';
+  if (/^ST\d+/.test(baseSeriesId)) return 'starter-deck';
+  if (/^P/.test(baseSeriesId)) return 'promo-line';
   return 'regular-booster';
 }
 
 function getDisplaySeriesCode(series) {
   const match = series?.queryLabel?.match(/^\[([^\]]+)\]/);
-  return match?.[1] ?? series?.id ?? '';
+  return match?.[1] ?? series?.baseSeriesId ?? series?.id ?? '';
 }
 
 function sortDescByCode(items) {
-  return [...items].sort((a, b) => b.id.localeCompare(a.id, 'en', { numeric: true }));
+  return [...items].sort((a, b) => getBaseSeriesId(b).localeCompare(getBaseSeriesId(a), 'en', { numeric: true }));
 }
 
 function normalizeMultiValue(value) {
@@ -88,11 +98,11 @@ function getFriendlyAuthErrorMessage(error, mode = 'login') {
   return rawMessage || '인증 처리에 실패했습니다.';
 }
 
-function buildSidebarSections() {
-  const regular = sortDescByCode(seriesData.filter((series) => /^OP\d+/.test(series.id)));
-  const extraPremium = sortDescByCode(seriesData.filter((series) => /^(EB|PRB)\d+/.test(series.id)));
-  const starter = sortDescByCode(seriesData.filter((series) => /^ST\d+/.test(series.id)));
-  const promo = seriesData.filter((series) => series.id === 'PROMO');
+function buildSidebarSections(seriesList) {
+  const regular = sortDescByCode(seriesList.filter((series) => /^OP\d+/.test(getBaseSeriesId(series))));
+  const extraPremium = sortDescByCode(seriesList.filter((series) => /^(EB|PRB)\d+/.test(getBaseSeriesId(series))));
+  const starter = sortDescByCode(seriesList.filter((series) => /^ST\d+/.test(getBaseSeriesId(series))));
+  const promo = seriesList.filter((series) => getBaseSeriesId(series) === 'PROMO');
 
   return [
     { id: 'regular-booster', label: '정규 부스터', children: regular },
@@ -132,13 +142,13 @@ function buildSidebarSections() {
   ];
 }
 
-function getDefaultSeriesId() {
-  const sections = buildSidebarSections();
+function getDefaultSeriesId(locale = 'KR', seriesList = seriesData.filter((series) => (series.locale ?? 'KR') === locale)) {
+  const sections = buildSidebarSections(seriesList);
   for (const section of sections) {
     const firstSeries = section.children.find((series) => !series.disabled && series.id);
     if (firstSeries) return firstSeries.id;
   }
-  return seriesData[0]?.id ?? '';
+  return seriesList[0]?.id ?? '';
 }
 
 function getOrderedRarities(cards) {
@@ -308,7 +318,8 @@ function serializeSavedDecks(decks = []) {
 }
 
 export default function App() {
-  const [selectedSeries, setSelectedSeries] = useState(getDefaultSeriesId);
+  const [currentLocale, setCurrentLocale] = useState('KR');
+  const [selectedSeries, setSelectedSeries] = useState(() => getDefaultSeriesId('KR'));
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -361,7 +372,7 @@ export default function App() {
   const [communityStorageMode, setCommunityStorageMode] = useState('shared');
   const [communityCommentContent, setCommunityCommentContent] = useState('');
   const [communityCommentLoading, setCommunityCommentLoading] = useState(false);
-  const [labSeriesId, setLabSeriesId] = useState(getDefaultSeriesId);
+  const [labSeriesId, setLabSeriesId] = useState(() => getDefaultSeriesId('KR'));
   const [labOpenedPack, setLabOpenedPack] = useState([]);
   const [labRevealCount, setLabRevealCount] = useState(0);
   const [labOpening, setLabOpening] = useState(false);
@@ -381,14 +392,32 @@ export default function App() {
   const [adminStats, setAdminStats] = useState(null);
   const [userStateReady, setUserStateReady] = useState(false);
 
+  const localizedSeriesData = useMemo(
+    () => seriesData.filter((series) => (series.locale ?? 'KR') === currentLocale),
+    [currentLocale]
+  );
+  const localizedCardsData = useMemo(
+    () => cardsData.filter((card) => (card.locale ?? 'KR') === currentLocale),
+    [currentLocale]
+  );
   const currentSeries = useMemo(
-    () => seriesData.find((series) => series.id === selectedSeries) ?? seriesData.find((series) => series.id === getDefaultSeriesId()) ?? seriesData[0],
-    [selectedSeries]
+    () => localizedSeriesData.find((series) => series.id === selectedSeries) ?? localizedSeriesData.find((series) => series.id === getDefaultSeriesId(currentLocale, localizedSeriesData)) ?? localizedSeriesData[0],
+    [selectedSeries, localizedSeriesData, currentLocale]
   );
   const trimmedSearchKeyword = searchKeyword.trim();
   const isGlobalSearch = searchScope === 'all' && Boolean(trimmedSearchKeyword);
-  const sidebarSections = useMemo(() => buildSidebarSections(), []);
-  const activeSidebarCategory = useMemo(() => getSeriesCategory(selectedSeries), [selectedSeries]);
+  const sidebarSections = useMemo(() => buildSidebarSections(localizedSeriesData), [localizedSeriesData]);
+  const activeSidebarCategory = useMemo(() => getSeriesCategory(currentSeries ?? selectedSeries), [currentSeries, selectedSeries]);
+
+  useEffect(() => {
+    if (!localizedSeriesData.length) return;
+    if (!localizedSeriesData.some((series) => series.id === selectedSeries)) {
+      setSelectedSeries(getDefaultSeriesId(currentLocale, localizedSeriesData));
+    }
+    if (!localizedSeriesData.some((series) => series.id === labSeriesId)) {
+      setLabSeriesId(getDefaultSeriesId(currentLocale, localizedSeriesData));
+    }
+  }, [currentLocale, localizedSeriesData, selectedSeries, labSeriesId]);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem('one-piece-tcg-theme');
@@ -559,9 +588,9 @@ export default function App() {
     const load = async () => {
       const fetchedCards = trimmedSearchKeyword
         ? isGlobalSearch
-          ? await searchCards(trimmedSearchKeyword)
-          : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity })
-        : await fetchCards({ series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity });
+          ? await searchCards(trimmedSearchKeyword, currentLocale)
+          : await fetchCards({ locale: currentLocale, series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity })
+        : await fetchCards({ locale: currentLocale, series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity });
 
       const filteredCards = fetchedCards.filter((card) => {
         const matchesSeries = isGlobalSearch || card.series === selectedSeries;
@@ -585,7 +614,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch]);
+  }, [currentLocale, selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch]);
 
   useEffect(() => {
     setOpenRaritySections({});
@@ -646,8 +675,8 @@ export default function App() {
 
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
   const rarityOptionSourceCards = useMemo(
-    () => (isGlobalSearch ? cardsData : cardsData.filter((card) => card.series === selectedSeries)),
-    [isGlobalSearch, selectedSeries]
+    () => (isGlobalSearch ? localizedCardsData : localizedCardsData.filter((card) => card.series === selectedSeries)),
+    [isGlobalSearch, localizedCardsData, selectedSeries]
   );
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(rarityOptionSourceCards)], [rarityOptionSourceCards]);
   const colorOptions = useMemo(() => ['ALL', ...new Set(rarityOptionSourceCards.flatMap((card) => normalizeMultiValue(card.colorKo)))], [rarityOptionSourceCards]);
@@ -658,7 +687,7 @@ export default function App() {
   const collectionVisibleCards = useMemo(() => (activeRarity === 'ALL' ? cards : cards.filter((card) => card.rarity === activeRarity)), [cards, activeRarity]);
   const ownedInSeries = useMemo(() => cards.filter((card) => ownedSet.has(card.id)).length, [cards, ownedSet]);
   const ownedInVisibleCollection = useMemo(() => collectionVisibleCards.filter((card) => ownedSet.has(card.id)).length, [collectionVisibleCards, ownedSet]);
-  const officialSeriesCount = useMemo(() => cardsData.filter((card) => card.series === selectedSeries).length, [selectedSeries]);
+  const officialSeriesCount = useMemo(() => localizedCardsData.filter((card) => card.series === selectedSeries).length, [localizedCardsData, selectedSeries]);
 
   const deckCards = useMemo(
     () => [...deckEntries].sort((a, b) => (a.categoryKo === '리더' ? -1 : b.categoryKo === '리더' ? 1 : b.count - a.count)),
@@ -666,6 +695,7 @@ export default function App() {
   );
   const activeSavedDeck = useMemo(() => savedDecks.find((deck) => deck.id === activeDeckId) ?? null, [savedDecks, activeDeckId]);
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
+  const currentOfficialSiteUrl = currentLocale === 'JP' ? 'https://www.onepiece-cardgame.com/' : OFFICIAL_SITE_URL;
   const isAdminUser = authUser?.user_metadata?.username === 'admin';
   const defaultCollapsedRarities = useMemo(() => {
     if (cards.length < 30) return ['UC'];
@@ -676,7 +706,7 @@ export default function App() {
   const leaderCard = useMemo(() => deckEntries.find((entry) => entry.id === leaderCardId) ?? null, [deckEntries, leaderCardId]);
   const deckFilterCards = useMemo(() => {
     const keyword = deckSearchKeyword.trim().toLowerCase();
-    return cardsData.filter((card) => {
+    return localizedCardsData.filter((card) => {
       const matchesKeyword = !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value ?? '').toLowerCase().includes(keyword));
       const matchesColor = deckFilterColor === 'ALL' || card.colorKo === deckFilterColor;
       const matchesRarity = deckFilterRarity === 'ALL' || card.rarity === deckFilterRarity;
@@ -684,18 +714,18 @@ export default function App() {
       const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
       return matchesKeyword && matchesColor && matchesRarity && matchesCategory && !hideBaseLeader;
     });
-  }, [deckSearchKeyword, deckFilterColor, deckFilterRarity, deckFilterCategory]);
+  }, [localizedCardsData, deckSearchKeyword, deckFilterColor, deckFilterRarity, deckFilterCategory]);
   const deckPageCount = useMemo(() => Math.max(1, Math.ceil(deckFilterCards.length / DECK_PAGE_SIZE)), [deckFilterCards.length]);
   const safeDeckPage = Math.min(deckPage, deckPageCount);
   const pagedDeckCards = useMemo(() => {
     const start = (safeDeckPage - 1) * DECK_PAGE_SIZE;
     return deckFilterCards.slice(start, start + DECK_PAGE_SIZE);
   }, [deckFilterCards, safeDeckPage]);
-  const deckColorOptions = useMemo(() => ['ALL', ...new Set(cardsData.map((card) => card.colorKo).filter(Boolean))], []);
-  const deckRarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cardsData)], []);
-  const deckCategoryOptions = useMemo(() => ['ALL', ...new Set(cardsData.map((card) => card.categoryKo).filter(Boolean))], []);
-  const homeOwnedCount = useMemo(() => cardsData.filter((card) => ownedSet.has(card.id)).length, [ownedSet]);
-  const homeOwnedPercent = useMemo(() => (cardsData.length ? ((homeOwnedCount / cardsData.length) * 100).toFixed(1) : '0.0'), [homeOwnedCount]);
+  const deckColorOptions = useMemo(() => ['ALL', ...new Set(localizedCardsData.map((card) => card.colorKo).filter(Boolean))], [localizedCardsData]);
+  const deckRarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(localizedCardsData)], [localizedCardsData]);
+  const deckCategoryOptions = useMemo(() => ['ALL', ...new Set(localizedCardsData.map((card) => card.categoryKo).filter(Boolean))], [localizedCardsData]);
+  const homeOwnedCount = useMemo(() => localizedCardsData.filter((card) => ownedSet.has(card.id)).length, [localizedCardsData, ownedSet]);
+  const homeOwnedPercent = useMemo(() => (localizedCardsData.length ? ((homeOwnedCount / localizedCardsData.length) * 100).toFixed(1) : '0.0'), [localizedCardsData.length, homeOwnedCount]);
   const collectionOwnedPercent = useMemo(() => (collectionVisibleCards.length ? ((ownedInVisibleCollection / collectionVisibleCards.length) * 100).toFixed(1) : '0.0'), [ownedInVisibleCollection, collectionVisibleCards.length]);
   const homeShopCounts = useMemo(
     () => ({
@@ -709,12 +739,12 @@ export default function App() {
     [cards, activeRarity]
   );
   const currentSeriesCardIds = useMemo(
-    () => cardsData.filter((card) => card.series === selectedSeries).map((card) => card.id),
-    [selectedSeries]
+    () => localizedCardsData.filter((card) => card.series === selectedSeries).map((card) => card.id),
+    [localizedCardsData, selectedSeries]
   );
   const allCollectionCardIds = useMemo(
-    () => cardsData.map((card) => card.id),
-    []
+    () => localizedCardsData.map((card) => card.id),
+    [localizedCardsData]
   );
   const isCurrentRarityFullyOwned = useMemo(
     () => currentRarityCardIds.length > 0 && currentRarityCardIds.every((id) => ownedSet.has(id)),
@@ -733,16 +763,16 @@ export default function App() {
     [communityBoard]
   );
   const labSeriesOptions = useMemo(
-    () => seriesData.filter((series) => cardsData.some((card) => card.series === series.id)),
-    []
+    () => localizedSeriesData.filter((series) => localizedCardsData.some((card) => card.series === series.id)),
+    [localizedSeriesData, localizedCardsData]
   );
   const activeLabSeries = useMemo(
     () => labSeriesOptions.find((series) => series.id === labSeriesId) ?? labSeriesOptions[0] ?? null,
     [labSeriesOptions, labSeriesId]
   );
   const labSeriesCards = useMemo(
-    () => cardsData.filter((card) => card.series === (activeLabSeries?.id ?? labSeriesId)),
-    [activeLabSeries, labSeriesId]
+    () => localizedCardsData.filter((card) => card.series === (activeLabSeries?.id ?? labSeriesId)),
+    [localizedCardsData, activeLabSeries, labSeriesId]
   );
   const boardCommunityPosts = useMemo(
     () => communityPosts.filter((post) => (post.boardId ?? 'free') === communityBoard),
@@ -934,7 +964,7 @@ export default function App() {
   }
 
   function openLatestArchive() {
-    const latestSeriesId = getDefaultSeriesId();
+    const latestSeriesId = getDefaultSeriesId(currentLocale, localizedSeriesData);
     setSelectedSeries(latestSeriesId);
     setSearchKeyword('');
     setActiveRarity('ALL');
@@ -946,7 +976,7 @@ export default function App() {
   }
 
   function openLatestCollection() {
-    const latestSeriesId = getDefaultSeriesId();
+    const latestSeriesId = getDefaultSeriesId(currentLocale, localizedSeriesData);
     openSeriesView(latestSeriesId, 'collection');
   }
 
@@ -1349,12 +1379,34 @@ export default function App() {
               <section className={`border ${panelClass} rounded-2xl p-5`}>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                   <div>
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {CARD_LOCALES.map((locale) => {
+                        const active = currentLocale === locale.id;
+                        return (
+                          <button
+                            key={locale.id}
+                            type="button"
+                            onClick={() => {
+                              setCurrentLocale(locale.id);
+                              setSearchKeyword('');
+                              setActiveRarity('ALL');
+                              setActiveColor('ALL');
+                              setActiveCost('ALL');
+                              setActiveAttribute('ALL');
+                            }}
+                            className={`inline-flex rounded-full border px-4 py-2 text-sm font-black transition ${active ? 'border-[#c94d35] bg-[#c94d35] text-white' : isDark ? 'border-white/15 bg-white/5 text-white' : 'border-stone-300 bg-white text-stone-700'}`}
+                          >
+                            {locale.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                     {viewMode === 'home' ? (
                       <>
                         <div className="flex flex-wrap items-center gap-3">
                           <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG</h1>
                           <a href="https://cafe.naver.com/onepiecetcg" target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-black text-[#c94d35]">공식카페</a>
-                          <a href={OFFICIAL_SITE_URL} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-black text-[#c94d35]">공식사이트</a>
+                          <a href={currentOfficialSiteUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-black text-[#c94d35]">공식사이트</a>
                         </div>
                       </>
                     ) : viewMode === 'shops' ? (
@@ -1391,8 +1443,8 @@ export default function App() {
                   <div className="flex flex-wrap gap-2 text-sm">
                     {viewMode === 'home' ? (
                       <>
-                        <Metric label="전체 카드" value={`${cardsData.length}장`} className={subtleClass} />
-                        <Metric label="시리즈" value={`${seriesData.length}개`} className={subtleClass} />
+                        <Metric label="전체 카드" value={`${localizedCardsData.length}장`} className={subtleClass} />
+                        <Metric label="시리즈" value={`${localizedSeriesData.length}개`} className={subtleClass} />
                         <Metric label="내 수집" value={`${homeOwnedCount}장`} className={subtleClass} />
                       </>
                     ) : viewMode === 'shops' ? (
@@ -1525,7 +1577,7 @@ export default function App() {
                       <div className="grid h-full gap-3 grid-cols-2 xl:grid-cols-1">
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className={`text-sm ${textMuted}`}>수집 진행</div>
-                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {cardsData.length}</div>
+                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {localizedCardsData.length}</div>
                           <div className={`mt-1 text-sm ${textMuted}`}>{homeOwnedPercent}%</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>

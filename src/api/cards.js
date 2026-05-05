@@ -32,23 +32,26 @@ export async function fetchCards(filters = {}) {
   const url = `${API_BASE}${buildQuery(filters)}`;
   return safeFetchJson(url, () => {
     return cardsFallback.filter((card) => {
+      const matchesLocale = !filters.locale || card.locale === filters.locale;
       const matchesSeries = !filters.series || card.series === filters.series;
       const matchesRarity = !filters.rarity || card.rarity === filters.rarity;
-      return matchesSeries && matchesRarity;
+      return matchesLocale && matchesSeries && matchesRarity;
     });
   });
 }
 
-export async function searchCards(query) {
+export async function searchCards(query, locale) {
   const trimmed = query?.trim() ?? '';
   if (!trimmed) return [];
 
-  const url = `${API_BASE}/search${buildQuery({ q: trimmed })}`;
+  const url = `${API_BASE}/search${buildQuery({ q: trimmed, locale })}`;
   return safeFetchJson(url, () => {
     const keyword = trimmed.toLowerCase();
-    return cardsFallback.filter((card) =>
-      [card.cardNo, card.name].some((value) => value.toLowerCase().includes(keyword))
-    );
+    return cardsFallback.filter((card) => {
+      const matchesLocale = !locale || card.locale === locale;
+      const matchesKeyword = [card.cardNo, card.name].some((value) => value.toLowerCase().includes(keyword));
+      return matchesLocale && matchesKeyword;
+    });
   });
 }
 
