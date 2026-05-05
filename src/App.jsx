@@ -1356,6 +1356,15 @@ export default function App() {
             </div>
           </header>
 
+          <section className={`mb-4 rounded-2xl border px-4 py-3 sm:mb-5 ${isDark ? 'border-[#5a3b26] bg-[#2d1f16] text-orange-100' : 'border-[#f0c9a8] bg-[#fff2e8] text-[#8a3f13]'}`}>
+            <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+              <div className="font-black">📢 주소 변경 되었습니다.</div>
+              <div className="text-sm font-medium">
+                기존 주소도 접속 가능하며 <span className="font-black">onepiece-tcgkr.vercel.app</span> 에서 <span className="font-black">optcgkorea.com</span> 으로 변경되었습니다.
+              </div>
+            </div>
+          </section>
+
           <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:mb-5 lg:grid lg:grid-cols-7 lg:overflow-visible lg:pb-0">
             <TopTab active={viewMode === 'home'} onClick={() => setViewMode('home')} label="메인" />
             <TopTab active={viewMode === 'archive'} onClick={openLatestArchive} label="카드 도감" />
