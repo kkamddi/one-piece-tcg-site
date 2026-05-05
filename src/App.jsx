@@ -1358,10 +1358,7 @@ export default function App() {
 
           <section className={`mb-4 rounded-2xl border px-4 py-3 sm:mb-5 ${isDark ? 'border-[#5a3b26] bg-[#2d1f16] text-orange-100' : 'border-[#f0c9a8] bg-[#fff2e8] text-[#8a3f13]'}`}>
             <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-              <div className="font-black">📢 홈페이지 주소가 변경되었습니다.</div>
-              <div className="text-sm font-medium">
-                새 주소: <a href="https://www.optcgkorea.com" target="_blank" rel="noreferrer" className="font-black underline underline-offset-2">optcgkorea.com</a>
-              </div>
+              <div className="font-black">📢 기존 주소도 접속가능합니다. 새로운 주소 : <a href="https://www.optcgkorea.com" target="_blank" rel="noreferrer" className="underline underline-offset-2">optcgkorea.com</a></div>
             </div>
           </section>
 
