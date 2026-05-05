@@ -1415,7 +1415,7 @@ export default function App() {
               </div>
             </aside>}
 
-            <main className="space-y-5">
+            <main className={viewMode === 'archive' || viewMode === 'collection' ? 'space-y-3' : 'space-y-5'}>
               <section className={`border ${panelClass} rounded-2xl p-5`}>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                   <div>
@@ -1527,34 +1527,34 @@ export default function App() {
               </section>
 
               {viewMode === 'archive' || viewMode === 'collection' ? (
-                <section className={`border ${panelClass} rounded-2xl p-4`}>
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+                <section className={`border ${panelClass} rounded-2xl p-3`}>
+                  <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
                     <label className="block">
-                      <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
+                      <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
                       <input
                         value={searchKeyword}
                         onChange={(event) => setSearchKeyword(event.target.value)}
                         placeholder="카드명 또는 카드번호 검색"
-                        className={`w-full rounded-xl border px-4 py-3 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
+                        className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
                       />
                     </label>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div>
-                        <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>검색 범위</div>
+                        <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>검색 범위</div>
                         <div className="flex flex-wrap gap-2">
                           <ModeChip active={searchScope === 'series'} onClick={() => setSearchScope('series')} label="현재 시리즈" />
                           <ModeChip active={searchScope === 'all'} onClick={() => setSearchScope('all')} label="전체 카드" />
                         </div>
                       </div>
                       <div>
-                      <div className={`mb-2 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
+                      <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
                       <div className="flex flex-wrap gap-2">
                         {rarityOptions.map((rarity) => (
                           <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
                         ))}
                       </div>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="grid gap-2.5 sm:grid-cols-3">
                       <FilterSelect label="컬러" value={activeColor} onChange={setActiveColor} options={colorOptions} subtleClass={subtleClass} isDark={isDark} />
                       <FilterSelect label="코스트" value={activeCost} onChange={setActiveCost} options={costOptions} subtleClass={subtleClass} isDark={isDark} />
                       <FilterSelect label="속성" value={activeAttribute} onChange={setActiveAttribute} options={attributeOptions} subtleClass={subtleClass} isDark={isDark} />
@@ -2217,6 +2217,7 @@ export default function App() {
             <section className={`mt-5 border ${panelClass} rounded-2xl p-5 text-center`}>
               <div className="text-lg font-black">배너문의 주세요</div>
               <div className={`mt-2 text-sm ${textMuted}`}>제휴 및 배너 관련 문의 환영합니다.</div>
+              <a href="mailto:optkr26@gmail.com" className="mt-3 inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-bold text-[#c94d35]">optkr26@gmail.com</a>
             </section>
           </div>
         </div>
