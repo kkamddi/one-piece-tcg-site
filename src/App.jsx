@@ -168,6 +168,13 @@ function placeholderImage(event) {
   event.currentTarget.src = '/card-placeholder.svg';
 }
 
+function getCardImageSrc(card) {
+  const imageUrl = card?.imageUrl;
+  if (!imageUrl) return '/card-placeholder.svg';
+  if (card?.locale === 'JP') return `/api/card-image?url=${encodeURIComponent(imageUrl)}`;
+  return imageUrl;
+}
+
 function rarityTone(rarity) {
   if (rarity === 'SP') return 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200';
   if (rarity === 'SEC') return 'bg-amber-50 text-amber-700 border-amber-200';
@@ -1634,7 +1641,7 @@ export default function App() {
                               {group.cards.map((card) => (
                                 <button key={card.id} type="button" onClick={() => openCard(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left transition hover:-translate-y-0.5`}>
                                   <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
-                                    <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
+                                    <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
                                     <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${ownedSet.has(card.id) ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{ownedSet.has(card.id) ? '보유중' : '미보유'}</div>
                                   </div>
                                   <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
@@ -1707,7 +1714,7 @@ export default function App() {
                       return (
                         <button key={card.id} type="button" onClick={() => toggleOwned(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left ${owned ? 'ring-1 ring-emerald-500' : ''}`}>
                           <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
-                            <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className={`h-full w-full object-contain [image-rendering:auto] ${owned ? '' : 'opacity-65 grayscale-[0.15]'}`} />
+                            <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className={`h-full w-full object-contain [image-rendering:auto] ${owned ? '' : 'opacity-65 grayscale-[0.15]'}`} />
                             <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${owned ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{owned ? '보유중' : '미보유'}</div>
                           </div>
                           <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
@@ -1758,7 +1765,7 @@ export default function App() {
                       {pagedDeckCards.map((card) => (
                         <div key={card.id} className={`border ${subtleClass} rounded-xl p-3`}>
                           <div className="flex gap-3">
-                            <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-24 w-16 rounded-lg object-contain" />
+                            <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className="h-24 w-16 rounded-lg object-contain" />
                             <div className="min-w-0 flex-1">
                               <div className="truncate text-sm font-extrabold">{card.name}</div>
                               <div className={`mt-1 text-[11px] ${textMuted}`}>{card.cardNo}</div>
@@ -1882,7 +1889,7 @@ export default function App() {
                             {revealed ? (
                               <>
                                 <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
-                                  <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
+                                  <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
                                   <span className={`absolute right-2 top-2 rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
                                 </div>
                                 <div className={`border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
@@ -2380,7 +2387,7 @@ function CardModal({ card, onClose, dark }) {
         <div className="grid gap-6 p-5 lg:grid-cols-[360px_minmax(0,1fr)] lg:p-7">
           <div>
             <div className={`overflow-hidden rounded-xl border p-2 ${dark ? 'border-[#333333] bg-[#111111]' : 'border-[#ece0d4] bg-[#f8f5f0]'}`}>
-              <img src={card.imageUrl || '/card-placeholder.svg'} alt={card.name} onError={placeholderImage} className="aspect-[5/7] h-full w-full object-contain [image-rendering:auto]" />
+              <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className="aspect-[5/7] h-full w-full object-contain [image-rendering:auto]" />
             </div>
           </div>
           <div className="space-y-5">
