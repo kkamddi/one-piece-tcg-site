@@ -19,20 +19,25 @@ const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const CARD_LOCALES = [
   { id: 'KR', label: '한글판' },
-  { id: 'JP', label: '일본판' }
+  { id: 'JP', label: '일본판' },
+  { id: 'EN', label: '영문판' }
 ];
 const HOME_UPDATES = [
   {
     id: '2026-05-05-update',
     title: '[26.05.05] 업데이트 안내',
-    summary: '일본판 카드 도감 추가',
+    summary: '일본판·영문판 카드 도감 추가',
     details: [
       '일본판 카드 도감 추가',
       '일본판 수집표 적용 완료',
       '일본판 덱 시뮬레이터 적용 완료',
       '일본판 카드 이미지 표시 적용 완료',
       '일본판에서 한글 검색 가능 (한국판 출시 카드 기준)',
-      '한국판 미출시 일본판 카드는 한글 검색 미지원'
+      '한국판 미출시 일본판 카드는 한글 검색 미지원',
+      '영문판 카드 도감 추가',
+      '영문판 수집표 적용 완료',
+      '영문판 덱 시뮬레이터 적용 완료',
+      '영문판 실험실 카드깡 적용 완료'
     ]
   }
 ];
@@ -63,7 +68,7 @@ const SIDEBAR_CATEGORIES = [
 
 function getBaseSeriesId(seriesOrId) {
   if (typeof seriesOrId === 'object' && seriesOrId) return seriesOrId.baseSeriesId ?? seriesOrId.id ?? '';
-  return String(seriesOrId ?? '').replace(/^(KR|JP)-/, '');
+  return String(seriesOrId ?? '').replace(/^(KR|JP|EN)-/, '');
 }
 
 function getSeriesCategory(seriesOrId) {
@@ -735,7 +740,11 @@ export default function App() {
   );
   const activeSavedDeck = useMemo(() => savedDecks.find((deck) => deck.id === activeDeckId) ?? null, [savedDecks, activeDeckId]);
   const activeShopType = useMemo(() => SHOP_TYPES.find((item) => item.id === shopType) ?? SHOP_TYPES[0], [shopType]);
-  const currentOfficialSiteUrl = currentLocale === 'JP' ? 'https://www.onepiece-cardgame.com/' : OFFICIAL_SITE_URL;
+  const currentOfficialSiteUrl = currentLocale === 'JP'
+    ? 'https://www.onepiece-cardgame.com/'
+    : currentLocale === 'EN'
+      ? 'https://en.onepiece-cardgame.com/'
+      : OFFICIAL_SITE_URL;
   const isAdminUser = authUser?.user_metadata?.username === 'admin';
   const defaultCollapsedRarities = useMemo(() => {
     if (cards.length < 30) return ['UC'];
@@ -1426,7 +1435,7 @@ export default function App() {
               <section className={`border ${panelClass} rounded-2xl ${viewMode === 'archive' || viewMode === 'collection' ? 'p-3' : 'p-5'}`}>
                 <div className={`flex flex-col ${viewMode === 'archive' || viewMode === 'collection' ? 'gap-2' : 'gap-4'} xl:flex-row xl:items-end xl:justify-between`}>
                   <div>
-                    {viewMode !== 'home' ? <div className={`${viewMode === 'archive' || viewMode === 'collection' ? 'mb-2' : 'mb-3'} flex flex-wrap gap-2`}>
+                    {['archive', 'collection', 'deck', 'lab'].includes(viewMode) ? <div className={`${viewMode === 'archive' || viewMode === 'collection' ? 'mb-2' : 'mb-3'} flex flex-wrap gap-2`}>
                       {CARD_LOCALES.map((locale) => {
                         const active = currentLocale === locale.id;
                         return (
