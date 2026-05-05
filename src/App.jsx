@@ -19,6 +19,7 @@ const COMMUNITY_AUTHOR_TOKEN_KEY = 'one-piece-tcg-community-author-token';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
+const OFFICIAL_SITE_URL = 'https://onepiece-cardgame.kr/';
 const DONATION_URL = 'https://acoffee.shop/d/573d0164-c9c5-45e7-84ce-ed432026517c';
 const SHOP_TYPES = [
   { id: 'general', label: '공식 취급 점포', pageUrl: 'https://onepiece-cardgame.kr/shoplist.do' },
@@ -1353,6 +1354,7 @@ export default function App() {
                         <div className="flex flex-wrap items-center gap-3">
                           <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>원피스 TCG</h1>
                           <a href="https://cafe.naver.com/onepiecetcg" target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-black text-[#c94d35]">공식카페</a>
+                          <a href={OFFICIAL_SITE_URL} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-[#c94d35] px-4 py-2 text-sm font-black text-[#c94d35]">공식사이트</a>
                         </div>
                       </>
                     ) : viewMode === 'shops' ? (
