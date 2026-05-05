@@ -22,7 +22,19 @@ const CARD_LOCALES = [
   { id: 'JP', label: '일본판' }
 ];
 const HOME_UPDATES = [
-  '[26.05.05] 일본판 카드 도감 추가'
+  {
+    id: '2026-05-05-update',
+    title: '[26.05.05] 업데이트 안내',
+    summary: '일본판 카드 도감 추가',
+    details: [
+      '일본판 카드 도감 추가',
+      '일본판 수집표 적용 완료',
+      '일본판 덱 시뮬레이터 적용 완료',
+      '일본판 카드 이미지 표시 적용 완료',
+      '일본판에서 한글 검색 가능 (한국판 출시 카드 기준)',
+      '한국판 미출시 일본판 카드는 한글 검색 미지원'
+    ]
+  }
 ];
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
@@ -372,6 +384,7 @@ export default function App() {
   const [deckFilterRarity, setDeckFilterRarity] = useState('ALL');
   const [deckFilterCategory, setDeckFilterCategory] = useState('ALL');
   const [deckPage, setDeckPage] = useState(1);
+  const [openHomeUpdateId, setOpenHomeUpdateId] = useState(null);
   const [communityPosts, setCommunityPosts] = useState([]);
   const [communityNickname, setCommunityNickname] = useState('');
   const [communityTitle, setCommunityTitle] = useState('');
@@ -1406,7 +1419,7 @@ export default function App() {
               <section className={`border ${panelClass} rounded-2xl p-5`}>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                   <div>
-                    <div className="mb-3 flex flex-wrap gap-2">
+                    {viewMode !== 'home' ? <div className="mb-3 flex flex-wrap gap-2">
                       {CARD_LOCALES.map((locale) => {
                         const active = currentLocale === locale.id;
                         return (
@@ -1427,7 +1440,7 @@ export default function App() {
                           </button>
                         );
                       })}
-                    </div>
+                    </div> : null}
                     {viewMode === 'home' ? (
                       <>
                         <div className="flex flex-wrap items-center gap-3">
@@ -1618,11 +1631,30 @@ export default function App() {
                   <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
                     <div className="text-lg font-black">업데이트 공지</div>
                     <div className="mt-3 space-y-2">
-                      {HOME_UPDATES.map((item) => (
-                        <div key={item} className={`rounded-xl border px-4 py-3 text-sm font-semibold ${cardClass}`}>
-                          {item}
-                        </div>
-                      ))}
+                      {HOME_UPDATES.map((item) => {
+                        const opened = openHomeUpdateId === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setOpenHomeUpdateId((prev) => prev === item.id ? null : item.id)}
+                            className={`w-full rounded-xl border px-4 py-3 text-left ${cardClass}`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <div className="text-sm font-black">{item.title}</div>
+                                <div className={`mt-1 text-xs ${textMuted}`}>{item.summary}</div>
+                              </div>
+                              <div className="text-sm font-black text-[#c94d35]">{opened ? '접기' : '상세보기'}</div>
+                            </div>
+                            {opened ? <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
+                              {item.details.map((detail) => (
+                                <div key={detail} className={`text-sm ${isDark ? 'text-stone-200' : 'text-stone-700'}`}>• {detail}</div>
+                              ))}
+                            </div> : null}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
