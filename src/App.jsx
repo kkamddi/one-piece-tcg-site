@@ -1527,16 +1527,7 @@ export default function App() {
 
               {viewMode === 'archive' || viewMode === 'collection' ? (
                 <section className={`border ${panelClass} rounded-2xl p-3`}>
-                  <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
-                    <label className="block">
-                      <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
-                      <input
-                        value={searchKeyword}
-                        onChange={(event) => setSearchKeyword(event.target.value)}
-                        placeholder="카드명 또는 카드번호 검색"
-                        className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
-                      />
-                    </label>
+                  <div className="space-y-3">
                     <div className="space-y-3">
                       <div>
                         <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>검색 범위</div>
@@ -1546,18 +1537,28 @@ export default function App() {
                         </div>
                       </div>
                       <div>
-                      <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
-                      <div className="flex flex-wrap gap-2">
-                        {rarityOptions.map((rarity) => (
-                          <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
-                        ))}
+                        <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>등급</div>
+                        <div className="flex flex-wrap gap-2">
+                          {rarityOptions.map((rarity) => (
+                            <ModeChip key={rarity} active={activeRarity === rarity} onClick={() => setActiveRarity(rarity)} label={rarity} />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="grid gap-2.5 sm:grid-cols-3">
+                        <FilterSelect label="컬러" value={activeColor} onChange={setActiveColor} options={colorOptions} subtleClass={subtleClass} isDark={isDark} />
+                        <FilterSelect label="코스트" value={activeCost} onChange={setActiveCost} options={costOptions} subtleClass={subtleClass} isDark={isDark} />
+                        <FilterSelect label="속성" value={activeAttribute} onChange={setActiveAttribute} options={attributeOptions} subtleClass={subtleClass} isDark={isDark} />
                       </div>
                     </div>
-                    <div className="grid gap-2.5 sm:grid-cols-3">
-                      <FilterSelect label="컬러" value={activeColor} onChange={setActiveColor} options={colorOptions} subtleClass={subtleClass} isDark={isDark} />
-                      <FilterSelect label="코스트" value={activeCost} onChange={setActiveCost} options={costOptions} subtleClass={subtleClass} isDark={isDark} />
-                      <FilterSelect label="속성" value={activeAttribute} onChange={setActiveAttribute} options={attributeOptions} subtleClass={subtleClass} isDark={isDark} />
-                    </div>
+                    <label className="block">
+                      <div className={`mb-1.5 text-sm font-semibold ${isDark ? 'text-stone-300' : 'text-stone-700'}`}>카드 찾기</div>
+                      <input
+                        value={searchKeyword}
+                        onChange={(event) => setSearchKeyword(event.target.value)}
+                        placeholder="카드명 또는 카드번호 검색"
+                        className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none ${subtleClass} ${isDark ? 'placeholder:text-stone-500' : 'placeholder:text-stone-400'} focus:border-[#c94d35]`}
+                      />
+                    </label>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       {!authUser ? <div className={`text-sm ${textMuted}`}>카드 체크와 수집표 저장은 로그인 후 이용하실 수 있습니다.</div> : <div />}
                       <button
@@ -1574,7 +1575,6 @@ export default function App() {
                       >
                         필터 초기화
                       </button>
-                    </div>
                     </div>
                   </div>
                 </section>
