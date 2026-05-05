@@ -1360,7 +1360,11 @@ export default function App() {
             <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <div className="font-black">📢 주소 변경 되었습니다.</div>
               <div className="text-sm font-medium">
-                기존 주소도 접속 가능하며 <span className="font-black">onepiece-tcgkr.vercel.app</span> 에서 <span className="font-black">optcgkorea.com</span> 으로 변경되었습니다.
+                기존 주소도 접속 가능하며 <span className="font-black">onepiece-tcgkr.vercel.app</span> 에서{' '}
+                <a href="https://optcgkorea.com" target="_blank" rel="noreferrer" className="font-black underline underline-offset-2">
+                  optcgkorea.com
+                </a>{' '}
+                으로 변경되었습니다.
               </div>
             </div>
           </section>
