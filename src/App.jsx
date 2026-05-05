@@ -21,6 +21,9 @@ const CARD_LOCALES = [
   { id: 'KR', label: '한글판' },
   { id: 'JP', label: '일본판' }
 ];
+const HOME_UPDATES = [
+  '[26.05.05] 일본판 카드 도감 추가'
+];
 const rarityPriority = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const OFFICIAL_LOGO_URL = 'https://onepiece-cardgame.kr/image/logo/main_logo.png';
 const OFFICIAL_SITE_URL = 'https://onepiece-cardgame.kr/';
@@ -1612,6 +1615,17 @@ export default function App() {
                     </div>
                   </div>
 
+                  <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
+                    <div className="text-lg font-black">업데이트 공지</div>
+                    <div className="mt-3 space-y-2">
+                      {HOME_UPDATES.map((item) => (
+                        <div key={item} className={`rounded-xl border px-4 py-3 text-sm font-semibold ${cardClass}`}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="grid gap-4 xl:grid-cols-1">
                     <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
                       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -2176,6 +2190,7 @@ export default function App() {
 
             <section className={`mt-5 border ${panelClass} rounded-2xl p-5 text-center`}>
               <div className="text-lg font-black">배너문의 주세요</div>
+              <div className={`mt-2 text-sm ${textMuted}`}>제휴 및 배너 관련 문의 환영합니다.</div>
             </section>
           </div>
         </div>
