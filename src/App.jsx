@@ -1415,11 +1415,11 @@ export default function App() {
               </div>
             </aside>}
 
-            <main className={viewMode === 'archive' || viewMode === 'collection' ? 'space-y-3' : 'space-y-5'}>
-              <section className={`border ${panelClass} rounded-2xl p-5`}>
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <main className={viewMode === 'archive' || viewMode === 'collection' ? 'space-y-2' : 'space-y-5'}>
+              <section className={`border ${panelClass} rounded-2xl ${viewMode === 'archive' || viewMode === 'collection' ? 'p-3' : 'p-5'}`}>
+                <div className={`flex flex-col ${viewMode === 'archive' || viewMode === 'collection' ? 'gap-2' : 'gap-4'} xl:flex-row xl:items-end xl:justify-between`}>
                   <div>
-                    {viewMode !== 'home' ? <div className="mb-3 flex flex-wrap gap-2">
+                    {viewMode !== 'home' ? <div className={`${viewMode === 'archive' || viewMode === 'collection' ? 'mb-2' : 'mb-3'} flex flex-wrap gap-2`}>
                       {CARD_LOCALES.map((locale) => {
                         const active = currentLocale === locale.id;
                         return (
@@ -1473,10 +1473,9 @@ export default function App() {
                       </>
                     ) : (
                       <>
-                        <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
+                        <h1 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-950'}`}>{currentSeries?.koName}</h1>
                         <div className={`mt-1 text-sm ${textMuted}`}>{currentSeries?.enName}</div>
-                        {officialSeriesCount !== cards.length ? <div className={`mt-2 text-sm ${textMuted}`}>현재 표시 {cards.length}장 · 공식 기준 {officialSeriesCount}장</div> : null}
-                        <p className={`mt-3 max-w-3xl text-sm leading-6 ${textMuted}`}>{currentSeries?.description}</p>
+                        {officialSeriesCount !== cards.length ? <div className={`mt-1 text-sm ${textMuted}`}>현재 표시 {cards.length}장 · 공식 기준 {officialSeriesCount}장</div> : null}
                       </>
                     )}
                   </div>
@@ -1643,7 +1642,7 @@ export default function App() {
                             <div className="flex items-center justify-between gap-3">
                               <div>
                                 <div className="text-sm font-black">{item.title}</div>
-                                <div className={`mt-1 text-xs ${textMuted}`}>{item.summary}</div>
+                                {opened ? <div className={`mt-1 text-xs ${textMuted}`}>{item.summary}</div> : null}
                               </div>
                               <div className="text-sm font-black text-[#c94d35]">{opened ? '접기' : '상세보기'}</div>
                             </div>
