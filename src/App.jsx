@@ -1660,19 +1660,13 @@ export default function App() {
 
                   <div className="grid gap-4 xl:grid-cols-1">
                     <div className={`border ${panelClass} rounded-2xl p-4 sm:p-5`}>
-                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
                         <button type="button" onClick={() => { setShopType('official'); setSelectedRegion('서울특별시'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-sm font-black">서울 공식 점포 보기</div>
                         </button>
                         <button type="button" onClick={() => { setShopType('general'); setSelectedRegion('경기도'); setSelectedGungu('전체'); setViewMode('shops'); }} className={`rounded-xl border px-4 py-4 text-left ${cardClass}`}>
                           <div className="text-sm font-black">경기 취급 점포 보기</div>
                         </button>
-                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className="text-sm font-black">취급 점포 {homeShopCounts.general}곳 · 공인/공식 점포 {homeShopCounts.official}곳</div>
-                        </div>
-                        <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
-                          <div className="text-sm font-black">사이트 운영과 업데이트 계속 진행 중</div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1700,14 +1694,14 @@ export default function App() {
                             </div>
                           </button>
                           {isOpen ? (
-                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                               {group.cards.map((card) => (
                                 <button key={card.id} type="button" onClick={() => openCard(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left transition hover:-translate-y-0.5`}>
-                                  <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
+                                  <div className={`relative aspect-[5/7] overflow-hidden p-1 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
                                     <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className="h-full w-full object-contain [image-rendering:auto]" />
                                     <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${ownedSet.has(card.id) ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{ownedSet.has(card.id) ? '보유중' : '미보유'}</div>
                                   </div>
-                                  <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
+                                  <div className={`space-y-1.5 border-t p-2 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
                                     <div className="flex items-center justify-between gap-2">
                                       <span className={`text-[11px] font-bold ${textMuted}`}>{card.cardNo}</span>
                                       <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
@@ -1771,16 +1765,16 @@ export default function App() {
                       </button>
                     </div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                  <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                     {collectionVisibleCards.map((card) => {
                       const owned = ownedSet.has(card.id);
                       return (
                         <button key={card.id} type="button" onClick={() => toggleOwned(card.id)} className={`overflow-hidden border ${cardClass} rounded-xl text-left ${owned ? 'ring-1 ring-emerald-500' : ''}`}>
-                          <div className={`relative aspect-[5/7] overflow-hidden p-2 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
+                          <div className={`relative aspect-[5/7] overflow-hidden p-1 ${isDark ? 'bg-[#111111]' : 'bg-[#f6f1e9]'}`}>
                             <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} className={`h-full w-full object-contain [image-rendering:auto] ${owned ? '' : 'opacity-65 grayscale-[0.15]'}`} />
                             <div className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${owned ? 'bg-emerald-600 text-white' : 'bg-black/55 text-white'}`}>{owned ? '보유중' : '미보유'}</div>
                           </div>
-                          <div className={`space-y-2 border-t p-3 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
+                          <div className={`space-y-1.5 border-t p-2 ${isDark ? 'border-[#333333]' : 'border-[#eee5d8]'}`}>
                             <div className="flex items-center justify-between gap-2">
                               <span className={`text-[11px] font-bold ${textMuted}`}>{card.cardNo}</span>
                               <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${rarityTone(card.rarity)}`}>{card.rarity}</span>
