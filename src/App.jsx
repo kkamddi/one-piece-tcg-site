@@ -78,6 +78,10 @@ function matchesMultiValue(cardValue, selectedValue) {
   return normalizeMultiValue(cardValue).includes(selectedValue);
 }
 
+function getBaseCardNo(cardNo) {
+  return String(cardNo ?? '').replace(/_p\d+$/i, '').trim();
+}
+
 function getFriendlyAuthErrorMessage(error, mode = 'login') {
   const rawMessage = String(error?.message ?? '').trim();
   if (mode === 'login') {
@@ -407,6 +411,18 @@ export default function App() {
     () => cardsData.filter((card) => (card.locale ?? 'KR') === currentLocale),
     [currentLocale]
   );
+  const krNameAliasMap = useMemo(() => {
+    const map = new Map();
+    cardsData
+      .filter((card) => (card.locale ?? 'KR') === 'KR')
+      .forEach((card) => {
+        const exact = String(card.cardNo ?? '').trim();
+        const base = getBaseCardNo(card.cardNo);
+        if (exact && !map.has(exact)) map.set(exact, card.name);
+        if (base && !map.has(base)) map.set(base, card.name);
+      });
+    return map;
+  }, []);
   const currentSeries = useMemo(
     () => localizedSeriesData.find((series) => series.id === selectedSeries) ?? localizedSeriesData.find((series) => series.id === getDefaultSeriesId(currentLocale, localizedSeriesData)) ?? localizedSeriesData[0],
     [selectedSeries, localizedSeriesData, currentLocale]
@@ -593,13 +609,11 @@ export default function App() {
     setLoading(true);
 
     const load = async () => {
-      const fetchedCards = trimmedSearchKeyword
-        ? isGlobalSearch
-          ? await searchCards(trimmedSearchKeyword, currentLocale)
-          : await fetchCards({ locale: currentLocale, series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity })
-        : await fetchCards({ locale: currentLocale, series: selectedSeries, rarity: activeRarity === 'ALL' ? '' : activeRarity });
+      const fetchedCards = (isGlobalSearch ? localizedCardsData : localizedCardsData.filter((card) => card.series === selectedSeries))
+        .filter((card) => (card.locale ?? 'KR') === currentLocale);
 
       const filteredCards = fetchedCards.filter((card) => {
+        const matchesLocale = (card.locale ?? 'KR') === currentLocale;
         const matchesSeries = isGlobalSearch || card.series === selectedSeries;
         const matchesRarity = activeRarity === 'ALL' || card.rarity === activeRarity;
         const matchesColor = matchesMultiValue(card.colorKo, activeColor);
@@ -607,8 +621,11 @@ export default function App() {
         const matchesAttribute = matchesMultiValue(card.attributeKo || card.attribute, activeAttribute);
         const hideBaseLeader = card.rarity === 'L' && !card.cardNo.includes('_P');
         const keyword = trimmedSearchKeyword.toLowerCase();
-        const matchesSearch = !keyword || [card.name, card.cardNo, card.type, card.effect].some((value) => String(value).toLowerCase().includes(keyword));
-        return matchesSeries && matchesRarity && matchesColor && matchesCost && matchesAttribute && matchesSearch && !hideBaseLeader;
+        const krAlias = card.locale === 'JP'
+          ? krNameAliasMap.get(String(card.cardNo ?? '').trim()) ?? krNameAliasMap.get(getBaseCardNo(card.cardNo)) ?? ''
+          : '';
+        const matchesSearch = !keyword || [card.name, card.cardNo, card.type, card.effect, krAlias].some((value) => String(value).toLowerCase().includes(keyword));
+        return matchesLocale && matchesSeries && matchesRarity && matchesColor && matchesCost && matchesAttribute && matchesSearch && !hideBaseLeader;
       });
 
       if (alive) {
@@ -621,7 +638,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [currentLocale, selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch]);
+  }, [currentLocale, selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch, localizedCardsData, krNameAliasMap]);
 
   useEffect(() => {
     setOpenRaritySections({});
