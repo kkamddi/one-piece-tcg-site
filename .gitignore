@@ -3,6 +3,9 @@ dist
 .vite
 .vercel
 .wrangler
+.env
+.env.local
+.env.*.local
 *.log
 preview-*.js
 preview-*.css
