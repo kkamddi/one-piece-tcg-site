@@ -7,7 +7,10 @@
     "dev": "node ./node_modules/vite/bin/vite.js --host 0.0.0.0",
     "build": "node ./node_modules/vite/bin/vite.js build",
     "start": "node ./node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port 4173",
-    "sync:cards": "node ./scripts/syncOfficialCards.js"
+    "sync:cards": "node ./scripts/syncOfficialCards.js",
+    "prepare:card-db": "node ./scripts/prepareCardDbSeed.js",
+    "validate:card-api": "node ./scripts/validateCardApiContract.js",
+    "upload:card-db": "node ./scripts/uploadCardDbToSupabase.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",

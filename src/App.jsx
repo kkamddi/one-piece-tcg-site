@@ -6,7 +6,6 @@ import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { addCommunityComment, createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityComments, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import { fetchShopRegions, fetchShops } from './api/shops';
-import cardsData from './data/cards.json';
 import seriesData from './data/series.json';
 import shopsData from './data/shops.json';
 
@@ -22,6 +21,11 @@ const CARD_LOCALES = [
   { id: 'JP', label: '일본판' },
   { id: 'EN', label: '영문판' }
 ];
+const CARD_TOTALS = {
+  KR: 2584,
+  JP: 4292,
+  EN: 3845
+};
 const HOME_UPDATES = [
   {
     id: '2026-05-05-update',
@@ -65,6 +69,19 @@ const SIDEBAR_CATEGORIES = [
   { id: 'flagship-line', label: '플래그십' },
   { id: 'championship-line', label: '챔피언십 / 시리얼' }
 ];
+const TRUSTED_IMAGE_HOSTS = new Set([
+  'onepiece-cardgame.kr',
+  'www.onepiece-cardgame.com',
+  'en.onepiece-cardgame.com',
+  'optcgkorea.com',
+  'www.optcgkorea.com'
+]);
+let cardsDataPromise;
+
+function loadCardsData() {
+  cardsDataPromise ??= import('./data/cards.json').then((module) => module.default);
+  return cardsDataPromise;
+}
 
 function getBaseSeriesId(seriesOrId) {
   if (typeof seriesOrId === 'object' && seriesOrId) return seriesOrId.baseSeriesId ?? seriesOrId.id ?? '';
@@ -100,6 +117,11 @@ function matchesMultiValue(cardValue, selectedValue) {
 
 function getBaseCardNo(cardNo) {
   return String(cardNo ?? '').replace(/_p\d+$/i, '').trim();
+}
+
+function getLocaleFromCardId(cardId) {
+  const match = String(cardId ?? '').match(/^(KR|JP|EN)-/);
+  return match?.[1] ?? 'KR';
 }
 
 function getFriendlyAuthErrorMessage(error, mode = 'login') {
@@ -192,10 +214,29 @@ function placeholderImage(event) {
   event.currentTarget.src = '/card-placeholder.svg';
 }
 
+function unwrapProxiedImageUrl(value) {
+  if (!value) return '';
+  try {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.optcgkorea.com';
+    const url = new URL(value, baseUrl);
+    if (url.pathname === '/api/card-image' && url.searchParams.has('url')) {
+      return url.searchParams.get('url') || value;
+    }
+  } catch {
+    return value;
+  }
+  return value;
+}
+
 function getCardImageSrc(card) {
-  const imageUrl = card?.imageUrl;
+  const imageUrl = unwrapProxiedImageUrl(card?.imageUrl);
   if (!imageUrl) return '/card-placeholder.svg';
-  if (card?.locale === 'JP') return `/api/card-image?url=${encodeURIComponent(imageUrl)}`;
+  try {
+    const url = new URL(imageUrl);
+    if (TRUSTED_IMAGE_HOSTS.has(url.hostname)) return imageUrl;
+  } catch {
+    return imageUrl;
+  }
   return imageUrl;
 }
 
@@ -315,22 +356,22 @@ function serializeDeckEntries(entries = []) {
     .filter((entry) => entry.id);
 }
 
-function hydrateDeckEntries(entries = []) {
+function hydrateDeckEntries(entries = [], cardSource = []) {
   return serializeDeckEntries(entries)
     .map((entry) => {
-      const card = cardsData.find((item) => item.id === entry.id);
+      const card = cardSource.find((item) => item.id === entry.id);
       return card ? { ...card, count: entry.count } : null;
     })
     .filter(Boolean);
 }
 
-function hydrateSavedDecks(decks = []) {
+function hydrateSavedDecks(decks = [], cardSource = []) {
   return Array.isArray(decks)
     ? decks
         .map((deck) => ({
           id: String(deck?.id ?? '').trim(),
           name: String(deck?.name ?? '').trim() || '내 덱',
-          deckEntries: hydrateDeckEntries(deck?.deckEntries ?? []),
+          deckEntries: hydrateDeckEntries(deck?.deckEntries ?? [], cardSource),
           leaderCardId: deck?.leaderCardId ? String(deck.leaderCardId) : null,
           updatedAt: deck?.updatedAt ?? null
         }))
@@ -423,18 +464,22 @@ export default function App() {
   const [visitorToken, setVisitorToken] = useState('');
   const [adminStats, setAdminStats] = useState(null);
   const [userStateReady, setUserStateReady] = useState(false);
+  const [storedDeckEntries, setStoredDeckEntries] = useState([]);
+  const [storedSavedDecks, setStoredSavedDecks] = useState([]);
+  const [allCardsData, setAllCardsData] = useState([]);
+  const [cardsDataReady, setCardsDataReady] = useState(false);
 
   const localizedSeriesData = useMemo(
     () => seriesData.filter((series) => (series.locale ?? 'KR') === currentLocale),
     [currentLocale]
   );
   const localizedCardsData = useMemo(
-    () => cardsData.filter((card) => (card.locale ?? 'KR') === currentLocale),
-    [currentLocale]
+    () => allCardsData.filter((card) => (card.locale ?? 'KR') === currentLocale),
+    [allCardsData, currentLocale]
   );
   const krNameAliasMap = useMemo(() => {
     const map = new Map();
-    cardsData
+    allCardsData
       .filter((card) => (card.locale ?? 'KR') === 'KR')
       .forEach((card) => {
         const exact = String(card.cardNo ?? '').trim();
@@ -443,7 +488,7 @@ export default function App() {
         if (base && !map.has(base)) map.set(base, card.name);
       });
     return map;
-  }, []);
+  }, [allCardsData]);
   const currentSeries = useMemo(
     () => localizedSeriesData.find((series) => series.id === selectedSeries) ?? localizedSeriesData.find((series) => series.id === getDefaultSeriesId(currentLocale, localizedSeriesData)) ?? localizedSeriesData[0],
     [selectedSeries, localizedSeriesData, currentLocale]
@@ -452,6 +497,22 @@ export default function App() {
   const isGlobalSearch = searchScope === 'all' && Boolean(trimmedSearchKeyword);
   const sidebarSections = useMemo(() => buildSidebarSections(localizedSeriesData), [localizedSeriesData]);
   const activeSidebarCategory = useMemo(() => getSeriesCategory(currentSeries ?? selectedSeries), [currentSeries, selectedSeries]);
+  const needsAllCardsData = viewMode === 'deck' || viewMode === 'lab' || viewMode === 'collection';
+
+  useEffect(() => {
+    if (!needsAllCardsData || cardsDataReady) return undefined;
+    let alive = true;
+    loadCardsData()
+      .then((nextCards) => {
+        if (!alive) return;
+        setAllCardsData(nextCards);
+        setCardsDataReady(true);
+      })
+      .catch((error) => console.error('Failed to load card data', error));
+    return () => {
+      alive = false;
+    };
+  }, [needsAllCardsData, cardsDataReady]);
 
   useEffect(() => {
     if (!localizedSeriesData.length) return;
@@ -519,7 +580,7 @@ export default function App() {
   }, [authUser, communityNickname]);
 
   useEffect(() => {
-    if (!communityAuthorToken) return;
+    if (!communityAuthorToken || viewMode !== 'community') return;
 
     let alive = true;
     setCommunityLoading(true);
@@ -541,7 +602,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [communityAuthorToken]);
+  }, [communityAuthorToken, viewMode]);
 
   useEffect(() => {
     if (!authUser?.id) {
@@ -551,6 +612,8 @@ export default function App() {
       setLeaderCardId(null);
       setSavedDecks([]);
       setActiveDeckId(null);
+      setStoredDeckEntries([]);
+      setStoredSavedDecks([]);
       if (viewMode === 'deck') setViewMode('home');
       const guestAuthorToken = window.localStorage.getItem(COMMUNITY_AUTHOR_TOKEN_KEY);
       const guestNickname = window.localStorage.getItem(COMMUNITY_NICKNAME_KEY);
@@ -569,10 +632,17 @@ export default function App() {
         if (!alive) return;
         if (state?.hasState) {
           setOwnedCardIds(Array.isArray(state.ownedCardIds) ? state.ownedCardIds : []);
-          setDeckEntries(hydrateDeckEntries(state.deckEntries));
+          const nextStoredDeckEntries = Array.isArray(state.deckEntries) ? state.deckEntries : [];
+          const nextStoredSavedDecks = Array.isArray(state.savedDecks) ? state.savedDecks : [];
+          setStoredDeckEntries(nextStoredDeckEntries);
+          setStoredSavedDecks(nextStoredSavedDecks);
+          if (allCardsData.length) setDeckEntries(hydrateDeckEntries(nextStoredDeckEntries, allCardsData));
           setLeaderCardId(state.leaderCardId || null);
-          setSavedDecks(hydrateSavedDecks(state.savedDecks));
+          if (allCardsData.length) setSavedDecks(hydrateSavedDecks(nextStoredSavedDecks, allCardsData));
           setActiveDeckId(state.activeDeckId || null);
+        } else {
+          setStoredDeckEntries([]);
+          setStoredSavedDecks([]);
         }
       })
       .catch((error) => console.error('Failed to load user state', error))
@@ -583,7 +653,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [authUser, viewMode]);
+  }, [authUser, viewMode, allCardsData]);
 
   useEffect(() => {
     if (!authUser?.id || !userStateReady) return undefined;
@@ -591,19 +661,28 @@ export default function App() {
     const timer = window.setTimeout(() => {
       saveMyState({
         ownedCardIds,
-        deckEntries: serializeDeckEntries(deckEntries),
+        deckEntries: cardsDataReady ? serializeDeckEntries(deckEntries) : storedDeckEntries,
         leaderCardId,
-        savedDecks: serializeSavedDecks(savedDecks),
+        savedDecks: cardsDataReady ? serializeSavedDecks(savedDecks) : storedSavedDecks,
         activeDeckId
       }).catch((error) => console.error('Failed to save user state', error));
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [authUser, userStateReady, ownedCardIds, deckEntries, leaderCardId, savedDecks, activeDeckId]);
+  }, [authUser, userStateReady, ownedCardIds, deckEntries, leaderCardId, savedDecks, activeDeckId, cardsDataReady, storedDeckEntries, storedSavedDecks]);
 
   useEffect(() => {
     if (!visitorToken) return;
-    trackVisit(visitorToken, window.location.pathname).catch((error) => console.error('Failed to track visit', error));
+
+    const reportVisit = () => {
+      trackVisit(visitorToken, window.location.pathname).catch((error) => console.error('Failed to track visit', error));
+    };
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(reportVisit, { timeout: 2500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+    const timer = window.setTimeout(reportVisit, 1500);
+    return () => window.clearTimeout(timer);
   }, [visitorToken]);
 
   useEffect(() => {
@@ -627,11 +706,13 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
+    if (viewMode !== 'archive' && viewMode !== 'collection') return undefined;
     setLoading(true);
 
     const load = async () => {
-      const fetchedCards = (isGlobalSearch ? localizedCardsData : localizedCardsData.filter((card) => card.series === selectedSeries))
-        .filter((card) => (card.locale ?? 'KR') === currentLocale);
+      const fetchedCards = isGlobalSearch
+        ? await searchCards(trimmedSearchKeyword, currentLocale)
+        : await fetchCards({ locale: currentLocale, series: selectedSeries });
 
       const filteredCards = fetchedCards.filter((card) => {
         const matchesLocale = (card.locale ?? 'KR') === currentLocale;
@@ -659,7 +740,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [currentLocale, selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch, localizedCardsData, krNameAliasMap]);
+  }, [viewMode, currentLocale, selectedSeries, activeRarity, activeColor, activeCost, activeAttribute, trimmedSearchKeyword, isGlobalSearch, krNameAliasMap]);
 
   useEffect(() => {
     setOpenRaritySections({});
@@ -673,6 +754,7 @@ export default function App() {
   }, [activeSidebarCategory]);
 
   useEffect(() => {
+    if (viewMode !== 'shops') return undefined;
     let alive = true;
 
     const loadRegions = async () => {
@@ -688,9 +770,10 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [shopType, selectedRegion, selectedGungu]);
+  }, [viewMode, shopType, selectedRegion, selectedGungu]);
 
   useEffect(() => {
+    if (viewMode !== 'shops') return undefined;
     let alive = true;
     setShopLoading(true);
 
@@ -712,7 +795,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [shopType, selectedRegion, selectedGungu, shopSearchKeyword]);
+  }, [viewMode, shopType, selectedRegion, selectedGungu, shopSearchKeyword]);
 
   useEffect(() => {
     setDeckPage(1);
@@ -720,8 +803,8 @@ export default function App() {
 
   const groupedCards = useMemo(() => groupByRarity(cards), [cards]);
   const rarityOptionSourceCards = useMemo(
-    () => (isGlobalSearch ? localizedCardsData : localizedCardsData.filter((card) => card.series === selectedSeries)),
-    [isGlobalSearch, localizedCardsData, selectedSeries]
+    () => cards,
+    [cards]
   );
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(rarityOptionSourceCards)], [rarityOptionSourceCards]);
   const colorOptions = useMemo(() => ['ALL', ...new Set(rarityOptionSourceCards.flatMap((card) => normalizeMultiValue(card.colorKo)))], [rarityOptionSourceCards]);
@@ -732,7 +815,7 @@ export default function App() {
   const collectionVisibleCards = useMemo(() => (activeRarity === 'ALL' ? cards : cards.filter((card) => card.rarity === activeRarity)), [cards, activeRarity]);
   const ownedInSeries = useMemo(() => cards.filter((card) => ownedSet.has(card.id)).length, [cards, ownedSet]);
   const ownedInVisibleCollection = useMemo(() => collectionVisibleCards.filter((card) => ownedSet.has(card.id)).length, [collectionVisibleCards, ownedSet]);
-  const officialSeriesCount = useMemo(() => localizedCardsData.filter((card) => card.series === selectedSeries).length, [localizedCardsData, selectedSeries]);
+  const officialSeriesCount = useMemo(() => cards.length, [cards.length]);
 
   const deckCards = useMemo(
     () => [...deckEntries].sort((a, b) => (a.categoryKo === '리더' ? -1 : b.categoryKo === '리더' ? 1 : b.count - a.count)),
@@ -773,8 +856,14 @@ export default function App() {
   const deckColorOptions = useMemo(() => ['ALL', ...new Set(localizedCardsData.map((card) => card.colorKo).filter(Boolean))], [localizedCardsData]);
   const deckRarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(localizedCardsData)], [localizedCardsData]);
   const deckCategoryOptions = useMemo(() => ['ALL', ...new Set(localizedCardsData.map((card) => card.categoryKo).filter(Boolean))], [localizedCardsData]);
-  const homeOwnedCount = useMemo(() => localizedCardsData.filter((card) => ownedSet.has(card.id)).length, [localizedCardsData, ownedSet]);
-  const homeOwnedPercent = useMemo(() => (localizedCardsData.length ? ((homeOwnedCount / localizedCardsData.length) * 100).toFixed(1) : '0.0'), [localizedCardsData.length, homeOwnedCount]);
+  const currentLocaleTotal = localizedCardsData.length || CARD_TOTALS[currentLocale] || 0;
+  const homeOwnedCount = useMemo(
+    () => localizedCardsData.length
+      ? localizedCardsData.filter((card) => ownedSet.has(card.id)).length
+      : ownedCardIds.filter((id) => getLocaleFromCardId(id) === currentLocale).length,
+    [currentLocale, localizedCardsData, ownedCardIds, ownedSet]
+  );
+  const homeOwnedPercent = useMemo(() => (currentLocaleTotal ? ((homeOwnedCount / currentLocaleTotal) * 100).toFixed(1) : '0.0'), [currentLocaleTotal, homeOwnedCount]);
   const collectionOwnedPercent = useMemo(() => (collectionVisibleCards.length ? ((ownedInVisibleCollection / collectionVisibleCards.length) * 100).toFixed(1) : '0.0'), [ownedInVisibleCollection, collectionVisibleCards.length]);
   const homeShopCounts = useMemo(
     () => ({
@@ -788,8 +877,8 @@ export default function App() {
     [cards, activeRarity]
   );
   const currentSeriesCardIds = useMemo(
-    () => localizedCardsData.filter((card) => card.series === selectedSeries).map((card) => card.id),
-    [localizedCardsData, selectedSeries]
+    () => cards.map((card) => card.id),
+    [cards]
   );
   const allCollectionCardIds = useMemo(
     () => localizedCardsData.map((card) => card.id),
@@ -1296,7 +1385,7 @@ export default function App() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: 'https://www.optcgkorea.com/',
           scopes: 'profile_nickname profile_image'
         }
       });
@@ -1498,7 +1587,7 @@ export default function App() {
                   <div className="flex flex-wrap gap-2 text-sm">
                     {viewMode === 'home' ? (
                       <>
-                        <Metric label="전체 카드" value={`${localizedCardsData.length}장`} className={subtleClass} />
+                        <Metric label="전체 카드" value={`${currentLocaleTotal}장`} className={subtleClass} />
                         <Metric label="시리즈" value={`${localizedSeriesData.length}개`} className={subtleClass} />
                         <Metric label="내 수집" value={`${homeOwnedCount}장`} className={subtleClass} />
                       </>
@@ -1632,7 +1721,7 @@ export default function App() {
                       <div className="grid h-full gap-3 grid-cols-2 xl:grid-cols-1">
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>
                           <div className={`text-sm ${textMuted}`}>수집 진행</div>
-                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {localizedCardsData.length}</div>
+                          <div className="mt-2 text-2xl font-black">{homeOwnedCount} / {currentLocaleTotal}</div>
                           <div className={`mt-1 text-sm ${textMuted}`}>{homeOwnedPercent}%</div>
                         </div>
                         <div className={`rounded-xl border px-4 py-4 ${cardClass}`}>

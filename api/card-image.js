@@ -38,11 +38,11 @@ export default async function handler(request, response) {
     }
 
     const contentType = upstream.headers.get('content-type') || 'image/png';
-    const cacheControl = upstream.headers.get('cache-control') || 'public, max-age=86400';
     const buffer = Buffer.from(await upstream.arrayBuffer());
 
     response.setHeader('Content-Type', contentType);
-    response.setHeader('Cache-Control', cacheControl);
+    response.setHeader('Cache-Control', 'public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=604800, immutable');
+    response.setHeader('CDN-Cache-Control', 'public, max-age=2592000, stale-while-revalidate=604800');
     response.status(200).send(buffer);
   } catch (error) {
     response.status(502).json({ error: 'proxy_failed', detail: error?.message ?? 'unknown' });
