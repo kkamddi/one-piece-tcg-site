@@ -7,6 +7,7 @@ const RATE_LIMITS = {
   communityIndex: 60,
   communityId: 60,
   market: 120,
+  marketCollector: 120,
   boxMarket: 30
 };
 const rateLimitBuckets = new Map();
@@ -162,6 +163,7 @@ function routeApi(pathParts) {
   if (first === 'series') return { key: 'series' };
   if (first === 'card-image') return { key: 'cardImage' };
   if (first === 'market') return { key: 'market' };
+  if (first === 'market-collector') return { key: 'marketCollector' };
   if (first === 'box-market') return { key: 'boxMarket' };
   return null;
 }
@@ -180,6 +182,7 @@ async function loadHandler(key) {
   if (key === 'series') return (await import('../../api/series.js')).default;
   if (key === 'cardImage') return (await import('../../api/card-image.js')).default;
   if (key === 'market') return (await import('../../api/market.js')).default;
+  if (key === 'marketCollector') return (await import('../../api/market-collector.js')).default;
   if (key === 'boxMarket') return (await import('../../api/box-market.js')).default;
   return null;
 }

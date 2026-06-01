@@ -1,0 +1,36 @@
+name: Market price collector
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Collect approved JP market prices
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+        run: |
+          if [ -z "$COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+
+          offset=0
+          limit=25
+          for i in $(seq 1 80); do
+            url="${COLLECTOR_URL}?scope=approved&limit=${limit}&offset=${offset}"
+            json=$(curl -fsS -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url")
+            echo "$json"
+            done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")
+            next_offset=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.nextOffset || 0)" "$json")
+            if [ "$done_flag" = "1" ]; then
+              break
+            fi
+            offset="$next_offset"
+            sleep 2
+          done

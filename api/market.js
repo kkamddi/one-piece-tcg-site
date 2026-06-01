@@ -243,6 +243,21 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
   };
 }
 
+export async function collectMarketSnapshot(item) {
+  if (!item?.apparelId) return { ok: false, error: 'missing_apparel_id' };
+  const conditionPrices = await fetchConditionPrices(item.apparelId);
+  await saveMarketSnapshots(item, conditionPrices);
+  const aPrice = getConditionPrice(conditionPrices, 'a') || usdToJpy(item?.minPrice);
+  const psa10Price = getConditionPrice(conditionPrices, 'psa10');
+  return {
+    ok: Boolean(aPrice || psa10Price),
+    apparelId: item.apparelId,
+    code: item.code || '',
+    aPrice,
+    psa10Price
+  };
+}
+
 async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
   const apparelId = params.get('apparelId');
