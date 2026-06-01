@@ -172,12 +172,26 @@ function filterPoints(points = [], range) {
   return filtered.length ? filtered : points.slice(-1);
 }
 
+function ensureDrawablePoints(points = [], range) {
+  if (points.length !== 1) return points;
+  const point = points[0];
+  const fallbackSpan = range === '7d'
+    ? 24 * 60 * 60 * 1000
+    : range === '1m'
+      ? 3 * 24 * 60 * 60 * 1000
+      : 7 * 24 * 60 * 60 * 1000;
+  return [
+    { ...point, timestamp: point.timestamp - fallbackSpan, synthetic: true },
+    point
+  ];
+}
+
 function buildSeries(points = [], price = 0) {
   const merged = mergeCurrentPoint(points, price);
   return {
-    '7d': filterPoints(merged, '7d'),
-    '1m': filterPoints(merged, '1m'),
-    all: filterPoints(merged, 'all')
+    '7d': ensureDrawablePoints(filterPoints(merged, '7d'), '7d'),
+    '1m': ensureDrawablePoints(filterPoints(merged, '1m'), '1m'),
+    all: ensureDrawablePoints(filterPoints(merged, 'all'), 'all')
   };
 }
 
