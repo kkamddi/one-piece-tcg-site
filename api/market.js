@@ -1,6 +1,7 @@
-const MARKET_API_ORIGIN = 'https://7a03ca96.optcgkorea-static.pages.dev';
+const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
 
 function isSelfRequest(request) {
+  if (!MARKET_API_ORIGIN) return true;
   const host = request.headers?.host || request.headers?.get?.('host') || '';
   return host === new URL(MARKET_API_ORIGIN).host;
 }
@@ -66,7 +67,7 @@ export default async function handler(request, response) {
 
   const params = normalizeParams(request.query);
 
-  if (isSelfRequest(request)) {
+  if (!MARKET_API_ORIGIN || isSelfRequest(request)) {
     const fallback = await localFallback(params);
     return response.status(fallback.error ? 404 : 200).json(fallback);
   }
@@ -84,8 +85,13 @@ export default async function handler(request, response) {
     const fallback = await localFallback(params);
     return response.status(fallback.error ? 404 : 200).json(fallback);
   }
+  const contentType = upstreamResponse.headers.get('Content-Type') || '';
+  if (!upstreamResponse.ok || !contentType.includes('application/json')) {
+    const fallback = await localFallback(params);
+    return response.status(fallback.error ? 404 : 200).json(fallback);
+  }
 
-  response.setHeader('Content-Type', upstreamResponse.headers.get('Content-Type') || 'application/json; charset=utf-8');
+  response.setHeader('Content-Type', contentType || 'application/json; charset=utf-8');
   response.setHeader('Cache-Control', 'no-store, max-age=0');
   response.status(upstreamResponse.status).send(text);
 }
