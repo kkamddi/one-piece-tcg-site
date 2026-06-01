@@ -2,7 +2,9 @@ import { supabaseAdmin } from '../lib/supabase-admin.js';
 
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
+const PRICECHARTING_BASE = 'https://www.pricecharting.com';
 const CACHE_SECONDS = 60 * 30;
+const PRICECHARTING_CACHE_SECONDS = 60 * 60 * 12;
 const USD_TO_JPY = 155;
 const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
 const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
@@ -28,6 +30,12 @@ function usdToJpy(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount <= 0) return 0;
   return Math.round(amount * USD_TO_JPY);
+}
+
+function centsToJpy(value) {
+  const cents = Number(value || 0);
+  if (!Number.isFinite(cents) || cents <= 0) return 0;
+  return usdToJpy(cents / 100);
 }
 
 function conditionKey(name) {
@@ -62,6 +70,161 @@ async function fetchConditionPrices(apparelId) {
   } catch {
     return [];
   }
+}
+
+function slugifyPriceChartingPart(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/['’]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+}
+
+function marketItemLooksVariant(item) {
+  const text = `${item?.name || ''} ${item?.setName || ''}`;
+  return /(?:-P\b|Parallel|Comic|Wanted|SPC|THE BEST|Premium|Promotional|Championship|Winner|Prize|Anniversary|Flagship|World Final)/i.test(text);
+}
+
+function derivePriceChartingUrl(item) {
+  if (!item?.code || !item?.name || !item?.setName) return '';
+  if (marketItemLooksVariant(item)) return '';
+
+  const cleanSet = String(item.setName || '')
+    .replace(/^Booster Pack\s*/i, '')
+    .replace(/^Extra Booster\s*/i, '')
+    .replace(/^Starter Deck\s*/i, '')
+    .replace(/["“”]/g, '')
+    .trim();
+  const setSlug = slugifyPriceChartingPart(cleanSet);
+  if (!setSlug) return '';
+
+  const namePart = String(item.name || '')
+    .replace(/\[[^\]]+\].*$/g, '')
+    .replace(/\([^)]*\).*$/g, '')
+    .replace(/\b(?:L|C|UC|R|SR|SEC|SP CARD|SP|P)\b.*$/i, '')
+    .replace(/\b([A-Za-z]+)\s+([A-Z])\s+([A-Za-z]+)\b/g, '$1$2$3')
+    .trim();
+  const cardSlug = slugifyPriceChartingPart(`${namePart} ${item.code}`);
+  if (!cardSlug) return '';
+
+  return `${PRICECHARTING_BASE}/game/one-piece-japanese-${setSlug}/${cardSlug}`;
+}
+
+function parsePriceChartingChartData(html) {
+  const match = String(html || '').match(/VGPC\.chart_data\s*=\s*(\{[\s\S]*?\});/);
+  if (!match) return null;
+  try {
+    return JSON.parse(match[1]);
+  } catch {
+    return null;
+  }
+}
+
+function parsePriceChartingPrice(html, label) {
+  const escaped = String(label || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = String(html || '').match(new RegExp(`<td>\\s*${escaped}\\s*<\\/td>\\s*<td[^>]*>\\s*\\$([0-9,.]+)\\s*<\\/td>`, 'i'));
+  if (!match) return 0;
+  return usdToJpy(Number(match[1].replace(/,/g, '')));
+}
+
+function priceChartingPointsToJpy(points = []) {
+  return (Array.isArray(points) ? points : [])
+    .map(([timestamp, cents]) => ({
+      timestamp: Number(timestamp),
+      price: centsToJpy(cents),
+      source: 'pricecharting_psa10'
+    }))
+    .filter((point) => Number.isFinite(point.timestamp) && point.price > 0)
+    .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+async function fetchPriceChartingSupplement(item) {
+  const url = derivePriceChartingUrl(item);
+  if (!url) return null;
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: 'text/html',
+        'User-Agent': 'Mozilla/5.0 OPTCGKoreaBot/1.0'
+      },
+      redirect: 'manual',
+      cf: { cacheTtl: PRICECHARTING_CACHE_SECONDS, cacheEverything: true }
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    const chartData = parsePriceChartingChartData(html);
+    const psa10Points = priceChartingPointsToJpy(chartData?.manualonly);
+    const psa10Price = parsePriceChartingPrice(html, 'PSA 10') || psa10Points[psa10Points.length - 1]?.price || 0;
+    if (!psa10Price && !psa10Points.length) return null;
+    return { url, psa10Price, psa10Points };
+  } catch {
+    return null;
+  }
+}
+
+function mergeUniquePoints(...pointGroups) {
+  const byTimestamp = new Map();
+  pointGroups.flat().forEach((point) => {
+    const timestamp = Number(point?.timestamp || 0);
+    const price = Number(point?.price || 0);
+    if (!Number.isFinite(timestamp) || price <= 0 || point.synthetic) return;
+    byTimestamp.set(timestamp, { timestamp, price, source: point.source || 'market' });
+  });
+  return [...byTimestamp.values()].sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function priceChartingPointsToRecentSales(points = [], label = 'PSA10') {
+  return (Array.isArray(points) ? points : [])
+    .slice()
+    .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
+    .slice(0, 8)
+    .map((point) => ({
+      date: formatSnapshotDate(point.timestamp),
+      timestamp: point.timestamp,
+      price: point.price,
+      condition: label,
+      source: point.source || 'pricecharting'
+    }));
+}
+
+function applyPriceChartingSupplement(detail, supplement) {
+  if (!supplement?.psa10Price && !supplement?.psa10Points?.length) return detail;
+  const existingAll = detail?.series?.psa10?.all || [];
+  const psa10Points = mergeUniquePoints(existingAll, supplement.psa10Points || []);
+  const psa10Price = Number(supplement.psa10Price || detail?.latestByCondition?.psa10?.price || 0) || 0;
+  if (!psa10Points.length && !psa10Price) return detail;
+
+  return {
+    ...detail,
+    latestByCondition: {
+      ...detail.latestByCondition,
+      psa10: psa10Price
+        ? { timestamp: Date.now(), price: psa10Price, source: 'pricecharting_psa10' }
+        : detail.latestByCondition?.psa10
+    },
+    series: {
+      ...detail.series,
+      psa10: buildSeries(psa10Points, psa10Price)
+    },
+    recentSalesByCondition: {
+      ...detail.recentSalesByCondition,
+      psa10: [
+        ...priceChartingPointsToRecentSales(supplement.psa10Points || [], 'PSA10'),
+        ...(detail.recentSalesByCondition?.psa10 || [])
+      ]
+        .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
+        .slice(0, 8)
+    },
+    sources: {
+      ...(detail.sources || {}),
+      pricecharting: {
+        url: supplement.url,
+        condition: 'psa10'
+      }
+    }
+  };
 }
 
 function normalizeSnapshotContent(content) {
@@ -284,7 +447,10 @@ async function localFallback(params) {
   const item = candidates[0] || null;
   if (!item) return { error: 'market_item_not_found', candidates: [] };
   const conditionPrices = await fetchConditionPrices(item.apparelId);
-  return buildFallbackDetail(item, conditionPrices, { persistSnapshot: params.get('summary') !== '1' });
+  const detail = await buildFallbackDetail(item, conditionPrices, { persistSnapshot: params.get('summary') !== '1' });
+  if (params.get('summary') === '1') return detail;
+  const priceChartingSupplement = await fetchPriceChartingSupplement(item);
+  return applyPriceChartingSupplement(detail, priceChartingSupplement);
 }
 
 export default async function handler(request, response) {
