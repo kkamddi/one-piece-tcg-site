@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
+import priceChartingMarketLinks from '../src/data/pricecharting-market-links.js';
 
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
@@ -112,6 +113,19 @@ function derivePriceChartingUrl(item) {
   return `${PRICECHARTING_BASE}/game/one-piece-japanese-${setSlug}/${cardSlug}`;
 }
 
+function getApprovedPriceChartingUrl(item) {
+  const apparelId = String(item?.apparelId || '');
+  if (!apparelId) return '';
+  const match = (Array.isArray(priceChartingMarketLinks) ? priceChartingMarketLinks : [])
+    .find((link) => (
+      link?.status === 'approved'
+      && String(link.apparelId || '') === apparelId
+      && typeof link.priceChartingUrl === 'string'
+      && link.priceChartingUrl.startsWith(`${PRICECHARTING_BASE}/game/`)
+    ));
+  return match?.priceChartingUrl || '';
+}
+
 function parsePriceChartingChartData(html) {
   const match = String(html || '').match(/VGPC\.chart_data\s*=\s*(\{[\s\S]*?\});/);
   if (!match) return null;
@@ -141,7 +155,7 @@ function priceChartingPointsToJpy(points = []) {
 }
 
 async function fetchPriceChartingSupplement(item) {
-  const url = derivePriceChartingUrl(item);
+  const url = getApprovedPriceChartingUrl(item) || derivePriceChartingUrl(item);
   if (!url) return null;
   try {
     const response = await fetch(url, {
