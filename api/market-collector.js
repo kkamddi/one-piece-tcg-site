@@ -4,6 +4,8 @@ import { collectMarketSnapshot } from './market.js';
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 50;
+const DEFAULT_CONCURRENCY = 5;
+const MAX_CONCURRENCY = 8;
 
 function getBearerToken(request) {
   const header = String(request.headers?.authorization || request.headers?.Authorization || '');
@@ -40,24 +42,30 @@ function buildTargetItems(scope = 'approved') {
   return jpMarketCards.filter((item) => approvedIds.has(Number(item.apparelId)) && byApparelId.has(Number(item.apparelId)));
 }
 
-async function collectBatch(items) {
+async function collectBatch(items, concurrency = DEFAULT_CONCURRENCY) {
   const result = { collected: 0, priced: 0, failed: 0, errors: [] };
-  for (const item of items) {
-    try {
-      const collected = await collectMarketSnapshot(item);
-      result.collected += 1;
-      if (collected.ok) result.priced += 1;
-    } catch (error) {
-      result.failed += 1;
-      if (result.errors.length < 5) {
-        result.errors.push({
-          apparelId: item?.apparelId || '',
-          code: item?.code || '',
-          error: error?.message || 'collect_failed'
-        });
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (cursor < items.length) {
+      const item = items[cursor];
+      cursor += 1;
+      try {
+        const collected = await collectMarketSnapshot(item);
+        result.collected += 1;
+        if (collected.ok) result.priced += 1;
+      } catch (error) {
+        result.failed += 1;
+        if (result.errors.length < 5) {
+          result.errors.push({
+            apparelId: item?.apparelId || '',
+            code: item?.code || '',
+            error: error?.message || 'collect_failed'
+          });
+        }
       }
     }
-  }
+  });
+  await Promise.all(workers);
   return result;
 }
 
@@ -73,8 +81,9 @@ export default async function handler(request, response) {
   const allTargets = buildTargetItems(scope);
   const offset = Math.max(0, Number(request.query?.offset || 0) || 0);
   const limit = Math.min(MAX_LIMIT, Math.max(1, Number(request.query?.limit || DEFAULT_LIMIT) || DEFAULT_LIMIT));
+  const concurrency = Math.min(MAX_CONCURRENCY, Math.max(1, Number(request.query?.concurrency || DEFAULT_CONCURRENCY) || DEFAULT_CONCURRENCY));
   const batch = allTargets.slice(offset, offset + limit);
-  const batchResult = await collectBatch(batch);
+  const batchResult = await collectBatch(batch, concurrency);
   const nextOffset = offset + batch.length;
 
   return response.status(200).json({
@@ -83,6 +92,7 @@ export default async function handler(request, response) {
     total: allTargets.length,
     offset,
     limit,
+    concurrency,
     nextOffset,
     done: nextOffset >= allTargets.length,
     ...batchResult
