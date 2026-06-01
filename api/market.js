@@ -1,7 +1,13 @@
+import { supabaseAdmin } from '../lib/supabase-admin.js';
+
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const CACHE_SECONDS = 60 * 30;
 const USD_TO_JPY = 155;
+const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
+const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
+const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const SNAPSHOT_LIMIT = 180;
 
 function isSelfRequest(request) {
   if (!MARKET_API_ORIGIN) return true;
@@ -36,6 +42,10 @@ function getConditionPrice(conditionPrices, key) {
   return found ? usdToJpy(found.minPrice) : 0;
 }
 
+function getConditionRaw(conditionPrices, key) {
+  return (conditionPrices || []).find((item) => conditionKey(item.conditionName) === key) || null;
+}
+
 async function fetchConditionPrices(apparelId) {
   if (!apparelId) return [];
   try {
@@ -54,15 +64,151 @@ async function fetchConditionPrices(apparelId) {
   }
 }
 
-function buildSeriesPoint(price) {
-  const now = Date.now();
-  return price ? [{ timestamp: now, price }] : [];
+function normalizeSnapshotContent(content) {
+  if (!content) return null;
+  try {
+    return typeof content === 'string' ? JSON.parse(content) : content;
+  } catch {
+    return null;
+  }
 }
 
-function buildFallbackDetail(item, conditionPrices = []) {
+function snapshotAuthorToken(apparelId, key) {
+  return `market:${apparelId}:${key}`;
+}
+
+async function saveMarketSnapshots(item, conditionPrices = []) {
+  if (!supabaseAdmin || !item?.apparelId) return;
+
+  const now = Date.now();
+  const bucketStartedAt = Math.floor(now / SNAPSHOT_INTERVAL_MS) * SNAPSHOT_INTERVAL_MS;
+  const bucketDate = new Date(bucketStartedAt).toISOString();
+  const rows = ['a', 'psa10'].map((key) => {
+    const raw = getConditionRaw(conditionPrices, key);
+    const price = raw ? usdToJpy(raw.minPrice) : 0;
+    if (!price) return null;
+    const authorToken = snapshotAuthorToken(item.apparelId, key);
+    const content = {
+      apparelId: Number(item.apparelId),
+      code: item.code || '',
+      condition: key,
+      conditionName: raw.conditionName || key.toUpperCase(),
+      conditionId: raw.conditionId || null,
+      price,
+      minPriceUsd: Number(raw.minPrice || 0) || 0,
+      source: 'snkrdunk_min_price',
+      capturedAt: new Date(now).toISOString()
+    };
+    return {
+      id: `market-snapshot-${item.apparelId}-${key}-${bucketStartedAt}`,
+      created_at: bucketDate,
+      updated_at: new Date(now).toISOString(),
+      board_id: SNAPSHOT_BOARD_ID,
+      nickname: 'market',
+      title: `${item.code || ''} ${key}`.trim(),
+      card_name: item.code || '',
+      image_url: item.previewImageUrl || '',
+      content: JSON.stringify(content),
+      likes: 0,
+      views: 0,
+      author_token: authorToken,
+      liked_tokens: []
+    };
+  }).filter(Boolean);
+
+  if (!rows.length) return;
+  try {
+    await supabaseAdmin.from(COMMUNITY_TABLE).upsert(rows, { onConflict: 'id' });
+  } catch {
+    // Snapshot persistence is best-effort. Market display must not fail because of it.
+  }
+}
+
+async function readMarketSnapshots(apparelId) {
+  if (!supabaseAdmin || !apparelId) return { a: [], psa10: [] };
+  try {
+    const { data, error } = await supabaseAdmin
+      .from(COMMUNITY_TABLE)
+      .select('content, created_at')
+      .eq('board_id', SNAPSHOT_BOARD_ID)
+      .in('author_token', [snapshotAuthorToken(apparelId, 'a'), snapshotAuthorToken(apparelId, 'psa10')])
+      .order('created_at', { ascending: true })
+      .limit(SNAPSHOT_LIMIT);
+    if (error) return { a: [], psa10: [] };
+    return (data || []).reduce((acc, row) => {
+      const parsed = normalizeSnapshotContent(row.content);
+      const key = conditionKey(parsed?.condition || parsed?.conditionName);
+      const price = Number(parsed?.price || 0);
+      const timestamp = new Date(parsed?.capturedAt || row.created_at || Date.now()).getTime();
+      if ((key === 'a' || key === 'psa10') && price > 0 && Number.isFinite(timestamp)) {
+        acc[key].push({ timestamp, price });
+      }
+      return acc;
+    }, { a: [], psa10: [] });
+  } catch {
+    return { a: [], psa10: [] };
+  }
+}
+
+function mergeCurrentPoint(points = [], price = 0) {
+  const valid = points
+    .map((point) => ({ timestamp: Number(point.timestamp), price: Number(point.price) }))
+    .filter((point) => Number.isFinite(point.timestamp) && point.price > 0)
+    .sort((a, b) => a.timestamp - b.timestamp);
+  if (!price) return valid;
+  const now = Date.now();
+  const last = valid[valid.length - 1];
+  if (!last || Math.abs(now - last.timestamp) > 60 * 60 * 1000 || last.price !== price) {
+    valid.push({ timestamp: now, price });
+  }
+  return valid;
+}
+
+function filterPoints(points = [], range) {
+  if (range === 'all') return points;
+  const days = range === '7d' ? 7 : 30;
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  const filtered = points.filter((point) => point.timestamp >= cutoff);
+  return filtered.length ? filtered : points.slice(-1);
+}
+
+function buildSeries(points = [], price = 0) {
+  const merged = mergeCurrentPoint(points, price);
+  return {
+    '7d': filterPoints(merged, '7d'),
+    '1m': filterPoints(merged, '1m'),
+    all: filterPoints(merged, 'all')
+  };
+}
+
+function formatSnapshotDate(timestamp) {
+  const date = new Date(timestamp);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  return `${month}.${day} ${hour}:${minute}`;
+}
+
+function buildRecentSnapshots(points = [], price = 0, label = '') {
+  return mergeCurrentPoint(points, price)
+    .slice()
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 8)
+    .map((point) => ({
+      date: formatSnapshotDate(point.timestamp),
+      timestamp: point.timestamp,
+      price: point.price,
+      condition: label
+    }));
+}
+
+async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot = false } = {}) {
   const basePrice = usdToJpy(item?.minPrice);
   const aPrice = getConditionPrice(conditionPrices, 'a') || basePrice;
   const psa10Price = getConditionPrice(conditionPrices, 'psa10');
+  if (persistSnapshot) await saveMarketSnapshots(item, conditionPrices);
+  const snapshots = await readMarketSnapshots(item?.apparelId);
   const latestByCondition = {};
   if (aPrice) latestByCondition.a = { timestamp: Date.now(), price: aPrice };
   if (psa10Price) latestByCondition.psa10 = { timestamp: Date.now(), price: psa10Price };
@@ -86,11 +232,14 @@ function buildFallbackDetail(item, conditionPrices = []) {
       { key: 'all', label: 'ALL' }
     ],
     series: {
-      a: { '7d': buildSeriesPoint(aPrice), '1m': buildSeriesPoint(aPrice), all: buildSeriesPoint(aPrice) },
-      psa10: { '7d': buildSeriesPoint(psa10Price), '1m': buildSeriesPoint(psa10Price), all: buildSeriesPoint(psa10Price) }
+      a: buildSeries(snapshots.a, aPrice),
+      psa10: buildSeries(snapshots.psa10, psa10Price)
     },
     latestByCondition,
-    recentSalesByCondition: { a: [], psa10: [] }
+    recentSalesByCondition: {
+      a: buildRecentSnapshots(snapshots.a, aPrice, 'A'),
+      psa10: buildRecentSnapshots(snapshots.psa10, psa10Price, 'PSA10')
+    }
   };
 }
 
@@ -106,7 +255,7 @@ async function localFallback(params) {
   const item = candidates[0] || null;
   if (!item) return { error: 'market_item_not_found', candidates: [] };
   const conditionPrices = await fetchConditionPrices(item.apparelId);
-  return buildFallbackDetail(item, conditionPrices);
+  return buildFallbackDetail(item, conditionPrices, { persistSnapshot: params.get('summary') !== '1' });
 }
 
 export default async function handler(request, response) {
