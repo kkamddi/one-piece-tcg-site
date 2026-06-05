@@ -12,13 +12,13 @@ import seriesCardCounts from './data/series-card-counts.json';
 import './renew.css';
 
 const LOGO_SRC = '/onepiece-logo-main-tight.png';
-const DONATION_URL = 'https://acoffee.shop/d/573d0164-c9c5-45e7-84ce-ed432026517c';
 const SNKRDUNK_MARKET_URL = 'https://snkrdunk.com/en/invitation/AGJ872';
 const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const RENEWAL_NOTICE_KEY = 'one-piece-tcg-renewal-notice-2026-05-29';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
+const RECENT_SALES_VISIBLE_MS = 7 * 24 * 60 * 60 * 1000;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
 const RENEW_HOME_UPDATES = [
@@ -92,7 +92,9 @@ const COUPANG_PARTNER_ITEMS = [
   { title: '슬리브', description: '카드 기본 보호용', href: 'https://link.coupang.com/a/eaCOdZmKuO' },
   { title: '탑로더', description: '고가 카드 보관용', href: 'https://link.coupang.com/a/eaCQ3DWFZ6' },
   { title: '바인더', description: '컬렉션 정리용', href: 'https://link.coupang.com/a/eaCTozQr92' },
-  { title: '자석케이스', description: '전시·장기 보관용', href: 'https://link.coupang.com/a/eaCV5rRP1U' }
+  { title: '자석케이스', description: '전시·장기 보관용', href: 'https://link.coupang.com/a/eaCV5rRP1U' },
+  { title: '카드 거치대', description: '전시·촬영 보조', href: '' },
+  { title: '촬영박스', description: '카드 촬영 조명용', href: '' }
 ];
 const OFFICIAL_LINK_ITEMS = [
   { labelKr: '공식카페', labelEn: 'Official Cafe', href: 'https://cafe.naver.com/onepiecetcg', external: true },
@@ -256,6 +258,15 @@ function formatMarketDate(timestamp) {
   return date.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' });
 }
 
+function formatChartAxisDate(timestamp) {
+  const date = new Date(Number(timestamp || 0));
+  if (Number.isNaN(date.getTime())) return '';
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}.${month}.${day}`;
+}
+
 function getUserDisplayName(user) {
   const metadata = user?.user_metadata || {};
   return metadata.nickname || metadata.username || user?.email?.split('@')[0] || '계정';
@@ -287,7 +298,7 @@ const UI_TEXT = {
     navShops: '구매처',
     login: '로그인',
     logout: '로그아웃',
-    donate: '후원',
+    cardSupplies: '카드용품',
     searchKr: '한글판',
     searchJp: '일본판',
     searchPlaceholder: '카드명 또는 품번 검색...',
@@ -368,7 +379,7 @@ const UI_TEXT = {
     navShops: 'Shops',
     login: 'Login',
     logout: 'Logout',
-    donate: 'Donation',
+    cardSupplies: 'Supplies',
     searchKr: 'KR',
     searchJp: 'JP',
     searchPlaceholder: 'Search card name or code...',
@@ -489,6 +500,11 @@ const PRIVACY_SECTIONS = [
 
 function RenewHeader({ activePage, onNavigate, isDark, onToggleTheme, isLoggedIn, displayName, onAuthClick, uiLang, onUiLangChange }) {
   const t = (key) => getUiText(uiLang, key);
+  const [suppliesOpen, setSuppliesOpen] = useState(false);
+  const openSupplyLink = (event, href) => {
+    event.preventDefault();
+    window.location.href = href;
+  };
   return (
     <header className="renew-header">
       <div className="renew-nav">
@@ -518,9 +534,47 @@ function RenewHeader({ activePage, onNavigate, isDark, onToggleTheme, isLoggedIn
               </>
             ) : t('login')}
           </button>
-          <a className="renew-pill" href={DONATION_URL} target="_blank" rel="noreferrer">
-            {t('donate')}
-          </a>
+          <div
+            className={`renew-supplies-menu ${suppliesOpen ? 'is-open' : ''}`}
+            onMouseEnter={() => setSuppliesOpen(true)}
+            onMouseLeave={() => setSuppliesOpen(false)}
+            onFocus={() => setSuppliesOpen(true)}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setSuppliesOpen(false);
+            }}
+          >
+            <button
+              type="button"
+              className="renew-pill renew-supplies-trigger"
+              aria-haspopup="true"
+              aria-expanded={suppliesOpen}
+              onClick={() => setSuppliesOpen(true)}
+            >
+              {t('cardSupplies')}
+            </button>
+            <div className="renew-supplies-dropdown" role="menu" aria-label="카드용품">
+              {COUPANG_PARTNER_ITEMS.map((item) => (
+                item.href ? (
+                  <a
+                    key={item.title}
+                    href={item.href}
+                    rel="nofollow sponsored noreferrer"
+                    role="menuitem"
+                    onMouseDown={(event) => openSupplyLink(event, item.href)}
+                    onClick={(event) => openSupplyLink(event, item.href)}
+                  >
+                    <b>{item.title}</b>
+                    <span>{item.description}</span>
+                  </a>
+                ) : (
+                  <span key={item.title} className="is-disabled" role="menuitem" aria-disabled="true">
+                    <b>{item.title}</b>
+                    <small>링크 준비중</small>
+                  </span>
+                )
+              ))}
+            </div>
+          </div>
           <div className="renew-ui-lang" aria-label="UI language">
             {['KR', 'EN'].map((lang) => (
               <button key={lang} type="button" className={uiLang === lang ? 'is-active' : ''} onClick={() => onUiLangChange(lang)}>
@@ -1097,7 +1151,7 @@ function PortfolioValueImage({ item, src, resolveImage, onError }) {
 
 function CoupangPartnerBanners() {
   return (
-    <section className="renew-partner-banners" aria-label="카드 보관용품 추천">
+    <section id="card-supplies" className="renew-partner-banners" aria-label="카드 보관용품 추천">
       <div className="renew-partner-head">
         <strong>카드 보관용품</strong>
       </div>
@@ -1478,10 +1532,18 @@ function PlaceholderPage({ title }) {
   );
 }
 
-function RenewMarketChart({ points = [], uiLang }) {
+function RenewMarketChart({ points = [], uiLang, range }) {
   const t = (key) => getUiText(uiLang, key);
   const [hoverIndex, setHoverIndex] = useState(null);
-  if (!points.length) {
+  const orderedPoints = points
+    .map((point) => ({
+      ...point,
+      timestamp: Number(point.timestamp || 0),
+      price: Number(point.price || 0)
+    }))
+    .filter((point) => Number.isFinite(point.timestamp) && point.timestamp > 0 && point.price > 0)
+    .sort((a, b) => a.timestamp - b.timestamp);
+  if (!orderedPoints.length) {
     return <div className="renew-chart-placeholder"><span>{t('noChart')}</span></div>;
   }
   const width = 920;
@@ -1489,27 +1551,65 @@ function RenewMarketChart({ points = [], uiLang }) {
   const padX = 54;
   const padTop = 26;
   const padBottom = 42;
-  const prices = points.map((point) => Number(point.price || 0));
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = Math.max(max - min, 1);
-  const plotted = points.map((point, index) => {
-    const x = padX + ((width - padX * 2) * index / Math.max(points.length - 1, 1));
-    const y = padTop + ((max - Number(point.price || 0)) / range) * (height - padTop - padBottom);
-    return { ...point, x, y };
+  const prices = orderedPoints.map((point) => Number(point.price || 0));
+  const sortedPrices = [...prices].sort((a, b) => a - b);
+  const percentile = (value) => {
+    const index = Math.min(sortedPrices.length - 1, Math.max(0, Math.floor((sortedPrices.length - 1) * value)));
+    return sortedPrices[index];
+  };
+  const min = sortedPrices[0];
+  const max = sortedPrices[sortedPrices.length - 1];
+  const q1 = percentile(0.25);
+  const q3 = percentile(0.75);
+  const iqr = q3 - q1;
+  const outlierMin = iqr > 0 ? Math.max(min, q1 - iqr * 1.5) : min;
+  const outlierMax = iqr > 0 ? Math.min(max, q3 + iqr * 1.5) : max;
+  const useOutlierScale = points.length >= 6 && outlierMax > outlierMin && (outlierMin > min || outlierMax < max);
+  const scaleMinBase = useOutlierScale ? outlierMin : min;
+  const scaleMaxBase = useOutlierScale ? outlierMax : max;
+  const scalePadding = Math.max((scaleMaxBase - scaleMinBase) * 0.16, scaleMaxBase * 0.012, 1000);
+  const scaleMin = Math.max(0, scaleMinBase - scalePadding);
+  const scaleMax = scaleMaxBase + scalePadding;
+  const priceRange = Math.max(scaleMax - scaleMin, 1);
+  const average = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+  const averagePrice = Math.min(scaleMax, Math.max(scaleMin, average));
+  const averageY = padTop + ((scaleMax - averagePrice) / priceRange) * (height - padTop - padBottom);
+  const minTime = orderedPoints[0].timestamp;
+  const maxTime = orderedPoints[orderedPoints.length - 1].timestamp;
+  const timeRange = Math.max(maxTime - minTime, 1);
+  const plotted = orderedPoints.map((point) => {
+    const x = padX + ((width - padX * 2) * (point.timestamp - minTime) / timeRange);
+    const price = Number(point.price || 0);
+    const clampedPrice = Math.min(scaleMax, Math.max(scaleMin, price));
+    const y = padTop + ((scaleMax - clampedPrice) / priceRange) * (height - padTop - padBottom);
+    return { ...point, x, y, isClamped: price !== clampedPrice };
   });
   const path = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
   const active = plotted[hoverIndex ?? plotted.length - 1];
   const tipX = active ? Math.min(active.x + 12, width - 150) : 0;
   const tipY = active ? Math.max(active.y - 58, 8) : 0;
+  const midPoint = plotted[Math.floor((plotted.length - 1) / 2)] || plotted[0];
+  const axisLabels = [
+    { key: 'start', className: 'is-start', x: padX, text: formatChartAxisDate(plotted[0]?.timestamp) },
+    { key: 'middle', className: 'is-middle', x: midPoint?.x || width / 2, text: formatChartAxisDate(midPoint?.timestamp) },
+    { key: 'end', className: 'is-end', x: width - padX, text: formatChartAxisDate(plotted[plotted.length - 1]?.timestamp) }
+  ].filter((item) => item.text);
+  const rangeLabel = range === '1m' ? '1M' : range === 'all' ? 'ALL' : '7D';
 
   return (
     <div className="renew-market-chart-box">
+      <span className="renew-chart-range-label">{rangeLabel}</span>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="시세 그래프">
+        <defs>
+          <linearGradient id="renew-chart-fill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#d04d38" stopOpacity="0.24" />
+            <stop offset="100%" stopColor="#d04d38" stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
         {[0, 1, 2, 3].map((step) => {
           const y = padTop + ((height - padTop - padBottom) * step / 3);
-          const value = max - (range * step / 3);
+          const value = scaleMax - (priceRange * step / 3);
           return (
             <g key={step}>
               <line x1={padX} y1={y} x2={width - padX} y2={y} />
@@ -1517,10 +1617,22 @@ function RenewMarketChart({ points = [], uiLang }) {
             </g>
           );
         })}
+        <line className="renew-chart-average" x1={padX} y1={averageY} x2={width - padX} y2={averageY} />
         <path d={area} className="renew-chart-area" />
         <path d={path} className="renew-chart-line" />
+        {axisLabels.map((item) => (
+          <text key={item.key} className={`renew-chart-axis-date ${item.className}`} x={item.x} y={height - 12}>
+            {item.text}
+          </text>
+        ))}
         {plotted.map((point, index) => (
-          <circle key={`${point.timestamp}-${index}`} cx={point.x} cy={point.y} r={index === hoverIndex || (hoverIndex == null && index === plotted.length - 1) ? 5 : 3} />
+          <circle
+            key={`${point.timestamp}-${index}`}
+            className={`renew-chart-point ${point.isClamped ? 'is-clamped' : ''}`}
+            cx={point.x}
+            cy={point.y}
+            r={index === hoverIndex || (hoverIndex == null && index === plotted.length - 1) ? 5 : 3}
+          />
         ))}
         {plotted.map((point, index) => (
           <circle
@@ -1728,6 +1840,10 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const selectedLatest = marketDetail?.latestByCondition?.[condition];
   const chartPoints = marketDetail?.series?.[condition]?.[range] || [];
   const recentSales = marketDetail?.recentSalesByCondition?.[condition] || [];
+  const recentSalesVisible = recentSales.filter((sale) => {
+    const timestamp = Number(sale?.timestamp || 0);
+    return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
+  });
   const currentPrice = selectedLatest?.price ? formatYen(selectedLatest.price) : selected?.minPriceFormat || '가격 정보 없음';
 
   return (
@@ -1802,17 +1918,17 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                   ))}
                 </div>
               </div>
-              <RenewMarketChart points={chartPoints} uiLang={uiLang} />
+              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={range} />
               <div className="renew-market-recent">
                 <h3>{t('recentSales')}</h3>
-                {recentSales.slice(0, 8).map((sale, index) => (
+                {recentSalesVisible.slice(0, 8).map((sale, index) => (
                   <div key={`${sale.date}-${sale.price}-${index}`} className="renew-market-sale">
                     <span>{sale.condition || condition.toUpperCase()}</span>
                     <small>{sale.date}</small>
                     <strong>{formatYen(sale.price)}</strong>
                   </div>
                 ))}
-                {!recentSales.length ? <div className="renew-empty">{t('noRecentSales')}</div> : null}
+                {!recentSalesVisible.length ? <div className="renew-empty">{t('noRecentSales')}</div> : null}
               </div>
             </div>
           </div>
@@ -2310,7 +2426,6 @@ export default function RenewApp() {
       )}
       {authOpen ? <RenewAuthModal onClose={() => setAuthOpen(false)} onSignedIn={setAuthUser} /> : null}
       {deckComingSoonOpen ? <RenewComingSoonModal uiLang={uiLang} onClose={() => setDeckComingSoonOpen(false)} /> : null}
-      {activePage === 'home' ? <CoupangPartnerBanners /> : null}
       <footer className="renew-footer">
         <strong>© 2026 OPTCG Korea. All rights reserved.</strong>
         <p>

@@ -10,7 +10,8 @@
     "sync:cards": "node ./scripts/syncOfficialCards.js",
     "prepare:card-db": "node ./scripts/prepareCardDbSeed.js",
     "validate:card-api": "node ./scripts/validateCardApiContract.js",
-    "upload:card-db": "node ./scripts/uploadCardDbToSupabase.js"
+    "upload:card-db": "node ./scripts/uploadCardDbToSupabase.js",
+    "collect:market": "node ./scripts/runMarketCollectorCycle.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",
