@@ -1,0 +1,38 @@
+name: Official topics sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 03:07 / 09:07 / 15:07 / 21:07 KST
+    - cron: "7 0,6,12,18 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync official topics
+        run: node scripts/syncOfficialTopics.js
+
+      - name: Commit topic updates
+        run: |
+          if git diff --quiet -- src/data/topics.json; then
+            echo "No topic updates."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/topics.json
+          git commit -m "chore: sync official topics"
+          git push

@@ -3,8 +3,8 @@ name: Market price collector
 on:
   workflow_dispatch:
   schedule:
-    # 09:17 / 21:17 KST
-    - cron: "17 */12 * * *"
+    # 03:17 / 09:17 / 15:17 / 21:17 KST
+    - cron: "17 0,6,12,18 * * *"
 
 jobs:
   collect:
