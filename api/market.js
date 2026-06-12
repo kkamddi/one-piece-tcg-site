@@ -11,6 +11,60 @@ const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts
 const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
 const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_LIMIT = 180;
+const MARKET_DATA_SOURCE = String(process.env.MARKET_DATA_SOURCE || '').trim().toLowerCase();
+const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
+const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
+const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
+const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
+const MARKET_WRITE_SOURCE = String(process.env.MARKET_WRITE_SOURCE || '').trim().toLowerCase();
+
+function shouldReadD1Market() {
+  return MARKET_DATA_SOURCE !== 'supabase'
+    && (MARKET_DATA_SOURCE === 'd1' || Boolean(getD1Binding()) || Boolean(D1_API_TOKEN && D1_ACCOUNT_ID && D1_DATABASE_ID));
+}
+
+function shouldReadSupabaseMarket() {
+  return MARKET_DATA_SOURCE === 'supabase';
+}
+
+function getD1Binding() {
+  const binding = process.env?.[D1_BINDING_NAME] || process.env?.DB || null;
+  return binding && typeof binding.prepare === 'function' ? binding : null;
+}
+
+async function queryD1(sql, params = []) {
+  const binding = getD1Binding();
+  if (binding) {
+    const statement = binding.prepare(sql);
+    const result = params.length ? await statement.bind(...params).all() : await statement.all();
+    return result?.results || [];
+  }
+  if (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID) return [];
+  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${D1_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${D1_API_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ sql, params })
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok || !body?.success) throw new Error('d1_market_query_failed');
+  return body.result?.[0]?.results || [];
+}
+
+function shouldWriteD1Market() {
+  return MARKET_WRITE_SOURCE === 'd1' || (MARKET_WRITE_SOURCE !== 'supabase' && Boolean(getD1Binding()));
+}
+
+function shouldWriteSupabaseMarket() {
+  return MARKET_WRITE_SOURCE === 'supabase';
+}
+
+function todayDateKey(value = Date.now()) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString().slice(0, 10) : date.toISOString().slice(0, 10);
+}
 
 function isSelfRequest(request) {
   if (!MARKET_API_ORIGIN) return true;
@@ -397,6 +451,7 @@ function snapshotAuthorToken(apparelId, key) {
 }
 
 async function saveMarketSnapshots(item, conditionPrices = []) {
+  if (!shouldWriteSupabaseMarket()) return;
   if (!supabaseAdmin || !item?.apparelId) return;
 
   const now = Date.now();
@@ -444,14 +499,102 @@ async function saveMarketSnapshots(item, conditionPrices = []) {
 }
 
 async function saveMarketStorageSnapshot(item, conditionPrices = []) {
-  if (!supabaseAdmin || !item?.apparelId) return;
-
   const capturedAt = new Date().toISOString();
-  const apparelId = Number(item.apparelId);
+  const apparelId = Number(item?.apparelId || 0);
+  if (!apparelId) return;
   const minPriceAmount = Number(item.minPrice || 0) > 0 ? Number(item.minPrice) : null;
   const listingCount = Number.isFinite(Number(item.listingCount)) ? Number(item.listingCount) : null;
   const aRaw = getConditionRaw(conditionPrices, 'a');
   const psa10Raw = getConditionRaw(conditionPrices, 'psa10');
+  const aPriceJpy = getConditionPrice(conditionPrices, 'a') || null;
+  const psa10PriceJpy = getConditionPrice(conditionPrices, 'psa10') || null;
+
+  if (shouldWriteD1Market()) {
+    try {
+      await queryD1(
+        `insert into market_products (
+          source, apparel_id, locale, code, name, set_name, source_url, preview_image_url,
+          latest_a_price_jpy, latest_psa10_price_jpy, latest_min_price_amount,
+          latest_min_price_currency, latest_listing_count, latest_captured_at,
+          is_active, raw_market_card_json, updated_at
+        ) values (
+          'snkrdunk', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?
+        )
+        on conflict(source, apparel_id) do update set
+          locale = excluded.locale,
+          code = excluded.code,
+          name = excluded.name,
+          set_name = excluded.set_name,
+          source_url = excluded.source_url,
+          preview_image_url = excluded.preview_image_url,
+          latest_a_price_jpy = excluded.latest_a_price_jpy,
+          latest_psa10_price_jpy = excluded.latest_psa10_price_jpy,
+          latest_min_price_amount = excluded.latest_min_price_amount,
+          latest_min_price_currency = excluded.latest_min_price_currency,
+          latest_listing_count = excluded.latest_listing_count,
+          latest_captured_at = excluded.latest_captured_at,
+          is_active = 1,
+          raw_market_card_json = excluded.raw_market_card_json,
+          updated_at = excluded.updated_at`,
+        [
+          apparelId,
+          item.locale || 'JP',
+          item.code || '',
+          item.name || '',
+          item.setName || null,
+          item.sourceUrl || '',
+          item.previewImageUrl || null,
+          aPriceJpy,
+          psa10PriceJpy,
+          minPriceAmount,
+          minPriceAmount ? 'USD' : null,
+          listingCount,
+          capturedAt,
+          JSON.stringify(item || {}),
+          capturedAt
+        ]
+      );
+
+      const day = todayDateKey(capturedAt);
+      const chartRows = [
+        { key: 'a', price: aPriceJpy },
+        { key: 'psa10', price: psa10PriceJpy }
+      ].filter((row) => Number(row.price || 0) > 0);
+      for (const row of chartRows) {
+        await queryD1(
+          `insert into market_chart_daily_points (
+            source, apparel_id, locale, code, condition_key, point_date,
+            median_price_jpy, min_price_jpy, max_price_jpy, trade_count, source_count, updated_at
+          ) values (
+            'snkrdunk', ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?
+          )
+          on conflict(source, apparel_id, condition_key, point_date) do update set
+            median_price_jpy = excluded.median_price_jpy,
+            min_price_jpy = excluded.min_price_jpy,
+            max_price_jpy = excluded.max_price_jpy,
+            source_count = excluded.source_count,
+            updated_at = excluded.updated_at`,
+          [
+            apparelId,
+            item.locale || 'JP',
+            item.code || '',
+            row.key,
+            day,
+            row.price,
+            row.price,
+            row.price,
+            capturedAt
+          ]
+        );
+      }
+      return;
+    } catch {
+      if (MARKET_WRITE_SOURCE === 'd1') return;
+      return;
+    }
+  }
+
+  if (!shouldWriteSupabaseMarket() || !supabaseAdmin) return;
 
   try {
     await supabaseAdmin.from('market_products').upsert({
@@ -532,6 +675,7 @@ async function saveMarketStorageSnapshot(item, conditionPrices = []) {
 }
 
 async function readMarketSnapshots(apparelId) {
+  if (!shouldReadSupabaseMarket()) return { a: [], psa10: [] };
   if (!supabaseAdmin || !apparelId) return { a: [], psa10: [] };
   try {
     const { data, error } = await supabaseAdmin
@@ -558,6 +702,38 @@ async function readMarketSnapshots(apparelId) {
 }
 
 async function readStoredMarketTrades(apparelId) {
+  if (shouldReadD1Market() && apparelId) {
+    try {
+      const rows = await queryD1(
+        `select condition_key, trade_date_text, price_amount_jpy, price_text, last_seen_at
+         from market_recent_trades
+         where source = 'snkrdunk' and apparel_id = ? and condition_key in ('a', 'psa10')
+         order by coalesce(trade_date, last_seen_at) desc
+         limit 500`,
+        [Number(apparelId)]
+      );
+      const grouped = (rows || []).reduce((acc, row) => {
+        const key = conditionKey(row.condition_key);
+        const price = Number(row.price_amount_jpy || 0);
+        const timestamp = parseMarketTradeTimestamp(row.trade_date_text) || new Date(row.last_seen_at || 0).getTime();
+        if ((key === 'a' || key === 'psa10') && price > 0 && timestamp > 0) {
+          acc[key].push({
+            timestamp,
+            price,
+            condition: key === 'psa10' ? 'PSA 10' : 'A',
+            dateText: row.trade_date_text,
+            priceText: row.price_text,
+            source: 'd1_snkrdunk_recent_trade'
+          });
+        }
+        return acc;
+      }, { a: [], psa10: [] });
+      if (grouped.a.length || grouped.psa10.length) return grouped;
+    } catch {
+      return { a: [], psa10: [] };
+    }
+  }
+  if (!shouldReadSupabaseMarket()) return { a: [], psa10: [] };
   if (!supabaseAdmin || !apparelId) return { a: [], psa10: [] };
   try {
     const { data, error } = await supabaseAdmin
@@ -590,6 +766,35 @@ async function readStoredMarketTrades(apparelId) {
 }
 
 async function readStoredMarketChartPoints(apparelId) {
+  if (shouldReadD1Market() && apparelId) {
+    try {
+      const rows = await queryD1(
+        `select condition_key, point_date, median_price_jpy
+         from market_chart_daily_points
+         where source = 'snkrdunk' and apparel_id = ? and condition_key in ('a', 'psa10')
+         order by point_date asc
+         limit 1200`,
+        [Number(apparelId)]
+      );
+      const points = (rows || []).reduce((acc, row) => {
+        const key = conditionKey(row.condition_key);
+        const price = Number(row.median_price_jpy || 0);
+        const timestamp = new Date(row.point_date).getTime();
+        if ((key === 'a' || key === 'psa10') && price > 0 && Number.isFinite(timestamp)) {
+          acc[key].push({
+            timestamp,
+            price: Math.round(price),
+            source: 'd1_snkrdunk_chart_daily'
+          });
+        }
+        return acc;
+      }, { a: [], psa10: [] });
+      if (points.a.length || points.psa10.length) return points;
+    } catch {
+      return { a: [], psa10: [] };
+    }
+  }
+  if (!shouldReadSupabaseMarket()) return { a: [], psa10: [] };
   if (!supabaseAdmin || !apparelId) return { a: [], psa10: [] };
   const fromSnapshots = async () => {
     try {
@@ -644,7 +849,7 @@ async function readStoredMarketChartPoints(apparelId) {
   }
 }
 
-function mergeCurrentPoint(points = [], price = 0) {
+function mergeCurrentPoint(points = [], price = 0, source = '') {
   const futureCutoff = Date.now() + 30 * 24 * 60 * 60 * 1000;
   const valid = points
     .map((point) => ({ ...point, timestamp: Number(point.timestamp), price: Number(point.price) }))
@@ -659,7 +864,7 @@ function mergeCurrentPoint(points = [], price = 0) {
   const now = Date.now();
   const last = valid[valid.length - 1];
   if (!last || Math.abs(now - last.timestamp) > 60 * 60 * 1000 || last.price !== price) {
-    valid.push({ timestamp: now, price });
+    valid.push({ timestamp: now, price, source });
   }
   return valid;
 }
@@ -696,6 +901,7 @@ function aggregateDailyMedian(points = []) {
     .map(([, group]) => {
       const prices = group.map((point) => point.price);
       const timestamps = group.map((point) => point.timestamp).sort((a, b) => a - b);
+      const sourceText = group.map((point) => point.source || '').join(' ').toLowerCase();
       return {
         ...group[group.length - 1],
         timestamp: medianNumber(timestamps),
@@ -703,7 +909,7 @@ function aggregateDailyMedian(points = []) {
         minPrice: Math.min(...prices),
         maxPrice: Math.max(...prices),
         count: group.length,
-        source: group.length > 1 ? 'daily_median' : group[0].source
+        source: sourceText.includes('snkrdunk') ? 'snkrdunk_daily_median' : group.length > 1 ? 'daily_median' : group[0].source
       };
     });
 }
@@ -730,8 +936,8 @@ function ensureDrawablePoints(points = [], range) {
   ];
 }
 
-function buildSeries(points = [], price = 0) {
-  const merged = aggregateDailyMedian(mergeCurrentPoint(points, price));
+function buildSeries(points = [], price = 0, source = '') {
+  const merged = aggregateDailyMedian(mergeCurrentPoint(points, price, source));
   return {
     '7d': ensureDrawablePoints(filterPoints(merged, '7d'), '7d'),
     '1m': ensureDrawablePoints(filterPoints(merged, '1m'), '1m'),
@@ -748,8 +954,8 @@ function formatSnapshotDate(timestamp) {
   return `${month}.${day} ${hour}:${minute}`;
 }
 
-function buildRecentSnapshots(points = [], price = 0, label = '') {
-  return mergeCurrentPoint(points, price)
+function buildRecentSnapshots(points = [], price = 0, label = '', source = '') {
+  return aggregateDailyMedian(points)
     .slice()
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 8)
@@ -757,7 +963,9 @@ function buildRecentSnapshots(points = [], price = 0, label = '') {
       date: formatSnapshotDate(point.timestamp),
       timestamp: point.timestamp,
       price: point.price,
-      condition: label
+      condition: label,
+      source: point.source || source || '',
+      platform: /snkrdunk/i.test(String(point.source || source || '')) ? 'SNKR' : point.platform
     }));
 }
 
@@ -803,13 +1011,13 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
       { key: 'all', label: 'ALL' }
     ],
     series: {
-      a: buildSeries([...storedChartPoints.a, ...snapshots.a, ...storedTrades.a], aPrice),
-      psa10: buildSeries([...storedChartPoints.psa10, ...snapshots.psa10, ...storedTrades.psa10], psa10Price)
+      a: buildSeries([...storedChartPoints.a, ...snapshots.a, ...storedTrades.a], aPrice, 'snkrdunk_current_price'),
+      psa10: buildSeries([...storedChartPoints.psa10, ...snapshots.psa10, ...storedTrades.psa10], psa10Price, 'snkrdunk_current_price')
     },
     latestByCondition,
     recentSalesByCondition: {
-      a: buildRecentSnapshots([...snapshots.a, ...storedTrades.a], aPrice, 'A'),
-      psa10: buildRecentSnapshots([...snapshots.psa10, ...storedTrades.psa10], psa10Price, 'PSA10')
+      a: buildRecentSnapshots([...storedChartPoints.a, ...snapshots.a, ...storedTrades.a], aPrice, 'A', 'snkrdunk_current_price'),
+      psa10: buildRecentSnapshots([...storedChartPoints.psa10, ...snapshots.psa10, ...storedTrades.psa10], psa10Price, 'PSA10', 'snkrdunk_current_price')
     }
   };
 }
@@ -834,10 +1042,21 @@ async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
   const apparelId = params.get('apparelId');
   const code = (params.get('code') || '').trim().toUpperCase();
+  const normalizeMarketCode = (value) => String(value || '').trim().toUpperCase().replace(/^OPC-/, '');
   const candidates = (Array.isArray(marketCards) ? marketCards : [])
     .filter((item) => {
       if (apparelId) return String(item.apparelId) === String(apparelId);
-      return code ? String(item.code || '').toUpperCase() === code : false;
+      if (!code) return false;
+      const itemCode = String(item.code || '').toUpperCase();
+      const name = String(item.name || '').toUpperCase();
+      return itemCode === code || normalizeMarketCode(itemCode) === code || name.includes(`[${code}]`);
+    })
+    .sort((a, b) => {
+      const jpDelta = (String(b.locale || '').toUpperCase() === 'JP') - (String(a.locale || '').toUpperCase() === 'JP');
+      if (jpDelta) return jpDelta;
+      const stockDelta = Number(b.listingCount || 0) - Number(a.listingCount || 0);
+      if (stockDelta) return stockDelta;
+      return Number(b.minPrice || 0) - Number(a.minPrice || 0);
     });
   const item = candidates[0] || null;
   if (!item) return { error: 'market_item_not_found', candidates: [] };

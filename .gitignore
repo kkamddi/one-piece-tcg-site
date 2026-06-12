@@ -7,6 +7,15 @@ dist
 .env.local
 .env.*.local
 *.log
+tmp/
+data/card-thumbnails/
+data/d1-market-history-seed/
+data/d1-market-migration/
+data/d1-psa10-seed/
+data/d1-public-seed/
+data/psa10-targets/jp-op-pr-collection-queue.json
+data/psa10-targets/jp-op-pr-spec-worklist.csv
+data/psa10-targets/jp-op-pr-targets.json
 preview-*.js
 preview-*.css
 preview-*.html

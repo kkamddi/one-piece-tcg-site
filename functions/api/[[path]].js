@@ -6,7 +6,16 @@ const RATE_LIMITS = {
   me: 60,
   communityIndex: 60,
   communityId: 60,
+  cardsIndex: 180,
+  cardsSearch: 180,
+  cardsId: 240,
+  shopsIndex: 120,
+  shopsRegions: 120,
+  series: 120,
+  cardImage: 240,
+  cardThumb: 300,
   market: 120,
+  psa10Market: 120,
   marketCollector: 120,
   boxMarket: 30
 };
@@ -46,6 +55,29 @@ function getClientIp(headers) {
     || headers.get('x-real-ip')
     || String(headers.get('x-forwarded-for') || '').split(',')[0].trim()
     || 'unknown';
+}
+
+function isClearlyBlockedBot(userAgent) {
+  const ua = String(userAgent || '').toLowerCase();
+  if (!ua) return false;
+  const allowedSearchBots = [
+    'googlebot',
+    'bingbot',
+    'oai-searchbot',
+    'perplexitybot',
+    'naverbot'
+  ];
+  if (allowedSearchBots.some((bot) => ua.includes(bot))) return false;
+  return [
+    'bytespider',
+    'ccbot',
+    'claudebot',
+    'dataforseobot',
+    'semrushbot',
+    'ahrefsbot',
+    'mj12bot',
+    'dotbot'
+  ].some((bot) => ua.includes(bot));
 }
 
 function isRateLimited(request, routeKey) {
@@ -162,7 +194,9 @@ function routeApi(pathParts) {
   if (first === 'shops' && second === 'regions') return { key: 'shopsRegions' };
   if (first === 'series') return { key: 'series' };
   if (first === 'card-image') return { key: 'cardImage' };
+  if (first === 'card-thumb') return { key: 'cardThumb' };
   if (first === 'market') return { key: 'market' };
+  if (first === 'psa10-market') return { key: 'psa10Market' };
   if (first === 'market-collector') return { key: 'marketCollector' };
   if (first === 'box-market') return { key: 'boxMarket' };
   return null;
@@ -181,7 +215,9 @@ async function loadHandler(key) {
   if (key === 'shopsRegions') return (await import('../../api/shops/regions.js')).default;
   if (key === 'series') return (await import('../../api/series.js')).default;
   if (key === 'cardImage') return (await import('../../api/card-image.js')).default;
+  if (key === 'cardThumb') return (await import('../../api/card-thumb.js')).default;
   if (key === 'market') return (await import('../../api/market.js')).default;
+  if (key === 'psa10Market') return (await import('../../api/psa10-market.js')).default;
   if (key === 'marketCollector') return (await import('../../api/market-collector.js')).default;
   if (key === 'boxMarket') return (await import('../../api/box-market.js')).default;
   return null;
@@ -199,6 +235,12 @@ export async function onRequest(context) {
   if (!route) {
     return new Response(JSON.stringify({ error: 'not_found' }), {
       status: 404,
+      headers: applySecurityHeaders(new Headers({ 'Content-Type': 'application/json; charset=utf-8' }))
+    });
+  }
+  if (isClearlyBlockedBot(context.request.headers.get('user-agent'))) {
+    return new Response(JSON.stringify({ error: 'bot_blocked' }), {
+      status: 403,
       headers: applySecurityHeaders(new Headers({ 'Content-Type': 'application/json; charset=utf-8' }))
     });
   }

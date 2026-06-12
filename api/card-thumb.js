@@ -1,0 +1,26 @@
+const THUMBNAIL_CACHE_CONTROL = 'public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=604800, immutable';
+
+export default async function handler(request, response) {
+  const key = String(request.query?.key || '').replace(/^\/+/, '');
+  if (!key || key.includes('..') || !/^cards\/(KR|JP)\/[A-Za-z0-9_-]+\.webp$/.test(key)) {
+    response.status(400).json({ error: 'invalid_key' });
+    return;
+  }
+
+  const bucket = process.env?.CARD_THUMBNAILS;
+  if (!bucket || typeof bucket.get !== 'function') {
+    response.status(503).json({ error: 'thumbnail_bucket_unavailable' });
+    return;
+  }
+
+  const object = await bucket.get(key);
+  if (!object) {
+    response.status(404).json({ error: 'thumbnail_not_found' });
+    return;
+  }
+
+  response.setHeader('Content-Type', object.httpMetadata?.contentType || 'image/webp');
+  response.setHeader('Cache-Control', THUMBNAIL_CACHE_CONTROL);
+  response.setHeader('CDN-Cache-Control', THUMBNAIL_CACHE_CONTROL);
+  response.status(200).send(object.body);
+}

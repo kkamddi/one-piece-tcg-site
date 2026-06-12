@@ -70,7 +70,7 @@
 }
 
 .renew-app.is-dark .renew-logo {
-  content: url('/onepiece-logo-main-tight-dark.png');
+  content: url('/optcg-logo-dark.png');
   filter: none;
 }
 
@@ -102,6 +102,12 @@
   justify-self: end;
   align-items: center;
   gap: 10px;
+}
+
+.renew-mobile-topbar,
+.renew-bottom-nav,
+.renew-back-to-top {
+  display: none;
 }
 
 .renew-pill,
@@ -187,6 +193,17 @@
   font-weight: 700;
 }
 
+.renew-supplies-disclosure {
+  margin: 4px 2px 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
 .renew-supplies-dropdown .is-disabled {
   opacity: 1;
 }
@@ -209,6 +226,78 @@
 
 .renew-app.is-dark .renew-supplies-dropdown span,
 .renew-app.is-dark .renew-supplies-dropdown small {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-supplies-disclosure {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+.renew-supplies-modal {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.renew-supplies-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 18px 22px 10px;
+}
+
+.renew-supplies-modal-item {
+  display: grid;
+  gap: 6px;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  color: #17191c;
+  background: rgba(244, 244, 245, 0.72);
+  text-decoration: none;
+}
+
+.renew-supplies-modal-item:hover,
+.renew-supplies-modal-item:focus-visible {
+  border-color: rgba(201, 77, 53, 0.28);
+  background: rgba(251, 225, 209, 0.72);
+  outline: none;
+}
+
+.renew-supplies-modal-item b {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.renew-supplies-modal-item span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-supplies-modal-disclosure {
+  margin: 0;
+  padding: 8px 22px 22px;
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.renew-app.is-dark .renew-supplies-modal-item {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-supplies-modal-item:hover,
+.renew-app.is-dark .renew-supplies-modal-item:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.renew-app.is-dark .renew-supplies-modal-item span,
+.renew-app.is-dark .renew-supplies-modal-disclosure {
   color: #cbd5e1;
 }
 
@@ -250,18 +339,75 @@
   min-width: 118px;
 }
 
-.renew-account-logout {
-  display: none;
+.renew-account-menu {
+  position: relative;
 }
 
-.renew-account-pill:hover .renew-account-name,
-.renew-account-pill:focus-visible .renew-account-name {
-  display: none;
+.renew-account-menu::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: calc(100% + 48px);
+  height: 12px;
+  content: "";
+  transform: translateX(-50%);
 }
 
-.renew-account-pill:hover .renew-account-logout,
-.renew-account-pill:focus-visible .renew-account-logout {
-  display: inline;
+.renew-account-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 120;
+  display: grid;
+  min-width: 132px;
+  padding: 7px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 6px);
+  transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s ease;
+  visibility: hidden;
+}
+
+.renew-account-menu.is-open .renew-account-dropdown,
+.renew-account-menu:hover .renew-account-dropdown,
+.renew-account-menu:focus-within .renew-account-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+.renew-account-dropdown button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  color: #17191c;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: center;
+  cursor: pointer;
+}
+
+.renew-account-dropdown button:hover {
+  background: rgba(23, 25, 28, 0.07);
+}
+
+.renew-app.is-dark .renew-account-dropdown {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(23, 25, 31, 0.98);
+}
+
+.renew-app.is-dark .renew-account-dropdown button {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-account-dropdown button:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .renew-pill.is-filled {
@@ -423,6 +569,69 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   white-space: nowrap;
+}
+
+.renew-seo-summary {
+  width: min(980px, 100%);
+  margin: 0 auto 18px;
+  color: #4b5563;
+  text-align: center;
+}
+
+.renew-seo-summary h1,
+.renew-seo-summary h2 {
+  margin: 0 0 8px;
+  color: #17191c;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.renew-seo-summary p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.renew-seo-summary-cards {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+.renew-seo-summary-footer {
+  width: min(1440px, 100%);
+  margin: 28px auto 0;
+  padding: 0 clamp(18px, 4vw, 48px);
+  text-align: center;
+}
+
+.renew-seo-summary-footer h2 {
+  margin-bottom: 6px;
+  font-size: clamp(17px, 1.8vw, 22px);
+}
+
+.renew-seo-summary-footer p {
+  max-width: 860px;
+  margin: 0 auto;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.renew-subpage > .renew-seo-summary {
+  margin-top: 4px;
+  margin-bottom: 14px;
+}
+
+.renew-app.is-dark .renew-seo-summary,
+.renew-app.is-dark .renew-seo-summary p {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-seo-summary h1,
+.renew-app.is-dark .renew-seo-summary h2 {
+  color: #f8fafc;
 }
 
 .renew-dashboard {
@@ -642,6 +851,90 @@
   font-size: 14px;
 }
 
+.renew-home-news {
+  right: 0;
+  bottom: 26px;
+  width: min(390px, 32vw);
+  padding: 24px 26px;
+}
+
+.renew-home-news-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.renew-home-news-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 14px;
+  padding: 11px 12px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.62);
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-home-news-list strong {
+  color: #17191c;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-home-news-list span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.renew-home-news-more,
+.renew-home-updates-mini {
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.renew-home-news-more {
+  margin-top: 12px;
+  padding: 0;
+  color: #c94d35;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: left;
+}
+
+.renew-home-updates-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: min(640px, calc(100% - 36px));
+  margin: 18px auto 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.renew-home-updates-mini span {
+  color: #c94d35;
+  font-weight: 900;
+}
+
+.renew-home-updates-mini strong {
+  overflow: hidden;
+  color: #4b5563;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .renew-admin-stats {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -752,6 +1045,14 @@
   color: #fff;
 }
 
+.renew-mobile-category-panel {
+  display: none;
+}
+
+.renew-catalog-desktop-categories {
+  display: block;
+}
+
 .renew-category-row {
   display: flex;
   align-items: center;
@@ -827,6 +1128,10 @@
   gap: 10px;
 }
 
+.renew-mobile-rarity-filter {
+  display: none;
+}
+
 .renew-catalog-toolbar input {
   min-width: 0;
   height: 52px;
@@ -888,7 +1193,8 @@
   margin: 22px 0 14px;
 }
 
-.renew-catalog-title h1 {
+.renew-catalog-title h1,
+.renew-catalog-title h2 {
   margin: 0;
   font-size: 26px;
   line-height: 1.2;
@@ -1018,14 +1324,14 @@
 
 .renew-card-body strong {
   overflow: hidden;
-  display: -webkit-box;
-  min-height: 38px;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: block;
+  min-width: 0;
   color: #4b5563;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .renew-card-body small {
@@ -1039,7 +1345,7 @@
 
 .renew-card-actions {
   display: grid;
-  grid-template-columns: 1fr 42px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin-top: 4px;
 }
@@ -1278,13 +1584,18 @@
 .renew-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   background: rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(12px);
+}
+
+.renew-news-guide-backdrop {
+  z-index: 260;
+  overscroll-behavior: contain;
 }
 
 .renew-announcement-modal {
@@ -1378,6 +1689,196 @@
   background: rgba(19, 23, 31, 0.97);
 }
 
+.renew-account-modal {
+  width: min(480px, 100%);
+}
+
+.renew-account-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 12px 20px 0;
+}
+
+.renew-account-form {
+  display: grid;
+  gap: 12px;
+  padding: 12px 20px 20px;
+}
+
+.renew-account-form label,
+.renew-password-panel label {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-account-form span,
+.renew-password-panel span {
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.renew-account-form input,
+.renew-account-summary input,
+.renew-password-panel input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 13px;
+  padding: 0 13px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.renew-account-summary > div {
+  display: grid;
+  gap: 7px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.renew-account-summary span,
+.renew-account-summary small {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.renew-account-summary strong {
+  overflow: hidden;
+  color: #17191c;
+  font-size: 16px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-account-summary button,
+.renew-account-actions button,
+.renew-password-panel button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-account-summary button,
+.renew-account-actions button:first-child,
+.renew-password-panel button[type="submit"] {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-account-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 18px 20px 20px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+}
+
+.renew-account-actions button:last-child,
+.renew-password-panel button[type="button"] {
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.renew-account-help,
+.renew-account-message {
+  margin: 12px 20px 0;
+}
+
+.renew-password-panel {
+  margin: 14px 20px 20px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(251, 246, 240, 0.78);
+}
+
+.renew-password-panel form {
+  display: grid;
+  gap: 12px;
+}
+
+.renew-password-panel form > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.renew-password-panel button {
+  width: 100%;
+}
+
+.renew-account-logout-button {
+  width: calc(100% - 48px);
+  min-height: 48px;
+  margin: 16px 24px 24px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-app.is-dark .renew-account-summary > div {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-account-summary strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-account-actions {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-account-form span,
+.renew-app.is-dark .renew-password-panel span {
+  color: #d1d5db;
+}
+
+.renew-app.is-dark .renew-account-form input,
+.renew-app.is-dark .renew-account-summary input,
+.renew-app.is-dark .renew-password-panel input {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-account-summary button,
+.renew-app.is-dark .renew-account-actions button:first-child,
+.renew-app.is-dark .renew-password-panel button[type="submit"],
+.renew-app.is-dark .renew-account-logout-button {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-account-actions button:last-child,
+.renew-app.is-dark .renew-password-panel button[type="button"] {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-password-panel {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .renew-value-card-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -1457,6 +1958,16 @@
   padding: 20px 24px 26px;
 }
 
+.renew-update-modal {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.renew-update-modal .renew-update-list {
+  overflow-y: auto;
+}
+
 .renew-update-list article {
   padding: 14px 16px;
   border: 1px solid rgba(117, 183, 219, 0.62);
@@ -1484,6 +1995,691 @@
 
 .renew-update-list li + li {
   margin-top: 7px;
+}
+
+.renew-news-main {
+  display: grid;
+  gap: 18px;
+  padding-inline: clamp(18px, 2.4vw, 34px);
+}
+
+.renew-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+.renew-news-panel .renew-section-head p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.renew-news-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-left: 4px;
+}
+
+.renew-news-filter-tabs button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-news-filter-tabs button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-news-supplies-panel .renew-section-head span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.renew-news-supplies-panel .renew-section-head h2 {
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-guide-panel .renew-section-head span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.renew-news-guide-panel .renew-section-head h2 {
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-guide-panel .renew-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 0;
+}
+
+.renew-guide-qa-toggle {
+  flex: 0 0 auto;
+}
+
+.renew-guide-qa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 22px 26px 30px;
+}
+
+.renew-guide-qa-group {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.renew-guide-qa-group h3 {
+  margin: 0;
+  color: #17191c;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
+}
+
+.renew-guide-qa-list {
+  display: grid;
+  gap: 12px;
+}
+
+.renew-guide-qa-item {
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 14px;
+  background: rgba(248, 247, 245, 0.88);
+}
+
+.renew-guide-qa-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 50px;
+  padding: 14px 16px;
+  color: #17191c;
+  font-size: 14.5px;
+  font-weight: 900;
+  line-height: 1.45;
+  cursor: pointer;
+  list-style: none;
+}
+
+.renew-guide-qa-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.renew-guide-qa-item summary::after {
+  content: '+';
+  flex: 0 0 auto;
+  color: #c94d35;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.renew-guide-qa-item[open] summary::after {
+  content: '-';
+}
+
+.renew-guide-qa-answer {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 2px 16px 18px;
+  color: #4b5563;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.78;
+  list-style: none;
+}
+
+.renew-guide-qa-answer li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.renew-guide-qa-answer li::before {
+  content: "-";
+  position: absolute;
+  left: 0;
+  color: #c94d35;
+  font-weight: 900;
+}
+
+.renew-topic-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 20px 24px 26px;
+}
+
+.renew-topic-card {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 132px;
+  padding: 14px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.renew-topic-thumb {
+  display: block;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #f3f4f6;
+}
+
+.renew-topic-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.renew-topic-body {
+  min-width: 0;
+}
+
+.renew-topic-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #7b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-topic-meta span,
+.renew-topic-meta time {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+}
+
+.renew-topic-card h2 {
+  display: -webkit-box;
+  margin: 0 0 10px;
+  overflow: hidden;
+  color: #17191c;
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.renew-topic-card a:not(.renew-topic-thumb) {
+  color: #c94d35;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.renew-news-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr);
+  gap: 14px;
+  padding: 0;
+  margin-inline: 4px;
+}
+
+.renew-news-overview.is-filtered {
+  grid-template-columns: 1fr;
+}
+
+.renew-news-card,
+.renew-news-link-card {
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.renew-news-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 0;
+}
+
+.renew-news-card-head span,
+.renew-news-link-card span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.renew-news-card-head h2,
+.renew-news-link-card h2 {
+  margin: 4px 0 0;
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-toggle,
+.renew-news-supply-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.renew-news-toggle button,
+.renew-news-supply-tabs button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-news-toggle button.is-active,
+.renew-news-supply-tabs button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-topic-list-compact {
+  grid-template-columns: 1fr;
+  padding: 14px 18px 18px;
+}
+
+.renew-topic-list-compact .renew-topic-card {
+  grid-template-columns: 104px minmax(0, 1fr);
+  min-height: 108px;
+  padding: 10px;
+}
+
+.renew-topic-thumb.is-empty {
+  display: grid;
+  place-items: center;
+  color: #c94d35;
+  font-size: 22px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.renew-news-links {
+  display: grid;
+  gap: 14px;
+}
+
+.renew-news-links.is-single {
+  grid-template-columns: 1fr;
+}
+
+.renew-news-link-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 148px;
+  padding: 18px;
+}
+
+.renew-news-link-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.renew-news-link-title-row h2 {
+  min-width: 0;
+}
+
+.renew-news-info-button {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  color: #c94d35;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-news-link-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-news-link-items {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.renew-news-link-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 8px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 14px;
+  background: rgba(248, 247, 244, 0.9);
+  color: #17191c;
+  text-decoration: none;
+}
+
+.renew-news-link-thumb {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  color: #c94d35;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-link-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.renew-news-link-thumb.is-empty {
+  border: 1px solid rgba(201, 77, 53, 0.16);
+  background: rgba(201, 77, 53, 0.08);
+}
+
+.renew-news-link-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.renew-news-link-copy strong,
+.renew-news-link-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-news-link-copy strong {
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-news-link-copy small {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-news-supply-wrap {
+  display: grid;
+  gap: 14px;
+  margin-inline: 4px;
+  padding: 20px 24px 26px;
+}
+
+.renew-news-supply-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.renew-news-supply-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #17191c;
+  text-decoration: none;
+}
+
+.renew-news-supply-image {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.42 / 1;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 24% 20%, rgba(201, 77, 53, 0.18), transparent 32%),
+    linear-gradient(135deg, #f7f3ed, #fff);
+  color: #c94d35;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.renew-news-supply-image.has-embed {
+  aspect-ratio: auto;
+  min-height: 240px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.renew-news-supply-image.has-embed iframe {
+  display: block;
+  width: 120px;
+  height: 240px;
+  max-width: 100%;
+  border: 0;
+  pointer-events: none;
+}
+
+.renew-news-supply-card strong {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.renew-news-supply-card small,
+.renew-news-supply-disclosure {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.renew-news-supply-disclosure {
+  margin: 0;
+  text-align: center;
+}
+
+.renew-news-guide-modal {
+  width: min(560px, calc(100vw - 28px));
+  max-height: min(760px, calc(100dvh - 40px));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.renew-news-guide-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 18px 24px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.renew-news-guide-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.renew-news-guide-tabs button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.renew-news-guide-tabs button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-news-guide-body {
+  display: grid;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 24px 28px;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.68;
+}
+
+.renew-news-guide-body p {
+  margin: 0;
+}
+
+.renew-news-guide-section,
+.renew-news-guide-platform {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 16px;
+  background: rgba(248, 247, 245, 0.82);
+}
+
+.renew-news-guide-section h3,
+.renew-news-guide-platform > h3 {
+  margin: 0;
+  color: #17191c;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-guide-highlight {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(212, 79, 54, 0.11);
+  color: #c9513b;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.renew-news-guide-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+  counter-reset: guide-step;
+}
+
+.renew-news-guide-steps li {
+  position: relative;
+  min-height: 26px;
+  padding-left: 34px;
+  counter-increment: guide-step;
+}
+
+.renew-news-guide-steps li::before {
+  content: counter(guide-step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #17191c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.renew-news-guide-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
 }
 
 .renew-legal-modal {
@@ -1560,6 +2756,40 @@
   color: #11151d;
 }
 
+.renew-progress-groups {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.renew-progress-groups button {
+  min-height: 40px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.74);
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-progress-groups button.is-active {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-app.is-dark .renew-progress-groups button {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-progress-groups button.is-active {
+  border-color: #f5f2ec;
+  color: #11151d;
+  background: #f5f2ec;
+}
+
 .renew-progress-series-list {
   display: grid;
   gap: 10px;
@@ -1596,6 +2826,23 @@
 .renew-progress-series-list b {
   text-align: right;
   font-size: 13px;
+}
+
+.renew-progress-empty {
+  padding: 22px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 16px;
+  color: #71757f;
+  background: rgba(244, 244, 245, 0.5);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.renew-app.is-dark .renew-progress-empty {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.055);
 }
 
 .renew-update-pager {
@@ -1865,6 +3112,15 @@
   color: #17191c;
 }
 
+.renew-shop-filters select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 14px 14px;
+}
+
 .renew-market-search > button,
 .renew-market-actions button,
 .renew-market-actions a,
@@ -1887,6 +3143,33 @@
   margin-top: 22px;
 }
 
+.renew-market-home-tabs {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(23, 25, 28, 0.06);
+}
+
+.renew-market-home-tabs button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  color: #4b5563;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.renew-market-home-tabs button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
 .renew-box-market {
   margin-top: 22px;
   border: 1px solid rgba(23, 25, 28, 0.08);
@@ -1900,7 +3183,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .renew-box-market-head h2 {
@@ -1962,9 +3245,14 @@
 }
 
 .renew-box-market-card strong,
+.renew-box-mobile-title,
 .renew-box-market-card small,
 .renew-box-market-card b {
   display: block;
+}
+
+.renew-box-mobile-title {
+  display: none;
 }
 
 .renew-box-market-card strong {
@@ -1987,6 +3275,87 @@
   color: #c94d35;
 }
 
+.renew-market-card-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-market-card-preview {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 16px;
+  padding: 10px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+}
+
+.renew-market-card-preview-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 0.72;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.renew-market-card-preview-thumb img {
+  width: 108%;
+  height: 108%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  display: block;
+}
+
+.renew-market-card-preview small,
+.renew-market-card-preview strong,
+.renew-market-card-preview span,
+.renew-market-card-preview b {
+  display: block;
+  min-width: 0;
+}
+
+.renew-market-card-preview small {
+  color: #71757f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-market-card-preview strong,
+.renew-market-card-preview span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.renew-market-card-preview strong {
+  min-height: 36px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.renew-market-card-preview span {
+  color: #71757f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+  -webkit-line-clamp: 1;
+}
+
+.renew-market-card-preview b {
+  margin-top: 2px;
+  color: #c94d35;
+  font-size: 16px;
+  font-weight: 900;
+}
+
 .renew-market-candidates > b {
   display: block;
   margin-bottom: 12px;
@@ -1995,21 +3364,20 @@
 .renew-market-candidates > div {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 10px 12px;
 }
 
 .renew-market-candidates button {
-  min-height: 166px;
   border: 1px solid rgba(23, 25, 28, 0.1);
   border-radius: 16px;
-  padding: 10px 12px;
+  padding: 14px 16px;
   color: inherit;
   background: rgba(255, 255, 255, 0.66);
   text-align: left;
   cursor: pointer;
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  column-gap: 16px;
+  grid-template-columns: 118px minmax(0, 1fr);
+  column-gap: 14px;
   align-items: center;
 }
 
@@ -2019,34 +3387,140 @@
 }
 
 .renew-market-candidates span,
-.renew-market-candidates small {
+.renew-market-candidates small,
+.renew-market-candidates b,
+.renew-market-candidates em {
   display: block;
+}
+
+.renew-market-candidate-body {
   grid-column: 2;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.renew-market-candidate-body > span,
+.renew-market-candidate-body > small,
+.renew-market-candidate-body > b,
+.renew-market-candidate-body > em {
+  grid-column: auto;
+  min-width: 0;
 }
 
 .renew-market-candidates span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 900;
-  align-self: end;
+  line-height: 1.18;
 }
 
 .renew-market-candidates small {
-  margin-top: 6px;
   color: #71757f;
   font-weight: 700;
+  line-height: 1.18;
+}
+
+.renew-market-candidate-set {
+  display: -webkit-box !important;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.renew-market-candidates b {
+  color: #d04b35;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.renew-market-candidates em {
+  color: #17191c;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.renew-market-candidate-bottom {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.renew-market-candidate-bottom b,
+.renew-market-candidate-bottom em,
+.renew-market-candidate-bottom small {
+  display: inline;
 }
 
 .renew-market-candidates button img {
-  grid-row: 1 / span 3;
-  width: 128px;
-  height: 150px;
+  width: 112px;
+  height: 138px;
   max-width: none;
   max-height: none;
   object-fit: contain;
   display: block;
+  transform: scale(1.35);
   border-radius: 6px;
   background: transparent;
   border: 0;
   padding: 0;
+}
+
+.renew-market-candidate-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.renew-market-candidate-summary div {
+  min-width: 0;
+}
+
+.renew-market-candidate-summary small,
+.renew-market-candidate-summary strong,
+.renew-market-candidate-summary span {
+  display: block;
+  min-width: 0;
+}
+
+.renew-market-candidate-summary small,
+.renew-market-candidate-summary span {
+  color: #71757f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-market-candidate-summary strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.renew-market-candidate-summary button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: #fff;
+  background: #17191c;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .renew-market-detail {
@@ -2085,11 +3559,20 @@
   font-weight: 700;
 }
 
+.renew-market-selected-meta {
+  display: block;
+  margin-bottom: 6px;
+  color: #71757f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .renew-market-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
   margin-top: 18px;
+  grid-column: 2 / -1;
 }
 
 .renew-market-actions a {
@@ -2098,7 +3581,13 @@
   color: inherit;
 }
 
+.renew-action-compact {
+  display: none;
+}
+
 .renew-market-price {
+  display: grid;
+  gap: 3px;
   border-radius: 999px;
   padding: 13px 16px;
   background: #f4f4f5;
@@ -2106,6 +3595,13 @@
   font-weight: 800;
   letter-spacing: -0.045em;
   white-space: nowrap;
+}
+
+.renew-market-price small {
+  color: #71757f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .renew-chart-placeholder {
@@ -2142,10 +3638,14 @@
 .renew-market-chart-box {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(201, 77, 53, 0.14);
+  border: 1px solid rgba(201, 77, 53, 0.16);
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 247, 242, 0.82));
-  box-shadow: rgba(23, 25, 28, 0.04) 0 16px 34px -22px inset;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(201, 77, 53, 0.08), transparent 46%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 248, 244, 0.9));
+  box-shadow:
+    rgba(23, 25, 28, 0.05) 0 18px 38px -24px inset,
+    rgba(201, 77, 53, 0.08) 0 18px 48px -34px;
 }
 
 .renew-chart-range-label {
@@ -2169,7 +3669,9 @@
 
 .renew-app.is-dark .renew-market-chart-box {
   border-color: rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(208, 77, 56, 0.055));
+  background:
+    radial-gradient(circle at 50% 0%, rgba(246, 177, 159, 0.11), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(208, 77, 56, 0.055));
 }
 
 .renew-app.is-dark .renew-chart-range-label {
@@ -2183,13 +3685,13 @@
   display: block;
 }
 
-.renew-market-chart-box line {
-  stroke: rgba(120, 113, 108, 0.2);
+.renew-market-chart-box .renew-chart-grid {
+  stroke: rgba(120, 113, 108, 0.24);
   stroke-dasharray: 4 4;
 }
 
 .renew-market-chart-box text {
-  fill: #71757f;
+  fill: #5f6673;
   font-size: 12px;
   font-weight: 800;
   text-anchor: end;
@@ -2208,10 +3710,10 @@
 
 .renew-chart-line {
   fill: none;
-  stroke-width: 4.5;
+  stroke-width: 4.75;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 6px 10px rgba(208, 77, 56, 0.16));
+  filter: drop-shadow(0 8px 12px rgba(201, 77, 53, 0.18));
 }
 
 .renew-chart-area {
@@ -2220,13 +3722,30 @@
 }
 
 .renew-chart-average {
-  stroke: rgba(23, 25, 28, 0.28);
-  stroke-width: 1.5;
-  stroke-dasharray: 6 7;
+  stroke: rgba(23, 25, 28, 0.34);
+  stroke-width: 1.6;
+  stroke-dasharray: 7 8;
+}
+
+.renew-chart-boundary {
+  stroke: rgba(23, 25, 28, 0.34);
+  stroke-width: 1.6;
+  stroke-dasharray: 7 8;
+}
+
+.renew-market-chart-box .renew-chart-boundary-label {
+  fill: #5f554f;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-anchor: start;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 3px;
 }
 
 .renew-market-chart-box .renew-chart-point {
-  fill: #fff7ed;
+  fill: #fffaf5;
   stroke: #d04d38;
   stroke-width: 3;
 }
@@ -2239,19 +3758,29 @@
   stroke: rgba(255, 255, 255, 0.24);
 }
 
+.renew-app.is-dark .renew-chart-boundary {
+  stroke: rgba(255, 255, 255, 0.28);
+}
+
+.renew-app.is-dark .renew-market-chart-box .renew-chart-boundary-label {
+  fill: #d1d5db;
+  stroke: rgba(17, 21, 29, 0.88);
+}
+
 .renew-app.is-dark .renew-market-chart-box .renew-chart-point {
   fill: #11151d;
 }
 
 .renew-market-chart-box .renew-chart-cursor {
   stroke: #d04d38;
-  stroke-width: 1.5;
-  opacity: 0.42;
+  stroke-width: 1.7;
+  opacity: 0.5;
 }
 
 .renew-market-chart-box rect {
-  fill: #fff;
-  stroke: rgba(23, 25, 28, 0.12);
+  fill: rgba(255, 255, 255, 0.96);
+  stroke: rgba(23, 25, 28, 0.14);
+  filter: drop-shadow(0 8px 18px rgba(23, 25, 28, 0.11));
 }
 
 .renew-app.is-dark .renew-market-chart-box rect {
@@ -2264,10 +3793,17 @@
   text-anchor: start;
 }
 
+.renew-market-chart-box .renew-chart-tip-date {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
 .renew-market-chart-box .renew-chart-tip-price {
   fill: #17191c;
   font-size: 16px;
   font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 .renew-app.is-dark .renew-market-chart-box .renew-chart-tip-price {
@@ -2276,7 +3812,7 @@
 
 .renew-market-chart-box .renew-chart-axis-date {
   fill: #8a7f76;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   letter-spacing: -0.02em;
   text-anchor: middle;
@@ -2329,8 +3865,10 @@
 
 .renew-app.is-dark .renew-market-sale,
 .renew-app.is-dark .renew-market-card,
+.renew-app.is-dark .renew-market-candidate-summary,
 .renew-app.is-dark .renew-box-market,
 .renew-app.is-dark .renew-box-market-card,
+.renew-app.is-dark .renew-market-card-preview,
 .renew-app.is-dark .renew-market-price {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
@@ -2346,6 +3884,28 @@
 .renew-app.is-dark .renew-box-thumb {
   border-color: rgba(255, 255, 255, 0.12);
   background: linear-gradient(145deg, #2b2421, #17191c);
+}
+
+.renew-app.is-dark .renew-market-home-tabs {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-market-home-tabs button {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-market-home-tabs button.is-active {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-market-card-preview-thumb {
+  background: transparent;
+}
+
+.renew-app.is-dark .renew-card-market {
+  border-color: transparent;
+  background: transparent;
 }
 
 .renew-deck-summary {
@@ -2401,6 +3961,28 @@
   gap: 10px;
 }
 
+.renew-shop-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 8px;
+  min-width: 0;
+}
+
+.renew-shop-search button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  background: #17191c;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .renew-shop-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2428,6 +4010,26 @@
 .renew-shop-grid small {
   color: #71757f;
   font-weight: 800;
+}
+
+.renew-shop-map-links {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.renew-shop-map-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .renew-stats-prototype {
@@ -2686,6 +4288,21 @@
   color: #cbd5e1;
 }
 
+.renew-app.is-dark .renew-home-news-list button {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-home-news-list strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-home-news-list span,
+.renew-app.is-dark .renew-home-updates-mini,
+.renew-app.is-dark .renew-home-updates-mini strong {
+  color: #cbd5e1;
+}
+
 .renew-app.is-dark .renew-stats-hero,
 .renew-app.is-dark .renew-stats-panel,
 .renew-app.is-dark .renew-stats-metrics article {
@@ -2715,6 +4332,134 @@
 .renew-app.is-dark .renew-update-list h3,
 .renew-app.is-dark .renew-update-list ul {
   color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-panel .renew-section-head p {
+  color: #9ca3af;
+}
+
+.renew-app.is-dark .renew-topic-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.8);
+}
+
+.renew-app.is-dark .renew-topic-thumb,
+.renew-app.is-dark .renew-topic-meta span,
+.renew-app.is-dark .renew-topic-meta time {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-topic-card h2 {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-card,
+.renew-app.is-dark .renew-news-link-card,
+.renew-app.is-dark .renew-news-supply-card,
+.renew-app.is-dark .renew-guide-qa-group {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.82);
+}
+
+.renew-app.is-dark .renew-news-card-head h2,
+.renew-app.is-dark .renew-news-link-card h2,
+.renew-app.is-dark .renew-news-supplies-panel .renew-section-head h2,
+.renew-app.is-dark .renew-news-guide-panel .renew-section-head h2,
+.renew-app.is-dark .renew-news-supply-card,
+.renew-app.is-dark .renew-guide-qa-group h3,
+.renew-app.is-dark .renew-guide-qa-item summary {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-link-card p,
+.renew-app.is-dark .renew-news-supply-card small,
+.renew-app.is-dark .renew-news-supply-disclosure,
+.renew-app.is-dark .renew-guide-qa-answer {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-guide-qa-item {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-news-link-item {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-news-link-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-news-link-copy strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-link-copy small {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-news-info-button,
+.renew-app.is-dark .renew-news-guide-tabs button {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-guide-tabs button.is-active {
+  border-color: #f5f2ec;
+  background: #f5f2ec;
+  color: #111827;
+}
+
+.renew-app.is-dark .renew-news-guide-body,
+.renew-app.is-dark .renew-news-guide-steps,
+.renew-app.is-dark .renew-news-guide-list {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-news-guide-section h3,
+.renew-app.is-dark .renew-news-guide-platform > h3 {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-guide-section,
+.renew-app.is-dark .renew-news-guide-platform {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-news-guide-highlight {
+  background: rgba(212, 79, 54, 0.18);
+  color: #ffb19f;
+}
+
+.renew-app.is-dark .renew-news-guide-steps li::before {
+  background: #f5f2ec;
+  color: #111827;
+}
+
+.renew-app.is-dark .renew-news-toggle button,
+.renew-app.is-dark .renew-news-filter-tabs button,
+.renew-app.is-dark .renew-news-supply-tabs button {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-toggle button.is-active,
+.renew-app.is-dark .renew-news-filter-tabs button.is-active,
+.renew-app.is-dark .renew-news-supply-tabs button.is-active {
+  border-color: #f5f2ec;
+  background: #f5f2ec;
+  color: #111827;
+}
+
+.renew-app.is-dark .renew-news-supply-image {
+  background:
+    radial-gradient(circle at 24% 20%, rgba(201, 77, 53, 0.32), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
 }
 
 .renew-app.is-dark .renew-update-pager button {
@@ -2811,7 +4556,185 @@
 
   .renew-catalog {
     grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 100%;
+    gap: 14px;
     padding-top: 28px;
+  }
+
+  .renew-catalog-side,
+  .renew-catalog-main {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .renew-catalog-desktop-categories {
+    display: none;
+  }
+
+  .renew-mobile-category-panel {
+    display: block;
+  }
+
+  .renew-mobile-category-chips {
+    display: flex;
+    gap: 8px;
+    padding: 2px 0 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .renew-mobile-category-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .renew-mobile-category-chips button {
+    flex: 0 0 auto;
+    min-width: 58px;
+    min-height: 42px;
+    border: 1px solid rgba(23, 25, 28, 0.12);
+    border-radius: 999px;
+    color: #17191c;
+    background: rgba(255, 255, 255, 0.88);
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+  }
+
+  .renew-mobile-category-chips button.is-active {
+    border-color: #17191c;
+    color: #fff;
+    background: #17191c;
+  }
+
+  .renew-mobile-series-list {
+    display: grid;
+    gap: 8px;
+    max-height: 310px;
+    margin: 0 0 12px;
+    padding: 10px;
+    overflow-y: auto;
+    border: 1px solid rgba(23, 25, 28, 0.1);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .renew-mobile-series-heading {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 12px;
+    color: #5d2a1a;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .renew-mobile-series-list .renew-series-item {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .renew-app.is-dark .renew-mobile-category-chips button {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #f5f2ec;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .renew-app.is-dark .renew-mobile-category-chips button.is-active {
+    border-color: #f5f2ec;
+    color: #17191c;
+    background: #f5f2ec;
+  }
+
+  .renew-app.is-dark .renew-mobile-series-list {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .renew-catalog-main {
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
+  }
+
+  .renew-catalog-toolbar {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 8px;
+  }
+
+  .renew-catalog-toolbar input {
+    height: 42px;
+    padding: 0 13px;
+    font-size: 14px;
+  }
+
+  .renew-mobile-rarity-filter {
+    position: relative;
+    display: block;
+    z-index: 40;
+  }
+
+  .renew-mobile-rarity-filter > button {
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .renew-mobile-rarity-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 90;
+    display: grid;
+    width: 98px;
+    padding: 6px;
+    border: 1px solid rgba(23, 25, 28, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+  }
+
+  .renew-mobile-rarity-menu button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 10px;
+    color: #17191c;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .renew-mobile-rarity-menu button.is-active {
+    color: #fff;
+    background: #17191c;
+  }
+
+  .renew-rarity-chip-group {
+    display: none;
+  }
+
+  .renew-catalog-toolbar > button:last-child {
+    grid-column: 1 / -1;
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .renew-app.is-dark .renew-mobile-rarity-menu {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(23, 25, 31, 0.98);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+  }
+
+  .renew-app.is-dark .renew-mobile-rarity-menu button {
+    color: #f5f2ec;
+  }
+
+  .renew-app.is-dark .renew-mobile-rarity-menu button.is-active {
+    color: #17191c;
+    background: #f5f2ec;
   }
 
   .renew-card-grid {
@@ -2827,20 +4750,69 @@
     grid-template-columns: 1fr;
   }
 
+  .renew-shop-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .renew-shop-filters select {
+    height: 42px;
+    padding: 0 28px 0 10px;
+    background-position: right 10px center;
+    background-size: 12px 12px;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .renew-shop-filters input {
+    height: 42px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .renew-shop-search {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 8px;
+  }
+
+  .renew-shop-search button {
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
   .renew-market-search {
-    grid-template-columns: 64px minmax(0, 1fr) auto;
+    grid-template-columns: 58px minmax(0, 1fr) 74px;
     gap: 8px;
   }
 
   .renew-market-snkr-link {
-    min-width: 64px;
-    height: 48px;
+    min-width: 58px;
+    height: 42px;
     font-size: 10px;
   }
 
+  .renew-market-search input {
+    height: 42px;
+    padding: 0 13px;
+    font-size: 14px;
+  }
+
   .renew-market-search > button {
-    min-height: 48px;
-    padding: 0 14px;
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .renew-market-home-tabs {
+    margin-top: 14px;
+  }
+
+  .renew-market-home-tabs button {
+    min-height: 34px;
+    padding: 0 16px;
+    font-size: 13px;
   }
 
   .renew-progress-series-list article {
@@ -2853,38 +4825,273 @@
 
   .renew-shop-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .renew-shop-grid article {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .renew-shop-grid b {
+    font-size: 15px;
+  }
+
+  .renew-shop-grid p {
+    margin: 8px 0;
+    font-size: 13px;
+  }
+
+  .renew-shop-grid small {
+    font-size: 12px;
+  }
+
+  .renew-shop-map-links {
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .renew-shop-map-links a {
+    flex: 1;
+    min-height: 36px;
+    padding: 0 8px;
+    font-size: 12px;
   }
 
   .renew-market-candidates > div,
   .renew-box-market-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .renew-market-candidates > div {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
   }
 
   .renew-market-chart-box svg {
-    height: 320px;
+    height: 400px;
+  }
+
+  .renew-market-chart-box text {
+    fill: #4b5563;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .renew-app.is-dark .renew-market-chart-box text {
+    fill: #d1d5db;
+  }
+
+  .renew-app.is-dark .renew-market-chart-box .renew-chart-grid {
+    stroke: rgba(255, 255, 255, 0.16);
+  }
+
+  .renew-market-chart-box .renew-chart-axis-date {
+    font-size: 13px;
+  }
+
+  .renew-market-chart-box .renew-chart-boundary-label,
+  .renew-market-chart-box .renew-chart-tip-date {
+    font-size: 12px;
+  }
+
+  .renew-market-chart-box .renew-chart-tip-price {
+    font-size: 13.5px;
+    font-weight: 900;
+  }
+
+  .renew-market-chart-box rect {
+    stroke-width: 1.2;
   }
 
   .renew-box-market-head {
     display: grid;
+    gap: 10px;
+  }
+
+  .renew-box-market-head .renew-chip-group button {
+    min-height: 36px;
+    padding: 0 13px;
+    font-size: 13px;
   }
 
   .renew-market-candidates button {
-    grid-template-columns: 1fr;
-    align-items: start;
+    grid-template-columns: 98px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: center;
     min-height: 0;
+    padding: 10px 12px;
+    border-radius: 14px;
   }
 
   .renew-market-candidates button img {
     grid-column: 1;
-    grid-row: auto;
     justify-self: center;
     width: 92px;
-    height: 118px;
+    height: 114px;
+    transform: scale(1.28);
+  }
+
+  .renew-market-candidate-body {
+    grid-column: 2;
+    align-content: center;
+    gap: 3px;
   }
 
   .renew-market-candidates span,
+  .renew-market-candidates small,
+  .renew-market-candidates b,
+  .renew-market-candidates em {
+    min-width: 0;
+  }
+
+  .renew-market-candidate-body > span,
+  .renew-market-candidate-body > small,
+  .renew-market-candidate-body > b,
+  .renew-market-candidate-body > em {
+    grid-column: auto;
+    margin-top: 0;
+  }
+
+  .renew-market-candidates span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
   .renew-market-candidates small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+
+  .renew-market-candidates b {
+    font-size: 14px;
+  }
+
+  .renew-market-candidates em {
+    font-size: 11px;
+  }
+
+  .renew-market-candidate-id {
+    display: none !important;
+  }
+
+  .renew-market-candidate-summary {
+    margin-top: 14px;
+    padding: 10px 11px;
+    border-radius: 14px;
+  }
+
+  .renew-market-candidate-summary strong {
+    font-size: 13px;
+  }
+
+  .renew-market-candidate-summary small,
+  .renew-market-candidate-summary span {
+    font-size: 11px;
+  }
+
+  .renew-market-candidate-summary button {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .renew-market-detail {
+    gap: 14px;
+    margin-top: 16px;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .renew-market-card {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 10px 12px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .renew-market-card > img {
     grid-column: 1;
+    grid-row: 1;
+    width: 82px;
+    max-height: 108px;
+    border-radius: 7px;
+  }
+
+  .renew-market-card > div {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .renew-market-card h2 {
+    display: -webkit-box;
+    margin: 3px 0 4px;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 16px;
+    line-height: 1.22;
+  }
+
+  .renew-market-card p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .renew-market-selected-meta {
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+
+  .renew-market-price {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-size: 20px;
+  }
+
+  .renew-market-price small {
+    font-size: 11px;
+  }
+
+  .renew-market-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: 1 / -1;
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .renew-market-actions a,
+  .renew-market-actions button {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .renew-market-actions .renew-action-full {
+    display: inline;
+  }
+
+  .renew-market-actions .renew-action-compact {
+    display: none;
   }
 
   .renew-stats-hero,
@@ -2907,67 +5114,422 @@
 }
 
 @media (max-width: 560px) {
-  .renew-header {
-    padding: 0 14px;
+  .renew-app {
+    padding-bottom: 78px;
   }
 
-  .renew-nav {
+  .renew-subpage {
+    padding: 18px 12px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .renew-panel.renew-market {
+    border: 0;
+    border-radius: 0;
+    padding: 0 2px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-panel.renew-shops {
+    border: 0;
+    border-radius: 0;
+    padding: 0 2px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-topic-list {
     grid-template-columns: 1fr;
-    min-height: 0;
-    gap: 6px;
+    gap: 10px;
+    padding: 14px 0 18px;
   }
 
-  .renew-logo-button,
-  .renew-actions,
-  .renew-tabs {
-    justify-self: center;
+  .renew-topic-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    min-height: 104px;
+    padding: 10px;
+    border-radius: 16px;
   }
 
-  .renew-logo {
-    width: 190px;
+  .renew-topic-card h2 {
+    margin-bottom: 8px;
+    font-size: 14px;
   }
 
-  .renew-tabs {
-    grid-row: auto;
-    grid-column: 1;
+  .renew-topic-meta {
+    gap: 4px;
+    margin-bottom: 6px;
+    font-size: 10.5px;
+  }
+
+  .renew-topic-meta span,
+  .renew-topic-meta time {
+    min-height: 22px;
+    padding: 0 7px;
+  }
+
+  .renew-news-filter-tabs {
+    flex-wrap: nowrap;
+    gap: 7px;
+    margin-top: 8px;
+    padding-left: 2px;
     overflow-x: auto;
-    justify-content: center;
-    max-width: 100%;
-    padding-bottom: 0;
-    gap: 16px;
+    padding-bottom: 2px;
   }
 
-  .renew-actions {
-    grid-column: 1;
-    gap: 6px;
+  .renew-news-filter-tabs button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 13px;
+    font-size: 12px;
   }
 
-  .renew-supplies-dropdown {
-    right: auto;
-    left: 50%;
-    width: min(232px, calc(100vw - 28px));
-    transform: translateX(-50%);
+  .renew-news-overview,
+  .renew-news-supply-wrap {
+    padding: 14px 0 18px;
   }
 
-  .renew-supplies-menu.is-open .renew-supplies-dropdown,
-  .renew-supplies-menu:hover .renew-supplies-dropdown,
-  .renew-supplies-menu:focus-within .renew-supplies-dropdown {
-    transform: translateX(-50%);
+  .renew-guide-qa-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px 0 22px;
   }
 
-  .renew-tab {
-    padding: 4px 0;
+  .renew-news-guide-panel .renew-section-head {
+    align-items: flex-start;
+    padding: 14px 14px 0;
   }
 
-  .renew-pill {
-    height: 40px;
-    min-width: 68px;
+  .renew-guide-qa-toggle {
+    justify-content: flex-end;
+  }
+
+  .renew-guide-qa-group {
+    gap: 12px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .renew-guide-qa-group h3 {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .renew-guide-qa-list {
+    gap: 10px;
+  }
+
+  .renew-guide-qa-item summary {
+    min-height: 48px;
+    padding: 13px 14px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+
+  .renew-guide-qa-answer {
+    gap: 8px;
+    padding: 2px 14px 16px;
+    font-size: 13px;
+    line-height: 1.72;
+  }
+
+  .renew-news-overview,
+  .renew-news-links {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-news-card-head {
+    display: grid;
+    gap: 12px;
+    padding: 14px 14px 0;
+  }
+
+  .renew-news-toggle button,
+  .renew-news-supply-tabs button {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .renew-topic-list-compact {
+    padding: 12px 14px 14px;
+  }
+
+  .renew-topic-list-compact .renew-topic-card {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+
+  .renew-news-link-card {
+    min-height: 118px;
+    padding: 14px;
+  }
+
+  .renew-news-info-button {
+    width: 26px;
+    height: 26px;
     font-size: 13px;
   }
 
-  .renew-mode {
-    width: 40px;
-    height: 40px;
+  .renew-news-guide-tabs {
+    padding: 14px 16px 8px;
+  }
+
+  .renew-news-guide-tabs button {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+
+  .renew-news-guide-backdrop {
+    align-items: center;
+    padding: 14px 12px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .renew-news-guide-modal {
+    width: 100%;
+    max-height: calc(100dvh - 48px);
+  }
+
+  .renew-news-guide-body {
+    gap: 10px;
+    padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
+    font-size: 13px;
+    line-height: 1.66;
+  }
+
+  .renew-news-guide-section,
+  .renew-news-guide-platform {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .renew-news-guide-section h3,
+  .renew-news-guide-platform > h3 {
+    font-size: 15px;
+  }
+
+  .renew-news-guide-steps {
+    font-size: 13px;
+  }
+
+  .renew-news-guide-list {
+    font-size: 13px;
+  }
+
+  .renew-news-supply-tabs {
+    padding: 0 2px;
+  }
+
+  .renew-news-supply-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .renew-news-supply-card {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .renew-news-supply-image {
+    border-radius: 12px;
+    font-size: 20px;
+  }
+
+  .renew-catalog {
+    padding: 22px 14px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .renew-catalog-side,
+  .renew-catalog-main {
+    border-radius: 22px;
+    padding: 14px;
+  }
+
+  .renew-catalog-headline {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .renew-mobile-category-chips {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7px;
+    overflow: visible;
+  }
+
+  .renew-mobile-category-chips button {
+    min-width: 0;
+    min-height: 40px;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  .renew-header {
+    padding: 12px 16px 0;
+  }
+
+  .renew-nav {
+    display: none;
+  }
+
+  .renew-mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 48px;
+    gap: 12px;
+  }
+
+  .renew-mobile-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 150px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .renew-mobile-logo img {
+    display: block;
+    width: 136px;
+    height: auto;
+  }
+
+  .renew-app.is-dark .renew-mobile-logo img {
+    content: url('/optcg-logo-dark.png');
+  }
+
+  .renew-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .renew-mobile-actions > button,
+  .renew-mobile-actions .renew-account-menu > button,
+  .renew-mobile-supplies > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(17, 24, 39, 0.18);
+    border-radius: 999px;
+    color: #17191c;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .renew-mobile-actions svg,
+  .renew-bottom-nav svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .renew-app.is-dark .renew-mobile-actions > button,
+  .renew-app.is-dark .renew-mobile-actions .renew-account-menu > button,
+  .renew-app.is-dark .renew-mobile-supplies > button {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #f5f2ec;
+    background: rgba(23, 25, 31, 0.92);
+  }
+
+  .renew-mobile-supplies {
+    position: relative;
+  }
+
+  .renew-mobile-supplies .renew-supplies-dropdown {
+    right: 0;
+    left: auto;
+    width: min(248px, calc(100vw - 32px));
+    transform: translateY(8px);
+  }
+
+  .renew-mobile-supplies.is-open .renew-supplies-dropdown,
+  .renew-mobile-supplies:focus-within .renew-supplies-dropdown {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .renew-bottom-nav {
+    position: fixed;
+    z-index: 80;
+    left: 14px;
+    right: 14px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    min-height: 58px;
+    padding: 8px;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(16px);
+  }
+
+  .renew-bottom-nav button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 17px;
+    color: #4b5563;
+    background: transparent;
+    font-size: 22px;
+    font-weight: 900;
+  }
+
+  .renew-bottom-nav button.is-active {
+    color: #fff;
+    background: #17191c;
+  }
+
+  .renew-back-to-top {
+    position: fixed;
+    z-index: 90;
+    left: 50%;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(17, 24, 39, 0.1);
+    border-radius: 999px;
+    color: #fff;
+    background: #17191c;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
+    transform: translateX(-50%);
+    font-size: 22px;
+    font-weight: 900;
+  }
+
+  .renew-app.is-dark .renew-bottom-nav {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(18, 20, 27, 0.92);
+  }
+
+  .renew-app.is-dark .renew-bottom-nav button {
+    color: #c9c1b7;
+  }
+
+  .renew-app.is-dark .renew-bottom-nav button.is-active {
+    color: #17191c;
+    background: #f5f2ec;
+  }
+
+  .renew-app.is-dark .renew-back-to-top {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #17191c;
+    background: #f5f2ec;
   }
 
   .renew-home {
@@ -2984,6 +5546,25 @@
     gap: 10px;
     padding: 12px;
     border-radius: 20px;
+  }
+
+  .renew-official-links {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .renew-official-links a {
+    min-width: 0;
+    min-height: 30px;
+    padding: 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 10px;
+    font-weight: 800;
   }
 
   .renew-locale-switch {
@@ -3005,7 +5586,39 @@
   }
 
   .renew-market-chart-box svg {
-    height: 280px;
+    height: 400px;
+  }
+
+  .renew-market-sale {
+    grid-template-columns: 46px minmax(70px, 1fr) auto;
+    gap: 6px;
+    padding: 8px 9px;
+    border-radius: 12px;
+  }
+
+  .renew-market-sale span,
+  .renew-market-sale small,
+  .renew-market-sale strong {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .renew-market-sale span {
+    font-size: 11px;
+    letter-spacing: -0.03em;
+  }
+
+  .renew-market-sale small {
+    font-size: 11px;
+    letter-spacing: -0.03em;
+  }
+
+  .renew-market-sale strong {
+    justify-self: end;
+    font-size: 11px;
+    letter-spacing: -0.04em;
   }
 
   .renew-chart-range-label {
@@ -3025,13 +5638,67 @@
     order: 2;
   }
 
-  .renew-update {
+  .renew-update,
+  .renew-home-news {
     order: 3;
+  }
+
+  .renew-home-updates-mini {
+    max-width: calc(100% - 24px);
+    margin-top: 14px;
   }
 
   .renew-announcement-modal {
     padding: 26px;
     border-radius: 24px;
+  }
+
+  .renew-modal-backdrop {
+    align-items: center;
+    padding: 24px 14px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .renew-info-modal {
+    max-height: calc(100dvh - 48px);
+  }
+
+  .renew-account-summary {
+    grid-template-columns: 1fr;
+    padding: 12px 18px 0;
+  }
+
+  .renew-account-form {
+    padding: 12px 18px 20px;
+  }
+
+  .renew-account-actions {
+    grid-template-columns: 1fr;
+    margin-top: 16px;
+    padding: 18px 18px 20px;
+  }
+
+  .renew-password-panel {
+    margin: 14px 18px 20px;
+  }
+
+  .renew-account-logout-button {
+    width: calc(100% - 36px);
+    margin: 14px 18px 20px;
+  }
+
+  .renew-update-modal {
+    max-height: calc(100dvh - 48px);
+  }
+
+  .renew-update-modal .renew-modal-head {
+    flex: 0 0 auto;
+  }
+
+  .renew-update-modal .renew-update-list {
+    min-height: 0;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .renew-card-grid {
@@ -3140,30 +5807,149 @@
   }
 
   .renew-box-market-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .renew-market-card-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .renew-market-card-preview {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .renew-card-market {
+    border: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .renew-market-card-preview-thumb {
+    aspect-ratio: auto;
+  }
+
+  .renew-market-card-preview-thumb img {
+    width: 100%;
+    height: auto;
+  }
+
+  .renew-market-card-preview strong {
+    min-height: 42px;
+    font-size: 11px;
+    line-height: 1.25;
+    -webkit-line-clamp: 3;
+  }
+
+  .renew-market-card-preview span,
+  .renew-market-card-preview small {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .renew-market-card-preview b {
+    font-size: 13px;
   }
 
   .renew-box-market-card {
     grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 10px;
+    gap: 7px;
+    min-height: 0;
+    padding: 9px;
   }
 
   .renew-box-thumb {
     width: 100%;
-    height: 104px;
+    height: 86px;
+    border-radius: 12px;
   }
 
   .renew-box-market-card strong {
+    display: none;
+  }
+
+  .renew-box-mobile-title {
+    display: grid;
+    gap: 2px;
+  }
+
+  .renew-box-mobile-title em {
+    color: #17191c;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+
+  .renew-box-mobile-title span {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #4b5563;
     font-size: 12px;
+    font-weight: 800;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .renew-box-market-card small {
-    font-size: 11px;
+    display: none;
   }
 
   .renew-box-market-card b {
-    font-size: 14px;
+    margin-top: 5px;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .renew-box-market {
+    margin-top: 14px;
+    border: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-app.is-dark .renew-box-market,
+  .renew-app.is-dark .renew-card-market {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .renew-box-market-head {
+    margin-bottom: 10px;
+  }
+
+  .renew-box-market-head h2 {
+    font-size: 17px;
+  }
+
+  .renew-box-market-head p {
+    margin-top: 3px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .renew-card-market .renew-market-card-preview-thumb {
+    width: 100%;
+    aspect-ratio: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .renew-card-market .renew-market-card-preview-thumb img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    margin: 0 auto;
+    object-fit: contain;
   }
 
   .renew-stats-hero,
@@ -3190,7 +5976,7 @@
   }
 
   .renew-catalog-toolbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 72px;
   }
 
   .renew-admin-stats {

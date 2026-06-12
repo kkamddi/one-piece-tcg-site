@@ -7,6 +7,18 @@ function normalizeAuthApiError(message) {
   return raw;
 }
 
+function isLocalPreview() {
+  if (typeof window === 'undefined') return false;
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname);
+}
+
+function getLocalPreviewEmail(identifier) {
+  const value = String(identifier ?? '').trim();
+  if (!isLocalPreview() || value.includes('@')) return '';
+  if (value.toLowerCase() === 'admin') return 'admin@onepiece-tcg.local';
+  return '';
+}
+
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {
     cache: 'no-store',
@@ -40,5 +52,14 @@ export function signupWithProfile(payload) {
 }
 
 export function resolveLoginEmail(identifier) {
-  return requestJson(`/api/auth?action=lookup&identifier=${encodeURIComponent(identifier)}`);
+  return requestJson(`/api/auth?action=lookup&identifier=${encodeURIComponent(identifier)}`).then((payload) => {
+    if (payload?.email) return payload;
+    const localEmail = getLocalPreviewEmail(identifier);
+    if (localEmail) return { email: localEmail };
+    return payload;
+  }).catch((error) => {
+    const localEmail = getLocalPreviewEmail(identifier);
+    if (localEmail) return { email: localEmail };
+    throw error;
+  });
 }

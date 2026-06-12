@@ -1,0 +1,128 @@
+[
+  {
+    "cardId": "JP::P-046",
+    "cardNo": "P-046",
+    "locale": "JP",
+    "name": "ヤマト",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/9555289",
+    "status": "approved",
+    "note": "Yamato #046 / 2023 One Piece Japanese Promos"
+  },
+  {
+    "cardId": "JP::OP01-120_p1",
+    "cardNo": "OP01-120",
+    "locale": "JP",
+    "name": "シャンクス",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/7264169",
+    "status": "approved",
+    "note": "Shanks #120 / 2022 One Piece Japanese OP01 Romance Dawn Alternate Art"
+  },
+  {
+    "cardId": "JP::OP01-120_p2",
+    "cardNo": "OP01-120",
+    "locale": "JP",
+    "name": "シャンクス",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/7248065",
+    "status": "approved",
+    "note": "Shanks #120 / 2022 One Piece Japanese OP01 Romance Dawn Manga Alternate Art"
+  },
+  {
+    "cardId": "JP::OP01-121_p1",
+    "cardNo": "OP01-121",
+    "locale": "JP",
+    "name": "ヤマト",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/7272618",
+    "status": "approved",
+    "note": "Yamato #121 / 2022 One Piece Japanese OP01 Romance Dawn Alternate Art"
+  },
+  {
+    "cardId": "JP::OP05-119_p2",
+    "cardNo": "OP05-119",
+    "locale": "JP",
+    "name": "モンキー・D・ルフィ",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/9454789",
+    "status": "approved",
+    "note": "Monkey D. Luffy #119 / 2023 One Piece Japanese OP05 Awakening of the New Era Manga Alternate Art"
+  },
+  {
+    "cardId": "JP::OP02-120_p1",
+    "cardNo": "OP02-120",
+    "locale": "JP",
+    "name": "ウタ",
+    "psaSpecUrl": "https://www.psacard.com/auctionprices/tcg-cards/2022-one-piece-japanese-op02-paramount-war/uta/7714615",
+    "status": "approved",
+    "note": "Uta #120 / 2022 One Piece Japanese OP02 Paramount War Alternate Art"
+  },
+  {
+    "cardId": "JP::OP03-122_p2",
+    "cardNo": "OP03-122",
+    "locale": "JP",
+    "name": "そげキング",
+    "psaSpecUrl": "https://www.psacard.com/auctionprices/tcg-cards/one-piece-japanese-pillars-strength/sogeking/8266624",
+    "status": "approved",
+    "note": "Sogeking #122 / 2023 One Piece Japanese OP03 Pillars of Strength Manga Alternate Art"
+  },
+  {
+    "cardId": "JP::OP03-123_p1",
+    "cardNo": "OP03-123",
+    "locale": "JP",
+    "name": "シャーロット・カタクリ",
+    "psaSpecUrl": "https://www.psacard.com/auctionprices/tcg-cards/2023-one-piece-japanese-op03-pillars-strength/charlotte-katakuri/8271325",
+    "status": "approved",
+    "note": "Charlotte Katakuri #123 / 2023 One Piece Japanese OP03 Pillars of Strength Alternate Art"
+  },
+  {
+    "cardId": "JP::OP04-118_p1",
+    "cardNo": "OP04-118",
+    "locale": "JP",
+    "name": "ネフェルタリ・ビビ",
+    "psaSpecUrl": "https://www.psacard.com/auctionprices/tcg-cards/2023-one-piece-japanese-op04-kingdoms-intrigue/nefeltari-vivi/8924758",
+    "status": "approved",
+    "note": "Nefeltari Vivi #118 / 2023 One Piece Japanese OP04 Kingdoms of Intrigue Alternate Art"
+  },
+  {
+    "cardId": "JP::OP04-119_p1",
+    "cardNo": "OP04-119",
+    "locale": "JP",
+    "name": "ドンキホーテ・ロシナンテ",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/8921539",
+    "status": "approved",
+    "note": "Donquixote Rosinante #119 / 2023 One Piece Japanese OP04 Kingdoms of Intrigue Alternate Art"
+  },
+  {
+    "cardId": "JP::OP05-118",
+    "cardNo": "OP05-118",
+    "locale": "JP",
+    "name": "カイドウ",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/9637067",
+    "status": "approved",
+    "note": "Kaido #118 / 2023 One Piece Japanese OP05 Awakening of the New Era base SEC"
+  },
+  {
+    "cardId": "JP::OP05-119",
+    "cardNo": "OP05-119",
+    "locale": "JP",
+    "name": "モンキー・D・ルフィ",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/9453255",
+    "status": "approved",
+    "note": "Monkey D. Luffy #119 / 2023 One Piece Japanese OP05 Awakening of the New Era base SEC"
+  },
+  {
+    "cardId": "JP::OP06-118",
+    "cardNo": "OP06-118",
+    "locale": "JP",
+    "name": "ロロノア・ゾロ",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/9749075",
+    "status": "approved",
+    "note": "Roronoa Zoro #118 / 2023 One Piece Japanese OP06 Wings of the Captain base SEC"
+  },
+  {
+    "cardId": "JP::OP06-119",
+    "cardNo": "OP06-119",
+    "locale": "JP",
+    "name": "サンジ",
+    "psaSpecUrl": "https://www.psacard.com/spec/psa/9749077",
+    "status": "approved",
+    "note": "Sanji #119 / 2023 One Piece Japanese OP06 Wings of the Captain base SEC"
+  }
+]

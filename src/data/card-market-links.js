@@ -25184,6 +25184,1401 @@ const cardMarketLinks = [
     "apparelId": 793201,
     "status": "approved",
     "note": "auto approved p1 parallel: Monkey.D.Luffy SR-P [ST30-012] (Start Deck EX \"Luffy&Ace Bonus Pack\")"
+  },
+  {
+    "cardId": "JP::OP16-001",
+    "cardNo": "OP16-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828060,
+    "status": "approved",
+    "note": "OP16 auto approved: Portgas.D.Ace L [OP16-001](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-001_p1",
+    "cardNo": "OP16-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822584,
+    "status": "approved",
+    "note": "OP16 auto approved: Portgas.D.Ace L-P [OP16-001](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-002",
+    "cardNo": "OP16-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828061,
+    "status": "approved",
+    "note": "OP16 auto approved: Izo UC [OP16-002](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-003",
+    "cardNo": "OP16-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828062,
+    "status": "approved",
+    "note": "OP16 auto approved: Edward.Newgate SR [OP16-003](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-003_p1",
+    "cardNo": "OP16-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822585,
+    "status": "approved",
+    "note": "OP16 auto approved: Edward.Newgate SR-P [OP16-003](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-004",
+    "cardNo": "OP16-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828063,
+    "status": "approved",
+    "note": "OP16 auto approved: Curiel C [OP16-004](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-005",
+    "cardNo": "OP16-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828064,
+    "status": "approved",
+    "note": "OP16 auto approved: Thatch UC [OP16-005](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-006",
+    "cardNo": "OP16-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828065,
+    "status": "approved",
+    "note": "OP16 auto approved: Shanks C [OP16-006](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-007",
+    "cardNo": "OP16-007",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828066,
+    "status": "approved",
+    "note": "OP16 auto approved: Jozu UC [OP16-007](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-008",
+    "cardNo": "OP16-008",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828067,
+    "status": "approved",
+    "note": "OP16 auto approved: Squard C [OP16-008](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-009",
+    "cardNo": "OP16-009",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828068,
+    "status": "approved",
+    "note": "OP16 auto approved: Speed Jil C [OP16-009](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-010",
+    "cardNo": "OP16-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828069,
+    "status": "approved",
+    "note": "OP16 auto approved: Namule UC [OP16-010](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-011",
+    "cardNo": "OP16-011",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828070,
+    "status": "approved",
+    "note": "OP16 auto approved: Vista R [OP16-011](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-012",
+    "cardNo": "OP16-012",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828071,
+    "status": "approved",
+    "note": "OP16 auto approved: Benn.Beckman R [OP16-012](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-013",
+    "cardNo": "OP16-013",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828082,
+    "status": "approved",
+    "note": "OP16 auto approved: McGuy C [OP16-013](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-014",
+    "cardNo": "OP16-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828083,
+    "status": "approved",
+    "note": "OP16 auto approved: Marco R [OP16-014](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-014_p1",
+    "cardNo": "OP16-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822586,
+    "status": "approved",
+    "note": "OP16 auto approved: Marco R-P [OP16-014](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-015",
+    "cardNo": "OP16-015",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828084,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy SR [OP16-015](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-015_p1",
+    "cardNo": "OP16-015",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822587,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy SR-P [OP16-015](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-016",
+    "cardNo": "OP16-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828085,
+    "status": "approved",
+    "note": "OP16 auto approved: Ramba C [OP16-016](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-017",
+    "cardNo": "OP16-017",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828086,
+    "status": "approved",
+    "note": "OP16 auto approved: LittleOars Jr. R [OP16-017](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-018",
+    "cardNo": "OP16-018",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828087,
+    "status": "approved",
+    "note": "OP16 auto approved: Rockstar C [OP16-018](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-019",
+    "cardNo": "OP16-019",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828088,
+    "status": "approved",
+    "note": "OP16 auto approved: Let's Show 'Em Our Power!!! C [OP16-019](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-020",
+    "cardNo": "OP16-020",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828089,
+    "status": "approved",
+    "note": "OP16 auto approved: Anyone Who Is Coming with Me, Throw Away Your Life and Follow Me!!! UC [OP16-020](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-021",
+    "cardNo": "OP16-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828090,
+    "status": "approved",
+    "note": "OP16 auto approved: Moby Dick R [OP16-021](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-021_p1",
+    "cardNo": "OP16-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822588,
+    "status": "approved",
+    "note": "OP16 auto approved: Moby Dick R-P [OP16-021](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-022",
+    "cardNo": "OP16-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828091,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy L [OP16-022](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-022_p1",
+    "cardNo": "OP16-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822589,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy L-P [OP16-022](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-023",
+    "cardNo": "OP16-023",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828092,
+    "status": "approved",
+    "note": "OP16 auto approved: Arlong C [OP16-023](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-024",
+    "cardNo": "OP16-024",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828093,
+    "status": "approved",
+    "note": "OP16 auto approved: Inazuma UC [OP16-024](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-025",
+    "cardNo": "OP16-025",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828094,
+    "status": "approved",
+    "note": "OP16 auto approved: Usakkof UC [OP16-025](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-026",
+    "cardNo": "OP16-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828095,
+    "status": "approved",
+    "note": "OP16 auto approved: Emporio.Ivankov SR [OP16-026](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-026_p1",
+    "cardNo": "OP16-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822590,
+    "status": "approved",
+    "note": "OP16 auto approved: Emporio.Ivankov SR-P [OP16-026](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-027",
+    "cardNo": "OP16-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828096,
+    "status": "approved",
+    "note": "OP16 auto approved: Jinbe R [OP16-027](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-028",
+    "cardNo": "OP16-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828097,
+    "status": "approved",
+    "note": "OP16 auto approved: Smoker C [OP16-028](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-029",
+    "cardNo": "OP16-029",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828098,
+    "status": "approved",
+    "note": "OP16 auto approved: Tsunokkof UC [OP16-029](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-030",
+    "cardNo": "OP16-030",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828099,
+    "status": "approved",
+    "note": "OP16 auto approved: Trafalgar Law R [OP16-030](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-031",
+    "cardNo": "OP16-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828100,
+    "status": "approved",
+    "note": "OP16 auto approved: Buggy UC [OP16-031](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-032",
+    "cardNo": "OP16-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828101,
+    "status": "approved",
+    "note": "OP16 auto approved: Boa Hancock SR [OP16-032](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-032_p1",
+    "cardNo": "OP16-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822591,
+    "status": "approved",
+    "note": "OP16 auto approved: Boa Hancock SR-P [OP16-032](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-033",
+    "cardNo": "OP16-033",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828102,
+    "status": "approved",
+    "note": "OP16 auto approved: Morley C [OP16-033](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-034",
+    "cardNo": "OP16-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828103,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy R [OP16-034](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-034_p1",
+    "cardNo": "OP16-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822592,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy R-P [OP16-034](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-035",
+    "cardNo": "OP16-035",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828104,
+    "status": "approved",
+    "note": "OP16 auto approved: Roronoa Zoro C [OP16-035](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-036",
+    "cardNo": "OP16-036",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828105,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.2.Bon.Kurei(Bentham) C [OP16-036](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-037",
+    "cardNo": "OP16-037",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828106,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.3(Galdino) C [OP16-037](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-038",
+    "cardNo": "OP16-038",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828107,
+    "status": "approved",
+    "note": "OP16 auto approved: Let's Go!!! Marineford HQ!!! R [OP16-038](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-039",
+    "cardNo": "OP16-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828108,
+    "status": "approved",
+    "note": "OP16 auto approved: Gum-Gum Twin Jet Pistol C [OP16-039](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-040",
+    "cardNo": "OP16-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828109,
+    "status": "approved",
+    "note": "OP16 auto approved: Gum-Gum Hammer Rifle UC [OP16-040](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-041",
+    "cardNo": "OP16-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828110,
+    "status": "approved",
+    "note": "OP16 auto approved: Buggy L [OP16-041](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-041_p1",
+    "cardNo": "OP16-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822593,
+    "status": "approved",
+    "note": "OP16 auto approved: Buggy L-P [OP16-041](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-042",
+    "cardNo": "OP16-042",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 2 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP16-042_p1",
+    "cardNo": "OP16-042",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 2 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP16-043",
+    "cardNo": "OP16-043",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828112,
+    "status": "approved",
+    "note": "OP16 auto approved: Usopp UC [OP16-043](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-044",
+    "cardNo": "OP16-044",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828113,
+    "status": "approved",
+    "note": "OP16 auto approved: Emporio.Ivankov C [OP16-044](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-045",
+    "cardNo": "OP16-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828114,
+    "status": "approved",
+    "note": "OP16 auto approved: Crocodile UC [OP16-045](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-046",
+    "cardNo": "OP16-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828115,
+    "status": "approved",
+    "note": "OP16 auto approved: Jinbe C [OP16-046](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-047",
+    "cardNo": "OP16-047",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828116,
+    "status": "approved",
+    "note": "OP16 auto approved: Donquixote Doflamingo C [OP16-047](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-048",
+    "cardNo": "OP16-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828117,
+    "status": "approved",
+    "note": "OP16 auto approved: Buggy SR [OP16-048](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-048_p1",
+    "cardNo": "OP16-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822595,
+    "status": "approved",
+    "note": "OP16 auto approved: Buggy SR-P [OP16-048](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-049",
+    "cardNo": "OP16-049",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828118,
+    "status": "approved",
+    "note": "OP16 auto approved: Portgas.D.Ace C [OP16-049](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-050",
+    "cardNo": "OP16-050",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828119,
+    "status": "approved",
+    "note": "OP16 auto approved: Miss Olive UC [OP16-050](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-051",
+    "cardNo": "OP16-051",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828120,
+    "status": "approved",
+    "note": "OP16 auto approved: Mohji & Cabaji C [OP16-051](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-052",
+    "cardNo": "OP16-052",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828121,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy UC [OP16-052](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-053",
+    "cardNo": "OP16-053",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828122,
+    "status": "approved",
+    "note": "OP16 auto approved: Roronoa Zoro C [OP16-053](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-054",
+    "cardNo": "OP16-054",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828123,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.1(Daz.Bonez) R [OP16-054](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-055",
+    "cardNo": "OP16-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828124,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.2.Bon.Kurei(Bentham) R [OP16-055](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-055_p1",
+    "cardNo": "OP16-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822596,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.2.Bon.Kurei(Bentham) R-P [OP16-055](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-056",
+    "cardNo": "OP16-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828125,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.3(Galdino) SR [OP16-056](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-056_p1",
+    "cardNo": "OP16-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822597,
+    "status": "approved",
+    "note": "OP16 auto approved: Mr.3(Galdino) SR-P [OP16-056](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-057",
+    "cardNo": "OP16-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828126,
+    "status": "approved",
+    "note": "OP16 auto approved: Our Savior!!! Captain Buggy!!!! C [OP16-057](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-058",
+    "cardNo": "OP16-058",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828127,
+    "status": "approved",
+    "note": "OP16 auto approved: The Prisoners Have Broken Loose!!! R [OP16-058](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-059",
+    "cardNo": "OP16-059",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828128,
+    "status": "approved",
+    "note": "OP16 auto approved: Change of Plans, We're Doing This Flashy Style!!! UC [OP16-059](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-060",
+    "cardNo": "OP16-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828129,
+    "status": "approved",
+    "note": "OP16 auto approved: Sengoku L [OP16-060](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-060_p1",
+    "cardNo": "OP16-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822598,
+    "status": "approved",
+    "note": "OP16 auto approved: Sengoku L-P [OP16-060](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-061",
+    "cardNo": "OP16-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828130,
+    "status": "approved",
+    "note": "OP16 auto approved: Marine Older Brother C [OP16-061](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-062",
+    "cardNo": "OP16-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828131,
+    "status": "approved",
+    "note": "OP16 auto approved: Marine Younger Brother C [OP16-062](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-063",
+    "cardNo": "OP16-063",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828132,
+    "status": "approved",
+    "note": "OP16 auto approved: Kuzan R [OP16-063](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-063_p1",
+    "cardNo": "OP16-063",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822599,
+    "status": "approved",
+    "note": "OP16 auto approved: Kuzan R-P [OP16-063](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-063_p2",
+    "cardNo": "OP16-063",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 3 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP16-064",
+    "cardNo": "OP16-064",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828133,
+    "status": "approved",
+    "note": "OP16 auto approved: Koby R [OP16-064](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-065",
+    "cardNo": "OP16-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828134,
+    "status": "approved",
+    "note": "OP16 auto approved: Sakazuki SR [OP16-065](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-065_p1",
+    "cardNo": "OP16-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822601,
+    "status": "approved",
+    "note": "OP16 auto approved: Sakazuki SR-P [OP16-065](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-065_p2",
+    "cardNo": "OP16-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 3 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP16-066",
+    "cardNo": "OP16-066",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828135,
+    "status": "approved",
+    "note": "OP16 auto approved: Sengoku UC [OP16-066](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-067",
+    "cardNo": "OP16-067",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828136,
+    "status": "approved",
+    "note": "OP16 auto approved: Tsuru UC [OP16-067](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-068",
+    "cardNo": "OP16-068",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828137,
+    "status": "approved",
+    "note": "OP16 auto approved: Trafalgar Law C [OP16-068](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-069",
+    "cardNo": "OP16-069",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828138,
+    "status": "approved",
+    "note": "OP16 auto approved: Donquixote Doflamingo C [OP16-069](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-070",
+    "cardNo": "OP16-070",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828139,
+    "status": "approved",
+    "note": "OP16 auto approved: Donquixote Rosinante UC [OP16-070](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-071",
+    "cardNo": "OP16-071",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828140,
+    "status": "approved",
+    "note": "OP16 auto approved: Deva of the Waves C [OP16-071](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-072",
+    "cardNo": "OP16-072",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828141,
+    "status": "approved",
+    "note": "OP16 auto approved: Hannyabal C [OP16-072](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-073",
+    "cardNo": "OP16-073",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828142,
+    "status": "approved",
+    "note": "OP16 auto approved: Borsalino R [OP16-073](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-073_p1",
+    "cardNo": "OP16-073",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822603,
+    "status": "approved",
+    "note": "OP16 auto approved: Borsalino R-P [OP16-073](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-073_p2",
+    "cardNo": "OP16-073",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 3 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP16-074",
+    "cardNo": "OP16-074",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828143,
+    "status": "approved",
+    "note": "OP16 auto approved: Magellan C [OP16-074](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-075",
+    "cardNo": "OP16-075",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828144,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Garp C [OP16-075](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-076",
+    "cardNo": "OP16-076",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828145,
+    "status": "approved",
+    "note": "OP16 auto approved: The Three Admirals!!! UC [OP16-076](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-077",
+    "cardNo": "OP16-077",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828146,
+    "status": "approved",
+    "note": "OP16 auto approved: Strategic Leader \"Sengoku the Buddha\" R [OP16-077](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-078",
+    "cardNo": "OP16-078",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828147,
+    "status": "approved",
+    "note": "OP16 auto approved: Marineford UC [OP16-078](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-079",
+    "cardNo": "OP16-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828148,
+    "status": "approved",
+    "note": "OP16 auto approved: Yamato L [OP16-079](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-079_p1",
+    "cardNo": "OP16-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822605,
+    "status": "approved",
+    "note": "OP16 auto approved: Yamato L-P [OP16-079](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-080",
+    "cardNo": "OP16-080",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828149,
+    "status": "approved",
+    "note": "OP16 auto approved: Marshall.D.Teach L [OP16-080](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-080_p1",
+    "cardNo": "OP16-080",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822606,
+    "status": "approved",
+    "note": "OP16 auto approved: Marshall.D.Teach L-P [OP16-080](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-081",
+    "cardNo": "OP16-081",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828150,
+    "status": "approved",
+    "note": "OP16 auto approved: Otama C [OP16-081](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-082",
+    "cardNo": "OP16-082",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828151,
+    "status": "approved",
+    "note": "OP16 auto approved: Kin'emon SR [OP16-082](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-082_p1",
+    "cardNo": "OP16-082",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822607,
+    "status": "approved",
+    "note": "OP16 auto approved: Kin'emon SR-P [OP16-082](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-083",
+    "cardNo": "OP16-083",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828152,
+    "status": "approved",
+    "note": "OP16 auto approved: Kouzuki Oden C [OP16-083](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-084",
+    "cardNo": "OP16-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828153,
+    "status": "approved",
+    "note": "OP16 auto approved: Kouzuki Momonosuke UC [OP16-084](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-085",
+    "cardNo": "OP16-085",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828154,
+    "status": "approved",
+    "note": "OP16 auto approved: Kouzuki Momonosuke R [OP16-085](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-085_p1",
+    "cardNo": "OP16-085",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822608,
+    "status": "approved",
+    "note": "OP16 auto approved: Kouzuki Momonosuke R-P [OP16-085](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-086",
+    "cardNo": "OP16-086",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828155,
+    "status": "approved",
+    "note": "OP16 auto approved: Sanji C [OP16-086](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-087",
+    "cardNo": "OP16-087",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828156,
+    "status": "approved",
+    "note": "OP16 auto approved: Shinobu UC [OP16-087](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-088",
+    "cardNo": "OP16-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828157,
+    "status": "approved",
+    "note": "OP16 auto approved: Shimotsuki Ushimaru C [OP16-088](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-089",
+    "cardNo": "OP16-089",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828158,
+    "status": "approved",
+    "note": "OP16 auto approved: Dracule Mihawk C [OP16-089](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-090",
+    "cardNo": "OP16-090",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828159,
+    "status": "approved",
+    "note": "OP16 auto approved: Tony Tony.Chopper C [OP16-090](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-091",
+    "cardNo": "OP16-091",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828160,
+    "status": "approved",
+    "note": "OP16 auto approved: Nami R [OP16-091](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-092",
+    "cardNo": "OP16-092",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828161,
+    "status": "approved",
+    "note": "OP16 auto approved: Nico Robin UC [OP16-092](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-093",
+    "cardNo": "OP16-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828162,
+    "status": "approved",
+    "note": "OP16 auto approved: Bartholomew Kuma C [OP16-093](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-094",
+    "cardNo": "OP16-094",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828163,
+    "status": "approved",
+    "note": "OP16 auto approved: Portgas.D.Ace UC [OP16-094](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-095",
+    "cardNo": "OP16-095",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828183,
+    "status": "approved",
+    "note": "OP16 auto approved: Monkey.D.Luffy R [OP16-095](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-096",
+    "cardNo": "OP16-096",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828184,
+    "status": "approved",
+    "note": "OP16 auto approved: Yamato R [OP16-096](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-097",
+    "cardNo": "OP16-097",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828185,
+    "status": "approved",
+    "note": "OP16 auto approved: Yamato R [OP16-097](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-098",
+    "cardNo": "OP16-098",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828186,
+    "status": "approved",
+    "note": "OP16 auto approved: Yamato SR [OP16-098](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-098_p1",
+    "cardNo": "OP16-098",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822609,
+    "status": "approved",
+    "note": "OP16 auto approved: Yamato SR-P [OP16-098](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-099",
+    "cardNo": "OP16-099",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828187,
+    "status": "approved",
+    "note": "OP16 auto approved: I've Come to Sever That \"Bond\"!!! UC [OP16-099](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-100",
+    "cardNo": "OP16-100",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828188,
+    "status": "approved",
+    "note": "OP16 auto approved: Ice Chop C [OP16-100](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-101",
+    "cardNo": "OP16-101",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828189,
+    "status": "approved",
+    "note": "OP16 auto approved: Phantom Horse Blade C [OP16-101](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-102",
+    "cardNo": "OP16-102",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828190,
+    "status": "approved",
+    "note": "OP16 auto approved: Avalo Pizarro UC [OP16-102](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-103",
+    "cardNo": "OP16-103",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828191,
+    "status": "approved",
+    "note": "OP16 auto approved: Van Augur UC [OP16-103](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-104",
+    "cardNo": "OP16-104",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828192,
+    "status": "approved",
+    "note": "OP16 auto approved: Catarina Devon R [OP16-104](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-105",
+    "cardNo": "OP16-105",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828193,
+    "status": "approved",
+    "note": "OP16 auto approved: Gecko Moria C [OP16-105](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-106",
+    "cardNo": "OP16-106",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828194,
+    "status": "approved",
+    "note": "OP16 auto approved: Sanjuan.Wolf R [OP16-106](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-107",
+    "cardNo": "OP16-107",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828195,
+    "status": "approved",
+    "note": "OP16 auto approved: Jesus Burgess C [OP16-107](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-108",
+    "cardNo": "OP16-108",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828196,
+    "status": "approved",
+    "note": "OP16 auto approved: Shiryu SR [OP16-108](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-108_p1",
+    "cardNo": "OP16-108",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822610,
+    "status": "approved",
+    "note": "OP16 auto approved: Shiryu SR-P [OP16-108](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-109",
+    "cardNo": "OP16-109",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828197,
+    "status": "approved",
+    "note": "OP16 auto approved: Doc Q UC [OP16-109](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-110",
+    "cardNo": "OP16-110",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828198,
+    "status": "approved",
+    "note": "OP16 auto approved: Vasco Shot R [OP16-110](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-111",
+    "cardNo": "OP16-111",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828199,
+    "status": "approved",
+    "note": "OP16 auto approved: Boa Sandersonia C [OP16-111](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-112",
+    "cardNo": "OP16-112",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828200,
+    "status": "approved",
+    "note": "OP16 auto approved: Boa Hancock C [OP16-112](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-113",
+    "cardNo": "OP16-113",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828201,
+    "status": "approved",
+    "note": "OP16 auto approved: Boa Marigold UC [OP16-113](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-114",
+    "cardNo": "OP16-114",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828202,
+    "status": "approved",
+    "note": "OP16 auto approved: Laffitte C [OP16-114](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-115",
+    "cardNo": "OP16-115",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828203,
+    "status": "approved",
+    "note": "OP16 auto approved: Black Vortex UC [OP16-115](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-116",
+    "cardNo": "OP16-116",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828204,
+    "status": "approved",
+    "note": "OP16 auto approved: Zehahahahaha!!! R [OP16-116](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-116_p1",
+    "cardNo": "OP16-116",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822611,
+    "status": "approved",
+    "note": "OP16 auto approved: Zehahahahaha!!! R-P [OP16-116](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-117",
+    "cardNo": "OP16-117",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828205,
+    "status": "approved",
+    "note": "OP16 auto approved: Black Hole C [OP16-117](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-118",
+    "cardNo": "OP16-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828206,
+    "status": "approved",
+    "note": "OP16 auto approved: Portgas.D.Ace SEC [OP16-118](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-118_p1",
+    "cardNo": "OP16-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822612,
+    "status": "approved",
+    "note": "OP16 auto approved: Portgas.D.Ace SEC-P [OP16-118](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-119",
+    "cardNo": "OP16-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 828207,
+    "status": "approved",
+    "note": "OP16 auto approved: Marshall.D.Teach SEC [OP16-119](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::OP16-119_p1",
+    "cardNo": "OP16-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 822613,
+    "status": "approved",
+    "note": "OP16 auto approved: Marshall.D.Teach SEC-P [OP16-119](Booster Pack \"THE TIME OF BATTLE\")"
+  },
+  {
+    "cardId": "JP::EB04-054_p1",
+    "cardNo": "EB04-054",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP10-045_p2",
+    "cardNo": "OP10-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-067_p2",
+    "cardNo": "OP11-067",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP14-029_p1",
+    "cardNo": "OP14-029",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::OP14-084_p2",
+    "cardNo": "OP14-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::ST15-005_p1",
+    "cardNo": "ST15-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
   }
 ];
 
