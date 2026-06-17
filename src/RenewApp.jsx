@@ -1278,21 +1278,21 @@ const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const PAGE_SEO = {
   home: {
     title: 'OPTCG Korea - 원피스 카드 도감, 시세, 컬렉션 관리',
-    h1: 'OPTCG Korea',
+    h1: '원피스카드 도감·시세·컬렉션 관리',
     description: 'OPTCG Korea는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세 확인, 컬렉션 관리 서비스입니다.',
-    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, OPTCG, OPTCG Korea',
-    body: 'OPTCG Korea는 원피스 카드게임의 카드 정보, 시세, 보유 카드, 위시리스트, 구매처 정보를 한 곳에서 확인할 수 있는 비공식 팬 서비스입니다.'
+    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, 원피스카드 구매처, OPTCG, OPTCG Korea',
+    body: 'OPTCG Korea는 원피스카드 유저가 한글판·일본판 카드 도감, 카드별 시세, 컬렉션 관리, 구매처 정보를 한 곳에서 확인할 수 있는 비공식 팬 서비스입니다.'
   },
   cards: {
-    title: '원피스 카드 도감 - 한글판 일본판 카드 검색 | OPTCG Korea',
-    h1: '원피스 카드 도감',
+    title: '원피스카드 도감 - 한글판 일본판 카드 검색 | OPTCG Korea',
+    h1: '원피스카드 도감',
     description: '한글판과 일본판 원피스카드의 OP, EB, ST, 프로모 카드를 카드명과 일련번호로 검색할 수 있습니다.',
     keywords: '원피스카드 도감, 원피스 카드 검색, OP16, OP15, 일본판 원피스카드, 한글판 원피스카드',
     body: '원피스 카드 도감에서는 한글판과 일본판 카드를 OP, EB, ST, 프로모 시리즈별로 확인하고 카드명 또는 일련번호로 검색할 수 있습니다.'
   },
   prices: {
-    title: '원피스 카드 시세 - 카드별 시세 그래프와 박스 가격 | OPTCG Korea',
-    h1: '원피스 카드 시세',
+    title: '원피스카드 시세 - 카드별 시세 그래프와 박스 가격 | OPTCG Korea',
+    h1: '원피스카드 시세',
     description: '원피스 카드별 시세, 박스 가격, 일본판과 한글판 거래 가격 흐름을 확인할 수 있습니다.',
     keywords: '원피스카드 시세, 원피스 카드 가격, 원피스카드 박스 시세, PSA10 시세, SNKRDUNK 원피스카드',
     body: '시세 페이지에서는 카드별 거래 가격, 박스 가격, 최근 거래 내역과 7일, 1개월, 전체 기간 그래프를 확인할 수 있습니다.'
@@ -1305,8 +1305,8 @@ const PAGE_SEO = {
     body: '정보 영역에서는 업데이트 공지, 공식 소식, 사전예약, 온라인 오리파, 카드 보관용품, 이용 가이드를 확인할 수 있습니다.'
   },
   shops: {
-    title: '원피스 카드 구매처 - 지역별 공인점포 취급점포 | OPTCG Korea',
-    h1: '원피스 카드 구매처',
+    title: '원피스카드 구매처 - 지역별 공인점포 취급점포 | OPTCG Korea',
+    h1: '원피스카드 구매처',
     description: '지역별 원피스 카드게임 오프라인 공인점포와 취급점포를 검색하고 지도 링크로 확인할 수 있습니다.',
     keywords: '원피스카드 구매처, 원피스 카드 공인점포, 원피스카드 매장, 원피스카드 취급점포',
     body: '구매처 페이지에서는 지역별 오프라인 공인점포와 취급점포를 필터로 찾고 네이버지도 또는 카카오맵으로 위치를 확인할 수 있습니다.'
@@ -2024,6 +2024,8 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
 
   return (
     <main className="renew-home">
+      <h1 className="renew-sr-only">{PAGE_SEO.home.h1}</h1>
+      <p className="renew-sr-only">{PAGE_SEO.home.body}</p>
       <section className="renew-hero" aria-label="메인 검색">
         <RenewSearch onSubmitSearch={onSubmitSearch} uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
