@@ -1,6 +1,26 @@
 [
   {
-    "id": "kr-2026-06-12-0-원피스 카드게임 발매기념대회 리미티드 배틀",
+    "id": "kr-2026-06-19-0-[OPK-13] 부스터 팩 계승되는 의지 사용 규정 공개",
+    "locale": "KR",
+    "source": "KR_OFFICIAL",
+    "category": "OTHER",
+    "title": "[OPK-13] 부스터 팩 계승되는 의지 사용 규정 공개",
+    "date": "2026-06-19",
+    "url": "https://onepiece-cardgame.kr/topics/view.do?brdno=5798",
+    "imageUrl": "https://onepiece-cardgame.kr/images/mainImg.png"
+  },
+  {
+    "id": "jp-2026-06-19-0-「メラメラの実争奪戦」のイベント情報を公開！​",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "イベント",
+    "title": "「メラメラの実争奪戦」のイベント情報を公開！​",
+    "date": "2026-06-19",
+    "url": "http://cp.onepiece-cardgame.com/flame-flame-fruit/",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/18/ribKXUQHYoHezWzN/event_W640_H360.webp?_=ca6b4d6c675cc014935aff000624710e"
+  },
+  {
+    "id": "kr-2026-06-12-1-원피스 카드게임 발매기념대회 리미티드 배틀",
     "locale": "KR",
     "source": "KR_OFFICIAL",
     "category": "EVENTS",
@@ -10,7 +30,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20260612_175725_8c6ebefc9040422bbe6801171edac9bc"
   },
   {
-    "id": "kr-2026-06-12-1-[7월] 원피스 카드게임 플래그쉽 배틀",
+    "id": "kr-2026-06-12-2-[7월] 원피스 카드게임 플래그쉽 배틀",
     "locale": "KR",
     "source": "KR_OFFICIAL",
     "category": "EVENTS",
@@ -20,7 +40,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20260612_175241_e50d6e50ad3d41c88d5c2d75a45bd5ab"
   },
   {
-    "id": "kr-2026-06-12-2-[7월] 원피스 카드게임 스탠다드 배틀",
+    "id": "kr-2026-06-12-3-[7월] 원피스 카드게임 스탠다드 배틀",
     "locale": "KR",
     "source": "KR_OFFICIAL",
     "category": "EVENTS",
@@ -30,7 +50,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20260612_175238_1e8649f7ece946e8a46888a081853870"
   },
   {
-    "id": "kr-2026-06-12-3-[7월] 원피스 카드게임 교류회",
+    "id": "kr-2026-06-12-4-[7월] 원피스 카드게임 교류회",
     "locale": "KR",
     "source": "KR_OFFICIAL",
     "category": "EVENTS",
@@ -40,74 +60,54 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20260612_175237_39f97db75f27485686dd22e6d083df97"
   },
   {
-    "id": "kr-2026-06-05-4-[OPK-13] 부스터 팩 계승되는 의지 발매일 공개",
-    "locale": "KR",
-    "source": "KR_OFFICIAL",
-    "category": "PRODUCTS",
-    "title": "[OPK-13] 부스터 팩 계승되는 의지 발매일 공개",
-    "date": "2026-06-05",
-    "url": "https://onepiece-cardgame.kr/products/view.do?brdno=5777",
-    "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20260605_124947_bca397e525234f86b644ee8090f3b6c1"
-  },
-  {
-    "id": "jp-2026-06-05-0-「スタートデッキ【ST-31】~【ST-36】」7月11日(土)6色同時発売決定！",
+    "id": "jp-2026-06-05-1-「スタートデッキ【ST-31】~【ST-36】」7月11日(土)6色同時発売決定！",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "商品情報",
     "title": "「スタートデッキ【ST-31】~【ST-36】」7月11日(土)6色同時発売決定！",
     "date": "2026-06-05",
     "url": "https://www.onepiece-cardgame.com/products/?subcategory=decks&tags=202607starter&view=normal",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/06/04/I1KuxPaeHnOTHwGe/thumbnail.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/06/04/I1KuxPaeHnOTHwGe/thumbnail.webp?_=ca6b4d6c675cc014935aff000624710e"
   },
   {
-    "id": "jp-2026-06-05-1-『最強ジャンプ』7月号 6月4日(木)発売！付録は新規プロモーションカード！",
+    "id": "jp-2026-06-05-2-『最強ジャンプ』7月号 6月4日(木)発売！付録は新規プロモーションカード！",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "雑誌",
     "title": "『最強ジャンプ』7月号 6月4日(木)発売！付録は新規プロモーションカード！",
     "date": "2026-06-05",
     "url": "https://www.onepiece-cardgame.com/news/01_288.html",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/03/C1aAK7g1kfIgWOfW/thumbnail_saikyojump.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/03/C1aAK7g1kfIgWOfW/thumbnail_saikyojump.webp?_=ca6b4d6c675cc014935aff000624710e"
   },
   {
-    "id": "jp-2026-06-05-2-『Vジャンプ』7月特大号 5月21日(木)発売！付録は新規プロモーションカード！",
+    "id": "jp-2026-06-05-3-『Vジャンプ』7月特大号 5月21日(木)発売！付録は新規プロモーションカード！",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "雑誌",
     "title": "『Vジャンプ』7月特大号 5月21日(木)発売！付録は新規プロモーションカード！",
     "date": "2026-06-05",
     "url": "https://www.onepiece-cardgame.com/news/01_287.html",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/03/fIOOlkJUBGJFOFzC/thumbnail_vjump.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/03/fIOOlkJUBGJFOFzC/thumbnail_vjump.webp?_=ca6b4d6c675cc014935aff000624710e"
   },
   {
-    "id": "jp-2026-06-04-3-「【麦わらの一味限定】クルーバトル」のイベント情報を公開！",
+    "id": "jp-2026-06-04-4-「【麦わらの一味限定】クルーバトル」のイベント情報を公開！",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "イベント",
     "title": "「【麦わらの一味限定】クルーバトル」のイベント情報を公開！",
     "date": "2026-06-04",
     "url": "https://www.onepiece-cardgame.com/events/crew_battle.html",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/04/ObWzZQvHk8msYIjf/thumbnail_クルーバトル.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/04/ObWzZQvHk8msYIjf/thumbnail_クルーバトル.webp?_=ca6b4d6c675cc014935aff000624710e"
   },
   {
-    "id": "jp-2026-06-01-4-7月開催イベントの最新情報をチェックしよう！",
+    "id": "jp-2026-06-01-5-7月開催イベントの最新情報をチェックしよう！",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "イベント",
     "title": "7月開催イベントの最新情報をチェックしよう！",
     "date": "2026-06-01",
     "url": "https://www.onepiece-cardgame.com/events/",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/05/28/xZJx0ZzKnPf0sUcX/thumbnail_07.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
-  },
-  {
-    "id": "jp-2026-06-01-5-『チャンピオンシップ26-27 Season 1 エリア大会 フラッグシップバトルEX』7月の記念品情報を公開！",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "イベント",
-    "title": "『チャンピオンシップ26-27 Season 1 エリア大会 フラッグシップバトルEX』7月の記念品情報を公開！",
-    "date": "2026-06-01",
-    "url": "https://www.onepiece-cardgame.com/events/season1-area-flagship.html",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/07/Gjc8ILhS2mImgoBO/thumbnail.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/05/28/xZJx0ZzKnPf0sUcX/thumbnail_07.webp?_=ca6b4d6c675cc014935aff000624710e"
   },
   {
     "id": "jp-2026-06-01-6-オンラインでカードバトル！「メタロビWeekend」6月の開催日程を公開！",
@@ -117,6 +117,6 @@
     "title": "オンラインでカードバトル！「メタロビWeekend」6月の開催日程を公開！",
     "date": "2026-06-01",
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/06/01/IloW7RuHJZPRBlQS/メタロビWE_6月.webp?_=ab93dfab05c6cf928c8fcfc1902c6f47"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/06/01/IloW7RuHJZPRBlQS/メタロビWE_6月.webp?_=ca6b4d6c675cc014935aff000624710e"
   }
 ]
