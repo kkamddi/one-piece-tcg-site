@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - uses: actions/checkout@v4
+
       - name: Collect all JP market prices
         env:
           COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
@@ -35,3 +37,15 @@ jobs:
             offset="$next_offset"
             sleep 2
           done
+
+      - name: Rebuild market indexes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "CLOUDFLARE_API_TOKEN secret is missing."
+            exit 1
+          fi
+          node scripts/rebuildMarketIndexes.js
