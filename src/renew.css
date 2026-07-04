@@ -1569,6 +1569,42 @@
   text-overflow: ellipsis;
 }
 
+.renew-card-price-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: rgba(201, 77, 53, 0.1);
+  color: #c94d35;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.renew-card-price-badge span {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.renew-card-price-badge b {
+  overflow: hidden;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.renew-app.is-dark .renew-card-price-badge {
+  background: rgba(238, 169, 136, 0.15);
+  color: #eea988;
+}
+
 .renew-card-body small {
   overflow: hidden;
   color: #4b5563;

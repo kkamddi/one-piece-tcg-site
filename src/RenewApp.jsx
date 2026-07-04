@@ -44,6 +44,7 @@ const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-06-30-kr-op13';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const RECENT_SALES_VISIBLE_MS = 7 * 24 * 60 * 60 * 1000;
 const MARKET_USD_TO_JPY = 155;
+const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
 const MARKETPLACE_TAB_VISIBLE = true;
 const MARKETPLACE_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
@@ -515,11 +516,20 @@ const HOME_SEO_GUIDE_LINKS = [
 ];
 
 function getHomeNewsLinks() {
+  const krTopic = OFFICIAL_TOPIC_ITEMS.find((item) => (item.locale || '').toUpperCase() === 'KR');
   const jpTopic = OFFICIAL_TOPIC_ITEMS.find((item) => (item.locale || '').toUpperCase() === 'JP');
   const preorderLink = NEWS_LINK_GROUPS.find((item) => item.id === 'preorder')?.links?.[0];
   return HOME_NEWS_LINKS.map((item) => {
     if (item.query === 'section=preorder' && preorderLink?.label) {
       return { ...item, label: preorderLink.label, description: 'Amazon Japan 사전예약 응모' };
+    }
+    if (item.query === 'section=notice&locale=JP' && krTopic?.title) {
+      return {
+        ...item,
+        label: '한글판 새소식',
+        description: krTopic.title,
+        query: 'section=notice&locale=KR'
+      };
     }
     if (item.query === 'section=notice&locale=JP' && jpTopic?.title) {
       return { ...item, description: jpTopic.title };
@@ -1247,6 +1257,30 @@ function formatYenWon(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount <= 0) return '가격 정보 없음';
   return `${formatYen(amount)} / ${formatWonFromYen(amount)}`;
+}
+
+function formatUsd(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return 'US $ -';
+  return `US $${Math.round(amount).toLocaleString('ko-KR')}`;
+}
+
+function formatWonFromUsd(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return '₩0';
+  return `₩${Math.round(amount * MARKET_USD_TO_KRW).toLocaleString('ko-KR')}`;
+}
+
+function formatUsdWonFromUsd(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return '가격 정보 없음';
+  return `${formatUsd(amount)} / ${formatWonFromUsd(amount)}`;
+}
+
+function formatUsdWonFromYen(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return '가격 정보 없음';
+  return formatUsdWonFromUsd(amount / MARKET_USD_TO_JPY);
 }
 
 function formatPercent(value) {
@@ -3912,6 +3946,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [catalogMarketPriceByCardId, setCatalogMarketPriceByCardId] = useState(() => new Map());
   const [expandedDeferredRarities, setExpandedDeferredRarities] = useState(() => new Set());
   const [rarityPanelOpen, setRarityPanelOpen] = useState(false);
   const rarityPanelRef = useRef(null);
@@ -3934,6 +3969,37 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [isAllSeriesMode, sections, selectedSeries]);
   const ownedSet = useMemo(() => new Set(Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds : []), [userState]);
   const wishSet = useMemo(() => new Set(Array.isArray(userState?.wishlistCardIds) ? userState.wishlistCardIds : []), [userState]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      loadCardMarketLinks(),
+      import('./data/market-cards.js')
+    ])
+      .then(([links, marketModule]) => {
+        if (cancelled) return;
+        const marketItems = Array.isArray(marketModule.default) ? marketModule.default : [];
+        const itemByApparelId = new Map(marketItems.map((item) => [String(item.apparelId), item]));
+        const nextMap = new Map();
+        links.forEach((link) => {
+          if (link?.status !== 'approved' || !link.cardId || !link.apparelId) return;
+          const item = itemByApparelId.get(String(link.apparelId));
+          const priceUsd = Number(item?.minPrice || 0);
+          if (!item || priceUsd <= 0) return;
+          nextMap.set(link.cardId, {
+            priceUsd,
+            apparelId: item.apparelId
+          });
+        });
+        setCatalogMarketPriceByCardId(nextMap);
+      })
+      .catch(() => {
+        if (!cancelled) setCatalogMarketPriceByCardId(new Map());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (localeSeries.some((series) => series.id === selectedSeries)) return;
@@ -4240,6 +4306,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                 const owned = ownedSet.has(card.id);
                 const wished = wishSet.has(card.id);
                 const listingCount = MARKETPLACE_ENABLED ? (listingCountByCardId.get(card.id) || 0) : 0;
+                const catalogMarketPrice = catalogMarketPriceByCardId.get(card.id);
                 return (
                   <article key={card.id} className={`renew-card-tile ${owned ? 'is-owned' : ''} ${wished ? 'is-wished' : ''}`} onClick={() => openCard(card.id)}>
                     <div className="renew-card-image">
@@ -4258,6 +4325,12 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                       <div className="renew-card-body">
                         <b>{card.cardNo}</b>
                         <strong>{card.name}</strong>
+                        {catalogMarketPrice ? (
+                          <div className="renew-card-price-badge">
+                            <span>A</span>
+                            <b>{formatUsdWonFromUsd(catalogMarketPrice.priceUsd)}</b>
+                          </div>
+                        ) : null}
                         <div className="renew-card-actions" onClick={(event) => event.stopPropagation()}>
                         <button type="button" className={owned ? 'is-owned' : ''} onClick={() => toggleListValue('ownedCardIds', card.id)}>{owned ? 'O' : 'X'}</button>
                         <button type="button" className={wished ? 'is-wished' : ''} onClick={() => toggleListValue('wishlistCardIds', card.id)}>♥</button>
@@ -5982,8 +6055,8 @@ function RenewMarketChart({ points = [], uiLang, range }) {
         })}
         <line className="renew-chart-boundary" x1={padX} y1={maxLabelY} x2={width - padX} y2={maxLabelY} />
         <line className="renew-chart-boundary" x1={padX} y1={minLabelY} x2={width - padX} y2={minLabelY} />
-        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{formatYen(max)}</text>
-        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{formatYen(min)}</text>
+        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{formatUsd(max / MARKET_USD_TO_JPY)}</text>
+        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{formatUsd(min / MARKET_USD_TO_JPY)}</text>
         <path d={area} className="renew-chart-area" />
         <path d={path} className="renew-chart-line" />
         {axisLabels.map((item) => (
@@ -6019,7 +6092,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             <line className="renew-chart-cursor" x1={active.x} y1={padTop} x2={active.x} y2={height - padBottom} />
             <rect x={tipX} y={tipY} width={tipWidth} height={tipHeight} rx="10" />
             <text className="renew-chart-tip-date" x={tipX + 14} y={tipY + 24}>{formatMarketDate(active.timestamp)}</text>
-            <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{formatYenWon(active.price)}</text>
+            <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{formatUsdWonFromYen(active.price)}</text>
           </g>
         ) : null}
       </svg>
@@ -6327,7 +6400,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
                 <span>{BOX_SHORT_TITLES[box.code] || box.name}</span>
               </span>
               <small>SNKRDUNK #{box.apparelId}</small>
-              <b>{box.minPrice ? (box.minPriceFormat || formatYen(box.minPrice)) : t('checkPrice')}</b>
+              <b>{box.minPrice ? formatUsdWonFromUsd(box.minPrice) : t('checkPrice')}</b>
             </div>
           </a>
         ))}
@@ -6384,9 +6457,10 @@ function getMarketMetaLine(item) {
 }
 
 function getMarketCandidatePriceText(item, fallbackText) {
-  const staticPriceJpy = Number(item?.minPrice || 0) > 0 ? Math.round(Number(item.minPrice) * MARKET_USD_TO_JPY) : 0;
-  const price = Number(item?.displayPriceJpy || item?.latestPriceJpy || staticPriceJpy || 0);
-  return price > 0 ? formatYenWon(price) : fallbackText;
+  const livePriceJpy = Number(item?.displayPriceJpy || item?.latestPriceJpy || 0);
+  if (livePriceJpy > 0) return formatUsdWonFromYen(livePriceJpy);
+  const staticPriceUsd = Number(item?.minPrice || 0);
+  return staticPriceUsd > 0 ? formatUsdWonFromUsd(staticPriceUsd) : fallbackText;
 }
 
 function getMarketCandidateStockScore(item) {
@@ -6491,7 +6565,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
               <small>{item.locale} / {item.code}</small>
               <strong title={item.name}>{getMarketDisplayName(item)}</strong>
               <span>{item.setName}</span>
-              <b>{item.minPrice ? (item.minPriceFormat || formatYen(item.minPrice)) : t('checkPrice')}</b>
+              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : t('checkPrice')}</b>
             </div>
           </a>
         ))}
@@ -6753,7 +6827,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
       const timestamp = Number(sale?.timestamp || 0);
       return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
     });
-  const currentPrice = selectedLatest?.price ? formatYenWon(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
+  const currentPrice = selectedLatest?.price ? formatUsdWonFromYen(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
   const latestSourceUrl = selectedLatest?.sourceUrl || '';
   const psaSourceUrl = condition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
     ? latestSourceUrl
@@ -6776,8 +6850,8 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
       url: `${SITE_ORIGIN}/prices?code=${encodeURIComponent(selected.code)}&apparelId=${encodeURIComponent(selected.apparelId || '')}`,
       offers: selectedLatest?.price ? {
         '@type': 'Offer',
-        price: selectedLatest.price,
-        priceCurrency: 'JPY',
+        price: Math.round((selectedLatest.price / MARKET_USD_TO_JPY) * 100) / 100,
+        priceCurrency: 'USD',
         availability: 'https://schema.org/InStock',
         url: selected.sourceUrl
       } : undefined
@@ -6915,7 +6989,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                   <div key={`${sale.date}-${sale.price}-${index}`} className="renew-market-sale">
                     <span>{getMarketSaleSourceLabel(sale, condition.toUpperCase())}</span>
                     <small>{formatMarketSaleDate(sale)}</small>
-                    <strong>{formatYenWon(sale.price)}</strong>
+                    <strong>{formatUsdWonFromYen(sale.price)}</strong>
                   </div>
                 ))}
                 {!recentSalesVisible.length ? <div className="renew-empty">{t('noRecentSales')}</div> : null}
