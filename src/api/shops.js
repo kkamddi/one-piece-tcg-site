@@ -28,9 +28,26 @@ async function safeFetchJson(url, fallback) {
   }
 }
 
+function dedupeShops(shops = []) {
+  const uniqueShops = new Map();
+
+  shops.forEach((shop) => {
+    const key = [shop?.name, shop?.address]
+      .map((value) => String(value ?? '').trim().toLowerCase())
+      .join('|');
+    const existing = uniqueShops.get(key);
+
+    if (!existing || (existing.sourceType !== 'official' && shop?.sourceType === 'official')) {
+      uniqueShops.set(key, shop);
+    }
+  });
+
+  return [...uniqueShops.values()];
+}
+
 export async function fetchShops(filters = {}) {
   const url = `${API_BASE}${buildQuery(filters)}`;
-  return safeFetchJson(url, () => {
+  const shops = await safeFetchJson(url, () => {
     const keyword = filters.q?.trim().toLowerCase();
     return shopsFallback.filter((shop) => {
       const matchesType = !filters.type || shop.sourceType === filters.type;
@@ -44,6 +61,8 @@ export async function fetchShops(filters = {}) {
       return matchesType && matchesSido && matchesGungu && matchesQuery;
     });
   });
+
+  return dedupeShops(Array.isArray(shops) ? shops : []);
 }
 
 export async function fetchShopRegions(type, sido = '') {

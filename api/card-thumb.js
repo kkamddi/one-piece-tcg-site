@@ -2,7 +2,9 @@ const THUMBNAIL_CACHE_CONTROL = 'public, max-age=2592000, s-maxage=2592000, stal
 
 export default async function handler(request, response) {
   const key = String(request.query?.key || '').replace(/^\/+/, '');
-  if (!key || key.includes('..') || !/^cards\/(KR|JP)\/[A-Za-z0-9_-]+\.webp$/.test(key)) {
+  const isCardThumb = /^cards\/(KR|JP)\/[A-Za-z0-9_-]+\.webp$/.test(key);
+  const isMarketImage = /^market\/listings\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(webp|jpg|jpeg|png)$/.test(key);
+  if (!key || key.includes('..') || (!isCardThumb && !isMarketImage)) {
     response.status(400).json({ error: 'invalid_key' });
     return;
   }

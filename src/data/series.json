@@ -144,6 +144,18 @@
     "baseSeriesId": "OP12"
   },
   {
+    "id": "KR-OP13",
+    "koName": "계승되는 의지",
+    "enName": "CARRYING ON HIS WILL",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-13] 부스터 팩 계승되는 의지",
+    "officialSeriesKeyword": "OP-13",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈",
+    "locale": "KR",
+    "baseSeriesId": "OP13"
+  },
+  {
     "id": "KR-EB01",
     "koName": "메모리얼 컬렉션",
     "enName": "MEMORIAL COLLECTION",

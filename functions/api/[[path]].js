@@ -15,6 +15,7 @@ const RATE_LIMITS = {
   cardImage: 240,
   cardThumb: 300,
   market: 120,
+  marketplace: 120,
   psa10Market: 120,
   marketCollector: 120,
   boxMarket: 30
@@ -102,10 +103,10 @@ function isRateLimited(request, routeKey) {
   return bucket.count > max;
 }
 
-async function parseBody(request) {
+async function parseBody(request, maxBodyBytes = MAX_BODY_BYTES) {
   if (request.method === 'GET' || request.method === 'HEAD') return undefined;
   const contentLength = Number(request.headers.get('content-length') || 0);
-  if (contentLength > MAX_BODY_BYTES) {
+  if (contentLength > maxBodyBytes) {
     const error = new Error('payload_too_large');
     error.statusCode = 413;
     throw error;
@@ -113,7 +114,7 @@ async function parseBody(request) {
   const contentType = request.headers.get('content-type') || '';
   if (contentType.includes('application/json')) {
     const text = await request.text();
-    if (new TextEncoder().encode(text).length > MAX_BODY_BYTES) {
+    if (new TextEncoder().encode(text).length > maxBodyBytes) {
       const error = new Error('payload_too_large');
       error.statusCode = 413;
       throw error;
@@ -127,7 +128,7 @@ async function parseBody(request) {
     }
   }
   const text = await request.text();
-  if (new TextEncoder().encode(text).length > MAX_BODY_BYTES) {
+  if (new TextEncoder().encode(text).length > maxBodyBytes) {
     const error = new Error('payload_too_large');
     error.statusCode = 413;
     throw error;
@@ -196,9 +197,11 @@ function routeApi(pathParts) {
   if (first === 'card-image') return { key: 'cardImage' };
   if (first === 'card-thumb') return { key: 'cardThumb' };
   if (first === 'market') return { key: 'market' };
+  if (first === 'marketplace') return { key: 'marketplace' };
   if (first === 'psa10-market') return { key: 'psa10Market' };
   if (first === 'market-collector') return { key: 'marketCollector' };
   if (first === 'box-market') return { key: 'boxMarket' };
+  if (first === 'market-index') return { key: 'marketIndex' };
   return null;
 }
 
@@ -217,9 +220,11 @@ async function loadHandler(key) {
   if (key === 'cardImage') return (await import('../../api/card-image.js')).default;
   if (key === 'cardThumb') return (await import('../../api/card-thumb.js')).default;
   if (key === 'market') return (await import('../../api/market.js')).default;
+  if (key === 'marketplace') return (await import('../../api/marketplace.js')).default;
   if (key === 'psa10Market') return (await import('../../api/psa10-market.js')).default;
   if (key === 'marketCollector') return (await import('../../api/market-collector.js')).default;
   if (key === 'boxMarket') return (await import('../../api/box-market.js')).default;
+  if (key === 'marketIndex') return (await import('../../api/market-index.js')).default;
   return null;
 }
 
@@ -257,7 +262,8 @@ export async function onRequest(context) {
   const query = Object.fromEntries(url.searchParams.entries());
   let body;
   try {
-    body = await parseBody(context.request);
+    const maxBodyBytes = route.key === 'marketplace' ? 1536 * 1024 : MAX_BODY_BYTES;
+    body = await parseBody(context.request, maxBodyBytes);
   } catch (error) {
     if (error?.statusCode === 400 || error?.statusCode === 413) {
       return new Response(JSON.stringify({ error: error.message || 'invalid_request' }), {

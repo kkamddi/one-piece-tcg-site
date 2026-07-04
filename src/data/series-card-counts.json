@@ -1,6 +1,6 @@
 {
   "KR": {
-    "total": 2584,
+    "total": 2776,
     "series": {
       "KR-OP01": 154,
       "KR-OP02": 154,
@@ -32,7 +32,8 @@
       "KR-ST14": 17,
       "KR-ST21": 17,
       "KR-ST22": 17,
-      "KR-PROMO": 246
+      "KR-PROMO": 246,
+      "KR-OP13": 192
     }
   },
   "JP": {

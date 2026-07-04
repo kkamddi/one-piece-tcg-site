@@ -5,6 +5,7 @@ import { resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
+import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceVerifications, incrementMarketplaceListingView, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
@@ -38,12 +39,48 @@ const BOX_SHORT_TITLES = {
 const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
-const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-06-11';
+const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
+const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-06-30-kr-op13';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const RECENT_SALES_VISIBLE_MS = 7 * 24 * 60 * 60 * 1000;
+const MARKET_USD_TO_JPY = 155;
+const MARKETPLACE_TAB_VISIBLE = true;
+const MARKETPLACE_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
 const RENEW_HOME_UPDATES = [
+  {
+    id: '2026-06-30-kr-op13',
+    title: '[26.06.30] 업데이트 안내',
+    summary: '한글판 OP-13 업데이트 완료',
+    details: [
+      '한글판 부스터 팩 OP-13 계승되는 의지 카드 데이터 추가',
+      '한글판 카드 도감 시리즈 목록에 OP-13 반영',
+      '카드 검색, 상세보기, 보유 카드, 위시리스트 기능에서 OP-13 확인 가능'
+    ]
+  },
+  {
+    id: '2026-06-27-nearby-shops',
+    title: '[26.06.27] 업데이트 안내',
+    summary: '구매처 내 주변순 기능 추가',
+    details: [
+      '가까운 구매처 순서로 자동 정렬',
+      '매장별 예상 거리 표시',
+      '지역·시군구·매장 유형 필터와 함께 사용 가능',
+      '위치 정보는 거리 계산에만 사용되며 별도로 저장되지 않음'
+    ]
+  },
+  {
+    id: '2026-06-19-marketplace',
+    title: '[26.06.19] 업데이트 안내',
+    summary: '거래 탭 기능 개선',
+    details: [
+      '판매자가 올린 게시물 사진이 거래 상세와 목록에 반영되도록 개선',
+      '게시물 문의 후 거래방으로 바로 이어지는 흐름 개선',
+      '거래완료 게시물은 거래방 추가 메시지 입력 제한',
+      '모바일 거래 화면과 다크모드 가독성 개선'
+    ]
+  },
   {
     id: '2026-06-11-news',
     title: '[26.06.11] 업데이트 안내',
@@ -122,6 +159,26 @@ const RENEW_HOME_UPDATES = [
     ]
   }
 ];
+
+function getMarketInterestStorageKey(userId) {
+  return `${MARKET_INTEREST_STORAGE_PREFIX}${userId || 'guest'}`;
+}
+
+function readMarketInterestIds(userId) {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(getMarketInterestStorageKey(userId));
+    const values = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(values) ? values.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function writeMarketInterestIds(userId, ids) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(getMarketInterestStorageKey(userId), JSON.stringify([...ids]));
+}
 const OFFICIAL_TOPIC_ITEMS = Array.isArray(topicsData) ? topicsData : [];
 const TOPIC_SOURCE_LABEL = {
   KR_OFFICIAL: '한국 공식',
@@ -203,6 +260,219 @@ const NEWS_FILTERS = [
   { id: 'oripa', label: '오리파' },
   { id: 'supplies', label: '카드용품' }
 ];
+const CARD_STORAGE_GUIDE = {
+  title: '원피스카드 보관 방법',
+  intro: '원피스카드는 습기, 빛, 압력, 마찰에 약합니다. 기본 보관 순서를 정해두면 일반 카드부터 고가 카드까지 상태를 안정적으로 유지할 수 있습니다.',
+  sections: [
+    {
+      title: '카드가 손상되는 주요 원인',
+      items: [
+        '습기와 온도 변화로 인한 휨',
+        '직사광선과 강한 조명으로 인한 색 바램',
+        '카드끼리 직접 닿으면서 생기는 표면 스크래치',
+        '무거운 물건에 눌리거나 비스듬히 보관되어 생기는 모서리 손상'
+      ]
+    },
+    {
+      title: '기본 보관 순서',
+      items: [
+        '개봉 직후 카드 표면을 손으로 문지르지 않습니다.',
+        '먼저 소프트 슬리브에 넣어 표면 마찰을 줄입니다.',
+        '자주 꺼내보는 카드는 탑로더나 바인더에 넣습니다.',
+        '고가 카드나 그레이딩 후보 카드는 카드세이버 또는 자석케이스로 따로 분리합니다.'
+      ]
+    },
+    {
+      title: '슬리브, 탑로더, 카드세이버 차이',
+      items: [
+        '슬리브는 가장 기본적인 표면 보호용입니다.',
+        '탑로더는 카드가 휘거나 눌리는 것을 줄이는 단단한 보관용입니다.',
+        '카드세이버는 PSA/BGS 등 그레이딩 제출용으로 자주 사용됩니다.',
+        '자석케이스는 전시용이나 고가 카드 단독 보관에 적합합니다.'
+      ]
+    },
+    {
+      title: '바인더 보관 시 주의점',
+      items: [
+        '카드를 슬리브에 넣은 뒤 바인더 포켓에 넣는 것이 안전합니다.',
+        '바인더를 과하게 채우면 카드가 눌릴 수 있습니다.',
+        '바인더는 세워두기보다 눕혀두는 편이 카드 휨을 줄이기 좋습니다.',
+        '습기가 많은 장소와 직사광선이 닿는 책장은 피하는 것이 좋습니다.'
+      ]
+    },
+    {
+      title: '고가 카드 보관 팁',
+      items: [
+        '망가, SP, 프로모, 우승 카드처럼 고가 카드는 일반 보관함과 분리합니다.',
+        '슬리브 + 카드세이버 또는 슬리브 + 자석케이스 조합을 사용합니다.',
+        '시세 확인용으로 자주 꺼내보는 카드는 별도 케이스에 보관합니다.',
+        '장기 보관 시 실리카겔과 함께 밀폐 보관함을 사용하는 것도 방법입니다.'
+      ]
+    }
+  ],
+  checklist: [
+    '카드는 슬리브 없이 겹쳐두지 않기',
+    '습기 많은 방, 창가, 차량 내부에 보관하지 않기',
+    '고가 카드는 일반 카드와 분리 보관하기',
+    '그레이딩 후보 카드는 표면 접촉을 최소화하기'
+  ]
+};
+const SHOP_BUYING_GUIDE = {
+  title: '원피스카드 사는 방법',
+  intro: '원피스카드를 처음 구매할 때는 공인점포와 취급점포를 먼저 확인하는 것이 좋습니다. Card Pone 구매처 페이지에서는 공식 홈페이지 기준의 매장 정보를 지역별로 정리하고, 내 위치 기준 가까운 매장부터 확인할 수 있습니다.',
+  sections: [
+    {
+      title: '공인점포와 취급점포 확인',
+      items: [
+        '공인점포와 취급점포는 공식 홈페이지 기준 매장 정보를 바탕으로 정리합니다.',
+        '매장별 취급 여부와 재고는 시점에 따라 달라질 수 있으므로 방문 전 확인이 필요합니다.',
+        '대회, 신상품 예약, 프로모션 카드 배포 여부는 매장마다 다를 수 있습니다.'
+      ]
+    },
+    {
+      title: '지역별 구매처 찾기',
+      items: [
+        '서울, 경기, 부산 등 지역 필터로 원하는 지역의 매장을 좁혀 볼 수 있습니다.',
+        '지역을 선택하면 해당 지역의 시군구 기준으로 한 번 더 필터링할 수 있습니다.',
+        '매장명 검색을 함께 사용하면 특정 매장을 빠르게 찾을 수 있습니다.'
+      ]
+    },
+    {
+      title: '내 주변 매장 찾기',
+      items: [
+        '위치 권한을 허용하면 현재 위치에서 가까운 구매처 순서로 정렬할 수 있습니다.',
+        '매장별 예상 거리를 함께 확인할 수 있어 방문 우선순위를 정하기 좋습니다.',
+        '위치 정보는 가까운 매장 정렬에만 사용하며, 브라우저 권한 설정에서 언제든 변경할 수 있습니다.'
+      ]
+    },
+    {
+      title: '지도 바로가기 활용',
+      items: [
+        '각 매장 카드에서 네이버지도와 카카오맵 바로가기를 제공합니다.',
+        '길찾기, 영업시간, 전화번호 등 세부 정보는 지도 앱에서 최종 확인하는 것이 안전합니다.',
+        '좌표가 없는 매장은 매장명 검색 링크로 연결합니다.'
+      ]
+    },
+    {
+      title: '구매 전 체크할 점',
+      items: [
+        '신상품 발매일과 예약 가능 여부를 먼저 확인합니다.',
+        '박스, 팩, 싱글카드 취급 범위가 매장마다 다를 수 있습니다.',
+        '방문 전 재고와 결제 방식, 이벤트 참여 조건을 확인하면 불필요한 이동을 줄일 수 있습니다.'
+      ]
+    }
+  ],
+  checklist: [
+    '가까운 구매처 순서로 먼저 확인하기',
+    '공인점포와 취급점포 구분하기',
+    '방문 전 매장 재고와 영업시간 확인하기',
+    '네이버지도 또는 카카오맵으로 이동 경로 확인하기'
+  ]
+};
+const CARD_PRICE_GUIDE = {
+  title: '원피스카드 시세 보는 방법',
+  intro: '원피스카드 시세는 같은 일련번호라도 일반 카드, 패러렐, 프로모, 언어, 그레이딩 상태에 따라 가격이 달라집니다. Card Pone 시세 페이지에서는 카드별 가격, 박스 가격, 최근 거래 기록, 기간별 그래프를 한곳에서 확인할 수 있습니다.',
+  sections: [
+    {
+      title: '시세 검색 기본 구조',
+      items: [
+        '일련번호를 입력하면 같은 번호를 가진 카드 후보를 확인할 수 있습니다.',
+        '같은 일련번호 안에서도 일반, 패러렐, 망가, 수배서, 프로모 버전을 구분해 선택할 수 있습니다.',
+        '카드 도감에서 시세 보기로 이동하면 매핑된 상품은 바로 상세 시세로 연결됩니다.'
+      ]
+    },
+    {
+      title: 'A등급과 PSA10 구분',
+      items: [
+        'A등급은 주로 일반 실물 카드 기준의 거래 흐름을 확인하는 용도로 사용합니다.',
+        'PSA10은 그레이딩 완료 카드 기준의 가격 흐름을 확인하는 용도로 구분합니다.',
+        '같은 카드라도 A등급과 PSA10은 시장 가격과 거래 빈도가 다를 수 있습니다.'
+      ]
+    },
+    {
+      title: '최근 거래 기록과 그래프',
+      items: [
+        '최근 가격 기록은 실제 거래 또는 수집된 시세 기록을 기준으로 표시합니다.',
+        '7D, 1M, 6M, ALL 기간을 바꿔 가격 흐름을 비교할 수 있습니다.',
+        '거래가 적은 카드는 특정 기간에 그래프가 비어 있거나 변동 폭이 크게 보일 수 있습니다.'
+      ]
+    },
+    {
+      title: '박스 가격과 싱글카드 가격',
+      items: [
+        '박스 탭에서는 부스터 박스와 팩 상품 가격을 확인할 수 있습니다.',
+        '카드 탭에서는 싱글카드 주요 상품을 가격 기준으로 확인할 수 있습니다.',
+        '시세는 수집 시점과 외부 플랫폼 상태에 따라 변동될 수 있습니다.'
+      ]
+    },
+    {
+      title: '시세를 볼 때 주의할 점',
+      items: [
+        '가격이 높다고 항상 실제 거래가 활발한 것은 아닙니다.',
+        '최근 거래 수, 카드 상태, 언어, 버전, 그레이딩 여부를 함께 확인해야 합니다.',
+        '구매와 판매 결정은 여러 플랫폼의 가격과 실제 매물 상태를 함께 비교하는 것이 좋습니다.'
+      ]
+    }
+  ],
+  checklist: [
+    '일련번호와 카드 버전을 함께 확인하기',
+    'A등급과 PSA10 가격을 구분해서 보기',
+    '최근 거래 기록과 그래프를 같이 확인하기',
+    '거래량이 적은 카드는 가격 변동을 보수적으로 판단하기'
+  ]
+};
+const CARD_CATALOG_GUIDE = {
+  title: '원피스카드 도감 사용법',
+  intro: '원피스카드 도감은 한글판과 일본판 카드 정보를 시리즈, 일련번호, 카드명 기준으로 찾을 수 있는 기능입니다. OP, EB, ST, PR 시리즈를 구분하고, 같은 일련번호 안의 패러렐과 프로모 카드도 확인할 수 있습니다.',
+  sections: [
+    {
+      title: '한글판과 일본판 도감',
+      items: [
+        '한글판과 일본판 카드를 별도로 선택해 검색할 수 있습니다.',
+        '일본판에서는 한글 카드명 검색도 함께 지원해 원하는 캐릭터를 더 쉽게 찾을 수 있습니다.',
+        '언어별 발매 시기와 수록 카드가 다를 수 있어 도감 선택 상태를 확인하는 것이 중요합니다.'
+      ]
+    },
+    {
+      title: '시리즈 분류',
+      items: [
+        'OP는 정규 부스터, EB는 엑스트라 부스터, ST는 스타터 덱, PR은 프로모 카드 중심으로 분류합니다.',
+        '카테고리를 선택하면 해당 시리즈 목록을 확인할 수 있습니다.',
+        'ALL에서는 전체 카드를 등급별로 나눠 볼 수 있습니다.'
+      ]
+    },
+    {
+      title: '일련번호 검색',
+      items: [
+        'OP05-119, ST21-014처럼 카드 일련번호를 입력하면 해당 번호의 카드를 찾을 수 있습니다.',
+        '같은 일련번호라도 일반 카드, 패러렐, 재록, 프로모 버전이 함께 존재할 수 있습니다.',
+        '정확한 카드 확인을 위해 이미지, 레어도, 시리즈 정보를 함께 비교하는 것이 좋습니다.'
+      ]
+    },
+    {
+      title: '카드명 검색',
+      items: [
+        '루피, 조로, 나미처럼 카드명이나 캐릭터명으로 검색할 수 있습니다.',
+        '일본판 카드도 한글 이름 기준으로 검색되도록 매핑을 보강하고 있습니다.',
+        '검색 결과가 많을 때는 시리즈와 등급 필터를 함께 사용하면 좋습니다.'
+      ]
+    },
+    {
+      title: '보유카드와 위시리스트',
+      items: [
+        '로그인 후 보유 여부와 위시리스트를 카드별로 관리할 수 있습니다.',
+        '포트폴리오에서는 보유 카드와 평가액을 모아 볼 수 있습니다.',
+        '수집 진행도는 시리즈별로 확인할 수 있어 목표 수집 범위를 정하기 쉽습니다.'
+      ]
+    }
+  ],
+  checklist: [
+    '먼저 한글판과 일본판을 정확히 선택하기',
+    '시리즈와 등급 필터를 함께 사용하기',
+    '같은 일련번호의 다른 버전을 이미지로 비교하기',
+    '도감 상세에서 시세 바로가기를 활용하기'
+  ]
+};
 const HOME_NEWS_LINKS = [
   {
     label: 'OP-17 사전예약 응모',
@@ -218,6 +488,29 @@ const HOME_NEWS_LINKS = [
     label: '수집 가이드 업데이트',
     description: '가이드/Q&A 바로가기',
     query: 'section=guide&mode=guide'
+  }
+];
+
+const HOME_SEO_GUIDE_LINKS = [
+  {
+    href: '/guide/card-price',
+    label: '원피스카드 시세 보는 법',
+    description: '카드 가격, 박스 가격, 최근 거래 기록 확인'
+  },
+  {
+    href: '/guide/card-catalog',
+    label: '원피스카드 도감 사용법',
+    description: '한글판·일본판 카드와 일련번호 검색'
+  },
+  {
+    href: '/guide/shops',
+    label: '원피스카드 파는 곳',
+    description: '공인점포·취급점포와 내 주변 구매처'
+  },
+  {
+    href: '/guide/card-storage',
+    label: '원피스카드 보관 방법',
+    description: '슬리브, 탑로더, 바인더 보관 기준'
   }
 ];
 
@@ -241,12 +534,12 @@ const GUIDE_QA_GROUPS = [
     title: '처음 이용 가이드',
     items: [
       {
-        question: 'OPTCG Korea는 어떤 사이트인가요?',
-        answer: 'OPTCG Korea는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세 확인, 구매처 검색, 컬렉션 관리 서비스입니다. 한글판과 일본판 카드를 검색하고 보유 카드, 위시리스트, Portfolio를 한 곳에서 관리할 수 있습니다.'
+        question: 'Card Pone는 어떤 사이트인가요?',
+        answer: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세 확인, 구매처 검색, 컬렉션 관리 서비스입니다. 한글판과 일본판 카드를 검색하고 보유 카드, 위시리스트, Portfolio를 한 곳에서 관리할 수 있습니다.'
       },
       {
         question: '일련번호 검색과 카드명 검색은 어떻게 다른가요?',
-        answer: '일련번호 검색은 OP05-119, ST21-014처럼 카드 일련번호를 기준으로 정확한 후보를 찾는 방식입니다. 카드명 검색은 루피, 야마토처럼 이름을 기준으로 관련 카드를 찾는 방식이며, 일본판에서도 가능한 범위 안에서 한글 이름 검색을 지원합니다.'
+        answer: '일련번호 검색은 OP05-119, ST21-014처럼 카드 번호를 기준으로 찾는 방식이고, 카드명 검색은 캐릭터명이나 카드명으로 관련 카드를 찾는 방식입니다. 자세한 도감 사용법은 /guide/card-catalog에서 확인할 수 있습니다.'
       }
     ]
   },
@@ -257,7 +550,7 @@ const GUIDE_QA_GROUPS = [
     items: [
       {
         question: 'OP, EB, ST, PR은 무엇인가요?',
-        answer: 'OP는 정규 부스터팩, EB는 엑스트라 부스터 또는 프리미엄 부스터 계열, ST는 스타터덱, PR은 프로모 카드 계열입니다. 도감에서는 이 분류를 기준으로 한글판과 일본판 카드를 빠르게 좁혀 볼 수 있습니다.'
+        answer: 'OP는 정규 부스터, EB는 엑스트라 부스터, ST는 스타터덱, PR은 프로모 계열입니다. 시리즈와 도감 검색 구조는 /guide/card-catalog에서 더 자세히 정리했습니다.'
       },
       {
         question: '보유중과 위시리스트는 어떻게 사용하나요?',
@@ -272,11 +565,11 @@ const GUIDE_QA_GROUPS = [
     items: [
       {
         question: '시세 탭은 어떻게 사용하나요?',
-        answer: '시세 탭에서 카드 일련번호를 검색하면 같은 일련번호를 가진 시세 후보가 표시됩니다. 후보가 여러 개라면 일반판, 패러렐, 프로모 등 원하는 버전을 선택한 뒤 상세 시세를 확인하면 됩니다.'
+        answer: '시세 탭에서는 일련번호나 카드명을 검색해 후보를 선택하고 상세 시세를 확인합니다. A등급, PSA10, 거래 기록, 그래프 설명은 /guide/card-price에서 확인할 수 있습니다.'
       },
       {
         question: '시세 정보는 어떻게 봐야 하나요?',
-        answer: '시세 정보는 외부 거래 데이터와 현재 매물 정보를 참고해 보여주는 보조 지표입니다. 실제 구매가, 판매가, 배송비, 관세, 카드 상태에 따라 최종 가격은 달라질 수 있으므로 거래 전 원문 페이지와 최종 결제 화면을 함께 확인해야 합니다.'
+        answer: '시세 정보는 외부 거래 데이터와 현재 매물 정보를 바탕으로 한 참고 지표입니다. 실제 구매 전에는 원문 페이지, 배송비, 관세, 카드 상태를 함께 확인해야 하며 자세한 내용은 /guide/card-price에 정리했습니다.'
       }
     ]
   },
@@ -302,7 +595,7 @@ const GUIDE_QA_GROUPS = [
     items: [
       {
         question: '공인점포와 취급점포는 무엇이 다른가요?',
-        answer: '공인점포는 공식 이벤트나 제품 취급 기준을 충족한 매장이고, 취급점포는 원피스 카드게임 제품을 판매하는 매장입니다. 구매처 페이지에서 지역과 시군구 기준으로 매장을 찾고 지도 링크로 이동할 수 있습니다.'
+        answer: '공인점포와 취급점포는 공식 홈페이지 기준의 매장 구분입니다. 지역별 검색, 내 주변순 정렬, 지도 바로가기는 /guide/shops에서 확인할 수 있습니다.'
       },
       {
         question: '온라인 오리파 이용 시 주의할 점은 무엇인가요?',
@@ -427,11 +720,11 @@ const GUIDE_QA_GROUPS = [
     items: [
       {
         question: 'OP, EB, ST, PR은 무엇을 뜻하나요?',
-        answer: 'OP는 정규 부스터팩 계열, EB는 엑스트라 부스터 계열, ST는 스타터덱 계열, PR은 프로모 카드 계열을 뜻합니다. 카드 일련번호 앞부분을 보면 어떤 상품 계열에서 나온 카드인지 대략 구분할 수 있습니다.'
+        answer: 'OP는 정규 부스터팩, EB는 엑스트라 부스터, ST는 스타터덱, PR은 프로모 계열입니다. 일련번호와 시리즈 구분은 /guide/card-catalog에서 확인할 수 있습니다.'
       },
       {
         question: 'OP05-119 같은 일련번호는 어떻게 읽나요?',
-        answer: 'OP05-119는 OP-05 계열 상품에 포함된 119번 카드를 뜻합니다. 같은 일련번호라도 일반판, 패러렐, 특별 일러스트, 프로모 변형이 존재할 수 있어 이미지와 등급을 함께 확인하는 것이 안전합니다.'
+        answer: 'OP05-119는 OP-05 계열의 119번 카드를 뜻합니다. 같은 일련번호에도 여러 버전이 있을 수 있으므로 자세한 구조는 /guide/card-catalog에서 확인할 수 있습니다.'
       },
       {
         question: '프로모 카드는 어디서 얻나요?',
@@ -454,7 +747,7 @@ const GUIDE_QA_GROUPS = [
       },
       {
         question: '일본판 카드 검색은 일본어만 가능한가요?',
-        answer: '공식 카드명은 일본어 기준이지만, OPTCG Korea에서는 가능한 범위에서 한글 카드명 검색도 함께 지원합니다. 다만 번역명과 표기 차이가 있을 수 있어 일련번호 검색이 가장 정확합니다.'
+        answer: '공식 카드명은 일본어 기준이지만, Card Pone에서는 가능한 범위에서 한글 카드명 검색도 함께 지원합니다. 다만 번역명과 표기 차이가 있을 수 있어 일련번호 검색이 가장 정확합니다.'
       }
     ]
   },
@@ -488,11 +781,11 @@ const GUIDE_QA_GROUPS = [
       },
       {
         question: '슬리브, 탑로더, 자석케이스는 언제 쓰나요?',
-        answer: '슬리브는 기본 보호용, 탑로더는 배송이나 단기 보관용, 자석케이스는 고가 카드의 전시와 장기 보관용으로 많이 사용됩니다. 고가 카드는 슬리브를 먼저 씌운 뒤 추가 보호 케이스에 넣는 방식이 안전합니다.'
+        answer: '슬리브는 기본 보호, 탑로더는 배송과 단기 보관, 자석케이스는 고가 카드 전시와 장기 보관에 많이 사용합니다. 자세한 보관 기준은 /guide/card-storage에 정리했습니다.'
       },
       {
         question: '카드 휘어짐을 줄이려면 어떻게 해야 하나요?',
-        answer: '습도와 온도 변화가 큰 곳을 피하고, 직사광선과 압력을 받는 보관을 피하는 것이 좋습니다. 슬리브와 보관함을 사용하고, 장기간 보관할 때는 카드가 과하게 눌리거나 휘지 않도록 공간을 안정적으로 유지해야 합니다.'
+        answer: '습도와 온도 변화, 직사광선, 압력을 피하는 것이 기본입니다. 장기 보관 방법과 용품별 차이는 /guide/card-storage에서 확인할 수 있습니다.'
       }
     ]
   },
@@ -507,11 +800,11 @@ const GUIDE_QA_GROUPS = [
       },
       {
         question: 'PSA10은 무엇인가요?',
-        answer: 'PSA10은 PSA 감정에서 최고 등급인 Gem Mint 10을 받은 상태를 뜻합니다. 일반 카드 가격과 달리 카드 상태, 감정 결과, 케이스 보관 상태, 감정 수요가 가격에 함께 반영됩니다.'
+        answer: 'PSA10은 PSA 감정에서 Gem Mint 10을 받은 최고 등급 상태를 뜻합니다. PSA10 시세와 일반 A등급 시세의 차이는 /guide/card-price에서 확인할 수 있습니다.'
       },
       {
         question: '시세 정보는 실제 거래가와 같나요?',
-        answer: '시세 정보는 거래 판단을 돕는 참고 자료입니다. 실제 거래 가격은 판매처, 배송비, 관세, 환율, 카드 상태, 결제 시점에 따라 달라질 수 있으므로 최종 구매나 판매 결정은 사용자가 직접 확인해야 합니다.'
+        answer: '시세 정보는 거래 판단을 돕는 참고 자료입니다. 실제 거래 가격은 판매처, 배송비, 관세, 환율, 카드 상태에 따라 달라질 수 있으며 자세한 확인 방법은 /guide/card-price에 정리했습니다.'
       }
     ]
   },
@@ -837,6 +1130,45 @@ function fallbackToOriginalCardImage(event) {
   placeholderImage(event);
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function compressMarketplaceImage(file) {
+  const source = await readFileAsDataUrl(file);
+  const image = await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = source;
+  });
+  const maxSide = 1200;
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
+  const scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+  const width = Math.max(1, Math.round(sourceWidth * scale));
+  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+  return new Promise((resolve) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        resolve({ data: source.replace(/^data:[^;]+;base64,/, ''), mimeType: file.type || 'image/jpeg' });
+        return;
+      }
+      const dataUrl = await readFileAsDataUrl(blob);
+      resolve({ data: dataUrl.replace(/^data:[^;]+;base64,/, ''), mimeType: blob.type || 'image/webp' });
+    }, 'image/webp', 0.82);
+  });
+}
+
 function isPlaceholderImageUrl(value) {
   return !value || String(value).includes('/card-placeholder.svg');
 }
@@ -1052,13 +1384,16 @@ function getMarketSaleSourceLabel(sale, fallback = '') {
 const NAV_ITEMS = [
   { id: 'cards', labelKey: 'navCards' },
   { id: 'prices', labelKey: 'navPrices' },
+  ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
   { id: 'news', labelKey: 'navNews' },
   { id: 'shops', labelKey: 'navShops' }
 ];
+const VISIBLE_RENEW_HOME_UPDATES = RENEW_HOME_UPDATES.filter((item) => MARKETPLACE_ENABLED || item.id !== '2026-06-19-marketplace');
 const UI_TEXT = {
   KR: {
     navCards: '도감',
     navPrices: '시세',
+    navMarketplace: '거래',
     navNews: '정보',
     navShops: '구매처',
     login: '로그인',
@@ -1147,7 +1482,7 @@ const UI_TEXT = {
     visitorsToday: '오늘 고유 방문자',
     usersTotal: '전체 회원 수',
     signupsToday: '오늘 가입자',
-    footerIntro: 'OPTCG Korea는 원피스 카드게임 유저를 위한 비공식 카드 도감·시세·컬렉션 관리 서비스입니다.',
+    footerIntro: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감·시세·컬렉션 관리 서비스입니다.',
     footerRights: 'ONE PIECE CARD GAME 및 관련 이미지, 명칭, 상표의 권리는 각 권리자에게 있으며,',
     footerNoAffiliation: '본 사이트는 BANDAI 및 공식 유통사와 제휴되어 있지 않습니다.',
     footerPriceNotice: '제공되는 시세 정보는 참고용이며, 실제 거래 가격과 차이가 있을 수 있습니다.',
@@ -1160,6 +1495,7 @@ const UI_TEXT = {
   EN: {
     navCards: 'Cards',
     navPrices: 'Prices',
+    navMarketplace: 'Trade',
     navNews: 'Info',
     navShops: 'Shops',
     login: 'Login',
@@ -1248,7 +1584,7 @@ const UI_TEXT = {
     visitorsToday: 'Unique visitors today',
     usersTotal: 'Total users',
     signupsToday: 'New users today',
-    footerIntro: 'OPTCG Korea is an unofficial card database, market price, and collection management service for ONE PIECE CARD GAME players.',
+    footerIntro: 'Card Pone is an unofficial card database, market price, and collection management service for ONE PIECE CARD GAME players.',
     footerRights: 'ONE PIECE CARD GAME images, names, and trademarks belong to their respective rights holders.',
     footerNoAffiliation: 'This site is not affiliated with BANDAI or official distributors.',
     footerPriceNotice: 'Market price information is provided for reference only and may differ from actual transaction prices.',
@@ -1267,57 +1603,408 @@ const PAGE_PATHS = {
   home: '/',
   cards: '/cards',
   prices: '/prices',
+  ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
   news: '/news',
   shops: '/shops',
+  about: '/about',
+  dataPolicy: '/data-policy',
+  terms: '/terms',
+  privacy: '/privacy',
   statsPrototype: '/stats-prototype'
 };
 const PATH_PAGES = Object.fromEntries(Object.entries(PAGE_PATHS).map(([page, path]) => [path, page]));
 PATH_PAGES['/deck'] = 'news';
 PATH_PAGES['/deck-simulator'] = 'news';
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
+function normalizeSitePath(pathname = '/') {
+  const normalized = String(pathname || '/').split('?')[0].replace(/\/+$/, '') || '/';
+  return normalized === '' ? '/' : normalized;
+}
+
+function getRouteSeoPage(pathname = '/') {
+  const path = normalizeSitePath(pathname);
+  if (PATH_PAGES[path]) return PATH_PAGES[path];
+  if (path.startsWith('/cards')) return 'cards';
+  if (path.startsWith('/prices')) return 'prices';
+  if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
+  if (path.startsWith('/shops')) return 'shops';
+  if (path.startsWith('/market')) return 'marketplace';
+  return 'home';
+}
+
+function getCatalogRouteViewState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
+  const path = normalizeSitePath(pathname);
+  if (path === '/cards/jp') return { locale: 'JP' };
+  if (path === '/cards/kr') return { locale: 'KR' };
+  if (path.startsWith('/cards/series/')) {
+    const slug = path.slice('/cards/series/'.length).toUpperCase().replace(/-/g, '');
+    const series = seriesData.find((item) => {
+      const id = String(item.id || '').toUpperCase().replace(/-/g, '');
+      const baseId = String(item.baseSeriesId || '').toUpperCase().replace(/-/g, '');
+      const official = String(item.officialSeriesKeyword || '').toUpperCase().replace(/-/g, '');
+      return id === slug || baseId === slug || official === slug;
+    });
+    if (series) return { locale: series.locale || 'KR', selectedSeries: series.id };
+  }
+  return null;
+}
+
+function getMarketRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/', search = typeof window !== 'undefined' ? window.location.search : '') {
+  const path = normalizeSitePath(pathname);
+  const params = new URLSearchParams(search);
+  const state = {
+    code: params.get('code') || '',
+    apparelId: params.get('apparelId') || null
+  };
+  if (path.startsWith('/prices/product/')) {
+    state.apparelId = path.slice('/prices/product/'.length);
+  }
+  if (path.startsWith('/prices/card/')) {
+    state.code = path.slice('/prices/card/'.length).toUpperCase();
+  }
+  return state;
+}
+
+function getBoxRouteCode(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
+  const path = normalizeSitePath(pathname);
+  if (!path.startsWith('/prices/box/')) return '';
+  return path.slice('/prices/box/'.length).toUpperCase();
+}
+
+function getNewsRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/', search = typeof window !== 'undefined' ? window.location.search : '') {
+  const path = normalizeSitePath(pathname);
+  const params = new URLSearchParams(search);
+  if (path.startsWith('/guide')) return { section: 'guide', mode: 'guide' };
+  if (path.startsWith('/faq')) return { section: 'guide', mode: 'qa' };
+  return {
+    section: params.get('section') || '',
+    mode: params.get('mode') || ''
+  };
+}
+
+function getShopRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
+  const path = normalizeSitePath(pathname);
+  if (path === '/shops/official') return { type: 'official' };
+  if (!path.startsWith('/shops/')) return null;
+  const slug = decodeURIComponent(path.slice('/shops/'.length)).toLowerCase();
+  const regions = {
+    seoul: '서울',
+    gyeonggi: '경기',
+    incheon: '인천',
+    busan: '부산',
+    daegu: '대구',
+    daejeon: '대전',
+    gwangju: '광주',
+    ulsan: '울산',
+    gangwon: '강원',
+    chungbuk: '충북',
+    chungnam: '충남',
+    jeonbuk: '전북',
+    jeonnam: '전남',
+    gyeongbuk: '경북',
+    gyeongnam: '경남',
+    jeju: '제주',
+    sejong: '세종'
+  };
+  return regions[slug] ? { sido: regions[slug] } : null;
+}
+
 const PAGE_SEO = {
   home: {
-    title: 'OPTCG Korea - 원피스카드 도감, 시세, 컬렉션 관리',
+    title: 'Card Pone - 원피스카드 도감, 시세, 컬렉션 관리',
     h1: '원피스카드 도감·시세·컬렉션 관리',
-    description: 'OPTCG Korea는 원피스카드 유저를 위한 비공식 카드 도감, 시세 확인, 컬렉션 관리 서비스입니다.',
-    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, 원피스카드 구매처, OPTCG, OPTCG Korea',
-    body: 'OPTCG Korea는 원피스카드 유저가 한글판·일본판 카드 도감, 카드별 시세, 컬렉션 관리, 구매처 정보를 한 곳에서 확인할 수 있는 비공식 팬 서비스입니다.'
+    description: 'Card Pone는 원피스카드 유저를 위한 비공식 카드 도감, 시세 확인, 컬렉션 관리 서비스입니다.',
+    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, 원피스카드 구매처, OPTCG, Card Pone',
+    body: 'Card Pone는 원피스카드 유저가 한글판·일본판 카드 도감, 카드별 시세, 컬렉션 관리, 구매처 정보를 한 곳에서 확인할 수 있는 비공식 팬 서비스입니다.'
   },
   cards: {
-    title: '원피스카드 도감 - 한글판 일본판 카드 검색 | OPTCG Korea',
+    title: '원피스카드 도감 - 한글판 일본판 카드 검색 | Card Pone',
     h1: '원피스카드 도감',
     description: '한글판과 일본판 원피스카드의 OP, EB, ST, 프로모 카드를 카드명과 일련번호로 검색할 수 있습니다.',
     keywords: '원피스카드 도감, 원피스 카드 검색, OP16, OP15, 일본판 원피스카드, 한글판 원피스카드',
     body: '원피스카드 도감에서는 한글판과 일본판 카드를 OP, EB, ST, 프로모 시리즈별로 확인하고 카드명 또는 일련번호로 검색할 수 있습니다.'
   },
   prices: {
-    title: '원피스카드 시세 - 카드별 시세 그래프와 박스 가격 | OPTCG Korea',
+    title: '원피스카드 시세 - 카드별 시세 그래프와 박스 가격 | Card Pone',
     h1: '원피스카드 시세',
     description: '원피스카드별 시세, 박스 가격, 일본판과 한글판 거래 가격 흐름을 확인할 수 있습니다.',
     keywords: '원피스카드 시세, 원피스 카드 가격, 원피스카드 박스 시세, PSA10 시세, SNKRDUNK 원피스카드',
     body: '시세 페이지에서는 카드별 거래 가격, 박스 가격, 최근 거래 내역과 7일, 1개월, 전체 기간 그래프를 확인할 수 있습니다.'
   },
+  marketplace: {
+    title: '원피스 카드 거래 - 유저 교환과 판매 게시판 | Card Pone',
+    h1: '원피스 카드 거래',
+    description: 'Card Pone 거래 페이지는 유저 간 원피스 카드 판매, 교환, 구매 글을 카페 인증 기반으로 운영하기 위한 공간입니다.',
+    keywords: '원피스카드 거래, 원피스 카드 교환, 원피스카드 판매, 원피스카드 마켓',
+    body: '거래 페이지는 유저 간 카드 판매와 교환을 안전하게 운영하기 위해 카페 인증, 매물 사진, 판매자 정보, 문의 기능을 단계적으로 제공할 예정입니다.'
+  },
   news: {
-    title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | OPTCG Korea',
+    title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | Card Pone',
     h1: '원피스카드 정보',
     description: '원피스카드 공식 소식, 업데이트 공지, 이용 가이드, 사전예약, 온라인 오리파, 카드 보관용품 정보를 확인할 수 있습니다.',
-    keywords: 'OPTCG Korea 정보, 원피스카드 공지사항, 원피스카드 뉴스, 원피스카드 가이드, 원피스카드 Q&A',
+    keywords: 'Card Pone 정보, 원피스카드 공지사항, 원피스카드 뉴스, 원피스카드 가이드, 원피스카드 Q&A',
     body: '정보 영역에서는 업데이트 공지, 공식 소식, 사전예약, 온라인 오리파, 카드 보관용품, 이용 가이드를 확인할 수 있습니다.'
   },
   shops: {
-    title: '원피스카드 구매처 - 지역별 공인점포 취급점포 | OPTCG Korea',
+    title: '원피스카드 구매처 - 지역별 공인점포 취급점포 | Card Pone',
     h1: '원피스카드 구매처',
     description: '지역별 원피스카드 오프라인 공인점포와 취급점포를 검색하고 지도 링크로 확인할 수 있습니다.',
     keywords: '원피스카드 구매처, 원피스 카드 공인점포, 원피스카드 매장, 원피스카드 취급점포',
     body: '구매처 페이지에서는 지역별 오프라인 공인점포와 취급점포를 필터로 찾고 네이버지도 또는 카카오맵으로 위치를 확인할 수 있습니다.'
+  },
+  about: {
+    title: 'Card Pone 소개 | 원피스카드 도감·시세·컬렉션 관리',
+    h1: 'Card Pone 소개',
+    description: 'Card Pone의 운영 목적, 제공 기능, 비공식 팬 서비스 고지와 문의 채널을 안내합니다.',
+    keywords: 'Card Pone 소개, 원피스카드 도감, 원피스카드 시세, 원피스카드 컬렉션',
+    body: 'Card Pone는 원피스 카드게임 유저가 카드 도감, 시세, 컬렉션, 구매처 정보를 한 곳에서 확인할 수 있도록 만든 비공식 정보 서비스입니다.'
+  },
+  dataPolicy: {
+    title: '데이터 운영 정책 | Card Pone',
+    h1: '데이터 운영 정책',
+    description: 'Card Pone의 카드 도감, 시세, 지수, 구매처 데이터 수집 기준과 한계를 안내합니다.',
+    keywords: 'Card Pone 데이터 정책, 원피스카드 시세 데이터, 원피스카드 도감 데이터',
+    body: 'Card Pone는 공개 자료와 자체 수집 데이터를 바탕으로 카드 정보와 시세 정보를 제공하며, 실제 거래와 차이가 있을 수 있음을 명확히 고지합니다.'
+  },
+  terms: {
+    title: '이용약관 | Card Pone',
+    h1: '이용약관',
+    description: 'Card Pone 서비스 이용 조건, 시세 정보 이용 기준, 광고 및 제휴 고지를 안내합니다.',
+    keywords: 'Card Pone 이용약관, 원피스카드 서비스 약관',
+    body: 'Card Pone 이용약관은 카드 도감, 시세, 컬렉션 관리 및 관련 기능의 이용 조건을 안내합니다.'
+  },
+  privacy: {
+    title: '개인정보처리방침 | Card Pone',
+    h1: '개인정보처리방침',
+    description: 'Card Pone의 개인정보 수집, 이용, 보관, 삭제 및 문의 방법을 안내합니다.',
+    keywords: 'Card Pone 개인정보처리방침, 원피스카드 개인정보',
+    body: 'Card Pone는 로그인, 컬렉션 관리, 문의 대응 등 서비스 제공에 필요한 범위에서 개인정보를 처리합니다.'
   }
 };
 
+const CLIENT_ROUTE_SEO = {
+  '/cards/jp': {
+    title: '일본판 원피스카드 도감 | Card Pone',
+    h1: '일본판 원피스카드 도감',
+    description: '일본판 원피스 카드게임 카드 목록을 OP, EB, ST, 프로모 시리즈별로 검색하고 확인할 수 있습니다.',
+    keywords: '일본판 원피스카드, 원피스카드 일본판 도감, OP 카드 리스트',
+    body: '일본판 원피스 카드게임 카드 목록과 시리즈별 수집 현황을 확인할 수 있습니다.'
+  },
+  '/cards/kr': {
+    title: '한글판 원피스카드 도감 | Card Pone',
+    h1: '한글판 원피스카드 도감',
+    description: '한글판 원피스 카드게임 카드 목록을 시리즈별로 검색하고 보유 카드와 위시리스트를 관리할 수 있습니다.',
+    keywords: '한글판 원피스카드, 원피스카드 한글판 도감, 원피스카드 검색',
+    body: '한글판 원피스 카드게임 카드 목록과 보유 카드 정보를 확인할 수 있습니다.'
+  },
+  '/prices/cards': {
+    title: '원피스카드 싱글 카드 시세 | Card Pone',
+    h1: '원피스카드 싱글 카드 시세',
+    description: 'SNKRDUNK 기준 원피스카드 싱글 카드 가격과 주요 카드 시세를 확인할 수 있습니다.',
+    keywords: '원피스카드 싱글 시세, 원피스카드 가격, SNKRDUNK 원피스카드',
+    body: '원피스카드 싱글 카드의 주요 가격과 시세 후보를 확인할 수 있습니다.'
+  },
+  '/prices/boxes': {
+    title: '원피스카드 박스 시세 | Card Pone',
+    h1: '원피스카드 박스 시세',
+    description: '원피스 카드게임 부스터 박스와 팩 가격을 최신순, 가격 높은순, 가격 낮은순으로 확인할 수 있습니다.',
+    keywords: '원피스카드 박스 시세, 원피스카드 박스 가격, 부스터 박스',
+    body: '원피스 카드게임 부스터 박스와 팩 가격을 확인할 수 있습니다.'
+  },
+  '/prices/index': {
+    title: 'OPTCG Collector Index | Card Pone',
+    h1: 'OPTCG Collector Index',
+    description: 'Card Pone가 추적하는 원피스카드 대표 지수와 하위 섹터 지수를 확인할 수 있습니다.',
+    keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표',
+    body: '원피스카드 대표 카드와 섹터별 가격 흐름을 지수로 확인할 수 있습니다.'
+  },
+  '/prices/index/manga': {
+    title: 'OPTCG Manga Index | Card Pone',
+    h1: 'OPTCG Manga Index',
+    description: '원피스카드 망가 카드 중심의 Manga Index 가격 흐름을 확인할 수 있습니다.',
+    keywords: '원피스카드 망가 시세, Manga Index, 망가 카드 가격',
+    body: '원피스카드 망가 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
+  },
+  '/prices/index/premium-art': {
+    title: 'OPTCG Premium Art Index | Card Pone',
+    h1: 'OPTCG Premium Art Index',
+    description: '수배서, 금배경, 은배경 등 프리미엄 아트 카드 중심의 지수를 확인할 수 있습니다.',
+    keywords: '원피스카드 수배서, 프리미엄 아트, 금배경 은배경',
+    body: '원피스카드 프리미엄 아트 계열 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
+  },
+  '/prices/index/sp': {
+    title: 'OPTCG SP Index | Card Pone',
+    h1: 'OPTCG SP Index',
+    description: '원피스카드 SP 계열 카드 가격 흐름을 지수로 확인할 수 있습니다.',
+    keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index',
+    body: '원피스카드 SP 계열 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
+  },
+  '/prices/index/luffy': {
+    title: 'OPTCG Luffy Index | Card Pone',
+    h1: 'OPTCG Luffy Index',
+    description: '몽키 D. 루피 주요 카드 가격 흐름을 Luffy Index로 확인할 수 있습니다.',
+    keywords: '루피 카드 시세, Monkey D Luffy 카드, OPTCG Luffy Index',
+    body: '몽키 D. 루피 주요 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
+  },
+  '/guide': {
+    title: '원피스카드 입문 가이드 | Card Pone',
+    h1: '원피스카드 입문 가이드',
+    description: '원피스카드 수집, 시세 확인, 보관, 구매 방향성을 처음 이용자도 이해하기 쉽게 정리합니다.',
+    keywords: '원피스카드 입문, 원피스카드 수집 가이드, 원피스카드 보관',
+    body: '원피스카드를 처음 수집하는 이용자를 위한 기본 가이드입니다.'
+  },
+  '/faq': {
+    title: '원피스카드 Q&A | Card Pone',
+    h1: '원피스카드 Q&A',
+    description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인에 대한 자주 묻는 질문을 정리합니다.',
+    keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 레어도',
+    body: '원피스카드 이용자가 자주 묻는 질문과 답변을 정리합니다.'
+  }
+};
+
+function getClientRouteSeo(page) {
+  if (typeof window === 'undefined') return null;
+  const path = normalizeSitePath(window.location.pathname);
+  const seoAliases = {
+    '/prices/collector-index': '/prices/index',
+    '/prices/manga-index': '/prices/index/manga',
+    '/prices/premium-art-index': '/prices/index/premium-art',
+    '/prices/sp-index': '/prices/index/sp',
+    '/prices/luffy-index': '/prices/index/luffy'
+  };
+  if (seoAliases[path] && CLIENT_ROUTE_SEO[seoAliases[path]]) return CLIENT_ROUTE_SEO[seoAliases[path]];
+  if (CLIENT_ROUTE_SEO[path]) return CLIENT_ROUTE_SEO[path];
+  if (path.startsWith('/cards/series/')) {
+    const series = path.split('/').pop()?.toUpperCase() || 'SERIES';
+    return {
+      title: `${series} 원피스카드 리스트 | Card Pone`,
+      h1: `${series} 원피스카드 리스트`,
+      description: `${series} 시리즈의 원피스 카드게임 카드 목록과 보유 카드 정보를 확인할 수 있습니다.`,
+      keywords: `${series} 원피스카드, ${series} 카드 리스트, 원피스카드 도감`,
+      body: `${series} 시리즈 카드 목록을 확인할 수 있습니다.`
+    };
+  }
+  if (path.startsWith('/shops/')) {
+    const region = decodeURIComponent(path.split('/').pop() || '').replace(/-/g, ' ');
+    return {
+      title: `${region} 원피스카드 구매처 | Card Pone`,
+      h1: `${region} 원피스카드 구매처`,
+      description: `${region} 지역의 원피스 카드게임 공인점포와 취급점포 정보를 확인할 수 있습니다.`,
+      keywords: `${region} 원피스카드 매장, ${region} 원피스카드 구매처`,
+      body: `${region} 지역 구매처 정보를 확인할 수 있습니다.`
+    };
+  }
+  if (path.startsWith('/prices/product/')) {
+    const id = path.slice('/prices/product/'.length);
+    return {
+      title: `SNKRDUNK Product #${id} Price | Card Pone`,
+      h1: `SNKRDUNK Product #${id}`,
+      description: `Check ONE PIECE Card Game market price, chart, and recent trades for SNKRDUNK product #${id}.`,
+      keywords: `SNKRDUNK ${id}, ONE PIECE Card Game price, Card Pone`,
+      body: `Market price detail for SNKRDUNK product #${id}.`
+    };
+  }
+  if (path.startsWith('/prices/card/')) {
+    const code = path.slice('/prices/card/'.length).toUpperCase();
+    return {
+      title: `${code} Price | Card Pone`,
+      h1: `${code} Price`,
+      description: `Check ONE PIECE Card Game market candidates and prices for ${code}.`,
+      keywords: `${code}, ONE PIECE Card Game price, Card Pone`,
+      body: `Market price candidates for ${code}.`
+    };
+  }
+  if (path.startsWith('/prices/box/')) {
+    const code = path.slice('/prices/box/'.length).toUpperCase();
+    return {
+      title: `${code} Box Price | Card Pone`,
+      h1: `${code} Box Price`,
+      description: `Check ONE PIECE Card Game booster box price for ${code}.`,
+      keywords: `${code} box price, ONE PIECE Card Game box, Card Pone`,
+      body: `Booster box market price for ${code}.`
+    };
+  }
+  if (path === '/guide/card-storage') {
+    return {
+      title: '원피스카드 보관 방법 | 슬리브, 탑로더, 바인더 보관 가이드 | Card Pone',
+      h1: '원피스카드 보관 방법',
+      description: '원피스카드 보관 방법을 슬리브, 탑로더, 카드세이버, 자석케이스, 바인더 기준으로 정리했습니다. 습기, 빛, 압력, 스크래치로부터 카드를 보호하는 방법을 확인하세요.',
+      keywords: '원피스카드 보관 방법, 원피스카드 슬리브, 원피스카드 탑로더, 카드세이버, 카드 바인더, 카드 보관용품',
+      body: '원피스카드를 장기 보관할 때 필요한 슬리브, 탑로더, 카드세이버, 바인더 사용 방법과 주의점을 정리한 가이드입니다.'
+    };
+  }
+  if (path === '/guide/shops') {
+    return {
+      title: '원피스카드 사는 방법 | 공인점포, 취급점포, 구매처 찾기 | Card Pone',
+      h1: '원피스카드 사는 방법',
+      description: '원피스카드 파는 곳을 공식 홈페이지 기준 공인점포와 취급점포로 정리했습니다. 지역별 검색, 내 주변순 정렬, 네이버지도와 카카오맵 바로가기를 확인하세요.',
+      keywords: '원피스카드 사는 방법, 원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 공인점포, 원피스카드 취급점포',
+      body: '원피스카드 구매처를 지역별로 찾고 가까운 매장 순서로 확인할 수 있는 구매 가이드입니다.'
+    };
+  }
+  if (path === '/guide/card-price') {
+    return {
+      title: '원피스카드 시세 보는 방법 | 카드 가격, 박스 가격, 거래 기록 | Card Pone',
+      h1: '원피스카드 시세 보는 방법',
+      description: '원피스카드 시세를 일련번호, 카드 버전, A등급, PSA10, 최근 거래 기록과 기간별 그래프로 확인하는 방법을 정리했습니다.',
+      keywords: '원피스카드 시세, 원피스카드 가격, 원피스카드 박스 시세, 원피스카드 PSA10, 원피스카드 거래 가격',
+      body: '원피스카드 카드별 시세와 박스 가격, 최근 거래 기록, 기간별 그래프를 확인하는 방법을 정리한 가이드입니다.'
+    };
+  }
+  if (path === '/guide/card-catalog') {
+    return {
+      title: '원피스카드 도감 사용법 | 한글판, 일본판, 일련번호 검색 | Card Pone',
+      h1: '원피스카드 도감 사용법',
+      description: '원피스카드 도감에서 한글판과 일본판 카드, OP/EB/ST/PR 시리즈, 일련번호와 카드명 검색을 사용하는 방법을 정리했습니다.',
+      keywords: '원피스카드 도감, 원피스카드 일련번호, 원피스카드 카드번호, 일본판 원피스카드 도감, 한글판 원피스카드 도감',
+      body: '원피스카드 도감에서 시리즈, 일련번호, 카드명, 언어별 카드를 찾는 방법을 정리한 가이드입니다.'
+    };
+  }
+  if (path.startsWith('/guide/')) {
+    const slug = path.slice('/guide/'.length).replace(/-/g, ' ');
+    return {
+      title: `OPTCG Guide - ${slug} | Card Pone`,
+      h1: 'OPTCG Guide',
+      description: `ONE PIECE Card Game guide for ${slug}.`,
+      keywords: `OPTCG guide, ONE PIECE Card Game ${slug}`,
+      body: 'Guide content for ONE PIECE Card Game collectors.'
+    };
+  }
+  if (path.startsWith('/faq/')) {
+    const slug = path.slice('/faq/'.length).replace(/-/g, ' ');
+    return {
+      title: `OPTCG FAQ - ${slug} | Card Pone`,
+      h1: 'OPTCG FAQ',
+      description: `Frequently asked questions about ONE PIECE Card Game ${slug}.`,
+      keywords: `OPTCG FAQ, ONE PIECE Card Game ${slug}`,
+      body: 'FAQ content for ONE PIECE Card Game collectors.'
+    };
+  }
+  return null;
+}
+
 function getPageFromPath(pathname = '/') {
-  return PATH_PAGES[pathname] || 'home';
+  return getRouteSeoPage(pathname);
+}
+
+function getRouteBackInfo(pathname = '/', search = '') {
+  const path = normalizeSitePath(pathname);
+  const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
+  if (path === '/' || (['/cards', '/prices', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
+  if (path.startsWith('/cards')) return { label: '도감으로 돌아가기', page: 'cards' };
+  if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { label: '시세로 돌아가기', page: 'prices' };
+  if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { label: '정보로 돌아가기', page: 'news' };
+  if (path.startsWith('/shops')) return { label: '구매처로 돌아가기', page: 'shops' };
+  if (path.startsWith('/market')) return { label: '거래로 돌아가기', page: 'marketplace' };
+  if (['/about', '/data-policy', '/terms', '/privacy'].includes(path)) return { label: '홈으로 돌아가기', page: 'home' };
+  return null;
 }
 
 function getCanonicalUrl(page) {
+  if (typeof window !== 'undefined') {
+    const currentPath = normalizeSitePath(window.location.pathname);
+    if (getRouteSeoPage(currentPath) === page) return `${SITE_ORIGIN}${currentPath === '/' ? '/' : currentPath}`;
+  }
   return `${SITE_ORIGIN}${PAGE_PATHS[page] || '/'}`;
 }
 
@@ -1352,10 +2039,25 @@ function setJsonLd(id, data) {
 function getPageJsonLd(page, seo) {
   const url = getCanonicalUrl(page);
   const breadcrumb = [
-    { '@type': 'ListItem', position: 1, name: 'OPTCG Korea', item: SITE_ORIGIN },
+    { '@type': 'ListItem', position: 1, name: 'Card Pone', item: SITE_ORIGIN },
     { '@type': 'ListItem', position: 2, name: seo.h1, item: url }
   ];
   const graph = [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_ORIGIN}/#organization`,
+      name: 'Card Pone',
+      alternateName: ['카드포네', '카드 포네'],
+      url: SITE_ORIGIN
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_ORIGIN}/#website`,
+      name: 'Card Pone',
+      alternateName: ['카드포네', '카드 포네', '원피스카드 도감', '원피스카드 시세'],
+      url: SITE_ORIGIN,
+      publisher: { '@id': `${SITE_ORIGIN}/#organization` }
+    },
     {
       '@type': 'WebPage',
       '@id': `${url}#webpage`,
@@ -1383,7 +2085,7 @@ function getPageJsonLd(page, seo) {
   if (page === 'news') {
     graph.push({
       '@type': 'FAQPage',
-      name: 'OPTCG Korea 이용 가이드',
+      name: 'Card Pone 이용 가이드',
       mainEntity: GUIDE_QA_GROUPS.flatMap((group) => group.items).slice(0, 10).map((item) => ({
         '@type': 'Question',
         name: item.question,
@@ -1392,9 +2094,9 @@ function getPageJsonLd(page, seo) {
     });
     graph.push({
       '@type': 'Article',
-      headline: 'OPTCG Korea 업데이트 안내',
+      headline: 'Card Pone 업데이트 안내',
       description: seo.description,
-      author: { '@type': 'Organization', name: 'OPTCG Korea' },
+      author: { '@type': 'Organization', name: 'Card Pone' },
       publisher: { '@id': `${SITE_ORIGIN}/#organization` },
       mainEntityOfPage: url
     });
@@ -1403,7 +2105,7 @@ function getPageJsonLd(page, seo) {
 }
 
 function applyPageSeo(page) {
-  const seo = PAGE_SEO[page] || PAGE_SEO.home;
+  const seo = getClientRouteSeo(page) || PAGE_SEO[page] || PAGE_SEO.home;
   const url = getCanonicalUrl(page);
   document.title = seo.title;
   setHeadMeta('meta[name="description"]', { content: seo.description });
@@ -1414,17 +2116,17 @@ function applyPageSeo(page) {
   setHeadMeta('meta[property="og:title"]', { property: 'og:title', content: seo.title });
   setHeadMeta('meta[property="og:description"]', { property: 'og:description', content: seo.description });
   setHeadMeta('meta[property="og:url"]', { property: 'og:url', content: url });
-  setHeadMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'OPTCG Korea' });
-  setHeadMeta('meta[property="og:image"]', { property: 'og:image', content: `${SITE_ORIGIN}/og-preview.jpg` });
+  setHeadMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'Card Pone' });
+  setHeadMeta('meta[property="og:image"]', { property: 'og:image', content: `${SITE_ORIGIN}/og-preview-optcg.jpg` });
   setHeadMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
   setHeadMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: seo.title });
   setHeadMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: seo.description });
-  setHeadMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: `${SITE_ORIGIN}/og-preview.jpg` });
+  setHeadMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: `${SITE_ORIGIN}/og-preview-optcg.jpg` });
   setJsonLd('optcg-page-jsonld', getPageJsonLd(page, seo));
 }
 
 const TERMS_SECTIONS = [
-  ['제1조 목적', '본 약관은 OPTCG Korea가 제공하는 카드 도감, 시세 확인, 컬렉션 관리 및 관련 서비스의 이용 조건과 절차를 정함을 목적으로 합니다.'],
+  ['제1조 목적', '본 약관은 Card Pone가 제공하는 카드 도감, 시세 확인, 컬렉션 관리 및 관련 서비스의 이용 조건과 절차를 정함을 목적으로 합니다.'],
   ['제2조 서비스의 성격', '본 사이트는 원피스 카드게임 유저를 위한 비공식 정보 제공 서비스입니다.\n본 사이트는 BANDAI, ONE PIECE CARD GAME 공식 유통사 및 관련 권리자와 제휴되어 있지 않습니다.'],
   ['제3조 제공 서비스', '본 사이트는 카드 정보, 카드 시세, 컬렉션 관리, 위시리스트, 덱 시뮬레이터, 공지사항 등의 기능을 제공할 수 있습니다.'],
   ['제4조 시세 정보의 이용', '본 사이트에서 제공하는 시세 정보는 외부 거래 플랫폼, 공개 정보 또는 자체 수집 데이터를 기반으로 한 참고용 정보입니다.\n실제 거래 가격과 차이가 있을 수 있으며, 카드 구매·판매·투자 판단의 책임은 이용자 본인에게 있습니다.'],
@@ -1445,15 +2147,155 @@ const PRIVACY_SECTIONS = [
   ['5. 개인정보의 제3자 제공', '본 사이트는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.\n다만 법령에 따른 요청이 있거나 이용자의 동의가 있는 경우에는 예외로 합니다.'],
   ['6. 개인정보 처리의 위탁', '본 사이트는 서비스 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.\n- Supabase: 회원 정보 및 컬렉션 데이터 저장\n- Kakao Login: 소셜 로그인 제공\n- Google AdSense: 광고 제공\n- Google Analytics 또는 Vercel Analytics: 방문 통계 분석\n사용하는 서비스가 변경될 경우 본 방침을 통해 안내합니다.'],
   ['7. 이용자의 권리', '이용자는 언제든지 본인의 개인정보 조회, 수정, 삭제, 처리 정지를 요청할 수 있습니다.\n요청은 아래 이메일을 통해 접수할 수 있습니다.\n이메일: optkr26@gmail.com'],
-  ['8. 개인정보 보호책임자', '개인정보 관련 문의는 아래 연락처로 문의할 수 있습니다.\n운영자: OPTCG Korea\n이메일: optkr26@gmail.com'],
+  ['8. 개인정보 보호책임자', '개인정보 관련 문의는 아래 연락처로 문의할 수 있습니다.\n운영자: Card Pone\n이메일: optkr26@gmail.com'],
   ['9. 개인정보처리방침 변경', '본 개인정보처리방침은 법령, 서비스 변경 사항에 따라 수정될 수 있으며, 변경 시 사이트 공지사항 또는 본 페이지를 통해 안내합니다.\n시행일: 2026년 5월 28일']
 ];
+
+const STATIC_INFO_PAGES = {
+  about: {
+    title: 'Card Pone 소개',
+    lead: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세 확인, 컬렉션 관리 서비스입니다.',
+    sections: [
+      {
+        title: '서비스 목적',
+        body: [
+          '한글판과 일본판 원피스 카드게임 카드를 한 곳에서 검색하고 비교할 수 있도록 정리합니다.',
+          '카드별 시세, 박스 가격, 수집 진행도, 구매처 정보를 함께 제공해 수집 판단에 필요한 정보를 줄이는 것을 목표로 합니다.'
+        ]
+      },
+      {
+        title: '제공 기능',
+        list: [
+          '한글판·일본판 카드 도감 검색',
+          '카드별 시세, 최근 거래 기록, 가격 그래프 확인',
+          '박스 가격과 OPTCG Index 확인',
+          '보유 카드, 위시리스트, 포트폴리오 관리',
+          '지역별 공인점포·취급점포 검색',
+          '공지사항, 사전예약, 가이드, Q&A 정보 제공'
+        ]
+      },
+      {
+        title: '운영 고지',
+        body: [
+          '본 사이트는 BANDAI 및 ONE PIECE CARD GAME 공식 유통사와 제휴된 공식 서비스가 아닙니다.',
+          'ONE PIECE CARD GAME 관련 이미지, 명칭, 상표의 권리는 각 권리자에게 있습니다.',
+          '시세 정보는 참고용이며 실제 거래 가격, 환율, 수수료, 배송비와 차이가 있을 수 있습니다.'
+        ]
+      },
+      {
+        title: '문의',
+        body: ['서비스 오류, 데이터 수정, 광고·제휴 문의는 optkr26@gmail.com 으로 연락할 수 있습니다.']
+      }
+    ]
+  },
+  dataPolicy: {
+    title: '데이터 운영 정책',
+    lead: 'Card Pone는 공개 자료와 자체 수집 데이터를 기반으로 카드 정보와 시세 정보를 제공합니다.',
+    sections: [
+      {
+        title: '카드 도감 데이터',
+        body: [
+          '카드 도감은 공식 카드 리스트와 공개적으로 확인 가능한 카드 정보를 기준으로 정리합니다.',
+          '같은 일련번호라도 일반판, 패러렐, 프로모, 언어, 재록판이 다를 수 있어 카드별 고유 구분값을 함께 관리합니다.'
+        ]
+      },
+      {
+        title: '시세 데이터',
+        body: [
+          '시세는 SNKRDUNK 등 공개적으로 확인 가능한 거래·상품 정보를 바탕으로 수집 및 정리합니다.',
+          'PSA10 통합 시세처럼 외부 플랫폼 데이터가 함께 표시되는 경우 플랫폼명이 함께 노출됩니다.',
+          '가격은 환율, 판매 상태, 수수료, 배송비, 플랫폼 정책에 따라 실제 구매·판매 금액과 다를 수 있습니다.'
+        ]
+      },
+      {
+        title: '지수 데이터',
+        body: [
+          'OPTCG Index는 지정된 카드군의 시세 데이터를 기준화해 만든 참고용 지표입니다.',
+          '지수는 투자 권유가 아니며, 수집 시장의 상대적인 가격 흐름을 보기 위한 보조 정보입니다.'
+        ]
+      },
+      {
+        title: '데이터 수정 요청',
+        body: ['잘못된 카드 정보, 시세 매핑, 구매처 정보가 있는 경우 optkr26@gmail.com 으로 제보할 수 있습니다.']
+      }
+    ]
+  },
+  terms: {
+    title: '이용약관',
+    lead: '본 약관은 Card Pone가 제공하는 카드 도감, 시세 확인, 컬렉션 관리 및 관련 서비스의 이용 조건을 안내합니다.',
+    sections: [
+      {
+        title: '서비스 성격',
+        body: [
+          'Card Pone는 원피스 카드게임 유저를 위한 비공식 정보 제공 서비스입니다.',
+          '본 사이트는 BANDAI, ONE PIECE CARD GAME 공식 유통사 및 권리자와 제휴되어 있지 않습니다.'
+        ]
+      },
+      {
+        title: '시세 정보 이용',
+        body: [
+          '제공되는 시세 정보는 공개 데이터와 자체 수집 데이터를 기반으로 한 참고용 정보입니다.',
+          '실제 거래 가격과 차이가 있을 수 있으며, 구매·판매·교환 결정의 책임은 이용자 본인에게 있습니다.'
+        ]
+      },
+      {
+        title: '광고 및 제휴',
+        body: [
+          '본 사이트에는 Google AdSense 등 제3자 광고 서비스 또는 제휴 링크가 포함될 수 있습니다.',
+          '본 사이트는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.',
+          '광고 및 제휴 링크를 통해 발생하는 외부 사이트 이용에는 해당 외부 사이트의 정책이 적용됩니다.'
+        ]
+      },
+      {
+        title: '문의',
+        body: ['서비스 이용과 관련한 문의는 optkr26@gmail.com 으로 접수할 수 있습니다.']
+      }
+    ]
+  },
+  privacy: {
+    title: '개인정보처리방침',
+    lead: 'Card Pone는 이용자의 개인정보를 중요하게 생각하며, 서비스 제공에 필요한 범위에서 개인정보를 처리합니다.',
+    sections: [
+      {
+        title: '수집하는 정보',
+        list: [
+          '소셜 로그인 정보: 카카오 계정 식별자, 닉네임, 프로필 이미지, 이메일',
+          '서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보',
+          '자동 수집 정보: 접속 IP, 브라우저 정보, 접속 기록, 쿠키, 기기 정보',
+          '문의 시 수집 정보: 이메일 주소, 문의 내용'
+        ]
+      },
+      {
+        title: '이용 목적',
+        list: [
+          '회원 식별 및 로그인 기능 제공',
+          '컬렉션 관리, 위시리스트, 보유 카드 저장 기능 제공',
+          '서비스 이용 기록 관리 및 부정 이용 방지',
+          '문의 응대 및 서비스 개선',
+          '광고 표시 및 광고 성과 분석'
+        ]
+      },
+      {
+        title: '외부 서비스',
+        body: [
+          '본 사이트는 Supabase, Kakao Login, Google AdSense, 방문 통계 분석 도구를 사용할 수 있습니다.',
+          '사용하는 외부 서비스가 변경될 경우 본 방침 또는 공지사항을 통해 안내합니다.'
+        ]
+      },
+      {
+        title: '문의 및 삭제 요청',
+        body: ['개인정보 조회, 수정, 삭제, 처리 정지 요청은 optkr26@gmail.com 으로 접수할 수 있습니다.']
+      }
+    ]
+  }
+};
 
 function MobileNavIcon({ type }) {
   const paths = {
     home: <><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /></>,
     cards: <><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1 1-1h5a3 3 0 0 1 3 3 3 3 0 0 1 3-3h5a1 1 0 0 1 1 1V5a1 1 0 0 0-1-1h-5a3 3 0 0 0-3 3 3 3 0 0 0-3-3H4a1 1 0 0 0-1 1z" /></>,
     prices: <><path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" /></>,
+    marketplace: <><path d="M7 7h11l-3-3" /><path d="M18 7l-3 3" /><path d="M17 17H6l3 3" /><path d="M6 17l3-3" /></>,
     news: <><path d="M15 18h-5" /><path d="M18 14h-8" /><path d="M18 10h-8" /><path d="M4 22h16a2 2 0 0 0 2-2V4H8a2 2 0 0 0-2 2v14a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2" /></>,
     shops: <><path d="M20 10c0 4.5-8 12-8 12S4 14.5 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" /></>,
     account: <><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></>,
@@ -1486,7 +2328,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
     <header className="renew-header" data-nosnippet>
       <div className="renew-mobile-topbar">
         <button type="button" className="renew-mobile-logo" onClick={() => onNavigate('home')} aria-label="메인으로 이동">
-          <img src={LOGO_SRC} alt="ONE PIECE CARD GAME" />
+          <img src={LOGO_SRC} alt="Card Pone" />
         </button>
         <div className="renew-mobile-actions">
           <button type="button" onClick={onToggleTheme} aria-label="테마 전환">
@@ -1507,7 +2349,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
       </div>
       <div className="renew-nav">
         <button type="button" className="renew-logo-button" onClick={() => onNavigate('home')} aria-label="메인으로 이동">
-          <img src={LOGO_SRC} alt="ONE PIECE CARD GAME" className="renew-logo" />
+          <img src={LOGO_SRC} alt="Card Pone" className="renew-logo" />
         </button>
 
         <nav className="renew-tabs" aria-label="주요 메뉴">
@@ -1548,16 +2390,18 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </div>
       </div>
       <nav className="renew-bottom-nav" aria-label="모바일 하단 메뉴">
-        <button type="button" className={activePage === 'home' ? 'is-active' : ''} onClick={() => onNavigate('home')} aria-label="홈">
-          <MobileNavIcon type="home" />
-        </button>
         <button type="button" className={activePage === 'cards' ? 'is-active' : ''} onClick={() => onNavigate('cards')} aria-label="도감">
           <MobileNavIcon type="cards" />
         </button>
         <button type="button" className={activePage === 'prices' ? 'is-active' : ''} onClick={() => onNavigate('prices')} aria-label="시세">
           <MobileNavIcon type="prices" />
         </button>
-        <button type="button" onClick={onMobileNews} aria-label="뉴스">
+        {MARKETPLACE_TAB_VISIBLE ? (
+          <button type="button" className={activePage === 'marketplace' ? 'is-active' : ''} onClick={() => onNavigate('marketplace')} aria-label="거래">
+            <MobileNavIcon type="marketplace" />
+          </button>
+        ) : null}
+        <button type="button" className={activePage === 'news' ? 'is-active' : ''} onClick={onMobileNews} aria-label="정보">
           <MobileNavIcon type="news" />
         </button>
         <button type="button" className={activePage === 'shops' ? 'is-active' : ''} onClick={() => onNavigate('shops')} aria-label="구매처">
@@ -1882,7 +2726,7 @@ function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle
   );
 }
 
-function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats, onSubmitSearch, onNavigateNews, uiLang }) {
+function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats, onSubmitSearch, onNavigateNews, onOpenIndex, uiLang }) {
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
   const [valueModalGrade, setValueModalGrade] = useState(null);
@@ -2067,6 +2911,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
               <strong>{psa10Count}</strong>
             </button>
           </div>
+          <RenewHomeCollectorIndex onOpen={onOpenIndex} />
         </article>
 
         <article className="renew-float-card renew-home-news">
@@ -2083,6 +2928,20 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
             전체 소식 보기
           </button>
         </article>
+      </section>
+      <section className="renew-home-guide-links" aria-labelledby="home-guide-links-heading">
+        <div>
+          <span>GUIDE</span>
+          <h2 id="home-guide-links-heading">검색 인기 가이드</h2>
+        </div>
+        <div className="renew-home-guide-grid">
+          {HOME_SEO_GUIDE_LINKS.map((item) => (
+            <a key={item.href} href={item.href}>
+              <strong>{item.label}</strong>
+              <small>{item.description}</small>
+            </a>
+          ))}
+        </div>
       </section>
       {adminStats ? (
         <section className="renew-admin-stats" aria-label="관리자 통계">
@@ -2101,7 +2960,6 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
       ) : null}
       <button type="button" className="renew-home-updates-mini" onClick={() => setUpdatesOpen(true)}>
         <span>업데이트 내역</span>
-        <strong>{RENEW_HOME_UPDATES[0].title.match(/\[[^\]]+\]/)?.[0] ?? ''} {RENEW_HOME_UPDATES[0].summary}</strong>
       </button>
       {valueModalGrade ? (
         <RenewValueModal
@@ -2125,16 +2983,53 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
   );
 }
 
+function RenewHomeCollectorIndex({ onOpen }) {
+  const [payload, setPayload] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/market-index?type=collector&condition=a&range=7d', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled) setPayload(data);
+      })
+      .catch(() => {
+        if (!cancelled) setPayload(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!payload?.currentValue) return null;
+
+  return (
+    <button type="button" className="renew-home-index-summary" onClick={onOpen} aria-label="OPTCG Collector Index 바로가기">
+      <div>
+        <span>Collector Index</span>
+        <strong>{formatIndexValue(payload.currentValue)}</strong>
+      </div>
+      <div className="renew-home-index-change">
+        <em className={Number(payload?.change?.d1) >= 0 ? 'is-up' : 'is-down'}>1D {formatIndexChange(payload?.change?.d1)}</em>
+        <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
+      </div>
+    </button>
+  );
+}
+
 function RenewalNoticeModal({ onClose }) {
+  const latestUpdate = VISIBLE_RENEW_HOME_UPDATES[0] || RENEW_HOME_UPDATES[0];
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-announcement-modal" onClick={(event) => event.stopPropagation()}>
         <span>NEWS UPDATE</span>
-        <h2>News 탭 업데이트가 완료되었습니다.</h2>
-        <p>
-          한글판·일본판 공식 공지사항, OP-17 아마존 사전예약 응모,
-          온라인 오리파, 가이드/Q&A, 카드 보관용품 바로가기를 확인할 수 있습니다.
-        </p>
+        <h2>{latestUpdate?.summary || '업데이트 안내'}</h2>
+        <ul>
+          {(latestUpdate?.details || []).slice(0, 4).map((detail) => (
+            <li key={detail}>{detail}</li>
+          ))}
+        </ul>
+        <p>{latestUpdate?.title || '[26.06.30] 업데이트 안내'}</p>
         <button type="button" onClick={onClose}>확인</button>
       </div>
     </div>
@@ -2201,16 +3096,16 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
 function RenewValueModal({ grade, cards, onClose, onRemove }) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(() => (window.innerWidth <= 560 ? 8 : 12));
-  const [imageCache, setImageCache] = useState(loadPortfolioImageCache);
+  const imageCacheRef = useRef(loadPortfolioImageCache());
   const total = cards.reduce((sum, item) => sum + Number(item.price || 0), 0);
   const pageCount = Math.max(1, Math.ceil(cards.length / pageSize));
   const visibleCards = cards.slice(page * pageSize, page * pageSize + pageSize);
   const getImageCacheKey = (item) => `${item.code || ''}::${item.apparelId || ''}`;
   const getValueImageSrc = (item) => {
-    const cachedSource = imageCache[getImageCacheKey(item)];
+    const cachedSource = imageCacheRef.current[getImageCacheKey(item)];
     if (cachedSource) return getCardImageSrc({ imageUrl: cachedSource });
-    if (!isPlaceholderImageUrl(item.previewImageUrl)) return item.previewImageUrl;
     if (!isPlaceholderImageUrl(item.imageUrl)) return item.imageUrl;
+    if (!isPlaceholderImageUrl(item.previewImageUrl)) return item.previewImageUrl;
     return '/card-placeholder.svg';
   };
 
@@ -2221,9 +3116,8 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
         const linkedCard = await fetchCardById(approvedLink.cardId);
         const linkedSource = linkedCard?.imageUrl || linkedCard?.image_url || linkedCard?.image;
         if (linkedSource) {
-          const nextCache = { ...loadPortfolioImageCache(), [getImageCacheKey(item)]: linkedSource };
-          setImageCache(nextCache);
-          savePortfolioImageCache(nextCache);
+          imageCacheRef.current = { ...imageCacheRef.current, [getImageCacheKey(item)]: linkedSource };
+          savePortfolioImageCache(imageCacheRef.current);
           return getCardImageSrc({ imageUrl: linkedSource });
         }
       }
@@ -2235,9 +3129,8 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
       )) || matches.find((card) => card.imageUrl || card.image_url || card.image);
       const fallbackSource = fallbackCard?.imageUrl || fallbackCard?.image_url || fallbackCard?.image;
       if (!fallbackSource) return '';
-      const nextCache = { ...loadPortfolioImageCache(), [getImageCacheKey(item)]: fallbackSource };
-      setImageCache(nextCache);
-      savePortfolioImageCache(nextCache);
+      imageCacheRef.current = { ...imageCacheRef.current, [getImageCacheKey(item)]: fallbackSource };
+      savePortfolioImageCache(imageCacheRef.current);
       return getCardImageSrc({ imageUrl: fallbackSource });
     } catch {
       return '';
@@ -2267,6 +3160,28 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
   }, []);
 
   useEffect(() => {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const previousOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousPosition = document.body.style.position;
+    const previousTop = document.body.style.top;
+    const previousWidth = document.body.style.width;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousOverflow;
+      document.body.style.position = previousPosition;
+      document.body.style.top = previousTop;
+      document.body.style.width = previousWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
+  useEffect(() => {
     setPage(0);
   }, [grade, pageSize]);
 
@@ -2274,7 +3189,7 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
     if (page >= pageCount) setPage(Math.max(0, pageCount - 1));
   }, [page, pageCount]);
 
-  return (
+  const modal = (
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-info-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
@@ -2310,6 +3225,8 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
 function PortfolioValueImage({ item, src, resolveImage, onError }) {
@@ -2319,7 +3236,7 @@ function PortfolioValueImage({ item, src, resolveImage, onError }) {
     let cancelled = false;
     setImageSrc(src);
     if (!isPlaceholderImageUrl(src)) {
-      resolveImage(item, false).then((fallbackSrc) => {
+      resolveImage(item, true).then((fallbackSrc) => {
         if (!cancelled && fallbackSrc) setImageSrc(fallbackSrc);
       });
     } else {
@@ -2330,7 +3247,7 @@ function PortfolioValueImage({ item, src, resolveImage, onError }) {
     return () => {
       cancelled = true;
     };
-  }, [item, src, resolveImage]);
+  }, [item.key, item.code, item.apparelId, src]);
 
   return (
     <img
@@ -2362,8 +3279,8 @@ function CoupangPartnerBanners() {
 function RenewUpdateModal({ onClose }) {
   const [page, setPage] = useState(0);
   const pageSize = 3;
-  const pageCount = Math.ceil(RENEW_HOME_UPDATES.length / pageSize);
-  const items = RENEW_HOME_UPDATES.slice(page * pageSize, page * pageSize + pageSize);
+  const pageCount = Math.ceil(VISIBLE_RENEW_HOME_UPDATES.length / pageSize);
+  const items = VISIBLE_RENEW_HOME_UPDATES.slice(page * pageSize, page * pageSize + pageSize);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -2407,12 +3324,29 @@ function RenewUpdateModal({ onClose }) {
 function RenewNews({ uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const initialParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
-  const initialSection = initialParams.get('section') || 'all';
+  const initialPath = typeof window !== 'undefined' ? normalizeSitePath(window.location.pathname) : '/news';
+  const isCardStorageGuide = initialPath === '/guide/card-storage';
+  const isShopBuyingGuide = initialPath === '/guide/shops';
+  const isCardPriceGuide = initialPath === '/guide/card-price';
+  const isCardCatalogGuide = initialPath === '/guide/card-catalog';
+  const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
+  const routeSection = initialPath === '/guide' || initialPath === '/faq'
+    ? 'guide'
+    : initialPath.startsWith('/news/official')
+      ? 'notice'
+      : initialPath.startsWith('/news/preorder')
+        ? 'preorder'
+        : initialPath.startsWith('/news/oripa')
+          ? 'oripa'
+          : initialPath.startsWith('/news/supplies')
+            ? 'supplies'
+            : '';
+  const initialSection = initialRouteState.section || routeSection || initialParams.get('section') || 'all';
   const initialLocale = (initialParams.get('locale') || 'KR').toUpperCase();
   const [newsFilter, setNewsFilter] = useState(NEWS_FILTERS.some((item) => item.id === initialSection) ? initialSection : 'all');
   const [noticeLocale, setNoticeLocale] = useState(initialLocale === 'JP' ? 'JP' : 'KR');
   const [supplyFilter, setSupplyFilter] = useState('all');
-  const [guideQaMode, setGuideQaMode] = useState(initialParams.get('mode') === 'qa' ? 'qa' : 'guide');
+  const [guideQaMode, setGuideQaMode] = useState(initialRouteState.mode === 'qa' || initialPath === '/faq' || initialParams.get('mode') === 'qa' ? 'qa' : 'guide');
   const [guideTarget, setGuideTarget] = useState(null);
   const officialTopics = OFFICIAL_TOPIC_ITEMS
     .filter((item) => (item.locale || '').toUpperCase() === noticeLocale)
@@ -2428,7 +3362,6 @@ function RenewNews({ uiLang }) {
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
   return (
     <main className="renew-main renew-news-main">
-      <RenewSeoSummary page="news" titleAs="h1" placement="page" />
       <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.map((item) => (
           <button
@@ -2528,40 +3461,6 @@ function RenewNews({ uiLang }) {
         </div>
       ) : null}
 
-      {showGuide ? (
-      <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
-        <div className="renew-section-head">
-          <div>
-            <span>GUIDE / Q&A</span>
-            <h2 id="guide-qa-heading">가이드/Q&A</h2>
-          </div>
-          <div className="renew-news-toggle renew-guide-qa-toggle" role="group" aria-label="가이드 Q&A 선택">
-            <button type="button" className={guideQaMode === 'guide' ? 'is-active' : ''} onClick={() => setGuideQaMode('guide')}>가이드</button>
-            <button type="button" className={guideQaMode === 'qa' ? 'is-active' : ''} onClick={() => setGuideQaMode('qa')}>Q&A</button>
-          </div>
-        </div>
-        <div className="renew-guide-qa-grid">
-          {visibleGuideQaGroups.map((group) => (
-            <section key={group.id} className="renew-guide-qa-group">
-              <h3>{group.title}</h3>
-              <div className="renew-guide-qa-list">
-                {group.items.map((item) => (
-                  <details key={item.question} className="renew-guide-qa-item">
-                    <summary>{item.question}</summary>
-                    <ul className="renew-guide-qa-answer">
-                      {splitGuideAnswer(item.answer).map((line, lineIndex) => (
-                        <li key={`${item.question}-${lineIndex}`}>{line}</li>
-                      ))}
-                    </ul>
-                  </details>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </section>
-      ) : null}
-
       {showSupplies ? (
       <section className="renew-panel renew-news-panel renew-news-supplies-panel">
         <div className="renew-section-head">
@@ -2611,6 +3510,71 @@ function RenewNews({ uiLang }) {
         </div>
       </section>
       ) : null}
+
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide ? (
+      <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
+        <div className="renew-section-head">
+          <div>
+            <span>GUIDE / Q&A</span>
+            <h2 id="guide-qa-heading">가이드/Q&A</h2>
+          </div>
+          <div className="renew-news-toggle renew-guide-qa-toggle" role="group" aria-label="가이드 Q&A 선택">
+            <button type="button" className={guideQaMode === 'guide' ? 'is-active' : ''} onClick={() => setGuideQaMode('guide')}>가이드</button>
+            <button type="button" className={guideQaMode === 'qa' ? 'is-active' : ''} onClick={() => setGuideQaMode('qa')}>Q&A</button>
+          </div>
+        </div>
+        {guideQaMode === 'guide' ? (
+          <>
+          <a className="renew-guide-feature-link" href="/guide/card-storage">
+            <span>STORAGE GUIDE</span>
+            <strong>원피스카드 보관 방법</strong>
+            <small>슬리브, 탑로더, 카드세이버, 바인더 보관 기준을 확인합니다.</small>
+          </a>
+          <a className="renew-guide-feature-link" href="/guide/shops">
+            <span>SHOP GUIDE</span>
+            <strong>원피스카드 사는 방법</strong>
+            <small>공인점포, 취급점포, 지역별 검색과 내 주변 구매처 찾는 방법을 확인합니다.</small>
+          </a>
+          <a className="renew-guide-feature-link" href="/guide/card-price">
+            <span>PRICE GUIDE</span>
+            <strong>원피스카드 시세 보는 방법</strong>
+            <small>카드 가격, 박스 가격, 최근 거래 기록과 기간별 그래프를 확인하는 방법을 정리했습니다.</small>
+          </a>
+          <a className="renew-guide-feature-link" href="/guide/card-catalog">
+            <span>CATALOG GUIDE</span>
+            <strong>원피스카드 도감 사용법</strong>
+            <small>한글판, 일본판, OP/EB/ST/PR 시리즈와 일련번호 검색 방법을 확인합니다.</small>
+          </a>
+          </>
+        ) : null}
+        <div className="renew-guide-qa-grid">
+          {visibleGuideQaGroups.map((group) => (
+            <section key={group.id} className="renew-guide-qa-group">
+              <h3>{group.title}</h3>
+              <div className="renew-guide-qa-list">
+                {group.items.map((item) => (
+                  <details key={item.question} className="renew-guide-qa-item">
+                    <summary>{item.question}</summary>
+                    <ul className="renew-guide-qa-answer">
+                      {splitGuideAnswer(item.answer).map((line, lineIndex) => (
+                        <li key={`${item.question}-${lineIndex}`}>{line}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
+      ) : null}
+
+      {isCardStorageGuide ? <RenewCardStorageGuide /> : null}
+      {isShopBuyingGuide ? <RenewShopBuyingGuide /> : null}
+      {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
+      {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
+
+      <RenewSeoSummary page="news" titleAs="h1" placement="footer" />
       {guideTarget ? (
         <RenewNewsGuideModal
           guideId={guideTarget}
@@ -2625,6 +3589,174 @@ function splitGuideAnswer(answer = '') {
   const normalized = String(answer).replace(/\s+/g, ' ').trim();
   if (!normalized) return [];
   return (normalized.match(/[^.]+(?:\.|$)/g) || [normalized]).map((line) => line.trim()).filter(Boolean);
+}
+
+function RenewCardStorageGuide() {
+  return (
+    <section className="renew-panel renew-news-panel renew-card-storage-guide" aria-labelledby="card-storage-guide-heading">
+      <div className="renew-section-head">
+        <div>
+          <span>STORAGE GUIDE</span>
+          <h2 id="card-storage-guide-heading">{CARD_STORAGE_GUIDE.title}</h2>
+        </div>
+      </div>
+      <p className="renew-card-storage-intro">{CARD_STORAGE_GUIDE.intro}</p>
+      <div className="renew-card-storage-grid">
+        {CARD_STORAGE_GUIDE.sections.map((section) => (
+          <article key={section.title} className="renew-card-storage-section">
+            <h3>{section.title}</h3>
+            <ul>
+              {section.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <div className="renew-card-storage-checklist">
+        <h3>장기 보관 체크리스트</h3>
+        <ul>
+          {CARD_STORAGE_GUIDE.checklist.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="renew-card-storage-cta">
+        <div>
+          <span>SUPPLIES</span>
+          <strong>카드 보관용품이 필요하다면</strong>
+          <p>슬리브, 탑로더, 카드세이버, 바인더 등 카드 보관에 자주 쓰이는 용품을 확인할 수 있습니다.</p>
+        </div>
+        <a href="/news/supplies">카드 보관용품 보러가기</a>
+      </div>
+    </section>
+  );
+}
+
+function RenewShopBuyingGuide() {
+  return (
+    <section className="renew-panel renew-news-panel renew-card-storage-guide" aria-labelledby="shop-buying-guide-heading">
+      <div className="renew-section-head">
+        <div>
+          <span>SHOP GUIDE</span>
+          <h2 id="shop-buying-guide-heading">{SHOP_BUYING_GUIDE.title}</h2>
+        </div>
+      </div>
+      <p className="renew-card-storage-intro">{SHOP_BUYING_GUIDE.intro}</p>
+      <div className="renew-card-storage-grid">
+        {SHOP_BUYING_GUIDE.sections.map((section) => (
+          <article key={section.title} className="renew-card-storage-section">
+            <h3>{section.title}</h3>
+            <ul>
+              {section.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <div className="renew-card-storage-checklist">
+        <h3>구매 전 체크리스트</h3>
+        <ul>
+          {SHOP_BUYING_GUIDE.checklist.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="renew-card-storage-cta">
+        <div>
+          <span>SHOPS</span>
+          <strong>가까운 구매처를 찾고 싶다면</strong>
+          <p>지역, 시군구, 매장 유형 필터와 내 주변순 정렬을 사용해 방문 가능한 매장을 확인할 수 있습니다.</p>
+        </div>
+        <a href="/shops">구매처 바로가기</a>
+      </div>
+    </section>
+  );
+}
+
+function RenewCardPriceGuide() {
+  return (
+    <section className="renew-panel renew-news-panel renew-card-storage-guide" aria-labelledby="card-price-guide-heading">
+      <div className="renew-section-head">
+        <div>
+          <span>PRICE GUIDE</span>
+          <h2 id="card-price-guide-heading">{CARD_PRICE_GUIDE.title}</h2>
+        </div>
+      </div>
+      <p className="renew-card-storage-intro">{CARD_PRICE_GUIDE.intro}</p>
+      <div className="renew-card-storage-grid">
+        {CARD_PRICE_GUIDE.sections.map((section) => (
+          <article key={section.title} className="renew-card-storage-section">
+            <h3>{section.title}</h3>
+            <ul>
+              {section.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <div className="renew-card-storage-checklist">
+        <h3>시세 확인 체크리스트</h3>
+        <ul>
+          {CARD_PRICE_GUIDE.checklist.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="renew-card-storage-cta">
+        <div>
+          <span>PRICES</span>
+          <strong>카드 시세를 바로 확인하려면</strong>
+          <p>일련번호 또는 카드명을 검색해 같은 카드의 버전별 가격과 최근 거래 기록을 확인할 수 있습니다.</p>
+        </div>
+        <a href="/prices">시세 바로가기</a>
+      </div>
+    </section>
+  );
+}
+
+function RenewCardCatalogGuide() {
+  return (
+    <section className="renew-panel renew-news-panel renew-card-storage-guide" aria-labelledby="card-catalog-guide-heading">
+      <div className="renew-section-head">
+        <div>
+          <span>CATALOG GUIDE</span>
+          <h2 id="card-catalog-guide-heading">{CARD_CATALOG_GUIDE.title}</h2>
+        </div>
+      </div>
+      <p className="renew-card-storage-intro">{CARD_CATALOG_GUIDE.intro}</p>
+      <div className="renew-card-storage-grid">
+        {CARD_CATALOG_GUIDE.sections.map((section) => (
+          <article key={section.title} className="renew-card-storage-section">
+            <h3>{section.title}</h3>
+            <ul>
+              {section.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <div className="renew-card-storage-checklist">
+        <h3>도감 사용 체크리스트</h3>
+        <ul>
+          {CARD_CATALOG_GUIDE.checklist.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="renew-card-storage-cta">
+        <div>
+          <span>CARDS</span>
+          <strong>카드 도감을 바로 사용하려면</strong>
+          <p>한글판과 일본판을 선택하고 시리즈, 등급, 일련번호, 카드명 기준으로 원하는 카드를 찾을 수 있습니다.</p>
+        </div>
+        <a href="/cards">도감 바로가기</a>
+      </div>
+    </section>
+  );
 }
 
 function RenewNewsGuideModal({ guideId, onClose }) {
@@ -2712,6 +3844,35 @@ function RenewNewsGuideModal({ guideId, onClose }) {
   );
 }
 
+function RenewStaticInfoPage({ type }) {
+  const page = STATIC_INFO_PAGES[type] || STATIC_INFO_PAGES.about;
+  return (
+    <main className="renew-main renew-static-info-main">
+      <article className="renew-static-info-page">
+        <header className="renew-static-info-head">
+          <h1>{page.title}</h1>
+          <p>{page.lead}</p>
+        </header>
+        <div className="renew-static-info-grid">
+          {page.sections.map((section) => (
+            <section key={section.title} className="renew-static-info-card">
+              <h2>{section.title}</h2>
+              {Array.isArray(section.body) ? section.body.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              )) : null}
+              {Array.isArray(section.list) ? (
+                <ul>
+                  {section.list.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              ) : null}
+            </section>
+          ))}
+        </div>
+      </article>
+    </main>
+  );
+}
+
 function RenewLegalModal({ type, onClose }) {
   const isPrivacy = type === 'privacy';
   const sections = isPrivacy ? PRIVACY_SECTIONS : TERMS_SECTIONS;
@@ -2721,7 +3882,7 @@ function RenewLegalModal({ type, onClose }) {
         <div className="renew-modal-head">
           <div>
             <h2>{isPrivacy ? '개인정보처리방침' : '이용약관'}</h2>
-            {isPrivacy ? <p>OPTCG Korea는 이용자의 개인정보를 중요하게 생각하며, 관련 법령에 따라 개인정보를 안전하게 관리합니다.</p> : null}
+            {isPrivacy ? <p>Card Pone는 이용자의 개인정보를 중요하게 생각하며, 관련 법령에 따라 개인정보를 안전하게 관리합니다.</p> : null}
           </div>
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
@@ -2738,7 +3899,7 @@ function RenewLegalModal({ type, onClose }) {
   );
 }
 
-function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, onViewStateChange, onOpenMarket, uiLang }) {
+function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, onViewStateChange, onOpenMarket, onOpenMarketplace, marketListings = [], uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const hasInitialSearch = Boolean(initialSearch?.q);
   const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'KR') : (initialViewState?.locale || 'KR');
@@ -2775,11 +3936,12 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   const wishSet = useMemo(() => new Set(Array.isArray(userState?.wishlistCardIds) ? userState.wishlistCardIds : []), [userState]);
 
   useEffect(() => {
+    if (localeSeries.some((series) => series.id === selectedSeries)) return;
     const nextSeries = getDefaultRenewSeriesId(locale);
     setSelectedSeries(nextSeries);
     setOpenSection('');
     setActiveRarity('ALL');
-  }, [locale]);
+  }, [locale, localeSeries, selectedSeries]);
 
   useEffect(() => {
     const q = initialSearch?.q?.trim();
@@ -2795,6 +3957,18 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   useEffect(() => {
     setExpandedDeferredRarities(new Set());
   }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter]);
+
+  useEffect(() => {
+    if (!selectedCard) return undefined;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [selectedCard]);
 
   useEffect(() => {
     onViewStateChange?.({
@@ -2850,6 +4024,14 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const mobileRarityOptions = ['ALL', 'SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C'];
   const groupedCards = useMemo(() => groupByRarity(visibleCards), [visibleCards]);
+  const listingCountByCardId = useMemo(() => {
+    const counts = new Map();
+    marketListings.forEach((item) => {
+      if (!item?.cardId) return;
+      counts.set(item.cardId, (counts.get(item.cardId) || 0) + 1);
+    });
+    return counts;
+  }, [marketListings]);
 
   useEffect(() => {
     if (!rarityPanelOpen) return undefined;
@@ -2987,7 +4169,6 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       </aside>
 
       <section className="renew-catalog-main">
-        <RenewSeoSummary page="cards" titleAs="h1" placement="page" />
         <div className="renew-catalog-toolbar">
           <input value={searchKeyword} onChange={(event) => setSearchKeyword(event.target.value)} placeholder={t('searchPlaceholder')} />
           <div className="renew-mobile-rarity-filter" ref={rarityPanelRef}>
@@ -3058,6 +4239,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
               {renderCards.map((card, index) => {
                 const owned = ownedSet.has(card.id);
                 const wished = wishSet.has(card.id);
+                const listingCount = MARKETPLACE_ENABLED ? (listingCountByCardId.get(card.id) || 0) : 0;
                 return (
                   <article key={card.id} className={`renew-card-tile ${owned ? 'is-owned' : ''} ${wished ? 'is-wished' : ''}`} onClick={() => openCard(card.id)}>
                     <div className="renew-card-image">
@@ -3071,6 +4253,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                         fetchPriority={groupIndex === 0 && index < 6 ? 'high' : 'auto'}
                       />
                       {owned ? <span className="renew-owned-badge">{t('owned')}</span> : null}
+                      {listingCount ? <span className="renew-market-badge">매물 {listingCount}</span> : null}
                     </div>
                       <div className="renew-card-body">
                         <b>{card.cardNo}</b>
@@ -3097,6 +4280,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
         );}) : null}
       </section>
 
+      <RenewSeoSummary page="cards" titleAs="h1" placement="footer" />
       {selectedCard ? (
         <RenewCardModal
           card={selectedCard}
@@ -3113,6 +4297,11 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
             setSearchKeyword(name || '');
             setSelectedCard(null);
           }}
+          marketListingCount={MARKETPLACE_ENABLED ? (listingCountByCardId.get(selectedCard.id) || 0) : 0}
+          onOpenMarketplace={MARKETPLACE_ENABLED ? ((card) => {
+            setSelectedCard(null);
+            onOpenMarketplace?.(card);
+          }) : undefined}
           uiLang={uiLang}
         />
       ) : null}
@@ -3120,7 +4309,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   );
 }
 
-function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, uiLang }) {
+function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketListingCount = 0, onOpenMarketplace, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
@@ -3143,11 +4332,1540 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, uiLang 
           </details>
           <div className="renew-modal-actions">
             <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
+            {marketListingCount ? (
+              <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
+                관련 매물 {marketListingCount}개 보기
+              </button>
+            ) : null}
             <button type="button" onClick={() => onSearchSameName?.(card.name)}>{t('searchSameName')}</button>
             {card.officialUrl ? <a href={card.officialUrl} target="_blank" rel="noreferrer">{t('officialInfo')}</a> : null}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function RenewMarketplaceHidden() {
+  return (
+    <main className="renew-subpage">
+      <section className="renew-panel renew-marketplace">
+        <div className="renew-empty">
+          <strong>제휴 채널 준비 중</strong>
+          <p>기존 유저 거래 매물은 잠시 숨김 처리했습니다. 제휴 채널로 전환 후 다시 안내하겠습니다.</p>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+const MARKETPLACE_SAMPLE_LISTINGS = [
+  {
+    id: 'sample-yamato',
+    cardId: 'JP::OP01-121_p2',
+    cardNo: 'OP01-121',
+    locale: 'JP',
+    title: 'Yamato SEC-SPC 판매/교환',
+    subtitle: 'OP01-121 · JP · PSA10',
+    price: '₩ 가격 협의',
+    time: '방금 전 등록',
+    seller: '판매자 프로필',
+    sellerNote: '카페 인증 완료 표시와 거래 상태를 보여주는 영역입니다.',
+    sellerStatus: '인증 완료',
+    description: '거래글 설명 영역입니다. 카드 상태, 원하는 교환 카드, 직거래 가능 지역, 택배 거래 조건을 판매자가 간단히 남기는 구조로 구성합니다.',
+    tradeType: '교환',
+    tags: ['JP', 'PSA10', '교환 가능'],
+    likes: '관심 0',
+    views: '조회 0'
+  },
+  {
+    id: 'sample-luffy',
+    cardId: 'JP::ST21-014',
+    cardNo: 'ST21-014',
+    locale: 'JP',
+    title: 'Monkey.D.Luffy 프로모 판매',
+    subtitle: 'ST21-014 · JP · SR',
+    price: '₩ 25,000',
+    time: '10분 전 등록',
+    seller: '카페 인증 판매자',
+    sellerNote: '최근 접속과 인증 상태를 판매자 프로필에서 확인할 수 있습니다.',
+    sellerStatus: '인증 완료',
+    description: '실물 사진과 상태 설명을 확인한 뒤 문의하도록 구성합니다. 거래 방식은 판매자가 선택합니다.',
+    tradeType: '판매',
+    tags: ['JP', 'SR', '택배 가능'],
+    likes: '관심 2',
+    views: '조회 18'
+  },
+  {
+    id: 'sample-trade',
+    cardId: 'JP::OP16-063',
+    cardNo: 'OP16-063',
+    locale: 'JP',
+    title: 'OP-16 패러렐 교환 희망',
+    subtitle: 'OP16-063 · JP · Parallel',
+    price: '교환 제안',
+    time: '1시간 전 등록',
+    seller: '판매자 프로필',
+    sellerNote: '카페 등급 인증이 완료된 판매자만 등록할 수 있게 설계합니다.',
+    sellerStatus: '인증 완료',
+    description: '원하는 교환 카드, 추가금 여부, 직거래 가능 지역을 본문에 표시하는 구조입니다.',
+    tradeType: '교환',
+    tags: ['JP', 'Parallel', '직거래'],
+    likes: '관심 5',
+    views: '조회 41'
+  }
+];
+
+const EMPTY_MARKET_VERIFICATION_FORM = {
+  cafeNickname: '',
+  cafeProfileUrl: '',
+  cafeGrade: '',
+  note: ''
+};
+
+function RenewMarketplace({ authUser, marketListings, setMarketListings, filterCardId, onClearFilter, onOpenPrice }) {
+  const [selectedListing, setSelectedListing] = useState(null);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [verificationOpen, setVerificationOpen] = useState(false);
+  const [marketGuideOpen, setMarketGuideOpen] = useState(false);
+  const [verificationSubmitted, setVerificationSubmitted] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+  const [marketSaving, setMarketSaving] = useState(false);
+  const [adminVerificationRows, setAdminVerificationRows] = useState([]);
+  const [adminUpdatingId, setAdminUpdatingId] = useState('');
+  const [adminVerificationTab, setAdminVerificationTab] = useState('pending');
+  const [registerPhotos, setRegisterPhotos] = useState([]);
+  const [registerCardLocale, setRegisterCardLocale] = useState('JP');
+  const [registerCardQuery, setRegisterCardQuery] = useState('');
+  const [registerCardCandidates, setRegisterCardCandidates] = useState([]);
+  const [registerCardLoading, setRegisterCardLoading] = useState(false);
+  const [registerLinkedCard, setRegisterLinkedCard] = useState(null);
+  const [editingListingId, setEditingListingId] = useState('');
+  const [marketListingFilter, setMarketListingFilter] = useState('all');
+  const [sellerVerification, setSellerVerification] = useState(null);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [inquiryMessage, setInquiryMessage] = useState('');
+  const [inquirySending, setInquirySending] = useState(false);
+  const [conversationOpen, setConversationOpen] = useState(false);
+  const [conversationRows, setConversationRows] = useState([]);
+  const [selectedConversationId, setSelectedConversationId] = useState('');
+  const [conversationMessages, setConversationMessages] = useState([]);
+  const [conversationText, setConversationText] = useState('');
+  const [conversationLoading, setConversationLoading] = useState(false);
+  const [conversationSending, setConversationSending] = useState(false);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusDraft, setStatusDraft] = useState('active');
+  const [selectedMarketImageIndex, setSelectedMarketImageIndex] = useState(0);
+  const [marketImageViewerOpen, setMarketImageViewerOpen] = useState(false);
+  const [marketImageViewerScale, setMarketImageViewerScale] = useState(1);
+  const [marketImageViewerOffset, setMarketImageViewerOffset] = useState({ x: 0, y: 0 });
+  const [likedListingIds, setLikedListingIds] = useState(() => readMarketInterestIds(authUser?.id));
+  const [interestSavingId, setInterestSavingId] = useState('');
+  const marketImageDragRef = useRef(null);
+  const marketImageTouchRef = useRef(null);
+  const [registerForm, setRegisterForm] = useState({
+    title: '',
+    cardCode: '',
+    cardName: '',
+    tradeType: '판매',
+    condition: 'A등급',
+    price: '',
+    negotiable: false,
+    delivery: '택배',
+    region: '',
+    description: ''
+  });
+  const [verificationForm, setVerificationForm] = useState(EMPTY_MARKET_VERIFICATION_FORM);
+  const [marketNotice, setMarketNotice] = useState('');
+  const marketFilterOptions = [
+    { id: 'all', label: '전체' },
+    { id: 'sale', label: '판매' },
+    { id: 'trade', label: '교환' },
+    { id: 'reserved', label: '예약' },
+    { id: 'closed', label: '거래완료' }
+  ];
+  const listingStatusLabels = {
+    active: '판매중',
+    hidden: '예약',
+    closed: '거래완료'
+  };
+  const visibleListings = useMemo(() => {
+    const baseListings = filterCardId ? marketListings.filter((item) => item.cardId === filterCardId) : marketListings;
+    return baseListings.filter((item) => {
+      if (marketListingFilter === 'sale') return item.rawStatus === 'active' && (item.tradeType === '판매' || item.tags?.includes('판매'));
+      if (marketListingFilter === 'trade') return item.rawStatus === 'active' && (item.tradeType === '교환' || item.tags?.some((tag) => String(tag).includes('교환')));
+      if (marketListingFilter === 'reserved') return item.rawStatus === 'hidden';
+      if (marketListingFilter === 'closed') return item.rawStatus === 'closed';
+      return true;
+    });
+  }, [filterCardId, marketListingFilter, marketListings]);
+  const listing = selectedListing || visibleListings[0] || marketListings[0];
+  const listingImages = useMemo(() => {
+    const urls = [
+      ...(Array.isArray(listing?.imageUrls) ? listing.imageUrls : []),
+      listing?.imageUrl
+    ].filter(Boolean);
+    const uniqueUrls = [...new Set(urls)].filter((url) => !String(url).includes('/card-placeholder.svg'));
+    return uniqueUrls.length ? uniqueUrls : [listing?.imageUrl || '/card-placeholder.svg'];
+  }, [listing]);
+  const activeListingImage = listingImages[selectedMarketImageIndex] || listingImages[0] || '/card-placeholder.svg';
+  const resetMarketImageViewer = () => {
+    setMarketImageViewerScale(1);
+    setMarketImageViewerOffset({ x: 0, y: 0 });
+    marketImageDragRef.current = null;
+    marketImageTouchRef.current = null;
+  };
+  const openMarketImageViewer = () => {
+    resetMarketImageViewer();
+    setMarketImageViewerOpen(true);
+  };
+  const closeMarketImageViewer = () => {
+    setMarketImageViewerOpen(false);
+    resetMarketImageViewer();
+  };
+  const setMarketViewerScale = (nextScale) => {
+    const scale = Math.max(1, Math.min(4, nextScale));
+    setMarketImageViewerScale(scale);
+    if (scale === 1) setMarketImageViewerOffset({ x: 0, y: 0 });
+  };
+  const getTouchDistance = (touches) => {
+    const [first, second] = touches;
+    if (!first || !second) return 0;
+    return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+  };
+  const handleMarketViewerWheel = (event) => {
+    event.preventDefault();
+    setMarketViewerScale(marketImageViewerScale + (event.deltaY < 0 ? 0.2 : -0.2));
+  };
+  const handleMarketViewerPointerDown = (event) => {
+    if (marketImageViewerScale <= 1) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    marketImageDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      offset: marketImageViewerOffset
+    };
+  };
+  const handleMarketViewerPointerMove = (event) => {
+    const drag = marketImageDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    setMarketImageViewerOffset({
+      x: drag.offset.x + event.clientX - drag.startX,
+      y: drag.offset.y + event.clientY - drag.startY
+    });
+  };
+  const handleMarketViewerPointerUp = () => {
+    marketImageDragRef.current = null;
+  };
+  const handleMarketViewerTouchStart = (event) => {
+    if (event.touches.length !== 2) return;
+    marketImageTouchRef.current = {
+      distance: getTouchDistance(event.touches),
+      scale: marketImageViewerScale
+    };
+  };
+  const handleMarketViewerTouchMove = (event) => {
+    const touchState = marketImageTouchRef.current;
+    if (!touchState || event.touches.length !== 2) return;
+    event.preventDefault();
+    const nextDistance = getTouchDistance(event.touches);
+    if (!nextDistance || !touchState.distance) return;
+    setMarketViewerScale(touchState.scale * (nextDistance / touchState.distance));
+  };
+  const isMarketplaceAdmin = authUser?.user_metadata?.username === 'admin';
+  const isListingOwner = Boolean(authUser?.id && listing?.sellerUserId && authUser.id === listing.sellerUserId);
+  const listingInterested = Boolean(listing?.id && likedListingIds.has(String(listing.id)));
+  const sellerVerificationApproved = sellerVerification?.status === 'approved';
+  const displayedAdminVerificationRows = adminVerificationRows.filter((row) => row.rawStatus === adminVerificationTab);
+  const adminVerificationCounts = {
+    pending: adminVerificationRows.filter((row) => row.rawStatus === 'pending').length,
+    approved: adminVerificationRows.filter((row) => row.rawStatus === 'approved').length
+  };
+
+  useEffect(() => {
+    setLikedListingIds(readMarketInterestIds(authUser?.id));
+  }, [authUser?.id]);
+
+  const openListing = (nextListing) => {
+    setVerificationOpen(false);
+    setRegisterOpen(false);
+    setAdminPanelOpen(false);
+    setSelectedMarketImageIndex(0);
+    setSelectedListing(nextListing);
+    if (nextListing?.id) {
+      incrementMarketplaceListingView(nextListing.id)
+        .then((payload) => {
+          const updated = payload?.listing;
+          if (!updated?.id) return;
+          setMarketListings((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+          setSelectedListing((current) => (current?.id === updated.id ? updated : current));
+        })
+        .catch(() => {});
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const openInquiry = () => {
+    if (!authUser) {
+      setMarketNotice('로그인이 필요합니다.');
+      return;
+    }
+    if (!listing?.id) {
+      setMarketNotice('문의할 매물을 찾을 수 없습니다.');
+      return;
+    }
+    if (isListingOwner) {
+      setMarketNotice('본인 매물에는 문의할 수 없습니다.');
+      return;
+    }
+    if (listing.rawStatus !== 'active') {
+      setMarketNotice('판매중 게시물에만 문의할 수 있습니다.');
+      return;
+    }
+    setInquiryMessage('');
+    setInquiryOpen(true);
+  };
+  const loadConversationMessages = async (conversationId) => {
+    if (!conversationId) return;
+    if (conversationRows.length && !conversationRows.some((row) => row.id === conversationId)) {
+      setSelectedConversationId('');
+      setConversationMessages([]);
+      setMarketNotice('접근할 수 없는 거래방입니다.');
+      return;
+    }
+    setSelectedConversationId(conversationId);
+    setConversationLoading(true);
+    try {
+      const payload = await fetchMarketplaceMessages(conversationId);
+      setConversationMessages(Array.isArray(payload?.messages) ? payload.messages : []);
+    } catch {
+      setConversationMessages([]);
+      setMarketNotice('거래방 메시지를 불러오지 못했습니다.');
+    } finally {
+      setConversationLoading(false);
+    }
+  };
+  const openConversationPanel = async (preferredConversationId = '') => {
+    if (!authUser) {
+      setMarketNotice('로그인이 필요합니다.');
+      return;
+    }
+    setConversationOpen(true);
+    setConversationLoading(true);
+    setConversationRows([]);
+    setSelectedConversationId('');
+    setConversationMessages([]);
+    setConversationText('');
+    try {
+      const payload = await fetchMarketplaceConversations();
+      const rows = Array.isArray(payload?.conversations) ? payload.conversations : [];
+      setConversationRows(rows);
+      const targetId = preferredConversationId && rows.some((row) => row.id === preferredConversationId)
+        ? preferredConversationId
+        : rows[0]?.id || '';
+      setSelectedConversationId(targetId);
+      if (targetId) {
+        const messagesPayload = await fetchMarketplaceMessages(targetId);
+        setConversationMessages(Array.isArray(messagesPayload?.messages) ? messagesPayload.messages : []);
+      } else {
+        setConversationMessages([]);
+      }
+    } catch {
+      setConversationRows([]);
+      setConversationMessages([]);
+      setMarketNotice('거래방을 불러오지 못했습니다.');
+    } finally {
+      setConversationLoading(false);
+    }
+  };
+  const selectedConversation = conversationRows.find((conversation) => conversation.id === selectedConversationId) || null;
+  const selectedConversationClosed = selectedConversation?.listingStatus === 'closed' || selectedConversation?.status === 'closed';
+  const submitConversationMessage = async (event) => {
+    event.preventDefault();
+    if (!selectedConversationId || selectedConversationClosed || !conversationText.trim() || conversationSending) return;
+    setConversationSending(true);
+    try {
+      const payload = await sendMarketplaceMessage({
+        conversationId: selectedConversationId,
+        message: conversationText.trim()
+      });
+      setConversationMessages((current) => [...current, payload?.message].filter(Boolean));
+      setConversationText('');
+    } catch {
+      setMarketNotice('메시지 전송에 실패했습니다.');
+    } finally {
+      setConversationSending(false);
+    }
+  };
+  const updateSelectedListing = (nextListing) => {
+    if (!nextListing?.id) return;
+    setMarketListings((current) => (
+      nextListing.rawStatus !== 'deleted'
+        ? current.map((item) => (item.id === nextListing.id ? nextListing : item))
+        : current.filter((item) => item.id !== nextListing.id)
+    ));
+    setSelectedListing(nextListing.rawStatus !== 'deleted' ? nextListing : null);
+  };
+  const toggleListingInterest = async () => {
+    if (!authUser) {
+      setMarketNotice('로그인이 필요합니다.');
+      return;
+    }
+    if (!listing?.id || isListingOwner || interestSavingId) return;
+    const listingId = String(listing.id);
+    const nextActive = !likedListingIds.has(listingId);
+    setInterestSavingId(listingId);
+    try {
+      const payload = await updateMarketplaceListingInterest(listingId, nextActive);
+      const updated = payload?.listing;
+      if (updated?.id) updateSelectedListing(updated);
+      setLikedListingIds((current) => {
+        const next = new Set(current);
+        if (nextActive) next.add(listingId);
+        else next.delete(listingId);
+        writeMarketInterestIds(authUser.id, next);
+        return next;
+      });
+    } catch (error) {
+      setMarketNotice(error?.message === 'cannot_like_own_listing' ? '본인 게시물은 관심 표시할 수 없습니다.' : '관심 표시를 저장하지 못했습니다.');
+    } finally {
+      setInterestSavingId('');
+    }
+  };
+  const changeListingStatus = async () => {
+    if (!listing?.id || marketSaving || !statusDraft) return;
+    setMarketSaving(true);
+    try {
+      const payload = await updateMarketplaceListing(listing.id, { status: statusDraft });
+      updateSelectedListing(payload?.listing);
+      setStatusModalOpen(false);
+      setMarketNotice(`게시물 상태를 ${listingStatusLabels[statusDraft] || '판매중'}으로 변경했습니다.`);
+    } catch {
+      setMarketNotice('게시물 상태 변경에 실패했습니다.');
+    } finally {
+      setMarketSaving(false);
+    }
+  };
+  const deleteListing = async () => {
+    if (!listing?.id || marketSaving) return;
+    if (typeof window !== 'undefined' && !window.confirm('이 게시물을 삭제할까요?')) return;
+    setMarketSaving(true);
+    try {
+      await deleteMarketplaceListing(listing.id);
+      setMarketListings((current) => current.filter((item) => item.id !== listing.id));
+      setSelectedListing(null);
+      setMarketNotice('게시물을 삭제했습니다.');
+    } catch {
+      setMarketNotice('게시물 삭제에 실패했습니다.');
+    } finally {
+      setMarketSaving(false);
+    }
+  };
+  const openEditListing = () => {
+    if (!listing?.id) return;
+    setEditingListingId(listing.id);
+    setRegisterForm({
+      title: listing.title || '',
+      cardCode: listing.cardNo || '',
+      cardName: listing.cardName || '',
+      tradeType: listing.tradeType || '판매',
+      condition: listing.condition || 'A등급',
+      price: listing.priceKrw ? String(listing.priceKrw) : '',
+      negotiable: Boolean(listing.negotiable),
+      delivery: listing.delivery || '택배',
+      region: listing.region || '',
+      description: listing.description || ''
+    });
+    setRegisterLinkedCard(null);
+    setRegisterCardCandidates([]);
+    setRegisterCardQuery('');
+    setSelectedListing(null);
+    setVerificationOpen(false);
+    setAdminPanelOpen(false);
+    setRegisterOpen(true);
+  };
+  const openStatusModal = () => {
+    if (!listing?.id) return;
+    setStatusDraft(['active', 'hidden', 'closed'].includes(listing.rawStatus) ? listing.rawStatus : 'active');
+    setStatusModalOpen(true);
+  };
+  const openRegister = () => {
+    if (!authUser) {
+      setMarketNotice('로그인이 필요합니다.');
+      return;
+    }
+    if (!sellerVerificationApproved) {
+      setMarketNotice('카페 인증 승인 후 판매 등록을 이용할 수 있습니다.');
+      return;
+    }
+    setSelectedListing(null);
+    setEditingListingId('');
+    setVerificationOpen(false);
+    setAdminPanelOpen(false);
+    setRegisterOpen(true);
+  };
+  const openVerification = () => {
+    if (!authUser) {
+      setMarketNotice('로그인이 필요합니다.');
+      return;
+    }
+    setVerificationForm(EMPTY_MARKET_VERIFICATION_FORM);
+    setVerificationSubmitted(false);
+    setSelectedListing(null);
+    setRegisterOpen(false);
+    setAdminPanelOpen(false);
+    setVerificationOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const openAdminPanel = () => {
+    setSelectedListing(null);
+    setVerificationOpen(false);
+    setVerificationSubmitted(false);
+    setVerificationForm(EMPTY_MARKET_VERIFICATION_FORM);
+    setRegisterOpen(false);
+    setAdminPanelOpen(true);
+    fetchMarketplaceVerifications()
+      .then((payload) => {
+        const rows = Array.isArray(payload?.verifications) ? payload.verifications : [];
+        setAdminVerificationRows(rows.map((row) => ({
+          id: row.id,
+          nickname: row.cafe_nickname,
+          profileUrl: row.cafe_profile_url,
+          grade: row.cafe_grade || '미입력',
+          note: row.note || '메모 없음',
+          rawStatus: row.status || 'pending',
+          status: row.status === 'approved' ? '승인됨' : row.status === 'rejected' ? '반려됨' : '검토 대기중'
+        })));
+      })
+      .catch(() => {
+        setAdminVerificationRows([]);
+        setMarketNotice('인증 신청 목록을 불러오지 못했습니다.');
+      });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const updateVerificationStatus = async (id, status) => {
+    if (!id || String(id).startsWith('local-')) return;
+    setAdminUpdatingId(id);
+    try {
+      const payload = await updateMarketplaceVerification(id, status);
+      const row = payload?.verification;
+      if (!row?.id) return;
+      setAdminVerificationRows((current) => current.map((item) => (
+        item.id === row.id
+          ? {
+              ...item,
+              rawStatus: row.status || status,
+              status: row.status === 'approved' ? '승인됨' : row.status === 'rejected' ? '반려됨' : '검토 대기중'
+            }
+          : item
+      )));
+      setMarketNotice(status === 'approved' ? '인증 신청을 승인했습니다.' : '인증 신청을 반려했습니다.');
+    } catch {
+      setMarketNotice('인증 상태 변경에 실패했습니다.');
+    } finally {
+      setAdminUpdatingId('');
+    }
+  };
+  const deleteVerificationRow = async (id) => {
+    if (!id || adminUpdatingId) return;
+    const target = adminVerificationRows.find((item) => item.id === id);
+    const message = target?.rawStatus === 'approved'
+      ? '이 유저의 판매자 인증을 해제할까요? 유저 계정은 삭제되지 않습니다.'
+      : '이 인증 신청 기록을 삭제할까요? 유저 계정은 삭제되지 않습니다.';
+    if (typeof window !== 'undefined' && !window.confirm(message)) return;
+    setAdminUpdatingId(id);
+    try {
+      await deleteMarketplaceVerification(id);
+      setAdminVerificationRows((current) => current.filter((item) => item.id !== id));
+      setMarketNotice(target?.rawStatus === 'approved' ? '판매자 인증을 해제했습니다.' : '인증 기록을 삭제했습니다.');
+    } catch {
+      setMarketNotice('인증 기록 삭제에 실패했습니다.');
+    } finally {
+      setAdminUpdatingId('');
+    }
+  };
+  const updateRegisterForm = (field, value) => {
+    setRegisterForm((current) => ({ ...current, [field]: value }));
+  };
+  const resetRegisterForm = () => {
+    setRegisterForm({
+      title: '',
+      cardCode: '',
+      cardName: '',
+      tradeType: '판매',
+      condition: 'A등급',
+      price: '',
+      negotiable: false,
+      delivery: '택배',
+      region: '',
+      description: ''
+    });
+    setRegisterPhotos([]);
+    setRegisterCardQuery('');
+    setRegisterCardCandidates([]);
+    setRegisterLinkedCard(null);
+  };
+  const closeRegister = () => {
+    setRegisterOpen(false);
+    setEditingListingId('');
+  };
+  const registerReady = registerForm.title.trim() && (registerForm.negotiable || registerForm.price.trim());
+  const submitRegister = async (event) => {
+    event.preventDefault();
+    if (!registerReady || marketSaving) return;
+    if (!sellerVerificationApproved) {
+      setMarketNotice('카페 인증 승인 후 판매 등록을 이용할 수 있습니다.');
+      return;
+    }
+    const code = registerForm.cardCode.trim();
+    const name = registerForm.cardName.trim();
+    const fallbackImageUrl = registerLinkedCard ? getCardThumbnailSrc(registerLinkedCard) : '/card-placeholder.svg';
+    const nextListing = {
+      id: `local-${Date.now()}`,
+      title: registerForm.title.trim(),
+      subtitle: [code, name, registerForm.condition].filter(Boolean).join(' · ') || registerForm.condition,
+      price: registerForm.negotiable ? '가격 협의' : `₩ ${Number(registerForm.price.replace(/,/g, '') || 0).toLocaleString('ko-KR')}`,
+      time: '방금 전 등록',
+      seller: getUserDisplayName(authUser),
+      sellerNote: '로그인 판매자가 등록한 매물입니다.',
+      sellerStatus: isMarketplaceAdmin ? '관리자' : '로그인 판매자',
+      description: registerForm.description.trim() || '판매자가 상세 설명을 입력하지 않았습니다.',
+      tags: [registerForm.tradeType, registerForm.condition, registerForm.delivery].filter(Boolean),
+      tradeType: registerForm.tradeType,
+      likes: '관심 0',
+      views: '조회 0',
+      cardId: registerLinkedCard?.id || '',
+      cardNo: registerLinkedCard?.cardNo || code,
+      locale: registerLinkedCard?.locale || registerCardLocale,
+      imageUrl: registerPhotos[0]?.url || fallbackImageUrl,
+      imageUrls: registerPhotos.length ? registerPhotos.map((photo) => photo.url) : [fallbackImageUrl]
+    };
+    setMarketSaving(true);
+    try {
+      const uploadedImageUrls = registerPhotos.length
+        ? await Promise.all(registerPhotos.map(async (photo) => {
+            const compressed = await compressMarketplaceImage(photo.file);
+            const uploaded = await uploadMarketplaceImage({
+              fileName: photo.name,
+              data: compressed.data,
+              mimeType: compressed.mimeType
+            });
+            return uploaded.imageUrl;
+          }))
+        : [];
+      const persistentImageUrl = uploadedImageUrls[0] || fallbackImageUrl;
+      const payload = editingListingId
+        ? await updateMarketplaceListing(editingListingId, {
+            title: registerForm.title.trim(),
+            tradeType: registerForm.tradeType,
+            condition: registerForm.condition,
+            priceKrw: registerForm.price,
+            negotiable: registerForm.negotiable,
+            delivery: registerForm.delivery,
+            region: registerForm.region,
+            description: registerForm.description,
+            ...(uploadedImageUrls.length ? { imageUrl: persistentImageUrl, imageUrls: uploadedImageUrls } : {}),
+            tags: [registerForm.tradeType, registerForm.condition, registerForm.delivery].filter(Boolean)
+          })
+        : await createMarketplaceListing({
+            title: registerForm.title.trim(),
+            cardId: registerLinkedCard?.id || '',
+            cardNo: registerLinkedCard?.cardNo || code,
+            locale: registerLinkedCard?.locale || registerCardLocale,
+            cardName: registerLinkedCard?.name || name,
+            tradeType: registerForm.tradeType,
+            condition: registerForm.condition,
+            priceKrw: registerForm.price,
+            negotiable: registerForm.negotiable,
+            delivery: registerForm.delivery,
+            region: registerForm.region,
+            description: registerForm.description,
+            imageUrl: persistentImageUrl,
+            imageUrls: uploadedImageUrls.length ? uploadedImageUrls : [persistentImageUrl],
+            tags: [registerForm.tradeType, registerForm.condition, registerForm.delivery].filter(Boolean)
+          });
+      setMarketListings((current) => (
+        editingListingId
+          ? current.map((item) => (item.id === payload?.listing?.id ? payload.listing : item))
+          : [payload?.listing || nextListing, ...current.filter((item) => item.id !== payload?.listing?.id)]
+      ));
+    } catch (error) {
+      const message = error?.message === 'seller_not_verified'
+        ? '카페 인증 승인 후 판매 등록을 이용할 수 있습니다.'
+        : error?.message === 'daily_listing_limit_exceeded'
+          ? '하루 판매 게시물은 최대 5개까지 등록할 수 있습니다.'
+          : editingListingId ? '매물 수정에 실패했습니다.' : '판매 등록에 실패했습니다.';
+      setMarketNotice(message);
+      return;
+    } finally {
+      setMarketSaving(false);
+    }
+    setSelectedListing(null);
+    setRegisterOpen(false);
+    setEditingListingId('');
+    resetRegisterForm();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const updateRegisterPhotos = (event) => {
+    const files = Array.from(event.target.files || []).slice(0, 6);
+    const nextPhotos = files.map((file) => ({
+      name: file.name,
+      file,
+      url: URL.createObjectURL(file)
+    }));
+    setRegisterPhotos(nextPhotos);
+  };
+  const searchRegisterCards = async (event) => {
+    event?.preventDefault?.();
+    const query = (registerCardQuery || registerForm.cardCode || registerForm.cardName).trim();
+    if (!query) return;
+    setRegisterCardLoading(true);
+    try {
+      const result = await searchCards(query, registerCardLocale);
+      setRegisterCardCandidates(Array.isArray(result) ? result.slice(0, 8) : []);
+    } catch {
+      setRegisterCardCandidates([]);
+    } finally {
+      setRegisterCardLoading(false);
+    }
+  };
+  const selectRegisterCard = (card) => {
+    setRegisterLinkedCard(card);
+    setRegisterForm((current) => ({
+      ...current,
+      cardCode: card.cardNo || current.cardCode,
+      cardName: card.name || current.cardName
+    }));
+    setRegisterCardCandidates([]);
+    setRegisterCardQuery('');
+  };
+  const closeVerification = () => {
+    setVerificationOpen(false);
+    setVerificationSubmitted(false);
+    setVerificationForm(EMPTY_MARKET_VERIFICATION_FORM);
+  };
+  const updateVerificationForm = (field, value) => {
+    setVerificationForm((current) => ({ ...current, [field]: value }));
+  };
+  const verificationReady = verificationForm.cafeNickname.trim() && verificationForm.cafeProfileUrl.trim();
+  const submitVerification = async (event) => {
+    event.preventDefault();
+    if (!verificationReady || marketSaving) return;
+    setMarketSaving(true);
+    try {
+      await submitMarketplaceVerification(verificationForm);
+      setVerificationSubmitted(true);
+    } catch (error) {
+      setMarketNotice(error?.message === 'duplicate_cafe_profile' ? '이미 다른 계정에서 사용 중인 카페 프로필입니다.' : '인증 신청 접수에 실패했습니다.');
+    } finally {
+      setMarketSaving(false);
+    }
+  };
+  const submitInquiry = async (event) => {
+    event.preventDefault();
+    if (!listing?.id || !inquiryMessage.trim() || inquirySending) return;
+    setInquirySending(true);
+    try {
+      const payload = await startMarketplaceConversation({
+        listingId: listing.id,
+        message: inquiryMessage.trim()
+      });
+      setInquiryOpen(false);
+      setInquiryMessage('');
+      await openConversationPanel(payload?.conversation?.id || '');
+    } catch (error) {
+      setMarketNotice(error?.message === 'cannot_message_own_listing' ? '본인 매물에는 문의할 수 없습니다.' : '문의 전송에 실패했습니다.');
+    } finally {
+      setInquirySending(false);
+    }
+  };
+  useEffect(() => {
+    if (!verificationOpen && !registerOpen && !marketGuideOpen && !marketNotice && !inquiryOpen && !conversationOpen && !statusModalOpen && !marketImageViewerOpen) return undefined;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [verificationOpen, registerOpen, marketGuideOpen, marketNotice, inquiryOpen, conversationOpen, statusModalOpen, marketImageViewerOpen]);
+  useEffect(() => {
+    setVerificationOpen(false);
+    setVerificationSubmitted(false);
+    setVerificationForm(EMPTY_MARKET_VERIFICATION_FORM);
+    setAdminPanelOpen(false);
+    setAdminVerificationRows([]);
+    setAdminUpdatingId('');
+    setAdminVerificationTab('pending');
+    setConversationOpen(false);
+    setConversationRows([]);
+    setSelectedConversationId('');
+    setConversationMessages([]);
+    setConversationText('');
+    setInquiryOpen(false);
+    setInquiryMessage('');
+  }, [authUser?.id]);
+  useEffect(() => {
+    if (!authUser?.id) {
+      setSellerVerification(null);
+      return;
+    }
+    let cancelled = false;
+    fetchMarketplaceMyVerification()
+      .then((payload) => {
+        if (!cancelled) setSellerVerification(payload?.verification || null);
+      })
+      .catch(() => {
+        if (!cancelled) setSellerVerification(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id, verificationSubmitted]);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !marketListings.length) return;
+    const returnListingId = window.sessionStorage.getItem('optcg_market_return_listing_id');
+    if (!returnListingId) return;
+    const matchedListing = marketListings.find((item) => String(item.id) === returnListingId);
+    if (!matchedListing) return;
+    setSelectedListing(matchedListing);
+    window.sessionStorage.removeItem('optcg_market_return_listing_id');
+  }, [marketListings]);
+  useEffect(() => {
+    setSelectedMarketImageIndex(0);
+  }, [listing?.id]);
+  useEffect(() => {
+    return () => {
+      registerPhotos.forEach((photo) => URL.revokeObjectURL(photo.url));
+    };
+  }, [registerPhotos]);
+
+  return (
+    <main className={`renew-subpage ${registerOpen || verificationOpen || marketGuideOpen || inquiryOpen || conversationOpen || statusModalOpen || marketImageViewerOpen || marketNotice ? 'is-marketplace-modal-open' : ''}`}>
+      <section className="renew-panel renew-marketplace">
+        <div className="renew-marketplace-head">
+          <div>
+            <h1 className="renew-sr-only">거래</h1>
+          </div>
+          <div className="renew-marketplace-actions">
+            <button type="button" className="renew-marketplace-info-button" onClick={() => setMarketGuideOpen(true)} aria-label="거래 시스템 이용 안내">i</button>
+            <button type="button" className="renew-marketplace-primary-action" onClick={openRegister}>판매 등록</button>
+            <button type="button" onClick={openVerification}>인증 신청</button>
+            <button type="button" onClick={() => openConversationPanel()}>거래방</button>
+            {isMarketplaceAdmin ? <button type="button" onClick={openAdminPanel}>인증 관리</button> : null}
+          </div>
+        </div>
+
+        {marketGuideOpen ? (
+          <div className="renew-marketplace-inquiry-modal" role="dialog" aria-modal="true" aria-label="거래 시스템 이용 안내">
+            <div className="renew-marketplace-inquiry-dialog">
+              <button type="button" className="renew-marketplace-verify-close" onClick={() => setMarketGuideOpen(false)} aria-label="닫기">×</button>
+              <div className="renew-marketplace-inquiry-title">
+                <h2>거래 시스템 이용 안내</h2>
+              </div>
+              <div className="renew-marketplace-guide-list">
+                <article>
+                  <h3>게시물 확인</h3>
+                  <ul>
+                    <li>거래 탭에서 판매·교환 게시물을 확인할 수 있습니다.</li>
+                    <li>예약 또는 거래완료 게시물은 상태 표시를 먼저 확인해 주세요.</li>
+                  </ul>
+                </article>
+                <article>
+                  <h3>판매 등록</h3>
+                  <ul>
+                    <li>판매 등록은 로그인과 카페 인증 승인 후 사용할 수 있습니다.</li>
+                    <li>게시물은 유저당 하루 최대 5개까지 등록할 수 있습니다.</li>
+                  </ul>
+                </article>
+                <article>
+                  <h3>문의와 거래방</h3>
+                  <ul>
+                    <li>게시물 상세에서 문의하기를 누르면 거래방이 생성됩니다.</li>
+                    <li>판매자와 문의자는 거래방에서 메시지를 이어갈 수 있습니다.</li>
+                  </ul>
+                </article>
+                <article>
+                  <h3>거래 전 확인</h3>
+                  <ul>
+                    <li>카드 상태, 사진, 가격, 배송·직거래 조건을 직접 확인해 주세요.</li>
+                    <li>외부 결제, 개인정보 공유, 선입금 거래는 신중하게 진행해 주세요.</li>
+                  </ul>
+                </article>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {marketImageViewerOpen ? (
+          <div className="renew-marketplace-image-modal" role="dialog" aria-modal="true" aria-label="매물 사진 확대 보기" onClick={closeMarketImageViewer}>
+            <div className="renew-marketplace-image-viewer" onClick={(event) => event.stopPropagation()}>
+              <button type="button" className="renew-marketplace-verify-close" onClick={closeMarketImageViewer} aria-label="닫기">×</button>
+              <div className="renew-marketplace-image-viewer-stage"
+                onWheel={handleMarketViewerWheel}
+                onPointerDown={handleMarketViewerPointerDown}
+                onPointerMove={handleMarketViewerPointerMove}
+                onPointerUp={handleMarketViewerPointerUp}
+                onPointerCancel={handleMarketViewerPointerUp}
+                onTouchStart={handleMarketViewerTouchStart}
+                onTouchMove={handleMarketViewerTouchMove}
+              >
+                <img
+                  src={activeListingImage}
+                  alt={`${listing?.title || '매물'} 확대 이미지`}
+                  draggable="false"
+                  onDoubleClick={() => setMarketViewerScale(marketImageViewerScale > 1 ? 1 : 2)}
+                  style={{ transform: `translate(${marketImageViewerOffset.x}px, ${marketImageViewerOffset.y}px) scale(${marketImageViewerScale})` }}
+                />
+              </div>
+              <div className="renew-marketplace-image-viewer-controls">
+                <button type="button" onClick={() => setMarketViewerScale(marketImageViewerScale - 0.5)}>-</button>
+                <span>{Math.round(marketImageViewerScale * 100)}%</span>
+                <button type="button" onClick={() => setMarketViewerScale(marketImageViewerScale + 0.5)}>+</button>
+                <button type="button" onClick={resetMarketImageViewer}>초기화</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {marketNotice ? (
+          <div className="renew-marketplace-notice" role="dialog" aria-modal="true">
+            <div className="renew-marketplace-notice-box">
+              <strong>{marketNotice}</strong>
+              <p>거래 기능 상태를 확인한 뒤 다시 진행해 주세요.</p>
+              <button type="button" onClick={() => setMarketNotice('')}>확인</button>
+            </div>
+          </div>
+        ) : null}
+
+        {inquiryOpen && listing ? (
+          <div className="renew-marketplace-inquiry-modal" role="dialog" aria-modal="true" aria-label="거래 문의">
+            <form className="renew-marketplace-inquiry-dialog" onSubmit={submitInquiry}>
+              <button type="button" className="renew-marketplace-verify-close" onClick={() => setInquiryOpen(false)} aria-label="닫기">×</button>
+              <div className="renew-marketplace-inquiry-title">
+                <h2>문의하기</h2>
+                <p>{listing.title}</p>
+              </div>
+              <label className="renew-marketplace-inquiry-field">
+                <span>문의 내용</span>
+                <textarea
+                  value={inquiryMessage}
+                  onChange={(event) => setInquiryMessage(event.target.value)}
+                  placeholder="거래 가능 여부, 희망 거래 방식, 추가 사진 요청 등을 입력하세요."
+                  maxLength={1000}
+                />
+              </label>
+              <div className="renew-marketplace-inquiry-actions">
+                <button type="submit" disabled={!inquiryMessage.trim() || inquirySending}>{inquirySending ? '전송 중' : '문의 보내기'}</button>
+                <button type="button" onClick={() => setInquiryOpen(false)}>취소</button>
+              </div>
+            </form>
+          </div>
+        ) : null}
+
+        {conversationOpen ? (
+          <div className="renew-marketplace-inquiry-modal" role="dialog" aria-modal="true" aria-label="거래방">
+            <div className="renew-marketplace-chat-dialog">
+              <button type="button" className="renew-marketplace-verify-close" onClick={() => setConversationOpen(false)} aria-label="닫기">×</button>
+              <div className="renew-marketplace-inquiry-title">
+                <h2>거래방</h2>
+              </div>
+              <div className="renew-marketplace-chat-shell">
+                <aside className="renew-marketplace-chat-list" aria-label="거래방 목록">
+                  {conversationRows.length ? conversationRows.map((conversation) => (
+                    <button
+                      type="button"
+                      key={conversation.id}
+                      className={selectedConversationId === conversation.id ? 'is-active' : ''}
+                      onClick={() => loadConversationMessages(conversation.id)}
+                    >
+                      <img src={conversation.imageUrl || '/card-placeholder.svg'} alt="" />
+                      <span>
+                        <b>{conversation.title}</b>
+                        <i>{conversation.otherUserLabel || (conversation.role === 'seller' ? '문의자' : '판매자')}</i>
+                        <small>
+                          {conversation.role === 'seller' ? '받은 문의' : '보낸 문의'} · {conversation.lastMessageAt}
+                          {conversation.listingStatus === 'closed' || conversation.status === 'closed' ? ' · 거래완료' : ''}
+                        </small>
+                        {conversation.lastMessage ? <em>{conversation.lastMessage}</em> : null}
+                      </span>
+                    </button>
+                  )) : (
+                    <div className="renew-marketplace-chat-empty">
+                      <strong>거래방이 없습니다.</strong>
+                      <p>문의가 시작되면 이곳에 표시됩니다.</p>
+                    </div>
+                  )}
+                </aside>
+                <section className="renew-marketplace-chat-room" aria-label="거래 메시지">
+                  {selectedConversationId ? (
+                    <>
+                      <div className="renew-marketplace-chat-messages">
+                        {conversationLoading ? <p className="renew-marketplace-chat-hint">불러오는 중...</p> : null}
+                        {!conversationLoading && conversationMessages.length ? conversationMessages.map((message) => (
+                          <div key={message.id} className={`renew-marketplace-chat-bubble ${message.isMine ? 'is-mine' : ''}`}>
+                            <p>{message.body}</p>
+                            <span>{message.time}</span>
+                          </div>
+                        )) : null}
+                        {!conversationLoading && !conversationMessages.length ? <p className="renew-marketplace-chat-hint">아직 메시지가 없습니다.</p> : null}
+                      </div>
+                      {selectedConversationClosed ? (
+                        <div className="renew-marketplace-chat-closed">거래완료된 게시물의 거래방입니다. 추가 메시지를 보낼 수 없습니다.</div>
+                      ) : (
+                        <form className="renew-marketplace-chat-form" onSubmit={submitConversationMessage}>
+                          <input
+                            type="text"
+                            value={conversationText}
+                            onChange={(event) => setConversationText(event.target.value)}
+                            placeholder="메시지를 입력하세요."
+                            maxLength={1000}
+                          />
+                          <button type="submit" disabled={!conversationText.trim() || conversationSending}>{conversationSending ? '전송 중' : '전송'}</button>
+                        </form>
+                      )}
+                    </>
+                  ) : (
+                    <div className="renew-marketplace-chat-empty">
+                      <strong>대화를 선택하세요.</strong>
+                      <p>왼쪽 목록에서 거래방을 선택하면 메시지를 볼 수 있습니다.</p>
+                    </div>
+                  )}
+                </section>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {statusModalOpen && listing ? (
+          <div className="renew-marketplace-inquiry-modal" role="dialog" aria-modal="true" aria-label="게시물 상태 변경">
+            <div className="renew-marketplace-inquiry-dialog">
+              <button type="button" className="renew-marketplace-verify-close" onClick={() => setStatusModalOpen(false)} aria-label="닫기">×</button>
+              <div className="renew-marketplace-inquiry-title">
+                <h2>게시물 상태 변경</h2>
+                <p>{listing.title}</p>
+              </div>
+              <div className="renew-marketplace-status-options">
+                {[
+                  { id: 'active', label: '판매중' },
+                  { id: 'hidden', label: '예약' },
+                  { id: 'closed', label: '거래완료' }
+                ].map((option) => (
+                  <button
+                    type="button"
+                    key={option.id}
+                    className={statusDraft === option.id ? 'is-active' : ''}
+                    onClick={() => setStatusDraft(option.id)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <div className="renew-marketplace-inquiry-actions">
+                <button type="button" onClick={changeListingStatus} disabled={marketSaving}>{marketSaving ? '변경 중' : '확인'}</button>
+                <button type="button" onClick={() => setStatusModalOpen(false)}>취소</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {registerOpen ? (
+          <div className="renew-marketplace-register-modal" role="dialog" aria-modal="true" aria-label="판매 등록">
+            <div className="renew-marketplace-register-dialog">
+              <button type="button" className="renew-marketplace-verify-close" onClick={closeRegister} aria-label="닫기">×</button>
+              <form className="renew-marketplace-register-form" onSubmit={submitRegister}>
+                <div className="renew-marketplace-register-title">
+                    <h2>{editingListingId ? '매물 수정' : '판매 등록'}</h2>
+                    <p>{editingListingId ? '거래 조건과 설명을 수정합니다.' : '등록한 매물은 바로 거래 목록에 표시됩니다.'}</p>
+                </div>
+                <div className="renew-marketplace-register-cardlink">
+                  <div className="renew-marketplace-register-cardlink-head">
+                    <strong>도감 카드 연동</strong>
+                    <span>정확한 카드를 선택하면 도감에 매물 배지가 표시됩니다.</span>
+                  </div>
+                  <div className="renew-marketplace-register-cardsearch">
+                    <select value={registerCardLocale} onChange={(event) => setRegisterCardLocale(event.target.value)} aria-label="카드 언어">
+                      <option value="JP">일본판</option>
+                      <option value="KR">한글판</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={registerCardQuery}
+                      onChange={(event) => setRegisterCardQuery(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          searchRegisterCards();
+                        }
+                      }}
+                      placeholder="일련번호 또는 카드명 검색"
+                    />
+                    <button type="button" onClick={searchRegisterCards} disabled={registerCardLoading}>
+                      {registerCardLoading ? '검색 중' : '검색'}
+                    </button>
+                  </div>
+                  {registerLinkedCard ? (
+                    <div className="renew-marketplace-linked-card">
+                      <img src={getCardThumbnailSrc(registerLinkedCard)} alt={registerLinkedCard.name || registerLinkedCard.cardNo} loading="lazy" />
+                      <div>
+                        <b>{registerLinkedCard.cardNo}</b>
+                        <strong>{registerLinkedCard.name}</strong>
+                        <span>{[registerLinkedCard.locale, registerLinkedCard.rarity, registerLinkedCard.variantKey].filter(Boolean).join(' · ')}</span>
+                      </div>
+                      <button type="button" onClick={() => setRegisterLinkedCard(null)}>해제</button>
+                    </div>
+                  ) : null}
+                  {registerCardCandidates.length ? (
+                    <div className="renew-marketplace-card-candidates">
+                      {registerCardCandidates.map((card) => (
+                        <button type="button" key={card.id || `${card.locale}-${card.cardNo}-${card.variantKey}`} onClick={() => selectRegisterCard(card)}>
+                          <img src={getCardThumbnailSrc(card)} alt={card.name || card.cardNo} loading="lazy" />
+                          <span>
+                            <b>{card.cardNo}</b>
+                            <strong>{card.name}</strong>
+                            <small>{[card.locale, card.rarity, card.seriesName].filter(Boolean).join(' · ')}</small>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="renew-marketplace-register-fields">
+                  <label>
+                    <span>판매 제목</span>
+                    <input
+                      type="text"
+                      value={registerForm.title}
+                      onChange={(event) => updateRegisterForm('title', event.target.value)}
+                      placeholder="예: OP05-119 루피 SEC 판매"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>일련번호</span>
+                    <input
+                      type="text"
+                      value={registerForm.cardCode}
+                      onChange={(event) => updateRegisterForm('cardCode', event.target.value)}
+                      placeholder="OP05-119"
+                    />
+                  </label>
+                  <label>
+                    <span>카드명</span>
+                    <input
+                      type="text"
+                      value={registerForm.cardName}
+                      onChange={(event) => updateRegisterForm('cardName', event.target.value)}
+                      placeholder="Monkey.D.Luffy"
+                    />
+                  </label>
+                  <label>
+                    <span>거래 유형</span>
+                    <select value={registerForm.tradeType} onChange={(event) => updateRegisterForm('tradeType', event.target.value)}>
+                      <option>판매</option>
+                      <option>교환</option>
+                      <option>판매+교환</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>카드 상태</span>
+                    <select value={registerForm.condition} onChange={(event) => updateRegisterForm('condition', event.target.value)}>
+                      <option>일반</option>
+                      <option>A등급</option>
+                      <option>PSA10</option>
+                      <option>기타 등급</option>
+                      <option>미개봉</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>가격</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={registerForm.price}
+                      onChange={(event) => updateRegisterForm('price', event.target.value)}
+                      placeholder="50000"
+                      disabled={registerForm.negotiable}
+                    />
+                  </label>
+                  <label>
+                    <span>거래 방식</span>
+                    <select value={registerForm.delivery} onChange={(event) => updateRegisterForm('delivery', event.target.value)}>
+                      <option>택배</option>
+                      <option>직거래</option>
+                      <option>택배+직거래</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>직거래 지역</span>
+                    <input
+                      type="text"
+                      value={registerForm.region}
+                      onChange={(event) => updateRegisterForm('region', event.target.value)}
+                      placeholder="예: 서울 강남"
+                    />
+                  </label>
+                  <label className="renew-marketplace-register-check">
+                    <input
+                      type="checkbox"
+                      checked={registerForm.negotiable}
+                      onChange={(event) => updateRegisterForm('negotiable', event.target.checked)}
+                    />
+                    <span>가격 협의 가능</span>
+                  </label>
+                  <div className="renew-marketplace-register-photo">
+                    <span>사진 업로드</span>
+                    <label>
+                      <input type="file" accept="image/*" multiple onChange={updateRegisterPhotos} />
+                      <b>사진 선택 / 촬영</b>
+                      <small>모바일은 카메라 또는 갤러리, 데스크탑은 저장된 이미지를 선택합니다.</small>
+                    </label>
+                    {registerPhotos.length ? (
+                      <div className="renew-marketplace-register-previews">
+                        {registerPhotos.map((photo) => (
+                          <img src={photo.url} alt={photo.name} key={photo.url} />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                  <label className="renew-marketplace-register-description">
+                    <span>설명</span>
+                    <textarea
+                      value={registerForm.description}
+                      onChange={(event) => updateRegisterForm('description', event.target.value)}
+                      placeholder="카드 상태, 하자 여부, 교환 희망 카드, 거래 조건을 입력"
+                      rows="4"
+                    />
+                  </label>
+                </div>
+                <div className="renew-marketplace-register-actions">
+                  <button type="submit" disabled={!registerReady || marketSaving}>{marketSaving ? '저장 중' : editingListingId ? '수정하기' : '등록하기'}</button>
+                  <button type="button" onClick={closeRegister}>취소</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
+
+        {verificationOpen ? (
+          <div className="renew-marketplace-verify-modal" role="dialog" aria-modal="true" aria-label="카페 인증 신청">
+            <div className="renew-marketplace-verify-dialog">
+              <button type="button" className="renew-marketplace-verify-close" onClick={closeVerification} aria-label="닫기">×</button>
+              {!verificationSubmitted ? (
+                <form className="renew-marketplace-verify-form" onSubmit={submitVerification}>
+                  <div className="renew-marketplace-verify-title">
+                    <h2>카페 인증 신청</h2>
+                    <p>판매 등록은 지정된 네이버 카페 인증 완료 후 이용할 수 있습니다.</p>
+                    <a href="https://cafe.naver.com/onepiecetcg" target="_blank" rel="noreferrer">네이버 카페 바로가기</a>
+                  </div>
+                  <div className="renew-marketplace-verify-fields">
+                    <label>
+                      <span>카페 닉네임</span>
+                      <input
+                        type="text"
+                        value={verificationForm.cafeNickname}
+                        onChange={(event) => updateVerificationForm('cafeNickname', event.target.value)}
+                        placeholder="네이버 카페 닉네임"
+                        required
+                      />
+                    </label>
+                    <label>
+                      <span>카페 프로필 URL</span>
+                      <input
+                        type="url"
+                        value={verificationForm.cafeProfileUrl}
+                        onChange={(event) => updateVerificationForm('cafeProfileUrl', event.target.value)}
+                        placeholder="카페 프로필 또는 활동 내역 링크"
+                        required
+                      />
+                    </label>
+                    <label>
+                      <span>카페 등급</span>
+                      <input
+                        type="text"
+                        value={verificationForm.cafeGrade}
+                        onChange={(event) => updateVerificationForm('cafeGrade', event.target.value)}
+                        placeholder="확인 가능한 등급명"
+                      />
+                    </label>
+                    <label>
+                      <span>메모</span>
+                      <textarea
+                        value={verificationForm.note}
+                        onChange={(event) => updateVerificationForm('note', event.target.value)}
+                        placeholder="운영자에게 전달할 내용이 있으면 입력"
+                        rows="3"
+                      />
+                    </label>
+                  </div>
+                  <div className="renew-marketplace-verify-actions">
+                    <button type="submit" disabled={!verificationReady || marketSaving}>{marketSaving ? '접수 중' : '인증 신청하기'}</button>
+                    <button type="button" onClick={closeVerification}>취소</button>
+                  </div>
+                </form>
+              ) : (
+                <div className="renew-marketplace-verify-pending">
+                  <h2>검토 대기중</h2>
+                  <p>인증 신청 내용이 접수되었습니다. 관리자 확인 후 판매자 프로필에 인증 상태가 표시됩니다.</p>
+                  <div className="renew-marketplace-verify-review">
+                    <span>카페 닉네임</span>
+                    <b>{verificationForm.cafeNickname}</b>
+                    <span>카페 등급</span>
+                    <b>{verificationForm.cafeGrade || '미입력'}</b>
+                  </div>
+                  <div className="renew-marketplace-verify-actions">
+                    <button type="button" onClick={closeVerification}>확인</button>
+                    <button type="button" onClick={() => setVerificationSubmitted(false)}>신청 내용 수정</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {adminPanelOpen ? (
+          <div className="renew-marketplace-admin">
+            <div className="renew-marketplace-admin-head">
+              <h2>인증 신청 관리</h2>
+              <p>카페 인증 신청을 확인하고 승인 상태를 관리하는 관리자 전용 화면입니다.</p>
+            </div>
+            <div className="renew-marketplace-admin-tabs" role="tablist" aria-label="인증 상태 필터">
+              {[
+                { id: 'pending', label: '대기', count: adminVerificationCounts.pending },
+                { id: 'approved', label: '승인 유저', count: adminVerificationCounts.approved }
+              ].map((tab) => (
+                <button
+                  type="button"
+                  key={tab.id}
+                  className={adminVerificationTab === tab.id ? 'is-active' : ''}
+                  onClick={() => setAdminVerificationTab(tab.id)}
+                >
+                  <span>{tab.label}</span>
+                  <b>{tab.count}</b>
+                </button>
+              ))}
+            </div>
+            {displayedAdminVerificationRows.length ? (
+              <div className="renew-marketplace-admin-list">
+                {displayedAdminVerificationRows.map((row) => (
+                  <article key={row.id} className="renew-marketplace-admin-row">
+                    <div>
+                      <span>카페 닉네임</span>
+                      <strong>{row.nickname}</strong>
+                    </div>
+                    <div>
+                      <span>카페 등급</span>
+                      <strong>{row.grade}</strong>
+                    </div>
+                    <div>
+                      <span>상태</span>
+                      <strong>{row.status}</strong>
+                    </div>
+                    <a href={row.profileUrl} target="_blank" rel="noreferrer">프로필 확인</a>
+                    <p>{row.note}</p>
+                    <div className="renew-marketplace-admin-actions">
+                      {row.rawStatus !== 'approved' ? (
+                        <button type="button" onClick={() => updateVerificationStatus(row.id, 'approved')} disabled={adminUpdatingId === row.id}>승인</button>
+                      ) : null}
+                      <button type="button" onClick={() => deleteVerificationRow(row.id)} disabled={adminUpdatingId === row.id}>{row.rawStatus === 'approved' ? '승인 해제' : '삭제'}</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="renew-marketplace-admin-empty">
+                <strong>{adminVerificationTab === 'approved' ? '승인된 유저가 없습니다.' : '접수된 인증 신청이 없습니다.'}</strong>
+                <p>{adminVerificationTab === 'pending' ? '새 인증 신청이 접수되면 이 영역에 표시됩니다.' : '상단 탭에서 다른 상태의 인증 기록을 확인할 수 있습니다.'}</p>
+              </div>
+            )}
+          </div>
+        ) : !selectedListing ? (
+          <>
+            {filterCardId ? (
+              <div className="renew-marketplace-linked-filter">
+                <strong>선택한 카드 관련 매물</strong>
+                <span>{visibleListings.length}개</span>
+                <button type="button" onClick={onClearFilter}>전체 매물 보기</button>
+              </div>
+            ) : null}
+            <div className="renew-marketplace-filter">
+              {marketFilterOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.id}
+                  className={marketListingFilter === option.id ? 'is-active' : ''}
+                  onClick={() => setMarketListingFilter(option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <div className="renew-marketplace-listings">
+              {visibleListings.length ? visibleListings.map((item) => (
+                <button type="button" className={`renew-marketplace-card ${item.rawStatus !== 'active' ? 'is-muted' : ''}`} key={item.id} onClick={() => openListing(item)}>
+                  <div className="renew-marketplace-card-image">
+                    <img src={item.imageUrl || '/card-placeholder.svg'} alt={`${item.title} 이미지`} />
+                    {item.rawStatus === 'hidden' ? <span className="renew-marketplace-status-overlay">예약</span> : null}
+                    {item.rawStatus === 'closed' ? <span className="renew-marketplace-status-overlay">거래완료</span> : null}
+                  </div>
+                  <div className="renew-marketplace-card-body">
+                    <div className="renew-marketplace-card-tags">
+                      {item.rawStatus === 'hidden' ? <span>예약</span> : null}
+                      {item.rawStatus === 'closed' ? <span>거래완료</span> : null}
+                      {item.tags.map((tag) => <span key={tag}>{tag}</span>)}
+                    </div>
+                    <h2>{item.title}</h2>
+                    <p>{item.subtitle}</p>
+                    <div className="renew-marketplace-card-meta">
+                      <strong>{item.price}</strong>
+                      <span>{item.time}</span>
+                    </div>
+                    <div className="renew-marketplace-card-foot">
+                      <span>{item.sellerStatus}</span>
+                      <span>{item.likes}</span>
+                      <span>{item.views}</span>
+                    </div>
+                  </div>
+                </button>
+              )) : (
+                <div className="renew-marketplace-empty">
+                  <strong>등록된 매물이 없습니다.</strong>
+                  <p>이 카드와 연결된 판매/교환 글이 등록되면 여기에 표시됩니다.</p>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="renew-marketplace-layout">
+          <article className="renew-marketplace-preview" aria-label="거래 상세 미리보기">
+            <button type="button" className="renew-marketplace-back" onClick={() => setSelectedListing(null)}>← 매물 목록</button>
+            <div
+              className={`renew-marketplace-image ${listing.rawStatus !== 'active' ? 'is-muted' : ''}`}
+              role="button"
+              tabIndex={0}
+              onClick={openMarketImageViewer}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openMarketImageViewer();
+                }
+              }}
+            >
+              <img src={activeListingImage} alt={`${listing.title} 이미지`} />
+              {listing.rawStatus === 'hidden' ? <span className="renew-marketplace-status-overlay">예약</span> : null}
+              {listing.rawStatus === 'closed' ? <span className="renew-marketplace-status-overlay">거래완료</span> : null}
+              <small>이미지 미리보기</small>
+            </div>
+            {listingImages.length > 1 ? (
+              <div className="renew-marketplace-thumbs" aria-label="매물 이미지 선택">
+                {listingImages.map((imageUrl, index) => (
+                  <button
+                    type="button"
+                    key={`${imageUrl}-${index}`}
+                    className={index === selectedMarketImageIndex ? 'is-active' : ''}
+                    onClick={() => setSelectedMarketImageIndex(index)}
+                    aria-label={`매물 이미지 ${index + 1}`}
+                  >
+                    <img src={imageUrl} alt="" />
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </article>
+
+          <aside className="renew-marketplace-detail">
+            <div className="renew-marketplace-seller">
+              <div className="renew-marketplace-seller-head">
+                <div className="renew-marketplace-avatar">S</div>
+                <div className="renew-marketplace-seller-main">
+                  <div className="renew-marketplace-seller-name">
+                    <b>{listing.seller}</b>
+                    <span>{listing.sellerStatus}</span>
+                  </div>
+                  <p>{listing.sellerNote}</p>
+                </div>
+              </div>
+              <div className="renew-marketplace-seller-meta">
+                <span>최근 접속 표시 예정</span>
+                <span>신고/숨김 관리 예정</span>
+              </div>
+              <a
+                className={`renew-marketplace-profile ${listing.sellerProfileUrl ? '' : 'is-disabled'}`}
+                href={listing.sellerProfileUrl || '#'}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => {
+                  if (!listing.sellerProfileUrl) {
+                    event.preventDefault();
+                    setMarketNotice('등록된 판매자 프로필 링크가 없습니다.');
+                  }
+                }}
+              >
+                판매자 프로필 바로가기
+              </a>
+            </div>
+            <div className="renew-marketplace-title">
+              <div className="renew-marketplace-badges">
+                {listing.rawStatus === 'hidden' ? <span>예약</span> : null}
+                {listing.rawStatus === 'closed' ? <span>거래완료</span> : null}
+                {listing.tags.map((tag) => <span key={tag}>{tag}</span>)}
+              </div>
+              <h2>{listing.title}</h2>
+              <p>{listing.subtitle}</p>
+            </div>
+            <div className="renew-marketplace-listing">
+              <strong>{listing.price}</strong>
+              <span>{listing.time}</span>
+            </div>
+            <div className="renew-marketplace-description">
+              <p>{listing.description}</p>
+            </div>
+            <div className="renew-marketplace-stats">
+              <span>{listing.likes}</span>
+              <span>{listing.views}</span>
+              <button
+                type="button"
+                className={listingInterested ? 'is-active' : ''}
+                onClick={toggleListingInterest}
+                disabled={isListingOwner || interestSavingId === String(listing.id)}
+              >
+                {listingInterested ? '관심 해제' : '관심'}
+              </button>
+            </div>
+            <button
+              type="button"
+              className="renew-marketplace-price-link"
+              onClick={() => onOpenPrice?.(listing.cardNo, listing.id)}
+              disabled={!listing.cardNo}
+            >
+              현재 시세로 바로가기
+            </button>
+            {isListingOwner ? (
+              <div className="renew-marketplace-owner-actions">
+                <button type="button" onClick={openStatusModal} disabled={marketSaving}>상태 변경</button>
+                <button type="button" onClick={openEditListing} disabled={marketSaving}>수정</button>
+                <button type="button" onClick={deleteListing} disabled={marketSaving}>삭제</button>
+              </div>
+            ) : null}
+            <button type="button" className="renew-marketplace-contact" onClick={openInquiry}>
+              {authUser ? '문의하기' : '로그인 후 문의'}
+            </button>
+          </aside>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function RenewRouteBackButton({ label = '뒤로가기', onClick }) {
+  return (
+    <div className="renew-route-back-wrap" data-nosnippet>
+      <button type="button" className="renew-route-back-button" onClick={onClick}>
+        <span aria-hidden="true">←</span>
+        {label}
+      </button>
     </div>
   );
 }
@@ -3309,7 +6027,246 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   );
 }
 
-function RenewBoxMarket({ uiLang }) {
+function formatIndexValue(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) && number > 0 ? number.toFixed(2) : '-';
+}
+
+function formatIndexChange(value) {
+  if (value == null || !Number.isFinite(Number(value))) return '-';
+  const number = Number(value);
+  const prefix = number > 0 ? '+' : '';
+  return `${prefix}${number.toFixed(2)}%`;
+}
+
+function RenewIndexChart({ points = [] }) {
+  const orderedPoints = points
+    .map((point) => ({ ...point, value: Number(point.value || 0) }))
+    .filter((point) => point.date && point.value > 0)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (!orderedPoints.length) {
+    return <div className="renew-chart-placeholder"><span>지수 데이터 준비 중</span></div>;
+  }
+  const width = 920;
+  const height = 320;
+  const padX = 44;
+  const padTop = 28;
+  const padBottom = 42;
+  const values = orderedPoints.map((point) => point.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(max - min, 1);
+  const scaleMin = Math.max(0, min - range * 0.12);
+  const scaleMax = max + range * 0.12;
+  const scaleRange = Math.max(scaleMax - scaleMin, 1);
+  const plotted = orderedPoints.map((point, index) => {
+    const x = padX + ((width - padX * 2) * index / Math.max(orderedPoints.length - 1, 1));
+    const y = padTop + ((scaleMax - point.value) / scaleRange) * (height - padTop - padBottom);
+    return { ...point, x, y };
+  });
+  const path = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+  const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
+  const labelPoints = [plotted[0], plotted[Math.floor((plotted.length - 1) / 2)], plotted[plotted.length - 1]].filter(Boolean);
+  return (
+    <div className="renew-index-chart">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="OPTCG Manga Index chart" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="renew-index-fill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#c94d35" stopOpacity="0.24" />
+            <stop offset="100%" stopColor="#c94d35" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {[0, 1, 2].map((step) => {
+          const y = padTop + ((height - padTop - padBottom) * step / 2);
+          return <line key={step} className="renew-index-grid" x1={padX} y1={y} x2={width - padX} y2={y} />;
+        })}
+        <text className="renew-index-boundary is-max" x={padX + 4} y={padTop + 14}>{formatIndexValue(max)}</text>
+        <text className="renew-index-boundary is-min" x={padX + 4} y={height - padBottom - 8}>{formatIndexValue(min)}</text>
+        <path d={area} className="renew-index-area" />
+        <path d={path} className="renew-index-line" />
+        {labelPoints.map((point, index) => (
+          <text key={`${point.date}-${index}`} className={`renew-index-date is-${index}`} x={point.x} y={height - 12}>{point.date.slice(2)}</text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+const MARKET_INDEX_OPTIONS = [
+  { key: 'collector', label: 'Collector', title: 'OPTCG Collector Index' },
+  { key: 'manga', label: 'Manga', title: 'OPTCG Manga Index' },
+  { key: 'premium_art', label: 'Premium Art', title: 'OPTCG Premium Art Index' },
+  { key: 'sp', label: 'SP', title: 'OPTCG SP Index' },
+  { key: 'luffy', label: 'Luffy', title: 'OPTCG Luffy Index' },
+];
+const MARKET_SECTOR_INDEX_OPTIONS = MARKET_INDEX_OPTIONS.filter((item) => item.key !== 'collector');
+const MARKET_INDEX_COMPONENTS_PER_PAGE = 8;
+
+function getMarketIndexTypeFromPath(path) {
+  const aliasMap = {
+    '/prices/collector-index': 'collector',
+    '/prices/manga-index': 'manga',
+    '/prices/premium-art-index': 'premium_art',
+    '/prices/sp-index': 'sp',
+    '/prices/luffy-index': 'luffy'
+  };
+  if (aliasMap[path]) return aliasMap[path];
+  const slug = path.startsWith('/prices/index/') ? path.slice('/prices/index/'.length) : '';
+  const legacyMap = { collector: 'collector', manga: 'manga', 'premium-art': 'premium_art', sp: 'sp', luffy: 'luffy' };
+  return legacyMap[slug] || 'collector';
+}
+
+function isMarketIndexPath(path) {
+  return path === '/prices/collector-index'
+    || path === '/prices/manga-index'
+    || path === '/prices/premium-art-index'
+    || path === '/prices/sp-index'
+    || path === '/prices/luffy-index'
+    || path.startsWith('/prices/index');
+}
+
+function RenewMarketIndex() {
+  const [payload, setPayload] = useState(null);
+  const [indexType, setIndexType] = useState(() => {
+    if (typeof window === 'undefined') return 'collector';
+    const path = normalizeSitePath(window.location.pathname);
+    return getMarketIndexTypeFromPath(path);
+  });
+  const [range, setRange] = useState('all');
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [componentPage, setComponentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const selectedIndex = MARKET_INDEX_OPTIONS.find((item) => item.key === indexType) || MARKET_INDEX_OPTIONS[0];
+
+  useEffect(() => {
+    let cancelled = false;
+    setPayload(null);
+    setComponentPage(1);
+    setLoading(true);
+    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=a&range=${range}`, { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled) setPayload(data);
+      })
+      .catch(() => {
+        if (!cancelled) setPayload(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [indexType, range]);
+
+  const components = Array.isArray(payload?.components) ? payload.components.filter((item) => item.hasData) : [];
+  const componentPageCount = Math.max(1, Math.ceil(components.length / MARKET_INDEX_COMPONENTS_PER_PAGE));
+  const visibleComponents = components.slice((componentPage - 1) * MARKET_INDEX_COMPONENTS_PER_PAGE, componentPage * MARKET_INDEX_COMPONENTS_PER_PAGE);
+  return (
+    <section className="renew-box-market renew-index-market">
+      <div className="renew-index-head">
+        <div>
+          <span>Index</span>
+          <h2>{selectedIndex.title}</h2>
+        </div>
+        <div className="renew-chip-group">
+          <button type="button" className={range === '1d' ? 'is-active' : ''} onClick={() => setRange('1d')}>1D</button>
+          <button type="button" className={range === '7d' ? 'is-active' : ''} onClick={() => setRange('7d')}>7D</button>
+          <button type="button" className={range === '1m' ? 'is-active' : ''} onClick={() => setRange('1m')}>1M</button>
+          <button type="button" className={range === '6m' ? 'is-active' : ''} onClick={() => setRange('6m')}>6M</button>
+          <button type="button" className={range === 'all' ? 'is-active' : ''} onClick={() => setRange('all')}>ALL</button>
+        </div>
+      </div>
+      <div className="renew-index-primary" aria-label="Representative market index">
+        <button
+          type="button"
+          className={indexType === 'collector' ? 'is-active' : ''}
+          onClick={() => {
+            setIndexType('collector');
+            setDetailsOpen(false);
+          }}
+        >
+          <span>Core Benchmark</span>
+          <strong>OPTCG Collector Index</strong>
+        </button>
+      </div>
+      <div className="renew-index-sector-head">
+        <span>Sector Index</span>
+        <em>Manga, Premium Art, SP, Luffy</em>
+      </div>
+      <div className="renew-index-tabs" aria-label="Market sector index type">
+        {MARKET_SECTOR_INDEX_OPTIONS.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            className={indexType === option.key ? 'is-active' : ''}
+            onClick={() => {
+              setIndexType(option.key);
+              setDetailsOpen(false);
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <div className="renew-index-summary">
+        <strong>{loading ? '...' : formatIndexValue(payload?.currentValue)}</strong>
+        <span>Base 100 · {payload?.index?.baseDate || '2025-01-01'}</span>
+        <div>
+          <em className={Number(payload?.change?.d1) >= 0 ? 'is-up' : 'is-down'}>1D {formatIndexChange(payload?.change?.d1)}</em>
+          <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
+          <em className={Number(payload?.change?.m1) >= 0 ? 'is-up' : 'is-down'}>1M {formatIndexChange(payload?.change?.m1)}</em>
+          <em className={Number(payload?.change?.m6) >= 0 ? 'is-up' : 'is-down'}>6M {formatIndexChange(payload?.change?.m6)}</em>
+          <em className={Number(payload?.change?.all) >= 0 ? 'is-up' : 'is-down'}>ALL {formatIndexChange(payload?.change?.all)}</em>
+        </div>
+      </div>
+      <RenewIndexChart points={payload?.points || []} />
+      <button
+        type="button"
+        className="renew-index-disclosure"
+        aria-expanded={detailsOpen}
+        onClick={() => setDetailsOpen((value) => !value)}
+      >
+        <span>구성 정보 {detailsOpen ? `${componentPage}/${componentPageCount}` : ''}</span>
+        <b>{detailsOpen ? '-' : '+'}</b>
+      </button>
+      {detailsOpen ? (
+        <>
+          <div className="renew-index-meta">
+            <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
+            <span>A등급 SNKRDUNK 일별 중앙값 기준</span>
+          </div>
+          <div className="renew-index-components">
+            {visibleComponents.map((item) => (
+              <article key={item.apparelId}>
+                <b>{item.code}</b>
+                <strong>{item.name}</strong>
+                <span>{item.note} · #{item.apparelId}</span>
+                <em>{formatIndexValue(item.currentIndex)}</em>
+              </article>
+            ))}
+          </div>
+          {componentPageCount > 1 ? (
+            <div className="renew-index-pagination" aria-label="Index component pages">
+              {Array.from({ length: componentPageCount }, (_, index) => index + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  className={componentPage === page ? 'is-active' : ''}
+                  onClick={() => setComponentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </>
+      ) : null}
+    </section>
+  );
+}
+
+function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
   const t = (key) => getUiText(uiLang, key);
   const [sortMode, setSortMode] = useState('latest');
   const [boxes, setBoxes] = useState(boxMarketItems);
@@ -3326,7 +6283,11 @@ function RenewBoxMarket({ uiLang }) {
     };
   }, []);
   const sortedBoxes = useMemo(() => {
-    const withIndex = boxes.map((item, index) => ({ ...item, index }));
+    const routeCode = String(initialBoxCode || '').toUpperCase().replace(/-/g, '');
+    const sourceBoxes = routeCode
+      ? boxes.filter((item) => String(item.code || '').toUpperCase().replace(/-/g, '') === routeCode)
+      : boxes;
+    const withIndex = sourceBoxes.map((item, index) => ({ ...item, index }));
     if (sortMode === 'high') {
       return withIndex.sort((a, b) => (Number(b.minPrice) || -1) - (Number(a.minPrice) || -1));
     }
@@ -3342,7 +6303,7 @@ function RenewBoxMarket({ uiLang }) {
       const codeB = Number(String(b.code || '').match(/\d+/)?.[0]) || 0;
       return codeB - codeA || a.index - b.index;
     });
-  }, [boxes, sortMode]);
+  }, [boxes, sortMode, initialBoxCode]);
 
   return (
     <section className="renew-box-market">
@@ -3422,7 +6383,68 @@ function getMarketMetaLine(item) {
   return [item?.locale || 'JP', rarity, ...variants].filter(Boolean).join(' · ');
 }
 
-function RenewCardMarket({ uiLang }) {
+function getMarketCandidatePriceText(item, fallbackText) {
+  const staticPriceJpy = Number(item?.minPrice || 0) > 0 ? Math.round(Number(item.minPrice) * MARKET_USD_TO_JPY) : 0;
+  const price = Number(item?.displayPriceJpy || item?.latestPriceJpy || staticPriceJpy || 0);
+  return price > 0 ? formatYenWon(price) : fallbackText;
+}
+
+function getMarketCandidateStockScore(item) {
+  const priceScore = Number(item?.displayPriceJpy || item?.latestPriceJpy || item?.minPrice || 0) > 0 ? 1 : 0;
+  const listingScore = Number(item?.listingCount || 0) > 0 ? 1 : 0;
+  return (priceScore * 2) + listingScore;
+}
+
+function normalizeMarketText(value = '') {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\s.\u30fb\u00b7'"“”‘’()[\]{}:_\-/,]/g, '')
+    .trim();
+}
+
+function hasHangulText(value = '') {
+  return /[가-힣]/.test(String(value || ''));
+}
+
+function getMarketSearchText(item) {
+  return normalizeMarketText([
+    item?.code,
+    item?.name,
+    item?.setName,
+    item?.apparelId
+  ].filter(Boolean).join(' '));
+}
+
+function uniqueMarketItems(items = []) {
+  const seen = new Set();
+  return items.filter((item) => {
+    const key = String(item?.apparelId || `${item?.code}-${item?.name}`);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+async function getKoreanNameMarketCodes(query) {
+  if (!hasHangulText(query)) return new Set();
+  try {
+    const [krCards, jpCards] = await Promise.all([
+      searchCards(query, 'KR').catch(() => []),
+      searchCards(query, 'JP').catch(() => [])
+    ]);
+    const cards = [...krCards, ...jpCards];
+    return new Set(cards.flatMap((card) => [
+      card.cardNo,
+      card.baseCardNo,
+      card.marketCode
+    ]).filter(Boolean).map(normalizeCode));
+  } catch {
+    return new Set();
+  }
+}
+
+function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   const t = (key) => getUiText(uiLang, key);
   const [sortMode, setSortMode] = useState('focus');
   const [items, setItems] = useState([]);
@@ -3432,14 +6454,14 @@ function RenewCardMarket({ uiLang }) {
     import('./data/market-cards.js')
       .then((mod) => {
         if (!cancelled && Array.isArray(mod.default)) {
-          setItems(mod.default.filter((item) => item?.locale === 'JP' && item?.apparelId));
+          setItems(mod.default.filter((item) => String(item?.locale || '').toUpperCase() === marketLocale && item?.apparelId));
         }
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [marketLocale]);
 
   const visibleItems = useMemo(() => {
     const withPrice = items.filter((item) => Number(item.minPrice || 0) > 0);
@@ -3466,7 +6488,7 @@ function RenewCardMarket({ uiLang }) {
               <img src={item.previewImageUrl || '/card-placeholder.svg'} alt={item.name} onError={placeholderImage} />
             </div>
             <div>
-              <small>{item.code}</small>
+              <small>{item.locale} / {item.code}</small>
               <strong title={item.name}>{getMarketDisplayName(item)}</strong>
               <span>{item.setName}</span>
               <b>{item.minPrice ? (item.minPriceFormat || formatYen(item.minPrice)) : t('checkPrice')}</b>
@@ -3481,7 +6503,17 @@ function RenewCardMarket({ uiLang }) {
 function RenewMarket({ authUser, userState, setUserState, initialCode, initialApparelId, onBackToCatalog, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const [code, setCode] = useState(initialCode || '');
-  const [homeTab, setHomeTab] = useState('box');
+  const [marketProductLocale, setMarketProductLocale] = useState('JP');
+  const [homeTab, setHomeTab] = useState(() => {
+    if (typeof window === 'undefined') return 'box';
+    const path = normalizeSitePath(window.location.pathname);
+    if (isMarketIndexPath(path)) return 'index';
+    if (path.startsWith('/prices/product/') || path.startsWith('/prices/card/')) return 'card';
+    if (path.startsWith('/prices/box/')) return 'box';
+    if (path === '/prices/cards') return 'card';
+    if (path === '/prices/boxes') return 'box';
+    return new URLSearchParams(window.location.search).get('tab') === 'index' ? 'index' : 'box';
+  });
   const [candidates, setCandidates] = useState([]);
   const [selected, setSelected] = useState(null);
   const [marketDetail, setMarketDetail] = useState(null);
@@ -3491,11 +6523,24 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const [message, setMessage] = useState('');
   const [candidatePanelCollapsed, setCandidatePanelCollapsed] = useState(false);
   const marketDetailRef = useRef(null);
+  const marketCandidateRef = useRef(null);
+  const marketCandidateScrollYRef = useRef(0);
 
   useEffect(() => {
     if (initialCode) {
       setCode(initialCode);
       searchMarket(initialCode, initialApparelId);
+      return;
+    }
+    if (initialApparelId) {
+      loadMarketCards()
+        .then((items) => {
+          const item = items.find((candidate) => String(candidate.apparelId) === String(initialApparelId));
+          if (!item?.code) return;
+          setCode(item.code);
+          searchMarket(item.code, initialApparelId);
+        })
+        .catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode, initialApparelId]);
@@ -3506,7 +6551,8 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   }
 
   async function searchMarket(nextCode = code, targetApparelId = null) {
-    const normalized = normalizeCode(nextCode);
+    const rawQuery = String(nextCode || '').trim();
+    const normalized = normalizeCode(rawQuery);
     if (!normalized) return;
     setLoading(true);
     setMessage('');
@@ -3516,25 +6562,98 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     setCandidatePanelCollapsed(false);
     try {
       const items = await loadMarketCards();
-      const result = items
-        .filter((item) => normalizeCode(item.code) === normalized)
-        .filter((item) => item.locale === 'JP')
+      const marketItems = items.filter((item) => item?.apparelId);
+      const primaryLocale = String(marketProductLocale || 'JP').toUpperCase();
+      const primaryItems = marketItems.filter((item) => String(item.locale || '').toUpperCase() === primaryLocale);
+      const exactCodeResult = primaryItems.filter((item) => normalizeCode(item.code) === normalized);
+      const normalizedText = normalizeMarketText(rawQuery);
+      const primaryApparelIdResult = primaryItems.filter((item) => String(item.apparelId || '') === rawQuery);
+      const primaryTitleResult = primaryItems.filter((item) => normalizedText && getMarketSearchText(item).includes(normalizedText));
+      const globalTitleResult = exactCodeResult.length || primaryTitleResult.length
+        ? []
+        : marketItems.filter((item) => (
+          String(item.apparelId || '') === rawQuery
+          || (normalizedText && getMarketSearchText(item).includes(normalizedText))
+        ));
+      const resultSource = exactCodeResult.length
+        ? exactCodeResult
+        : uniqueMarketItems([
+          ...primaryApparelIdResult,
+          ...primaryTitleResult,
+          ...globalTitleResult
+        ]);
+      const koreanNameCodes = exactCodeResult.length ? new Set() : await getKoreanNameMarketCodes(rawQuery);
+      const expandedResult = exactCodeResult.length
+        ? exactCodeResult
+        : uniqueMarketItems([
+          ...resultSource,
+          ...primaryItems.filter((item) => koreanNameCodes.has(normalizeCode(item.code)))
+        ]);
+      const result = expandedResult
         .filter((item) => {
           if (targetApparelId && String(item.apparelId) === String(targetApparelId)) return true;
           const price = Number(item.minPrice || 0);
           const listingCount = item.listingCount;
           return price > 0 || listingCount == null || Number(listingCount) > 0;
         })
-        .sort((a, b) => String(a.name).localeCompare(String(b.name), 'en'));
+        .sort((a, b) => {
+          const targetDelta = Number(String(b.apparelId) === String(targetApparelId)) - Number(String(a.apparelId) === String(targetApparelId));
+          if (targetDelta) return targetDelta;
+          const exactDelta = Number(normalizeCode(b.code) === normalized) - Number(normalizeCode(a.code) === normalized);
+          if (exactDelta) return exactDelta;
+          const koreanDelta = Number(koreanNameCodes.has(normalizeCode(b.code))) - Number(koreanNameCodes.has(normalizeCode(a.code)));
+          if (koreanDelta) return koreanDelta;
+          const localeDelta = Number(String(b.locale || '').toUpperCase() === primaryLocale) - Number(String(a.locale || '').toUpperCase() === primaryLocale);
+          if (localeDelta) return localeDelta;
+          const stockDelta = getMarketCandidateStockScore(b) - getMarketCandidateStockScore(a);
+          if (stockDelta) return stockDelta;
+          return String(a.name).localeCompare(String(b.name), 'en');
+        });
+      const hydrateLimit = Boolean(targetApparelId) || exactCodeResult.length > 0
+        ? result.length
+        : Math.min(result.length, 36);
+      const hydratedHead = hydrateLimit
+        ? (await Promise.all(result.slice(0, hydrateLimit).map(async (item) => {
+          try {
+            const summary = await fetchMarketPrice({ code: item.code, apparelId: item.apparelId, summary: true });
+            const latestPrice = Number(summary?.latestByCondition?.a?.price || 0);
+            const hasSeries = Boolean(
+              summary?.series?.a?.all?.length
+              || summary?.series?.a?.['1m']?.length
+              || summary?.series?.a?.['7d']?.length
+              || summary?.recentSalesByCondition?.a?.length
+            );
+            return {
+              ...item,
+              displayPriceJpy: latestPrice > 0 ? latestPrice : item.displayPriceJpy,
+              hasMarketHistory: hasSeries
+            };
+          } catch {
+            return item;
+          }
+        }))).filter(Boolean)
+        : [];
+      const hydratedResult = [
+        ...hydratedHead.sort((a, b) => {
+          const targetDelta = Number(String(b.apparelId) === String(targetApparelId)) - Number(String(a.apparelId) === String(targetApparelId));
+          if (targetDelta) return targetDelta;
+          const historyDelta = Number(Boolean(b.hasMarketHistory)) - Number(Boolean(a.hasMarketHistory));
+          if (historyDelta) return historyDelta;
+          const stockDelta = getMarketCandidateStockScore(b) - getMarketCandidateStockScore(a);
+          if (stockDelta) return stockDelta;
+          return String(a.name).localeCompare(String(b.name), 'en');
+        }),
+        ...result.slice(hydrateLimit)
+      ];
       const directItem = targetApparelId
-        ? result.find((item) => String(item.apparelId) === String(targetApparelId))
+        ? hydratedResult.find((item) => String(item.apparelId) === String(targetApparelId))
         : null;
-      setCandidates(directItem ? [] : result);
-      setSelected(directItem || (result.length === 1 ? result[0] : null));
-      setCandidatePanelCollapsed(Boolean(directItem || result.length === 1));
+      setCandidates(directItem ? [] : hydratedResult);
+      setSelected(directItem || (hydratedResult.length === 1 ? hydratedResult[0] : null));
+      setCandidatePanelCollapsed(Boolean(directItem || hydratedResult.length === 1));
       setMarketDetail(null);
-      if (!result.length) setMessage(t('marketNoCandidates'));
-      if (targetApparelId && result.length && !directItem) setMessage(t('marketFallback'));
+      if (!hydratedResult.length) setMessage(t('marketNoCandidates'));
+      if (targetApparelId && hydratedResult.length && !directItem) setMessage(t('marketFallback'));
     } finally {
       setLoading(false);
     }
@@ -3606,10 +6725,22 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   }
 
   function selectMarketCandidate(item) {
+    marketCandidateScrollYRef.current = window.scrollY || 0;
     setSelected(item);
     setCandidatePanelCollapsed(true);
     window.setTimeout(() => {
       marketDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
+  function returnToMarketCandidates() {
+    setCandidatePanelCollapsed(false);
+    window.setTimeout(() => {
+      if (marketCandidateScrollYRef.current > 0) {
+        window.scrollTo({ top: marketCandidateScrollYRef.current, behavior: 'smooth' });
+        return;
+      }
+      marketCandidateRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
   }
 
@@ -3622,7 +6753,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
       const timestamp = Number(sale?.timestamp || 0);
       return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
     });
-  const currentPrice = selectedLatest?.price ? formatYenWon(selectedLatest.price) : selected?.minPriceFormat || '가격 정보 없음';
+  const currentPrice = selectedLatest?.price ? formatYenWon(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
   const latestSourceUrl = selectedLatest?.sourceUrl || '';
   const psaSourceUrl = condition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
     ? latestSourceUrl
@@ -3655,7 +6786,6 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
 
   return (
     <main className="renew-subpage">
-      <RenewSeoSummary page="prices" titleAs="h1" placement="page" />
       <section className="renew-panel renew-market">
         {onBackToCatalog ? (
           <button type="button" className="renew-back-button" onClick={onBackToCatalog}>
@@ -3671,6 +6801,11 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
+        <div className="renew-market-locale-tabs" aria-label="Market product locale">
+          <button type="button" className={marketProductLocale === 'JP' ? 'is-active' : ''} onClick={() => setMarketProductLocale('JP')}>JP</button>
+          <button type="button" className={marketProductLocale === 'EN' ? 'is-active' : ''} onClick={() => setMarketProductLocale('EN')}>EN</button>
+        </div>
+
         {loading ? <div className="renew-empty">{t('marketLoading')}</div> : null}
         {message ? <div className="renew-empty">{message}</div> : null}
 
@@ -3679,8 +6814,9 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
             <div className="renew-market-home-tabs">
               <button type="button" className={homeTab === 'box' ? 'is-active' : ''} onClick={() => setHomeTab('box')}>{t('marketHomeBoxTab')}</button>
               <button type="button" className={homeTab === 'card' ? 'is-active' : ''} onClick={() => setHomeTab('card')}>{t('marketHomeCardTab')}</button>
+              <button type="button" className={homeTab === 'index' ? 'is-active' : ''} onClick={() => setHomeTab('index')}>Index</button>
             </div>
-            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} /> : <RenewCardMarket uiLang={uiLang} />}
+            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : <RenewMarketIndex />}
           </>
         ) : null}
 
@@ -3691,12 +6827,12 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
               <strong>{selected.code} · {getMarketShortName(selected)}</strong>
               <span>{getMarketMetaLine(selected)}</span>
             </div>
-            <button type="button" onClick={() => setCandidatePanelCollapsed(false)}>{t('reselectVariant')}</button>
+            <button type="button" onClick={returnToMarketCandidates}>{t('reselectVariant')}</button>
           </div>
         ) : null}
 
         {candidates.length > 1 && !candidatePanelCollapsed ? (
-          <div className="renew-market-candidates">
+          <div className="renew-market-candidates" ref={marketCandidateRef}>
             <b>{t('variantSelect')}</b>
             <div>
               {candidates.map((item) => (
@@ -3708,7 +6844,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                           <small>{getMarketMetaLine(item)}</small>
                           <small className="renew-market-candidate-set">{item.setName}</small>
                           <div className="renew-market-candidate-bottom">
-                            <b>{item.minPrice ? (item.minPriceFormat || formatYen(item.minPrice)) : t('checkPrice')}</b>
+                            <b>{getMarketCandidatePriceText(item, t('checkPrice'))}</b>
                             <small className="renew-market-candidate-id">#{item.apparelId}</small>
                           </div>
                         </div>
@@ -3720,6 +6856,11 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
 
         {selected ? (
           <div className="renew-market-detail" ref={marketDetailRef}>
+            {candidates.length > 1 ? (
+              <button type="button" className="renew-market-detail-back" onClick={returnToMarketCandidates}>
+                ← {t('reselectVariant')}
+              </button>
+            ) : null}
             <div className="renew-market-card">
               <img src={selected.previewImageUrl || '/card-placeholder.svg'} alt={selected.name} onError={placeholderImage} />
               <div>
@@ -3782,6 +6923,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           </div>
         ) : null}
       </section>
+      <RenewSeoSummary page="prices" titleAs="h1" placement="footer" />
     </main>
   );
 }
@@ -3842,6 +6984,7 @@ function RenewDeck({ authUser, userState, setUserState, uiLang }) {
           ))}
         </div>
       </section>
+      <RenewSeoSummary page="shops" titleAs="h1" placement="footer" />
     </main>
   );
 }
@@ -3967,15 +7110,42 @@ function getShopMapLinks(shop) {
   };
 }
 
+function getDistanceKm(from, shop) {
+  const lat = Number(shop?.lat);
+  const lng = Number(shop?.lng);
+  if (!from || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const latDelta = toRadians(lat - from.lat);
+  const lngDelta = toRadians(lng - from.lng);
+  const startLat = toRadians(from.lat);
+  const endLat = toRadians(lat);
+  const haversine =
+    Math.sin(latDelta / 2) ** 2 +
+    Math.cos(startLat) * Math.cos(endLat) * Math.sin(lngDelta / 2) ** 2;
+
+  return 6371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function formatShopDistance(distanceKm) {
+  if (!Number.isFinite(distanceKm)) return '';
+  if (distanceKm < 1) return `${Math.max(10, Math.round(distanceKm * 1000 / 10) * 10)}m`;
+  return `${distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm)}km`;
+}
+
 function RenewShops({ uiLang }) {
   const t = (key) => getUiText(uiLang, key);
-  const [type, setType] = useState('');
-  const [sido, setSido] = useState('전체');
+  const initialShopRouteState = getShopRouteState();
+  const [type, setType] = useState(initialShopRouteState && initialShopRouteState.type ? initialShopRouteState.type : '');
+  const [sido, setSido] = useState(initialShopRouteState && initialShopRouteState.sido ? initialShopRouteState.sido : '전체');
   const [gungu, setGungu] = useState('전체');
   const [draftQuery, setDraftQuery] = useState('');
   const [query, setQuery] = useState('');
   const [regions, setRegions] = useState({ sidos: [], gungus: [] });
   const [shops, setShops] = useState([]);
+  const [userPosition, setUserPosition] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
 
   useEffect(() => {
     fetchShopRegions(type, sido).then(setRegions).catch(() => setRegions({ sidos: [], gungus: [] }));
@@ -3985,9 +7155,46 @@ function RenewShops({ uiLang }) {
     fetchShops({ type, sido, gungu, q: query }).then((items) => setShops(Array.isArray(items) ? items : []));
   }, [type, sido, gungu, query]);
 
+  const displayedShops = useMemo(() => {
+    if (!userPosition) return shops;
+    return shops
+      .map((shop) => ({ ...shop, distanceKm: getDistanceKm(userPosition, shop) }))
+      .sort((left, right) => (left.distanceKm ?? Infinity) - (right.distanceKm ?? Infinity));
+  }, [shops, userPosition]);
+
+  const handleNearbySort = () => {
+    if (userPosition) {
+      setUserPosition(null);
+      setLocationError('');
+      return;
+    }
+    if (!navigator.geolocation) {
+      setLocationError(uiLang === 'EN' ? 'Location is not supported on this device.' : '이 기기에서는 위치 기능을 사용할 수 없습니다.');
+      return;
+    }
+
+    setLocationLoading(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setUserPosition({ lat: coords.latitude, lng: coords.longitude });
+        setLocationLoading(false);
+      },
+      (error) => {
+        const denied = error.code === error.PERMISSION_DENIED;
+        setLocationError(
+          uiLang === 'EN'
+            ? denied ? 'Location permission was denied.' : 'Unable to determine your location.'
+            : denied ? '위치 권한이 차단되었습니다. 기기 설정에서 권한을 허용해 주세요.' : '현재 위치를 확인하지 못했습니다.'
+        );
+        setLocationLoading(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  };
+
   return (
     <main className="renew-subpage">
-      <RenewSeoSummary page="shops" titleAs="h1" placement="page" />
       <section className="renew-panel renew-shops">
         <div className="renew-shop-filters">
           <select value={type} onChange={(event) => setType(event.target.value)}>
@@ -4008,14 +7215,35 @@ function RenewShops({ uiLang }) {
             <button type="submit">검색</button>
           </form>
         </div>
+        <div className="renew-shop-sortbar">
+          <button
+            type="button"
+            className={userPosition ? 'is-active' : ''}
+            onClick={handleNearbySort}
+            disabled={locationLoading}
+            aria-pressed={Boolean(userPosition)}
+          >
+            {locationLoading
+              ? (uiLang === 'EN' ? 'Locating...' : '위치 확인 중...')
+              : userPosition
+                ? (uiLang === 'EN' ? 'Nearby first ON' : '내 주변순 적용 중')
+                : (uiLang === 'EN' ? 'Sort by distance' : '내 주변순')}
+          </button>
+          {locationError ? <small role="status">{locationError}</small> : null}
+        </div>
         <div className="renew-shop-grid">
-          {shops.map((shop) => {
+          {displayedShops.map((shop) => {
             const links = getShopMapLinks(shop);
             return (
               <article key={`${shop.name}-${shop.address}`}>
                 <b>{shop.name}</b>
                 <p>{shop.address}</p>
                 <small>{shop.sido} {shop.gungu} · {shop.sourceLabel || shop.sourceType}</small>
+                {userPosition && Number.isFinite(shop.distanceKm) ? (
+                  <strong className="renew-shop-distance">
+                    {uiLang === 'EN' ? 'About ' : '현재 위치에서 약 '}{formatShopDistance(shop.distanceKm)}
+                  </strong>
+                ) : null}
                 <div className="renew-shop-map-links">
                   <a href={links.naver} target="_blank" rel="noreferrer">{t('naverMap')}</a>
                   <a href={links.kakao} target="_blank" rel="noreferrer">{t('kakaoMap')}</a>
@@ -4047,20 +7275,21 @@ export default function RenewApp() {
   const [stateLoading, setStateLoading] = useState(false);
   const [adminStats, setAdminStats] = useState(null);
   const [visitorToken, setVisitorToken] = useState('');
-  const [legalOpen, setLegalOpen] = useState(() => {
-    if (typeof window === 'undefined') return null;
-    if (window.location.pathname === '/privacy') return 'privacy';
-    if (window.location.pathname === '/terms') return 'terms';
-    return null;
-  });
+  const [legalOpen, setLegalOpen] = useState(null);
   const [catalogInitialSearch, setCatalogInitialSearch] = useState(null);
-  const [catalogViewState, setCatalogViewState] = useState(null);
+  const [catalogViewState, setCatalogViewState] = useState(() => getCatalogRouteViewState());
   const [canReturnToCatalog, setCanReturnToCatalog] = useState(false);
   const [marketInitialCode, setMarketInitialCode] = useState('');
   const [marketInitialApparelId, setMarketInitialApparelId] = useState(null);
+  const [marketListings, setMarketListings] = useState(MARKETPLACE_SAMPLE_LISTINGS);
+  const [marketFilterCardId, setMarketFilterCardId] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return new URLSearchParams(window.location.search).get('cardId') || '';
+  });
   const [deckComingSoonOpen, setDeckComingSoonOpen] = useState(false);
   const [newsComingSoonOpen, setNewsComingSoonOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const internalNavigationRef = useRef(false);
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
@@ -4074,6 +7303,26 @@ export default function RenewApp() {
     if (window.location.pathname === '/deck' || window.location.pathname === '/deck-simulator') {
       window.history.replaceState(null, '', '/news');
     }
+  }, []);
+
+  useEffect(() => {
+    if (!MARKETPLACE_ENABLED) {
+      setMarketListings([]);
+      return undefined;
+    }
+    let cancelled = false;
+    fetchMarketplaceListings()
+      .then((payload) => {
+        if (cancelled) return;
+        const listings = Array.isArray(payload?.listings) ? payload.listings : [];
+        setMarketListings(listings);
+      })
+      .catch(() => {
+        if (!cancelled) setMarketListings(MARKETPLACE_SAMPLE_LISTINGS);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -4092,10 +7341,10 @@ export default function RenewApp() {
   }, [uiLang]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
     if (activePage === 'prices') {
-      setMarketInitialCode(params.get('code') || '');
-      setMarketInitialApparelId(params.get('apparelId') || null);
+      const routeState = getMarketRouteState(window.location.pathname, window.location.search);
+      setMarketInitialCode(routeState.code);
+      setMarketInitialApparelId(routeState.apparelId);
     }
   }, []);
 
@@ -4106,11 +7355,18 @@ export default function RenewApp() {
         setCatalogInitialSearch(null);
         setCatalogViewState(null);
       }
+      if (nextPage === 'cards') {
+        setCatalogViewState(getCatalogRouteViewState(window.location.pathname));
+      }
       setActivePage(nextPage);
       if (nextPage === 'prices') {
+        const routeState = getMarketRouteState(window.location.pathname, window.location.search);
+        setMarketInitialCode(routeState.code);
+        setMarketInitialApparelId(routeState.apparelId);
+      }
+      if (nextPage === 'marketplace') {
         const params = new URLSearchParams(window.location.search);
-        setMarketInitialCode(params.get('code') || '');
-        setMarketInitialApparelId(params.get('apparelId') || null);
+        setMarketFilterCardId(params.get('cardId') || '');
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -4219,13 +7475,26 @@ export default function RenewApp() {
   }
 
   function navigatePage(page, options = {}) {
+    if (page === 'marketplace' && !MARKETPLACE_TAB_VISIBLE) {
+      page = 'home';
+    }
     if (page === 'deck') {
       setDeckComingSoonOpen(true);
+      return;
+    }
+    const path = PAGE_PATHS[page] || '/';
+    const query = options.query ? `?${options.query}` : '';
+    const nextUrl = `${path}${query}`;
+    if (page === 'marketplace') {
+      window.location.assign(nextUrl);
       return;
     }
     if (page === 'home') {
       setCatalogInitialSearch(null);
       setCatalogViewState(null);
+    }
+    if (page === 'marketplace' && !options.query) {
+      setMarketFilterCardId('');
     }
     setActivePage(page);
     if (page === 'prices' && !options.query) {
@@ -4233,16 +7502,15 @@ export default function RenewApp() {
       setMarketInitialApparelId(null);
       setCanReturnToCatalog(false);
     }
-    const path = PAGE_PATHS[page] || '/';
-    const query = options.query ? `?${options.query}` : '';
-    const nextUrl = `${path}${query}`;
     if (window.location.pathname + window.location.search !== nextUrl) {
+      internalNavigationRef.current = true;
       window.history.pushState(null, '', nextUrl);
     }
   }
 
   function openLegal(type) {
     setLegalOpen(type);
+    internalNavigationRef.current = true;
     window.history.pushState(null, '', `/${type}`);
   }
 
@@ -4255,6 +7523,18 @@ export default function RenewApp() {
 
   function openMobileNews() {
     navigatePage('news');
+  }
+
+  const routeBackInfo = getRouteBackInfo(window.location.pathname, window.location.search);
+
+  function handleRouteBack() {
+    if (!routeBackInfo) return;
+    const sameOriginReferrer = document.referrer && document.referrer.startsWith(SITE_ORIGIN);
+    if (internalNavigationRef.current || sameOriginReferrer) {
+      window.history.back();
+      return;
+    }
+    navigatePage(routeBackInfo.page);
   }
 
   return (
@@ -4271,6 +7551,7 @@ export default function RenewApp() {
         uiLang={uiLang}
         onUiLangChange={setUiLang}
       />
+      {routeBackInfo ? <RenewRouteBackButton label={routeBackInfo.label} onClick={handleRouteBack} /> : null}
       {activePage === 'home' ? (
         <RenewHome
           authUser={authUser}
@@ -4289,6 +7570,12 @@ export default function RenewApp() {
             navigatePage('cards');
           }}
           onNavigateNews={(query) => navigatePage('news', { query })}
+          onOpenIndex={() => {
+            setMarketInitialCode('');
+            setMarketInitialApparelId(null);
+            setCanReturnToCatalog(false);
+            navigatePage('prices', { query: 'tab=index' });
+          }}
         />
       ) : activePage === 'cards' ? (
         <RenewCatalog
@@ -4309,6 +7596,14 @@ export default function RenewApp() {
             if (nextApparelId) query.set('apparelId', String(nextApparelId));
             navigatePage('prices', { query: query.toString() });
           }}
+          onOpenMarketplace={MARKETPLACE_ENABLED ? ((card) => {
+            const cardId = card?.id || '';
+            setMarketFilterCardId(cardId);
+            const query = new URLSearchParams();
+            if (cardId) query.set('cardId', cardId);
+            navigatePage('marketplace', { query: query.toString() });
+          }) : undefined}
+          marketListings={MARKETPLACE_ENABLED ? marketListings : []}
           uiLang={uiLang}
         />
       ) : activePage === 'prices' ? (
@@ -4321,10 +7616,36 @@ export default function RenewApp() {
           onBackToCatalog={canReturnToCatalog ? () => navigatePage('cards') : null}
           uiLang={uiLang}
         />
+      ) : activePage === 'marketplace' ? (
+        MARKETPLACE_ENABLED ? (
+          <RenewMarketplace
+            authUser={authUser}
+            marketListings={marketListings}
+            setMarketListings={setMarketListings}
+            filterCardId={marketFilterCardId}
+            onClearFilter={() => {
+              setMarketFilterCardId('');
+              navigatePage('marketplace');
+            }}
+            onOpenPrice={(cardNo, listingId) => {
+              if (!cardNo) return;
+              if (listingId && typeof window !== 'undefined') {
+                window.sessionStorage.setItem('optcg_market_return_listing_id', String(listingId));
+              }
+              setMarketInitialCode(cardNo);
+              setMarketInitialApparelId(null);
+              navigatePage('prices', { query: `code=${encodeURIComponent(cardNo)}` });
+            }}
+          />
+        ) : (
+          <RenewMarketplaceHidden />
+        )
       ) : activePage === 'news' ? (
         <RenewNews uiLang={uiLang} />
       ) : activePage === 'shops' ? (
         <RenewShops uiLang={uiLang} />
+      ) : activePage === 'about' || activePage === 'dataPolicy' || activePage === 'terms' || activePage === 'privacy' ? (
+        <RenewStaticInfoPage type={activePage} />
       ) : activePage === 'statsPrototype' ? (
         <RenewStatsPrototype />
       ) : (
@@ -4363,7 +7684,7 @@ export default function RenewApp() {
         />
       ) : null}
       <footer className="renew-footer" data-nosnippet>
-        <strong>© 2026 OPTCG Korea. All rights reserved.</strong>
+        <strong>© 2026 Card Pone. All rights reserved.</strong>
         <p>
           {t('footerIntro')}<br />
           {t('footerRights')}<br />
@@ -4374,9 +7695,13 @@ export default function RenewApp() {
           {t('footerResponsibility')}
         </p>
         <div className="renew-footer-links">
-          <a href="/terms" onClick={(event) => { event.preventDefault(); openLegal('terms'); }}>{t('terms')}</a>
+          <a href="/about">소개</a>
           <span>·</span>
-          <a href="/privacy" onClick={(event) => { event.preventDefault(); openLegal('privacy'); }}>{t('privacy')}</a>
+          <a href="/data-policy">데이터 운영 정책</a>
+          <span>·</span>
+          <a href="/terms">{t('terms')}</a>
+          <span>·</span>
+          <a href="/privacy">{t('privacy')}</a>
           <span>·</span>
           <span>{t('contact')}: optkr26@gmail.com</span>
           <span>·</span>

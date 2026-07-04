@@ -26558,18 +26558,18 @@ const cardMarketLinks = [
     "cardNo": "OP14-029",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+    "apparelId": 822581,
+    "status": "approved",
+    "note": "manual approved: Tashigi R-SPC [OP14-029] (THE TIME OF BATTLE)"
   },
   {
     "cardId": "JP::OP14-084_p2",
     "cardNo": "OP14-084",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+    "apparelId": 822582,
+    "status": "approved",
+    "note": "manual approved: Ms. All Sunday SR-SPC [OP14-084] (THE TIME OF BATTLE)"
   },
   {
     "cardId": "JP::ST15-005_p1",

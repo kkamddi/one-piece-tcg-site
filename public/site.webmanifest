@@ -1,0 +1,24 @@
+{
+  "name": "Card Pone",
+  "short_name": "Card Pone",
+  "description": "카드포네 Card Pone - 원피스카드 도감, 시세, 구매처, 수집 가이드",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbfaf8",
+  "theme_color": "#11151d",
+  "icons": [
+    {
+      "src": "/card-pone-app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/card-pone-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

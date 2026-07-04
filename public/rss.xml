@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>OPTCG Korea</title>
+    <title>Card Pone 카드포네</title>
     <link>https://www.optcgkorea.com/</link>
-    <description>원피스 카드 도감, 시세, 구매처, 업데이트 공지 피드</description>
+    <description>카드포네 Card Pone - 원피스카드 도감, 시세, 구매처, 업데이트 공지 피드</description>
     <language>ko-KR</language>
-    <lastBuildDate>Fri, 12 Jun 2026 00:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Tue, 23 Jun 2026 00:00:00 +0900</lastBuildDate>
+    <item>
+      <title>OPTCG Index 차트 개선</title>
+      <link>https://www.optcgkorea.com/prices</link>
+      <description>OPTCG Collector Index와 하위 지수 차트의 표시 방식을 개선했습니다.</description>
+      <pubDate>Tue, 23 Jun 2026 00:00:00 +0900</pubDate>
+    </item>
     <item>
       <title>가이드/Q&amp;A 섹션 추가</title>
       <link>https://www.optcgkorea.com/news</link>
-      <description>원피스 카드 도감, 시세, Portfolio, 구매처, 사전예약, 온라인 오리파 이용 방법을 정리한 가이드/Q&amp;A 섹션을 추가했습니다.</description>
+      <description>원피스 카드 입문, 수집 방향, 구매 주의사항, 보관 방법, Q&amp;A 콘텐츠를 추가했습니다.</description>
       <pubDate>Fri, 12 Jun 2026 00:00:00 +0900</pubDate>
     </item>
     <item>
       <title>News 탭 업데이트 완료</title>
       <link>https://www.optcgkorea.com/news</link>
-      <description>한글판·일본판 공식 공지사항, OP-17 아마존 사전예약 응모, 온라인 오리파, 카드 보관용품 바로가기를 추가했습니다.</description>
+      <description>한글판/일본판 공식 공지, 사전예약, 온라인 오리파, 카드 보관용품 바로가기 영역을 정리했습니다.</description>
       <pubDate>Thu, 11 Jun 2026 00:00:00 +0900</pubDate>
     </item>
     <item>
-      <title>원피스 카드 시세 그래프 및 PSA10 통합 시세 개선</title>
+      <title>시세 그래프 및 PSA10 통합 시세 개선</title>
       <link>https://www.optcgkorea.com/prices</link>
       <description>카드별 시세 그래프, 최근 거래 기록, PSA10 통합 시세 표시를 개선했습니다.</description>
       <pubDate>Wed, 10 Jun 2026 00:00:00 +0900</pubDate>
@@ -27,26 +33,8 @@
     <item>
       <title>OP-16 업데이트 완료</title>
       <link>https://www.optcgkorea.com/cards</link>
-      <description>일본판 부스터 팩 OP-16 카드도감, 이미지, 상세 정보를 추가했습니다.</description>
+      <description>일본판 부스터 OP-16 카드 도감, 이미지, 상세 정보를 추가했습니다.</description>
       <pubDate>Sat, 30 May 2026 00:00:00 +0900</pubDate>
-    </item>
-    <item>
-      <title>홈페이지 UI 리뉴얼 및 시세 매핑 개선</title>
-      <link>https://www.optcgkorea.com/</link>
-      <description>메인 화면, 카드 도감, 시세 확인 화면을 정리하고 카드별 시세 상품 이동 구조를 개선했습니다.</description>
-      <pubDate>Fri, 29 May 2026 00:00:00 +0900</pubDate>
-    </item>
-    <item>
-      <title>카드 빠른 검색 및 컬렉션 가치 팝업 추가</title>
-      <link>https://www.optcgkorea.com/cards</link>
-      <description>카드도감 빠른 검색 버튼과 컬렉션 가치 이미지 팝업 기능을 추가했습니다.</description>
-      <pubDate>Mon, 25 May 2026 00:00:00 +0900</pubDate>
-    </item>
-    <item>
-      <title>원피스 카드 구매처 지도 링크 개선</title>
-      <link>https://www.optcgkorea.com/shops</link>
-      <description>오프라인 구매처 검색과 네이버지도, 카카오맵 이동 흐름을 개선했습니다.</description>
-      <pubDate>Thu, 21 May 2026 00:00:00 +0900</pubDate>
     </item>
   </channel>
 </rss>

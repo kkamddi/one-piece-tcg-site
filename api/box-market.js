@@ -95,7 +95,7 @@ async function fetchBox(item) {
     const response = await fetch(item.sourceUrl, {
       headers: {
         Accept: 'text/html,application/xhtml+xml',
-        'User-Agent': 'Mozilla/5.0 OPTCGKoreaBot/1.0'
+        'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0'
       },
       cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true }
     });

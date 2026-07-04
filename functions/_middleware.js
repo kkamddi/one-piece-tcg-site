@@ -1,46 +1,490 @@
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
+const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
+const LEGACY_REDIRECTS = {
+  '/deck': '/news',
+  '/deck-simulator': '/news',
+  '/community': '/',
+  '/collection': '/'
+};
 
 const PAGE_SEO = {
   '/': {
-    title: 'OPTCG Korea - 원피스 카드 도감, 시세, 컬렉션 관리',
-    description: 'OPTCG Korea는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세, 컬렉션 관리 서비스입니다.',
-    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, OPTCG, OPTCG Korea'
+    title: 'Card Pone - 원피스 카드 도감, 시세, 컬렉션 관리',
+    description: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세, 컬렉션 관리 서비스입니다.',
+    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, OPTCG, Card Pone'
   },
   '/cards': {
-    title: '원피스 카드 도감 - 한글판 일본판 카드 검색 | OPTCG Korea',
+    title: '원피스 카드 도감 - 한글판 일본판 카드 검색 | Card Pone',
     description: '한글판과 일본판 원피스 카드게임 카드를 OP, EB, ST, 프로모 시리즈별로 검색하고 보유 카드와 위시리스트를 관리할 수 있습니다.',
     keywords: '원피스카드 도감, 원피스 카드 검색, OP16, OP15, 일본판 원피스카드, 한글판 원피스카드'
   },
   '/prices': {
-    title: '원피스 카드 시세 - 카드별 시세 그래프와 박스 가격 | OPTCG Korea',
+    title: '원피스 카드 시세 - 카드별 시세 그래프와 박스 가격 | Card Pone',
     description: '원피스 카드별 시세, 박스 가격, PSA10 통합 시세, 최근 거래 기록과 가격 그래프를 확인할 수 있습니다.',
     keywords: '원피스카드 시세, 원피스 카드 가격, 원피스카드 박스 시세, PSA10 시세, SNKRDUNK 원피스카드'
   },
+  '/market': {
+    title: '원피스 카드 거래 - 유저 교환과 판매 게시판 | Card Pone',
+    description: 'Card Pone 거래 페이지는 유저 간 원피스 카드 판매, 교환, 구매 글을 카페 인증 기반으로 운영하기 위한 공간입니다.',
+    keywords: '원피스카드 거래, 원피스 카드 교환, 원피스카드 판매, 원피스카드 마켓'
+  },
   '/news': {
-    title: '원피스 카드 공지사항 및 업데이트 | OPTCG Korea',
-    description: 'OPTCG Korea의 카드 데이터 업데이트, 시세 기능 개선, 원피스 카드게임 관련 공지사항을 확인할 수 있습니다.',
-    keywords: 'OPTCG Korea 공지사항, 원피스카드 업데이트, 원피스카드 뉴스'
+    title: '원피스 카드 공지사항 및 업데이트 | Card Pone',
+    description: 'Card Pone의 카드 데이터 업데이트, 시세 기능 개선, 원피스 카드게임 관련 공지사항을 확인할 수 있습니다.',
+    keywords: 'Card Pone 공지사항, 원피스카드 업데이트, 원피스카드 뉴스'
   },
   '/shops': {
-    title: '원피스 카드 구매처 - 지역별 공인점포 취급점포 | OPTCG Korea',
+    title: '원피스 카드 구매처 - 지역별 공인점포 취급점포 | Card Pone',
     description: '원피스 카드게임 오프라인 구매처를 지역별로 검색하고 공인점포와 취급점포 정보를 확인할 수 있습니다.',
     keywords: '원피스카드 구매처, 원피스 카드 공인점포, 원피스카드 매장, 원피스카드 취급점포'
   },
+  '/about': {
+    title: 'Card Pone 소개 | 원피스카드 도감·시세·컬렉션 관리',
+    description: 'Card Pone의 운영 목적, 제공 기능, 비공식 팬 서비스 고지와 문의 채널을 안내합니다.',
+    keywords: 'Card Pone 소개, 원피스카드 도감, 원피스카드 시세, 원피스카드 컬렉션'
+  },
+  '/data-policy': {
+    title: '데이터 운영 정책 | Card Pone',
+    description: 'Card Pone의 카드 도감, 시세, 지수, 구매처 데이터 수집 기준과 한계를 안내합니다.',
+    keywords: 'Card Pone 데이터 정책, 원피스카드 시세 데이터, 원피스카드 도감 데이터'
+  },
   '/terms': {
-    title: '이용약관 | OPTCG Korea',
-    description: 'OPTCG Korea 서비스 이용 조건과 시세 정보, 컬렉션 관리 기능의 이용 기준을 안내합니다.',
-    keywords: 'OPTCG Korea 이용약관, 원피스카드 서비스 약관'
+    title: '이용약관 | Card Pone',
+    description: 'Card Pone 서비스 이용 조건과 시세 정보, 컬렉션 관리 기능의 이용 기준을 안내합니다.',
+    keywords: 'Card Pone 이용약관, 원피스카드 서비스 약관'
   },
   '/privacy': {
-    title: '개인정보처리방침 | OPTCG Korea',
-    description: 'OPTCG Korea의 개인정보 수집, 이용, 보관, 삭제 및 문의 방법을 안내합니다.',
-    keywords: 'OPTCG Korea 개인정보처리방침, 원피스카드 개인정보'
+    title: '개인정보처리방침 | Card Pone',
+    description: 'Card Pone의 개인정보 수집, 이용, 보관, 삭제 및 문의 방법을 안내합니다.',
+    keywords: 'Card Pone 개인정보처리방침, 원피스카드 개인정보'
   }
 };
 
+const ROUTE_SEO = {
+  '/cards/jp': {
+    title: '일본판 원피스카드 도감 | Card Pone',
+    description: '일본판 원피스 카드게임 카드 목록을 OP, EB, ST, 프로모 시리즈별로 검색하고 확인할 수 있습니다.',
+    keywords: '일본판 원피스카드, 원피스카드 일본판 도감, OP 카드 리스트'
+  },
+  '/cards/kr': {
+    title: '한글판 원피스카드 도감 | Card Pone',
+    description: '한글판 원피스 카드게임 카드 목록을 시리즈별로 검색하고 보유 카드와 위시리스트를 관리할 수 있습니다.',
+    keywords: '한글판 원피스카드, 원피스카드 한글판 도감, 원피스카드 검색'
+  },
+  '/prices/cards': {
+    title: '원피스카드 싱글 카드 시세 | Card Pone',
+    description: 'SNKRDUNK 기준 원피스카드 싱글 카드 가격과 주요 카드 시세를 확인할 수 있습니다.',
+    keywords: '원피스카드 싱글 시세, 원피스카드 가격, SNKRDUNK 원피스카드'
+  },
+  '/prices/boxes': {
+    title: '원피스카드 박스 시세 | Card Pone',
+    description: '원피스 카드게임 부스터 박스와 팩 가격을 최신순, 가격 높은순, 가격 낮은순으로 확인할 수 있습니다.',
+    keywords: '원피스카드 박스 시세, 원피스카드 박스 가격, 부스터 박스'
+  },
+  '/prices/index': {
+    title: 'OPTCG Collector Index | Card Pone',
+    description: 'Card Pone가 추적하는 원피스카드 대표 지수와 하위 섹터 지수를 확인할 수 있습니다.',
+    keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표'
+  },
+  '/prices/index/manga': {
+    title: 'OPTCG Manga Index | Card Pone',
+    description: '원피스카드 망가 카드 중심의 Manga Index 가격 흐름을 확인할 수 있습니다.',
+    keywords: '원피스카드 망가 시세, Manga Index, 망가 카드 가격'
+  },
+  '/prices/index/premium-art': {
+    title: 'OPTCG Premium Art Index | Card Pone',
+    description: '수배서, 금배경, 은배경 등 프리미엄 아트 카드 중심의 지수를 확인할 수 있습니다.',
+    keywords: '원피스카드 수배서, 프리미엄 아트, 금배경 은배경'
+  },
+  '/prices/index/sp': {
+    title: 'OPTCG SP Index | Card Pone',
+    description: '원피스카드 SP 계열 카드 가격 흐름을 지수로 확인할 수 있습니다.',
+    keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index'
+  },
+  '/prices/index/luffy': {
+    title: 'OPTCG Luffy Index | Card Pone',
+    description: '몽키 D. 루피 주요 카드 가격 흐름을 Luffy Index로 확인할 수 있습니다.',
+    keywords: '루피 카드 시세, Monkey D Luffy 카드, OPTCG Luffy Index'
+  },
+  '/news/official': {
+    title: '원피스카드 공식 공지 모음 | Card Pone',
+    description: '한글판과 일본판 원피스 카드게임 공식 공지를 한곳에서 확인할 수 있습니다.',
+    keywords: '원피스카드 공식공지, 원피스카드 뉴스, 원피스카드 업데이트'
+  },
+  '/news/preorder': {
+    title: '원피스카드 사전예약 정보 | Card Pone',
+    description: '원피스 카드게임 사전예약, 아마존 응모, 예약구매 바로가기 정보를 정리합니다.',
+    keywords: '원피스카드 사전예약, OP17 예약, 아마존 원피스카드'
+  },
+  '/news/oripa': {
+    title: '온라인 오리파 정보 | Card Pone',
+    description: '온라인 오리파 플랫폼 바로가기와 이용 전 확인해야 할 주의사항을 정리합니다.',
+    keywords: '온라인 오리파, 원피스카드 오리파, 미스터리팩'
+  },
+  '/news/supplies': {
+    title: '원피스카드 보관용품 | Card Pone',
+    description: '슬리브, 탑로더, 바인더, 자석케이스 등 카드 보관용품 정보를 확인할 수 있습니다.',
+    keywords: '카드 슬리브, 탑로더, 카드 바인더, 카드 보관함'
+  },
+  '/guide': {
+    title: '원피스카드 입문 가이드 | Card Pone',
+    description: '원피스카드 수집, 시세 확인, 보관, 구매 방향성을 처음 이용자도 이해하기 쉽게 정리합니다.',
+    keywords: '원피스카드 입문, 원피스카드 수집 가이드, 원피스카드 보관'
+  },
+  '/faq': {
+    title: '원피스카드 Q&A | Card Pone',
+    description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인에 대한 자주 묻는 질문을 정리합니다.',
+    keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 레어도'
+  },
+  '/shops/official': {
+    title: '원피스카드 공인점포 | Card Pone',
+    description: '원피스 카드게임 공인점포와 취급점포를 지역별로 확인할 수 있습니다.',
+    keywords: '원피스카드 공인점포, 원피스카드 매장, 원피스카드 구매처'
+  }
+};
+
+const SEO_FIXES = {
+  '/': {
+    title: 'Card Pone - 원피스카드 도감, 시세, 컬렉션 관리',
+    description: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세, 지수, 구매처, 컬렉션 관리 서비스입니다.',
+    keywords: '원피스카드, 원피스 카드게임, 원피스카드 도감, 원피스카드 시세, 원피스카드 구매처, Card Pone',
+    schemaType: 'WebPage'
+  },
+  '/cards': {
+    title: '원피스카드 도감 - 한글판 일본판 카드 검색 | Card Pone',
+    description: '한글판과 일본판 원피스카드를 OP, EB, ST, PR 시리즈별로 검색하고 일련번호, 카드명, 레어도, 보유 카드와 위시리스트를 확인할 수 있습니다.',
+    keywords: '원피스카드 도감, 원피스카드 검색, 일본판 원피스카드, 한글판 원피스카드, OP16, OP13',
+    schemaType: 'CollectionPage'
+  },
+  '/prices': {
+    title: '원피스카드 시세 - 카드 가격, 박스 가격, 가격 지수 | Card Pone',
+    description: '원피스카드 싱글 카드 시세, 박스 가격, PSA10 통합 시세, 최근 거래 기록, 가격 그래프와 OPTCG Index를 확인할 수 있습니다.',
+    keywords: '원피스카드 시세, 원피스카드 가격, 원피스카드 박스 시세, PSA10 시세, SNKRDUNK 원피스카드',
+    schemaType: 'CollectionPage'
+  },
+  '/prices/cards': {
+    title: '원피스카드 싱글 카드 시세 | Card Pone',
+    description: 'SNKRDUNK 기준 원피스카드 싱글 카드 가격과 주요 카드 시세 후보를 확인할 수 있습니다.',
+    keywords: '원피스카드 싱글 시세, 원피스카드 가격, SNKRDUNK 원피스카드',
+    schemaType: 'CollectionPage'
+  },
+  '/prices/boxes': {
+    title: '원피스카드 박스 시세 | Card Pone',
+    description: '원피스 카드게임 부스터 박스와 팩 가격을 최신순, 가격 높은순, 가격 낮은순으로 확인할 수 있습니다.',
+    keywords: '원피스카드 박스 시세, 원피스카드 박스 가격, 원피스카드 부스터 박스',
+    schemaType: 'CollectionPage'
+  },
+  '/prices/index': {
+    title: 'OPTCG Collector Index - 원피스카드 가격 지수 | Card Pone',
+    description: 'Card Pone가 추적하는 원피스카드 대표 가격 지수와 Manga, Premium Art, SP, Luffy 하위 지수를 확인할 수 있습니다.',
+    keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표, 망가카드 시세',
+    schemaType: 'Dataset'
+  },
+  '/prices/index/manga': {
+    title: 'OPTCG Manga Index - 원피스카드 망가 지수 | Card Pone',
+    description: '원피스카드 망가 카드 중심의 Manga Index 가격 흐름과 구성 종목을 확인할 수 있습니다.',
+    keywords: '원피스카드 망가, Manga Index, 망가 카드 가격, 원피스카드 지수',
+    schemaType: 'Dataset'
+  },
+  '/prices/index/premium-art': {
+    title: 'OPTCG Premium Art Index - 원피스카드 프리미엄 아트 지수 | Card Pone',
+    description: '수배서, 금배경, 은배경 등 프리미엄 아트 카드 중심의 가격 지수를 확인할 수 있습니다.',
+    keywords: '원피스카드 수배서, 프리미엄 아트, 금배경, 은배경, OPTCG Premium Art Index',
+    schemaType: 'Dataset'
+  },
+  '/prices/index/sp': {
+    title: 'OPTCG SP Index - 원피스카드 SP 지수 | Card Pone',
+    description: '원피스카드 SP 계열 카드 가격 흐름과 구성 종목을 지수로 확인할 수 있습니다.',
+    keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index',
+    schemaType: 'Dataset'
+  },
+  '/prices/index/luffy': {
+    title: 'OPTCG Luffy Index - 루피 카드 가격 지수 | Card Pone',
+    description: '몽키 D. 루피 주요 카드 가격 흐름과 대표 루피 카드 시세를 Luffy Index로 확인할 수 있습니다.',
+    keywords: '루피 카드 시세, Monkey D Luffy 카드, OPTCG Luffy Index, 원피스카드 루피',
+    schemaType: 'Dataset'
+  },
+  '/news': {
+    title: '원피스카드 정보 - 공식공지, 사전예약, 가이드 | Card Pone',
+    description: '원피스카드 공식 소식, 업데이트 공지, 이용 가이드, 사전예약, 온라인 오리파, 카드 보관용품 정보를 확인할 수 있습니다.',
+    keywords: '원피스카드 공지, 원피스카드 뉴스, 원피스카드 가이드, 원피스카드 사전예약',
+    schemaType: 'CollectionPage'
+  },
+  '/news/official': {
+    title: '원피스카드 공식 공지 모음 | Card Pone',
+    description: '한글판과 일본판 원피스 카드게임 공식 공지를 한곳에서 확인할 수 있습니다.',
+    keywords: '원피스카드 공식공지, 원피스카드 뉴스, 원피스카드 업데이트',
+    schemaType: 'CollectionPage'
+  },
+  '/news/preorder': {
+    title: '원피스카드 사전예약 정보 | Card Pone',
+    description: '원피스 카드게임 사전예약, 아마존 응모, 예약구매 바로가기 정보를 정리합니다.',
+    keywords: '원피스카드 사전예약, OP17 예약, 아마존 원피스카드',
+    schemaType: 'CollectionPage'
+  },
+  '/news/supplies': {
+    title: '원피스카드 보관용품 | Card Pone',
+    description: '슬리브, 탑로더, 카드 세이버, 자석케이스, 바인더 등 원피스카드 보관용품 정보를 확인할 수 있습니다.',
+    keywords: '원피스카드 보관용품, 카드 슬리브, 탑로더, 카드 바인더, 자석케이스',
+    schemaType: 'CollectionPage'
+  },
+  '/guide': {
+    title: '원피스카드 입문 가이드 | Card Pone',
+    description: '원피스카드 수집, 시세 확인, 보관, 구매 방향성을 처음 이용자도 이해하기 쉽게 정리합니다.',
+    keywords: '원피스카드 입문, 원피스카드 수집 가이드, 원피스카드 보관, 원피스카드 구매',
+    schemaType: 'Article'
+  },
+  '/guide/card-storage': {
+    title: '원피스카드 보관 방법 - 슬리브, 탑로더, 바인더 | Card Pone',
+    description: '원피스카드 보관 방법을 슬리브, 탑로더, 카드 세이버, 자석케이스, 바인더 기준으로 정리했습니다.',
+    keywords: '원피스카드 보관 방법, 카드 보관, 카드 슬리브, 탑로더, 바인더',
+    schemaType: 'Article'
+  },
+  '/guide/shops': {
+    title: '원피스카드 파는 곳 - 공인점포와 취급점포 찾기 | Card Pone',
+    description: '원피스카드 파는 곳을 공식 홈페이지 기준 공인점포와 취급점포로 정리하고 지역별 검색과 내 주변순 정렬 방법을 안내합니다.',
+    keywords: '원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 매장, 원피스카드 공인점포',
+    schemaType: 'Article'
+  },
+  '/guide/card-price': {
+    title: '원피스카드 시세 보는 법 | Card Pone',
+    description: '원피스카드 시세를 일련번호, 카드 버전, A등급, PSA10, 최근 거래 기록과 기간별 그래프로 확인하는 방법을 정리했습니다.',
+    keywords: '원피스카드 시세 보는 법, 원피스카드 가격 확인, PSA10 시세, 원피스카드 그래프',
+    schemaType: 'Article'
+  },
+  '/guide/card-catalog': {
+    title: '원피스카드 도감 사용법 - 일련번호와 카드명 검색 | Card Pone',
+    description: '원피스카드 도감에서 한글판과 일본판 카드, OP/EB/ST/PR 시리즈, 일련번호와 카드명 검색을 사용하는 방법을 정리했습니다.',
+    keywords: '원피스카드 도감 사용법, 원피스카드 일련번호, 원피스카드 검색',
+    schemaType: 'Article'
+  },
+  '/faq': {
+    title: '원피스카드 Q&A | Card Pone',
+    description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
+    keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 레어도, 원피스카드 봉입률',
+    schemaType: 'FAQPage'
+  },
+  '/shops': {
+    title: '원피스카드 구매처 - 지역별 공인점포와 취급점포 | Card Pone',
+    description: '원피스 카드게임 오프라인 구매처를 지역별로 검색하고 공인점포와 취급점포, 네이버지도와 카카오맵 바로가기를 확인할 수 있습니다.',
+    keywords: '원피스카드 구매처, 원피스카드 공인점포, 원피스카드 매장, 원피스카드 취급점포',
+    schemaType: 'CollectionPage'
+  }
+};
+
+const SEO_PRIMARY = {
+  '/': {
+    title: '카드포네 Card Pone - 원피스카드 도감·시세·구매처',
+    description: '카드포네는 원피스카드 한글판·일본판 도감, 카드별 시세 그래프, 박스 가격, 카드 인덱스, 구매처와 수집 가이드를 제공하는 카드 정보 서비스입니다.',
+    keywords: '카드포네, 카드 포네, Card Pone, 원피스카드, 원피스카드 도감, 원피스카드 시세, 원피스카드 구매처, 원피스카드 지수',
+    schemaType: 'WebPage'
+  },
+  '/cards': {
+    title: '원피스카드 도감 - 한글판·일본판 카드 검색 | 카드포네',
+    description: '원피스카드 한글판과 일본판 카드를 OP, EB, ST, PR 시리즈별로 검색하고 일련번호, 카드명, 보유 카드와 위시리스트를 확인할 수 있습니다.',
+    keywords: '원피스카드 도감, 원피스카드 검색, 일본판 원피스카드, 한글판 원피스카드, 카드포네',
+    schemaType: 'CollectionPage'
+  },
+  '/prices': {
+    title: '원피스카드 시세 - 카드 가격·박스 가격·인덱스 | 카드포네',
+    description: '원피스카드 싱글 카드 시세, 박스 가격, 최근 거래 기록, 가격 그래프와 OPTCG Collector Index를 확인할 수 있습니다.',
+    keywords: '원피스카드 시세, 원피스카드 가격, 원피스카드 박스 시세, 카드포네 시세, SNKRDUNK 원피스카드',
+    schemaType: 'CollectionPage'
+  },
+  '/prices/cards': {
+    title: '원피스카드 싱글 카드 시세 | 카드포네',
+    description: '원피스카드 싱글 카드 가격을 카드명, 일련번호, 상품명 기준으로 검색하고 시세 그래프와 최근 거래 기록을 확인할 수 있습니다.',
+    keywords: '원피스카드 싱글 시세, 원피스카드 가격 검색, 카드포네 카드 시세',
+    schemaType: 'CollectionPage'
+  },
+  '/prices/boxes': {
+    title: '원피스카드 박스 시세 | 카드포네',
+    description: '원피스카드 부스터 박스와 팩 상품 가격을 최신순, 가격 높은순, 가격 낮은순으로 확인할 수 있습니다.',
+    keywords: '원피스카드 박스 시세, 원피스카드 박스 가격, 부스터 박스 가격',
+    schemaType: 'CollectionPage'
+  },
+  '/prices/index': {
+    title: 'OPTCG Collector Index - 원피스카드 가격 지수 | 카드포네',
+    description: '대표 원피스카드 가격 흐름을 Collector Index와 Manga, Premium Art, SP, Luffy 하위 지수로 확인할 수 있습니다.',
+    keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 가격 지표, 카드포네 인덱스',
+    schemaType: 'Dataset'
+  },
+  '/news': {
+    title: '원피스카드 정보 - 공식공지·사전예약·가이드 | 카드포네',
+    description: '원피스카드 공식 공지, 사전예약 정보, 온라인 오리파, 카드 보관용품, 수집 가이드와 Q&A를 확인할 수 있습니다.',
+    keywords: '원피스카드 정보, 원피스카드 공지, 원피스카드 사전예약, 카드포네 뉴스',
+    schemaType: 'CollectionPage'
+  },
+  '/shops': {
+    title: '원피스카드 구매처 - 지역별 공인점포·취급점포 | 카드포네',
+    description: '원피스카드 오프라인 구매처를 지역, 시군구, 매장 유형으로 검색하고 가까운 매장과 지도 바로가기를 확인할 수 있습니다.',
+    keywords: '원피스카드 구매처, 원피스카드 매장, 원피스카드 공인점포, 원피스카드 취급점포',
+    schemaType: 'CollectionPage'
+  },
+  '/guide': {
+    title: '원피스카드 입문 가이드 | 카드포네',
+    description: '원피스카드 수집 방향, 카드 보관 방법, 구매처 이용 방법, 도감과 시세 활용 방법을 입문자도 이해하기 쉽게 정리합니다.',
+    keywords: '원피스카드 가이드, 원피스카드 입문, 원피스카드 수집, 원피스카드 보관 방법',
+    schemaType: 'Article'
+  },
+  '/faq': {
+    title: '원피스카드 Q&A | 카드포네',
+    description: '원피스카드 언어판, 봉입률, 박스 구매, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
+    keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 질문, 카드포네',
+    schemaType: 'FAQPage'
+  }
+};
+
+const SITE_NAVIGATION_ITEMS = [
+  { name: '도감', url: `${SITE_ORIGIN}/cards`, description: '한글판·일본판 원피스카드 도감 검색' },
+  { name: '시세', url: `${SITE_ORIGIN}/prices`, description: '카드 시세, 박스 가격, 카드 인덱스' },
+  { name: '정보', url: `${SITE_ORIGIN}/news`, description: '공식공지, 사전예약, 가이드와 Q&A' },
+  { name: '구매처', url: `${SITE_ORIGIN}/shops`, description: '지역별 공인점포와 취급점포 검색' },
+  { name: '가이드/Q&A', url: `${SITE_ORIGIN}/guide`, description: '원피스카드 입문 및 수집 가이드' }
+];
+
+function getFixedPageSeo(normalized) {
+  const indexAliases = {
+    '/prices/collector-index': '/prices/index',
+    '/prices/manga-index': '/prices/index/manga',
+    '/prices/premium-art-index': '/prices/index/premium-art',
+    '/prices/sp-index': '/prices/index/sp',
+    '/prices/luffy-index': '/prices/index/luffy'
+  };
+  const aliasTarget = indexAliases[normalized];
+  if (aliasTarget && SEO_PRIMARY[aliasTarget]) return SEO_PRIMARY[aliasTarget];
+  if (SEO_PRIMARY[normalized]) return SEO_PRIMARY[normalized];
+  if (aliasTarget && SEO_FIXES[aliasTarget]) return SEO_FIXES[aliasTarget];
+  if (SEO_FIXES[normalized]) return SEO_FIXES[normalized];
+  if (normalized.startsWith('/cards/series/')) {
+    const series = normalized.split('/').pop()?.toUpperCase() || 'SERIES';
+    return {
+      title: `${series} 원피스카드 리스트 | Card Pone`,
+      description: `${series} 시리즈의 원피스 카드게임 카드 목록, 일련번호, 레어도, 보유 카드 정보를 확인할 수 있습니다.`,
+      keywords: `${series} 원피스카드, ${series} 카드 리스트, 원피스카드 도감`,
+      schemaType: 'CollectionPage'
+    };
+  }
+  if (normalized.startsWith('/shops/')) {
+    const region = decodeURIComponent(normalized.split('/').pop() || '').replace(/-/g, ' ');
+    return {
+      title: `${region} 원피스카드 구매처 | Card Pone`,
+      description: `${region} 지역의 원피스 카드게임 공인점포와 취급점포 정보를 확인할 수 있습니다.`,
+      keywords: `${region} 원피스카드 매장, ${region} 원피스카드 구매처, 원피스카드 공인점포`,
+      schemaType: 'CollectionPage'
+    };
+  }
+  if (normalized.startsWith('/prices/product/')) {
+    const id = normalized.slice('/prices/product/'.length);
+    return {
+      title: `SNKRDUNK 상품 #${id} 원피스카드 시세 | Card Pone`,
+      description: `SNKRDUNK 상품 #${id}의 원피스카드 시세, 가격 그래프, 최근 거래 기록을 확인할 수 있습니다.`,
+      keywords: `SNKRDUNK ${id}, 원피스카드 시세, 원피스카드 가격`,
+      schemaType: 'Product'
+    };
+  }
+  if (normalized.startsWith('/prices/card/')) {
+    const code = normalized.slice('/prices/card/'.length).toUpperCase();
+    return {
+      title: `${code} 원피스카드 시세 | Card Pone`,
+      description: `${code} 일련번호의 원피스카드 시세 후보, 카드 버전, 가격 정보를 확인할 수 있습니다.`,
+      keywords: `${code} 원피스카드 시세, ${code} 카드 가격, 원피스카드 일련번호`,
+      schemaType: 'Product'
+    };
+  }
+  if (normalized.startsWith('/prices/box/')) {
+    const code = normalized.slice('/prices/box/'.length).toUpperCase();
+    return {
+      title: `${code} 원피스카드 박스 시세 | Card Pone`,
+      description: `원피스 카드게임 ${code} 부스터 박스 가격과 SNKRDUNK 상품 정보를 확인할 수 있습니다.`,
+      keywords: `${code} 박스 시세, 원피스카드 박스 가격, 원피스카드 부스터 박스`,
+      schemaType: 'Product'
+    };
+  }
+  if (normalized.startsWith('/guide/')) {
+    const topic = decodeURIComponent(normalized.slice('/guide/'.length)).replace(/-/g, ' ');
+    return {
+      title: `원피스카드 가이드 - ${topic} | Card Pone`,
+      description: `원피스카드 수집가를 위한 ${topic} 가이드입니다.`,
+      keywords: `원피스카드 가이드, ${topic}, Card Pone`,
+      schemaType: 'Article'
+    };
+  }
+  if (normalized.startsWith('/faq/')) {
+    const topic = decodeURIComponent(normalized.slice('/faq/'.length)).replace(/-/g, ' ');
+    return {
+      title: `원피스카드 Q&A - ${topic} | Card Pone`,
+      description: `원피스카드 ${topic} 관련 자주 묻는 질문과 답변을 확인할 수 있습니다.`,
+      keywords: `원피스카드 Q&A, ${topic}, Card Pone`,
+      schemaType: 'FAQPage'
+    };
+  }
+  return null;
+}
+
 function getPageSeo(pathname) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
-  return PAGE_SEO[normalized] || null;
+  const fixedSeo = getFixedPageSeo(normalized);
+  if (fixedSeo) return fixedSeo;
+  if (ROUTE_SEO[normalized]) return ROUTE_SEO[normalized];
+  if (PAGE_SEO[normalized]) return PAGE_SEO[normalized];
+  if (normalized.startsWith('/cards/series/')) {
+    const series = normalized.split('/').pop()?.toUpperCase() || 'SERIES';
+    return {
+      title: `${series} 원피스카드 리스트 | Card Pone`,
+      description: `${series} 시리즈의 원피스 카드게임 카드 목록과 보유 카드 정보를 확인할 수 있습니다.`,
+      keywords: `${series} 원피스카드, ${series} 카드 리스트, 원피스카드 도감`
+    };
+  }
+  if (normalized.startsWith('/shops/')) {
+    const region = decodeURIComponent(normalized.split('/').pop() || '').replace(/-/g, ' ');
+    return {
+      title: `${region} 원피스카드 구매처 | Card Pone`,
+      description: `${region} 지역의 원피스 카드게임 공인점포와 취급점포 정보를 확인할 수 있습니다.`,
+      keywords: `${region} 원피스카드 매장, ${region} 원피스카드 구매처`
+    };
+  }
+  if (normalized.startsWith('/prices/product/')) {
+    const id = normalized.slice('/prices/product/'.length);
+    return {
+      title: `SNKRDUNK 상품 #${id} 시세 | Card Pone`,
+      description: `SNKRDUNK 상품 #${id}의 원피스카드 시세, 가격 그래프, 최근 거래 기록을 확인할 수 있습니다.`,
+      keywords: `SNKRDUNK ${id}, 원피스카드 시세, 원피스카드 가격`
+    };
+  }
+  if (normalized.startsWith('/prices/card/')) {
+    const code = normalized.slice('/prices/card/'.length).toUpperCase();
+    return {
+      title: `${code} 원피스카드 시세 | Card Pone`,
+      description: `${code} 일련번호의 원피스카드 시세 후보와 가격 정보를 확인할 수 있습니다.`,
+      keywords: `${code} 원피스카드 시세, ${code} 카드 가격`
+    };
+  }
+  if (normalized.startsWith('/prices/box/')) {
+    const code = normalized.slice('/prices/box/'.length).toUpperCase();
+    return {
+      title: `${code} 박스 시세 | Card Pone`,
+      description: `원피스 카드게임 ${code} 부스터 박스 가격과 SNKRDUNK 상품 정보를 확인할 수 있습니다.`,
+      keywords: `${code} 박스 시세, 원피스카드 박스 가격`
+    };
+  }
+  if (normalized.startsWith('/guide/')) {
+    const topic = decodeURIComponent(normalized.slice('/guide/'.length)).replace(/-/g, ' ');
+    return {
+      title: `원피스카드 가이드 - ${topic} | Card Pone`,
+      description: `원피스카드 수집가를 위한 ${topic} 가이드입니다.`,
+      keywords: `원피스카드 가이드, ${topic}, Card Pone`
+    };
+  }
+  if (normalized.startsWith('/faq/')) {
+    const topic = decodeURIComponent(normalized.slice('/faq/'.length)).replace(/-/g, ' ');
+    return {
+      title: `원피스카드 Q&A - ${topic} | Card Pone`,
+      description: `원피스카드 ${topic} 관련 자주 묻는 질문과 답변을 확인할 수 있습니다.`,
+      keywords: `원피스카드 Q&A, ${topic}, Card Pone`
+    };
+  }
+  return null;
 }
 
 function escapeHtml(value) {
@@ -58,9 +502,10 @@ function replaceOrInsertMeta(html, selectorPattern, replacement) {
 
 function createJsonLd(pathname, seo) {
   const url = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
-  return JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
+  const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const schemaType = seo.schemaType || 'WebPage';
+  const pageNode = {
+    '@type': schemaType,
     '@id': `${url}#webpage`,
     url,
     name: seo.title,
@@ -69,10 +514,99 @@ function createJsonLd(pathname, seo) {
     isPartOf: {
       '@type': 'WebSite',
       '@id': `${SITE_ORIGIN}/#website`,
-      name: 'OPTCG Korea',
+      name: 'Card Pone',
+      alternateName: ['카드포네', '카드 포네', '원피스카드 도감', '원피스카드 시세'],
       url: `${SITE_ORIGIN}/`
     },
     about: seo.keywords
+  };
+
+  if (schemaType === 'Article') {
+    pageNode.headline = seo.title;
+    pageNode.author = { '@type': 'Organization', name: 'Card Pone' };
+    pageNode.publisher = { '@id': `${SITE_ORIGIN}/#organization` };
+  }
+
+  if (schemaType === 'Product') {
+    pageNode.brand = { '@type': 'Brand', name: 'ONE PIECE Card Game' };
+    pageNode.category = 'Trading Card';
+  }
+
+  if (schemaType === 'Dataset') {
+    pageNode.creator = { '@type': 'Organization', name: 'Card Pone' };
+    pageNode.measurementTechnique = 'Market price index based on collected public market data';
+  }
+
+  if (schemaType === 'FAQPage') {
+    pageNode.mainEntity = [
+      {
+        '@type': 'Question',
+        name: '원피스카드 시세는 어떻게 확인하나요?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Card Pone의 시세 탭에서 일련번호나 카드명을 검색하면 카드 버전별 시세 후보, 가격 그래프, 최근 거래 기록을 확인할 수 있습니다.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: '원피스카드 도감에서는 무엇을 검색할 수 있나요?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: '한글판과 일본판 원피스카드를 OP, EB, ST, PR 시리즈와 일련번호, 카드명 기준으로 검색할 수 있습니다.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: '원피스카드 구매처는 어디에서 확인하나요?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: '구매처 탭에서 지역별 공인점포와 취급점포를 검색하고 네이버지도 또는 카카오맵으로 이동할 수 있습니다.'
+        }
+      }
+    ];
+  }
+
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      pageNode,
+      {
+        '@type': 'Organization',
+        '@id': `${SITE_ORIGIN}/#organization`,
+        name: 'Card Pone',
+        alternateName: ['카드포네', '카드 포네'],
+        url: `${SITE_ORIGIN}/`
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        name: 'Card Pone',
+        alternateName: ['카드포네', '카드 포네', '원피스카드 도감', '원피스카드 시세'],
+        url: `${SITE_ORIGIN}/`,
+        publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${SITE_ORIGIN}/prices?code={search_term_string}`,
+          'query-input': 'required name=search_term_string'
+        }
+      },
+      ...SITE_NAVIGATION_ITEMS.map((item, index) => ({
+        '@type': 'SiteNavigationElement',
+        '@id': `${item.url}#navigation`,
+        position: index + 1,
+        name: item.name,
+        description: item.description,
+        url: item.url
+      })),
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${url}#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Card Pone', item: `${SITE_ORIGIN}/` },
+          { '@type': 'ListItem', position: 2, name: seo.title, item: url }
+        ]
+      }
+    ]
   });
 }
 
@@ -82,7 +616,7 @@ function applySeo(html, pathname, seo) {
   const description = escapeHtml(seo.description);
   const keywords = escapeHtml(seo.keywords);
   const url = escapeHtml(canonicalUrl);
-  const image = `${SITE_ORIGIN}/og-preview.jpg`;
+  const image = `${SITE_ORIGIN}/og-preview-optcg.jpg`;
 
   let nextHtml = html
     .replace(/<title>.*?<\/title>/is, `<title>${title}</title>`)
@@ -115,8 +649,82 @@ function shouldSkip(pathname) {
   return /\.[a-z0-9]{2,8}$/i.test(pathname);
 }
 
+function hasMarketPreviewAccess(request) {
+  const cookie = request.headers.get('cookie') || '';
+  return cookie.split(';').map((part) => part.trim()).includes(`${MARKET_PREVIEW_COOKIE}=1`);
+}
+
+function renderMarketPasswordPage(errorMessage = '') {
+  const errorHtml = errorMessage ? `<p class="error">${escapeHtml(errorMessage)}</p>` : '';
+  return `<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>거래 탭 테스트 접근 | Card Pone</title>
+    <style>
+      :root { color-scheme: light; font-family: Pretendard, SUIT, -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #f7f7f5; color: #17191d; }
+      main { width: min(420px, calc(100vw - 32px)); padding: 28px; border: 1px solid #e5e1dc; border-radius: 24px; background: #fff; box-shadow: 0 18px 45px rgba(17, 24, 39, .08); }
+      h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.04em; }
+      p { margin: 0 0 18px; color: #6b7280; line-height: 1.55; font-size: 14px; }
+      label { display: grid; gap: 8px; font-weight: 800; font-size: 13px; }
+      input { height: 46px; border: 1px solid #d8d8d8; border-radius: 14px; padding: 0 14px; font: inherit; font-size: 16px; }
+      button { width: 100%; height: 46px; margin-top: 12px; border: 0; border-radius: 14px; background: #17191d; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+      .error { margin: 0 0 12px; color: #c23b22; font-weight: 800; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>거래 탭 테스트 접근</h1>
+      <p>현재 거래 기능은 검수용으로 제한 공개 중입니다.</p>
+      ${errorHtml}
+      <form method="post" action="/market">
+        <label>
+          비밀번호
+          <input name="password" type="password" autocomplete="current-password" autofocus />
+        </label>
+        <button type="submit">입장</button>
+      </form>
+    </main>
+  </body>
+</html>`;
+}
+
+async function handleMarketPreviewGate(request) {
+  if (hasMarketPreviewAccess(request)) return null;
+  if (request.method === 'POST') {
+    const formData = await request.formData().catch(() => null);
+    const password = String(formData?.get('password') || '');
+    if (password === MARKET_PREVIEW_PASSWORD) {
+      return new Response(null, {
+        status: 303,
+        headers: {
+          Location: '/market',
+          'Set-Cookie': `${MARKET_PREVIEW_COOKIE}=1; Path=/market; Max-Age=10; HttpOnly; Secure; SameSite=Lax`
+        }
+      });
+    }
+    return new Response(renderMarketPasswordPage('비밀번호가 올바르지 않습니다.'), {
+      status: 401,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+    });
+  }
+  return new Response(renderMarketPasswordPage(), {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+  });
+}
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
+  const legacyTarget = LEGACY_REDIRECTS[url.pathname.replace(/\/$/, '')];
+  if (legacyTarget) {
+    const redirectUrl = new URL(legacyTarget, SITE_ORIGIN);
+    return Response.redirect(redirectUrl.toString(), 301);
+  }
+
   if (shouldSkip(url.pathname)) return context.next();
 
   const seo = getPageSeo(url.pathname);

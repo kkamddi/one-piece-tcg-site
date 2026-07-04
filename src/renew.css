@@ -37,6 +37,10 @@
   padding: 10px clamp(18px, 4vw, 48px) 0;
 }
 
+.renew-subpage.is-marketplace-modal-open {
+  z-index: 10000;
+}
+
 .renew-nav {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -433,6 +437,14 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.renew-app button:focus-visible,
+.renew-app a:focus-visible,
+.renew-app input:focus-visible,
+.renew-app select:focus-visible {
+  outline: 3px solid rgba(201, 77, 53, 0.28);
+  outline-offset: 3px;
+}
+
 .renew-home {
   position: relative;
   width: min(1440px, 100%);
@@ -466,11 +478,17 @@
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: rgba(4, 23, 43, 0.05) 0 0 0 1px, rgba(0, 0, 0, 0.11) 0 24px 34px -18px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .renew-app.is-dark .renew-search {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(19, 23, 31, 0.88);
+}
+
+.renew-search:focus-within {
+  border-color: rgba(201, 77, 53, 0.34);
+  box-shadow: rgba(201, 77, 53, 0.1) 0 0 0 4px, rgba(0, 0, 0, 0.12) 0 24px 34px -18px;
 }
 
 .renew-locale-switch {
@@ -569,6 +587,13 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   white-space: nowrap;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.renew-official-links a:hover {
+  border-color: rgba(201, 77, 53, 0.26);
+  background: rgba(255, 255, 255, 0.88);
+  transform: translateY(-1px);
 }
 
 .renew-seo-summary {
@@ -822,6 +847,64 @@
   font-size: 22px;
 }
 
+.renew-home-index-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin-top: 14px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  padding: 13px 0 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-home-index-summary span {
+  display: block;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-home-index-summary strong {
+  display: block;
+  margin-top: 3px;
+  color: #17191c;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.renew-home-index-change {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.renew-home-index-change em {
+  border-radius: 999px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #6b7280;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.renew-home-index-change em.is-up {
+  color: #c94d35;
+}
+
+.renew-home-index-change em.is-down {
+  color: #2563eb;
+}
+
 .renew-update {
   right: 0;
   bottom: 26px;
@@ -875,6 +958,13 @@
   background: rgba(255, 255, 255, 0.62);
   text-align: left;
   cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.renew-home-news-list button:hover {
+  border-color: rgba(201, 77, 53, 0.2);
+  background: rgba(255, 255, 255, 0.86);
+  transform: translateY(-1px);
 }
 
 .renew-home-news-list strong {
@@ -905,6 +995,64 @@
   font-size: 13px;
   font-weight: 900;
   text-align: left;
+}
+
+.renew-home-guide-links {
+  display: grid;
+  gap: 14px;
+  width: min(1120px, calc(100% - 36px));
+  margin: 28px auto 0;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.renew-home-guide-links span {
+  display: block;
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.renew-home-guide-links h2 {
+  margin: 6px 0 0;
+  color: #17191c;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.renew-home-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-home-guide-grid a {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 16px;
+  padding: 14px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.68);
+  text-decoration: none;
+}
+
+.renew-home-guide-grid strong {
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-home-guide-grid small {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
 }
 
 .renew-home-updates-mini {
@@ -969,6 +1117,38 @@
   min-height: 720px;
   margin: 0 auto;
   padding: 60px clamp(18px, 4vw, 48px) 72px;
+}
+
+.renew-route-back-wrap {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 18px clamp(18px, 4vw, 48px) 0;
+}
+
+.renew-route-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.renew-route-back-button span {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.renew-app.is-dark .renew-route-back-button {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(19, 23, 31, 0.82);
+  color: #f7f7f8;
 }
 
 .renew-catalog {
@@ -1067,11 +1247,17 @@
   background: rgba(255, 255, 255, 0.74);
   font-weight: 900;
   cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
 }
 
 .renew-category-row.is-open {
   border-color: #5d2a1a;
   background: rgba(251, 225, 209, 0.42);
+}
+
+.renew-category-row:hover {
+  border-color: rgba(201, 77, 53, 0.24);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .renew-series-list {
@@ -1092,11 +1278,18 @@
   background: rgba(255, 255, 255, 0.72);
   text-align: left;
   cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
 }
 
 .renew-series-item.is-active {
   border-color: #5d2a1a;
   background: rgba(251, 225, 209, 0.52);
+}
+
+.renew-series-item:hover {
+  border-color: rgba(201, 77, 53, 0.24);
+  background: rgba(255, 255, 255, 0.88);
+  transform: translateY(-1px);
 }
 
 .renew-series-item b {
@@ -1272,6 +1465,13 @@
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.78);
   cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.renew-card-tile:hover {
+  border-color: rgba(201, 77, 53, 0.22);
+  box-shadow: rgba(4, 23, 43, 0.12) 0 16px 28px -24px;
+  transform: translateY(-2px);
 }
 
 .renew-card-tile.is-owned {
@@ -1287,7 +1487,7 @@
 .renew-card-image {
   position: relative;
   aspect-ratio: 5 / 7;
-  background: #f4f4f5;
+  background: linear-gradient(180deg, #f7f7f8, #eeeeef);
 }
 
 .renew-card-image img {
@@ -1295,6 +1495,21 @@
   height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.renew-app.is-dark .renew-category-row:hover,
+.renew-app.is-dark .renew-series-item:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.renew-app.is-dark .renew-card-tile:hover {
+  border-color: rgba(238, 169, 136, 0.3);
+  box-shadow: rgba(0, 0, 0, 0.26) 0 16px 28px -22px;
+}
+
+.renew-app.is-dark .renew-card-image {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
 }
 
 .renew-owned-badge {
@@ -1310,10 +1525,30 @@
   letter-spacing: -0.02em;
 }
 
+.renew-market-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.96);
+  padding: 4px 8px;
+  background: #d93f2f;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  box-shadow: rgba(4, 23, 43, 0.28) 0 10px 24px -12px;
+}
+
 .renew-card-body {
   display: grid;
-  gap: 4px;
+  gap: 3px;
   padding: 10px;
+  min-width: 0;
 }
 
 .renew-card-body b {
@@ -1360,6 +1595,11 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.renew-card-actions button:hover {
+  transform: translateY(-1px);
 }
 
 .renew-card-actions button.is-owned {
@@ -1457,6 +1697,12 @@
 .renew-modal-actions a {
   min-height: 46px;
   padding: 0 18px;
+}
+
+.renew-modal-market-link {
+  border-color: #d93f2f;
+  color: #fff;
+  background: #d93f2f;
 }
 
 .renew-placeholder {
@@ -1591,6 +1837,8 @@
   padding: 24px;
   background: rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .renew-news-guide-backdrop {
@@ -1636,6 +1884,34 @@
   line-height: 1.8;
 }
 
+.renew-announcement-modal ul {
+  margin: 18px 0 0;
+  padding-left: 0;
+  list-style: none;
+  color: #303640;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.renew-announcement-modal li,
+.renew-update-list li {
+  position: relative;
+  padding-left: 17px;
+}
+
+.renew-announcement-modal li::before,
+.renew-update-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 900;
+}
+
+.renew-announcement-modal li + li {
+  margin-top: 7px;
+}
+
 .renew-announcement-modal button {
   width: 100%;
   margin-top: 22px;
@@ -1658,6 +1934,10 @@
 
 .renew-app.is-dark .renew-announcement-modal p {
   color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-announcement-modal ul {
+  color: #e2e8f0;
 }
 
 .renew-auth-modal {
@@ -1987,7 +2267,8 @@
 
 .renew-update-list ul {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 0;
+  list-style: none;
   color: #17191c;
   font-size: 14px;
   line-height: 1.75;
@@ -2000,7 +2281,9 @@
 .renew-news-main {
   display: grid;
   gap: 18px;
-  padding-inline: clamp(18px, 2.4vw, 34px);
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(18px, 4vw, 48px) 72px;
 }
 
 .renew-sr-only {
@@ -2027,7 +2310,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 14px;
-  padding-left: 4px;
+  padding-left: 0;
 }
 
 .renew-news-filter-tabs button {
@@ -2181,6 +2464,157 @@
   font-weight: 900;
 }
 
+.renew-guide-feature-link {
+  display: grid;
+  gap: 6px;
+  margin: 18px 26px 0;
+  padding: 18px 20px;
+  border: 1px solid rgba(201, 77, 53, 0.22);
+  border-radius: 18px;
+  background: rgba(201, 77, 53, 0.06);
+  color: #17191c;
+  text-decoration: none;
+}
+
+.renew-guide-feature-link span,
+.renew-card-storage-cta span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.renew-guide-feature-link strong {
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.renew-guide-feature-link small {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-card-storage-guide {
+  padding: 0 0 30px;
+}
+
+.renew-card-storage-intro {
+  margin: 0;
+  padding: 16px 26px 0;
+  color: #4b5563;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+.renew-card-storage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 22px 26px 0;
+}
+
+.renew-card-storage-section,
+.renew-card-storage-checklist,
+.renew-card-storage-cta {
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.renew-card-storage-section {
+  padding: 20px;
+}
+
+.renew-card-storage-section h3,
+.renew-card-storage-checklist h3 {
+  margin: 0 0 12px;
+  color: #17191c;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.renew-card-storage-section ul,
+.renew-card-storage-checklist ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.renew-card-storage-section li,
+.renew-card-storage-checklist li {
+  position: relative;
+  padding-left: 14px;
+  color: #4b5563;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.renew-card-storage-section li::before,
+.renew-card-storage-checklist li::before {
+  content: "-";
+  position: absolute;
+  left: 0;
+  color: #c94d35;
+  font-weight: 950;
+}
+
+.renew-card-storage-checklist {
+  margin: 18px 26px 0;
+  padding: 20px;
+}
+
+.renew-card-storage-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 18px 26px 0;
+  padding: 20px;
+}
+
+.renew-card-storage-cta div {
+  display: grid;
+  gap: 6px;
+}
+
+.renew-card-storage-cta strong {
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.renew-card-storage-cta p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.renew-card-storage-cta a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #17191c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
 .renew-topic-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2262,7 +2696,7 @@
   grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr);
   gap: 14px;
   padding: 0;
-  margin-inline: 4px;
+  margin-inline: 0;
 }
 
 .renew-news-overview.is-filtered {
@@ -2473,7 +2907,7 @@
 .renew-news-supply-wrap {
   display: grid;
   gap: 14px;
-  margin-inline: 4px;
+  margin-inline: 0;
   padding: 20px 24px 26px;
 }
 
@@ -2715,6 +3149,79 @@
   font-size: 13px;
   line-height: 1.75;
   white-space: pre-line;
+}
+
+.renew-static-info-main {
+  padding: 34px 22px 80px;
+}
+
+.renew-static-info-page {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.renew-static-info-head {
+  margin-bottom: 22px;
+}
+
+.renew-static-info-head h1 {
+  margin: 0 0 10px;
+  color: #17191c;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.renew-static-info-head p {
+  max-width: 760px;
+  margin: 0;
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.renew-static-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.renew-static-info-card {
+  min-height: 100%;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 20px;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.05);
+}
+
+.renew-static-info-card h2 {
+  margin: 0 0 12px;
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.renew-static-info-card p,
+.renew-static-info-card li {
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.renew-static-info-card p {
+  margin: 0 0 10px;
+}
+
+.renew-static-info-card p:last-child {
+  margin-bottom: 0;
+}
+
+.renew-static-info-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .renew-progress-detail {
@@ -3025,6 +3532,2177 @@
   background: rgba(19, 23, 31, 0.86);
 }
 
+.renew-marketplace {
+  display: grid;
+  gap: 24px;
+}
+
+.renew-marketplace-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.renew-marketplace-head span {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.renew-marketplace-head h1 {
+  margin: 0;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.renew-marketplace-detail p,
+.renew-marketplace-seller p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.renew-marketplace-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.renew-marketplace-actions button,
+.renew-marketplace-contact,
+.renew-marketplace-price-link {
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 18px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.renew-marketplace-actions .renew-marketplace-primary-action,
+.renew-marketplace-contact {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-marketplace-actions .renew-marketplace-info-button {
+  flex: 0 0 42px;
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+  color: #c45136;
+  background: rgba(196, 80, 54, 0.08);
+}
+
+.renew-marketplace-price-link {
+  width: 100%;
+  border-color: rgba(196, 80, 54, 0.3);
+  color: #c45136;
+  background: rgba(196, 80, 54, 0.08);
+}
+
+.renew-marketplace-actions button:not(:disabled) {
+  cursor: pointer;
+}
+
+.renew-marketplace-actions button:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.renew-marketplace-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(23, 25, 28, 0.34);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.renew-marketplace-notice-box {
+  width: min(360px, 100%);
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 22px;
+  padding: 22px;
+  background: #fff;
+  box-shadow: rgba(4, 23, 43, 0.18) 0 28px 70px -30px;
+}
+
+.renew-marketplace-notice-box strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+}
+
+.renew-marketplace-notice-box p {
+  margin: 10px 0 18px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-marketplace-notice-box button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-verify-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(246, 243, 239, 0.96);
+  overflow: hidden;
+  overscroll-behavior: none;
+  isolation: isolate;
+}
+
+.renew-marketplace-verify-dialog {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 26px;
+  padding: 24px;
+  background: #fff;
+  box-shadow: rgba(4, 23, 43, 0.18) 0 28px 70px -30px;
+}
+
+.renew-marketplace-register-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(246, 243, 239, 0.96);
+  overflow: hidden;
+  overscroll-behavior: none;
+  isolation: isolate;
+}
+
+.renew-marketplace-register-dialog {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 22px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: rgba(4, 23, 43, 0.18) 0 28px 70px -30px;
+}
+
+.renew-marketplace-inquiry-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(246, 243, 239, 0.96);
+  overflow: hidden;
+  overscroll-behavior: none;
+  isolation: isolate;
+}
+
+.renew-marketplace-inquiry-dialog {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: min(520px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 22px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: rgba(4, 23, 43, 0.18) 0 28px 70px -30px;
+}
+
+.renew-marketplace-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(8, 10, 14, 0.86);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.renew-marketplace-image-viewer {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+  width: min(920px, 100%);
+  height: min(760px, calc(100dvh - 36px));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  padding: 16px;
+  background: rgba(15, 17, 22, 0.96);
+  box-shadow: rgba(0, 0, 0, 0.34) 0 28px 80px -30px;
+}
+
+.renew-marketplace-image-viewer-stage {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: grab;
+  touch-action: none;
+}
+
+.renew-marketplace-image-viewer-stage:active {
+  cursor: grabbing;
+}
+
+.renew-marketplace-image-viewer-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  transition: transform 0.08s ease-out;
+  will-change: transform;
+}
+
+.renew-marketplace-image-viewer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-image-viewer-controls button,
+.renew-marketplace-image-viewer-controls span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 0 14px;
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-marketplace-image-viewer-controls button {
+  cursor: pointer;
+}
+
+.renew-marketplace-chat-dialog {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: min(920px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 22px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: rgba(4, 23, 43, 0.18) 0 28px 70px -30px;
+}
+
+.renew-marketplace-chat-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 420px;
+  overflow: hidden;
+}
+
+.renew-marketplace-chat-list,
+.renew-marketplace-chat-room {
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(250, 249, 247, 0.86);
+}
+
+.renew-marketplace-chat-list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px;
+}
+
+.renew-marketplace-chat-list button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 14px;
+  padding: 9px;
+  color: inherit;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-marketplace-chat-list button.is-active {
+  border-color: #17191c;
+  background: rgba(23, 25, 28, 0.06);
+}
+
+.renew-marketplace-chat-list img {
+  width: 44px;
+  height: 58px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: rgba(23, 25, 28, 0.04);
+}
+
+.renew-marketplace-chat-list span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.renew-marketplace-chat-list b,
+.renew-marketplace-chat-list i,
+.renew-marketplace-chat-list em,
+.renew-marketplace-chat-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-marketplace-chat-list b {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-marketplace-chat-list i {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #c45136;
+  background: rgba(196, 80, 54, 0.1);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.renew-marketplace-chat-list small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-marketplace-chat-list em {
+  color: #4b5563;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.renew-marketplace-chat-room {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.renew-marketplace-chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.renew-marketplace-chat-bubble {
+  max-width: min(78%, 420px);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: #fff;
+  box-shadow: rgba(4, 23, 43, 0.06) 0 10px 22px -16px;
+}
+
+.renew-marketplace-chat-bubble.is-mine {
+  align-self: flex-end;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-marketplace-chat-bubble p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.renew-marketplace-chat-bubble span {
+  display: block;
+  margin-top: 5px;
+  opacity: 0.72;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-marketplace-chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+}
+
+.renew-marketplace-chat-form input {
+  min-width: 0;
+  height: 42px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.renew-marketplace-chat-form button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  color: #fff;
+  background: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-chat-form button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.renew-marketplace-chat-closed {
+  padding: 14px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  color: #6b7280;
+  background: rgba(23, 25, 28, 0.04);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.renew-marketplace-chat-empty,
+.renew-marketplace-chat-hint {
+  margin: auto;
+  padding: 18px;
+  color: #6b7280;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.renew-marketplace-chat-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #17191c;
+}
+
+.renew-marketplace-verify-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #17191c;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.renew-marketplace-verify-form,
+.renew-marketplace-verify-pending,
+.renew-marketplace-register-form {
+  display: grid;
+  gap: 12px;
+}
+
+.renew-marketplace-verify {
+  display: grid;
+  gap: 18px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 24px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.renew-marketplace-verify-title span {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.renew-marketplace-verify-title h2 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+
+.renew-marketplace-verify-title p {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-marketplace-verify-title a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 34px;
+  margin-top: 12px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.renew-marketplace-register-title h2 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+
+.renew-marketplace-register-title p {
+  margin: 7px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-marketplace-inquiry-title h2 {
+  margin: 0;
+  padding-right: 42px;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+
+.renew-marketplace-inquiry-title p {
+  margin: 7px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.renew-marketplace-guide-list {
+  display: grid;
+  gap: 10px;
+}
+
+.renew-marketplace-guide-list article {
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(246, 243, 239, 0.58);
+}
+
+.renew-marketplace-guide-list h3 {
+  margin: 0;
+  color: #17191c;
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: -0.025em;
+}
+
+.renew-marketplace-guide-list ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.renew-marketplace-inquiry-field {
+  display: grid;
+  gap: 7px;
+}
+
+.renew-marketplace-inquiry-field span {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-marketplace-inquiry-field textarea {
+  min-height: 140px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.84);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  resize: vertical;
+}
+
+.renew-marketplace-verify-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.renew-marketplace-register-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-marketplace-verify-fields label {
+  display: grid;
+  gap: 7px;
+}
+
+.renew-marketplace-register-fields label {
+  display: grid;
+  gap: 5px;
+}
+
+.renew-marketplace-verify-fields label:last-child {
+  grid-column: 1 / -1;
+}
+
+.renew-marketplace-register-description {
+  grid-column: 1 / -1;
+}
+
+.renew-marketplace-verify-fields span {
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-marketplace-register-fields span {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-marketplace-register-cardlink {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(23, 25, 28, 0.035);
+}
+
+.renew-marketplace-register-cardlink-head {
+  display: grid;
+  gap: 3px;
+}
+
+.renew-marketplace-register-cardlink-head strong {
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.renew-marketplace-register-cardlink-head span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.renew-marketplace-register-cardsearch {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 76px;
+  gap: 8px;
+}
+
+.renew-marketplace-register-cardsearch select,
+.renew-marketplace-register-cardsearch input,
+.renew-marketplace-register-cardsearch button {
+  min-width: 0;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 12px;
+  padding: 9px 10px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.renew-marketplace-register-cardsearch button {
+  color: #fff;
+  background: #17191c;
+  cursor: pointer;
+}
+
+.renew-marketplace-register-cardsearch button:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.renew-marketplace-linked-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(217, 63, 47, 0.22);
+  border-radius: 14px;
+  padding: 8px;
+  background: rgba(217, 63, 47, 0.08);
+}
+
+.renew-marketplace-linked-card img,
+.renew-marketplace-card-candidates img {
+  width: 42px;
+  height: 56px;
+  border-radius: 7px;
+  object-fit: cover;
+  background: #f3f4f6;
+}
+
+.renew-marketplace-linked-card div,
+.renew-marketplace-card-candidates span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.renew-marketplace-linked-card b,
+.renew-marketplace-card-candidates b {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.renew-marketplace-linked-card strong,
+.renew-marketplace-card-candidates strong {
+  overflow: hidden;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-marketplace-linked-card span,
+.renew-marketplace-card-candidates small {
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-marketplace-linked-card button {
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #17191c;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-card-candidates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.renew-marketplace-card-candidates button {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 13px;
+  padding: 7px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .renew-marketplace-register-cardsearch {
+    grid-template-columns: 78px minmax(0, 1fr) 62px;
+    gap: 6px;
+  }
+
+  .renew-marketplace-register-cardsearch select,
+  .renew-marketplace-register-cardsearch input,
+  .renew-marketplace-register-cardsearch button {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .renew-marketplace-card-candidates {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-marketplace-linked-card {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+  }
+}
+
+.renew-marketplace-verify-fields input,
+.renew-marketplace-verify-fields textarea,
+.renew-marketplace-register-fields input,
+.renew-marketplace-register-fields select,
+.renew-marketplace-register-fields textarea {
+  width: 100%;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 12px;
+  padding: 9px 11px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.82);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+}
+
+.renew-marketplace-verify-fields textarea,
+.renew-marketplace-register-fields textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.renew-marketplace-register-check {
+  display: flex !important;
+  align-items: center;
+  gap: 9px !important;
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 14px;
+  padding: 0 12px;
+  background: rgba(23, 25, 28, 0.04);
+}
+
+.renew-marketplace-register-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.renew-marketplace-register-photo {
+  display: grid;
+  gap: 6px;
+}
+
+.renew-marketplace-register-photo > span {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-marketplace-register-photo label {
+  display: grid;
+  gap: 3px;
+  min-height: 52px;
+  border: 1px dashed rgba(23, 25, 28, 0.2);
+  border-radius: 14px;
+  padding: 9px 11px;
+  color: #6b7280;
+  background: rgba(23, 25, 28, 0.04);
+  cursor: pointer;
+}
+
+.renew-marketplace-register-photo label input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.renew-marketplace-register-photo label b {
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-marketplace-register-photo label small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.renew-marketplace-register-previews {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.renew-marketplace-register-previews img {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 56px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f4f4f3;
+}
+
+.renew-marketplace-verify-review {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 12px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(23, 25, 28, 0.04);
+}
+
+.renew-marketplace-verify-review span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.renew-marketplace-verify-review b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-verify-pending h2 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 34px);
+  letter-spacing: -0.045em;
+}
+
+.renew-marketplace-verify-pending p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.6;
+}
+
+.renew-marketplace-verify-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.renew-marketplace-verify-grid div {
+  min-height: 120px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.renew-marketplace-verify-grid b {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-verify-grid p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-marketplace-verify-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-verify-actions button,
+.renew-marketplace-register-actions button {
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.84);
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-register-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-inquiry-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-verify-actions button:first-child,
+.renew-marketplace-register-actions button:first-child {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-marketplace-inquiry-actions button {
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.84);
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-inquiry-actions button:first-child {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-marketplace-status-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.renew-marketplace-status-options button {
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-status-options button.is-active {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-marketplace-verify-actions button:disabled,
+.renew-marketplace-register-actions button:disabled,
+.renew-marketplace-inquiry-actions button:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.renew-marketplace-admin {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 22px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.renew-marketplace-admin-head h2 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 32px);
+  letter-spacing: -0.045em;
+}
+
+.renew-marketplace-admin-head p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.renew-marketplace-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.renew-marketplace-admin-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 14px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-admin-tabs button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-marketplace-admin-tabs b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(23, 25, 28, 0.08);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.renew-marketplace-admin-tabs button.is-active b {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.renew-marketplace-admin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.renew-marketplace-admin-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.renew-marketplace-admin-row div {
+  display: grid;
+  gap: 4px;
+}
+
+.renew-marketplace-admin-row span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.renew-marketplace-admin-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-admin-row a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.renew-marketplace-admin-row p {
+  grid-column: 1 / -2;
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-marketplace-admin-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.renew-marketplace-admin-actions button {
+  min-height: 34px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-marketplace-admin-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.renew-marketplace-admin-empty {
+  border: 1px dashed rgba(23, 25, 28, 0.16);
+  border-radius: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.renew-marketplace-admin-empty strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.renew-marketplace-admin-empty p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.renew-marketplace-list-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.renew-marketplace-list-head h2 {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+
+.renew-marketplace-list-head p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-marketplace-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.renew-marketplace-filter button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  padding: 0 13px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-filter button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-marketplace-linked-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 1px solid rgba(217, 63, 47, 0.24);
+  border-radius: 18px;
+  padding: 12px 14px;
+  background: rgba(217, 63, 47, 0.06);
+}
+
+.renew-marketplace-linked-filter strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-linked-filter span {
+  color: #d93f2f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-marketplace-linked-filter button {
+  margin-left: auto;
+  min-height: 32px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #17191c;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-listings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.renew-marketplace-empty {
+  grid-column: 1 / -1;
+  border: 1px dashed rgba(23, 25, 28, 0.16);
+  border-radius: 20px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.renew-marketplace-empty strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.renew-marketplace-empty p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+
+.renew-marketplace-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 20px;
+  padding: 14px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: rgba(4, 23, 43, 0.04) 0 14px 28px -24px;
+}
+
+.renew-marketplace-card-image {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 164px;
+  border-radius: 16px;
+  background: #f4f4f3;
+  overflow: hidden;
+}
+
+.renew-marketplace-card-image img {
+  width: min(150px, 62%);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.82;
+}
+
+.renew-marketplace-card.is-muted {
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.renew-marketplace-card.is-muted .renew-marketplace-card-image img,
+.renew-marketplace-image.is-muted img {
+  opacity: 0.42;
+  filter: grayscale(0.2) saturate(0.7);
+}
+
+.renew-marketplace-status-overlay {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 86px;
+  min-height: 38px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 999px;
+  padding: 0 14px;
+  color: #fff;
+  background: rgba(23, 25, 28, 0.86);
+  box-shadow: rgba(4, 23, 43, 0.16) 0 16px 34px -18px;
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.renew-marketplace-card-body {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-marketplace-card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-card-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 0 8px;
+  color: #4b5563;
+  background: rgba(23, 25, 28, 0.06);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.renew-marketplace-card h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+.renew-marketplace-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.renew-marketplace-card-meta,
+.renew-marketplace-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.renew-marketplace-card-meta strong {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.renew-marketplace-card-meta span,
+.renew-marketplace-card-foot span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-marketplace-card-foot {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 36px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 13px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.renew-marketplace-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.renew-marketplace-preview,
+.renew-marketplace-detail {
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.renew-marketplace-preview {
+  padding: 18px;
+}
+
+.renew-marketplace-image {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 520px;
+  border-radius: 18px;
+  background: #f4f4f3;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.renew-marketplace-image img {
+  width: min(320px, 64%);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.82;
+}
+
+.renew-marketplace-image small {
+  margin-top: 14px;
+  color: #8b919d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-marketplace-thumbs {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.renew-marketplace-thumbs button {
+  width: 48px;
+  height: 58px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 9px;
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.renew-marketplace-thumbs button.is-active {
+  border-color: #c45136;
+  box-shadow: 0 0 0 2px rgba(196, 80, 54, 0.16);
+}
+
+.renew-marketplace-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.renew-marketplace-detail {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.renew-marketplace-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-marketplace-detail h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+}
+
+.renew-marketplace-title {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-marketplace-listing span,
+.renew-marketplace-seller span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.renew-marketplace-listing {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  border-bottom: 1px solid rgba(23, 25, 28, 0.08);
+  padding: 14px 0;
+}
+
+.renew-marketplace-listing strong {
+  font-size: clamp(24px, 4vw, 36px);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.renew-marketplace-description {
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.renew-marketplace-description p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.7;
+}
+
+.renew-marketplace-stats {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.renew-marketplace-stats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #6b7280;
+  background: rgba(23, 25, 28, 0.06);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.renew-marketplace-contact {
+  width: 100%;
+  min-height: 50px;
+}
+
+.renew-marketplace-price-link {
+  min-height: 48px;
+}
+
+.renew-marketplace-seller {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.renew-marketplace-seller-head {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.renew-marketplace-seller-main {
+  min-width: 0;
+}
+
+.renew-marketplace-seller-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.renew-marketplace-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: #fff;
+  background: #17191c;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.renew-marketplace-seller b {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-marketplace-seller-name span,
+.renew-marketplace-seller-head > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #0f7a4b;
+  background: rgba(16, 185, 129, 0.12);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.renew-marketplace-seller-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.renew-marketplace-seller-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  background: rgba(23, 25, 28, 0.06);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-marketplace-stats button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border: 1px solid rgba(196, 80, 54, 0.24);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #c45136;
+  background: rgba(196, 80, 54, 0.08);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-marketplace-stats button.is-active {
+  color: #fff;
+  border-color: #c45136;
+  background: #c45136;
+}
+
+.renew-marketplace-stats button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.renew-marketplace-profile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.renew-marketplace-profile.is-disabled {
+  color: #8a9099;
+  cursor: not-allowed;
+}
+
+.renew-marketplace-owner-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.renew-marketplace-owner-actions button {
+  min-height: 40px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-global-back {
+  position: fixed;
+  top: 104px;
+  left: max(18px, calc((100vw - 1240px) / 2 + 18px));
+  z-index: 80;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #17191c;
+  box-shadow: 0 10px 24px rgba(23, 25, 28, 0.08);
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-app.is-dark .renew-marketplace-preview,
+.renew-app.is-dark .renew-marketplace-detail,
+.renew-app.is-dark .renew-marketplace-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.renew-app.is-dark .renew-marketplace-linked-filter,
+.renew-app.is-dark .renew-marketplace-empty {
+  border-color: rgba(217, 63, 47, 0.34);
+  background: rgba(217, 63, 47, 0.1);
+}
+
+.renew-app.is-dark .renew-marketplace-linked-filter button {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-marketplace-notice-box,
+.renew-app.is-dark .renew-marketplace-register-dialog,
+.renew-app.is-dark .renew-marketplace-verify-dialog,
+.renew-app.is-dark .renew-marketplace-chat-dialog,
+.renew-app.is-dark .renew-marketplace-inquiry-dialog,
+.renew-app.is-dark .renew-marketplace-verify,
+.renew-app.is-dark .renew-marketplace-verify-grid div,
+.renew-app.is-dark .renew-marketplace-verify-review,
+.renew-app.is-dark .renew-marketplace-admin,
+.renew-app.is-dark .renew-marketplace-admin-row,
+.renew-app.is-dark .renew-marketplace-admin-empty {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #141518;
+}
+
+.renew-app.is-dark .renew-marketplace-admin-tabs button {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-marketplace-admin-tabs button.is-active {
+  border-color: #f5f2ec;
+  background: #f5f2ec;
+  color: #11151d;
+}
+
+.renew-app.is-dark .renew-marketplace-notice-box p,
+.renew-app.is-dark .renew-marketplace-register-title p,
+.renew-app.is-dark .renew-marketplace-verify-title p,
+.renew-app.is-dark .renew-marketplace-inquiry-title p,
+.renew-app.is-dark .renew-marketplace-verify-grid p,
+.renew-app.is-dark .renew-marketplace-verify-pending p,
+.renew-app.is-dark .renew-marketplace-verify-review span,
+.renew-app.is-dark .renew-marketplace-verify-fields span,
+.renew-app.is-dark .renew-marketplace-register-fields span,
+.renew-app.is-dark .renew-marketplace-register-photo > span {
+  color: #d7d1c9;
+}
+
+.renew-app.is-dark .renew-marketplace-register-cardlink {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.renew-app.is-dark .renew-marketplace-register-cardlink-head strong,
+.renew-app.is-dark .renew-marketplace-linked-card strong,
+.renew-app.is-dark .renew-marketplace-card-candidates strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-register-cardlink-head span,
+.renew-app.is-dark .renew-marketplace-linked-card b,
+.renew-app.is-dark .renew-marketplace-linked-card span,
+.renew-app.is-dark .renew-marketplace-card-candidates b,
+.renew-app.is-dark .renew-marketplace-card-candidates small {
+  color: #d7d1c9;
+}
+
+.renew-app.is-dark .renew-marketplace-verify-fields input,
+.renew-app.is-dark .renew-marketplace-verify-fields textarea,
+.renew-app.is-dark .renew-marketplace-register-fields input,
+.renew-app.is-dark .renew-marketplace-register-fields select,
+.renew-app.is-dark .renew-marketplace-register-fields textarea,
+.renew-app.is-dark .renew-marketplace-register-cardsearch select,
+.renew-app.is-dark .renew-marketplace-register-cardsearch input,
+.renew-app.is-dark .renew-marketplace-register-check,
+.renew-app.is-dark .renew-marketplace-register-photo label,
+.renew-app.is-dark .renew-marketplace-verify-title a,
+.renew-app.is-dark .renew-marketplace-admin-row a,
+.renew-app.is-dark .renew-marketplace-admin-actions button,
+.renew-app.is-dark .renew-marketplace-verify-close {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-marketplace-register-cardsearch button {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-linked-card {
+  border-color: rgba(217, 63, 47, 0.36);
+  background: rgba(217, 63, 47, 0.12);
+}
+
+.renew-app.is-dark .renew-marketplace-linked-card button,
+.renew-app.is-dark .renew-marketplace-card-candidates button {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-marketplace-register-photo label b {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-register-modal,
+.renew-app.is-dark .renew-marketplace-inquiry-modal {
+  background: #0c0d0f;
+}
+
+.renew-app.is-dark .renew-marketplace-verify-actions button,
+.renew-app.is-dark .renew-marketplace-register-actions button,
+.renew-app.is-dark .renew-marketplace-inquiry-actions button,
+.renew-app.is-dark .renew-marketplace-chat-form input,
+.renew-app.is-dark .renew-marketplace-inquiry-field textarea {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-marketplace-notice-box button,
+.renew-app.is-dark .renew-marketplace-verify-actions button:first-child,
+.renew-app.is-dark .renew-marketplace-register-actions button:first-child,
+.renew-app.is-dark .renew-marketplace-inquiry-actions button:first-child {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-image,
+.renew-app.is-dark .renew-marketplace-card-image,
+.renew-app.is-dark .renew-marketplace-chat-list,
+.renew-app.is-dark .renew-marketplace-chat-room,
+.renew-app.is-dark .renew-marketplace-description {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-marketplace-chat-list button,
+.renew-app.is-dark .renew-marketplace-chat-bubble {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-marketplace-chat-list button.is-active {
+  border-color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.renew-app.is-dark .renew-marketplace-chat-list small,
+.renew-app.is-dark .renew-marketplace-chat-list em,
+.renew-app.is-dark .renew-marketplace-chat-empty,
+.renew-app.is-dark .renew-marketplace-chat-hint,
+.renew-app.is-dark .renew-marketplace-chat-closed {
+  color: #d7d1c9;
+}
+
+.renew-app.is-dark .renew-marketplace-chat-list i {
+  color: #f1a58f;
+  background: rgba(196, 80, 54, 0.18);
+}
+
+.renew-app.is-dark .renew-marketplace-chat-empty strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-actions button,
+.renew-app.is-dark .renew-marketplace-badges span,
+.renew-app.is-dark .renew-marketplace-filter button,
+.renew-app.is-dark .renew-marketplace-owner-actions button,
+.renew-app.is-dark .renew-global-back {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-marketplace-actions .renew-marketplace-primary-action,
+.renew-app.is-dark .renew-marketplace-contact,
+.renew-app.is-dark .renew-marketplace-avatar,
+.renew-app.is-dark .renew-marketplace-filter button.is-active {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-actions .renew-marketplace-info-button {
+  color: #f1a58f;
+  background: rgba(196, 80, 54, 0.14);
+}
+
+.renew-app.is-dark .renew-marketplace-card h2,
+.renew-app.is-dark .renew-marketplace-detail h2,
+.renew-app.is-dark .renew-marketplace-seller b,
+.renew-app.is-dark .renew-marketplace-listing strong,
+.renew-app.is-dark .renew-marketplace-card-meta strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-card p,
+.renew-app.is-dark .renew-marketplace-detail p,
+.renew-app.is-dark .renew-marketplace-description p,
+.renew-app.is-dark .renew-marketplace-card-meta span,
+.renew-app.is-dark .renew-marketplace-stats span {
+  color: #d7d1c9;
+}
+
+.renew-app.is-dark .renew-marketplace-stats button {
+  border-color: rgba(238, 169, 136, 0.32);
+  color: #f1a889;
+  background: rgba(238, 169, 136, 0.1);
+}
+
+.renew-app.is-dark .renew-marketplace-stats button.is-active {
+  color: #17191c;
+  border-color: #f1a889;
+  background: #f1a889;
+}
+
+.renew-app.is-dark .renew-marketplace-card-tags span,
+.renew-app.is-dark .renew-marketplace-badges span {
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.renew-app.is-dark .renew-marketplace-seller-name span {
+  color: #7bf0b9;
+  background: rgba(16, 185, 129, 0.16);
+}
+
+.renew-app.is-dark .renew-marketplace-guide-list article {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-marketplace-guide-list h3 {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-marketplace-guide-list ul {
+  color: #c8c4bb;
+}
+
+.renew-app.is-dark .renew-marketplace-price-link {
+  border-color: rgba(238, 169, 136, 0.32);
+  color: #f1a889;
+  background: rgba(238, 169, 136, 0.1);
+}
+
+.renew-app.is-dark .renew-marketplace-seller-meta span,
+.renew-app.is-dark .renew-marketplace-stats span,
+.renew-app.is-dark .renew-marketplace-profile {
+  color: #d7d1c9;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-marketplace-description {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-marketplace-description p {
+  color: #d7d1c9;
+}
+
+.renew-app.is-dark .renew-marketplace-card-tags span,
+.renew-app.is-dark .renew-marketplace-card-foot span {
+  color: #d7d1c9;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .renew-market-search {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -3170,6 +5848,30 @@
   background: #17191c;
 }
 
+.renew-market-locale-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.renew-market-locale-tabs button {
+  min-height: 34px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  padding: 0 16px;
+  color: #4b5563;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-market-locale-tabs button.is-active {
+  color: #fff;
+  border-color: #17191c;
+  background: #17191c;
+}
+
 .renew-box-market {
   margin-top: 22px;
   border: 1px solid rgba(23, 25, 28, 0.08);
@@ -3217,6 +5919,13 @@
   color: inherit;
   background: rgba(255, 255, 255, 0.62);
   text-decoration: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.renew-box-market-card:hover {
+  border-color: rgba(201, 77, 53, 0.24);
+  box-shadow: rgba(4, 23, 43, 0.1) 0 16px 28px -24px;
+  transform: translateY(-1px);
 }
 
 .renew-box-thumb {
@@ -3284,13 +5993,22 @@
 .renew-market-card-preview {
   display: grid;
   gap: 8px;
+  align-content: start;
   min-width: 0;
+  overflow: hidden;
   border: 1px solid rgba(23, 25, 28, 0.08);
   border-radius: 16px;
   padding: 10px;
   color: inherit;
   background: rgba(255, 255, 255, 0.62);
   text-decoration: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.renew-market-card-preview:hover {
+  border-color: rgba(201, 77, 53, 0.24);
+  box-shadow: rgba(4, 23, 43, 0.1) 0 16px 28px -24px;
+  transform: translateY(-1px);
 }
 
 .renew-market-card-preview-thumb {
@@ -3298,18 +6016,24 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  aspect-ratio: 0.72;
+  height: 190px;
   border-radius: 12px;
   background: transparent;
 }
 
 .renew-market-card-preview-thumb img {
-  width: 108%;
-  height: 108%;
-  max-width: none;
-  max-height: none;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.renew-market-card-preview > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
 
 .renew-market-card-preview small,
@@ -3321,9 +6045,13 @@
 }
 
 .renew-market-card-preview small {
+  overflow: hidden;
   color: #71757f;
   font-size: 12px;
   font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .renew-market-card-preview strong,
@@ -3334,10 +6062,9 @@
 }
 
 .renew-market-card-preview strong {
-  min-height: 36px;
   font-size: 13px;
   font-weight: 900;
-  line-height: 1.35;
+  line-height: 1.28;
   -webkit-line-clamp: 2;
 }
 
@@ -3345,15 +6072,336 @@
   color: #71757f;
   font-size: 12px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.25;
   -webkit-line-clamp: 1;
 }
 
 .renew-market-card-preview b {
-  margin-top: 2px;
   color: #c94d35;
   font-size: 16px;
   font-weight: 900;
+  line-height: 1.1;
+}
+
+.renew-index-market {
+  display: grid;
+  gap: 14px;
+}
+
+.renew-index-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.renew-index-head span {
+  display: block;
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.renew-index-head h2 {
+  margin: 2px 0 0;
+  color: #17191c;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.renew-index-primary button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid rgba(201, 77, 53, 0.18);
+  border-radius: 16px;
+  padding: 0 16px;
+  background: rgba(251, 225, 209, 0.42);
+  color: #17191c;
+  font: inherit;
+  cursor: pointer;
+}
+
+.renew-index-primary button.is-active {
+  border-color: rgba(201, 77, 53, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(201, 77, 53, 0.12);
+}
+
+.renew-index-primary span {
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-index-primary strong {
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.renew-index-sector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.renew-index-sector-head span {
+  color: #17191c;
+  font-weight: 950;
+}
+
+.renew-index-sector-head em {
+  font-style: normal;
+}
+
+.renew-index-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.renew-index-tabs button {
+  min-height: 36px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #4b5563;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-index-tabs button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-index-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(201, 77, 53, 0.14);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(251, 225, 209, 0.34);
+}
+
+.renew-index-summary strong {
+  color: #17191c;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.055em;
+}
+
+.renew-index-summary span {
+  color: #71757f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.renew-index-summary div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.renew-index-summary em {
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #71757f;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.renew-index-summary em.is-up {
+  color: #c94d35;
+}
+
+.renew-index-summary em.is-down {
+  color: #2563eb;
+}
+
+.renew-index-chart {
+  height: 320px;
+  border: 1px solid rgba(201, 77, 53, 0.16);
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 249, 245, 0.5));
+}
+
+.renew-index-chart svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.renew-index-grid {
+  stroke: rgba(23, 25, 28, 0.1);
+  stroke-dasharray: 4 5;
+}
+
+.renew-index-area {
+  fill: url('#renew-index-fill');
+}
+
+.renew-index-line {
+  fill: none;
+  stroke: #c94d35;
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.renew-index-boundary,
+.renew-index-date {
+  fill: #4b5563;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-index-date {
+  text-anchor: middle;
+}
+
+.renew-index-date.is-0 {
+  text-anchor: start;
+}
+
+.renew-index-date.is-2 {
+  text-anchor: end;
+}
+
+.renew-index-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #71757f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-index-disclosure {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  justify-self: start;
+  min-height: 36px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  padding: 0 12px 0 14px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #4b5563;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-index-disclosure b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #17191c;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.renew-index-components {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-index-components article {
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.renew-index-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.renew-index-pagination button {
+  min-width: 34px;
+  min-height: 34px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4b5563;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-index-pagination button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-index-components b,
+.renew-index-components strong,
+.renew-index-components span,
+.renew-index-components em {
+  display: block;
+}
+
+.renew-index-components b {
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-index-components strong {
+  margin-top: 4px;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.renew-index-components span {
+  margin-top: 5px;
+  color: #71757f;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.renew-index-components em {
+  margin-top: 8px;
+  color: #17191c;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 .renew-market-candidates > b {
@@ -3527,6 +6575,23 @@
   display: grid;
   gap: 18px;
   margin-top: 22px;
+}
+
+.renew-market-detail-back {
+  justify-self: start;
+  min-height: 38px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 16px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.8);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-market-detail-back:hover {
+  background: #17191c;
+  color: #fff;
 }
 
 .renew-market-card {
@@ -3869,6 +6934,13 @@
 .renew-app.is-dark .renew-box-market,
 .renew-app.is-dark .renew-box-market-card,
 .renew-app.is-dark .renew-market-card-preview,
+.renew-app.is-dark .renew-index-components article,
+.renew-app.is-dark .renew-index-primary button,
+.renew-app.is-dark .renew-index-summary,
+.renew-app.is-dark .renew-index-chart,
+.renew-app.is-dark .renew-index-tabs button,
+.renew-app.is-dark .renew-index-disclosure,
+.renew-app.is-dark .renew-index-pagination button,
 .renew-app.is-dark .renew-market-price {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
@@ -3877,8 +6949,35 @@
 .renew-app.is-dark .renew-market-sale small,
 .renew-app.is-dark .renew-box-market-head p,
 .renew-app.is-dark .renew-box-market-card small,
+.renew-app.is-dark .renew-home-index-summary span,
+.renew-app.is-dark .renew-index-sector-head,
+.renew-app.is-dark .renew-index-sector-head em,
+.renew-app.is-dark .renew-index-summary span,
+.renew-app.is-dark .renew-index-meta,
+.renew-app.is-dark .renew-index-components span,
+.renew-app.is-dark .renew-index-tabs button,
+.renew-app.is-dark .renew-index-disclosure,
 .renew-app.is-dark .renew-market-card p {
   color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-index-tabs button.is-active,
+.renew-app.is-dark .renew-index-primary button.is-active,
+.renew-app.is-dark .renew-index-pagination button.is-active,
+.renew-app.is-dark .renew-index-disclosure b {
+  border-color: #f8fafc;
+  background: #f8fafc;
+  color: #17191c;
+}
+
+.renew-app.is-dark .renew-index-head h2,
+.renew-app.is-dark .renew-home-index-summary strong,
+.renew-app.is-dark .renew-index-primary strong,
+.renew-app.is-dark .renew-index-sector-head span,
+.renew-app.is-dark .renew-index-summary strong,
+.renew-app.is-dark .renew-index-components strong,
+.renew-app.is-dark .renew-index-components em {
+  color: #f8fafc;
 }
 
 .renew-app.is-dark .renew-box-thumb {
@@ -3897,6 +6996,24 @@
 .renew-app.is-dark .renew-market-home-tabs button.is-active {
   color: #17191c;
   background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-market-locale-tabs button {
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-market-locale-tabs button.is-active {
+  color: #17191c;
+  border-color: #f5f2ec;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-box-market-card:hover,
+.renew-app.is-dark .renew-market-card-preview:hover {
+  border-color: rgba(238, 169, 136, 0.3);
+  box-shadow: rgba(0, 0, 0, 0.26) 0 16px 28px -22px;
 }
 
 .renew-app.is-dark .renew-market-card-preview-thumb {
@@ -3983,6 +7100,42 @@
   cursor: pointer;
 }
 
+.renew-shop-sortbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.renew-shop-sortbar button {
+  min-height: 38px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-shop-sortbar button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-shop-sortbar button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.renew-shop-sortbar small {
+  color: #b44532;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .renew-shop-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4010,6 +7163,14 @@
 .renew-shop-grid small {
   color: #71757f;
   font-weight: 800;
+}
+
+.renew-shop-distance {
+  display: block;
+  margin-top: 7px;
+  color: #c6533c;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .renew-shop-map-links {
@@ -4303,6 +7464,25 @@
   color: #cbd5e1;
 }
 
+.renew-app.is-dark .renew-home-guide-links {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.78);
+}
+
+.renew-app.is-dark .renew-home-guide-grid a {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-home-guide-links h2,
+.renew-app.is-dark .renew-home-guide-grid strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-home-guide-grid small {
+  color: #cbd5e1;
+}
+
 .renew-app.is-dark .renew-stats-hero,
 .renew-app.is-dark .renew-stats-panel,
 .renew-app.is-dark .renew-stats-metrics article {
@@ -4356,7 +7536,11 @@
 .renew-app.is-dark .renew-news-card,
 .renew-app.is-dark .renew-news-link-card,
 .renew-app.is-dark .renew-news-supply-card,
-.renew-app.is-dark .renew-guide-qa-group {
+.renew-app.is-dark .renew-guide-qa-group,
+.renew-app.is-dark .renew-guide-feature-link,
+.renew-app.is-dark .renew-card-storage-section,
+.renew-app.is-dark .renew-card-storage-checklist,
+.renew-app.is-dark .renew-card-storage-cta {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(17, 21, 29, 0.82);
 }
@@ -4367,14 +7551,24 @@
 .renew-app.is-dark .renew-news-guide-panel .renew-section-head h2,
 .renew-app.is-dark .renew-news-supply-card,
 .renew-app.is-dark .renew-guide-qa-group h3,
-.renew-app.is-dark .renew-guide-qa-item summary {
+.renew-app.is-dark .renew-guide-qa-item summary,
+.renew-app.is-dark .renew-guide-feature-link,
+.renew-app.is-dark .renew-guide-feature-link strong,
+.renew-app.is-dark .renew-card-storage-section h3,
+.renew-app.is-dark .renew-card-storage-checklist h3,
+.renew-app.is-dark .renew-card-storage-cta strong {
   color: #f5f2ec;
 }
 
 .renew-app.is-dark .renew-news-link-card p,
 .renew-app.is-dark .renew-news-supply-card small,
 .renew-app.is-dark .renew-news-supply-disclosure,
-.renew-app.is-dark .renew-guide-qa-answer {
+.renew-app.is-dark .renew-guide-qa-answer,
+.renew-app.is-dark .renew-guide-feature-link small,
+.renew-app.is-dark .renew-card-storage-intro,
+.renew-app.is-dark .renew-card-storage-section li,
+.renew-app.is-dark .renew-card-storage-checklist li,
+.renew-app.is-dark .renew-card-storage-cta p {
   color: #cbd5e1;
 }
 
@@ -4482,11 +7676,41 @@
   color: #cbd5e1;
 }
 
+.renew-app.is-dark .renew-static-info-head h1,
+.renew-app.is-dark .renew-static-info-card h2 {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-static-info-head p,
+.renew-app.is-dark .renew-static-info-card p,
+.renew-app.is-dark .renew-static-info-card li {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-static-info-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 24, 39, 0.82);
+  box-shadow: none;
+}
+
 .renew-app.is-dark input::placeholder {
   color: #9ca3af;
 }
 
 @media (max-width: 900px) {
+  .renew-static-info-main {
+    padding: 22px 14px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .renew-static-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-static-info-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
   .renew-nav {
     grid-template-columns: 1fr auto;
     min-height: 0;
@@ -4526,6 +7750,44 @@
     position: static;
     width: 100%;
     transform: none;
+  }
+
+  .renew-home-index-summary {
+    align-items: flex-start;
+  }
+
+  .renew-home-index-change {
+    flex: 0 0 auto;
+  }
+
+  .renew-home-guide-links {
+    width: min(100% - 24px, 680px);
+    margin-top: 18px;
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .renew-home-guide-links h2 {
+    font-size: 17px;
+  }
+
+  .renew-home-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .renew-home-guide-grid a {
+    border-radius: 14px;
+    padding: 11px;
+  }
+
+  .renew-home-guide-grid strong {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .renew-home-guide-grid small {
+    font-size: 11px;
   }
 
   .renew-search {
@@ -4782,6 +8044,19 @@
     font-size: 13px;
   }
 
+  .renew-shop-sortbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  .renew-shop-sortbar button {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+
   .renew-market-search {
     grid-template-columns: 58px minmax(0, 1fr) 74px;
     gap: 8px;
@@ -4813,6 +8088,16 @@
     min-height: 34px;
     padding: 0 16px;
     font-size: 13px;
+  }
+
+  .renew-market-locale-tabs {
+    margin-top: 10px;
+  }
+
+  .renew-market-locale-tabs button {
+    min-height: 32px;
+    padding: 0 14px;
+    font-size: 12px;
   }
 
   .renew-progress-series-list article {
@@ -5138,6 +8423,380 @@
     box-shadow: none;
   }
 
+  .renew-panel.renew-marketplace {
+    border: 0;
+    border-radius: 0;
+    padding: 0 2px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-marketplace {
+    gap: 18px;
+  }
+
+  .renew-marketplace-head {
+    display: grid;
+    gap: 14px;
+  }
+
+  .renew-marketplace-actions {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .renew-marketplace-actions button {
+    flex: 0 0 auto;
+    min-width: 0;
+    min-height: 38px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .renew-marketplace-actions .renew-marketplace-info-button {
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
+  .renew-marketplace-notice {
+    padding: 14px;
+  }
+
+  .renew-marketplace-notice-box {
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  .renew-marketplace-verify-modal {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .renew-marketplace-register-modal {
+    align-items: center;
+    padding: 10px;
+  }
+
+  .renew-marketplace-inquiry-modal {
+    align-items: center;
+    padding: 10px;
+  }
+
+  .renew-marketplace-verify-dialog {
+    max-height: calc(100dvh - 24px);
+    border-radius: 22px;
+    padding: 14px;
+  }
+
+  .renew-marketplace-register-dialog {
+    max-height: calc(100dvh - 56px);
+    border-radius: 20px;
+    padding: 12px;
+  }
+
+  .renew-marketplace-inquiry-dialog {
+    max-height: calc(100dvh - 56px);
+    border-radius: 20px;
+    padding: 14px;
+  }
+
+  .renew-marketplace-image-modal {
+    padding: 10px;
+  }
+
+  .renew-marketplace-image-viewer {
+    height: calc(100dvh - 20px);
+    border-radius: 18px;
+    padding: 12px;
+  }
+
+  .renew-marketplace-image-viewer-controls {
+    gap: 6px;
+  }
+
+  .renew-marketplace-image-viewer-controls button,
+  .renew-marketplace-image-viewer-controls span {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .renew-marketplace-chat-dialog {
+    max-height: calc(100dvh - 56px);
+    border-radius: 20px;
+    padding: 14px;
+  }
+
+  .renew-marketplace-chat-shell {
+    grid-template-columns: 1fr;
+    min-height: min(620px, calc(100dvh - 148px));
+  }
+
+  .renew-marketplace-chat-list {
+    max-height: 172px;
+  }
+
+  .renew-marketplace-chat-room {
+    min-height: 320px;
+  }
+
+  .renew-marketplace-chat-list button {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .renew-marketplace-chat-list img {
+    width: 38px;
+    height: 50px;
+  }
+
+  .renew-marketplace-status-overlay {
+    min-width: 76px;
+    min-height: 34px;
+    font-size: 13px;
+  }
+
+  .renew-marketplace-verify-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    margin-left: 0;
+    margin-bottom: 0;
+    width: 34px;
+    height: 34px;
+    z-index: 3;
+  }
+
+  .renew-marketplace-verify-title h2 {
+    padding-right: 0;
+    font-size: 24px;
+  }
+
+  .renew-marketplace-register-title h2 {
+    padding-right: 0;
+    font-size: 22px;
+  }
+
+  .renew-marketplace-verify-title p {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  .renew-marketplace-register-title p {
+    display: none;
+  }
+
+  .renew-marketplace-verify-title a {
+    min-height: 32px;
+    margin-top: 9px;
+    font-size: 12px;
+  }
+
+  .renew-marketplace-verify {
+    gap: 14px;
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .renew-marketplace-verify-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .renew-marketplace-verify-grid div {
+    min-height: 0;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .renew-marketplace-verify-fields {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .renew-marketplace-register-fields {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .renew-marketplace-verify-fields label {
+    gap: 5px;
+  }
+
+  .renew-marketplace-register-fields label {
+    gap: 5px;
+  }
+
+  .renew-marketplace-verify-fields input,
+  .renew-marketplace-verify-fields textarea,
+  .renew-marketplace-register-fields input,
+  .renew-marketplace-register-fields select,
+  .renew-marketplace-register-fields textarea {
+    border-radius: 12px;
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .renew-marketplace-verify-fields textarea {
+    min-height: 64px;
+  }
+
+  .renew-marketplace-register-fields textarea {
+    min-height: 72px;
+  }
+
+  .renew-marketplace-register-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .renew-marketplace-verify-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .renew-marketplace-inquiry-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .renew-marketplace-admin {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .renew-marketplace-admin-row {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 13px;
+  }
+
+  .renew-marketplace-admin-row p,
+  .renew-marketplace-admin-actions {
+    grid-column: auto;
+  }
+
+  .renew-marketplace-admin-actions {
+    justify-content: stretch;
+  }
+
+  .renew-marketplace-admin-actions button {
+    flex: 1 1 0;
+  }
+
+  .renew-marketplace-list-head {
+    display: grid;
+    gap: 12px;
+  }
+
+  .renew-marketplace-filter {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .renew-marketplace-filter button {
+    flex: 0 0 auto;
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .renew-global-back {
+    top: 94px;
+    left: 12px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 11px;
+  }
+
+  .renew-global-back b {
+    display: none;
+  }
+
+  .renew-marketplace-listings {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .renew-marketplace-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .renew-marketplace-card-image {
+    min-height: 118px;
+    border-radius: 14px;
+  }
+
+  .renew-marketplace-card-image img {
+    width: min(76px, 70%);
+  }
+
+  .renew-marketplace-card h2 {
+    font-size: 15px;
+  }
+
+  .renew-marketplace-card-meta {
+    display: grid;
+    gap: 4px;
+  }
+
+  .renew-marketplace-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .renew-marketplace-preview,
+  .renew-marketplace-detail {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .renew-marketplace-preview,
+  .renew-marketplace-detail {
+    padding: 14px;
+  }
+
+  .renew-marketplace-image {
+    min-height: 320px;
+  }
+
+  .renew-marketplace-image img {
+    width: min(220px, 70%);
+  }
+
+  .renew-marketplace-listing {
+    display: grid;
+    gap: 6px;
+    padding: 12px 0;
+  }
+
+  .renew-marketplace-description {
+    padding: 14px;
+  }
+
+  .renew-marketplace-seller-head {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .renew-marketplace-seller-name {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .renew-marketplace-seller-name span {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
   .renew-topic-list {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -5193,6 +8852,48 @@
     grid-template-columns: 1fr;
     gap: 14px;
     padding: 16px 0 22px;
+  }
+
+  .renew-guide-feature-link,
+  .renew-card-storage-checklist,
+  .renew-card-storage-cta {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .renew-guide-feature-link {
+    padding: 16px;
+  }
+
+  .renew-card-storage-intro {
+    padding: 14px 0 0;
+  }
+
+  .renew-card-storage-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px 0 0;
+  }
+
+  .renew-card-storage-section,
+  .renew-card-storage-checklist,
+  .renew-card-storage-cta {
+    border-radius: 16px;
+  }
+
+  .renew-card-storage-section,
+  .renew-card-storage-checklist {
+    padding: 16px;
+  }
+
+  .renew-card-storage-cta {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .renew-card-storage-cta a {
+    width: 100%;
   }
 
   .renew-news-guide-panel .renew-section-head {
@@ -5407,6 +9108,13 @@
     gap: 8px;
   }
 
+  .renew-mobile-actions .renew-account-menu::after {
+    right: -8px;
+    left: auto;
+    width: calc(100% + 20px);
+    transform: none;
+  }
+
   .renew-mobile-actions > button,
   .renew-mobile-actions .renew-account-menu > button,
   .renew-mobile-supplies > button {
@@ -5428,6 +9136,20 @@
   .renew-bottom-nav svg {
     width: 21px;
     height: 21px;
+  }
+
+  .renew-mobile-actions .renew-account-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 122px;
+    max-width: calc(100vw - 32px);
+    transform: translateY(6px);
+  }
+
+  .renew-mobile-actions .renew-account-menu.is-open .renew-account-dropdown,
+  .renew-mobile-actions .renew-account-menu:hover .renew-account-dropdown,
+  .renew-mobile-actions .renew-account-menu:focus-within .renew-account-dropdown {
+    transform: translateY(0);
   }
 
   .renew-app.is-dark .renew-mobile-actions > button,
@@ -5935,7 +9657,7 @@
 
   .renew-card-market .renew-market-card-preview-thumb {
     width: 100%;
-    aspect-ratio: auto;
+    height: 118px;
     padding: 0;
     border: 0;
     border-radius: 0;
@@ -5944,10 +9666,10 @@
 
   .renew-card-market .renew-market-card-preview-thumb img {
     display: block;
-    width: 100%;
+    width: auto;
     max-width: 100%;
-    height: auto;
-    max-height: none;
+    height: 100%;
+    max-height: 100%;
     margin: 0 auto;
     object-fit: contain;
   }
@@ -5981,5 +9703,139 @@
 
   .renew-admin-stats {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .renew-index-market,
+  .renew-index-head,
+  .renew-index-primary,
+  .renew-index-summary,
+  .renew-index-sector-head,
+  .renew-index-tabs,
+  .renew-index-chart,
+  .renew-index-disclosure,
+  .renew-index-meta,
+  .renew-index-components {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .renew-index-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .renew-index-head .renew-chip-group {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+
+  .renew-index-head .renew-chip-group button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 4px;
+    white-space: nowrap;
+  }
+
+  .renew-index-head h2 {
+    max-width: 100%;
+    font-size: 21px;
+    line-height: 1.12;
+  }
+
+  .renew-index-primary button {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 4px;
+    min-height: 62px;
+  }
+
+  .renew-index-primary strong {
+    max-width: 100%;
+    font-size: 16px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .renew-index-sector-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .renew-index-sector-head em {
+    max-width: 100%;
+    line-height: 1.35;
+  }
+
+  .renew-index-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .renew-index-tabs button {
+    padding: 0 8px;
+  }
+
+  .renew-index-summary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .renew-index-summary strong {
+    font-size: 30px;
+  }
+
+  .renew-index-summary div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .renew-index-summary em {
+    min-width: 0;
+    padding: 7px 5px;
+    font-size: 10.5px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .renew-index-chart {
+    height: 260px;
+  }
+
+  .renew-index-boundary,
+  .renew-index-date {
+    font-size: 14px;
+  }
+
+  .renew-index-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .renew-index-components {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .renew-route-back-wrap {
+    padding: 10px 12px 0;
+  }
+
+  .renew-route-back-button {
+    min-height: 34px;
+    padding: 0 13px;
+    font-size: 13px;
   }
 }
