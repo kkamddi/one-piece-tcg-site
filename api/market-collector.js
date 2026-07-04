@@ -30,9 +30,13 @@ function uniqueByApparelId(items) {
 }
 
 function buildTargetItems(scope = 'approved') {
-  const jpMarketCards = uniqueByApparelId((Array.isArray(marketCards) ? marketCards : [])
-    .filter((item) => item?.locale === 'JP' && item?.apparelId));
+  const allMarketCards = uniqueByApparelId((Array.isArray(marketCards) ? marketCards : [])
+    .filter((item) => item?.apparelId));
+  const jpMarketCards = allMarketCards.filter((item) => item?.locale === 'JP');
+  const enMarketCards = allMarketCards.filter((item) => item?.locale === 'EN');
   if (scope === 'all-jp') return jpMarketCards;
+  if (scope === 'all-en') return enMarketCards;
+  if (scope === 'all-market' || scope === 'all') return allMarketCards;
 
   const byApparelId = new Map(jpMarketCards.map((item) => [Number(item.apparelId), item]));
   const approvedIds = new Set((Array.isArray(cardMarketLinks) ? cardMarketLinks : [])

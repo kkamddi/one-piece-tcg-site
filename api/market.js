@@ -268,7 +268,7 @@ async function fetchConditionPrices(apparelId) {
     const response = await fetch(`${SNKRDUNK_BASE}/en/v1/trading-cards/${apparelId}/min-prices-by-conditions`, {
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'Mozilla/5.0 OPTCGKoreaBot/1.0'
+        'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0'
       },
       cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true }
     });
@@ -368,7 +368,7 @@ async function fetchPriceChartingSupplement(item) {
     const response = await fetch(url, {
       headers: {
         Accept: 'text/html',
-        'User-Agent': 'Mozilla/5.0 OPTCGKoreaBot/1.0'
+        'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0'
       },
       redirect: 'manual',
       cf: { cacheTtl: PRICECHARTING_CACHE_SECONDS, cacheEverything: true }
@@ -561,6 +561,25 @@ async function saveMarketStorageSnapshot(item, conditionPrices = []) {
         { key: 'psa10', price: psa10PriceJpy }
       ].filter((row) => Number(row.price || 0) > 0);
       for (const row of chartRows) {
+        const existingPoint = await queryD1(
+          `select median_price_jpy, min_price_jpy, max_price_jpy
+           from market_chart_daily_points
+           where source = 'snkrdunk'
+             and apparel_id = ?
+             and condition_key = ?
+             and point_date = ?
+           limit 1`,
+          [apparelId, row.key, day]
+        );
+        const previous = existingPoint?.[0];
+        if (
+          previous
+          && Number(previous.median_price_jpy || 0) === Number(row.price)
+          && Number(previous.min_price_jpy || 0) === Number(row.price)
+          && Number(previous.max_price_jpy || 0) === Number(row.price)
+        ) {
+          continue;
+        }
         await queryD1(
           `insert into market_chart_daily_points (
             source, apparel_id, locale, code, condition_key, point_date,
