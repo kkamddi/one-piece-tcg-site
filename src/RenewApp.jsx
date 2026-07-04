@@ -2117,11 +2117,11 @@ function applyPageSeo(page) {
   setHeadMeta('meta[property="og:description"]', { property: 'og:description', content: seo.description });
   setHeadMeta('meta[property="og:url"]', { property: 'og:url', content: url });
   setHeadMeta('meta[property="og:site_name"]', { property: 'og:site_name', content: 'Card Pone' });
-  setHeadMeta('meta[property="og:image"]', { property: 'og:image', content: `${SITE_ORIGIN}/og-preview-optcg.jpg` });
+  setHeadMeta('meta[property="og:image"]', { property: 'og:image', content: `${SITE_ORIGIN}/og-card-pone.jpg` });
   setHeadMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
   setHeadMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: seo.title });
   setHeadMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: seo.description });
-  setHeadMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: `${SITE_ORIGIN}/og-preview-optcg.jpg` });
+  setHeadMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: `${SITE_ORIGIN}/og-card-pone.jpg` });
   setJsonLd('optcg-page-jsonld', getPageJsonLd(page, seo));
 }
 

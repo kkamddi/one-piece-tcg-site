@@ -616,7 +616,7 @@ function applySeo(html, pathname, seo) {
   const description = escapeHtml(seo.description);
   const keywords = escapeHtml(seo.keywords);
   const url = escapeHtml(canonicalUrl);
-  const image = `${SITE_ORIGIN}/og-preview-optcg.jpg`;
+  const image = `${SITE_ORIGIN}/og-card-pone.jpg`;
 
   let nextHtml = html
     .replace(/<title>.*?<\/title>/is, `<title>${title}</title>`)
