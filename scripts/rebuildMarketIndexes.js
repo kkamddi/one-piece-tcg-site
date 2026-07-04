@@ -33,8 +33,9 @@ async function queryD1(sql, params = []) {
 
 async function insertRows(tableName, columns, rows, chunkSize = 40) {
   if (!rows.length) return;
-  for (let start = 0; start < rows.length; start += chunkSize) {
-    const chunk = rows.slice(start, start + chunkSize);
+  const safeChunkSize = Math.max(1, Math.min(chunkSize, Math.floor(96 / columns.length)));
+  for (let start = 0; start < rows.length; start += safeChunkSize) {
+    const chunk = rows.slice(start, start + safeChunkSize);
     const valuesSql = chunk.map(() => `(${columns.map(() => '?').join(',')})`).join(',');
     const params = chunk.flatMap((row) => columns.map((column) => row[column]));
     await queryD1(
