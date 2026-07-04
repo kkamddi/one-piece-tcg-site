@@ -14,13 +14,15 @@ function requiredEnv() {
 }
 
 async function queryD1(sql, params = []) {
+  const signal = AbortSignal.timeout(60000);
   const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${D1_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${D1_API_TOKEN}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ sql, params })
+    body: JSON.stringify({ sql, params }),
+    signal
   });
   const body = await response.json().catch(() => null);
   if (!response.ok || !body?.success) {
@@ -29,7 +31,7 @@ async function queryD1(sql, params = []) {
   return body.result?.[0]?.results || [];
 }
 
-async function insertRows(tableName, columns, rows, chunkSize = 8) {
+async function insertRows(tableName, columns, rows, chunkSize = 40) {
   if (!rows.length) return;
   for (let start = 0; start < rows.length; start += chunkSize) {
     const chunk = rows.slice(start, start + chunkSize);
