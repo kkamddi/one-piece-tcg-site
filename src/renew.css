@@ -5710,6 +5710,18 @@
   align-items: center;
 }
 
+.renew-market-search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 52px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  padding: 0 8px 0 18px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
 .renew-back-button {
   display: inline-flex;
   align-items: center;
@@ -5771,12 +5783,31 @@
   outline: 0;
 }
 
+.renew-market-search-field input {
+  flex: 1 1 auto;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+
 .renew-app.is-dark .renew-market-search input,
 .renew-app.is-dark .renew-shop-filters input,
 .renew-app.is-dark .renew-shop-filters select {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
   color: #f8fafc;
+}
+
+.renew-app.is-dark .renew-market-search-field {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-market-search-field input {
+  border-color: transparent;
+  background: transparent;
 }
 
 .renew-app.is-dark .renew-back-button {
@@ -5870,6 +5901,21 @@
   color: #fff;
   border-color: #17191c;
   background: #17191c;
+}
+
+.renew-market-locale-tabs--inline {
+  flex: 0 0 auto;
+  gap: 4px;
+  margin-top: 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(23, 25, 28, 0.06);
+}
+
+.renew-market-locale-tabs--inline button {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 
 .renew-box-market {
@@ -8074,6 +8120,18 @@
     font-size: 14px;
   }
 
+  .renew-market-search-field {
+    height: 42px;
+    gap: 6px;
+    padding: 0 5px 0 12px;
+  }
+
+  .renew-market-search-field input {
+    height: 100%;
+    border: 0;
+    padding: 0;
+  }
+
   .renew-market-search > button {
     min-height: 42px;
     padding: 0 12px;
@@ -8098,6 +8156,17 @@
     min-height: 32px;
     padding: 0 14px;
     font-size: 12px;
+  }
+
+  .renew-market-locale-tabs--inline {
+    margin-top: 0;
+    padding: 2px;
+  }
+
+  .renew-market-locale-tabs--inline button {
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 
   .renew-progress-series-list article {

@@ -6797,14 +6797,15 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
             <span>SNKR</span>
             <span>{t('snkrShortcut')}</span>
           </a>
-          <input value={code} onChange={(event) => setCode(event.target.value)} placeholder={t('marketCodePlaceholder')} />
+          <div className="renew-market-search-field">
+            <input value={code} onChange={(event) => setCode(event.target.value)} placeholder={t('marketCodePlaceholder')} />
+            <div className="renew-market-locale-tabs renew-market-locale-tabs--inline" aria-label="Market product locale">
+              <button type="button" className={marketProductLocale === 'JP' ? 'is-active' : ''} onClick={() => setMarketProductLocale('JP')}>JP</button>
+              <button type="button" className={marketProductLocale === 'EN' ? 'is-active' : ''} onClick={() => setMarketProductLocale('EN')}>EN</button>
+            </div>
+          </div>
           <button type="submit">{t('marketSearch')}</button>
         </form>
-
-        <div className="renew-market-locale-tabs" aria-label="Market product locale">
-          <button type="button" className={marketProductLocale === 'JP' ? 'is-active' : ''} onClick={() => setMarketProductLocale('JP')}>JP</button>
-          <button type="button" className={marketProductLocale === 'EN' ? 'is-active' : ''} onClick={() => setMarketProductLocale('EN')}>EN</button>
-        </div>
 
         {loading ? <div className="renew-empty">{t('marketLoading')}</div> : null}
         {message ? <div className="renew-empty">{message}</div> : null}

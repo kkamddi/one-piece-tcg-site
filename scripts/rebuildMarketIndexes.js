@@ -4,6 +4,7 @@ const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const CONDITION_KEY = String(process.env.MARKET_INDEX_CONDITION || 'a').trim().toLowerCase() === 'psa10' ? 'psa10' : 'a';
+const REBUILD_WINDOW_DAYS = Math.max(0, Number(process.env.MARKET_INDEX_REBUILD_WINDOW_DAYS || 14) || 0);
 
 function requiredEnv() {
   const missing = [];
@@ -64,6 +65,13 @@ async function fetchDailyPointRows(apparelIds, baseDate) {
     rows.push(...chunkRows);
   }
   return rows;
+}
+
+function getRebuildStartDate() {
+  if (!REBUILD_WINDOW_DAYS) return null;
+  const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  kstNow.setUTCDate(kstNow.getUTCDate() - REBUILD_WINDOW_DAYS);
+  return kstNow.toISOString().slice(0, 10);
 }
 
 function buildIndexRows(indexConfig, rows) {
@@ -150,6 +158,7 @@ function buildIndexRows(indexConfig, rows) {
 async function rebuildIndex(indexConfig) {
   const apparelIds = indexConfig.components.map((item) => Number(item.apparelId)).filter(Boolean);
   const rows = await fetchDailyPointRows(apparelIds, indexConfig.baseDate);
+  const rebuildStartDate = getRebuildStartDate();
 
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
@@ -185,9 +194,20 @@ async function rebuildIndex(indexConfig) {
     active: 1
   })));
 
-  const { indexRows, componentRows } = buildIndexRows(indexConfig, rows);
-  await queryD1('delete from market_index_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
-  await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
+  const builtRows = buildIndexRows(indexConfig, rows);
+  const indexRows = rebuildStartDate
+    ? builtRows.indexRows.filter((row) => row.point_date >= rebuildStartDate)
+    : builtRows.indexRows;
+  const componentRows = rebuildStartDate
+    ? builtRows.componentRows.filter((row) => row.point_date >= rebuildStartDate)
+    : builtRows.componentRows;
+  if (rebuildStartDate) {
+    await queryD1('delete from market_index_daily_points where index_code = ? and condition_key = ? and point_date >= ?', [indexConfig.code, CONDITION_KEY, rebuildStartDate]);
+    await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ? and point_date >= ?', [indexConfig.code, CONDITION_KEY, rebuildStartDate]);
+  } else {
+    await queryD1('delete from market_index_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
+    await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
+  }
   await insertRows('market_index_daily_points', [
     'index_code',
     'condition_key',
@@ -207,7 +227,7 @@ async function rebuildIndex(indexConfig) {
     'component_index_value',
     'source'
   ], componentRows);
-  console.log(`${indexConfig.code}: ${indexRows.length} index points, ${componentRows.length} component points`);
+  console.log(`${indexConfig.code}: ${indexRows.length} index points, ${componentRows.length} component points${rebuildStartDate ? ` since ${rebuildStartDate}` : ' full rebuild'}`);
 }
 
 requiredEnv();
