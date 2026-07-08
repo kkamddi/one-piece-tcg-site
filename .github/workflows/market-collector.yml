@@ -47,7 +47,33 @@ jobs:
           offset=0
           limit=50
           for i in $(seq 1 "$COLLECTOR_MAX_PAGES"); do
-            url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${limit}&offset=${offset}&concurrency=5"
+            url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${limit}&offset=${offset}&concurrency=5&listingSnapshots=1"
+            json=$(curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url")
+            echo "$json"
+            done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")
+            next_offset=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.nextOffset || 0)" "$json")
+            if [ "$done_flag" = "1" ]; then
+              break
+            fi
+            offset="$next_offset"
+            sleep 2
+          done
+
+      - name: Collect approved listing floor snapshots
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+        run: |
+          if [ -z "$COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+
+          offset=0
+          limit=50
+          max_pages=30
+          for i in $(seq 1 "$max_pages"); do
+            url="${COLLECTOR_URL}?scope=approved&limit=${limit}&offset=${offset}&concurrency=4&listingSnapshots=1"
             json=$(curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url")
             echo "$json"
             done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")

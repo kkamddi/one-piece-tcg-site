@@ -7,10 +7,12 @@ const PRICECHARTING_BASE = 'https://www.pricecharting.com';
 const CACHE_SECONDS = 60 * 30;
 const PRICECHARTING_CACHE_SECONDS = 60 * 60 * 12;
 const USD_TO_JPY = 155;
+const KRW_PER_JPY = Number(process.env.KRW_PER_JPY || 9.3);
 const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
 const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
 const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_LIMIT = 180;
+const LISTING_SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const MARKET_DATA_SOURCE = String(process.env.MARKET_DATA_SOURCE || '').trim().toLowerCase();
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -66,6 +68,12 @@ function todayDateKey(value = Date.now()) {
   return Number.isNaN(date.getTime()) ? new Date().toISOString().slice(0, 10) : date.toISOString().slice(0, 10);
 }
 
+function listingSnapshotBucket(value = Date.now()) {
+  const timestamp = new Date(value).getTime();
+  const safeTimestamp = Number.isFinite(timestamp) ? timestamp : Date.now();
+  return new Date(Math.floor(safeTimestamp / LISTING_SNAPSHOT_INTERVAL_MS) * LISTING_SNAPSHOT_INTERVAL_MS).toISOString();
+}
+
 function isSelfRequest(request) {
   if (!MARKET_API_ORIGIN) return true;
   const host = request.headers?.host || request.headers?.get?.('host') || '';
@@ -87,10 +95,42 @@ function usdToJpy(value) {
   return Math.round(amount * USD_TO_JPY);
 }
 
+function jpyToUsd(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+  return amount / USD_TO_JPY;
+}
+
 function centsToJpy(value) {
   const cents = Number(value || 0);
   if (!Number.isFinite(cents) || cents <= 0) return 0;
   return usdToJpy(cents / 100);
+}
+
+function marketRawPriceCurrency(raw) {
+  const text = [
+    raw?.minPriceFormat,
+    raw?.priceFormat,
+    raw?.currency,
+    raw?.minPriceCurrency,
+    raw?.priceCurrency
+  ].filter(Boolean).join(' ').toUpperCase();
+  if (/(KRW|₩|원)/i.test(text)) return 'KRW';
+  if (/(JPY|¥|￥|円)/i.test(text)) return 'JPY';
+  if (/(USD|US\s*\$|\$)/i.test(text)) return 'USD';
+
+  const amount = Number(raw?.minPrice || raw?.price || 0);
+  if (Number.isFinite(amount) && amount > 1000) return 'KRW';
+  return 'USD';
+}
+
+function marketRawPriceToJpy(raw) {
+  const amount = Number(raw?.minPrice || raw?.price || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+  const currency = marketRawPriceCurrency(raw);
+  if (currency === 'JPY') return Math.round(amount);
+  if (currency === 'KRW') return Math.round(amount / KRW_PER_JPY);
+  return usdToJpy(amount);
 }
 
 function conditionKey(name) {
@@ -110,6 +150,27 @@ function storedTradePriceToJpy(row) {
   const amount = Number(row?.price_amount || 0);
   if (!Number.isFinite(amount) || amount <= 0) return 0;
   return String(row?.price_currency || '').toUpperCase() === 'JPY' ? Math.round(amount) : usdToJpy(amount);
+}
+
+function filterChartOutliers(points = []) {
+  const valid = points
+    .map((point) => ({ ...point, timestamp: Number(point.timestamp), price: Number(point.price) }))
+    .filter((point) => Number.isFinite(point.timestamp) && point.timestamp > 0 && point.price > 0)
+    .sort((a, b) => a.timestamp - b.timestamp);
+  if (valid.length < 4) return valid;
+  const prices = valid.map((point) => point.price).sort((a, b) => a - b);
+  const lowerHalf = prices.slice(0, Math.max(2, Math.ceil(prices.length / 2)));
+  const baseline = medianNumber(lowerHalf);
+  if (!baseline) return valid;
+  const upperLimit = baseline * 12;
+  return valid.filter((point) => point.price <= upperLimit);
+}
+
+function filterChartPointGroups(points = { a: [], psa10: [] }) {
+  return {
+    a: filterChartOutliers(points.a || []),
+    psa10: filterChartOutliers(points.psa10 || [])
+  };
 }
 
 function parseChartMonthLabel(value) {
@@ -255,7 +316,7 @@ function mergeUniquePoints(...pointGroups) {
 
 function getConditionPrice(conditionPrices, key) {
   const found = (conditionPrices || []).find((item) => conditionKey(item.conditionName) === key);
-  return found ? usdToJpy(found.minPrice) : 0;
+  return found ? marketRawPriceToJpy(found) : 0;
 }
 
 function getConditionRaw(conditionPrices, key) {
@@ -326,6 +387,7 @@ function getApprovedPriceChartingUrl(item) {
   const match = (Array.isArray(priceChartingMarketLinks) ? priceChartingMarketLinks : [])
     .find((link) => (
       link?.status === 'approved'
+      && !/derived base-clean url/i.test(String(link.note || ''))
       && String(link.apparelId || '') === apparelId
       && typeof link.priceChartingUrl === 'string'
       && link.priceChartingUrl.startsWith(`${PRICECHARTING_BASE}/game/`)
@@ -362,7 +424,8 @@ function priceChartingPointsToJpy(points = []) {
 }
 
 async function fetchPriceChartingSupplement(item) {
-  const url = getApprovedPriceChartingUrl(item) || derivePriceChartingUrl(item);
+  const allowAutoDerived = process.env.PRICECHARTING_AUTO_DERIVE === '1';
+  const url = getApprovedPriceChartingUrl(item) || (allowAutoDerived ? derivePriceChartingUrl(item) : '');
   if (!url) return null;
   try {
     const response = await fetch(url, {
@@ -459,8 +522,9 @@ async function saveMarketSnapshots(item, conditionPrices = []) {
   const bucketDate = new Date(bucketStartedAt).toISOString();
   const rows = ['a', 'psa10'].map((key) => {
     const raw = getConditionRaw(conditionPrices, key);
-    const price = raw ? usdToJpy(raw.minPrice) : 0;
+    const price = raw ? marketRawPriceToJpy(raw) : 0;
     if (!price) return null;
+    const minPriceCurrency = raw ? marketRawPriceCurrency(raw) : '';
     const authorToken = snapshotAuthorToken(item.apparelId, key);
     const content = {
       apparelId: Number(item.apparelId),
@@ -469,7 +533,9 @@ async function saveMarketSnapshots(item, conditionPrices = []) {
       conditionName: raw.conditionName || key.toUpperCase(),
       conditionId: raw.conditionId || null,
       price,
-      minPriceUsd: Number(raw.minPrice || 0) || 0,
+      minPriceAmount: Number(raw.minPrice || 0) || 0,
+      minPriceCurrency,
+      minPriceUsd: jpyToUsd(price),
       source: 'snkrdunk_min_price',
       capturedAt: new Date(now).toISOString()
     };
@@ -498,7 +564,61 @@ async function saveMarketSnapshots(item, conditionPrices = []) {
   }
 }
 
-async function saveMarketStorageSnapshot(item, conditionPrices = []) {
+async function saveListingFloorSnapshots(item, conditionPrices = [], capturedAt = new Date().toISOString()) {
+  const apparelId = Number(item?.apparelId || 0);
+  if (!apparelId || !shouldWriteD1Market()) return;
+  const capturedBucket = listingSnapshotBucket(capturedAt);
+  const rows = ['a', 'psa10']
+    .map((key) => {
+      const raw = getConditionRaw(conditionPrices, key);
+      const priceJpy = getConditionPrice(conditionPrices, key);
+      if (!priceJpy) return null;
+      return {
+        key,
+        priceJpy,
+        minPriceUsd: raw ? jpyToUsd(priceJpy) : null
+      };
+    })
+    .filter(Boolean);
+  if (!rows.length) return;
+
+  for (const row of rows) {
+    try {
+      await queryD1(
+        `insert into market_listing_floor_snapshots (
+          source, apparel_id, locale, code, condition_key, captured_bucket,
+          captured_at, price_amount_jpy, min_price_usd, listing_count, updated_at
+        ) values (
+          'snkrdunk', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )
+        on conflict(source, apparel_id, condition_key, captured_bucket) do update set
+          locale = excluded.locale,
+          code = excluded.code,
+          captured_at = excluded.captured_at,
+          price_amount_jpy = excluded.price_amount_jpy,
+          min_price_usd = excluded.min_price_usd,
+          listing_count = excluded.listing_count,
+          updated_at = excluded.updated_at`,
+        [
+          apparelId,
+          item.locale || 'JP',
+          item.code || '',
+          row.key,
+          capturedBucket,
+          capturedAt,
+          row.priceJpy,
+          row.minPriceUsd,
+          Number.isFinite(Number(item.listingCount)) ? Number(item.listingCount) : null,
+          capturedAt
+        ]
+      );
+    } catch {
+      // Listing-floor snapshots are supplemental. Do not fail price collection.
+    }
+  }
+}
+
+async function saveMarketStorageSnapshot(item, conditionPrices = [], { persistListingSnapshot = false } = {}) {
   const capturedAt = new Date().toISOString();
   const apparelId = Number(item?.apparelId || 0);
   if (!apparelId) return;
@@ -555,57 +675,9 @@ async function saveMarketStorageSnapshot(item, conditionPrices = []) {
         ]
       );
 
-      const day = todayDateKey(capturedAt);
-      const chartRows = [
-        { key: 'a', price: aPriceJpy },
-        { key: 'psa10', price: psa10PriceJpy }
-      ].filter((row) => Number(row.price || 0) > 0);
-      for (const row of chartRows) {
-        const existingPoint = await queryD1(
-          `select median_price_jpy, min_price_jpy, max_price_jpy
-           from market_chart_daily_points
-           where source = 'snkrdunk'
-             and apparel_id = ?
-             and condition_key = ?
-             and point_date = ?
-           limit 1`,
-          [apparelId, row.key, day]
-        );
-        const previous = existingPoint?.[0];
-        if (
-          previous
-          && Number(previous.median_price_jpy || 0) === Number(row.price)
-          && Number(previous.min_price_jpy || 0) === Number(row.price)
-          && Number(previous.max_price_jpy || 0) === Number(row.price)
-        ) {
-          continue;
-        }
-        await queryD1(
-          `insert into market_chart_daily_points (
-            source, apparel_id, locale, code, condition_key, point_date,
-            median_price_jpy, min_price_jpy, max_price_jpy, trade_count, source_count, updated_at
-          ) values (
-            'snkrdunk', ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?
-          )
-          on conflict(source, apparel_id, condition_key, point_date) do update set
-            median_price_jpy = excluded.median_price_jpy,
-            min_price_jpy = excluded.min_price_jpy,
-            max_price_jpy = excluded.max_price_jpy,
-            source_count = excluded.source_count,
-            updated_at = excluded.updated_at`,
-          [
-            apparelId,
-            item.locale || 'JP',
-            item.code || '',
-            row.key,
-            day,
-            row.price,
-            row.price,
-            row.price,
-            capturedAt
-          ]
-        );
-      }
+      // Current listing prices are stored separately from trade-backed rows.
+      // They are used only as a graph fallback when Trading History is unavailable.
+      if (persistListingSnapshot) await saveListingFloorSnapshots(item, conditionPrices, capturedAt);
       return;
     } catch {
       if (MARKET_WRITE_SOURCE === 'd1') return;
@@ -677,7 +749,9 @@ async function saveMarketStorageSnapshot(item, conditionPrices = []) {
             source: 'market_collector_min_price',
             conditionName: raw.conditionName || key,
             conditionId: raw.conditionId || null,
-            minPriceUsd: Number(raw.minPrice || 0) || 0
+            minPriceAmount: Number(raw.minPrice || 0) || 0,
+            minPriceCurrency: marketRawPriceCurrency(raw),
+            minPriceUsd: jpyToUsd(price)
           }
         };
       })
@@ -790,7 +864,10 @@ async function readStoredMarketChartPoints(apparelId) {
       const rows = await queryD1(
         `select condition_key, point_date, median_price_jpy
          from market_chart_daily_points
-         where source = 'snkrdunk' and apparel_id = ? and condition_key in ('a', 'psa10')
+         where source = 'snkrdunk'
+           and apparel_id = ?
+           and condition_key in ('a', 'psa10')
+           and coalesce(trade_count, 0) > 0
          order by point_date asc
          limit 1200`,
         [Number(apparelId)]
@@ -808,7 +885,7 @@ async function readStoredMarketChartPoints(apparelId) {
         }
         return acc;
       }, { a: [], psa10: [] });
-      if (points.a.length || points.psa10.length) return points;
+      if (points.a.length || points.psa10.length) return filterChartPointGroups(points);
     } catch {
       return { a: [], psa10: [] };
     }
@@ -862,9 +939,40 @@ async function readStoredMarketChartPoints(apparelId) {
       return acc;
     }, { a: [], psa10: [] });
     if (!points.a.length && !points.psa10.length) return fromSnapshots();
-    return points;
+    return filterChartPointGroups(points);
   } catch {
     return fromSnapshots();
+  }
+}
+
+async function readListingFloorChartPoints(apparelId) {
+  if (!shouldReadD1Market() || !apparelId) return { a: [], psa10: [] };
+  try {
+    const rows = await queryD1(
+      `select condition_key, captured_at, price_amount_jpy
+       from market_listing_floor_snapshots
+       where source = 'snkrdunk'
+         and apparel_id = ?
+         and condition_key in ('a', 'psa10')
+       order by captured_at asc
+       limit 1200`,
+      [Number(apparelId)]
+    );
+    return (rows || []).reduce((acc, row) => {
+      const key = conditionKey(row.condition_key);
+      const price = Number(row.price_amount_jpy || 0);
+      const timestamp = new Date(row.captured_at).getTime();
+      if ((key === 'a' || key === 'psa10') && price > 0 && Number.isFinite(timestamp)) {
+        acc[key].push({
+          timestamp,
+          price: Math.round(price),
+          source: 'snkrdunk_listing_floor'
+        });
+      }
+      return acc;
+    }, { a: [], psa10: [] });
+  } catch {
+    return { a: [], psa10: [] };
   }
 }
 
@@ -935,31 +1043,33 @@ function aggregateDailyMedian(points = []) {
 
 function filterPoints(points = [], range) {
   if (range === 'all') return points;
-  const days = range === '7d' ? 7 : 30;
+  const days = range === '7d' ? 7 : range === '6m' ? 180 : 30;
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-  const filtered = points.filter((point) => point.timestamp >= cutoff);
-  return filtered.length ? filtered : points.slice(-1);
+  return points.filter((point) => point.timestamp >= cutoff);
 }
 
 function ensureDrawablePoints(points = [], range) {
-  if (points.length !== 1) return points;
+  if ((points || []).length !== 1 || range === 'all') return points;
   const point = points[0];
-  const fallbackSpan = range === '7d'
-    ? 24 * 60 * 60 * 1000
-    : range === '1m'
-      ? 3 * 24 * 60 * 60 * 1000
-      : 7 * 24 * 60 * 60 * 1000;
+  const days = range === '7d' ? 7 : range === '6m' ? 180 : 30;
+  const startTimestamp = Date.now() - days * 24 * 60 * 60 * 1000;
   return [
-    { ...point, timestamp: point.timestamp - fallbackSpan, synthetic: true },
-    point
+    {
+      ...point,
+      timestamp: startTimestamp,
+      synthetic: true,
+    },
+    point,
   ];
 }
 
-function buildSeries(points = [], price = 0, source = '') {
-  const merged = aggregateDailyMedian(mergeCurrentPoint(points, price, source));
+function buildSeries(points = [], price = 0, source = '', options = {}) {
+  const includeCurrent = options.includeCurrent !== false;
+  const merged = aggregateDailyMedian(includeCurrent ? mergeCurrentPoint(points, price, source) : points);
   return {
     '7d': ensureDrawablePoints(filterPoints(merged, '7d'), '7d'),
     '1m': ensureDrawablePoints(filterPoints(merged, '1m'), '1m'),
+    '6m': ensureDrawablePoints(filterPoints(merged, '6m'), '6m'),
     all: ensureDrawablePoints(filterPoints(merged, 'all'), 'all')
   };
 }
@@ -995,21 +1105,43 @@ function latestPointPrice(points = []) {
   return Number(latest?.price || 0) || 0;
 }
 
+function saneCurrentPrice(currentPrice = 0, historyPoints = [], fallbackPrice = 0) {
+  const current = Number(currentPrice || 0);
+  const history = filterChartOutliers(historyPoints || []);
+  const latestHistory = latestPointPrice(history);
+  const medianHistory = medianNumber(history.map((point) => point.price));
+  const reference = latestHistory || medianHistory || 0;
+  if (current > 0 && reference > 0 && current > reference * 12) return reference;
+  if (current > 0) return current;
+  return reference || Number(fallbackPrice || 0) || 0;
+}
+
 async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot = false } = {}) {
-  const basePrice = usdToJpy(item?.minPrice);
   const storedTrades = await readStoredMarketTrades(item?.apparelId);
   const storedChartPoints = await readStoredMarketChartPoints(item?.apparelId);
-  const aTradePrice = latestPointPrice(storedTrades.a);
-  const psa10TradePrice = latestPointPrice(storedTrades.psa10);
-  const aChartPrice = latestPointPrice(storedChartPoints.a);
-  const psa10ChartPrice = latestPointPrice(storedChartPoints.psa10);
-  const aPrice = getConditionPrice(conditionPrices, 'a') || aTradePrice || aChartPrice || basePrice;
-  const psa10Price = getConditionPrice(conditionPrices, 'psa10') || psa10TradePrice || psa10ChartPrice;
+  const listingFloorPoints = await readListingFloorChartPoints(item?.apparelId);
   if (persistSnapshot) await saveMarketSnapshots(item, conditionPrices);
-  const snapshots = await readMarketSnapshots(item?.apparelId);
+  const aTradeHistory = filterChartOutliers([...storedChartPoints.a, ...storedTrades.a]);
+  const psa10TradeHistory = filterChartOutliers([...storedChartPoints.psa10, ...storedTrades.psa10]);
+  const aListingHistory = filterChartOutliers(listingFloorPoints.a || []);
+  const psa10ListingHistory = filterChartOutliers(listingFloorPoints.psa10 || []);
+  const aCurrentPrice = getConditionPrice(conditionPrices, 'a');
+  const psa10CurrentPrice = getConditionPrice(conditionPrices, 'psa10');
+  const useAListingHistory = aTradeHistory.length < 2 && aListingHistory.length > 0;
+  const usePsa10ListingHistory = psa10TradeHistory.length < 2 && psa10ListingHistory.length > 0;
+  const aHistory = useAListingHistory ? aListingHistory : aTradeHistory;
+  const psa10History = usePsa10ListingHistory ? psa10ListingHistory : psa10TradeHistory;
+  const aPrice = useAListingHistory || !aHistory.length
+    ? saneCurrentPrice(aCurrentPrice, aHistory, latestPointPrice(aHistory))
+    : latestPointPrice(aHistory);
+  const psa10Price = usePsa10ListingHistory || !psa10History.length
+    ? saneCurrentPrice(psa10CurrentPrice, psa10History, latestPointPrice(psa10History))
+    : latestPointPrice(psa10History);
+  const aSeriesPrice = aCurrentPrice || aPrice;
+  const psa10SeriesPrice = psa10CurrentPrice || psa10Price;
   const latestByCondition = {};
-  if (aPrice) latestByCondition.a = { timestamp: Date.now(), price: aPrice };
-  if (psa10Price) latestByCondition.psa10 = { timestamp: Date.now(), price: psa10Price };
+  if (aPrice) latestByCondition.a = { timestamp: Date.now(), price: aPrice, source: useAListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade' };
+  if (psa10Price) latestByCondition.psa10 = { timestamp: Date.now(), price: psa10Price, source: usePsa10ListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade' };
   return {
     item: {
       code: item?.code || '',
@@ -1030,22 +1162,38 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
       { key: 'all', label: 'ALL' }
     ],
     series: {
-      a: buildSeries([...storedChartPoints.a, ...snapshots.a, ...storedTrades.a], aPrice, 'snkrdunk_current_price'),
-      psa10: buildSeries([...storedChartPoints.psa10, ...snapshots.psa10, ...storedTrades.psa10], psa10Price, 'snkrdunk_current_price')
+      a: buildSeries(aHistory, aSeriesPrice, aCurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known'),
+      psa10: buildSeries(psa10History, psa10SeriesPrice, psa10CurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known')
+    },
+    listingSeriesByCondition: {
+      a: buildSeries(aListingHistory, aCurrentPrice, 'snkrdunk_listing_floor'),
+      psa10: buildSeries(psa10ListingHistory, psa10CurrentPrice, 'snkrdunk_listing_floor')
     },
     latestByCondition,
     recentSalesByCondition: {
-      a: buildRecentSnapshots([...storedChartPoints.a, ...snapshots.a, ...storedTrades.a], aPrice, 'A', 'snkrdunk_current_price'),
-      psa10: buildRecentSnapshots([...storedChartPoints.psa10, ...snapshots.psa10, ...storedTrades.psa10], psa10Price, 'PSA10', 'snkrdunk_current_price')
+      a: buildRecentSnapshots(
+        filterChartOutliers(storedTrades.a?.length ? storedTrades.a : aHistory),
+        0,
+        'A',
+        useAListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade'
+      ),
+      psa10: buildRecentSnapshots(
+        filterChartOutliers(storedTrades.psa10?.length ? storedTrades.psa10 : psa10History),
+        0,
+        'PSA10',
+        usePsa10ListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade'
+      )
     }
   };
 }
 
-export async function collectMarketSnapshot(item) {
+export async function collectMarketSnapshot(item, options = {}) {
   if (!item?.apparelId) return { ok: false, error: 'missing_apparel_id' };
   const conditionPrices = await fetchConditionPrices(item.apparelId);
   await saveMarketSnapshots(item, conditionPrices);
-  await saveMarketStorageSnapshot(item, conditionPrices);
+  await saveMarketStorageSnapshot(item, conditionPrices, {
+    persistListingSnapshot: Boolean(options.persistListingSnapshot)
+  });
   const aPrice = getConditionPrice(conditionPrices, 'a') || usdToJpy(item?.minPrice);
   const psa10Price = getConditionPrice(conditionPrices, 'psa10');
   return {
@@ -1059,6 +1207,81 @@ export async function collectMarketSnapshot(item) {
 
 async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
+  if (String(params.get('summary') || '').toLowerCase() === 'latest') {
+    const rows = shouldReadD1Market()
+      ? await queryD1(
+        `select apparel_id, latest_a_price_jpy, latest_psa10_price_jpy, latest_captured_at
+         from market_products
+         where source = 'snkrdunk' and is_active = 1
+         order by apparel_id asc`
+      ).catch(() => [])
+      : [];
+    const latestByApparelId = new Map();
+    for (const row of rows || []) {
+      const aPriceJpy = Number(row.latest_a_price_jpy || 0);
+      const psa10PriceJpy = Number(row.latest_psa10_price_jpy || 0);
+      if (!row.apparel_id || (aPriceJpy <= 0 && psa10PriceJpy <= 0)) continue;
+      latestByApparelId.set(String(row.apparel_id), {
+        apparelId: row.apparel_id,
+        aPriceJpy,
+        aPriceUsd: jpyToUsd(aPriceJpy),
+        psa10PriceJpy,
+        psa10PriceUsd: jpyToUsd(psa10PriceJpy),
+        capturedAt: row.latest_captured_at || ''
+      });
+    }
+
+    if (shouldReadD1Market()) {
+      const chartRows = await queryD1(
+        `with latest_points as (
+           select source, apparel_id, condition_key, max(point_date) as point_date
+             from market_chart_daily_points
+             where source = 'snkrdunk'
+               and condition_key in ('a', 'psa10')
+               and (trade_count is null or trade_count > 0)
+           group by source, apparel_id, condition_key
+         )
+         select p.apparel_id, p.condition_key, p.median_price_jpy, p.point_date, p.updated_at
+         from market_chart_daily_points p
+         join latest_points l
+           on p.source = l.source
+          and p.apparel_id = l.apparel_id
+          and p.condition_key = l.condition_key
+         and p.point_date = l.point_date
+         where p.source = 'snkrdunk'
+           and (p.trade_count is null or p.trade_count > 0)
+         order by p.apparel_id asc`
+      ).catch(() => []);
+      for (const row of chartRows || []) {
+        const apparelId = String(row.apparel_id || '');
+        const price = Number(row.median_price_jpy || 0);
+        if (!apparelId || price <= 0) continue;
+        const item = latestByApparelId.get(apparelId) || {
+          apparelId: row.apparel_id,
+          aPriceJpy: 0,
+          aPriceUsd: 0,
+          psa10PriceJpy: 0,
+          psa10PriceUsd: 0,
+          capturedAt: row.updated_at || row.point_date || ''
+        };
+        if (row.condition_key === 'a' && Number(item.aPriceJpy || 0) <= 0) {
+          item.aPriceJpy = price;
+          item.aPriceUsd = jpyToUsd(price);
+        }
+        if (row.condition_key === 'psa10' && Number(item.psa10PriceJpy || 0) <= 0) {
+          item.psa10PriceJpy = price;
+          item.psa10PriceUsd = jpyToUsd(price);
+        }
+        if (!item.capturedAt) item.capturedAt = row.updated_at || row.point_date || '';
+        latestByApparelId.set(apparelId, item);
+      }
+    }
+
+    return {
+      items: Array.from(latestByApparelId.values())
+        .filter((item) => item.apparelId && (item.aPriceJpy > 0 || item.psa10PriceJpy > 0))
+    };
+  }
   const apparelId = params.get('apparelId');
   const code = (params.get('code') || '').trim().toUpperCase();
   const normalizeMarketCode = (value) => String(value || '').trim().toUpperCase().replace(/^OPC-/, '');
