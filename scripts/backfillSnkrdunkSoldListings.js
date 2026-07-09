@@ -8,6 +8,7 @@ const DEFAULT_PER_PAGE = 50;
 const DEFAULT_DELAY_MS = 250;
 const DEFAULT_HISTORY_CHUNK_SIZE = 10;
 const DEFAULT_RECENT_RAW_DAYS = 30;
+const DEFAULT_DAILY_DAYS = 365;
 const DEFAULT_SAFETY_MAX_PAGES = 1000;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -185,6 +186,15 @@ function listingTimestamp(listing) {
   if (fromUid > 0) return fromUid;
   const parsed = Date.parse(listing?.soldAt || listing?.sold_at || listing?.updatedAt || listing?.updated_at || listing?.createdAt || listing?.created_at || '');
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function newestSoldListingDateKey(listings = []) {
+  let newest = 0;
+  for (const listing of listings || []) {
+    if (!listing?.isSold) continue;
+    newest = Math.max(newest, listingTimestamp(listing));
+  }
+  return newest > 0 ? dateKeyKst(newest) : '';
 }
 
 function listingConditionName(listing) {
@@ -416,6 +426,7 @@ async function backfillItem(item, options) {
     tradesStored: 0,
     dailyPointsUpdated: 0,
     capped: false,
+    stoppedAtDailyCutoff: false,
   };
   const dailyBuckets = new Map();
   const recentHistory = [];
@@ -430,7 +441,7 @@ async function backfillItem(item, options) {
     const { history, soldSeen } = historyFromListings(listings, options.allowedConditions);
     result.soldSeen += soldSeen;
     if (options.aggregateMode) {
-      addDailyHistory(dailyBuckets, item, history);
+      addDailyHistory(dailyBuckets, item, history.filter((trade) => isRecentHistoryItem(trade, options.dailyCutoffDate)));
       recentHistory.push(...history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate)));
     } else if (history.length) {
       const posted = await postHistoryChunks(item, history, options);
@@ -441,6 +452,11 @@ async function backfillItem(item, options) {
     }
 
     if (listings.length < options.perPage) break;
+    const newestSoldDay = newestSoldListingDateKey(listings);
+    if (options.aggregateMode && newestSoldDay && newestSoldDay < options.dailyCutoffDate) {
+      result.stoppedAtDailyCutoff = true;
+      break;
+    }
     if (page === options.maxPages) result.capped = true;
     if (options.delayMs) await sleep(options.delayMs);
   }
@@ -476,6 +492,8 @@ async function main() {
   const historyChunkSize = positiveInt(process.env.BACKFILL_HISTORY_CHUNK_SIZE, DEFAULT_HISTORY_CHUNK_SIZE, 25);
   const recentRawDays = positiveInt(process.env.BACKFILL_RECENT_RAW_DAYS, DEFAULT_RECENT_RAW_DAYS, 365);
   const recentRawCutoff = recentRawCutoffDate(recentRawDays);
+  const dailyDays = positiveInt(process.env.BACKFILL_DAILY_DAYS, DEFAULT_DAILY_DAYS, 3650);
+  const dailyCutoff = recentRawCutoffDate(dailyDays);
   const { maxPages, requestedAll } = parsePageLimit(process.env.SOLD_LISTING_MAX_PAGES || process.env.MAX_PAGES);
   const startIndex = Math.max(0, Number(process.env.BACKFILL_START_INDEX || 0) || 0);
   const cardLimit = Math.max(0, Number(process.env.BACKFILL_CARD_LIMIT || 0) || 0);
@@ -493,6 +511,8 @@ async function main() {
     requestedAll,
     perPage,
     historyChunkSize,
+    dailyDays,
+    dailyCutoff,
     recentRawDays,
     recentRawCutoff,
     pagesFetched: 0,
@@ -506,6 +526,7 @@ async function main() {
     dailyPointsUpdated: 0,
     failed: 0,
     capped: 0,
+    stoppedAtDailyCutoff: 0,
   };
 
   console.log(JSON.stringify({ event: 'start', ...summary }));
@@ -521,6 +542,7 @@ async function main() {
         delayMs,
         historyChunkSize,
         aggregateMode,
+        dailyCutoffDate: dailyCutoff,
         recentRawCutoffDate: recentRawCutoff,
         allowedConditions,
       });
@@ -534,6 +556,7 @@ async function main() {
       summary.tradesStored += result.tradesStored;
       summary.dailyPointsUpdated += result.dailyPointsUpdated;
       if (result.capped) summary.capped += 1;
+      if (result.stoppedAtDailyCutoff) summary.stoppedAtDailyCutoff += 1;
       const payload = { event: 'card', index: startIndex + index, selectedIndex: index, ...result };
       console.log(JSON.stringify(payload));
       await appendProgress(progressPath, payload);

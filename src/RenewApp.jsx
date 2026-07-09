@@ -1496,6 +1496,7 @@ function mergePsa10MarketDetail(detail, psaDetail) {
     || extraPsaRecent.length
     || extraPsaSeries['7d']?.length
     || extraPsaSeries['1m']?.length
+    || extraPsaSeries['1y']?.length
     || extraPsaSeries.all?.length
   );
   if (!hasPsaSupplement) return detail;
@@ -1513,7 +1514,7 @@ function mergePsa10MarketDetail(detail, psaDetail) {
         ...extraPsaSeries,
         '7d': mergeRecords(basePsaSeries['7d'], extraPsaSeries['7d'], 'asc'),
         '1m': mergeRecords(basePsaSeries['1m'], extraPsaSeries['1m'], 'asc'),
-        all: mergeRecords(basePsaSeries.all, extraPsaSeries.all, 'asc')
+        '1y': mergeRecords(basePsaSeries['1y'] || basePsaSeries.all, extraPsaSeries['1y'] || extraPsaSeries.all, 'asc')
       }
     },
     recentSalesByCondition: {
@@ -6091,7 +6092,8 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     }))
     .filter((point) => Number.isFinite(point.timestamp) && point.timestamp > 0 && point.price > 0)
     .sort((a, b) => a.timestamp - b.timestamp);
-  const orderedPoints = range === 'all'
+  const isLongMarketRange = range === '1y' || range === 'all';
+  const orderedPoints = isLongMarketRange
     ? compressMarketAllChartPoints(aggregatedPoints, isMobileChart ? 72 : 108)
     : aggregatedPoints;
   if (!orderedPoints.length) {
@@ -6118,10 +6120,10 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   const q1 = percentile(0.25);
   const q3 = percentile(0.75);
   const iqr = q3 - q1;
-  const outlierMin = range === 'all' && orderedPoints.length >= 12
+  const outlierMin = isLongMarketRange && orderedPoints.length >= 12
     ? percentile(0.04)
     : iqr > 0 ? Math.max(min, q1 - iqr * 1.5) : min;
-  const outlierMax = range === 'all' && orderedPoints.length >= 12
+  const outlierMax = isLongMarketRange && orderedPoints.length >= 12
     ? percentile(0.96)
     : iqr > 0 ? Math.min(max, q3 + iqr * 1.5) : max;
   const useOutlierScale = orderedPoints.length >= 4 && outlierMax > outlierMin && (outlierMin > min || outlierMax < max);
@@ -6148,7 +6150,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     const y = padTop + ((scaleMax - clampedPrice) / priceRange) * (height - padTop - padBottom);
     return { ...point, x, y, isClamped: price !== clampedPrice };
   });
-  const showPointDots = range !== 'all' || plotted.length <= 36;
+  const showPointDots = !isLongMarketRange || plotted.length <= 36;
   const linePath = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
   const smoothPath = plotted.length > 2
     ? plotted.reduce((path, point, index) => {
@@ -6159,7 +6161,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
       return `${path} Q ${previous.x} ${previous.y} ${midX} ${midY}`;
     }, '') + ` L ${plotted[plotted.length - 1].x} ${plotted[plotted.length - 1].y}`
     : linePath;
-  const path = range === 'all' ? smoothPath : linePath;
+  const path = isLongMarketRange ? smoothPath : linePath;
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
   const activeIndex = hoverIndex != null && hoverIndex >= 0 && hoverIndex < plotted.length ? hoverIndex : plotted.length - 1;
   const active = plotted[activeIndex];
@@ -6173,7 +6175,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
       { key: 'middle', className: 'is-middle', x: midPoint?.x || width / 2, text: formatChartAxisDate(midPoint?.timestamp) },
       { key: 'end', className: 'is-end', x: width - padX, text: formatChartAxisDate(plotted[plotted.length - 1]?.timestamp) }
     ].filter((item) => item.text);
-  const rangeLabel = range === '1m' ? '1M' : range === 'all' ? 'ALL' : '7D';
+  const rangeLabel = range === '1m' ? '1M' : range === '1y' ? '1Y' : range === 'all' ? 'ALL' : '7D';
 
   return (
     <div className="renew-market-chart-box">
@@ -6327,19 +6329,21 @@ function getMarketIndexTypeFromPath(path) {
   const aliasMap = {
     '/prices/collector-index': 'collector',
     '/prices/manga-index': 'manga',
+    '/prices/waifu-index': 'premium_art',
     '/prices/premium-art-index': 'premium_art',
     '/prices/sp-index': 'sp',
     '/prices/luffy-index': 'luffy'
   };
   if (aliasMap[path]) return aliasMap[path];
   const slug = path.startsWith('/prices/index/') ? path.slice('/prices/index/'.length) : '';
-  const legacyMap = { collector: 'collector', manga: 'manga', 'premium-art': 'premium_art', sp: 'sp', luffy: 'luffy' };
+  const legacyMap = { collector: 'collector', manga: 'manga', waifu: 'premium_art', premium: 'premium_art', 'premium-art': 'premium_art', sp: 'sp', luffy: 'luffy' };
   return legacyMap[slug] || 'collector';
 }
 
 function isMarketIndexPath(path) {
   return path === '/prices/collector-index'
     || path === '/prices/manga-index'
+    || path === '/prices/waifu-index'
     || path === '/prices/premium-art-index'
     || path === '/prices/sp-index'
     || path === '/prices/luffy-index'
@@ -6841,7 +6845,8 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
             const summarySeriesA = getMarketConditionBucket(summary?.series, 'a') || {};
             const latestPrice = Number(getMarketConditionBucket(summary?.latestByCondition, 'a')?.price || 0);
             const hasSeries = Boolean(
-              summarySeriesA.all?.length
+              summarySeriesA['1y']?.length
+              || summarySeriesA.all?.length
               || summarySeriesA['1m']?.length
               || summarySeriesA['7d']?.length
               || getMarketConditionBucket(summary?.recentSalesByCondition, 'a')?.length
@@ -6972,7 +6977,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const marketConditionOptions = getMarketConditionOptions(marketDetail?.conditions, t);
   const selectedLatest = getMarketConditionBucket(marketDetail?.latestByCondition, normalizedCondition);
   const conditionSeries = getMarketConditionBucket(marketDetail?.series, normalizedCondition) || {};
-  const chartPoints = conditionSeries?.[range] || [];
+  const chartPoints = conditionSeries?.[range] || (range === '1y' ? conditionSeries?.all : []) || [];
   const recentSales = getMarketConditionBucket(marketDetail?.recentSalesByCondition, normalizedCondition) || [];
   const recentSalesVisible = recentSales;
   const currentPrice = selectedLatest?.price ? formatUsdWonFromYen(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
@@ -7115,7 +7120,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                       className={normalizedCondition === item.key ? 'is-active' : ''}
                       onClick={() => {
                         setCondition(item.key);
-                        if (item.key === 'psa10') setRange('all');
+                        if (item.key === 'psa10') setRange('1y');
                       }}
                     >
                       {item.label}
@@ -7123,7 +7128,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                   ))}
                 </div>
                 <div className="renew-chip-group">
-                  {(marketDetail?.ranges || [{ key: '7d', label: '7D' }, { key: '1m', label: '1M' }, { key: 'all', label: 'ALL' }]).map((item) => (
+                  {(marketDetail?.ranges || [{ key: '7d', label: '7D' }, { key: '1m', label: '1M' }, { key: '1y', label: '1Y' }]).map((item) => (
                     <button key={item.key} type="button" className={range === item.key ? 'is-active' : ''} onClick={() => setRange(item.key)}>
                       {item.label}
                     </button>

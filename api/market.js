@@ -74,6 +74,10 @@ function todayDateKey(value = Date.now()) {
   return Number.isNaN(date.getTime()) ? new Date().toISOString().slice(0, 10) : date.toISOString().slice(0, 10);
 }
 
+function dateKeyDaysAgo(days) {
+  return new Date(Date.now() - Number(days || 0) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 function listingSnapshotBucket(value = Date.now()) {
   const timestamp = new Date(value).getTime();
   const safeTimestamp = Number.isFinite(timestamp) ? timestamp : Date.now();
@@ -498,7 +502,7 @@ function priceChartingPointsToRecentSales(points = [], label = 'PSA10') {
 
 function applyPriceChartingSupplement(detail, supplement) {
   if (!supplement?.psa10Price && !supplement?.psa10Points?.length) return detail;
-  const existingAll = detail?.series?.psa10?.all || [];
+  const existingAll = detail?.series?.psa10?.['1y'] || detail?.series?.psa10?.all || [];
   const psa10Points = mergeUniquePoints(existingAll, supplement.psa10Points || []);
   const psa10Price = Number(supplement.psa10Price || detail?.latestByCondition?.psa10?.price || 0) || 0;
   if (!psa10Points.length && !psa10Price) return detail;
@@ -896,6 +900,7 @@ async function readStoredMarketTrades(apparelId) {
 
 async function readStoredMarketChartPoints(apparelId) {
   let d1Points = { a: [], psa10: [] };
+  const chartCutoffDate = dateKeyDaysAgo(365);
   if (shouldReadD1Market() && apparelId) {
     try {
       const rows = await queryD1(
@@ -905,9 +910,10 @@ async function readStoredMarketChartPoints(apparelId) {
            and apparel_id = ?
            and condition_key in ('a', 'psa10')
            and median_price_jpy > 0
+           and point_date >= ?
          order by point_date asc
          limit 1200`,
-        [Number(apparelId)]
+        [Number(apparelId), chartCutoffDate]
       );
       const points = (rows || []).reduce((acc, row) => {
         const key = conditionKey(row.condition_key);
@@ -959,6 +965,7 @@ async function readStoredMarketChartPoints(apparelId) {
       .eq('source', 'snkrdunk')
       .eq('apparel_id', Number(apparelId))
       .in('condition_key', ['a', 'psa10'])
+      .gte('point_date', chartCutoffDate)
       .order('point_date', { ascending: true })
       .limit(1200);
     if (error) return fromSnapshots();
@@ -1081,14 +1088,14 @@ function aggregateDailyMedian(points = []) {
 
 function filterPoints(points = [], range) {
   if (range === 'all') return points;
-  const days = range === '7d' ? 7 : range === '6m' ? 180 : 30;
+  const days = range === '7d' ? 7 : range === '1y' ? 365 : range === '6m' ? 180 : 30;
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
   return points.filter((point) => point.timestamp >= cutoff);
 }
 
 function rangeCutoffTimestamp(range) {
   if (range === 'all') return 0;
-  const days = range === '7d' ? 7 : range === '6m' ? 180 : 30;
+  const days = range === '7d' ? 7 : range === '1y' ? 365 : range === '6m' ? 180 : 30;
   return Date.now() - days * 24 * 60 * 60 * 1000;
 }
 
@@ -1110,7 +1117,7 @@ function buildSeries(points = [], price = 0, source = '', options = {}) {
     '7d': buildRangePoints(merged, '7d'),
     '1m': buildRangePoints(merged, '1m'),
     '6m': buildRangePoints(merged, '6m'),
-    all: buildRangePoints(merged, 'all')
+    '1y': buildRangePoints(merged, '1y')
   };
 }
 
@@ -1211,7 +1218,7 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
     ranges: [
       { key: '7d', label: '7D' },
       { key: '1m', label: '1M' },
-      { key: 'all', label: 'ALL' }
+      { key: '1y', label: '1Y' }
     ],
     series: {
       a: buildSeries(aHistory, aHasTradeHistory ? 0 : aSeriesPrice, aCurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known', { includeCurrent: !aHasTradeHistory }),

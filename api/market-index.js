@@ -5,6 +5,12 @@ const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
 const CACHE_SECONDS = 60 * 60;
+const INDEX_TYPE_ALIASES = {
+  waifu: 'premium_art',
+  premium: 'premium_art',
+  premiumart: 'premium_art',
+  'premium-art': 'premium_art'
+};
 
 function getD1Binding() {
   const binding = process.env?.[D1_BINDING_NAME] || process.env?.DB || null;
@@ -45,6 +51,28 @@ function percentChange(current, previous) {
   const b = Number(previous || 0);
   if (!a || !b) return null;
   return ((a / b) - 1) * 100;
+}
+
+function medianNumber(values = []) {
+  const sorted = values
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function smoothIndexPoints(points = [], windowSize = 3) {
+  return (points || []).map((point, index) => {
+    const window = points.slice(Math.max(0, index - windowSize + 1), index + 1);
+    const smoothedValue = medianNumber(window.map((item) => item.value));
+    return {
+      ...point,
+      rawValue: point.value,
+      value: smoothedValue ? Number(smoothedValue.toFixed(2)) : point.value
+    };
+  });
 }
 
 function closestPointAtOrBefore(points, dateKey) {
@@ -149,9 +177,10 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
     }
   }
 
-  const scopedPoints = applyRange(points, range);
-  const current = points[points.length - 1] || null;
-  const previous = points[points.length - 2] || null;
+  const displayPoints = smoothIndexPoints(points);
+  const scopedPoints = applyRange(displayPoints, range);
+  const current = displayPoints[displayPoints.length - 1] || null;
+  const previous = displayPoints[displayPoints.length - 2] || null;
   const currentDate = current?.date ? new Date(`${current.date}T00:00:00Z`) : null;
   const dateAgo = (days) => {
     if (!currentDate) return '';
@@ -159,10 +188,10 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
     date.setUTCDate(date.getUTCDate() - days);
     return date.toISOString().slice(0, 10);
   };
-  const point7d = closestPointAtOrBefore(points, dateAgo(7));
-  const point30d = closestPointAtOrBefore(points, dateAgo(30));
-  const point183d = closestPointAtOrBefore(points, dateAgo(183));
-  const pointAll = points[0] || null;
+  const point7d = closestPointAtOrBefore(displayPoints, dateAgo(7));
+  const point30d = closestPointAtOrBefore(displayPoints, dateAgo(30));
+  const point183d = closestPointAtOrBefore(displayPoints, dateAgo(183));
+  const pointAll = displayPoints[0] || null;
 
   return {
     index: {
@@ -204,9 +233,10 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     .sort((a, b) => a.date.localeCompare(b.date));
   if (!points.length) return null;
 
-  const scopedPoints = applyRange(points, range);
-  const current = points[points.length - 1] || null;
-  const previous = points[points.length - 2] || null;
+  const displayPoints = smoothIndexPoints(points);
+  const scopedPoints = applyRange(displayPoints, range);
+  const current = displayPoints[displayPoints.length - 1] || null;
+  const previous = displayPoints[displayPoints.length - 2] || null;
   const currentDate = current?.date ? new Date(`${current.date}T00:00:00Z`) : null;
   const dateAgo = (days) => {
     if (!currentDate) return '';
@@ -214,10 +244,10 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     date.setUTCDate(date.getUTCDate() - days);
     return date.toISOString().slice(0, 10);
   };
-  const point7d = closestPointAtOrBefore(points, dateAgo(7));
-  const point30d = closestPointAtOrBefore(points, dateAgo(30));
-  const point183d = closestPointAtOrBefore(points, dateAgo(183));
-  const pointAll = points[0] || null;
+  const point7d = closestPointAtOrBefore(displayPoints, dateAgo(7));
+  const point30d = closestPointAtOrBefore(displayPoints, dateAgo(30));
+  const point183d = closestPointAtOrBefore(displayPoints, dateAgo(183));
+  const pointAll = displayPoints[0] || null;
   const componentIndexById = new Map(
     (componentRows || []).map((row) => [
       Number(row.apparel_id),
@@ -264,7 +294,8 @@ export default async function handler(request, response) {
   }
 
   const query = request.query || Object.fromEntries(new URL(request.url, 'https://local.invalid').searchParams.entries());
-  const type = String(query.type || 'manga').toLowerCase();
+  const requestedType = String(query.type || 'manga').toLowerCase();
+  const type = INDEX_TYPE_ALIASES[requestedType] || requestedType;
   const range = String(query.range || 'all').toLowerCase();
   const conditionKey = normalizeCondition(query.condition);
   const indexConfig = marketIndexes.find((item) => item.code === type) || marketIndexes[0];

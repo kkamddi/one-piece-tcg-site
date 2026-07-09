@@ -45,6 +45,10 @@ on:
         description: Raw recent trades to keep for recent history UI
         required: false
         default: "30"
+      daily_days:
+        description: Daily chart aggregate days to keep
+        required: false
+        default: "365"
       safety_max_pages:
         description: Safety cap used when max_pages is all.
         required: false
@@ -86,6 +90,7 @@ jobs:
           BACKFILL_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
           BACKFILL_MODE: ${{ github.event.inputs.mode || 'aggregate' }}
           BACKFILL_RECENT_RAW_DAYS: ${{ github.event.inputs.recent_raw_days || '30' }}
+          BACKFILL_DAILY_DAYS: ${{ github.event.inputs.daily_days || '365' }}
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '250' }}
