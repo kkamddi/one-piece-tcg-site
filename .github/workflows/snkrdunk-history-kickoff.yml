@@ -1,0 +1,43 @@
+name: SNKRDUNK history kickoff
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/snkrdunk-history-kickoff.yml"
+
+jobs:
+  collect-one-card:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Collect 706813 visible trading history
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+        run: |
+          if [ -z "$MARKET_COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+
+          node scripts/runSnkrdunkTradeHistoryCycle.js \
+            --apparel-id=706813 \
+            --active-only=false \
+            --delay-ms=15000 \
+            --headless=true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snkrdunk-history-kickoff-706813
+          path: tmp/snkrdunk-visible-history-*.json
+          if-no-files-found: warn
