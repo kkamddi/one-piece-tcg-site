@@ -6,6 +6,7 @@ const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_COLLECTOR_URL = 'https://www.optcgkorea.com/api/market-collector';
 const DEFAULT_PER_PAGE = 50;
 const DEFAULT_DELAY_MS = 250;
+const DEFAULT_HISTORY_CHUNK_SIZE = 10;
 const DEFAULT_SAFETY_MAX_PAGES = 1000;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -253,6 +254,23 @@ async function postHistory(item, history, collectorUrl, token) {
   });
 }
 
+async function postHistoryChunks(item, history, options) {
+  const result = {
+    tradesSeen: 0,
+    tradesStored: 0,
+    dailyPointsUpdated: 0,
+  };
+  for (let start = 0; start < history.length; start += options.historyChunkSize) {
+    const chunk = history.slice(start, start + options.historyChunkSize);
+    const posted = await postHistory(item, chunk, options.collectorUrl, options.token);
+    result.tradesSeen += Number(posted?.tradesSeen || 0);
+    result.tradesStored += Number(posted?.tradesStored || 0);
+    result.dailyPointsUpdated += Number(posted?.dailyPointsUpdated || 0);
+    if (options.delayMs) await sleep(Math.min(options.delayMs, 1000));
+  }
+  return result;
+}
+
 async function appendProgress(path, payload) {
   if (!path) return;
   await appendFile(path, `${JSON.stringify({ at: new Date().toISOString(), ...payload })}\n`, 'utf8');
@@ -282,7 +300,7 @@ async function backfillItem(item, options) {
     const { history, soldSeen } = historyFromListings(listings, options.allowedConditions);
     result.soldSeen += soldSeen;
     if (history.length) {
-      const posted = await postHistory(item, history, options.collectorUrl, options.token);
+      const posted = await postHistoryChunks(item, history, options);
       result.historyPosted += history.length;
       result.tradesSeen += Number(posted?.tradesSeen || 0);
       result.tradesStored += Number(posted?.tradesStored || 0);
@@ -304,6 +322,7 @@ async function main() {
   const collectorUrl = String(process.env.COLLECTOR_URL || DEFAULT_COLLECTOR_URL).trim();
   const perPage = positiveInt(process.env.SOLD_LISTING_PER_PAGE, DEFAULT_PER_PAGE, DEFAULT_PER_PAGE);
   const delayMs = positiveInt(process.env.BACKFILL_DELAY_MS, DEFAULT_DELAY_MS, 10000);
+  const historyChunkSize = positiveInt(process.env.BACKFILL_HISTORY_CHUNK_SIZE, DEFAULT_HISTORY_CHUNK_SIZE, 25);
   const { maxPages, requestedAll } = parsePageLimit(process.env.SOLD_LISTING_MAX_PAGES || process.env.MAX_PAGES);
   const startIndex = Math.max(0, Number(process.env.BACKFILL_START_INDEX || 0) || 0);
   const cardLimit = Math.max(0, Number(process.env.BACKFILL_CARD_LIMIT || 0) || 0);
@@ -319,6 +338,7 @@ async function main() {
     maxPages,
     requestedAll,
     perPage,
+    historyChunkSize,
     pagesFetched: 0,
     listingsSeen: 0,
     soldSeen: 0,
@@ -341,6 +361,7 @@ async function main() {
         perPage,
         maxPages,
         delayMs,
+        historyChunkSize,
         allowedConditions,
       });
       summary.pagesFetched += result.pagesFetched;

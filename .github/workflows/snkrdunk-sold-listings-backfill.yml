@@ -41,6 +41,10 @@ on:
         description: Delay between SNKRDUNK page requests
         required: false
         default: "250"
+      history_chunk_size:
+        description: Sold history rows per collector POST
+        required: false
+        default: "10"
       collector_url:
         description: Market collector endpoint
         required: false
@@ -71,6 +75,7 @@ jobs:
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '250' }}
+          BACKFILL_HISTORY_CHUNK_SIZE: ${{ github.event.inputs.history_chunk_size || '10' }}
           BACKFILL_PROGRESS_PATH: sold-listings-backfill-progress.jsonl
         run: npm run backfill:sold-listings
 
