@@ -5,6 +5,8 @@ const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
 const CACHE_SECONDS = 60 * 60;
+const INDEX_MIN_DATE = '2024-01-01';
+const CURRENT_OVERLAY_MAX_CHANGE_PERCENT = 20;
 const INDEX_TYPE_ALIASES = {
   waifu: 'premium_art',
   premium: 'premium_art',
@@ -45,8 +47,25 @@ function normalizeCondition(value) {
 function toDateKey(value) {
   const text = String(value || '').replace(/\b(\d+)(st|nd|rd|th)\b/gi, '$1').trim();
   if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
+  if (/^\d{4}\/\d{1,2}\/\d{1,2}/.test(text)) {
+    const [year, month, day] = text.split(/[\/\s]/);
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+  if (!/\b\d{4}\b/.test(text)) return '';
   const parsed = Date.parse(`${text} UTC`);
   return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : '';
+}
+
+function maxIndexDateKey() {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function isSaneIndexDate(date, baseDate = INDEX_MIN_DATE) {
+  const key = toDateKey(date);
+  if (!key || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return false;
+  return key >= (baseDate || INDEX_MIN_DATE) && key <= maxIndexDateKey();
 }
 
 function percentChange(current, previous) {
@@ -147,7 +166,8 @@ function applyRange(points, range) {
   if (Number.isNaN(lastDate.getTime())) return points;
   lastDate.setUTCDate(lastDate.getUTCDate() - days);
   const cutoff = lastDate.toISOString().slice(0, 10);
-  return points.filter((point) => point.date >= cutoff);
+  const scoped = points.filter((point) => point.date >= cutoff);
+  return scoped.length < 2 && points.length >= 2 ? points.slice(-2) : scoped;
 }
 
 async function fetchCurrentProductRows(apparelIds, conditionKey) {
@@ -305,6 +325,13 @@ function applyCurrentIndexPoint(points = [], currentPoint = null) {
   if (!currentPoint?.date || !currentPoint?.value) return points;
   const next = points.slice();
   const existingIndex = next.findIndex((point) => point.date === currentPoint.date);
+  const referencePoint = existingIndex >= 0
+    ? next[existingIndex]
+    : [...next].reverse().find((point) => point.date < currentPoint.date && Number(point.value || 0) > 0);
+  const overlayChange = referencePoint ? percentChange(currentPoint.value, referencePoint.value) : null;
+  if (Number.isFinite(Number(overlayChange)) && Math.abs(Number(overlayChange)) > CURRENT_OVERLAY_MAX_CHANGE_PERCENT) {
+    return next.sort((a, b) => a.date.localeCompare(b.date));
+  }
   const point = {
     date: currentPoint.date,
     value: currentPoint.value,
@@ -329,7 +356,7 @@ function buildIndexPayload(indexConfig, rows, currentRows, snapshotRows, conditi
     const apparelId = Number(row.apparel_id || 0);
     const price = Number(row.median_price_jpy || 0);
     const date = toDateKey(row.point_date);
-    if (!apparelId || !price || !date) continue;
+    if (!apparelId || !price || !isSaneIndexDate(date, indexConfig.baseDate)) continue;
     const list = rowsByApparelId.get(apparelId) || [];
     list.push({ date, price: Math.round(price) });
     rowsByApparelId.set(apparelId, list);
@@ -436,16 +463,17 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, currentR
       value: Number(Number(row.index_value || 0).toFixed(2)),
       activeCount: Number(row.active_component_count || 0)
     }))
-    .filter((point) => point.date && point.value > 0)
+    .filter((point) => point.value > 0 && isSaneIndexDate(point.date, indexConfig.baseDate))
     .sort((a, b) => a.date.localeCompare(b.date));
   if (!points.length) return null;
 
   const componentRowsById = new Map();
   for (const row of componentRows || []) {
     const apparelId = Number(row.apparel_id || 0);
-    if (!apparelId) continue;
+    const date = toDateKey(row.point_date);
+    if (!apparelId || !isSaneIndexDate(date, indexConfig.baseDate)) continue;
     const rows = componentRowsById.get(apparelId) || [];
-    rows.push(row);
+    rows.push({ ...row, point_date: date });
     componentRowsById.set(apparelId, rows);
   }
   const componentIndexById = new Map();

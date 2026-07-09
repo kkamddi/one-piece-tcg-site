@@ -65,6 +65,7 @@ const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-06-30-kr-op13';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
+const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = true;
 const MARKETPLACE_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
@@ -7009,6 +7010,11 @@ function formatIndexChange(value) {
   return `${prefix}${number.toFixed(2)}%`;
 }
 
+function formatIndexAxisDate(value) {
+  const text = String(value || '');
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text.slice(2) : text;
+}
+
 function RenewIndexChart({ points = [] }) {
   const orderedPoints = points
     .map((point) => ({ ...point, value: Number(point.value || 0) }))
@@ -7029,14 +7035,23 @@ function RenewIndexChart({ points = [] }) {
   const scaleMin = Math.max(0, min - range * 0.12);
   const scaleMax = max + range * 0.12;
   const scaleRange = Math.max(scaleMax - scaleMin, 1);
+  const hasSinglePoint = orderedPoints.length === 1;
   const plotted = orderedPoints.map((point, index) => {
-    const x = padX + ((width - padX * 2) * index / Math.max(orderedPoints.length - 1, 1));
+    const x = hasSinglePoint ? width / 2 : padX + ((width - padX * 2) * index / Math.max(orderedPoints.length - 1, 1));
     const y = padTop + ((scaleMax - point.value) / scaleRange) * (height - padTop - padBottom);
     return { ...point, x, y };
   });
   const path = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
-  const labelPoints = [plotted[0], plotted[Math.floor((plotted.length - 1) / 2)], plotted[plotted.length - 1]].filter(Boolean);
+  const seenLabelDates = new Set();
+  const labelPoints = (hasSinglePoint
+    ? [plotted[0]]
+    : [plotted[0], plotted[Math.floor((plotted.length - 1) / 2)], plotted[plotted.length - 1]])
+    .filter((point) => {
+      if (!point || seenLabelDates.has(point.date)) return false;
+      seenLabelDates.add(point.date);
+      return true;
+    });
   return (
     <div className="renew-index-chart">
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="OPTCG Manga Index chart" preserveAspectRatio="none">
@@ -7052,10 +7067,11 @@ function RenewIndexChart({ points = [] }) {
         })}
         <text className="renew-index-boundary is-max" x={padX + 4} y={padTop + 14}>{formatIndexValue(max)}</text>
         <text className="renew-index-boundary is-min" x={padX + 4} y={height - padBottom - 8}>{formatIndexValue(min)}</text>
-        <path d={area} className="renew-index-area" />
-        <path d={path} className="renew-index-line" />
+        {!hasSinglePoint ? <path d={area} className="renew-index-area" /> : null}
+        {!hasSinglePoint ? <path d={path} className="renew-index-line" /> : null}
+        {hasSinglePoint ? <circle className="renew-index-point" cx={plotted[0].x} cy={plotted[0].y} r="4" /> : null}
         {labelPoints.map((point, index) => (
-          <text key={`${point.date}-${index}`} className={`renew-index-date is-${index}`} x={point.x} y={height - 12}>{point.date.slice(2)}</text>
+          <text key={`${point.date}-${index}`} className={`renew-index-date is-${index}`} x={point.x} y={height - 12}>{formatIndexAxisDate(point.date)}</text>
         ))}
       </svg>
     </div>

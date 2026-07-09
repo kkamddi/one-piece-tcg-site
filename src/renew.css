@@ -7114,6 +7114,12 @@
   stroke-linejoin: round;
 }
 
+.renew-index-point {
+  fill: #c94d35;
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
 .renew-index-boundary,
 .renew-index-date {
   fill: #4b5563;
