@@ -486,7 +486,7 @@ function priceChartingPointsToRecentSales(points = [], label = 'PSA10') {
   return (Array.isArray(points) ? points : [])
     .slice()
     .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
-    .slice(0, 8)
+    .slice(0, 10)
     .map((point) => ({
       date: formatSnapshotDate(point.timestamp),
       timestamp: point.timestamp,
@@ -522,7 +522,7 @@ function applyPriceChartingSupplement(detail, supplement) {
         ...(detail.recentSalesByCondition?.psa10 || [])
       ]
         .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
-        .slice(0, 8)
+        .slice(0, 10)
     },
     sources: {
       ...(detail.sources || {}),
@@ -1093,17 +1093,7 @@ function rangeCutoffTimestamp(range) {
 }
 
 function ensureDrawablePoints(points = [], range) {
-  if ((points || []).length !== 1 || range === 'all') return points;
-  const point = points[0];
-  const startTimestamp = rangeCutoffTimestamp(range);
-  return [
-    {
-      ...point,
-      timestamp: startTimestamp,
-      synthetic: true,
-    },
-    point,
-  ];
+  return points;
 }
 
 function buildRangePoints(points = [], range) {
@@ -1137,7 +1127,7 @@ function buildRecentSnapshots(points = [], price = 0, label = '', source = '') {
   return aggregateDailyMedian(mergeCurrentPoint(points, price, source))
     .slice()
     .sort((a, b) => b.timestamp - a.timestamp)
-    .slice(0, 8)
+    .slice(0, 10)
     .map((point) => ({
       date: formatSnapshotDate(point.timestamp),
       timestamp: point.timestamp,
@@ -1153,7 +1143,7 @@ function buildRecentTradeSnapshots(points = [], label = '') {
     .filter((point) => Number(point?.timestamp || 0) > 0 && Number(point?.price || 0) > 0)
     .slice()
     .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
-    .slice(0, 8)
+    .slice(0, 10)
     .map((point) => ({
       date: formatSnapshotDate(point.timestamp),
       timestamp: point.timestamp,

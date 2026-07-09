@@ -42,7 +42,6 @@ const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
 const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-06-30-kr-op13';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
-const RECENT_SALES_VISIBLE_MS = 7 * 24 * 60 * 60 * 1000;
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
 const MARKETPLACE_TAB_VISIBLE = true;
@@ -1304,6 +1303,83 @@ function formatMarketDate(timestamp) {
 
 function formatMarketSaleDate(sale) {
   return formatShortDateValue(Number(sale?.timestamp || 0)) || formatShortDateValue(sale?.date || sale?.soldAt || '');
+}
+
+function normalizeMarketConditionKey(value) {
+  const key = String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+  if (!key || key === 'a' || key === 'single' || key === 'singlegrade' || key === 'raw') return 'a';
+  if (key === 'psa10' || (key.includes('psa') && key.includes('10'))) return 'psa10';
+  return key;
+}
+
+function getMarketConditionBucket(source, conditionKey) {
+  if (!source || typeof source !== 'object') return undefined;
+  const normalizedKey = normalizeMarketConditionKey(conditionKey);
+  if (source[normalizedKey]) return source[normalizedKey];
+  for (const [key, value] of Object.entries(source)) {
+    if (normalizeMarketConditionKey(key) === normalizedKey) return value;
+  }
+  return undefined;
+}
+
+function getMarketConditionOptions(conditions = [], t = (key) => key) {
+  const source = Array.isArray(conditions) && conditions.length
+    ? conditions
+    : [{ key: 'a', label: t('aGrade') }, { key: 'psa10', label: 'PSA10' }];
+  const seen = new Set();
+  return source.reduce((items, item) => {
+    const key = normalizeMarketConditionKey(item?.key || item?.label);
+    if (!key || seen.has(key)) return items;
+    seen.add(key);
+    items.push({
+      ...item,
+      key,
+      label: key === 'a' ? t('aGrade') : item?.label || key.toUpperCase()
+    });
+    return items;
+  }, []);
+}
+
+function medianMarketNumber(values = []) {
+  const sorted = values
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+}
+
+function aggregateMarketDailyChartPoints(points = []) {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const kstOffsetMs = 9 * 60 * 60 * 1000;
+  const groups = new Map();
+  for (const point of points || []) {
+    if (point?.synthetic) continue;
+    const timestamp = Number(point?.timestamp || 0);
+    const price = Number(point?.price || 0);
+    if (!Number.isFinite(timestamp) || timestamp <= 0 || !Number.isFinite(price) || price <= 0) continue;
+    const dayKey = Math.floor((timestamp + kstOffsetMs) / dayMs);
+    const group = groups.get(dayKey) || [];
+    group.push({ ...point, timestamp, price });
+    groups.set(dayKey, group);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([dayKey, group]) => {
+      const prices = group.map((point) => point.price);
+      const dayStartUtc = dayKey * dayMs - kstOffsetMs;
+      const sourceText = group.map((point) => point.source || '').join(' ').toLowerCase();
+      return {
+        ...group[group.length - 1],
+        timestamp: dayStartUtc + 12 * 60 * 60 * 1000,
+        price: medianMarketNumber(prices),
+        minPrice: Math.min(...prices),
+        maxPrice: Math.max(...prices),
+        count: group.length,
+        source: sourceText.includes('snkrdunk') ? 'snkrdunk_daily_median' : group.length > 1 ? 'daily_median' : group[0].source
+      };
+    });
 }
 
 function formatChartAxisDate(timestamp) {
@@ -2799,10 +2875,10 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
     }
 
     Promise.all(entries.map(async ([key, item]) => {
-      const grade = String(valuationGradeMap[key] || item.grade || 'a').toLowerCase();
+      const grade = normalizeMarketConditionKey(valuationGradeMap[key] || item.grade || 'a');
       try {
         const summary = await fetchMarketPrice({ code: item.code, apparelId: item.apparelId, summary: true });
-        const price = Number(summary?.latestByCondition?.[grade]?.price || item.minPrice || 0) || 0;
+        const price = Number(getMarketConditionBucket(summary?.latestByCondition, grade)?.price || item.minPrice || 0) || 0;
         return {
           key,
           grade,
@@ -5966,7 +6042,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     media.addEventListener?.('change', update);
     return () => media.removeEventListener?.('change', update);
   }, []);
-  const orderedPoints = points
+  const orderedPoints = aggregateMarketDailyChartPoints(points)
     .map((point) => ({
       ...point,
       timestamp: Number(point.timestamp || 0),
@@ -6000,38 +6076,53 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   const iqr = q3 - q1;
   const outlierMin = iqr > 0 ? Math.max(min, q1 - iqr * 1.5) : min;
   const outlierMax = iqr > 0 ? Math.min(max, q3 + iqr * 1.5) : max;
-  const useOutlierScale = points.length >= 6 && outlierMax > outlierMin && (outlierMin > min || outlierMax < max);
+  const useOutlierScale = orderedPoints.length >= 4 && outlierMax > outlierMin && (outlierMin > min || outlierMax < max);
   const scaleMinBase = useOutlierScale ? outlierMin : min;
   const scaleMaxBase = useOutlierScale ? outlierMax : max;
   const scalePadding = Math.max((scaleMaxBase - scaleMinBase) * 0.16, scaleMaxBase * 0.012, 1000);
   const scaleMin = Math.max(0, scaleMinBase - scalePadding);
   const scaleMax = scaleMaxBase + scalePadding;
   const priceRange = Math.max(scaleMax - scaleMin, 1);
-  const maxLabelPrice = Math.min(scaleMax, Math.max(scaleMin, max));
-  const minLabelPrice = Math.min(scaleMax, Math.max(scaleMin, min));
+  const maxBoundaryPrice = useOutlierScale ? scaleMaxBase : max;
+  const minBoundaryPrice = useOutlierScale ? scaleMinBase : min;
+  const maxLabelPrice = Math.min(scaleMax, Math.max(scaleMin, maxBoundaryPrice));
+  const minLabelPrice = Math.min(scaleMax, Math.max(scaleMin, minBoundaryPrice));
   const maxLabelY = padTop + ((scaleMax - maxLabelPrice) / priceRange) * (height - padTop - padBottom);
   const minLabelY = padTop + ((scaleMax - minLabelPrice) / priceRange) * (height - padTop - padBottom);
   const minTime = orderedPoints[0].timestamp;
   const maxTime = orderedPoints[orderedPoints.length - 1].timestamp;
   const timeRange = Math.max(maxTime - minTime, 1);
+  const hasSinglePoint = orderedPoints.length === 1;
   const plotted = orderedPoints.map((point) => {
-    const x = padX + ((width - padX * 2) * (point.timestamp - minTime) / timeRange);
+    const x = hasSinglePoint ? width / 2 : padX + ((width - padX * 2) * (point.timestamp - minTime) / timeRange);
     const price = Number(point.price || 0);
     const clampedPrice = Math.min(scaleMax, Math.max(scaleMin, price));
     const y = padTop + ((scaleMax - clampedPrice) / priceRange) * (height - padTop - padBottom);
     return { ...point, x, y, isClamped: price !== clampedPrice };
   });
-  const path = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+  const linePath = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+  const smoothPath = plotted.length > 2
+    ? plotted.reduce((path, point, index) => {
+      if (index === 0) return `M ${point.x} ${point.y}`;
+      const previous = plotted[index - 1];
+      const midX = (previous.x + point.x) / 2;
+      const midY = (previous.y + point.y) / 2;
+      return `${path} Q ${previous.x} ${previous.y} ${midX} ${midY}`;
+    }, '') + ` L ${plotted[plotted.length - 1].x} ${plotted[plotted.length - 1].y}`
+    : linePath;
+  const path = range === 'all' ? smoothPath : linePath;
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
   const active = plotted[hoverIndex ?? plotted.length - 1];
   const tipX = active ? Math.min(active.x + 12, width - tipWidth - 8) : 0;
   const tipY = active ? Math.max(active.y - tipHeight - 10, 8) : 0;
   const midPoint = plotted[Math.floor((plotted.length - 1) / 2)] || plotted[0];
-  const axisLabels = [
-    { key: 'start', className: 'is-start', x: padX, text: formatChartAxisDate(plotted[0]?.timestamp) },
-    { key: 'middle', className: 'is-middle', x: midPoint?.x || width / 2, text: formatChartAxisDate(midPoint?.timestamp) },
-    { key: 'end', className: 'is-end', x: width - padX, text: formatChartAxisDate(plotted[plotted.length - 1]?.timestamp) }
-  ].filter((item) => item.text);
+  const axisLabels = hasSinglePoint
+    ? [{ key: 'middle', className: 'is-middle', x: width / 2, text: formatChartAxisDate(plotted[0]?.timestamp) }]
+    : [
+      { key: 'start', className: 'is-start', x: padX, text: formatChartAxisDate(plotted[0]?.timestamp) },
+      { key: 'middle', className: 'is-middle', x: midPoint?.x || width / 2, text: formatChartAxisDate(midPoint?.timestamp) },
+      { key: 'end', className: 'is-end', x: width - padX, text: formatChartAxisDate(plotted[plotted.length - 1]?.timestamp) }
+    ].filter((item) => item.text);
   const rangeLabel = range === '1m' ? '1M' : range === 'all' ? 'ALL' : '7D';
 
   return (
@@ -6055,10 +6146,10 @@ function RenewMarketChart({ points = [], uiLang, range }) {
         })}
         <line className="renew-chart-boundary" x1={padX} y1={maxLabelY} x2={width - padX} y2={maxLabelY} />
         <line className="renew-chart-boundary" x1={padX} y1={minLabelY} x2={width - padX} y2={minLabelY} />
-        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{formatUsd(max / MARKET_USD_TO_JPY)}</text>
-        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{formatUsd(min / MARKET_USD_TO_JPY)}</text>
-        <path d={area} className="renew-chart-area" />
-        <path d={path} className="renew-chart-line" />
+        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{formatUsd(maxBoundaryPrice / MARKET_USD_TO_JPY)}</text>
+        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{formatUsd(minBoundaryPrice / MARKET_USD_TO_JPY)}</text>
+        {!hasSinglePoint ? <path d={area} className="renew-chart-area" /> : null}
+        {!hasSinglePoint ? <path d={path} className="renew-chart-line" /> : null}
         {axisLabels.map((item) => (
           <text key={item.key} className={`renew-chart-axis-date ${item.className}`} x={item.x} y={height - 12}>
             {item.text}
@@ -6690,12 +6781,13 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
         ? (await Promise.all(result.slice(0, hydrateLimit).map(async (item) => {
           try {
             const summary = await fetchMarketPrice({ code: item.code, apparelId: item.apparelId, summary: true });
-            const latestPrice = Number(summary?.latestByCondition?.a?.price || 0);
+            const summarySeriesA = getMarketConditionBucket(summary?.series, 'a') || {};
+            const latestPrice = Number(getMarketConditionBucket(summary?.latestByCondition, 'a')?.price || 0);
             const hasSeries = Boolean(
-              summary?.series?.a?.all?.length
-              || summary?.series?.a?.['1m']?.length
-              || summary?.series?.a?.['7d']?.length
-              || summary?.recentSalesByCondition?.a?.length
+              summarySeriesA.all?.length
+              || summarySeriesA['1m']?.length
+              || summarySeriesA['7d']?.length
+              || getMarketConditionBucket(summary?.recentSalesByCondition, 'a')?.length
             );
             return {
               ...item,
@@ -6750,7 +6842,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
       .then((detail) => {
         if (cancelled) return;
         setMarketDetail(detail || null);
-        setCondition(detail?.defaultCondition || detail?.conditions?.[0]?.key || 'a');
+        setCondition(normalizeMarketConditionKey(detail?.defaultCondition || detail?.conditions?.[0]?.key || 'a'));
         setRange(detail?.ranges?.[0]?.key || '7d');
       })
       .catch((error) => {
@@ -6769,7 +6861,8 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
       window.alert(t('loginRequired'));
       return;
     }
-    const key = makeMarketStateKey(selected, grade);
+    const gradeKey = normalizeMarketConditionKey(grade);
+    const key = makeMarketStateKey(selected, gradeKey);
     const approvedLink = await findApprovedCardMarketLinkByApparelId(selected.apparelId);
     const linkedCard = approvedLink?.cardId ? await fetchCardById(approvedLink.cardId) : null;
     const linkedImageUrl = linkedCard?.imageUrl || linkedCard?.image_url || linkedCard?.image || selected.previewImageUrl;
@@ -6785,12 +6878,12 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           imageUrl: linkedImageUrl,
           previewImageUrl: linkedImageUrl,
           sourceUrl: selected.sourceUrl,
-          minPrice: Number(marketDetail?.latestByCondition?.[grade]?.price || selected.minPrice || 0)
+          minPrice: Number(getMarketConditionBucket(marketDetail?.latestByCondition, gradeKey)?.price || selected.minPrice || 0)
         }
       },
       valuationCardGrades: {
         ...(userState?.valuationCardGrades || {}),
-        [key]: grade
+        [key]: gradeKey
       }
     };
     setUserState(nextState);
@@ -6818,21 +6911,19 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     }, 80);
   }
 
-  const selectedLatest = marketDetail?.latestByCondition?.[condition];
-  const chartPoints = marketDetail?.series?.[condition]?.[range] || [];
-  const recentSales = marketDetail?.recentSalesByCondition?.[condition] || [];
-  const recentSalesVisible = condition === 'psa10'
-    ? recentSales
-    : recentSales.filter((sale) => {
-      const timestamp = Number(sale?.timestamp || 0);
-      return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
-    });
+  const normalizedCondition = normalizeMarketConditionKey(condition);
+  const marketConditionOptions = getMarketConditionOptions(marketDetail?.conditions, t);
+  const selectedLatest = getMarketConditionBucket(marketDetail?.latestByCondition, normalizedCondition);
+  const conditionSeries = getMarketConditionBucket(marketDetail?.series, normalizedCondition) || {};
+  const chartPoints = conditionSeries?.[range] || [];
+  const recentSales = getMarketConditionBucket(marketDetail?.recentSalesByCondition, normalizedCondition) || [];
+  const recentSalesVisible = recentSales;
   const currentPrice = selectedLatest?.price ? formatUsdWonFromYen(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
   const latestSourceUrl = selectedLatest?.sourceUrl || '';
-  const psaSourceUrl = condition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
+  const psaSourceUrl = normalizedCondition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
     ? latestSourceUrl
     : recentSales.find((sale) => sale?.sourceUrl && !/snkrdunk\.com/i.test(sale.sourceUrl))?.sourceUrl || '';
-  const currentPriceLabel = condition === 'psa10' ? t('psa10IntegratedPrice') : t('snkrLowestPrice');
+  const currentPriceLabel = normalizedCondition === 'psa10' ? t('psa10IntegratedPrice') : t('snkrLowestPrice');
   const showMarketHome = !code.trim() && !selected && !candidates.length;
 
   useEffect(() => {
@@ -6960,11 +7051,11 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
             <div className="renew-market-chart">
               <div className="renew-market-controls">
                 <div className="renew-chip-group">
-                  {(marketDetail?.conditions || [{ key: 'a', label: t('aGrade') }, { key: 'psa10', label: 'PSA10' }]).map((item) => (
+                  {marketConditionOptions.map((item) => (
                     <button
                       key={item.key}
                       type="button"
-                      className={condition === item.key ? 'is-active' : ''}
+                      className={normalizedCondition === item.key ? 'is-active' : ''}
                       onClick={() => {
                         setCondition(item.key);
                         if (item.key === 'psa10') setRange('all');
@@ -6985,9 +7076,9 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
               <RenewMarketChart points={chartPoints} uiLang={uiLang} range={range} />
               <div className="renew-market-recent">
                 <h3>{t('recentSales')}</h3>
-                {recentSalesVisible.slice(0, 8).map((sale, index) => (
+                {recentSalesVisible.slice(0, 10).map((sale, index) => (
                   <div key={`${sale.date}-${sale.price}-${index}`} className="renew-market-sale">
-                    <span>{getMarketSaleSourceLabel(sale, condition.toUpperCase())}</span>
+                    <span>{getMarketSaleSourceLabel(sale, normalizedCondition === 'a' ? 'Single' : normalizedCondition.toUpperCase())}</span>
                     <small>{formatMarketSaleDate(sale)}</small>
                     <strong>{formatUsdWonFromYen(sale.price)}</strong>
                   </div>
