@@ -92,7 +92,9 @@ function dateDiffDays(currentDate, previousDate) {
 function consecutiveDailyChange(currentPoint, previousPoint) {
   if (!currentPoint || !previousPoint) return null;
   if (dateDiffDays(currentPoint.date || currentPoint.point_date, previousPoint.date || previousPoint.point_date) !== 1) return null;
-  return percentChange(currentPoint.price || currentPoint.median_price_jpy, previousPoint.price || previousPoint.median_price_jpy);
+  const change = percentChange(currentPoint.price || currentPoint.median_price_jpy, previousPoint.price || previousPoint.median_price_jpy);
+  if (!Number.isFinite(Number(change)) || Math.abs(Number(change)) > 30) return null;
+  return change;
 }
 
 function closestPointAtOrBefore(points, dateKey) {
