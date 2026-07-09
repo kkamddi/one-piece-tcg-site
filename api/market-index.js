@@ -82,6 +82,19 @@ function componentIndexValue(price, basePrice, baseValue) {
   return Number(((current / base) * baseValue).toFixed(2));
 }
 
+function dateDiffDays(currentDate, previousDate) {
+  const current = Date.parse(`${toDateKey(currentDate)}T00:00:00Z`);
+  const previous = Date.parse(`${toDateKey(previousDate)}T00:00:00Z`);
+  if (!Number.isFinite(current) || !Number.isFinite(previous)) return null;
+  return Math.round((current - previous) / (24 * 60 * 60 * 1000));
+}
+
+function consecutiveDailyChange(currentPoint, previousPoint) {
+  if (!currentPoint || !previousPoint) return null;
+  if (dateDiffDays(currentPoint.date || currentPoint.point_date, previousPoint.date || previousPoint.point_date) !== 1) return null;
+  return percentChange(currentPoint.price || currentPoint.median_price_jpy, previousPoint.price || previousPoint.median_price_jpy);
+}
+
 function closestPointAtOrBefore(points, dateKey) {
   for (let index = points.length - 1; index >= 0; index -= 1) {
     if (points[index].date <= dateKey) return points[index];
@@ -97,6 +110,31 @@ function applyRange(points, range) {
   lastDate.setUTCDate(lastDate.getUTCDate() - days);
   const cutoff = lastDate.toISOString().slice(0, 10);
   return points.filter((point) => point.date >= cutoff);
+}
+
+async function fetchLatestComponentDailyRows(apparelIds, conditionKey) {
+  const rows = [];
+  const chunkSize = 80;
+  for (let start = 0; start < apparelIds.length; start += chunkSize) {
+    const chunk = apparelIds.slice(start, start + chunkSize);
+    const placeholders = chunk.map(() => '?').join(',');
+    const chunkRows = await queryD1(
+      `select apparel_id, point_date, median_price_jpy
+       from (
+         select apparel_id, point_date, median_price_jpy,
+                row_number() over (partition by apparel_id order by point_date desc) as rn
+         from market_chart_daily_points
+         where source = 'snkrdunk'
+           and condition_key = ?
+           and apparel_id in (${placeholders})
+           and median_price_jpy > 0
+       )
+       where rn <= 2`,
+      [conditionKey, ...chunk]
+    );
+    rows.push(...chunkRows);
+  }
+  return rows;
 }
 
 async function fetchDailyPointRows(apparelIds, conditionKey, baseDate) {
@@ -231,14 +269,14 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
         previousIndex,
         currentIndex,
         change: {
-          d1: percentChange(currentIndex, previousIndex)
+          d1: consecutiveDailyChange({ date: component.latestDate, price: component.latestPrice }, previousPoint)
         }
       };
     })
   };
 }
 
-function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditionKey, range) {
+function buildStoredIndexPayload(indexConfig, pointRows, componentRows, actualDailyRows, conditionKey, range) {
   const points = (pointRows || [])
     .map((row) => ({
       date: toDateKey(row.point_date),
@@ -293,6 +331,14 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
       hasData: true
     });
   }
+  const actualRowsById = new Map();
+  for (const row of actualDailyRows || []) {
+    const apparelId = Number(row.apparel_id || 0);
+    if (!apparelId) continue;
+    const rows = actualRowsById.get(apparelId) || [];
+    rows.push(row);
+    actualRowsById.set(apparelId, rows);
+  }
 
   return {
     index: {
@@ -316,7 +362,13 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     points: scopedPoints,
     components: indexConfig.components.map((component) => ({
       ...component,
-      ...(componentIndexById.get(Number(component.apparelId)) || { hasData: false, currentIndex: null, change: { d1: null } })
+      ...(componentIndexById.get(Number(component.apparelId)) || { hasData: false, currentIndex: null }),
+      change: {
+        d1: consecutiveDailyChange(...((actualRowsById.get(Number(component.apparelId)) || [])
+          .slice()
+          .sort((a, b) => toDateKey(b.point_date).localeCompare(toDateKey(a.point_date)))
+          .slice(0, 2)))
+      }
     }))
   };
 }
@@ -354,7 +406,8 @@ export default async function handler(request, response) {
          where rn <= 2`,
         [indexConfig.code, conditionKey]
       ).catch(() => []);
-      const payload = buildStoredIndexPayload(indexConfig, storedRows, componentRows, conditionKey, range);
+      const actualDailyRows = await fetchLatestComponentDailyRows(apparelIds, conditionKey).catch(() => []);
+      const payload = buildStoredIndexPayload(indexConfig, storedRows, componentRows, actualDailyRows, conditionKey, range);
       if (payload) {
         response.setHeader?.('Cache-Control', `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS}`);
         return response.status(200).json(payload);
