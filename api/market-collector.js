@@ -133,6 +133,24 @@ function parsePriceAmountJpy(trade, usdToJpy) {
   return Number.isFinite(directJpy) && directJpy > 0 ? Math.round(directJpy) : 0;
 }
 
+let supportsListingUidDedupe = true;
+
+async function deleteExistingListingUidTrade({ source, apparelId, condition, listingUid }) {
+  if (!listingUid || !supportsListingUidDedupe) return;
+  try {
+    await runD1(`
+      DELETE FROM market_recent_trades
+      WHERE source = ?
+        AND apparel_id = ?
+        AND condition_key = ?
+        AND raw_payload_json IS NOT NULL
+        AND json_extract(raw_payload_json, '$.listingUid') = ?
+    `, [source, apparelId, condition, listingUid]);
+  } catch {
+    supportsListingUidDedupe = false;
+  }
+}
+
 function decodeUlidTimestamp(value) {
   const text = String(value || '').trim().toUpperCase();
   if (text.length < 10) return 0;
@@ -344,12 +362,20 @@ async function ingestHistoryPayload(body) {
       tradesSeen += 1;
       const now = new Date().toISOString();
       const priceText = trade?.priceText || trade?.price || trade?.amount || `JPY ${priceJpy}`;
+      const listingUid = String(trade?.listingUid || trade?.listingUID || '').trim();
       const rawPayload = JSON.stringify({
         date: trade?.dateText || trade?.date || day,
         condition: trade?.condition || trade?.conditionName || trade?.grade || condition,
         priceJpy,
         priceText,
-        listingUid: trade?.listingUid || trade?.listingUID || '',
+        listingUid,
+      });
+
+      await deleteExistingListingUidTrade({
+        source: item.source,
+        apparelId: item.apparelId,
+        condition,
+        listingUid,
       });
 
       const insertResult = await runD1(`

@@ -1,0 +1,78 @@
+name: SNKRDUNK sold listings backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Target scope
+        required: false
+        default: approved
+        type: choice
+        options:
+          - approved
+          - all-jp
+          - all-market
+      apparel_ids:
+        description: Optional comma-separated SNKRDUNK apparel IDs
+        required: false
+        default: ""
+      start_index:
+        description: Zero-based target offset for resume
+        required: false
+        default: "0"
+      card_limit:
+        description: Number of cards to process. Use 0 for all remaining.
+        required: false
+        default: "0"
+      max_pages:
+        description: Pages per card. Use all to continue until SNKRDUNK has no more pages.
+        required: false
+        default: all
+      safety_max_pages:
+        description: Safety cap used when max_pages is all.
+        required: false
+        default: "1000"
+      delay_ms:
+        description: Delay between SNKRDUNK page requests
+        required: false
+        default: "250"
+      collector_url:
+        description: Market collector endpoint
+        required: false
+        default: https://www.optcgkorea.com/api/market-collector
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Backfill sold listings
+        env:
+          COLLECTOR_URL: ${{ github.event.inputs.collector_url || 'https://www.optcgkorea.com/api/market-collector' }}
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+          BACKFILL_SCOPE: ${{ github.event.inputs.scope || 'approved' }}
+          APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
+          BACKFILL_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
+          BACKFILL_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
+          SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
+          SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
+          BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '250' }}
+          BACKFILL_PROGRESS_PATH: sold-listings-backfill-progress.jsonl
+        run: npm run backfill:sold-listings
+
+      - name: Upload progress
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sold-listings-backfill-progress
+          path: sold-listings-backfill-progress.jsonl
+          if-no-files-found: ignore

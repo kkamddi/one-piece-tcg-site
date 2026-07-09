@@ -13,6 +13,7 @@
     "upload:card-db": "node ./scripts/uploadCardDbToSupabase.js",
     "sync:topics": "node ./scripts/syncOfficialTopics.js",
     "collect:market": "node ./scripts/runMarketCollectorCycle.js",
+    "backfill:sold-listings": "node ./scripts/backfillSnkrdunkSoldListings.js",
     "generate:card-thumbnails": "node ./scripts/generateCardThumbnails.js",
     "rebuild:market-indexes": "node ./scripts/rebuildMarketIndexes.js"
   },
