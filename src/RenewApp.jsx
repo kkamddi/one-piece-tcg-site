@@ -6467,7 +6467,10 @@ function RenewMarketIndex() {
                 <b>{item.code}</b>
                 <strong>{item.name}</strong>
                 <span>{item.note} · #{item.apparelId}</span>
-                <em>{formatIndexValue(item.currentIndex)}</em>
+                <div className="renew-index-component-metrics">
+                  <em>{formatIndexValue(item.currentIndex)}</em>
+                  <i className={Number(item.change?.d1) >= 0 ? 'is-up' : 'is-down'}>1D {formatIndexChange(item.change?.d1)}</i>
+                </div>
               </article>
             ))}
           </div>

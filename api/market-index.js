@@ -75,6 +75,13 @@ function smoothIndexPoints(points = [], windowSize = 3) {
   });
 }
 
+function componentIndexValue(price, basePrice, baseValue) {
+  const current = Number(price || 0);
+  const base = Number(basePrice || 0);
+  if (!current || !base) return null;
+  return Number(((current / base) * baseValue).toFixed(2));
+}
+
 function closestPointAtOrBefore(points, dateKey) {
   for (let index = points.length - 1; index >= 0; index -= 1) {
     if (points[index].date <= dateKey) return points[index];
@@ -213,12 +220,21 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
     componentCount: indexConfig.components.length,
     activeComponentCount: current?.activeCount || 0,
     points: scopedPoints,
-    components: components.map(({ series, ...component }) => ({
-      ...component,
-      currentIndex: component.basePrice && component.latestPrice
-        ? Number(((component.latestPrice / component.basePrice) * indexConfig.baseValue).toFixed(2))
-        : null
-    }))
+    components: components.map(({ series, ...component }) => {
+      const previousPoint = series.slice().reverse().find((point) => point.date < component.latestDate) || null;
+      const currentIndex = componentIndexValue(component.latestPrice, component.basePrice, indexConfig.baseValue);
+      const previousIndex = componentIndexValue(previousPoint?.price, component.basePrice, indexConfig.baseValue);
+      return {
+        ...component,
+        previousDate: previousPoint?.date || null,
+        previousPrice: previousPoint?.price || 0,
+        previousIndex,
+        currentIndex,
+        change: {
+          d1: percentChange(currentIndex, previousIndex)
+        }
+      };
+    })
   };
 }
 
@@ -248,18 +264,35 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
   const point30d = closestPointAtOrBefore(displayPoints, dateAgo(30));
   const point183d = closestPointAtOrBefore(displayPoints, dateAgo(183));
   const pointAll = displayPoints[0] || null;
-  const componentIndexById = new Map(
-    (componentRows || []).map((row) => [
-      Number(row.apparel_id),
-      {
-        latestDate: toDateKey(row.point_date),
-        latestPrice: Number(row.price_jpy || 0),
-        basePrice: Number(row.base_price_jpy || 0),
-        currentIndex: Number(Number(row.component_index_value || 0).toFixed(2)),
-        hasData: true
-      }
-    ])
-  );
+  const componentRowsById = new Map();
+  for (const row of componentRows || []) {
+    const apparelId = Number(row.apparel_id || 0);
+    if (!apparelId) continue;
+    const rows = componentRowsById.get(apparelId) || [];
+    rows.push(row);
+    componentRowsById.set(apparelId, rows);
+  }
+  const componentIndexById = new Map();
+  for (const [apparelId, rows] of componentRowsById.entries()) {
+    const sortedRows = rows.slice().sort((a, b) => toDateKey(b.point_date).localeCompare(toDateKey(a.point_date)));
+    const latest = sortedRows[0] || null;
+    const previous = sortedRows.find((row) => toDateKey(row.point_date) < toDateKey(latest?.point_date)) || null;
+    const currentIndex = latest ? Number(Number(latest.component_index_value || 0).toFixed(2)) : null;
+    const previousIndex = previous ? Number(Number(previous.component_index_value || 0).toFixed(2)) : null;
+    componentIndexById.set(apparelId, {
+      latestDate: toDateKey(latest?.point_date),
+      latestPrice: Number(latest?.price_jpy || 0),
+      basePrice: Number(latest?.base_price_jpy || 0),
+      previousDate: toDateKey(previous?.point_date),
+      previousPrice: Number(previous?.price_jpy || 0),
+      previousIndex,
+      currentIndex,
+      change: {
+        d1: percentChange(currentIndex, previousIndex)
+      },
+      hasData: true
+    });
+  }
 
   return {
     index: {
@@ -283,7 +316,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     points: scopedPoints,
     components: indexConfig.components.map((component) => ({
       ...component,
-      ...(componentIndexById.get(Number(component.apparelId)) || { hasData: false, currentIndex: null })
+      ...(componentIndexById.get(Number(component.apparelId)) || { hasData: false, currentIndex: null, change: { d1: null } })
     }))
   };
 }
@@ -311,17 +344,15 @@ export default async function handler(request, response) {
     ).catch(() => []);
     if (storedRows.length) {
       const componentRows = await queryD1(
-        `select c.apparel_id, c.point_date, c.price_jpy, c.base_price_jpy, c.component_index_value
-         from market_index_component_daily_points c
-         join (
-           select apparel_id, max(point_date) as latest_date
-           from market_index_component_daily_points
-           where index_code = ? and condition_key = ?
-           group by apparel_id
-         ) latest
-           on latest.apparel_id = c.apparel_id and latest.latest_date = c.point_date
-         where c.index_code = ? and c.condition_key = ?`,
-        [indexConfig.code, conditionKey, indexConfig.code, conditionKey]
+        `select apparel_id, point_date, price_jpy, base_price_jpy, component_index_value
+         from (
+           select c.apparel_id, c.point_date, c.price_jpy, c.base_price_jpy, c.component_index_value,
+                  row_number() over (partition by c.apparel_id order by c.point_date desc) as rn
+           from market_index_component_daily_points c
+           where c.index_code = ? and c.condition_key = ?
+         )
+         where rn <= 2`,
+        [indexConfig.code, conditionKey]
       ).catch(() => []);
       const payload = buildStoredIndexPayload(indexConfig, storedRows, componentRows, conditionKey, range);
       if (payload) {

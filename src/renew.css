@@ -6486,6 +6486,34 @@
   letter-spacing: -0.04em;
 }
 
+.renew-index-component-metrics {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.renew-index-component-metrics em {
+  margin-top: 0;
+}
+
+.renew-index-component-metrics i {
+  color: #71757f;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.renew-index-component-metrics i.is-up {
+  color: #147a47;
+}
+
+.renew-index-component-metrics i.is-down {
+  color: #c94d35;
+}
+
 .renew-market-candidates > b {
   display: block;
   margin-bottom: 12px;
@@ -7060,6 +7088,14 @@
 .renew-app.is-dark .renew-index-components strong,
 .renew-app.is-dark .renew-index-components em {
   color: #f8fafc;
+}
+
+.renew-app.is-dark .renew-index-component-metrics i.is-up {
+  color: #86efac;
+}
+
+.renew-app.is-dark .renew-index-component-metrics i.is-down {
+  color: #fca5a5;
 }
 
 .renew-app.is-dark .renew-box-thumb {
