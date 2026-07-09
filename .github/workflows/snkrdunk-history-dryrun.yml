@@ -1,0 +1,46 @@
+name: SNKRDUNK history dry-run
+
+on:
+  workflow_dispatch:
+    inputs:
+      apparel_id:
+        description: SNKRDUNK apparel id
+        required: false
+        default: "706813"
+      delay_ms:
+        description: Page wait time in milliseconds
+        required: false
+        default: "15000"
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run history collector dry-run
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+          APPAREL_ID: ${{ github.event.inputs.apparel_id || '706813' }}
+          DELAY_MS: ${{ github.event.inputs.delay_ms || '15000' }}
+        run: |
+          mkdir -p tmp
+          node scripts/collect-snkrdunk-visible-history-cdp.js \
+            --apparel-id="${APPAREL_ID}" \
+            --active-only=false \
+            --out="tmp/snkrdunk-visible-history-${APPAREL_ID}-gha-dryrun.json" \
+            --delay-ms="${DELAY_MS}" \
+            --headless=true
+          node -e 'const fs=require("fs"); const id=process.env.APPAREL_ID; const file="tmp/snkrdunk-visible-history-"+id+"-gha-dryrun.json"; const data=JSON.parse(fs.readFileSync(file,"utf8")); const item=data[0]||{}; console.log(JSON.stringify({apparelId:item.apparelId,pageTitle:item.pageTitle,pageTitleLine:item.pageTitleLine,locked:item.locked,historyCount:(item.history||[]).length,chart:Boolean(item.chart),chartKeys:Object.keys(item.charts||{})},null,2));'
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snkrdunk-history-dryrun-${{ github.event.inputs.apparel_id || '706813' }}
+          path: tmp/snkrdunk-visible-history-*-gha-dryrun.json
+          if-no-files-found: warn

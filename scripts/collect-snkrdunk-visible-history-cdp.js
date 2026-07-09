@@ -6,7 +6,24 @@ import os from "os";
 import path from "path";
 import marketCards from "../src/data/market-cards.js";
 
-const chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const chromePathCandidates = [
+  process.env.CHROME_PATH,
+  process.env.GOOGLE_CHROME_SHIM,
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium-browser",
+  "/usr/bin/chromium",
+].filter(Boolean);
+
+function resolveChromePath() {
+  for (const candidate of chromePathCandidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return chromePathCandidates[0] || "google-chrome";
+}
+
+const chromePath = resolveChromePath();
 const defaultProfile = path.join(os.tmpdir(), "optcg-snkrdunk-collector-profile");
 let chromeStderr = "";
 
@@ -21,6 +38,12 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getArg(name, fallback) {
   return args.has(name) ? args.get(name) : fallback;
+}
+
+function writeJsonFile(filePath, value) {
+  const tmpPath = `${filePath}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(value, null, 2));
+  fs.renameSync(tmpPath, filePath);
 }
 
 function getJson(targetUrl) {
@@ -59,15 +82,43 @@ function parsePriceText(priceText) {
 }
 
 function makeTargets() {
+  const apparelId = getArg("apparel-id", "");
+  const apparelIds = String(getArg("apparel-ids", ""))
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
   const locale = getArg("locale", "JP");
   const activeOnly = getArg("active-only", "true") !== "false";
   const offset = Number(getArg("offset", 0));
   const limit = Number(getArg("limit", 25));
 
-  return marketCards
+  let targets = marketCards
     .filter((item) => item.locale === locale && item.apparelId)
-    .filter((item) => !activeOnly || Number(item.listingCount || 0) > 0)
-    .slice(offset, offset + limit)
+    .filter((item) => !activeOnly || Number(item.listingCount || 0) > 0);
+  if (apparelId) {
+    targets = targets.filter((item) => String(item.apparelId) === String(apparelId));
+  } else if (apparelIds.length) {
+    const targetIds = new Set(apparelIds.map(String));
+    targets = targets.filter((item) => targetIds.has(String(item.apparelId)));
+    const foundIds = new Set(targets.map((item) => String(item.apparelId)));
+    for (const id of apparelIds) {
+      if (!foundIds.has(String(id))) {
+        targets.push({
+          apparelId: Number(id),
+          code: "",
+          locale,
+          name: "",
+          setName: "",
+          minPrice: null,
+          listingCount: null,
+          sourceUrl: `https://snkrdunk.com/en/trading-cards/${id}?slide=right`,
+        });
+      }
+    }
+  } else {
+    targets = targets.slice(offset, offset + limit);
+  }
+  return targets
     .map((item) => ({
       apparelId: item.apparelId,
       code: item.code,
@@ -232,7 +283,8 @@ async function scrapeTarget(send, target, delayMs) {
 
 async function main() {
   const loginOnly = args.has("login");
-  const port = await findFreePort();
+  const connectPort = Number(getArg("connect-port", 0));
+  const port = connectPort || (await findFreePort());
   const profile = getArg("profile", defaultProfile);
   const outFile = getArg("out", path.join("tmp", "snkrdunk-visible-history.json"));
   const delayMs = Number(getArg("delay-ms", 3200));
@@ -259,12 +311,15 @@ async function main() {
     "about:blank",
   ].filter(Boolean);
 
-  const chrome = spawn(chromePath, chromeArgs, {
-    stdio: ["ignore", "ignore", "pipe"],
-  });
-  chrome.stderr.on("data", (chunk) => {
-    chromeStderr += chunk.toString();
-  });
+  let chrome = null;
+  if (!connectPort) {
+    chrome = spawn(chromePath, chromeArgs, {
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    chrome.stderr.on("data", (chunk) => {
+      chromeStderr += chunk.toString();
+    });
+  }
 
   try {
     const { ws, send } = await connectPage(port);
@@ -289,7 +344,7 @@ async function main() {
         const item = await scrapeTarget(send, target, delayMs);
         output.push(item);
         done.add(String(target.apparelId));
-        fs.writeFileSync(outFile, JSON.stringify(output, null, 2));
+        writeJsonFile(outFile, output);
         console.log(
           `${item.apparelId} ${item.history.length ? "history" : "no-history"} ${
             item.chart ? "chart" : "no-chart"
@@ -302,13 +357,13 @@ async function main() {
           ok: false,
           error: String(error),
         });
-        fs.writeFileSync(outFile, JSON.stringify(output, null, 2));
+        writeJsonFile(outFile, output);
         console.log(`${target.apparelId} failed ${String(error).slice(0, 120)}`);
       }
     }
     ws.close();
   } finally {
-    if (!loginOnly) chrome.kill();
+    if (chrome && !loginOnly) chrome.kill();
   }
 }
 
