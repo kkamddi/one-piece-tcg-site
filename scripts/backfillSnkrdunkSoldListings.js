@@ -7,6 +7,7 @@ const DEFAULT_COLLECTOR_URL = 'https://www.optcgkorea.com/api/market-collector';
 const DEFAULT_PER_PAGE = 50;
 const DEFAULT_DELAY_MS = 250;
 const DEFAULT_HISTORY_CHUNK_SIZE = 10;
+const DEFAULT_RECENT_RAW_DAYS = 30;
 const DEFAULT_SAFETY_MAX_PAGES = 1000;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -93,6 +94,23 @@ async function queryD1(sql, params = []) {
   );
   if (!body?.success) throw new Error(body?.errors?.[0]?.message || 'd1_query_failed');
   return body.result?.[0]?.results || [];
+}
+
+async function insertRows(tableName, columns, rows, conflictSql, chunkSize = 40) {
+  if (!rows.length) return 0;
+  const safeChunkSize = Math.max(1, Math.min(chunkSize, Math.floor(96 / columns.length)));
+  let written = 0;
+  for (let start = 0; start < rows.length; start += safeChunkSize) {
+    const chunk = rows.slice(start, start + safeChunkSize);
+    const valuesSql = chunk.map(() => `(${columns.map(() => '?').join(',')})`).join(',');
+    const params = chunk.flatMap((row) => columns.map((column) => row[column]));
+    await queryD1(
+      `insert into ${tableName} (${columns.join(',')}) values ${valuesSql} ${conflictSql}`,
+      params,
+    );
+    written += chunk.length;
+  }
+  return written;
 }
 
 async function fetchApprovedOverrideIds() {
@@ -190,6 +208,38 @@ function listingPriceText(listing) {
   return String(listing?.price || listing?.priceText || listing?.amount || '');
 }
 
+function parsePriceAmountJpy(trade) {
+  const text = String(trade?.priceText || trade?.price || trade?.amount || '');
+  const numberMatch = text.match(/([\d,]+(?:\.\d+)?)/);
+  const parsedTextAmount = numberMatch ? Number(numberMatch[1].replace(/,/g, '')) : 0;
+  const hasYenSymbol = text.includes(String.fromCharCode(165)) || text.includes(String.fromCharCode(20870));
+  const hasWonSymbol = text.includes(String.fromCharCode(8361)) || text.includes(String.fromCharCode(50896));
+  if (parsedTextAmount > 0 && /US\s*\$/i.test(text)) return Math.round(parsedTextAmount * Number(process.env.USD_TO_JPY || 155));
+  if (parsedTextAmount > 0 && (/\bJPY\b/i.test(text) || hasYenSymbol)) return Math.round(parsedTextAmount);
+  if (parsedTextAmount > 0 && (/\bKRW\b/i.test(text) || hasWonSymbol)) {
+    return Math.round(parsedTextAmount / Number(process.env.KRW_PER_JPY || 9.3));
+  }
+  const directJpy = Number(trade?.priceJpy || trade?.jpy || trade?.price_jpy || 0);
+  return Number.isFinite(directJpy) && directJpy > 0 ? Math.round(directJpy) : 0;
+}
+
+function median(values) {
+  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+}
+
+function recentRawCutoffDate(days) {
+  const kstNow = new Date(Date.now() + KST_OFFSET_MS);
+  kstNow.setUTCDate(kstNow.getUTCDate() - days);
+  return kstNow.toISOString().slice(0, 10);
+}
+
+function isRecentHistoryItem(historyItem, cutoffDate) {
+  return String(historyItem?.date || '').slice(0, 10) >= cutoffDate;
+}
+
 async function fetchUsedListingsPage(apparelId, page, perPage) {
   const productCode = `SW---${Number(apparelId)}`;
   const params = new URLSearchParams({
@@ -234,7 +284,9 @@ function historyFromListings(listings, allowedConditions) {
       date: day,
       dateText,
       condition,
+      conditionKey: key,
       priceText,
+      priceJpy: parsePriceAmountJpy({ priceText }),
       listingUid,
     });
   }
@@ -276,6 +328,80 @@ async function appendProgress(path, payload) {
   await appendFile(path, `${JSON.stringify({ at: new Date().toISOString(), ...payload })}\n`, 'utf8');
 }
 
+function addDailyHistory(dailyBuckets, item, history) {
+  for (const trade of history) {
+    const day = String(trade?.date || '').slice(0, 10);
+    const condition = conditionKey(trade?.conditionKey || trade?.condition);
+    const priceJpy = Number(trade?.priceJpy || parsePriceAmountJpy(trade));
+    if (!day || !condition || !Number.isFinite(priceJpy) || priceJpy <= 0) continue;
+    const key = `${condition}|${day}`;
+    const bucket = dailyBuckets.get(key) || {
+      source: 'snkrdunk',
+      apparel_id: Number(item.apparelId),
+      locale: String(item.locale || 'JP').toUpperCase(),
+      code: item.code || '',
+      condition_key: condition,
+      point_date: day,
+      prices: [],
+    };
+    bucket.prices.push(priceJpy);
+    dailyBuckets.set(key, bucket);
+  }
+}
+
+function buildDailyRows(dailyBuckets) {
+  const now = new Date().toISOString();
+  return [...dailyBuckets.values()]
+    .map((bucket) => {
+      const prices = bucket.prices.filter((price) => Number.isFinite(price) && price > 0);
+      if (!prices.length) return null;
+      return {
+        source: bucket.source,
+        apparel_id: bucket.apparel_id,
+        locale: bucket.locale,
+        code: bucket.code,
+        condition_key: bucket.condition_key,
+        point_date: bucket.point_date,
+        median_price_jpy: median(prices),
+        min_price_jpy: Math.min(...prices),
+        max_price_jpy: Math.max(...prices),
+        trade_count: prices.length,
+        source_count: prices.length,
+        updated_at: now,
+      };
+    })
+    .filter(Boolean);
+}
+
+async function upsertDailyRows(rows) {
+  if (!rows.length) return 0;
+  return insertRows('market_chart_daily_points', [
+    'source',
+    'apparel_id',
+    'locale',
+    'code',
+    'condition_key',
+    'point_date',
+    'median_price_jpy',
+    'min_price_jpy',
+    'max_price_jpy',
+    'trade_count',
+    'source_count',
+    'updated_at',
+  ], rows, `
+    on conflict(source, apparel_id, condition_key, point_date)
+    do update set
+      locale = excluded.locale,
+      code = excluded.code,
+      median_price_jpy = excluded.median_price_jpy,
+      min_price_jpy = excluded.min_price_jpy,
+      max_price_jpy = excluded.max_price_jpy,
+      trade_count = excluded.trade_count,
+      source_count = excluded.source_count,
+      updated_at = excluded.updated_at
+  `);
+}
+
 async function backfillItem(item, options) {
   const result = {
     apparelId: Number(item.apparelId),
@@ -283,12 +409,16 @@ async function backfillItem(item, options) {
     pagesFetched: 0,
     listingsSeen: 0,
     soldSeen: 0,
+    dailyRowsPrepared: 0,
+    recentHistoryPrepared: 0,
     historyPosted: 0,
     tradesSeen: 0,
     tradesStored: 0,
     dailyPointsUpdated: 0,
     capped: false,
   };
+  const dailyBuckets = new Map();
+  const recentHistory = [];
 
   for (let page = 1; page <= options.maxPages; page += 1) {
     const listings = await fetchUsedListingsPage(item.apparelId, page, options.perPage);
@@ -299,7 +429,10 @@ async function backfillItem(item, options) {
 
     const { history, soldSeen } = historyFromListings(listings, options.allowedConditions);
     result.soldSeen += soldSeen;
-    if (history.length) {
+    if (options.aggregateMode) {
+      addDailyHistory(dailyBuckets, item, history);
+      recentHistory.push(...history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate)));
+    } else if (history.length) {
       const posted = await postHistoryChunks(item, history, options);
       result.historyPosted += history.length;
       result.tradesSeen += Number(posted?.tradesSeen || 0);
@@ -312,6 +445,19 @@ async function backfillItem(item, options) {
     if (options.delayMs) await sleep(options.delayMs);
   }
 
+  if (options.aggregateMode) {
+    const dailyRows = buildDailyRows(dailyBuckets);
+    result.dailyRowsPrepared = dailyRows.length;
+    result.recentHistoryPrepared = recentHistory.length;
+    result.dailyPointsUpdated = await upsertDailyRows(dailyRows);
+    if (recentHistory.length) {
+      const posted = await postHistoryChunks(item, recentHistory, options);
+      result.historyPosted += recentHistory.length;
+      result.tradesSeen += Number(posted?.tradesSeen || 0);
+      result.tradesStored += Number(posted?.tradesStored || 0);
+    }
+  }
+
   return result;
 }
 
@@ -320,9 +466,16 @@ async function main() {
   if (!token) throw new Error('Missing MARKET_COLLECTOR_TOKEN or COLLECTOR_TOKEN');
 
   const collectorUrl = String(process.env.COLLECTOR_URL || DEFAULT_COLLECTOR_URL).trim();
+  const mode = String(process.env.BACKFILL_MODE || 'raw').trim().toLowerCase();
+  const aggregateMode = ['aggregate', 'daily', 'efficient'].includes(mode);
+  if (aggregateMode && (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID)) {
+    throw new Error('Aggregate mode requires CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, and D1_DATABASE_ID');
+  }
   const perPage = positiveInt(process.env.SOLD_LISTING_PER_PAGE, DEFAULT_PER_PAGE, DEFAULT_PER_PAGE);
   const delayMs = positiveInt(process.env.BACKFILL_DELAY_MS, DEFAULT_DELAY_MS, 10000);
   const historyChunkSize = positiveInt(process.env.BACKFILL_HISTORY_CHUNK_SIZE, DEFAULT_HISTORY_CHUNK_SIZE, 25);
+  const recentRawDays = positiveInt(process.env.BACKFILL_RECENT_RAW_DAYS, DEFAULT_RECENT_RAW_DAYS, 365);
+  const recentRawCutoff = recentRawCutoffDate(recentRawDays);
   const { maxPages, requestedAll } = parsePageLimit(process.env.SOLD_LISTING_MAX_PAGES || process.env.MAX_PAGES);
   const startIndex = Math.max(0, Number(process.env.BACKFILL_START_INDEX || 0) || 0);
   const cardLimit = Math.max(0, Number(process.env.BACKFILL_CARD_LIMIT || 0) || 0);
@@ -331,6 +484,7 @@ async function main() {
   const allTargets = await buildTargets();
   const targets = allTargets.slice(startIndex, cardLimit ? startIndex + cardLimit : undefined);
   const summary = {
+    mode,
     scope: process.env.BACKFILL_SCOPE || 'approved',
     totalTargets: allTargets.length,
     startIndex,
@@ -339,9 +493,13 @@ async function main() {
     requestedAll,
     perPage,
     historyChunkSize,
+    recentRawDays,
+    recentRawCutoff,
     pagesFetched: 0,
     listingsSeen: 0,
     soldSeen: 0,
+    dailyRowsPrepared: 0,
+    recentHistoryPrepared: 0,
     historyPosted: 0,
     tradesSeen: 0,
     tradesStored: 0,
@@ -362,11 +520,15 @@ async function main() {
         maxPages,
         delayMs,
         historyChunkSize,
+        aggregateMode,
+        recentRawCutoffDate: recentRawCutoff,
         allowedConditions,
       });
       summary.pagesFetched += result.pagesFetched;
       summary.listingsSeen += result.listingsSeen;
       summary.soldSeen += result.soldSeen;
+      summary.dailyRowsPrepared += result.dailyRowsPrepared;
+      summary.recentHistoryPrepared += result.recentHistoryPrepared;
       summary.historyPosted += result.historyPosted;
       summary.tradesSeen += result.tradesSeen;
       summary.tradesStored += result.tradesStored;

@@ -33,6 +33,18 @@ on:
         description: Pages per card. Use all to continue until SNKRDUNK has no more pages.
         required: false
         default: all
+      mode:
+        description: Backfill storage mode
+        required: false
+        default: aggregate
+        type: choice
+        options:
+          - aggregate
+          - raw
+      recent_raw_days:
+        description: Raw recent trades to keep for recent history UI
+        required: false
+        default: "30"
       safety_max_pages:
         description: Safety cap used when max_pages is all.
         required: false
@@ -72,6 +84,8 @@ jobs:
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           BACKFILL_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
           BACKFILL_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
+          BACKFILL_MODE: ${{ github.event.inputs.mode || 'aggregate' }}
+          BACKFILL_RECENT_RAW_DAYS: ${{ github.event.inputs.recent_raw_days || '30' }}
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '250' }}

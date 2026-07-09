@@ -151,6 +151,13 @@ async function deleteExistingListingUidTrade({ source, apparelId, condition, lis
   }
 }
 
+function recentRawCutoffDate() {
+  const days = positiveInt(process.env.MARKET_RECENT_TRADE_RAW_DAYS, 45, 365);
+  const kstNow = new Date(Date.now() + KST_OFFSET_MS);
+  kstNow.setUTCDate(kstNow.getUTCDate() - days);
+  return kstNow.toISOString().slice(0, 10);
+}
+
 function decodeUlidTimestamp(value) {
   const text = String(value || '').trim().toUpperCase();
   if (text.length < 10) return 0;
@@ -344,6 +351,7 @@ async function ingestHistoryPayload(body) {
   const normalized = normalizeBody(body);
   const items = Array.isArray(normalized) ? normalized : Array.isArray(normalized.items) ? normalized.items : [normalized];
   const usdToJpy = Number(process.env.USD_TO_JPY || 155);
+  const rawCutoffDate = recentRawCutoffDate();
   const touched = new Map();
   let tradesSeen = 0;
   let tradesStored = 0;
@@ -360,6 +368,8 @@ async function ingestHistoryPayload(body) {
       if (!day || !condition || !priceJpy) continue;
 
       tradesSeen += 1;
+      if (day < rawCutoffDate) continue;
+
       const now = new Date().toISOString();
       const priceText = trade?.priceText || trade?.price || trade?.amount || `JPY ${priceJpy}`;
       const listingUid = String(trade?.listingUid || trade?.listingUID || '').trim();
