@@ -29,6 +29,12 @@ function shouldReadSupabaseMarket() {
   return MARKET_DATA_SOURCE === 'supabase';
 }
 
+function shouldReadSupabaseHistoryFallback() {
+  return Boolean(supabaseAdmin)
+    && MARKET_DATA_SOURCE !== 'supabase'
+    && String(process.env.MARKET_SUPABASE_HISTORY_FALLBACK || '1') !== '0';
+}
+
 function getD1Binding() {
   const binding = process.env?.[D1_BINDING_NAME] || process.env?.DB || null;
   return binding && typeof binding.prepare === 'function' ? binding : null;
@@ -312,6 +318,34 @@ function mergeUniquePoints(...pointGroups) {
     byTimestamp.set(timestamp, { timestamp, price, source: point.source || 'market' });
   });
   return [...byTimestamp.values()].sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function mergePointBuckets(...groups) {
+  return {
+    a: mergeUniquePoints(...groups.map((group) => group?.a || [])),
+    psa10: mergeUniquePoints(...groups.map((group) => group?.psa10 || []))
+  };
+}
+
+function mergeTradeBuckets(...groups) {
+  const buckets = { a: [], psa10: [] };
+  const seen = new Set();
+  groups.forEach((group) => {
+    ['a', 'psa10'].forEach((key) => {
+      (group?.[key] || []).forEach((trade) => {
+        const timestamp = Number(trade?.timestamp || 0);
+        const price = Number(trade?.price || 0);
+        if (!timestamp || !price) return;
+        const id = `${key}:${timestamp}:${price}:${trade?.dateText || ''}`;
+        if (seen.has(id)) return;
+        seen.add(id);
+        buckets[key].push(trade);
+      });
+    });
+  });
+  buckets.a.sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+  buckets.psa10.sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+  return buckets;
 }
 
 function getConditionPrice(conditionPrices, key) {
@@ -795,6 +829,7 @@ async function readMarketSnapshots(apparelId) {
 }
 
 async function readStoredMarketTrades(apparelId) {
+  let d1Trades = { a: [], psa10: [] };
   if (shouldReadD1Market() && apparelId) {
     try {
       const rows = await queryD1(
@@ -821,13 +856,13 @@ async function readStoredMarketTrades(apparelId) {
         }
         return acc;
       }, { a: [], psa10: [] });
-      if (grouped.a.length || grouped.psa10.length) return grouped;
+      d1Trades = grouped;
     } catch {
-      return { a: [], psa10: [] };
+      d1Trades = { a: [], psa10: [] };
     }
   }
-  if (!shouldReadSupabaseMarket()) return { a: [], psa10: [] };
-  if (!supabaseAdmin || !apparelId) return { a: [], psa10: [] };
+  if (!shouldReadSupabaseMarket() && !shouldReadSupabaseHistoryFallback()) return d1Trades;
+  if (!supabaseAdmin || !apparelId) return d1Trades;
   try {
     const { data, error } = await supabaseAdmin
       .from('market_recent_trades')
@@ -853,12 +888,14 @@ async function readStoredMarketTrades(apparelId) {
       }
       return acc;
     }, { a: [], psa10: [] });
+    return mergeTradeBuckets(d1Trades, supabaseTrades);
   } catch {
-    return { a: [], psa10: [] };
+    return d1Trades;
   }
 }
 
 async function readStoredMarketChartPoints(apparelId) {
+  let d1Points = { a: [], psa10: [] };
   if (shouldReadD1Market() && apparelId) {
     try {
       const rows = await queryD1(
@@ -885,13 +922,13 @@ async function readStoredMarketChartPoints(apparelId) {
         }
         return acc;
       }, { a: [], psa10: [] });
-      if (points.a.length || points.psa10.length) return filterChartPointGroups(points);
+      d1Points = filterChartPointGroups(points);
     } catch {
-      return { a: [], psa10: [] };
+      d1Points = { a: [], psa10: [] };
     }
   }
-  if (!shouldReadSupabaseMarket()) return { a: [], psa10: [] };
-  if (!supabaseAdmin || !apparelId) return { a: [], psa10: [] };
+  if (!shouldReadSupabaseMarket() && !shouldReadSupabaseHistoryFallback()) return d1Points;
+  if (!supabaseAdmin || !apparelId) return d1Points;
   const fromSnapshots = async () => {
     try {
       const { data, error } = await supabaseAdmin
@@ -938,10 +975,11 @@ async function readStoredMarketChartPoints(apparelId) {
       }
       return acc;
     }, { a: [], psa10: [] });
-    if (!points.a.length && !points.psa10.length) return fromSnapshots();
-    return filterChartPointGroups(points);
+    const supabasePoints = points.a.length || points.psa10.length ? points : await fromSnapshots();
+    return filterChartPointGroups(mergePointBuckets(d1Points, supabasePoints));
   } catch {
-    return fromSnapshots();
+    const snapshotPoints = await fromSnapshots();
+    return filterChartPointGroups(mergePointBuckets(d1Points, snapshotPoints));
   }
 }
 
@@ -1048,11 +1086,16 @@ function filterPoints(points = [], range) {
   return points.filter((point) => point.timestamp >= cutoff);
 }
 
+function rangeCutoffTimestamp(range) {
+  if (range === 'all') return 0;
+  const days = range === '7d' ? 7 : range === '6m' ? 180 : 30;
+  return Date.now() - days * 24 * 60 * 60 * 1000;
+}
+
 function ensureDrawablePoints(points = [], range) {
   if ((points || []).length !== 1 || range === 'all') return points;
   const point = points[0];
-  const days = range === '7d' ? 7 : range === '6m' ? 180 : 30;
-  const startTimestamp = Date.now() - days * 24 * 60 * 60 * 1000;
+  const startTimestamp = rangeCutoffTimestamp(range);
   return [
     {
       ...point,
@@ -1063,14 +1106,33 @@ function ensureDrawablePoints(points = [], range) {
   ];
 }
 
+function buildRangePoints(points = [], range) {
+  if (range === 'all') return ensureDrawablePoints(filterPoints(points, 'all'), 'all');
+  const cutoff = rangeCutoffTimestamp(range);
+  const inRange = points.filter((point) => Number(point.timestamp || 0) >= cutoff);
+  const previous = points
+    .slice()
+    .reverse()
+    .find((point) => Number(point.timestamp || 0) < cutoff && Number(point.price || 0) > 0);
+  const withBaseline = previous
+    ? [{
+      ...previous,
+      timestamp: cutoff,
+      synthetic: true,
+      source: `${previous.source || 'market'}_carry_forward`
+    }, ...inRange]
+    : inRange;
+  return ensureDrawablePoints(withBaseline, range);
+}
+
 function buildSeries(points = [], price = 0, source = '', options = {}) {
   const includeCurrent = options.includeCurrent !== false;
   const merged = aggregateDailyMedian(includeCurrent ? mergeCurrentPoint(points, price, source) : points);
   return {
-    '7d': ensureDrawablePoints(filterPoints(merged, '7d'), '7d'),
-    '1m': ensureDrawablePoints(filterPoints(merged, '1m'), '1m'),
-    '6m': ensureDrawablePoints(filterPoints(merged, '6m'), '6m'),
-    all: ensureDrawablePoints(filterPoints(merged, 'all'), 'all')
+    '7d': buildRangePoints(merged, '7d'),
+    '1m': buildRangePoints(merged, '1m'),
+    '6m': buildRangePoints(merged, '6m'),
+    all: buildRangePoints(merged, 'all')
   };
 }
 
@@ -1084,7 +1146,7 @@ function formatSnapshotDate(timestamp) {
 }
 
 function buildRecentSnapshots(points = [], price = 0, label = '', source = '') {
-  return aggregateDailyMedian(points)
+  return aggregateDailyMedian(mergeCurrentPoint(points, price, source))
     .slice()
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 8)
@@ -1173,15 +1235,15 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
     recentSalesByCondition: {
       a: buildRecentSnapshots(
         filterChartOutliers(storedTrades.a?.length ? storedTrades.a : aHistory),
-        0,
+        aSeriesPrice,
         'A',
-        useAListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade'
+        aCurrentPrice ? 'snkrdunk_current_floor' : useAListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_latest_known'
       ),
       psa10: buildRecentSnapshots(
         filterChartOutliers(storedTrades.psa10?.length ? storedTrades.psa10 : psa10History),
-        0,
+        psa10SeriesPrice,
         'PSA10',
-        usePsa10ListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade'
+        psa10CurrentPrice ? 'snkrdunk_current_floor' : usePsa10ListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_latest_known'
       )
     }
   };
