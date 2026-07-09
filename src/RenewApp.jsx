@@ -1680,6 +1680,18 @@ const MARKET_DETAIL_RANGES = [
 ];
 const MARKET_DETAIL_RANGE_KEYS = new Set(MARKET_DETAIL_RANGES.map((item) => item.key));
 
+function getMarketRangeChartPoints(conditionSeries = {}, listingConditionSeries = {}, range = '7d') {
+  const primary = conditionSeries?.[range] || (range === '1y' ? conditionSeries?.all : []) || [];
+  const listing = listingConditionSeries?.[range] || (range === '1y' ? listingConditionSeries?.all : []) || [];
+  return primary.length ? primary : listing;
+}
+
+function resolveMarketChartRange(conditionSeries = {}, listingConditionSeries = {}, requestedRange = '7d') {
+  const safeRange = MARKET_DETAIL_RANGE_KEYS.has(requestedRange) ? requestedRange : '7d';
+  if (getMarketRangeChartPoints(conditionSeries, listingConditionSeries, safeRange).length) return safeRange;
+  return MARKET_DETAIL_RANGES.find((item) => getMarketRangeChartPoints(conditionSeries, listingConditionSeries, item.key).length)?.key || safeRange;
+}
+
 function medianMarketNumber(values = []) {
   const sorted = values
     .map((value) => Number(value))
@@ -7854,9 +7866,8 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const selectedLatest = getMarketConditionBucket(marketDetail?.latestByCondition, normalizedCondition);
   const conditionSeries = getMarketConditionBucket(marketDetail?.series, normalizedCondition) || {};
   const listingConditionSeries = getMarketConditionBucket(marketDetail?.listingSeriesByCondition, normalizedCondition) || {};
-  const primaryChartPoints = conditionSeries?.[marketRange] || (marketRange === '1y' ? conditionSeries?.all : []) || [];
-  const listingChartPoints = listingConditionSeries?.[marketRange] || (marketRange === '1y' ? listingConditionSeries?.all : []) || [];
-  const chartPoints = primaryChartPoints.length ? primaryChartPoints : listingChartPoints;
+  const chartRange = resolveMarketChartRange(conditionSeries, listingConditionSeries, marketRange);
+  const chartPoints = getMarketRangeChartPoints(conditionSeries, listingConditionSeries, chartRange);
   const recentSales = getMarketConditionBucket(marketDetail?.recentSalesByCondition, normalizedCondition) || [];
   const recentSalesInRange = recentSales.filter((sale) => {
     const timestamp = Number(sale?.timestamp || 0);
@@ -8028,13 +8039,13 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                 </div>
                 <div className="renew-chip-group">
                   {MARKET_DETAIL_RANGES.map((item) => (
-                    <button key={item.key} type="button" className={marketRange === item.key ? 'is-active' : ''} onClick={() => setRange(item.key)}>
+                    <button key={item.key} type="button" className={chartRange === item.key ? 'is-active' : ''} onClick={() => setRange(item.key)}>
                       {item.label}
                     </button>
                   ))}
                 </div>
               </div>
-              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={marketRange} />
+              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={chartRange} />
               <div className="renew-market-recent">
                 <h3>{t('recentSales')}</h3>
                 {recentSalesVisible.slice(0, 10).map((sale, index) => (
