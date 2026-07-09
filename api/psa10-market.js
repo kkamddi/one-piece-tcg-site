@@ -38,7 +38,7 @@ function getSpecUrl(link) {
 
 function filterRange(points, range) {
   if (range === 'all') return points;
-  const days = range === '1m' ? 30 : 7;
+  const days = range === '1y' ? 365 : range === '1m' ? 30 : 7;
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
   return points.filter((point) => toTimestamp(point.point_date || point.date) >= cutoff);
 }
@@ -175,7 +175,7 @@ export default async function handler(request, response) {
     ranges: [
       { key: '7d', label: '7D' },
       { key: '1m', label: '1M' },
-      { key: 'all', label: 'ALL' }
+      { key: '1y', label: '1Y' }
     ],
     latestByCondition: {
       psa10: latest ? {
@@ -191,7 +191,7 @@ export default async function handler(request, response) {
       psa10: {
         '7d': filterRange(allPoints, '7d'),
         '1m': filterRange(allPoints, '1m'),
-        all: allPoints
+        '1y': filterRange(allPoints, '1y')
       }
     },
     recentSalesByCondition: {

@@ -1673,6 +1673,13 @@ function getMarketConditionOptions(conditions = [], t = (key) => key) {
   }, []);
 }
 
+const MARKET_DETAIL_RANGES = [
+  { key: '7d', label: '7D' },
+  { key: '1m', label: '1M' },
+  { key: '1y', label: '1Y' }
+];
+const MARKET_DETAIL_RANGE_KEYS = new Set(MARKET_DETAIL_RANGES.map((item) => item.key));
+
 function medianMarketNumber(values = []) {
   const sorted = values
     .map((value) => Number(value))
@@ -7736,7 +7743,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
         if (cancelled) return;
         setMarketDetail(detail || null);
         setCondition(normalizeMarketConditionKey(detail?.defaultCondition || detail?.conditions?.[0]?.key || 'a'));
-        setRange(detail?.ranges?.[0]?.key || '7d');
+        setRange('7d');
       })
       .catch((error) => {
         if (!cancelled) setMessage(error?.message || t('marketDetailError'));
@@ -7843,11 +7850,12 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
 
   const normalizedCondition = normalizeMarketConditionKey(condition);
   const marketConditionOptions = getMarketConditionOptions(marketDetail?.conditions, t);
+  const marketRange = MARKET_DETAIL_RANGE_KEYS.has(range) ? range : '7d';
   const selectedLatest = getMarketConditionBucket(marketDetail?.latestByCondition, normalizedCondition);
   const conditionSeries = getMarketConditionBucket(marketDetail?.series, normalizedCondition) || {};
   const listingConditionSeries = getMarketConditionBucket(marketDetail?.listingSeriesByCondition, normalizedCondition) || {};
-  const primaryChartPoints = conditionSeries?.[range] || ((range === '1y' || range === 'all') ? conditionSeries?.all : []) || [];
-  const listingChartPoints = listingConditionSeries?.[range] || ((range === '1y' || range === 'all') ? listingConditionSeries?.all : []) || [];
+  const primaryChartPoints = conditionSeries?.[marketRange] || (marketRange === '1y' ? conditionSeries?.all : []) || [];
+  const listingChartPoints = listingConditionSeries?.[marketRange] || (marketRange === '1y' ? listingConditionSeries?.all : []) || [];
   const chartPoints = primaryChartPoints.length ? primaryChartPoints : listingChartPoints;
   const recentSales = getMarketConditionBucket(marketDetail?.recentSalesByCondition, normalizedCondition) || [];
   const recentSalesInRange = recentSales.filter((sale) => {
@@ -8012,24 +8020,21 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                       key={item.key}
                       type="button"
                       className={normalizedCondition === item.key ? 'is-active' : ''}
-                      onClick={() => {
-                        setCondition(item.key);
-                        if (item.key === 'psa10') setRange('1y');
-                      }}
+                      onClick={() => setCondition(item.key)}
                     >
                       {item.key === 'a' ? t('aGrade') : item.label}
                     </button>
                   ))}
                 </div>
                 <div className="renew-chip-group">
-                  {(marketDetail?.ranges || [{ key: '7d', label: '7D' }, { key: '1m', label: '1M' }, { key: '1y', label: '1Y' }]).map((item) => (
-                    <button key={item.key} type="button" className={range === item.key ? 'is-active' : ''} onClick={() => setRange(item.key)}>
+                  {MARKET_DETAIL_RANGES.map((item) => (
+                    <button key={item.key} type="button" className={marketRange === item.key ? 'is-active' : ''} onClick={() => setRange(item.key)}>
                       {item.label}
                     </button>
                   ))}
                 </div>
               </div>
-              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={range} />
+              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={marketRange} />
               <div className="renew-market-recent">
                 <h3>{t('recentSales')}</h3>
                 {recentSalesVisible.slice(0, 10).map((sale, index) => (
