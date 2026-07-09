@@ -99,7 +99,14 @@ function conditionKey(value) {
 }
 
 function parseTradeDate(value) {
-  const text = String(value || '').replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
+  const rawText = String(value || '').trim();
+  if (!rawText) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawText)) return rawText;
+
+  const directParsed = Date.parse(rawText);
+  if (Number.isFinite(directParsed)) return new Date(directParsed).toISOString().slice(0, 10);
+
+  const text = rawText.replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
 
   const englishDate = text.match(/^([A-Za-z]{3,})\s+(\d{1,2}),\s+(\d{4})$/);

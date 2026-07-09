@@ -1,10 +1,13 @@
 import { appendFile } from 'node:fs/promises';
+import fs from 'node:fs';
 import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
 
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_COLLECTOR_URL = 'https://www.optcgkorea.com/api/market-collector';
 const DEFAULT_PER_PAGE = 50;
+const DEFAULT_TRADING_HISTORY_PER_PAGE = 12;
+const DEFAULT_TRADING_HISTORY_MAX_PAGES = 120;
 const DEFAULT_DELAY_MS = 250;
 const DEFAULT_HISTORY_CHUNK_SIZE = 10;
 const DEFAULT_RECENT_RAW_DAYS = 30;
@@ -12,6 +15,18 @@ const DEFAULT_DAILY_DAYS = 365;
 const DEFAULT_SAFETY_MAX_PAGES = 1000;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+function loadEnvFile(filePath = '.env.local') {
+  if (!fs.existsSync(filePath)) return;
+  for (const line of fs.readFileSync(filePath, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^([^#=\s]+)=(.*)$/);
+    if (!match || process.env[match[1]]) continue;
+    process.env[match[1]] = match[2].trim();
+  }
+}
+
+loadEnvFile();
+
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
@@ -24,6 +39,12 @@ function positiveInt(value, fallback, max = Number.MAX_SAFE_INTEGER) {
   const parsed = Number(value || 0);
   if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
   return Math.min(max, Math.max(1, Math.floor(parsed)));
+}
+
+function parseEnabled(value, fallback = false) {
+  const text = String(value ?? '').trim().toLowerCase();
+  if (!text) return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(text);
 }
 
 function parseIds(value) {
@@ -52,6 +73,29 @@ function conditionKey(value) {
 function acceptedConditionKeys() {
   const raw = String(process.env.BACKFILL_CONDITIONS || 'a,psa10');
   return new Set(raw.split(',').map(conditionKey).filter(Boolean));
+}
+
+function snkrdunkAuthHeaders() {
+  const headers = {};
+  const cookie = String(process.env.SNKRDUNK_COOKIE || process.env.SNKRDUNK_SESSION_COOKIE || '').trim();
+  const authorization = String(process.env.SNKRDUNK_AUTHORIZATION || '').trim();
+  const csrfToken = String(process.env.SNKRDUNK_X_CSRF_TOKEN || process.env.SNKRDUNK_CSRF_TOKEN || '').trim();
+  if (cookie) headers.Cookie = cookie;
+  if (authorization) headers.Authorization = authorization;
+  if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+  return headers;
+}
+
+function hasSnkrdunkTradingHistoryAuth() {
+  return Object.keys(snkrdunkAuthHeaders()).length > 0;
+}
+
+function snkrdunkJsonHeaders(authenticated = false) {
+  return {
+    Accept: 'application/json',
+    'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0',
+    ...(authenticated ? snkrdunkAuthHeaders() : {}),
+  };
 }
 
 function uniqueByApparelId(items) {
@@ -218,6 +262,50 @@ function listingPriceText(listing) {
   return String(listing?.price || listing?.priceText || listing?.amount || '');
 }
 
+function tradeDateTimestamp(value) {
+  const rawText = String(value || '').trim();
+  if (!rawText) return 0;
+  const directParsed = Date.parse(rawText);
+  if (Number.isFinite(directParsed)) return directParsed;
+
+  const text = rawText.replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
+  const englishDate = text.match(/^([A-Za-z]{3,})\s+(\d{1,2}),\s+(\d{4})$/);
+  if (englishDate) {
+    const month = new Date(`${englishDate[1]} 1, 2000 UTC`).getUTCMonth();
+    if (Number.isFinite(month)) {
+      return Date.UTC(Number(englishDate[3]), month, Number(englishDate[2]));
+    }
+  }
+
+  const parsed = Date.parse(`${text} UTC`);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function tradeDateKey(value) {
+  const timestamp = tradeDateTimestamp(value);
+  return timestamp > 0 ? new Date(timestamp).toISOString().slice(0, 10) : '';
+}
+
+function tradingHistoryDateText(row) {
+  return String(
+    row?.tradedAt
+    || row?.traded_at
+    || row?.tradeDate
+    || row?.trade_date
+    || row?.date
+    || row?.dateText
+    || ''
+  ).trim();
+}
+
+function tradingHistoryConditionName(row) {
+  return String(row?.condition || row?.conditionName || row?.condition_name || row?.grade || '').trim();
+}
+
+function tradingHistoryPriceText(row) {
+  return String(row?.priceFormat || row?.priceText || row?.price_text || row?.price || row?.amount || '').trim();
+}
+
 function parsePriceAmountJpy(trade) {
   const text = String(trade?.priceText || trade?.price || trade?.amount || '');
   const numberMatch = text.match(/([\d,]+(?:\.\d+)?)/);
@@ -259,15 +347,30 @@ async function fetchUsedListingsPage(apparelId, page, perPage) {
     isOnlyOnSale: 'false',
   });
   const data = await fetchJsonWithRetry(`${SNKRDUNK_BASE}/en/v1/products/${productCode}/used-listings?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-      'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0',
-    },
+    headers: snkrdunkJsonHeaders(false),
   });
   return [
     data?.usedListings,
     data?.used_listings,
     data?.listings,
+    data?.items,
+  ].find(Array.isArray) || [];
+}
+
+async function fetchTradingHistoriesPage(apparelId, page, perPage) {
+  const productCode = `SW---${Number(apparelId)}`;
+  const params = new URLSearchParams({
+    perPage: String(perPage),
+    page: String(page),
+    used: 'true',
+  });
+  const data = await fetchJsonWithRetry(`${SNKRDUNK_BASE}/en/v1/products/${productCode}/trading-histories?${params.toString()}`, {
+    headers: snkrdunkJsonHeaders(true),
+  });
+  return [
+    data?.histories,
+    data?.tradingHistories,
+    data?.trading_histories,
     data?.items,
   ].find(Array.isArray) || [];
 }
@@ -302,6 +405,40 @@ function historyFromListings(listings, allowedConditions) {
   }
 
   return { history, soldSeen };
+}
+
+function historyFromTradingHistories(rows, allowedConditions) {
+  const seen = new Set();
+  const history = [];
+
+  for (const row of rows || []) {
+    const dateText = tradingHistoryDateText(row);
+    const day = tradeDateKey(dateText);
+    const condition = tradingHistoryConditionName(row);
+    const key = conditionKey(condition);
+    const priceText = tradingHistoryPriceText(row);
+    const dedupeKey = `${dateText || day}|${key}|${priceText}`;
+    if (!day || !condition || !priceText || !allowedConditions.has(key) || seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    history.push({
+      date: day,
+      dateText: dateText || day,
+      condition,
+      conditionKey: key,
+      priceText,
+      priceJpy: parsePriceAmountJpy({ priceText }),
+    });
+  }
+
+  return history;
+}
+
+function oldestTradingHistoryDateKey(rows = []) {
+  const timestamps = rows
+    .map((row) => tradeDateTimestamp(tradingHistoryDateText(row)))
+    .filter((timestamp) => timestamp > 0);
+  if (!timestamps.length) return '';
+  return new Date(Math.min(...timestamps)).toISOString().slice(0, 10);
 }
 
 async function postHistory(item, history, collectorUrl, token) {
@@ -412,10 +549,81 @@ async function upsertDailyRows(rows) {
   `);
 }
 
-async function backfillItem(item, options) {
+async function backfillTradingHistoryItem(item, options) {
   const result = {
     apparelId: Number(item.apparelId),
     code: item.code || '',
+    historySource: 'trading-histories',
+    pagesFetched: 0,
+    listingsSeen: 0,
+    soldSeen: 0,
+    dailyRowsPrepared: 0,
+    recentHistoryPrepared: 0,
+    historyPosted: 0,
+    tradesSeen: 0,
+    tradesStored: 0,
+    dailyPointsUpdated: 0,
+    capped: false,
+    stoppedAtDailyCutoff: false,
+  };
+  const dailyBuckets = new Map();
+  const recentHistory = [];
+
+  for (let page = 1; page <= options.tradingHistoryMaxPages; page += 1) {
+    const rows = await fetchTradingHistoriesPage(item.apparelId, page, options.tradingHistoryPerPage);
+    result.pagesFetched += 1;
+    result.listingsSeen += rows.length;
+    result.soldSeen += rows.length;
+
+    if (!rows.length) break;
+
+    const history = historyFromTradingHistories(rows, options.allowedConditions);
+    if (options.aggregateMode) {
+      addDailyHistory(dailyBuckets, item, history.filter((trade) => isRecentHistoryItem(trade, options.dailyCutoffDate)));
+      recentHistory.push(...history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate)));
+    } else if (history.length) {
+      const posted = await postHistoryChunks(item, history, options);
+      result.historyPosted += history.length;
+      result.tradesSeen += Number(posted?.tradesSeen || 0);
+      result.tradesStored += Number(posted?.tradesStored || 0);
+      result.dailyPointsUpdated += Number(posted?.dailyPointsUpdated || 0);
+    }
+
+    if (rows.length < options.tradingHistoryPerPage) break;
+    const oldestDay = oldestTradingHistoryDateKey(rows);
+    if (oldestDay && oldestDay < options.dailyCutoffDate) {
+      result.stoppedAtDailyCutoff = true;
+      break;
+    }
+    if (page === options.tradingHistoryMaxPages) result.capped = true;
+    if (options.delayMs) await sleep(options.delayMs);
+  }
+
+  if (options.aggregateMode) {
+    const dailyRows = buildDailyRows(dailyBuckets);
+    result.dailyRowsPrepared = dailyRows.length;
+    result.recentHistoryPrepared = recentHistory.length;
+    result.dailyPointsUpdated = await upsertDailyRows(dailyRows);
+    if (recentHistory.length) {
+      const posted = await postHistoryChunks(item, recentHistory, options);
+      result.historyPosted += recentHistory.length;
+      result.tradesSeen += Number(posted?.tradesSeen || 0);
+      result.tradesStored += Number(posted?.tradesStored || 0);
+    }
+  }
+
+  return result;
+}
+
+async function backfillItem(item, options) {
+  if (options.useTradingHistories) {
+    return backfillTradingHistoryItem(item, options);
+  }
+
+  const result = {
+    apparelId: Number(item.apparelId),
+    code: item.code || '',
+    historySource: 'used-listings',
     pagesFetched: 0,
     listingsSeen: 0,
     soldSeen: 0,
@@ -495,6 +703,22 @@ async function main() {
   const dailyDays = positiveInt(process.env.BACKFILL_DAILY_DAYS, DEFAULT_DAILY_DAYS, 3650);
   const dailyCutoff = recentRawCutoffDate(dailyDays);
   const { maxPages, requestedAll } = parsePageLimit(process.env.SOLD_LISTING_MAX_PAGES || process.env.MAX_PAGES);
+  const hasTradingHistoryAuth = hasSnkrdunkTradingHistoryAuth();
+  const useTradingHistories = parseEnabled(process.env.BACKFILL_TRADING_HISTORIES, hasTradingHistoryAuth);
+  if (useTradingHistories && !hasTradingHistoryAuth) {
+    throw new Error('BACKFILL_TRADING_HISTORIES requires SNKRDUNK_COOKIE or SNKRDUNK_AUTHORIZATION');
+  }
+  const historySource = useTradingHistories ? 'trading-histories' : 'used-listings';
+  const tradingHistoryPerPage = positiveInt(
+    process.env.TRADING_HISTORY_PER_PAGE,
+    DEFAULT_TRADING_HISTORY_PER_PAGE,
+    100,
+  );
+  const tradingHistoryMaxPages = positiveInt(
+    process.env.TRADING_HISTORY_MAX_PAGES,
+    DEFAULT_TRADING_HISTORY_MAX_PAGES,
+    500,
+  );
   const startIndex = Math.max(0, Number(process.env.BACKFILL_START_INDEX || 0) || 0);
   const cardLimit = Math.max(0, Number(process.env.BACKFILL_CARD_LIMIT || 0) || 0);
   const progressPath = String(process.env.BACKFILL_PROGRESS_PATH || '').trim();
@@ -503,6 +727,7 @@ async function main() {
   const targets = allTargets.slice(startIndex, cardLimit ? startIndex + cardLimit : undefined);
   const summary = {
     mode,
+    historySource,
     scope: process.env.BACKFILL_SCOPE || 'approved',
     totalTargets: allTargets.length,
     startIndex,
@@ -510,6 +735,8 @@ async function main() {
     maxPages,
     requestedAll,
     perPage,
+    tradingHistoryMaxPages,
+    tradingHistoryPerPage,
     historyChunkSize,
     dailyDays,
     dailyCutoff,
@@ -542,6 +769,9 @@ async function main() {
         delayMs,
         historyChunkSize,
         aggregateMode,
+        useTradingHistories,
+        tradingHistoryMaxPages,
+        tradingHistoryPerPage,
         dailyCutoffDate: dailyCutoff,
         recentRawCutoffDate: recentRawCutoff,
         allowedConditions,
@@ -568,6 +798,7 @@ async function main() {
         selectedIndex: index,
         apparelId: Number(item?.apparelId || 0),
         code: item?.code || '',
+        historySource,
         error: error?.message || 'failed',
       };
       console.error(JSON.stringify(payload));

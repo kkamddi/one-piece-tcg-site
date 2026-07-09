@@ -1,5 +1,16 @@
 import fs from 'node:fs';
 
+function loadEnvFile(filePath = '.env.local') {
+  if (!fs.existsSync(filePath)) return;
+  for (const line of fs.readFileSync(filePath, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^([^#=\s]+)=(.*)$/);
+    if (!match || process.env[match[1]]) continue;
+    process.env[match[1]] = match[2].trim();
+  }
+}
+
+loadEnvFile();
+
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || 'ed82677cb22fd8679792f6cff73a00d6').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || 'da59fbad-d4bb-4f4a-88cc-37b0a698646a').trim();
@@ -13,7 +24,7 @@ function conditionKey(value) {
   const text = String(value || '').trim().toLowerCase();
   if (text === 'a') return 'a';
   if (text === 'psa 10' || text === 'psa10') return 'psa10';
-  return text.replace(/\s+/g, '_') || 'unknown';
+  return '';
 }
 
 function parseDate(value) {
