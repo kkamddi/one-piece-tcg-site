@@ -871,8 +871,8 @@ async function readStoredMarketTrades(apparelId) {
       .eq('apparel_id', Number(apparelId))
       .in('condition', ['A', 'PSA 10'])
       .limit(500);
-    if (error) return { a: [], psa10: [] };
-    return (data || []).reduce((acc, row) => {
+    if (error) return d1Trades;
+    const supabaseTrades = (data || []).reduce((acc, row) => {
       const key = conditionKey(row.condition);
       const price = storedTradePriceToJpy(row);
       const timestamp = parseMarketTradeTimestamp(row.trade_date_text);
