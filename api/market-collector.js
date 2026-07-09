@@ -168,6 +168,17 @@ function listingConditionName(listing) {
   ).trim();
 }
 
+function listingPriceText(listing) {
+  const amount = Number(listing?.priceAmount || listing?.price_amount || 0);
+  const currency = String(listing?.currency || '').trim().toUpperCase();
+  if (Number.isFinite(amount) && amount > 0) {
+    if (currency === 'USD') return `US $${amount}`;
+    if (currency === 'JPY') return `JPY ${Math.round(amount)}`;
+    if (currency === 'KRW') return `KRW ${Math.round(amount)}`;
+  }
+  return String(listing?.price || listing?.priceText || listing?.amount || '');
+}
+
 async function fetchUsedListingsPage(apparelId, page, perPage) {
   const productCode = `SW---${Number(apparelId)}`;
   const params = new URLSearchParams({
@@ -219,10 +230,7 @@ async function fetchSoldListingHistory(item, options = {}) {
       const day = dateKeyKst(timestamp);
       const dateText = dateTimeTextKst(timestamp) || day;
       const condition = listingConditionName(listing);
-      const priceAmount = Number(listing?.priceAmount || listing?.price_amount || 0);
-      const priceText = priceAmount > 0
-        ? `KRW ${Math.round(priceAmount)}`
-        : String(listing?.price || listing?.priceText || listing?.amount || '');
+      const priceText = listingPriceText(listing);
       const listingUid = String(listing?.listingUID || listing?.listingUid || listing?.id || '');
       const dedupeKey = `${listingUid || `${day}|${condition}|${priceText}`}`;
       if (!day || !condition || !priceText || seen.has(dedupeKey)) continue;
