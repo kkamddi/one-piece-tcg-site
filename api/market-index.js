@@ -102,7 +102,7 @@ function latestCurrentPrice(row, conditionKey) {
   return Number.isFinite(price) && price > 0 ? Math.round(price) : 0;
 }
 
-function snapshotOneDayChange(rows = []) {
+function snapshotOneDayPair(rows = []) {
   const sorted = (rows || [])
     .map((row) => ({
       capturedAt: row.captured_at,
@@ -116,6 +116,13 @@ function snapshotOneDayChange(rows = []) {
   const minPreviousTimestamp = latest.timestamp - 36 * 60 * 60 * 1000;
   const targetPreviousTimestamp = latest.timestamp - 18 * 60 * 60 * 1000;
   const previous = sorted.find((row) => row.timestamp <= targetPreviousTimestamp && row.timestamp >= minPreviousTimestamp) || null;
+  return previous ? { latest, previous } : null;
+}
+
+function snapshotOneDayChange(rows = []) {
+  const pair = snapshotOneDayPair(rows);
+  if (!pair) return null;
+  const { latest, previous } = pair;
   if (!previous) return null;
   const change = percentChange(latest.price, previous.price);
   if (!Number.isFinite(Number(change)) || Math.abs(Number(change)) > 30) return null;
@@ -222,12 +229,19 @@ function applyCurrentComponentPrices(indexConfig, components = [], currentRows =
   let totalWeighted = 0;
   let totalWeight = 0;
   let activeCount = 0;
+  let previousSnapshotWeighted = 0;
+  let latestSnapshotWeighted = 0;
+  let snapshotWeight = 0;
+  let snapshotCoverageCount = 0;
 
   const updatedComponents = components.map((component) => {
     const apparelId = Number(component.apparelId || component.apparel_id || 0);
     const currentRow = currentById.get(apparelId);
     const currentPrice = latestCurrentPrice(currentRow, conditionKey);
     const basePrice = Number(component.basePrice || component.base_price_jpy || 0);
+    const snapshotRowsForComponent = snapshotsById.get(apparelId) || [];
+    const snapshotPair = snapshotOneDayPair(snapshotRowsForComponent);
+    const snapshotD1 = snapshotPair ? percentChange(snapshotPair.latest.price, snapshotPair.previous.price) : null;
     const currentIndex = currentPrice && basePrice
       ? componentIndexValue(currentPrice, basePrice, indexConfig.baseValue)
       : Number(component.currentIndex || 0) || null;
@@ -241,6 +255,12 @@ function applyCurrentComponentPrices(indexConfig, components = [], currentRows =
       totalWeight += weight;
       activeCount += 1;
     }
+    if (snapshotPair && basePrice && weight > 0 && Number.isFinite(Number(snapshotD1)) && Math.abs(Number(snapshotD1)) <= 30) {
+      latestSnapshotWeighted += componentIndexValue(snapshotPair.latest.price, basePrice, indexConfig.baseValue) * weight;
+      previousSnapshotWeighted += componentIndexValue(snapshotPair.previous.price, basePrice, indexConfig.baseValue) * weight;
+      snapshotWeight += weight;
+      snapshotCoverageCount += 1;
+    }
     if (currentRow?.latest_captured_at && (!currentDate || String(currentRow.latest_captured_at) > currentDate)) {
       currentDate = String(currentRow.latest_captured_at);
     }
@@ -252,13 +272,20 @@ function applyCurrentComponentPrices(indexConfig, components = [], currentRows =
       currentSource: currentPrice ? 'snkrdunk_current_floor' : component.currentSource || 'snkrdunk_index_daily',
       change: {
         ...(component.change || {}),
-        d1: snapshotOneDayChange(snapshotsById.get(apparelId) || [])
+        d1: Number.isFinite(Number(snapshotD1)) && Math.abs(Number(snapshotD1)) <= 30 ? snapshotD1 : null
       }
     };
   });
+  const minimumSnapshotCoverage = Math.max(3, Math.ceil(Math.max(activeCount, indexConfig.components.length) * 0.4));
+  const latestSnapshotIndex = snapshotWeight > 0 ? latestSnapshotWeighted / snapshotWeight : 0;
+  const previousSnapshotIndex = snapshotWeight > 0 ? previousSnapshotWeighted / snapshotWeight : 0;
+  const indexD1 = snapshotCoverageCount >= minimumSnapshotCoverage
+    ? percentChange(latestSnapshotIndex, previousSnapshotIndex)
+    : null;
 
   return {
     components: updatedComponents,
+    indexD1: Number.isFinite(Number(indexD1)) && Math.abs(Number(indexD1)) <= 30 ? indexD1 : null,
     currentPoint: totalWeight > 0
       ? {
           date: toDateKey(currentDate) || null,
@@ -372,6 +399,7 @@ function buildIndexPayload(indexConfig, rows, currentRows, snapshotRows, conditi
   const point30d = closestPointAtOrBefore(displayPoints, dateAgo(30));
   const point183d = closestPointAtOrBefore(displayPoints, dateAgo(183));
   const pointAll = displayPoints[0] || null;
+  const currentPointUsesCurrentFloor = current?.source === 'snkrdunk_current_floor';
 
   return {
     index: {
@@ -384,7 +412,7 @@ function buildIndexPayload(indexConfig, rows, currentRows, snapshotRows, conditi
     currentValue: current?.value || null,
     currentDate: current?.date || null,
     change: {
-      d1: percentChange(current?.value, previous?.value),
+      d1: currentPointUsesCurrentFloor ? currentOverlay.indexD1 : percentChange(current?.value, previous?.value),
       d7: percentChange(current?.value, point7d?.value),
       m1: percentChange(current?.value, point30d?.value),
       m6: percentChange(current?.value, point183d?.value),
@@ -457,6 +485,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, currentR
   const point30d = closestPointAtOrBefore(displayPoints, dateAgo(30));
   const point183d = closestPointAtOrBefore(displayPoints, dateAgo(183));
   const pointAll = displayPoints[0] || null;
+  const currentPointUsesCurrentFloor = current?.source === 'snkrdunk_current_floor';
 
   return {
     index: {
@@ -469,7 +498,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, currentR
     currentValue: current?.value || null,
     currentDate: current?.date || null,
     change: {
-      d1: percentChange(current?.value, previous?.value),
+      d1: currentPointUsesCurrentFloor ? currentOverlay.indexD1 : percentChange(current?.value, previous?.value),
       d7: percentChange(current?.value, point7d?.value),
       m1: percentChange(current?.value, point30d?.value),
       m6: percentChange(current?.value, point183d?.value),
