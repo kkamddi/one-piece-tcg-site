@@ -34,7 +34,7 @@ on:
           - "false"
           - "true"
       sold_listing_pages:
-        description: Sold used-listing pages per card
+        description: Sold used-listing pages per card. Use "all" for backfill.
         required: false
         default: "1"
   schedule:

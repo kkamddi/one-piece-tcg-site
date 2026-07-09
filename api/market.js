@@ -141,7 +141,7 @@ function marketRawPriceToJpy(raw) {
 
 function conditionKey(name) {
   const text = String(name || '').trim().toLowerCase();
-  if (text === 'a') return 'a';
+  if (text === 'a' || text === 'single') return 'a';
   if (text === 'psa 10' || text === 'psa10') return 'psa10';
   return '';
 }
@@ -848,7 +848,7 @@ async function readStoredMarketTrades(apparelId) {
           acc[key].push({
             timestamp,
             price,
-            condition: key === 'psa10' ? 'PSA 10' : 'A',
+            condition: key === 'psa10' ? 'PSA 10' : 'Single',
             dateText: row.trade_date_text,
             priceText: row.price_text,
             source: 'd1_snkrdunk_recent_trade'
@@ -880,7 +880,7 @@ async function readStoredMarketTrades(apparelId) {
         acc[key].push({
           timestamp,
           price,
-          condition: row.condition,
+          condition: key === 'a' ? 'Single' : row.condition,
           dateText: row.trade_date_text,
           priceText: row.price_text,
           source: 'snkrdunk_recent_trade'
@@ -1204,7 +1204,7 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
       previewImageUrl: item?.previewImageUrl || ''
     },
     conditions: [
-      { key: 'a', label: 'A등급' },
+      { key: 'a', label: 'Single' },
       { key: 'psa10', label: 'PSA10' }
     ],
     defaultCondition: 'a',
@@ -1224,8 +1224,8 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
     latestByCondition,
     recentSalesByCondition: {
       a: storedTrades.a?.length
-        ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.a), 'A')
-        : buildRecentSnapshots(filterChartOutliers(aTradeHistory), 0, 'A', 'snkrdunk_trade_history'),
+        ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.a), 'Single')
+        : buildRecentSnapshots(filterChartOutliers(aTradeHistory), 0, 'Single', 'snkrdunk_trade_history'),
       psa10: storedTrades.psa10?.length
         ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.psa10), 'PSA10')
         : buildRecentSnapshots(filterChartOutliers(psa10TradeHistory), 0, 'PSA10', 'snkrdunk_trade_history')

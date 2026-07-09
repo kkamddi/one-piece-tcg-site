@@ -8,7 +8,7 @@ const DEFAULT_CONCURRENCY = 5;
 const MAX_CONCURRENCY = 8;
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_SOLD_LISTING_PAGES = 1;
-const MAX_SOLD_LISTING_PAGES = 10;
+const MAX_SOLD_LISTING_PAGES = 50;
 const DEFAULT_SOLD_LISTING_PER_PAGE = 50;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -73,6 +73,12 @@ function positiveInt(value, fallback, max = Number.MAX_SAFE_INTEGER) {
   return Math.min(max, Math.max(1, Math.floor(parsed)));
 }
 
+function soldListingPageLimit(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (['all', 'full', 'max', '*'].includes(text)) return MAX_SOLD_LISTING_PAGES;
+  return positiveInt(value, DEFAULT_SOLD_LISTING_PAGES, MAX_SOLD_LISTING_PAGES);
+}
+
 function normalizeBody(body) {
   if (!body) return {};
   if (typeof body === 'string') {
@@ -87,7 +93,7 @@ function normalizeBody(body) {
 
 function conditionKey(value) {
   const text = String(value || '').trim().toLowerCase();
-  if (text === 'a') return 'a';
+  if (text === 'a' || text === 'single') return 'a';
   if (text === 'psa 10' || text === 'psa10') return 'psa10';
   return text.replace(/\s+/g, '_') || 'unknown';
 }
@@ -209,7 +215,7 @@ async function fetchSoldListingHistory(item, options = {}) {
   const apparelId = Number(item?.apparelId || 0);
   if (!apparelId) return { history: [], pagesFetched: 0, listingsSeen: 0, soldSeen: 0 };
 
-  const pages = positiveInt(options.soldListingPages, DEFAULT_SOLD_LISTING_PAGES, MAX_SOLD_LISTING_PAGES);
+  const pages = soldListingPageLimit(options.soldListingPages);
   const perPage = positiveInt(options.soldListingPerPage, DEFAULT_SOLD_LISTING_PER_PAGE, DEFAULT_SOLD_LISTING_PER_PAGE);
   const seen = new Set();
   const history = [];
@@ -243,6 +249,7 @@ async function fetchSoldListingHistory(item, options = {}) {
         listingUid,
       });
     }
+    if (listings.length < perPage) break;
   }
 
   return { history, pagesFetched, listingsSeen, soldSeen };
@@ -540,7 +547,7 @@ export default async function handler(request, response) {
   const concurrency = Math.min(MAX_CONCURRENCY, Math.max(1, Number(request.query?.concurrency || DEFAULT_CONCURRENCY) || DEFAULT_CONCURRENCY));
   const persistListingSnapshot = parseEnabled(request.query?.listingSnapshots);
   const collectSoldListings = parseEnabled(request.query?.soldListings || request.query?.recentTrades);
-  const soldListingPages = positiveInt(request.query?.soldListingPages, DEFAULT_SOLD_LISTING_PAGES, MAX_SOLD_LISTING_PAGES);
+  const soldListingPages = soldListingPageLimit(request.query?.soldListingPages);
   const soldListingPerPage = positiveInt(request.query?.soldListingPerPage, DEFAULT_SOLD_LISTING_PER_PAGE, DEFAULT_SOLD_LISTING_PER_PAGE);
   const batch = allTargets.slice(offset, offset + limit);
   const batchResult = await collectBatch(batch, concurrency, {
