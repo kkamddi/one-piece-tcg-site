@@ -66,6 +66,10 @@ on:
         required: false
         default: https://www.optcgkorea.com/api/market-collector
 
+concurrency:
+  group: snkrdunk-sold-listings-backfill
+  cancel-in-progress: true
+
 jobs:
   backfill:
     runs-on: ubuntu-latest
