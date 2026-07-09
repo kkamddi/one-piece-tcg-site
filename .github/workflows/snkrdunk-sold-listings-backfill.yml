@@ -1,6 +1,11 @@
 name: SNKRDUNK sold listings backfill
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/backfill-triggers/sold-listings-approved-all.txt
   workflow_dispatch:
     inputs:
       scope:
