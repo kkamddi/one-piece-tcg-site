@@ -904,7 +904,7 @@ async function readStoredMarketChartPoints(apparelId) {
          where source = 'snkrdunk'
            and apparel_id = ?
            and condition_key in ('a', 'psa10')
-           and coalesce(trade_count, 0) > 0
+           and median_price_jpy > 0
          order by point_date asc
          limit 1200`,
         [Number(apparelId)]
@@ -912,7 +912,7 @@ async function readStoredMarketChartPoints(apparelId) {
       const points = (rows || []).reduce((acc, row) => {
         const key = conditionKey(row.condition_key);
         const price = Number(row.median_price_jpy || 0);
-        const timestamp = new Date(row.point_date).getTime();
+        const timestamp = parseMarketTradeTimestamp(row.point_date);
         if ((key === 'a' || key === 'psa10') && price > 0 && Number.isFinite(timestamp)) {
           acc[key].push({
             timestamp,
@@ -1110,19 +1110,7 @@ function buildRangePoints(points = [], range) {
   if (range === 'all') return ensureDrawablePoints(filterPoints(points, 'all'), 'all');
   const cutoff = rangeCutoffTimestamp(range);
   const inRange = points.filter((point) => Number(point.timestamp || 0) >= cutoff);
-  const previous = points
-    .slice()
-    .reverse()
-    .find((point) => Number(point.timestamp || 0) < cutoff && Number(point.price || 0) > 0);
-  const withBaseline = previous
-    ? [{
-      ...previous,
-      timestamp: cutoff,
-      synthetic: true,
-      source: `${previous.source || 'market'}_carry_forward`
-    }, ...inRange]
-    : inRange;
-  return ensureDrawablePoints(withBaseline, range);
+  return ensureDrawablePoints(inRange, range);
 }
 
 function buildSeries(points = [], price = 0, source = '', options = {}) {
@@ -1160,6 +1148,22 @@ function buildRecentSnapshots(points = [], price = 0, label = '', source = '') {
     }));
 }
 
+function buildRecentTradeSnapshots(points = [], label = '') {
+  return (points || [])
+    .filter((point) => Number(point?.timestamp || 0) > 0 && Number(point?.price || 0) > 0)
+    .slice()
+    .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
+    .slice(0, 8)
+    .map((point) => ({
+      date: formatSnapshotDate(point.timestamp),
+      timestamp: point.timestamp,
+      price: point.price,
+      condition: label,
+      source: point.source || '',
+      platform: /snkrdunk/i.test(String(point.source || '')) ? 'SNKR' : point.platform
+    }));
+}
+
 function latestPointPrice(points = []) {
   const latest = (points || [])
     .filter((point) => Number(point?.timestamp || 0) > 0 && Number(point?.price || 0) > 0)
@@ -1189,21 +1193,17 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
   const psa10ListingHistory = filterChartOutliers(listingFloorPoints.psa10 || []);
   const aCurrentPrice = getConditionPrice(conditionPrices, 'a');
   const psa10CurrentPrice = getConditionPrice(conditionPrices, 'psa10');
-  const useAListingHistory = aTradeHistory.length < 2 && aListingHistory.length > 0;
-  const usePsa10ListingHistory = psa10TradeHistory.length < 2 && psa10ListingHistory.length > 0;
-  const aHistory = useAListingHistory ? aListingHistory : aTradeHistory;
-  const psa10History = usePsa10ListingHistory ? psa10ListingHistory : psa10TradeHistory;
-  const aPrice = useAListingHistory || !aHistory.length
-    ? saneCurrentPrice(aCurrentPrice, aHistory, latestPointPrice(aHistory))
-    : latestPointPrice(aHistory);
-  const psa10Price = usePsa10ListingHistory || !psa10History.length
-    ? saneCurrentPrice(psa10CurrentPrice, psa10History, latestPointPrice(psa10History))
-    : latestPointPrice(psa10History);
+  const aHasTradeHistory = aTradeHistory.length > 0;
+  const psa10HasTradeHistory = psa10TradeHistory.length > 0;
+  const aHistory = aHasTradeHistory ? aTradeHistory : aListingHistory;
+  const psa10History = psa10HasTradeHistory ? psa10TradeHistory : psa10ListingHistory;
+  const aPrice = saneCurrentPrice(aCurrentPrice, aHistory, latestPointPrice(aHistory));
+  const psa10Price = saneCurrentPrice(psa10CurrentPrice, psa10History, latestPointPrice(psa10History));
   const aSeriesPrice = aCurrentPrice || aPrice;
   const psa10SeriesPrice = psa10CurrentPrice || psa10Price;
   const latestByCondition = {};
-  if (aPrice) latestByCondition.a = { timestamp: Date.now(), price: aPrice, source: useAListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade' };
-  if (psa10Price) latestByCondition.psa10 = { timestamp: Date.now(), price: psa10Price, source: usePsa10ListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_recent_trade' };
+  if (aPrice) latestByCondition.a = { timestamp: Date.now(), price: aPrice, source: aCurrentPrice || aListingHistory.length ? 'snkrdunk_listing_floor' : 'snkrdunk_chart_daily' };
+  if (psa10Price) latestByCondition.psa10 = { timestamp: Date.now(), price: psa10Price, source: psa10CurrentPrice || psa10ListingHistory.length ? 'snkrdunk_listing_floor' : 'snkrdunk_chart_daily' };
   return {
     item: {
       code: item?.code || '',
@@ -1224,8 +1224,8 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
       { key: 'all', label: 'ALL' }
     ],
     series: {
-      a: buildSeries(aHistory, aSeriesPrice, aCurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known'),
-      psa10: buildSeries(psa10History, psa10SeriesPrice, psa10CurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known')
+      a: buildSeries(aHistory, aHasTradeHistory ? 0 : aSeriesPrice, aCurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known', { includeCurrent: !aHasTradeHistory }),
+      psa10: buildSeries(psa10History, psa10HasTradeHistory ? 0 : psa10SeriesPrice, psa10CurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known', { includeCurrent: !psa10HasTradeHistory })
     },
     listingSeriesByCondition: {
       a: buildSeries(aListingHistory, aCurrentPrice, 'snkrdunk_listing_floor'),
@@ -1233,18 +1233,12 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
     },
     latestByCondition,
     recentSalesByCondition: {
-      a: buildRecentSnapshots(
-        filterChartOutliers(storedTrades.a?.length ? storedTrades.a : aHistory),
-        aSeriesPrice,
-        'A',
-        aCurrentPrice ? 'snkrdunk_current_floor' : useAListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_latest_known'
-      ),
-      psa10: buildRecentSnapshots(
-        filterChartOutliers(storedTrades.psa10?.length ? storedTrades.psa10 : psa10History),
-        psa10SeriesPrice,
-        'PSA10',
-        psa10CurrentPrice ? 'snkrdunk_current_floor' : usePsa10ListingHistory ? 'snkrdunk_listing_floor' : 'snkrdunk_latest_known'
-      )
+      a: storedTrades.a?.length
+        ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.a), 'A')
+        : buildRecentSnapshots(filterChartOutliers(aTradeHistory), 0, 'A', 'snkrdunk_trade_history'),
+      psa10: storedTrades.psa10?.length
+        ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.psa10), 'PSA10')
+        : buildRecentSnapshots(filterChartOutliers(psa10TradeHistory), 0, 'PSA10', 'snkrdunk_trade_history')
     }
   };
 }
