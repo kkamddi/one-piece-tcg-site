@@ -21,6 +21,22 @@ on:
         description: Index rebuild window days. Use 0 for full rebuild.
         required: false
         default: "14"
+      apparel_ids:
+        description: Optional comma-separated SNKRDUNK apparel IDs for a focused run
+        required: false
+        default: ""
+      collect_sold_listings:
+        description: Collect sold used-listing trades during this run
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      sold_listing_pages:
+        description: Sold used-listing pages per card
+        required: false
+        default: "1"
   schedule:
     # 03:17 / 09:17 / 15:17 / 21:17 KST
     - cron: "17 0,6,12,18 * * *"
@@ -38,6 +54,9 @@ jobs:
           COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
           COLLECTOR_SCOPE: ${{ github.event.inputs.scope || 'all-jp' }}
           COLLECTOR_MAX_PAGES: ${{ github.event.inputs.max_pages || '120' }}
+          APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
+          COLLECT_SOLD_LISTINGS: ${{ github.event.inputs.collect_sold_listings || 'false' }}
+          SOLD_LISTING_PAGES: ${{ github.event.inputs.sold_listing_pages || '1' }}
         run: |
           if [ -z "$COLLECTOR_TOKEN" ]; then
             echo "MARKET_COLLECTOR_TOKEN secret is missing."
@@ -48,6 +67,12 @@ jobs:
           limit=50
           for i in $(seq 1 "$COLLECTOR_MAX_PAGES"); do
             url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${limit}&offset=${offset}&concurrency=5&listingSnapshots=1"
+            if [ -n "$APPAREL_IDS" ]; then
+              url="${url}&apparelIds=${APPAREL_IDS}"
+            fi
+            if [ "$COLLECT_SOLD_LISTINGS" = "true" ]; then
+              url="${url}&soldListings=1&soldListingPages=${SOLD_LISTING_PAGES}"
+            fi
             json=$(curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url")
             echo "$json"
             done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")
@@ -60,6 +85,7 @@ jobs:
           done
 
       - name: Collect approved listing floor snapshots
+        if: ${{ github.event_name == 'schedule' || github.event.inputs.apparel_ids == '' }}
         env:
           COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
           COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
