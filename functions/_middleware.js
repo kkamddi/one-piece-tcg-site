@@ -178,31 +178,31 @@ const SEO_FIXES = {
     title: 'OPTCG Collector Index - 원피스카드 가격 지수 | Card Pone',
     description: 'Card Pone가 추적하는 원피스카드 대표 가격 지수와 Manga, Premium Art, SP, Luffy 하위 지수를 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표, 망가카드 시세',
-    schemaType: 'Dataset'
+    schemaType: 'WebPage'
   },
   '/prices/index/manga': {
     title: 'OPTCG Manga Index - 원피스카드 망가 지수 | Card Pone',
     description: '원피스카드 망가 카드 중심의 Manga Index 가격 흐름과 구성 종목을 확인할 수 있습니다.',
     keywords: '원피스카드 망가, Manga Index, 망가 카드 가격, 원피스카드 지수',
-    schemaType: 'Dataset'
+    schemaType: 'WebPage'
   },
   '/prices/index/premium-art': {
     title: 'OPTCG Premium Art Index - 원피스카드 프리미엄 아트 지수 | Card Pone',
     description: '수배서, 금배경, 은배경 등 프리미엄 아트 카드 중심의 가격 지수를 확인할 수 있습니다.',
     keywords: '원피스카드 수배서, 프리미엄 아트, 금배경, 은배경, OPTCG Premium Art Index',
-    schemaType: 'Dataset'
+    schemaType: 'WebPage'
   },
   '/prices/index/sp': {
     title: 'OPTCG SP Index - 원피스카드 SP 지수 | Card Pone',
     description: '원피스카드 SP 계열 카드 가격 흐름과 구성 종목을 지수로 확인할 수 있습니다.',
     keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index',
-    schemaType: 'Dataset'
+    schemaType: 'WebPage'
   },
   '/prices/index/luffy': {
     title: 'OPTCG Luffy Index - 루피 카드 가격 지수 | Card Pone',
     description: '몽키 D. 루피 주요 카드 가격 흐름과 대표 루피 카드 시세를 Luffy Index로 확인할 수 있습니다.',
     keywords: '루피 카드 시세, Monkey D Luffy 카드, OPTCG Luffy Index, 원피스카드 루피',
-    schemaType: 'Dataset'
+    schemaType: 'WebPage'
   },
   '/news': {
     title: '원피스카드 정보 - 공식공지, 사전예약, 가이드 | Card Pone',
@@ -307,7 +307,7 @@ const SEO_PRIMARY = {
     title: 'OPTCG Collector Index - 원피스카드 가격 지수 | 카드포네',
     description: '대표 원피스카드 가격 흐름을 Collector Index와 Manga, Premium Art, SP, Luffy 하위 지수로 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 가격 지표, 카드포네 인덱스',
-    schemaType: 'Dataset'
+    schemaType: 'WebPage'
   },
   '/news': {
     title: '원피스카드 정보 - 공식공지·사전예약·가이드 | 카드포네',

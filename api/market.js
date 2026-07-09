@@ -145,8 +145,17 @@ function marketRawPriceToJpy(raw) {
 
 function conditionKey(name) {
   const text = String(name || '').trim().toLowerCase();
-  if (text === 'a' || text === 'single') return 'a';
-  if (text === 'psa 10' || text === 'psa10') return 'psa10';
+  const compact = text.replace(/[\s_-]+/g, '');
+  if (
+    text === 'a'
+    || compact === 'a'
+    || compact === 'a등급'
+    || compact === 'agrade'
+    || compact === 'single'
+    || compact === 'singlegrade'
+    || compact === 'single등급'
+  ) return 'a';
+  if (compact === 'psa10') return 'psa10';
   return '';
 }
 

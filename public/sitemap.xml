@@ -157,6 +157,24 @@
     <priority>0.66</priority>
   </url>
   <url>
+    <loc>https://www.optcgkorea.com/shops/partners</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.74</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/shops/partners/the-card-room</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.72</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/shops/partners/card-sungji</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.72</priority>
+  </url>
+  <url>
     <loc>https://www.optcgkorea.com/terms</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>

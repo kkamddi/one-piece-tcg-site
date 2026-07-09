@@ -5,6 +5,12 @@ const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const CONDITION_KEY = String(process.env.MARKET_INDEX_CONDITION || 'a').trim().toLowerCase() === 'psa10' ? 'psa10' : 'a';
 const REBUILD_WINDOW_DAYS = Math.max(0, Number(process.env.MARKET_INDEX_REBUILD_WINDOW_DAYS || 14) || 0);
+const INDEX_CODE_FILTER = new Set(
+  String(process.env.MARKET_INDEX_CODES || '')
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+);
 
 function requiredEnv() {
   const missing = [];
@@ -74,12 +80,19 @@ function getRebuildStartDate() {
   return kstNow.toISOString().slice(0, 10);
 }
 
+function toDateKey(value) {
+  const text = String(value || '').replace(/\b(\d+)(st|nd|rd|th)\b/gi, '$1').trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
+  const parsed = Date.parse(`${text} UTC`);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : '';
+}
+
 function buildIndexRows(indexConfig, rows) {
   const rowsByApparelId = new Map();
   for (const row of rows || []) {
     const apparelId = Number(row.apparel_id || 0);
     const price = Number(row.median_price_jpy || 0);
-    const date = String(row.point_date || '').slice(0, 10);
+    const date = toDateKey(row.point_date);
     if (!apparelId || !price || !date) continue;
     const list = rowsByApparelId.get(apparelId) || [];
     list.push({ date, price: Math.round(price) });
@@ -231,6 +244,6 @@ async function rebuildIndex(indexConfig) {
 }
 
 requiredEnv();
-for (const indexConfig of marketIndexes) {
+for (const indexConfig of marketIndexes.filter((item) => !INDEX_CODE_FILTER.size || INDEX_CODE_FILTER.has(item.code))) {
   await rebuildIndex(indexConfig);
 }

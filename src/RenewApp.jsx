@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
 import { resolveLoginEmail } from './api/auth';
@@ -34,8 +34,29 @@ const BOX_SHORT_TITLES = {
   'OP-13': 'Carrying on His Will',
   'OP-14': "The Azure Sea's Seven",
   'OP-15': "Adventure on KAMI's Island",
-  'OP-16': 'The Time of Battle'
+  'OP-16': 'The Time of Battle',
+  'EB-02': 'Anime 25th Collection',
+  'EB-03': 'ONE PIECE Heroines',
+  'EB-03-SP': 'Heroines Special Set',
+  'EB-04': 'EGGHEAD CRISIS',
+  'PRB-01': 'THE BEST',
+  'PRB-02': 'THE BEST vol.2',
+  'PCC-1': 'BASE SHOP vol.1',
+  'PCC-6A-1': '6 assort vol.1',
+  'PCC-BS4': 'Best Selection vol.4',
+  'PCC-KUMAMOTO': 'Kumamoto Special',
+  'OPDAY-2024': "ONE PIECE DAY'24",
+  'OPDAY-2025': "ONE PIECE DAY'25",
+  'OPC-001': '25th Anniversary',
+  'OPC-018': '1st ANNIVERSARY SET',
+  'OPC-033': 'Promotion Card Set 1',
+  'OPC-035': 'Promotion Card Set 3',
+  'OPC-046': 'English 2nd Anniversary JP',
+  'OJP-3': 'Official Judge Pack Vol.3',
+  'P-2022': 'Promotional Pack 2022',
+  'TPP-NFE': 'New Four Emperors Pack'
 };
+const BOX_MARKET_PAGE_SIZE = 20;
 const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
@@ -48,6 +69,58 @@ const MARKETPLACE_TAB_VISIBLE = true;
 const MARKETPLACE_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
+
+function getBoxReleaseSortValue(item) {
+  const rawDate = item?.releaseDate || item?.release_date || item?.releasedAt || item?.released_at;
+  const normalizedDate = typeof rawDate === 'string' ? rawDate.replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, '$1') : rawDate;
+  const releaseTime = normalizedDate ? Date.parse(normalizedDate) : NaN;
+  if (Number.isFinite(releaseTime)) return releaseTime;
+  return Number(item?.sortOrder ?? String(item?.code || '').match(/\d+/)?.[0]) || 0;
+}
+
+function useBodyScrollLock(active = true) {
+  useEffect(() => {
+    if (!active || typeof window === 'undefined' || typeof document === 'undefined' || !document.body) return undefined;
+    const body = document.body;
+    const doc = document.documentElement;
+    const lockCount = Number(body.dataset.renewModalLockCount || 0);
+    const scrollY = lockCount ? Number(body.dataset.renewModalScrollY || 0) : (window.scrollY || doc.scrollTop || 0);
+    if (!lockCount) {
+      body.dataset.renewModalScrollY = String(scrollY);
+      body.dataset.renewModalPrevPosition = body.style.position || '';
+      body.dataset.renewModalPrevTop = body.style.top || '';
+      body.dataset.renewModalPrevWidth = body.style.width || '';
+      body.dataset.renewModalPrevOverflow = body.style.overflow || '';
+      body.dataset.renewModalPrevHtmlOverflow = doc.style.overflow || '';
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
+      doc.style.overflow = 'hidden';
+    }
+    body.dataset.renewModalLockCount = String(lockCount + 1);
+    return () => {
+      const nextCount = Math.max(0, Number(body.dataset.renewModalLockCount || 1) - 1);
+      body.dataset.renewModalLockCount = String(nextCount);
+      if (nextCount) return;
+      const restoreY = Number(body.dataset.renewModalScrollY || 0);
+      body.style.position = body.dataset.renewModalPrevPosition || '';
+      body.style.top = body.dataset.renewModalPrevTop || '';
+      body.style.width = body.dataset.renewModalPrevWidth || '';
+      body.style.overflow = body.dataset.renewModalPrevOverflow || '';
+      doc.style.overflow = body.dataset.renewModalPrevHtmlOverflow || '';
+      delete body.dataset.renewModalLockCount;
+      delete body.dataset.renewModalScrollY;
+      delete body.dataset.renewModalPrevPosition;
+      delete body.dataset.renewModalPrevTop;
+      delete body.dataset.renewModalPrevWidth;
+      delete body.dataset.renewModalPrevOverflow;
+      delete body.dataset.renewModalPrevHtmlOverflow;
+      window.scrollTo(0, restoreY);
+    };
+  }, [active]);
+}
+
 const RENEW_HOME_UPDATES = [
   {
     id: '2026-06-30-kr-op13',
@@ -513,6 +586,95 @@ const HOME_SEO_GUIDE_LINKS = [
     description: '슬리브, 탑로더, 바인더 보관 기준'
   }
 ];
+
+const PARTNER_AD_ITEMS = [
+  {
+    key: 'shop-news',
+    labelKr: 'CARD SHOP',
+    labelEn: 'CARD SHOP',
+    titleKr: '더 카드룸',
+    titleEn: 'The Card Room',
+    bodyKr: '서울 마포구 연남로 3길 40, 2층',
+    bodyEn: '2F, 40, Yeonnam-ro 3-gil, Mapo-gu, Seoul',
+    metaKr: 'Mon-Sun 11:00~22:00',
+    metaEn: 'Mon-Sun 11:00~22:00',
+    imageUrl: '/partners/the-card-room.png',
+    actions: [
+      { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://map.naver.com/p/entry/place/2096216680' },
+      { labelKr: '스마트스토어', labelEn: 'Smart Store', href: 'https://smartstore.naver.com/fogandsunset' },
+      { labelKr: '인스타그램', labelEn: 'Instagram', href: 'https://www.instagram.com/tcr_kr/' }
+    ]
+  },
+  {
+    key: 'card-sungji',
+    labelKr: 'CARD SHOP',
+    labelEn: 'CARD SHOP',
+    titleKr: '카드성지',
+    titleEn: 'Card Sungji',
+    bodyKr: '한강대로 95 지하2층 B212호(용산 래미안)',
+    bodyEn: 'B2 B212, 95 Hangang-daero, Yongsan',
+    metaKr: 'Mon-Sun 14:00~21:00',
+    metaEn: 'Mon-Sun 14:00~21:00',
+    imageUrl: '/partners/card-sungji.png',
+    actions: [
+      { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://naver.me/xQe4VQum' },
+      { labelKr: '인스타그램', labelEn: 'Instagram', href: 'https://www.instagram.com/card_sungji/' }
+    ]
+  }
+];
+
+const PARTNER_SHOP_NEWS = [
+  {
+    id: 'card-sungji-op13-restock-2026-07-07',
+    shopKey: 'card-sungji',
+    type: 'stock',
+    titleKr: '카드성지 OP-13 입고 예정',
+    titleEn: 'Card Sungji OP-13 Coming Soon',
+    bodyKr: '카드성지에 원피스카드 OP-13 관련 매물이 곧 입고될 예정입니다.',
+    bodyEn: 'OP-13 products are expected to arrive at Card Sungji soon.',
+    imageUrl: '/partners/news/card-sungji-op13.png',
+    date: '2026-07-07',
+    status: 'active',
+    priority: 1
+  }
+];
+
+function getPartnerShopByKey(key) {
+  return PARTNER_AD_ITEMS.find((item) => item.key === key) || null;
+}
+
+function getPartnerShopSlug(itemOrKey) {
+  const key = typeof itemOrKey === 'string' ? itemOrKey : itemOrKey?.key;
+  if (key === 'shop-news') return 'the-card-room';
+  return String(key || '').trim();
+}
+
+function getPartnerShopUrl(itemOrKey) {
+  const slug = getPartnerShopSlug(itemOrKey);
+  return slug ? `/shops/partners/${slug}` : '/shops/partners';
+}
+
+function getPartnerShopBySlug(slug) {
+  const normalized = String(slug || '').trim().toLowerCase();
+  return PARTNER_AD_ITEMS.find((item) => getPartnerShopSlug(item) === normalized) || null;
+}
+
+function getPartnerShopRoute(pathname = typeof window !== 'undefined' ? window.location.pathname : '/shops/partners') {
+  const path = normalizeSitePath(pathname);
+  if (!path.startsWith('/shops/partners/')) return { shop: null, slug: '' };
+  const slug = decodeURIComponent(path.slice('/shops/partners/'.length)).toLowerCase();
+  return { shop: getPartnerShopBySlug(slug), slug };
+}
+
+function getActivePartnerShopNews() {
+  return PARTNER_SHOP_NEWS
+    .filter((item) => item.status !== 'hidden')
+    .sort((a, b) => {
+      const priorityDiff = Number(b.priority || 0) - Number(a.priority || 0);
+      if (priorityDiff) return priorityDiff;
+      return String(b.date || '').localeCompare(String(a.date || ''));
+    });
+}
 
 function getHomeNewsLinks() {
   const krTopic = OFFICIAL_TOPIC_ITEMS.find((item) => (item.locale || '').toUpperCase() === 'KR');
@@ -1036,6 +1198,31 @@ function getBaseSeriesId(seriesOrId) {
   return String(seriesOrId ?? '').replace(/^(KR|JP|EN)-/, '');
 }
 
+function normalizeSeriesSlug(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function getSeriesSlug(series) {
+  return normalizeSeriesSlug(series?.officialSeriesKeyword || getBaseSeriesId(series) || series?.id);
+}
+
+function getSeriesRoutePath(series) {
+  const slug = getSeriesSlug(series);
+  return slug ? `/cards/${slug}` : '/cards';
+}
+
+function findSeriesByRouteSlug(slug, preferredLocale = 'JP') {
+  const normalized = normalizeSeriesSlug(slug);
+  if (!normalized) return null;
+  const matches = seriesData.filter((item) => {
+    const id = normalizeSeriesSlug(item.id);
+    const baseId = normalizeSeriesSlug(item.baseSeriesId);
+    const official = normalizeSeriesSlug(item.officialSeriesKeyword);
+    return id === normalized || baseId === normalized || official === normalized;
+  });
+  return matches.find((item) => (item.locale || 'JP') === preferredLocale) || matches[0] || null;
+}
+
 function getProgressSeriesGroup(series) {
   const baseId = String(series?.code || getBaseSeriesId(series)).replace(/^(KR|JP|EN)-/, '');
   if (/^OP\d+/.test(baseId)) return 'OP';
@@ -1130,6 +1317,38 @@ function placeholderImage(event) {
   event.currentTarget.src = '/card-placeholder.svg';
 }
 
+function getSeriesBoxCode(series) {
+  const baseId = getBaseSeriesId(series);
+  const match = String(baseId || '').match(/^([A-Z]+)(\d+)$/);
+  return match ? `${match[1]}-${match[2]}` : baseId;
+}
+
+function getSeriesBoxPreviewUrl(series, boxImageByCode) {
+  const boxCode = getSeriesBoxCode(series);
+  if (!boxCode || boxCode === 'PROMO') return '';
+  return boxImageByCode?.get(boxCode)
+    || boxMarketItems.find((item) => item.code === boxCode)?.previewImageUrl
+    || '';
+}
+
+function RenewSeriesOptionContent({ series, boxImageByCode }) {
+  const previewUrl = getSeriesBoxPreviewUrl(series, boxImageByCode);
+  return (
+    <>
+      <span className="renew-series-thumb" aria-hidden="true">
+        {previewUrl ? (
+          <img src={previewUrl} alt="" loading="lazy" onError={placeholderImage} />
+        ) : (
+          <span className="renew-series-thumb-label">{getBaseSeriesId(series).slice(0, 2) || 'PR'}</span>
+        )}
+      </span>
+      <b>{getBaseSeriesId(series)}</b>
+      <span>{series.koName}</span>
+      <small>{series.kindEn || series.enName}</small>
+    </>
+  );
+}
+
 function fallbackToOriginalCardImage(event) {
   const fallbackSrc = event.currentTarget.dataset.fallbackSrc;
   if (fallbackSrc && event.currentTarget.src !== fallbackSrc) {
@@ -1210,19 +1429,108 @@ function makeMarketStateKey(item, grade) {
 
 let cardMarketLinksPromise = null;
 
+async function fetchCardMarketLinkOverrides() {
+  const response = await fetch('/api/card-market-link-overrides', { cache: 'no-store' });
+  if (!response.ok) return [];
+  const payload = await response.json().catch(() => null);
+  return Array.isArray(payload?.items) ? payload.items : [];
+}
+
+function mergeCardMarketLinks(baseLinks, overrideLinks) {
+  const merged = new Map();
+  const looseLinks = [];
+  (baseLinks || []).forEach((link) => {
+    if (link?.cardId) {
+      const existing = merged.get(link.cardId);
+      if (existing?.status === 'approved' && link.status !== 'approved') return;
+      merged.set(link.cardId, link);
+    }
+    else if (link) looseLinks.push(link);
+  });
+  (overrideLinks || []).forEach((link) => {
+    if (!link?.cardId) return;
+    if (link.status === 'blocked') {
+      merged.set(link.cardId, {
+        ...merged.get(link.cardId),
+        cardId: link.cardId,
+        apparelId: 0,
+        status: 'blocked',
+        note: link.note || 'admin blocked mapping'
+      });
+      return;
+    }
+    if (!link?.apparelId) return;
+    merged.set(link.cardId, {
+      ...merged.get(link.cardId),
+      cardId: link.cardId,
+      apparelId: Number(link.apparelId),
+      status: link.status || 'approved',
+      note: link.note || 'admin override'
+    });
+  });
+  return [...merged.values(), ...looseLinks];
+}
+
 function loadCardMarketLinks() {
-  cardMarketLinksPromise ??= import('./data/card-market-links.js')
-    .then((module) => (Array.isArray(module.default) ? module.default : []))
+  cardMarketLinksPromise ??= Promise.all([
+    import('./data/card-market-links.js').then((module) => (Array.isArray(module.default) ? module.default : [])),
+    fetchCardMarketLinkOverrides().catch(() => [])
+  ])
+    .then(([baseLinks, overrideLinks]) => mergeCardMarketLinks(baseLinks, overrideLinks))
     .catch(() => []);
   return cardMarketLinksPromise;
+}
+
+function invalidateCardMarketLinks() {
+  cardMarketLinksPromise = null;
+}
+
+async function saveCardMarketLinkOverride({ cardId, apparelId, note }) {
+  const { data } = supabase ? await supabase.auth.getSession() : { data: null };
+  const token = data?.session?.access_token || '';
+  const response = await fetch('/api/card-market-link-overrides', {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ cardId, apparelId, note })
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
+  invalidateCardMarketLinks();
+  return payload?.item || null;
+}
+
+async function blockCardMarketLinkOverride(cardId) {
+  const { data } = supabase ? await supabase.auth.getSession() : { data: null };
+  const token = data?.session?.access_token || '';
+  const response = await fetch('/api/card-market-link-overrides', {
+    method: 'POST',
+    cache: 'no-store',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ cardId, apparelId: 0, status: 'blocked', note: 'admin blocked mapping' })
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
+  invalidateCardMarketLinks();
+  return payload;
 }
 
 async function findApprovedCardMarketLink(card) {
   if (!card) return null;
   const cardMarketLinks = await loadCardMarketLinks();
+  const targetCardId = card.id || card.cardId;
+  if (targetCardId && cardMarketLinks.some((link) => link.status === 'blocked' && link.cardId === targetCardId)) {
+    return null;
+  }
   return cardMarketLinks.find((link) => {
     if (link.status !== 'approved') return false;
-    if (link.cardId) return link.cardId === (card.id || card.cardId);
+    if (link.cardId) return link.cardId === targetCardId;
     if (normalizeCode(link.cardNo) !== normalizeCode(card.cardNo)) return false;
     if (link.locale && link.locale !== card.locale) return false;
     if (link.variantKey && link.variantKey !== (card.variantKey || '')) return false;
@@ -1270,6 +1578,22 @@ function formatWonFromUsd(value) {
   return `₩${Math.round(amount * MARKET_USD_TO_KRW).toLocaleString('ko-KR')}`;
 }
 
+function formatCatalogWonFromUsd(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return '-';
+  const won = Math.round(amount * MARKET_USD_TO_KRW);
+  if (won >= 100000000) {
+    const eok = Math.floor(won / 100000000);
+    const man = Math.floor((won % 100000000) / 10000);
+    return man > 0 ? `₩${eok}억 ${man.toLocaleString('ko-KR')}만` : `₩${eok}억`;
+  }
+  if (won >= 10000) {
+    const man = won / 10000;
+    return `₩${man >= 100 ? Math.round(man).toLocaleString('ko-KR') : man.toFixed(1)}만`;
+  }
+  return `₩${won.toLocaleString('ko-KR')}`;
+}
+
 function formatUsdWonFromUsd(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount <= 0) return '가격 정보 없음';
@@ -1280,6 +1604,14 @@ function formatUsdWonFromYen(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount <= 0) return '가격 정보 없음';
   return formatUsdWonFromUsd(amount / MARKET_USD_TO_JPY);
+}
+
+function normalizePortfolioPriceJpy(item) {
+  const raw = Number(item?.minPrice || item?.price || 0);
+  if (!Number.isFinite(raw) || raw <= 0) return 0;
+  const currency = String(item?.priceCurrency || item?.currency || '').toUpperCase();
+  if (currency === 'USD') return Math.round(raw * MARKET_USD_TO_JPY);
+  return raw;
 }
 
 function formatPercent(value) {
@@ -1463,7 +1795,7 @@ function mergePsa10MarketDetail(detail, psaDetail) {
   if (!detail || !psaDetail) return detail;
   const baseConditions = Array.isArray(detail.conditions) && detail.conditions.length
     ? detail.conditions
-    : [{ key: 'a', label: 'A등급' }, { key: 'psa10', label: 'PSA10' }];
+    : [{ key: 'a', label: 'Single' }, { key: 'psa10', label: 'PSA10' }];
   const conditions = baseConditions.some((item) => item.key === 'psa10')
     ? baseConditions
     : [...baseConditions, { key: 'psa10', label: 'PSA10' }];
@@ -1571,6 +1903,7 @@ const UI_TEXT = {
     openMarket: '바로 카드시세 보기',
     searchSameName: '같은 이름 카드 검색',
     officialInfo: '공식 정보보기',
+    openSnkrdunk: '스니덩크 바로가기',
     loginRequired: '로그인 후 이용해 주세요.',
     backToCatalog: '← 도감으로 돌아가기',
     marketCodePlaceholder: '일련번호 검색 예: OP05-119',
@@ -1585,11 +1918,11 @@ const UI_TEXT = {
     sourcePsa: 'PSA 원문 보기',
     sourcePsaShort: 'PSA 보기',
     snkrShortcut: '바로가기',
-    addAGrade: 'A등급 추가',
-    addAGradeShort: 'A 추가',
+    addAGrade: 'Single등급 추가',
+    addAGradeShort: 'Single등급 추가',
     addPsa10: 'PSA10등급 추가',
     addPsa10Short: 'PSA10 추가',
-    aGrade: 'A등급',
+    aGrade: 'Single',
     addedToPortfolio: '컬렉션 가치에 추가했습니다.',
     noChart: '그래프 데이터가 없습니다.',
     recentSales: '최근 가격 기록',
@@ -1608,7 +1941,7 @@ const UI_TEXT = {
     marketCandidateSelect: '선택하기',
     selectedVariant: '선택한 버전',
     reselectVariant: '다시 선택',
-    snkrLowestPrice: 'SNKRDUNK 최저가',
+    snkrLowestPrice: 'SNKRDUNK 최근 시세',
     psa10IntegratedPrice: 'PSA10 통합 시세',
     checkPrice: '가격 확인',
     deckSearchPlaceholder: '덱에 넣을 카드 검색',
@@ -1639,6 +1972,13 @@ const UI_TEXT = {
     footerNoAffiliation: '본 사이트는 BANDAI 및 공식 유통사와 제휴되어 있지 않습니다.',
     footerPriceNotice: '제공되는 시세 정보는 참고용이며, 실제 거래 가격과 차이가 있을 수 있습니다.',
     footerResponsibility: '구매 및 판매 결정에 대한 책임은 이용자 본인에게 있습니다.',
+    portfolioLoginRequired: '로그인 후 사용 가능합니다.',
+    portfolioEmptyHelp: '시세탭에서 추가할 수 있습니다.',
+    goToPrices: '시세 바로 가기',
+    catalogSortRarity: '등급순',
+    catalogSortPrice: '가격순',
+    cardOwned: '보유',
+    cardNotOwned: '미보유',
     terms: '이용약관',
     privacy: '개인정보처리방침',
     contact: '문의하기',
@@ -1673,6 +2013,7 @@ const UI_TEXT = {
     openMarket: 'View Market Price',
     searchSameName: 'Search Same Name',
     officialInfo: 'Official Info',
+    openSnkrdunk: 'Open SNKRDUNK',
     loginRequired: 'Please log in first.',
     backToCatalog: '← Back to Cards',
     marketCodePlaceholder: 'Card code e.g. OP05-119',
@@ -1687,11 +2028,11 @@ const UI_TEXT = {
     sourcePsa: 'View PSA',
     sourcePsaShort: 'PSA',
     snkrShortcut: 'Open',
-    addAGrade: 'Add A Grade',
-    addAGradeShort: 'Add A',
+    addAGrade: 'Add Single Grade',
+    addAGradeShort: 'Single Grade',
     addPsa10: 'Add PSA10 Grade',
     addPsa10Short: 'Add PSA10',
-    aGrade: 'A Grade',
+    aGrade: 'Single',
     addedToPortfolio: 'added to Portfolio.',
     noChart: 'No chart data.',
     recentSales: 'Recent Price Records',
@@ -1710,7 +2051,7 @@ const UI_TEXT = {
     marketCandidateSelect: 'Select',
     selectedVariant: 'Selected Version',
     reselectVariant: 'Reselect',
-    snkrLowestPrice: 'SNKRDUNK Lowest',
+    snkrLowestPrice: 'SNKRDUNK Recent Price',
     psa10IntegratedPrice: 'PSA10 Integrated Price',
     checkPrice: 'Check Price',
     deckSearchPlaceholder: 'Search cards for deck',
@@ -1741,6 +2082,13 @@ const UI_TEXT = {
     footerNoAffiliation: 'This site is not affiliated with BANDAI or official distributors.',
     footerPriceNotice: 'Market price information is provided for reference only and may differ from actual transaction prices.',
     footerResponsibility: 'Users are responsible for their own purchase and sale decisions.',
+    portfolioLoginRequired: 'Available after login.',
+    portfolioEmptyHelp: 'You can add cards from the Prices tab.',
+    goToPrices: 'Go to Prices',
+    catalogSortRarity: 'By Rarity',
+    catalogSortPrice: 'By Price',
+    cardOwned: 'Owned',
+    cardNotOwned: 'Not Owned',
     terms: 'Terms',
     privacy: 'Privacy Policy',
     contact: 'Contact',
@@ -1758,6 +2106,7 @@ const PAGE_PATHS = {
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
   news: '/news',
   shops: '/shops',
+  partnerShops: '/shops/partners',
   about: '/about',
   dataPolicy: '/data-policy',
   terms: '/terms',
@@ -1779,6 +2128,7 @@ function getRouteSeoPage(pathname = '/') {
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
+  if (path.startsWith('/shops/partners')) return 'partnerShops';
   if (path.startsWith('/shops')) return 'shops';
   if (path.startsWith('/market')) return 'marketplace';
   return 'home';
@@ -1789,14 +2139,15 @@ function getCatalogRouteViewState(pathname = typeof window !== 'undefined' ? win
   if (path === '/cards/jp') return { locale: 'JP' };
   if (path === '/cards/kr') return { locale: 'KR' };
   if (path.startsWith('/cards/series/')) {
-    const slug = path.slice('/cards/series/'.length).toUpperCase().replace(/-/g, '');
-    const series = seriesData.find((item) => {
-      const id = String(item.id || '').toUpperCase().replace(/-/g, '');
-      const baseId = String(item.baseSeriesId || '').toUpperCase().replace(/-/g, '');
-      const official = String(item.officialSeriesKeyword || '').toUpperCase().replace(/-/g, '');
-      return id === slug || baseId === slug || official === slug;
-    });
-    if (series) return { locale: series.locale || 'KR', selectedSeries: series.id };
+    const series = findSeriesByRouteSlug(path.slice('/cards/series/'.length));
+    if (series) return { locale: series.locale || 'JP', selectedSeries: series.id };
+  }
+  if (path.startsWith('/cards/')) {
+    const slug = path.slice('/cards/'.length);
+    if (slug && !slug.includes('/')) {
+      const series = findSeriesByRouteSlug(slug);
+      if (series) return { locale: series.locale || 'JP', selectedSeries: series.id };
+    }
   }
   return null;
 }
@@ -1806,7 +2157,8 @@ function getMarketRouteState(pathname = typeof window !== 'undefined' ? window.l
   const params = new URLSearchParams(search);
   const state = {
     code: params.get('code') || '',
-    apparelId: params.get('apparelId') || null
+    apparelId: params.get('apparelId') || null,
+    cardId: params.get('cardId') || ''
   };
   if (path.startsWith('/prices/product/')) {
     state.apparelId = path.slice('/prices/product/'.length);
@@ -2026,8 +2378,43 @@ function getClientRouteSeo(page) {
   };
   if (seoAliases[path] && CLIENT_ROUTE_SEO[seoAliases[path]]) return CLIENT_ROUTE_SEO[seoAliases[path]];
   if (CLIENT_ROUTE_SEO[path]) return CLIENT_ROUTE_SEO[path];
+  if (path.startsWith('/shops/partners')) {
+    const { shop } = getPartnerShopRoute(path);
+    if (shop) {
+      const title = shop.titleEn || shop.titleKr || 'Partner Card Shop';
+      const location = shop.bodyEn || shop.bodyKr || '';
+      return {
+        title: `${title} - 원피스카드 파는곳 | Card Pone`,
+        h1: `${title} - 원피스카드 파는곳`,
+        description: `${title} 제휴 카드샵 정보입니다. ${location} 위치, 영업시간, 지도, 온라인 채널을 확인할 수 있습니다.`,
+        keywords: `${title}, 원피스카드 파는곳, 원피스카드 매장, 원피스카드 카드샵, Card Pone`,
+        body: `${title} 제휴 카드샵 상세 정보`
+      };
+    }
+    return {
+      title: '원피스카드 파는곳 - 제휴 카드샵 | Card Pone',
+      h1: '원피스카드 파는곳 - 제휴 카드샵',
+      description: 'Card Pone 제휴 카드샵 목록입니다. 원피스카드 매장 위치, 영업시간, 네이버지도, 인스타그램, 스마트스토어 바로가기를 확인할 수 있습니다.',
+      keywords: '원피스카드 파는곳, 원피스카드 매장, 원피스카드 카드샵, 원피스카드 구매처, Card Pone',
+      body: '원피스카드 제휴 카드샵 목록'
+    };
+  }
   if (path.startsWith('/cards/series/')) {
-    const series = path.split('/').pop()?.toUpperCase() || 'SERIES';
+    const matchedSeries = findSeriesByRouteSlug(path.slice('/cards/series/'.length));
+    const series = matchedSeries ? getBaseSeriesId(matchedSeries) : (path.split('/').pop()?.toUpperCase() || 'SERIES');
+    return {
+      title: `${series} 원피스카드 리스트 | Card Pone`,
+      h1: `${series} 원피스카드 리스트`,
+      description: `${series} 시리즈의 원피스 카드게임 카드 목록과 보유 카드 정보를 확인할 수 있습니다.`,
+      keywords: `${series} 원피스카드, ${series} 카드 리스트, 원피스카드 도감`,
+      body: `${series} 시리즈 카드 목록을 확인할 수 있습니다.`
+    };
+  }
+  if (path.startsWith('/cards/')) {
+    const slug = path.slice('/cards/'.length);
+    const matchedSeries = slug && !slug.includes('/') ? findSeriesByRouteSlug(slug) : null;
+    if (!matchedSeries) return null;
+    const series = getBaseSeriesId(matchedSeries);
     return {
       title: `${series} 원피스카드 리스트 | Card Pone`,
       h1: `${series} 원피스카드 리스트`,
@@ -2142,6 +2529,8 @@ function getPageFromPath(pathname = '/') {
 function getRouteBackInfo(pathname = '/', search = '') {
   const path = normalizeSitePath(pathname);
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
+  if (path.startsWith('/shops/partners/')) return { label: '제휴 카드샵으로 돌아가기', page: 'partnerShops' };
+  if (path === '/shops/partners') return { label: '구매처로 돌아가기', page: 'shops' };
   if (path === '/' || (['/cards', '/prices', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
   if (path.startsWith('/cards')) return { label: '도감으로 돌아가기', page: 'cards' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { label: '시세로 돌아가기', page: 'prices' };
@@ -2233,6 +2622,33 @@ function getPageJsonLd(page, seo) {
       description: seo.description,
       url
     });
+  }
+  if (page === 'partnerShops') {
+    const { shop } = typeof window !== 'undefined' ? getPartnerShopRoute(window.location.pathname) : { shop: null };
+    if (shop) {
+      graph.push({
+        '@type': 'LocalBusiness',
+        name: shop.titleEn || shop.titleKr,
+        image: shop.imageUrl ? `${SITE_ORIGIN}${shop.imageUrl}` : undefined,
+        address: shop.bodyKr || shop.bodyEn,
+        openingHours: shop.metaKr || shop.metaEn,
+        url,
+        sameAs: (shop.actions || []).map((action) => action.href).filter(Boolean)
+      });
+    } else {
+      graph.push({
+        '@type': 'ItemList',
+        name: 'Card Pone 제휴 카드샵',
+        description: seo.description,
+        url,
+        itemListElement: PARTNER_AD_ITEMS.map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.titleEn || item.titleKr,
+          url: `${SITE_ORIGIN}${getPartnerShopUrl(item)}`
+        }))
+      });
+    }
   }
   if (page === 'news') {
     graph.push({
@@ -2544,20 +2960,25 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
       <nav className="renew-bottom-nav" aria-label="모바일 하단 메뉴">
         <button type="button" className={activePage === 'cards' ? 'is-active' : ''} onClick={() => onNavigate('cards')} aria-label="도감">
           <MobileNavIcon type="cards" />
+          <span>{t('navCards')}</span>
         </button>
         <button type="button" className={activePage === 'prices' ? 'is-active' : ''} onClick={() => onNavigate('prices')} aria-label="시세">
           <MobileNavIcon type="prices" />
+          <span>{t('navPrices')}</span>
         </button>
         {MARKETPLACE_TAB_VISIBLE ? (
           <button type="button" className={activePage === 'marketplace' ? 'is-active' : ''} onClick={() => onNavigate('marketplace')} aria-label="거래">
             <MobileNavIcon type="marketplace" />
+            <span>{t('navMarketplace')}</span>
           </button>
         ) : null}
         <button type="button" className={activePage === 'news' ? 'is-active' : ''} onClick={onMobileNews} aria-label="정보">
           <MobileNavIcon type="news" />
+          <span>{t('navNews')}</span>
         </button>
         <button type="button" className={activePage === 'shops' ? 'is-active' : ''} onClick={() => onNavigate('shops')} aria-label="구매처">
           <MobileNavIcon type="shops" />
+          <span>{t('navShops')}</span>
         </button>
       </nav>
     </header>
@@ -2565,6 +2986,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
 }
 
 function RenewSuppliesModal({ onClose }) {
+  useBodyScrollLock();
   return (
     <div className="renew-modal-backdrop" onClick={onClose} data-nosnippet>
       <div className="renew-info-modal renew-supplies-modal" onClick={(event) => event.stopPropagation()}>
@@ -2647,6 +3069,7 @@ function RenewSeoSummary({ page, titleAs = 'h1', placement = 'page' }) {
 }
 
 function RenewAuthModal({ onClose, onSignedIn }) {
+  useBodyScrollLock();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -2719,6 +3142,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
 }
 
 function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout, onUserUpdated }) {
+  useBodyScrollLock();
   const email = authUser?.email || '';
   const username = authUser?.user_metadata?.username || email.split('@')[0] || '-';
   const provider = authUser?.app_metadata?.provider || 'email';
@@ -2862,6 +3286,7 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
 }
 
 function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle', bodyKey = 'deckComingSoonBody' }) {
+  useBodyScrollLock();
   const t = (key) => getUiText(uiLang, key);
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
@@ -2878,12 +3303,13 @@ function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle
   );
 }
 
-function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats, onSubmitSearch, onNavigateNews, onOpenIndex, uiLang }) {
+function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
   const [valueModalGrade, setValueModalGrade] = useState(null);
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [renewalNoticeOpen, setRenewalNoticeOpen] = useState(false);
+  const [partnerNewsOpen, setPartnerNewsOpen] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
   const [progressLocale, setProgressLocale] = useState('KR');
   const [progressData, setProgressData] = useState({ KR: { owned: 0, total: 0, percent: 0, series: [] }, JP: { owned: 0, total: 0, percent: 0, series: [] } });
@@ -2894,11 +3320,11 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
   const valuationGrades = userState?.valuationCardGrades && typeof userState.valuationCardGrades === 'object'
     ? Object.values(userState.valuationCardGrades).map((grade) => String(grade || '').toLowerCase())
     : [];
-  const valuationEntries = [
-    ...(userState?.valuationMarketItems && typeof userState.valuationMarketItems === 'object' ? Object.entries(userState.valuationMarketItems) : []),
-    ...(userState?.ownedMarketItems && typeof userState.ownedMarketItems === 'object' ? Object.entries(userState.ownedMarketItems) : [])
-  ];
-  const storedTotalJpy = valuationEntries.reduce((sum, [, item]) => sum + (Number(item?.minPrice || 0) || 0), 0);
+  const valuationEntries = Array.from(new Map([
+    ...(userState?.ownedMarketItems && typeof userState.ownedMarketItems === 'object' ? Object.entries(userState.ownedMarketItems) : []),
+    ...(userState?.valuationMarketItems && typeof userState.valuationMarketItems === 'object' ? Object.entries(userState.valuationMarketItems) : [])
+  ]).entries());
+  const storedTotalJpy = valuationEntries.reduce((sum, [, item]) => sum + normalizePortfolioPriceJpy(item), 0);
   const totalJpy = marketTotalJpy ?? storedTotalJpy;
   const aCount = valuationGrades.filter((grade) => grade === 'a').length;
   const psa10Count = valuationGrades.filter((grade) => grade === 'psa10').length;
@@ -2920,7 +3346,8 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
       const grade = normalizeMarketConditionKey(valuationGradeMap[key] || item.grade || 'a');
       try {
         const summary = await fetchMarketPrice({ code: item.code, apparelId: item.apparelId, summary: true });
-        const price = Number(getMarketConditionBucket(summary?.latestByCondition, grade)?.price || item.minPrice || 0) || 0;
+        const livePrice = Number(getMarketConditionBucket(summary?.latestByCondition, grade)?.price || 0) || 0;
+        const price = livePrice > 0 ? livePrice : normalizePortfolioPriceJpy(item);
         return {
           key,
           grade,
@@ -2933,7 +3360,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
           previewImageUrl: item.previewImageUrl || item.imageUrl || summary?.item?.previewImageUrl || '/card-placeholder.svg'
         };
       } catch {
-        const price = Number(item.minPrice || 0) || 0;
+        const price = normalizePortfolioPriceJpy(item);
         return { key, grade, price, code: item.code, apparelId: item.apparelId, name: item.name || item.code, setName: item.setName || '', sourceUrl: item.sourceUrl || '', previewImageUrl: item.previewImageUrl || item.imageUrl || '/card-placeholder.svg' };
       }
     })).then((items) => {
@@ -2983,6 +3410,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
     : [];
   const t = (key) => getUiText(uiLang, key);
   const homeNewsLinks = useMemo(() => getHomeNewsLinks(), []);
+  const latestPartnerNews = useMemo(() => getActivePartnerShopNews()[0] || null, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2990,6 +3418,20 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
     window.localStorage.setItem(RENEWAL_NOTICE_KEY, '1');
     setRenewalNoticeOpen(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !latestPartnerNews || renewalNoticeOpen) return;
+    const storageKey = `card-pone-partner-news-${latestPartnerNews.id}`;
+    if (window.localStorage.getItem(storageKey)) return;
+    setPartnerNewsOpen(true);
+  }, [latestPartnerNews, renewalNoticeOpen]);
+
+  function closePartnerNews() {
+    if (typeof window !== 'undefined' && latestPartnerNews) {
+      window.localStorage.setItem(`card-pone-partner-news-${latestPartnerNews.id}`, '1');
+    }
+    setPartnerNewsOpen(false);
+  }
 
   async function removeValuationCard(key) {
     if (!authUser) {
@@ -3049,13 +3491,11 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
         <article className="renew-float-card renew-value">
           <div className="renew-card-title">Portfolio</div>
           <div className="renew-value-total">
-            <span>{formatYen(totalJpy)}</span>
-            <i>/</i>
-            <span>{formatWonFromYen(totalJpy)}</span>
+            <span>{authUser ? formatUsdWonFromYen(totalJpy) : t('portfolioLoginRequired')}</span>
           </div>
           <div className="renew-value-grid">
             <button type="button" onClick={() => setValueModalGrade('a')}>
-              <span>A</span>
+              <span>Single</span>
               <strong>{aCount}</strong>
             </button>
             <button type="button" onClick={() => setValueModalGrade('psa10')}>
@@ -3081,20 +3521,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
           </button>
         </article>
       </section>
-      <section className="renew-home-guide-links" aria-labelledby="home-guide-links-heading">
-        <div>
-          <span>GUIDE</span>
-          <h2 id="home-guide-links-heading">검색 인기 가이드</h2>
-        </div>
-        <div className="renew-home-guide-grid">
-          {HOME_SEO_GUIDE_LINKS.map((item) => (
-            <a key={item.href} href={item.href}>
-              <strong>{item.label}</strong>
-              <small>{item.description}</small>
-            </a>
-          ))}
-        </div>
-      </section>
+      <RenewPartnerAdSection uiLang={uiLang} />
       {adminStats ? (
         <section className="renew-admin-stats" aria-label="관리자 통계">
           {[
@@ -3119,10 +3546,18 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
           cards={modalCards}
           onClose={() => setValueModalGrade(null)}
           onRemove={removeValuationCard}
+          uiLang={uiLang}
+          onOpenPrices={() => {
+            setValueModalGrade(null);
+            onOpenPrices?.();
+          }}
         />
       ) : null}
       {updatesOpen ? <RenewUpdateModal onClose={() => setUpdatesOpen(false)} /> : null}
       {renewalNoticeOpen ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
+      {partnerNewsOpen && latestPartnerNews ? (
+        <PartnerShopNewsModal news={latestPartnerNews} uiLang={uiLang} onClose={closePartnerNews} />
+      ) : null}
       {progressOpen ? (
         <RenewProgressModal
           progressData={progressData}
@@ -3131,6 +3566,160 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
           onClose={() => setProgressOpen(false)}
         />
       ) : null}
+    </main>
+  );
+}
+
+function RenewPartnerAdSection({ uiLang }) {
+  const isEn = uiLang === 'EN';
+  return (
+    <section className="renew-partner-ad" aria-label={isEn ? 'Partner card shop news' : '제휴 카드샵 소식'}>
+      <div className="renew-partner-ad-head">
+        <span>{isEn ? 'Partner Shops' : '제휴 카드샵'}</span>
+        <a className="renew-partner-ad-contact" href="mailto:optkr26@gmail.com?subject=Card%20Pone%20card%20shop%20partnership">
+          {isEn ? 'Contact' : '제휴 문의'}
+        </a>
+      </div>
+      <div className="renew-partner-ad-grid">
+        {PARTNER_AD_ITEMS.map((item) => {
+          const shopNews = null;
+          return (
+            <article key={item.key} className={`renew-partner-ad-card${item.imageUrl ? ' has-logo' : ''}`}>
+              {item.imageUrl ? (
+                <img className="renew-partner-ad-logo" src={item.imageUrl} alt={isEn ? item.titleEn : item.titleKr} loading="lazy" />
+              ) : null}
+              <div className="renew-partner-ad-copy">
+                <small>{isEn ? item.labelEn : item.labelKr}</small>
+                <strong>{isEn ? item.titleEn : item.titleKr}</strong>
+                <span>{isEn ? item.bodyEn : item.bodyKr}</span>
+                {item.metaKr ? <em>{isEn ? item.metaEn : item.metaKr}</em> : null}
+              </div>
+              {shopNews ? (
+                <div className="renew-partner-ad-news">
+                  <img src={shopNews.imageUrl} alt={isEn ? shopNews.titleEn : shopNews.titleKr} loading="lazy" />
+                  <div>
+                    <small>{isEn ? 'Stock News' : '입고소식'}</small>
+                    <b>{isEn ? shopNews.titleEn : shopNews.titleKr}</b>
+                    <span>{isEn ? shopNews.date : shopNews.date}</span>
+                  </div>
+                </div>
+              ) : null}
+              <div className="renew-partner-ad-actions">
+                <a href={getPartnerShopUrl(item)}>
+                  {isEn ? 'Details' : '상세 보기'}
+                </a>
+                {(item.actions || []).filter((action) => action?.href).map((action) => {
+                  const isExternal = action.href.startsWith('http');
+                  return (
+                  <a key={action.href} href={action.href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noreferrer' : undefined}>
+                    {isEn ? action.labelEn : action.labelKr}
+                  </a>
+                  );
+                })}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function RenewPartnerShopSeoPage({ uiLang }) {
+  const isEn = uiLang === 'EN';
+  const { shop } = getPartnerShopRoute();
+  const shops = PARTNER_AD_ITEMS;
+
+  const renderActions = (item) => (
+    <div className="renew-partner-seo-actions">
+      {(item.actions || []).filter((action) => action?.href).map((action) => {
+        const isExternal = action.href.startsWith('http');
+        return (
+          <a key={action.href} href={action.href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noreferrer' : undefined}>
+            {isEn ? action.labelEn : action.labelKr}
+          </a>
+        );
+      })}
+    </div>
+  );
+
+  const renderShopCard = (item) => (
+    <article key={item.key} className="renew-partner-seo-card">
+      <a className="renew-partner-seo-card-link" href={getPartnerShopUrl(item)}>
+        {item.imageUrl ? <img src={item.imageUrl} alt={item.titleEn || item.titleKr} loading="lazy" /> : null}
+        <div>
+          <small>{isEn ? 'Partner card shop' : '제휴 카드샵'}</small>
+          <h2>{isEn ? item.titleEn : item.titleKr}</h2>
+          <p>{isEn ? item.bodyEn : item.bodyKr}</p>
+          {item.metaKr ? <em>{isEn ? item.metaEn : item.metaKr}</em> : null}
+        </div>
+      </a>
+      {renderActions(item)}
+    </article>
+  );
+
+  if (shop) {
+    const shopNews = getActivePartnerShopNews().filter((item) => item.shopKey === shop.key);
+    return (
+      <main className="renew-subpage renew-partner-seo-main">
+        <article className="renew-panel renew-partner-seo-detail">
+          <div className="renew-partner-seo-detail-head">
+            {shop.imageUrl ? <img src={shop.imageUrl} alt={shop.titleEn || shop.titleKr} loading="lazy" /> : null}
+            <div>
+              <small>{isEn ? 'Partner card shop' : '제휴 카드샵'}</small>
+              <h1>{isEn ? `${shop.titleEn} card shop` : `${shop.titleKr} - 원피스카드 파는곳`}</h1>
+              <p>{isEn ? shop.bodyEn : shop.bodyKr}</p>
+              {shop.metaKr ? <em>{isEn ? shop.metaEn : shop.metaKr}</em> : null}
+            </div>
+          </div>
+          {renderActions(shop)}
+          {shopNews.length ? (
+            <section className="renew-partner-seo-news" aria-label={isEn ? 'Shop news' : '카드샵 소식'}>
+              <h2>{isEn ? 'Shop News' : '입고소식 / 이벤트'}</h2>
+              {shopNews.map((item) => (
+                <article key={item.id}>
+                  {item.imageUrl ? <img src={item.imageUrl} alt={isEn ? item.titleEn : item.titleKr} loading="lazy" /> : null}
+                  <div>
+                    <small>{item.date}</small>
+                    <strong>{isEn ? item.titleEn : item.titleKr}</strong>
+                    <p>{isEn ? item.bodyEn : item.bodyKr}</p>
+                  </div>
+                </article>
+              ))}
+            </section>
+          ) : null}
+          <section className="renew-partner-seo-copy">
+            <h2>{isEn ? 'Before visiting' : '방문 전 확인할 점'}</h2>
+            <ul>
+              <li>{isEn ? 'Check opening hours before visiting.' : '방문 전 영업시간을 확인해 주세요.'}</li>
+              <li>{isEn ? 'Use map or Instagram links for current store notices.' : '최신 입고소식과 이벤트는 지도 또는 인스타그램 링크에서 확인할 수 있습니다.'}</li>
+              <li>{isEn ? 'Stock and event details may change by store.' : '매장별 재고와 이벤트 내용은 시점에 따라 달라질 수 있습니다.'}</li>
+            </ul>
+          </section>
+        </article>
+      </main>
+    );
+  }
+
+  return (
+    <main className="renew-subpage renew-partner-seo-main">
+      <article className="renew-panel renew-partner-seo-list">
+        <header className="renew-partner-seo-hero">
+          <small>{isEn ? 'PARTNER SHOPS' : 'PARTNER SHOPS'}</small>
+          <h1>{isEn ? 'Partner Card Shops' : '원피스카드 파는곳 - 제휴 카드샵'}</h1>
+        </header>
+        <div className="renew-partner-seo-grid">
+          {shops.map(renderShopCard)}
+        </div>
+        <section className="renew-partner-seo-copy">
+          <h2>{isEn ? 'How to use this page' : '원피스카드 매장 찾기'}</h2>
+          <p>
+            {isEn
+              ? 'Use this page when you want to find nearby partner shops or check store channels before visiting.'
+              : '원피스카드 파는곳을 찾을 때 제휴 카드샵 위치와 링크를 먼저 확인할 수 있습니다. 매장 방문 전 재고, 이벤트, 운영시간은 각 매장 채널에서 한 번 더 확인하는 것이 좋습니다.'}
+          </p>
+        </section>
+      </article>
     </main>
   );
 }
@@ -3170,6 +3759,7 @@ function RenewHomeCollectorIndex({ onOpen }) {
 }
 
 function RenewalNoticeModal({ onClose }) {
+  useBodyScrollLock();
   const latestUpdate = VISIBLE_RENEW_HOME_UPDATES[0] || RENEW_HOME_UPDATES[0];
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
@@ -3188,7 +3778,50 @@ function RenewalNoticeModal({ onClose }) {
   );
 }
 
+function PartnerShopNewsModal({ news, uiLang, onClose }) {
+  useBodyScrollLock();
+  const isEn = uiLang === 'EN';
+  const shop = getPartnerShopByKey(news.shopKey);
+  const title = isEn ? news.titleEn : news.titleKr;
+  const body = isEn ? news.bodyEn : news.bodyKr;
+  const shopName = shop ? (isEn ? shop.titleEn : shop.titleKr) : '';
+  return (
+    <div className="renew-modal-backdrop" onClick={onClose}>
+      <div className="renew-info-modal renew-partner-news-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="renew-modal-head">
+          <div>
+            <span className="renew-partner-news-kicker">{isEn ? 'PARTNER SHOP NEWS' : '카드샵 입고소식'}</span>
+            <h2>{title}</h2>
+            {shopName ? <p>{shopName} · {news.date}</p> : <p>{news.date}</p>}
+          </div>
+          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={isEn ? 'Close' : '닫기'}>×</button>
+        </div>
+        <img className="renew-partner-news-image" src={news.imageUrl} alt={title} />
+        <div className="renew-partner-news-copy">
+          <p>{body}</p>
+        </div>
+        <p className="renew-partner-news-note">
+          {isEn ? 'For detailed stock availability and purchase questions, please contact the shop through Instagram DM.' : '자세한 입고 수량과 구매 가능 여부는 인스타그램 DM으로 문의해 주세요.'}
+        </p>
+        {shop?.actions?.length ? (
+          <div className="renew-partner-news-actions">
+            {shop.actions.filter((action) => action?.href).map((action) => {
+              const isExternal = action.href.startsWith('http');
+              return (
+                <a key={action.href} href={action.href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noreferrer' : undefined}>
+                  {isEn ? action.labelEn : action.labelKr}
+                </a>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
+  useBodyScrollLock();
   const [progressGroup, setProgressGroup] = useState('OP');
   const current = progressData[locale] || { owned: 0, total: 0, percent: 0, series: [] };
   const progressGroups = ['OP', 'EB', 'ST', 'PR'];
@@ -3245,7 +3878,9 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
   );
 }
 
-function RenewValueModal({ grade, cards, onClose, onRemove }) {
+function RenewValueModal({ grade, cards, onClose, onRemove, onOpenPrices, uiLang }) {
+  useBodyScrollLock();
+  const t = (key) => getUiText(uiLang, key);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(() => (window.innerWidth <= 560 ? 8 : 12));
   const imageCacheRef = useRef(loadPortfolioImageCache());
@@ -3312,28 +3947,6 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
   }, []);
 
   useEffect(() => {
-    const scrollY = window.scrollY || window.pageYOffset || 0;
-    const previousOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousPosition = document.body.style.position;
-    const previousTop = document.body.style.top;
-    const previousWidth = document.body.style.width;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousOverflow;
-      document.body.style.position = previousPosition;
-      document.body.style.top = previousTop;
-      document.body.style.width = previousWidth;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
-  useEffect(() => {
     setPage(0);
   }, [grade, pageSize]);
 
@@ -3346,8 +3959,8 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
       <div className="renew-info-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
-            <h2>{grade === 'psa10' ? 'PSA10 Collection' : 'A Collection'}</h2>
-            <p>{cards.length}장 · {formatYen(total)} / {formatWonFromYen(total)}</p>
+            <h2>{grade === 'psa10' ? 'PSA10 Collection' : 'Single Collection'}</h2>
+            <p>{cards.length}장 · {formatUsdWonFromYen(total)}</p>
           </div>
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
@@ -3363,9 +3976,14 @@ function RenewValueModal({ grade, cards, onClose, onRemove }) {
               />
               <strong>{item.code}</strong>
               <span>{item.name}</span>
-              <b>{formatYen(item.price)}</b>
+              <b>{formatUsdWonFromYen(item.price)}</b>
             </article>
-          )) : <p className="renew-empty-note">표시할 카드가 없습니다.</p>}
+          )) : (
+            <div className="renew-empty-note renew-value-empty">
+              <p>{t('portfolioEmptyHelp')}</p>
+              <button type="button" onClick={onOpenPrices}>{t('goToPrices')}</button>
+            </div>
+          )}
         </div>
         {cards.length > pageSize ? (
           <div className="renew-update-pager renew-value-pager">
@@ -3429,18 +4047,11 @@ function CoupangPartnerBanners() {
 }
 
 function RenewUpdateModal({ onClose }) {
+  useBodyScrollLock();
   const [page, setPage] = useState(0);
   const pageSize = 3;
   const pageCount = Math.ceil(VISIBLE_RENEW_HOME_UPDATES.length / pageSize);
   const items = VISIBLE_RENEW_HOME_UPDATES.slice(page * pageSize, page * pageSize + pageSize);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
 
   const modal = (
     <div className="renew-modal-backdrop" onClick={onClose}>
@@ -3913,29 +4524,9 @@ function RenewCardCatalogGuide() {
 
 function RenewNewsGuideModal({ guideId, onClose }) {
   const guide = NEWS_GUIDE_CONTENT[guideId];
+  useBodyScrollLock(Boolean(guide));
   const [platformId, setPlatformId] = useState('');
   const activePlatform = guide?.platforms?.find((item) => item.id === platformId) || null;
-  useEffect(() => {
-    if (!guide) return undefined;
-    const scrollY = window.scrollY || window.pageYOffset || 0;
-    const previous = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width
-    };
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    return () => {
-      document.body.style.overflow = previous.overflow;
-      document.body.style.position = previous.position;
-      document.body.style.top = previous.top;
-      document.body.style.width = previous.width;
-      window.scrollTo(0, scrollY);
-    };
-  }, [guide]);
   if (!guide) return null;
   const StepList = ({ items }) => (
     <ol className="renew-news-guide-steps">
@@ -4026,6 +4617,7 @@ function RenewStaticInfoPage({ type }) {
 }
 
 function RenewLegalModal({ type, onClose }) {
+  useBodyScrollLock();
   const isPrivacy = type === 'privacy';
   const sections = isPrivacy ? PRIVACY_SECTIONS : TERMS_SECTIONS;
   return (
@@ -4051,22 +4643,28 @@ function RenewLegalModal({ type, onClose }) {
   );
 }
 
-function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, onViewStateChange, onOpenMarket, onOpenMarketplace, marketListings = [], uiLang }) {
+function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, marketListings = [], uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const hasInitialSearch = Boolean(initialSearch?.q);
-  const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'KR') : (initialViewState?.locale || 'KR');
+  const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (initialViewState?.locale || 'JP');
   const [locale, setLocale] = useState(initialLocale);
   const [selectedSeries, setSelectedSeries] = useState(() => hasInitialSearch ? getDefaultRenewSeriesId(initialLocale) : (initialViewState?.selectedSeries || getDefaultRenewSeriesId(initialLocale)));
   const [openSection, setOpenSection] = useState('');
   const [searchKeyword, setSearchKeyword] = useState(hasInitialSearch ? initialSearch.q : (initialViewState?.searchKeyword || ''));
   const [activeRarity, setActiveRarity] = useState(hasInitialSearch ? 'ALL' : (initialViewState?.activeRarity || 'ALL'));
   const [collectionFilter, setCollectionFilter] = useState(hasInitialSearch ? 'all' : (initialViewState?.collectionFilter || 'all'));
+  const [catalogSortMode, setCatalogSortMode] = useState(hasInitialSearch ? 'rarity' : (initialViewState?.catalogSortMode || 'rarity'));
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [catalogMarketPriceByCardId, setCatalogMarketPriceByCardId] = useState(() => new Map());
   const [expandedDeferredRarities, setExpandedDeferredRarities] = useState(() => new Set());
   const [rarityPanelOpen, setRarityPanelOpen] = useState(false);
+  const [seriesBoxImageByCode, setSeriesBoxImageByCode] = useState(() => new Map(
+    boxMarketItems
+      .filter((item) => item.code && item.previewImageUrl)
+      .map((item) => [item.code, item.previewImageUrl])
+  ));
   const rarityPanelRef = useRef(null);
 
   const localeSeries = useMemo(() => seriesData.filter((series) => (series.locale ?? 'KR') === locale), [locale]);
@@ -4092,20 +4690,39 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     let cancelled = false;
     Promise.all([
       loadCardMarketLinks(),
-      import('./data/market-cards.js')
+      import('./data/market-cards.js'),
+      fetch('/api/market?summary=latest', { cache: 'no-store' })
+        .then((res) => res.ok ? res.json() : null)
+        .catch(() => null),
+      fetch('/api/psa10-market?summary=latest', { cache: 'no-store' })
+        .then((res) => res.ok ? res.json() : null)
+        .catch(() => null)
     ])
-      .then(([links, marketModule]) => {
+      .then(([links, marketModule, marketSummary, psaSummary]) => {
         if (cancelled) return;
         const marketItems = Array.isArray(marketModule.default) ? marketModule.default : [];
         const itemByApparelId = new Map(marketItems.map((item) => [String(item.apparelId), item]));
+        const latestByApparelId = new Map(
+          (Array.isArray(marketSummary?.items) ? marketSummary.items : [])
+            .filter((item) => item?.apparelId)
+            .map((item) => [String(item.apparelId), item])
+        );
+        const psaPriceByCardId = new Map(
+          (Array.isArray(psaSummary?.items) ? psaSummary.items : [])
+            .filter((item) => item?.cardId && Number(item.priceUsd || 0) > 0)
+            .map((item) => [item.cardId, Number(item.priceUsd || 0)])
+        );
         const nextMap = new Map();
         links.forEach((link) => {
           if (link?.status !== 'approved' || !link.cardId || !link.apparelId) return;
           const item = itemByApparelId.get(String(link.apparelId));
-          const priceUsd = Number(item?.minPrice || 0);
-          if (!item || priceUsd <= 0) return;
+          const latest = latestByApparelId.get(String(link.apparelId));
+          const priceUsd = Number(latest?.aPriceUsd || item?.minPrice || 0);
+          const psa10PriceUsd = Number(psaPriceByCardId.get(link.cardId) || latest?.psa10PriceUsd || 0);
+          if (!item || (priceUsd <= 0 && psa10PriceUsd <= 0)) return;
           nextMap.set(link.cardId, {
             priceUsd,
+            psa10PriceUsd,
             apparelId: item.apparelId
           });
         });
@@ -4130,7 +4747,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   useEffect(() => {
     const q = initialSearch?.q?.trim();
     if (!q) return;
-    const nextLocale = initialSearch.locale || 'KR';
+    const nextLocale = initialSearch.locale || 'JP';
     setLocale(nextLocale);
     setSearchKeyword(q);
     setSelectedSeries(getDefaultRenewSeriesId(nextLocale));
@@ -4155,14 +4772,50 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [selectedCard]);
 
   useEffect(() => {
+    if (loading || restoreScrollY == null || typeof window === 'undefined') return undefined;
+    const targetY = Math.max(0, Number(restoreScrollY) || 0);
+    const restore = () => window.scrollTo({ top: targetY, left: 0, behavior: 'auto' });
+    const frameId = window.requestAnimationFrame(restore);
+    const timerId = window.setTimeout(() => {
+      restore();
+      onRestoreScrollDone?.();
+    }, 220);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timerId);
+    };
+  }, [loading, restoreScrollY, onRestoreScrollDone]);
+
+  useEffect(() => {
     onViewStateChange?.({
       locale,
       selectedSeries,
       searchKeyword,
       activeRarity,
-      collectionFilter
+      collectionFilter,
+      catalogSortMode
     });
-  }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter, onViewStateChange]);
+  }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter, catalogSortMode, onViewStateChange]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/box-market', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (cancelled || !Array.isArray(payload?.items)) return;
+        setSeriesBoxImageByCode((current) => {
+          const next = new Map(current);
+          payload.items.forEach((item) => {
+            if (item?.code && item?.previewImageUrl) next.set(item.code, item.previewImageUrl);
+          });
+          return next;
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -4193,8 +4846,13 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     };
   }, [locale, selectedSeries, searchKeyword, collectionFilter, userState]);
 
+  const getCatalogPriceRank = useCallback((card) => {
+    const price = catalogMarketPriceByCardId.get(card.id);
+    return Math.max(Number(price?.priceUsd || 0), Number(price?.psa10PriceUsd || 0));
+  }, [catalogMarketPriceByCardId]);
+
   const visibleCards = useMemo(() => {
-    return cards.filter((card) => {
+    const filtered = cards.filter((card) => {
       const rarityOk = activeRarity === 'ALL' || getRarityBucket(card.rarity) === activeRarity;
       const collectionOk = collectionFilter === 'owned'
         ? ownedSet.has(card.id)
@@ -4203,11 +4861,21 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
           : true;
       return rarityOk && collectionOk;
     });
-  }, [cards, activeRarity, collectionFilter, ownedSet, wishSet]);
+    if (catalogSortMode !== 'price') return filtered;
+    return [...filtered].sort((a, b) => {
+      const priceDiff = getCatalogPriceRank(b) - getCatalogPriceRank(a);
+      if (priceDiff) return priceDiff;
+      return String(a.cardNo || '').localeCompare(String(b.cardNo || ''), 'en', { numeric: true });
+    });
+  }, [cards, activeRarity, collectionFilter, ownedSet, wishSet, catalogSortMode, getCatalogPriceRank]);
 
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const mobileRarityOptions = ['ALL', 'SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C'];
-  const groupedCards = useMemo(() => groupByRarity(visibleCards), [visibleCards]);
+  const groupedCards = useMemo(() => (
+    catalogSortMode === 'price'
+    ? [{ rarity: t('catalogSortPrice'), cards: visibleCards }]
+      : groupByRarity(visibleCards)
+  ), [catalogSortMode, visibleCards]);
   const listingCountByCardId = useMemo(() => {
     const counts = new Map();
     marketListings.forEach((item) => {
@@ -4229,14 +4897,28 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [rarityPanelOpen]);
 
   async function persistState(nextState, changedFields = []) {
+    const previousState = userState;
     setUserState(nextState);
     if (!authUser) return;
-    await saveMyState({ ...nextState, __changedFields: changedFields });
+    const payload = changedFields.length
+      ? Object.fromEntries(changedFields.map((field) => [field, nextState?.[field]]))
+      : nextState;
+    try {
+      await saveMyState({ ...payload, __changedFields: changedFields });
+    } catch (error) {
+      setUserState(previousState);
+      window.alert(`저장에 실패했습니다: ${error?.message || 'server_error'}`);
+      throw error;
+    }
   }
 
   async function toggleListValue(field, cardId) {
     if (!authUser) {
       window.alert(t('loginRequired'));
+      return;
+    }
+    if (!cardId) {
+      window.alert('카드 정보를 확인할 수 없습니다. 새로고침 후 다시 시도해 주세요.');
       return;
     }
     const current = Array.isArray(userState?.[field]) ? userState[field] : [];
@@ -4265,6 +4947,19 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       url: `${SITE_ORIGIN}/cards`
     });
   }, [selectedCard, locale]);
+
+  const selectCatalogSeries = (series, options = {}) => {
+    setSelectedSeries(series.id);
+    setSearchKeyword('');
+    setActiveRarity('ALL');
+    if (options.closeSection) setOpenSection('');
+    if (typeof window !== 'undefined') {
+      const nextPath = getSeriesRoutePath(series);
+      if (window.location.pathname !== nextPath) {
+        window.history.pushState(null, '', nextPath);
+      }
+    }
+  };
 
   return (
     <main className="renew-catalog">
@@ -4303,16 +4998,9 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                   key={series.id}
                   type="button"
                   className={`renew-series-item ${selectedSeries === series.id && !searchKeyword.trim() ? 'is-active' : ''}`}
-                  onClick={() => {
-                    setSelectedSeries(series.id);
-                    setSearchKeyword('');
-                    setActiveRarity('ALL');
-                    setOpenSection('');
-                  }}
+                  onClick={() => selectCatalogSeries(series, { closeSection: true })}
                 >
-                  <b>{getBaseSeriesId(series)}</b>
-                  <span>{series.koName}</span>
-                  <small>{series.kindEn || series.enName}</small>
+                  <RenewSeriesOptionContent series={series} boxImageByCode={seriesBoxImageByCode} />
                 </button>
               ))}
             </div>
@@ -4334,15 +5022,9 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                       key={series.id}
                       type="button"
                       className={`renew-series-item ${selectedSeries === series.id && !searchKeyword.trim() ? 'is-active' : ''}`}
-                      onClick={() => {
-                        setSelectedSeries(series.id);
-                        setSearchKeyword('');
-                        setActiveRarity('ALL');
-                      }}
+                      onClick={() => selectCatalogSeries(series)}
                     >
-                      <b>{getBaseSeriesId(series)}</b>
-                      <span>{series.koName}</span>
-                      <small>{series.kindEn || series.enName}</small>
+                      <RenewSeriesOptionContent series={series} boxImageByCode={seriesBoxImageByCode} />
                     </button>
                   ))}
                 </div>
@@ -4386,10 +5068,16 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
         </div>
 
         <div className="renew-filter-line">
-          <div className="renew-chip-group">
+          <div className="renew-chip-group renew-catalog-view-group">
+            <span className="renew-chip-group-label">{uiLang === 'EN' ? 'View' : '보기'}</span>
             <button type="button" className={collectionFilter === 'all' ? 'is-active' : ''} onClick={() => setCollectionFilter('all')}>{t('all')}</button>
             <button type="button" className={collectionFilter === 'owned' ? 'is-active' : ''} onClick={() => setCollectionFilter('owned')}>{t('owned')}</button>
             <button type="button" className={collectionFilter === 'wish' ? 'is-active' : ''} onClick={() => setCollectionFilter('wish')}>{t('wishlist')}</button>
+          </div>
+          <div className="renew-chip-group renew-catalog-sort-group">
+            <span className="renew-chip-group-label">{uiLang === 'EN' ? 'Sort' : '정렬'}</span>
+            <button type="button" className={catalogSortMode === 'rarity' ? 'is-active' : ''} onClick={() => setCatalogSortMode('rarity')}>{t('catalogSortRarity')}</button>
+            <button type="button" className={catalogSortMode === 'price' ? 'is-active' : ''} onClick={() => setCatalogSortMode('price')}>{t('catalogSortPrice')}</button>
           </div>
           <div className="renew-chip-group renew-rarity-chip-group">
             {rarityOptions.map((rarity) => (
@@ -4408,7 +5096,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
         {loading ? <div className="renew-empty">{t('loading')}</div> : null}
         {!loading && !visibleCards.length ? <div className="renew-empty">{t('noResults')}</div> : null}
         {!loading ? groupedCards.map((group, groupIndex) => {
-          const shouldLimitGroup = activeRarity === 'ALL' && collectionFilter === 'all' && (
+          const shouldLimitGroup = catalogSortMode !== 'price' && activeRarity === 'ALL' && collectionFilter === 'all' && (
             isAllSeriesMode || DEFERRED_RARITIES.has(group.rarity)
           ) && !expandedDeferredRarities.has(group.rarity);
           const renderCards = shouldLimitGroup ? group.cards.slice(0, 8) : group.cards;
@@ -4437,21 +5125,43 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                         decoding="async"
                         fetchPriority={groupIndex === 0 && index < 6 ? 'high' : 'auto'}
                       />
-                      {owned ? <span className="renew-owned-badge">{t('owned')}</span> : null}
+                      <button
+                        type="button"
+                        className={`renew-card-wish-button ${wished ? 'is-wished' : ''}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          toggleListValue('wishlistCardIds', card.id);
+                        }}
+                        aria-label={wished ? '위시리스트에서 제거' : '위시리스트에 추가'}
+                        title={wished ? '위시리스트에서 제거' : '위시리스트에 추가'}
+                      >
+                        ♥
+                      </button>
                       {listingCount ? <span className="renew-market-badge">매물 {listingCount}</span> : null}
                     </div>
                       <div className="renew-card-body">
                         <b>{card.cardNo}</b>
-                        <strong>{card.name}</strong>
-                        {catalogMarketPrice ? (
-                          <div className="renew-card-price-badge">
-                            <span>A</span>
-                            <b>{formatUsdWonFromUsd(catalogMarketPrice.priceUsd)}</b>
-                          </div>
-                        ) : null}
+                        <div className="renew-card-price-row" title={card.name}>
+                          <span className="renew-card-price-chip">
+                            <em>Single</em>
+                            <b>{catalogMarketPrice?.priceUsd ? formatCatalogWonFromUsd(catalogMarketPrice.priceUsd) : '-'}</b>
+                          </span>
+                          <span className="renew-card-price-chip">
+                            <em>PSA10</em>
+                            <b>{catalogMarketPrice?.psa10PriceUsd ? formatCatalogWonFromUsd(catalogMarketPrice.psa10PriceUsd) : '-'}</b>
+                          </span>
+                        </div>
                         <div className="renew-card-actions" onClick={(event) => event.stopPropagation()}>
-                        <button type="button" className={owned ? 'is-owned' : ''} onClick={() => toggleListValue('ownedCardIds', card.id)}>{owned ? 'O' : 'X'}</button>
-                        <button type="button" className={wished ? 'is-wished' : ''} onClick={() => toggleListValue('wishlistCardIds', card.id)}>♥</button>
+                          <button
+                            type="button"
+                            className={owned ? 'is-owned' : ''}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              toggleListValue('ownedCardIds', card.id);
+                            }}
+                          >
+                            {owned ? t('cardOwned') : t('cardNotOwned')}
+                          </button>
                       </div>
                     </div>
                   </article>
@@ -4481,7 +5191,8 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
             setSelectedCard(null);
             onOpenMarket?.({
               code: card?.marketCode || card?.cardNo || '',
-              apparelId: marketLink?.apparelId || null
+              apparelId: marketLink?.apparelId || null,
+              cardId: card?.id || card?.cardId || ''
             });
           }}
           onSearchSameName={(name) => {
@@ -4501,7 +5212,26 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
 }
 
 function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketListingCount = 0, onOpenMarketplace, uiLang }) {
+  useBodyScrollLock();
   const t = (key) => getUiText(uiLang, key);
+  const [snkrdunkApparelId, setSnkrdunkApparelId] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    setSnkrdunkApparelId(null);
+    findApprovedCardMarketLink(card)
+      .then((link) => {
+        if (!cancelled) setSnkrdunkApparelId(link?.apparelId || null);
+      })
+      .catch(() => {
+        if (!cancelled) setSnkrdunkApparelId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [card?.id, card?.cardId, card?.cardNo, card?.locale, card?.parallelIndex]);
+  const snkrdunkUrl = snkrdunkApparelId
+    ? `https://snkrdunk.com/en/trading-cards/${snkrdunkApparelId}?slide=right`
+    : '';
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-card-modal" onClick={(event) => event.stopPropagation()}>
@@ -4523,6 +5253,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           </details>
           <div className="renew-modal-actions">
             <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
+            {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
             {marketListingCount ? (
               <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
                 관련 매물 {marketListingCount}개 보기
@@ -6074,7 +6805,7 @@ function PlaceholderPage({ title }) {
 
 function RenewMarketChart({ points = [], uiLang, range }) {
   const t = (key) => getUiText(uiLang, key);
-  const [hoverIndex, setHoverIndex] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const [isMobileChart, setIsMobileChart] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return undefined;
@@ -6084,6 +6815,9 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     media.addEventListener?.('change', update);
     return () => media.removeEventListener?.('change', update);
   }, []);
+  useEffect(() => {
+    setSelectedIndex(null);
+  }, [range, points.length]);
   const aggregatedPoints = aggregateMarketDailyChartPoints(points)
     .map((point) => ({
       ...point,
@@ -6163,7 +6897,9 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     : linePath;
   const path = isLongMarketRange ? smoothPath : linePath;
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
-  const activeIndex = hoverIndex != null && hoverIndex >= 0 && hoverIndex < plotted.length ? hoverIndex : plotted.length - 1;
+  const activeIndex = selectedIndex != null && selectedIndex >= 0 && selectedIndex < plotted.length
+    ? selectedIndex
+    : plotted.length - 1;
   const active = plotted[activeIndex];
   const tipX = active ? Math.min(active.x + 12, width - tipWidth - 8) : 0;
   const tipY = active ? Math.max(active.y - tipHeight - 10, 8) : 0;
@@ -6175,7 +6911,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
       { key: 'middle', className: 'is-middle', x: midPoint?.x || width / 2, text: formatChartAxisDate(midPoint?.timestamp) },
       { key: 'end', className: 'is-end', x: width - padX, text: formatChartAxisDate(plotted[plotted.length - 1]?.timestamp) }
     ].filter((item) => item.text);
-  const rangeLabel = range === '1m' ? '1M' : range === '1y' ? '1Y' : range === 'all' ? 'ALL' : '7D';
+  const rangeLabel = range === '1d' ? '1D' : range === '1m' ? '1M' : range === '1y' ? '1Y' : range === '6m' ? '6M' : range === 'all' ? 'ALL' : '7D';
 
   return (
     <div className="renew-market-chart-box">
@@ -6231,15 +6967,26 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             cy={point.y}
             r={hitRadius}
             tabIndex="0"
-            onMouseEnter={() => setHoverIndex(index)}
-            onFocus={() => setHoverIndex(index)}
-            onMouseLeave={() => setHoverIndex(null)}
-            onBlur={() => setHoverIndex(null)}
+            role="button"
+            aria-label={`${formatMarketDate(point.timestamp)} ${formatUsdWonFromYen(point.price)}`}
+            onClick={() => setSelectedIndex(index)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setSelectedIndex(index);
+              }
+            }}
           />
         ))}
         {active ? (
           <g>
             <line className="renew-chart-cursor" x1={active.x} y1={padTop} x2={active.x} y2={height - padBottom} />
+            <circle
+              className={`renew-chart-point ${active.isClamped ? 'is-clamped' : ''}`}
+              cx={active.x}
+              cy={active.y}
+              r={activePointRadius}
+            />
             <rect x={tipX} y={tipY} width={tipWidth} height={tipHeight} rx="10" />
             <text className="renew-chart-tip-date" x={tipX + 14} y={tipY + 24}>{formatMarketDate(active.timestamp)}</text>
             <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{formatUsdWonFromYen(active.price)}</text>
@@ -6459,7 +7206,7 @@ function RenewMarketIndex() {
         <>
           <div className="renew-index-meta">
             <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
-            <span>A등급 SNKRDUNK 일별 중앙값 기준</span>
+            <span>Single SNKRDUNK 일별 중앙값 기준</span>
           </div>
           <div className="renew-index-components">
             {visibleComponents.map((item) => (
@@ -6497,6 +7244,7 @@ function RenewMarketIndex() {
 function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
   const t = (key) => getUiText(uiLang, key);
   const [sortMode, setSortMode] = useState('latest');
+  const [boxPage, setBoxPage] = useState(1);
   const [boxes, setBoxes] = useState(boxMarketItems);
   useEffect(() => {
     let cancelled = false;
@@ -6510,6 +7258,9 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
       cancelled = true;
     };
   }, []);
+  useEffect(() => {
+    setBoxPage(1);
+  }, [sortMode, initialBoxCode]);
   const sortedBoxes = useMemo(() => {
     const routeCode = String(initialBoxCode || '').toUpperCase().replace(/-/g, '');
     const sourceBoxes = routeCode
@@ -6527,11 +7278,16 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
       });
     }
     return withIndex.sort((a, b) => {
-      const codeA = Number(String(a.code || '').match(/\d+/)?.[0]) || 0;
-      const codeB = Number(String(b.code || '').match(/\d+/)?.[0]) || 0;
-      return codeB - codeA || a.index - b.index;
+      const releaseA = getBoxReleaseSortValue(a);
+      const releaseB = getBoxReleaseSortValue(b);
+      return releaseB - releaseA || a.index - b.index;
     });
   }, [boxes, sortMode, initialBoxCode]);
+  const totalBoxPages = initialBoxCode ? 1 : Math.max(1, Math.ceil(sortedBoxes.length / BOX_MARKET_PAGE_SIZE));
+  const currentBoxPage = Math.min(boxPage, totalBoxPages);
+  const pagedBoxes = initialBoxCode
+    ? sortedBoxes
+    : sortedBoxes.slice((currentBoxPage - 1) * BOX_MARKET_PAGE_SIZE, currentBoxPage * BOX_MARKET_PAGE_SIZE);
 
   return (
     <section className="renew-box-market">
@@ -6543,7 +7299,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
         </div>
       </div>
       <div className="renew-box-market-grid">
-        {sortedBoxes.map((box) => (
+        {pagedBoxes.map((box) => (
           <a key={box.apparelId} className="renew-box-market-card" href={box.sourceUrl} target="_blank" rel="noreferrer">
             <div className="renew-box-thumb">
               {box.previewImageUrl ? <img src={box.previewImageUrl} alt={box.name} onError={placeholderImage} /> : <span>{box.code}</span>}
@@ -6560,6 +7316,27 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
           </a>
         ))}
       </div>
+      {totalBoxPages > 1 && (
+        <div className="renew-box-market-pager" aria-label={uiLang === 'en' ? 'Box price pages' : '박스 시세 페이지'}>
+          <button type="button" disabled={currentBoxPage <= 1} onClick={() => setBoxPage((page) => Math.max(1, page - 1))}>
+            {uiLang === 'en' ? 'Prev' : '이전'}
+          </button>
+          {Array.from({ length: totalBoxPages }, (_, index) => index + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              className={page === currentBoxPage ? 'is-active' : ''}
+              aria-current={page === currentBoxPage ? 'page' : undefined}
+              onClick={() => setBoxPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+          <button type="button" disabled={currentBoxPage >= totalBoxPages} onClick={() => setBoxPage((page) => Math.min(totalBoxPages, page + 1))}>
+            {uiLang === 'en' ? 'Next' : '다음'}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
@@ -6622,6 +7399,13 @@ function getMarketCandidateStockScore(item) {
   const priceScore = Number(item?.displayPriceJpy || item?.latestPriceJpy || item?.minPrice || 0) > 0 ? 1 : 0;
   const listingScore = Number(item?.listingCount || 0) > 0 ? 1 : 0;
   return (priceScore * 2) + listingScore;
+}
+
+function getMarketCandidatePriceRank(item) {
+  const livePriceJpy = Number(item?.displayPriceJpy || item?.latestPriceJpy || 0);
+  if (livePriceJpy > 0) return livePriceJpy;
+  const staticPriceUsd = Number(item?.minPrice || 0);
+  return staticPriceUsd > 0 ? staticPriceUsd * MARKET_USD_TO_JPY : 0;
 }
 
 function normalizeMarketText(value = '') {
@@ -6729,7 +7513,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, userState, setUserState, initialCode, initialApparelId, onBackToCatalog, uiLang }) {
+function RenewMarket({ authUser, userState, setUserState, initialCode, initialApparelId, initialCardId, onBackToCatalog, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const [code, setCode] = useState(initialCode || '');
   const [marketProductLocale, setMarketProductLocale] = useState('JP');
@@ -6750,6 +7534,9 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const [range, setRange] = useState('7d');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [mappedApparelId, setMappedApparelId] = useState(null);
+  const [mappingBusyId, setMappingBusyId] = useState(null);
+  const [mappingMessage, setMappingMessage] = useState('');
   const [candidatePanelCollapsed, setCandidatePanelCollapsed] = useState(false);
   const marketDetailRef = useRef(null);
   const marketCandidateRef = useRef(null);
@@ -6773,6 +7560,21 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode, initialApparelId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setMappedApparelId(null);
+    setMappingMessage('');
+    if (!initialCardId) return undefined;
+    findApprovedCardMarketLink({ id: initialCardId })
+      .then((link) => {
+        if (!cancelled) setMappedApparelId(link?.apparelId ? String(link.apparelId) : null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [initialCardId]);
 
   async function loadMarketCards() {
     const mod = await import('./data/market-cards.js');
@@ -6818,9 +7620,11 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           ...resultSource,
           ...primaryItems.filter((item) => koreanNameCodes.has(normalizeCode(item.code)))
         ]);
+      const shouldSortCandidatesByPrice = !targetApparelId && !exactCodeResult.length;
       const result = expandedResult
         .filter((item) => {
           if (targetApparelId && String(item.apparelId) === String(targetApparelId)) return true;
+          if (exactCodeResult.length && normalizeCode(item.code) === normalized) return true;
           const price = Number(item.minPrice || 0);
           const listingCount = item.listingCount;
           return price > 0 || listingCount == null || Number(listingCount) > 0;
@@ -6834,6 +7638,10 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           if (koreanDelta) return koreanDelta;
           const localeDelta = Number(String(b.locale || '').toUpperCase() === primaryLocale) - Number(String(a.locale || '').toUpperCase() === primaryLocale);
           if (localeDelta) return localeDelta;
+          if (shouldSortCandidatesByPrice) {
+            const priceDelta = getMarketCandidatePriceRank(b) - getMarketCandidatePriceRank(a);
+            if (priceDelta) return priceDelta;
+          }
           const stockDelta = getMarketCandidateStockScore(b) - getMarketCandidateStockScore(a);
           if (stockDelta) return stockDelta;
           return String(a.name).localeCompare(String(b.name), 'en');
@@ -6870,6 +7678,10 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           if (targetDelta) return targetDelta;
           const historyDelta = Number(Boolean(b.hasMarketHistory)) - Number(Boolean(a.hasMarketHistory));
           if (historyDelta) return historyDelta;
+          if (shouldSortCandidatesByPrice) {
+            const priceDelta = getMarketCandidatePriceRank(b) - getMarketCandidatePriceRank(a);
+            if (priceDelta) return priceDelta;
+          }
           const stockDelta = getMarketCandidateStockScore(b) - getMarketCandidateStockScore(a);
           if (stockDelta) return stockDelta;
           return String(a.name).localeCompare(String(b.name), 'en');
@@ -6931,6 +7743,11 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     const approvedLink = await findApprovedCardMarketLinkByApparelId(selected.apparelId);
     const linkedCard = approvedLink?.cardId ? await fetchCardById(approvedLink.cardId) : null;
     const linkedImageUrl = linkedCard?.imageUrl || linkedCard?.image_url || linkedCard?.image || selected.previewImageUrl;
+    const livePriceJpy = Number(getMarketConditionBucket(marketDetail?.latestByCondition, gradeKey)?.price || 0) || 0;
+    const fallbackPriceUsd = Number(selected.minPrice || 0) || 0;
+    const valuationPriceJpy = livePriceJpy > 0
+      ? livePriceJpy
+      : (fallbackPriceUsd > 0 ? Math.round(fallbackPriceUsd * MARKET_USD_TO_JPY) : 0);
     const nextState = {
       ...(userState || {}),
       valuationMarketItems: {
@@ -6943,7 +7760,9 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           imageUrl: linkedImageUrl,
           previewImageUrl: linkedImageUrl,
           sourceUrl: selected.sourceUrl,
-          minPrice: Number(getMarketConditionBucket(marketDetail?.latestByCondition, gradeKey)?.price || selected.minPrice || 0)
+          minPrice: valuationPriceJpy,
+          priceCurrency: 'JPY',
+          fallbackPriceUsd
         }
       },
       valuationCardGrades: {
@@ -6953,7 +7772,10 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     };
     setUserState(nextState);
     await saveMyState({ ...nextState, __changedFields: ['valuationMarketItems', 'valuationCardGrades'] });
-    window.alert(`${grade.toUpperCase()} ${t('addedToPortfolio')}`);
+    const gradeLabel = grade === 'a'
+      ? (uiLang === 'en' ? 'Single Grade' : 'Single등급')
+      : (uiLang === 'en' ? 'PSA10 Grade' : 'PSA10등급');
+    window.alert(`${gradeLabel} ${t('addedToPortfolio')}`);
   }
 
   function selectMarketCandidate(item) {
@@ -6976,13 +7798,47 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     }, 80);
   }
 
+  async function mapCandidateToInitialCard(event, item) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!initialCardId || !item?.apparelId || mappingBusyId) return;
+    setMappingBusyId(String(item.apparelId));
+    setMappingMessage('');
+    try {
+      if (mappedApparelId === String(item.apparelId)) {
+        await blockCardMarketLinkOverride(initialCardId);
+        setMappedApparelId(null);
+        setMappingMessage('매핑 취소 완료');
+      } else {
+        await saveCardMarketLinkOverride({
+          cardId: initialCardId,
+          apparelId: item.apparelId,
+          note: `${item.code || ''} ${getMarketShortName(item) || ''}`.trim()
+        });
+        setMappedApparelId(String(item.apparelId));
+        setMappingMessage('매핑 저장 완료');
+      }
+    } catch (error) {
+      setMappingMessage(error?.message || '매핑 처리 실패');
+    } finally {
+      setMappingBusyId(null);
+    }
+  }
+
   const normalizedCondition = normalizeMarketConditionKey(condition);
   const marketConditionOptions = getMarketConditionOptions(marketDetail?.conditions, t);
   const selectedLatest = getMarketConditionBucket(marketDetail?.latestByCondition, normalizedCondition);
   const conditionSeries = getMarketConditionBucket(marketDetail?.series, normalizedCondition) || {};
-  const chartPoints = conditionSeries?.[range] || (range === '1y' ? conditionSeries?.all : []) || [];
+  const listingConditionSeries = getMarketConditionBucket(marketDetail?.listingSeriesByCondition, normalizedCondition) || {};
+  const primaryChartPoints = conditionSeries?.[range] || ((range === '1y' || range === 'all') ? conditionSeries?.all : []) || [];
+  const listingChartPoints = listingConditionSeries?.[range] || ((range === '1y' || range === 'all') ? listingConditionSeries?.all : []) || [];
+  const chartPoints = primaryChartPoints.length ? primaryChartPoints : listingChartPoints;
   const recentSales = getMarketConditionBucket(marketDetail?.recentSalesByCondition, normalizedCondition) || [];
-  const recentSalesVisible = recentSales;
+  const recentSalesInRange = recentSales.filter((sale) => {
+    const timestamp = Number(sale?.timestamp || 0);
+    return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
+  });
+  const recentSalesVisible = recentSalesInRange.length ? recentSalesInRange : recentSales;
   const currentPrice = selectedLatest?.price ? formatUsdWonFromYen(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
   const latestSourceUrl = selectedLatest?.sourceUrl || '';
   const psaSourceUrl = normalizedCondition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
@@ -6990,6 +7846,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     : recentSales.find((sale) => sale?.sourceUrl && !/snkrdunk\.com/i.test(sale.sourceUrl))?.sourceUrl || '';
   const currentPriceLabel = normalizedCondition === 'psa10' ? t('psa10IntegratedPrice') : t('snkrLowestPrice');
   const showMarketHome = !code.trim() && !selected && !candidates.length;
+  const canMapInitialCard = authUser?.user_metadata?.username === 'admin' && Boolean(initialCardId);
 
   useEffect(() => {
     if (!selected) {
@@ -7065,6 +7922,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
         {candidates.length > 1 && !candidatePanelCollapsed ? (
           <div className="renew-market-candidates" ref={marketCandidateRef}>
             <b>{t('variantSelect')}</b>
+            {mappingMessage ? <small className="renew-market-mapping-message">{mappingMessage}</small> : null}
             <div>
               {candidates.map((item) => (
                 <button key={`${item.apparelId}-${item.locale}`} type="button" className={selected?.apparelId === item.apparelId ? 'is-active' : ''} onClick={() => selectMarketCandidate(item)}>
@@ -7078,6 +7936,23 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                             <b>{getMarketCandidatePriceText(item, t('checkPrice'))}</b>
                             <small className="renew-market-candidate-id">#{item.apparelId}</small>
                           </div>
+                          {canMapInitialCard ? (
+                            <span className="renew-market-map-row">
+                              <em>{mappedApparelId === String(item.apparelId) ? '매핑됨' : '미매핑'}</em>
+                              <span
+                                role="button"
+                                tabIndex={0}
+                                className="renew-market-map-button"
+                                aria-disabled={mappingBusyId === String(item.apparelId)}
+                                onClick={(event) => mapCandidateToInitialCard(event, item)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') mapCandidateToInitialCard(event, item);
+                                }}
+                              >
+                                {mappingBusyId === String(item.apparelId) ? '처리 중' : (mappedApparelId === String(item.apparelId) ? '매핑 취소' : '이 카드에 매핑')}
+                              </span>
+                            </span>
+                          ) : null}
                         </div>
                       </button>
                     ))}
@@ -7102,12 +7977,12 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
               </div>
               <strong className="renew-market-price"><small>{currentPriceLabel}</small><span>{currentPrice}</span></strong>
               <div className="renew-market-actions">
+                {canMapInitialCard ? (
+                  <button type="button" onClick={(event) => mapCandidateToInitialCard(event, selected)}>
+                    {mappedApparelId === String(selected.apparelId) ? '매핑 취소' : '이 카드에 매핑'}
+                  </button>
+                ) : null}
                 <a href={selected?.sourceUrl} target="_blank" rel="noreferrer"><span className="renew-action-full">{t('sourceMarket')}</span><span className="renew-action-compact">{t('sourceMarketShort')}</span></a>
-                {psaSourceUrl ? (
-                  <a href={psaSourceUrl} target="_blank" rel="noreferrer"><span className="renew-action-full">{t('sourcePsa')}</span><span className="renew-action-compact">{t('sourcePsaShort')}</span></a>
-                ) : (
-                  <button type="button" disabled><span className="renew-action-full">{t('sourcePsa')}</span><span className="renew-action-compact">{t('sourcePsaShort')}</span></button>
-                )}
                 <button type="button" onClick={() => addValuation('a')}><span className="renew-action-full">{t('addAGrade')}</span><span className="renew-action-compact">{t('addAGradeShort')}</span></button>
                 <button type="button" onClick={() => addValuation('psa10')}><span className="renew-action-full">{t('addPsa10')}</span><span className="renew-action-compact">{t('addPsa10Short')}</span></button>
               </div>
@@ -7126,7 +8001,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                         if (item.key === 'psa10') setRange('1y');
                       }}
                     >
-                      {item.label}
+                      {item.key === 'a' ? t('aGrade') : item.label}
                     </button>
                   ))}
                 </div>
@@ -7427,6 +8302,14 @@ function RenewShops({ uiLang }) {
   return (
     <main className="renew-subpage">
       <section className="renew-panel renew-shops">
+        <div className="renew-shop-partner-link">
+          <div>
+            <small>{uiLang === 'EN' ? 'PARTNER SHOPS' : 'PARTNER SHOPS'}</small>
+            <strong>{uiLang === 'EN' ? 'Partner card shops' : '제휴 카드샵'}</strong>
+            <span>{uiLang === 'EN' ? 'Check partner stores and shop news.' : '제휴 카드샵 위치와 입고소식을 확인할 수 있습니다.'}</span>
+          </div>
+          <a href="/shops/partners">{uiLang === 'EN' ? 'View' : '보기'}</a>
+        </div>
         <div className="renew-shop-filters">
           <select value={type} onChange={(event) => setType(event.target.value)}>
             <option value="">{t('allShops')}</option>
@@ -7509,9 +8392,11 @@ export default function RenewApp() {
   const [legalOpen, setLegalOpen] = useState(null);
   const [catalogInitialSearch, setCatalogInitialSearch] = useState(null);
   const [catalogViewState, setCatalogViewState] = useState(() => getCatalogRouteViewState());
+  const [catalogReturnScrollY, setCatalogReturnScrollY] = useState(null);
   const [canReturnToCatalog, setCanReturnToCatalog] = useState(false);
   const [marketInitialCode, setMarketInitialCode] = useState('');
   const [marketInitialApparelId, setMarketInitialApparelId] = useState(null);
+  const [marketInitialCardId, setMarketInitialCardId] = useState('');
   const [marketListings, setMarketListings] = useState(MARKETPLACE_SAMPLE_LISTINGS);
   const [marketFilterCardId, setMarketFilterCardId] = useState(() => {
     if (typeof window === 'undefined') return '';
@@ -7576,6 +8461,7 @@ export default function RenewApp() {
       const routeState = getMarketRouteState(window.location.pathname, window.location.search);
       setMarketInitialCode(routeState.code);
       setMarketInitialApparelId(routeState.apparelId);
+      setMarketInitialCardId(routeState.cardId);
     }
   }, []);
 
@@ -7594,6 +8480,7 @@ export default function RenewApp() {
         const routeState = getMarketRouteState(window.location.pathname, window.location.search);
         setMarketInitialCode(routeState.code);
         setMarketInitialApparelId(routeState.apparelId);
+        setMarketInitialCardId(routeState.cardId);
       }
       if (nextPage === 'marketplace') {
         const params = new URLSearchParams(window.location.search);
@@ -7731,6 +8618,7 @@ export default function RenewApp() {
     if (page === 'prices' && !options.query) {
       setMarketInitialCode('');
       setMarketInitialApparelId(null);
+      setMarketInitialCardId('');
       setCanReturnToCatalog(false);
     }
     if (window.location.pathname + window.location.search !== nextUrl) {
@@ -7804,9 +8692,11 @@ export default function RenewApp() {
           onOpenIndex={() => {
             setMarketInitialCode('');
             setMarketInitialApparelId(null);
+            setMarketInitialCardId('');
             setCanReturnToCatalog(false);
             navigatePage('prices', { query: 'tab=index' });
           }}
+          onOpenPrices={() => navigatePage('prices')}
         />
       ) : activePage === 'cards' ? (
         <RenewCatalog
@@ -7815,16 +8705,22 @@ export default function RenewApp() {
           setUserState={setUserState}
           initialSearch={catalogInitialSearch}
           initialViewState={catalogViewState}
+          restoreScrollY={catalogReturnScrollY}
+          onRestoreScrollDone={() => setCatalogReturnScrollY(null)}
           onViewStateChange={setCatalogViewState}
           onOpenMarket={(marketTarget) => {
             const nextCode = typeof marketTarget === 'object' ? marketTarget?.code : marketTarget;
             const nextApparelId = typeof marketTarget === 'object' ? marketTarget?.apparelId : null;
+            const nextCardId = typeof marketTarget === 'object' ? marketTarget?.cardId : '';
+            setCatalogReturnScrollY(typeof window !== 'undefined' ? window.scrollY : null);
             setMarketInitialCode(nextCode || '');
             setMarketInitialApparelId(nextApparelId || null);
+            setMarketInitialCardId(nextCardId || '');
             setCanReturnToCatalog(true);
             const query = new URLSearchParams();
             if (nextCode) query.set('code', nextCode);
             if (nextApparelId) query.set('apparelId', String(nextApparelId));
+            if (nextCardId) query.set('cardId', String(nextCardId));
             navigatePage('prices', { query: query.toString() });
           }}
           onOpenMarketplace={MARKETPLACE_ENABLED ? ((card) => {
@@ -7844,6 +8740,7 @@ export default function RenewApp() {
           setUserState={setUserState}
           initialCode={marketInitialCode}
           initialApparelId={marketInitialApparelId}
+          initialCardId={marketInitialCardId}
           onBackToCatalog={canReturnToCatalog ? () => navigatePage('cards') : null}
           uiLang={uiLang}
         />
@@ -7873,6 +8770,8 @@ export default function RenewApp() {
         )
       ) : activePage === 'news' ? (
         <RenewNews uiLang={uiLang} />
+      ) : activePage === 'partnerShops' ? (
+        <RenewPartnerShopSeoPage uiLang={uiLang} />
       ) : activePage === 'shops' ? (
         <RenewShops uiLang={uiLang} />
       ) : activePage === 'about' || activePage === 'dataPolicy' || activePage === 'terms' || activePage === 'privacy' ? (

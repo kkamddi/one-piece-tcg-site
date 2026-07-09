@@ -72,16 +72,67 @@ function toRecentSale(row) {
   };
 }
 
+function toLatestSummary(row) {
+  const usd = Number(row.price_usd || 0);
+  return {
+    cardId: row.card_id,
+    cardNo: row.card_no,
+    priceUsd: usd,
+    priceKrw: Number(row.price_krw || usdToKrw(usd)),
+    date: row.sold_at || '',
+    platform: row.platform || row.source || 'PSA',
+    source: row.source || 'psa',
+    sourceUrl: getSpecUrl(row) || row.source_url || ''
+  };
+}
+
 export default async function handler(request, response) {
   if (!['GET', 'HEAD'].includes(request.method)) {
     return response.status(405).json({ error: 'method_not_allowed' });
   }
 
-  const cardId = String(request.query?.cardId || '').trim();
-  if (!cardId) return response.status(400).json({ error: 'missing_card_id' });
-
   const d1 = getD1Binding();
   if (!d1) return response.status(503).json({ error: 'd1_not_configured' });
+
+  const summary = String(request.query?.summary || '').trim().toLowerCase();
+  if (summary === 'latest') {
+    const rowsResult = await d1.prepare(`
+      SELECT
+        l.card_id,
+        l.card_no,
+        l.locale,
+        l.name,
+        l.match_basis_json,
+        t.sold_at,
+        t.price_usd,
+        t.price_krw,
+        t.platform,
+        t.source,
+        t.source_url
+      FROM psa10_market_links l
+      LEFT JOIN psa10_market_trades t
+        ON t.id = (
+          SELECT id
+          FROM psa10_market_trades
+          WHERE card_id = l.card_id
+            AND grade = 'PSA10'
+            AND status = 'approved'
+          ORDER BY sold_at DESC
+          LIMIT 1
+        )
+      WHERE l.status = 'approved'
+      ORDER BY l.card_no ASC
+    `).all();
+    const items = (rowsResult?.results || [])
+      .map(toLatestSummary)
+      .filter((item) => item.cardId && item.priceUsd > 0);
+
+    response.setHeader('Cache-Control', `public, max-age=${CACHE_SECONDS}`);
+    return response.status(200).json({ items });
+  }
+
+  const cardId = String(request.query?.cardId || '').trim();
+  if (!cardId) return response.status(400).json({ error: 'missing_card_id' });
 
   const link = await d1.prepare(`
     SELECT card_id, card_no, locale, name, grade, search_query, match_basis_json, status, confidence, notes

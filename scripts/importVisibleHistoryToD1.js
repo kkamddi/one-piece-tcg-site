@@ -17,8 +17,15 @@ function conditionKey(value) {
 }
 
 function parseDate(value) {
-  const text = String(value || '').replace(/(\d+)(st|nd|rd|th)/gi, '$1');
-  const parsed = new Date(text);
+  const text = String(value || '').replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
+  const match = text.match(/^([A-Za-z]{3,})\s+(\d{1,2}),\s+(\d{4})$/);
+  if (match) {
+    const month = new Date(`${match[1]} 1, 2000 UTC`).getUTCMonth();
+    if (Number.isFinite(month)) {
+      return new Date(Date.UTC(Number(match[3]), month, Number(match[2]))).toISOString().slice(0, 10);
+    }
+  }
+  const parsed = new Date(`${text} UTC`);
   if (Number.isNaN(parsed.getTime())) return '';
   return parsed.toISOString().slice(0, 10);
 }

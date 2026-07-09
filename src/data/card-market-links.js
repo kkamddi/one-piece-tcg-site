@@ -979,9 +979,9 @@ const cardMarketLinks = [
     "cardNo": "EB02-006",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 5 JP market candidates",
+    "apparelId": 764513,
+    "status": "approved",
+    "note": "manual approved: Yamato SR :Serial Numbered :Champion's Prize :Opened [EB02-006](Promotional Card \"Extra Grand Battle\")",
     "candidateApparelIds": [
       789185,
       764513,
@@ -1082,13 +1082,9 @@ const cardMarketLinks = [
     "cardNo": "EB02-017",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 2 JP market candidates",
-    "candidateApparelIds": [
-      503406,
-      506992
-    ]
+    "apparelId": 838503,
+    "status": "approved",
+    "note": "manual approved: Nami R [EB02-017] Promotional Card ONE PIECE CARD GAME 3rd ANNIVERSARY COMPLETE GUIDE"
   },
   {
     "cardId": "JP::EB02-018",
@@ -1113,14 +1109,9 @@ const cardMarketLinks = [
     "cardNo": "EB02-019",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 3 JP market candidates",
-    "candidateApparelIds": [
-      503408,
-      514390,
-      514392
-    ]
+    "apparelId": 514390,
+    "status": "approved",
+    "note": "manual approved: Roronoa Zoro R [EB02-019] Standard Battle March 2025 Championship Commemorative Item"
   },
   {
     "cardId": "JP::EB02-019_p2",
@@ -1641,13 +1632,9 @@ const cardMarketLinks = [
     "cardNo": "EB03-006",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 2 JP market candidates",
-    "candidateApparelIds": [
-      713670,
-      819283
-    ]
+    "apparelId": 819283,
+    "status": "approved",
+    "note": "manual approved: Nami R [EB03-006] Promotional Card Promotion Pack EX Vol.4"
   },
   {
     "cardId": "JP::EB03-008",
@@ -4287,9 +4274,9 @@ const cardMarketLinks = [
     "cardNo": "OP01-121",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 5 JP market candidates",
+    "apparelId": 328424,
+    "status": "approved",
+    "note": "manual approved: Yamato SEC-P [OP01-121](Premium Booster One Piece Card The Best)",
     "candidateApparelIds": [
       93517,
       328423,
@@ -4403,9 +4390,9 @@ const cardMarketLinks = [
     "cardNo": "OP02-004",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 7 JP market candidates",
+    "apparelId": 126179,
+    "status": "approved",
+    "note": "manual approved: Edward Newgate SR-SPC [OP02-004] (Booster Pack The Kingdom Of Conspiracy)",
     "candidateApparelIds": [
       102414,
       102442,
@@ -5165,9 +5152,9 @@ const cardMarketLinks = [
     "cardNo": "OP02-085",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 3 JP market candidates",
+    "apparelId": 126180,
+    "status": "approved",
+    "note": "manual approved: Magellan SR-SPC [OP02-085] (Booster Pack The Kingdom Of Conspiracy)",
     "candidateApparelIds": [
       102420,
       102460,
@@ -5458,9 +5445,9 @@ const cardMarketLinks = [
     "cardNo": "OP02-099",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 7 JP market candidates",
+    "apparelId": 117167,
+    "status": "approved",
+    "note": "manual approved: Sakazuki SR-P [OP02-099] (Champion Ship Prize)",
     "candidateApparelIds": [
       102422,
       328440,
@@ -6078,16 +6065,9 @@ const cardMarketLinks = [
     "cardNo": "OP03-044",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 5 JP market candidates",
-    "candidateApparelIds": [
-      143337,
-      159279,
-      159278,
-      768178,
-      300061
-    ]
+    "apparelId": 143337,
+    "status": "approved",
+    "note": "manual approved: Kaya R [OP03-044] Booster Pack Formidable Enemy"
   },
   {
     "cardId": "JP::OP03-044_p1",
@@ -6110,16 +6090,9 @@ const cardMarketLinks = [
     "cardNo": "OP03-044",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 5 JP market candidates",
-    "candidateApparelIds": [
-      143337,
-      159279,
-      159278,
-      768178,
-      300061
-    ]
+    "apparelId": 159278,
+    "status": "approved",
+    "note": "manual approved: Kaya R [OP03-044] Standard Battle Trophy"
   },
   {
     "cardId": "JP::OP03-044_p4",
@@ -19521,15 +19494,9 @@ const cardMarketLinks = [
     "cardNo": "OP14-033",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 4 JP market candidates",
-    "candidateApparelIds": [
-      764515,
-      813223,
-      727587,
-      728139
-    ]
+    "apparelId": 764515,
+    "status": "approved",
+    "note": "manual approved: Perona SR Top Prize [OP14-033] Extra Grand Battle"
   },
   {
     "cardId": "JP::OP14-034",
@@ -22916,42 +22883,27 @@ const cardMarketLinks = [
     "cardNo": "PRB02-005",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 3 JP market candidates",
-    "candidateApparelIds": [
-      618673,
-      819289,
-      618672
-    ]
+    "apparelId": 618673,
+    "status": "approved",
+    "note": "manual approved: Monkey.D.Luffy SR [PRB02-005] Premium Booster ONE PIECE CARD THE BEST vol.2"
   },
   {
     "cardId": "JP::PRB02-005_p1",
     "cardNo": "PRB02-005",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 3 JP market candidates",
-    "candidateApparelIds": [
-      618673,
-      819289,
-      618672
-    ]
+    "apparelId": 618672,
+    "status": "approved",
+    "note": "manual approved: Monkey.D.Luffy SR-P [PRB02-005] Premium Booster ONE PIECE CARD THE BEST vol.2"
   },
   {
     "cardId": "JP::PRB02-005_p2",
     "cardNo": "PRB02-005",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 3 JP market candidates",
-    "candidateApparelIds": [
-      618673,
-      819289,
-      618672
-    ]
+    "apparelId": 819289,
+    "status": "approved",
+    "note": "manual approved: Monkey.D.Luffy SR [PRB02-005] Promotional Card Promotion Pack EX Vol.4"
   },
   {
     "cardId": "JP::PRB02-006",
@@ -24957,13 +24909,9 @@ const cardMarketLinks = [
     "cardNo": "ST23-001",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 2 JP market candidates",
-    "candidateApparelIds": [
-      819290,
-      599899
-    ]
+    "apparelId": 819290,
+    "status": "approved",
+    "note": "manual approved: Uta SR [ST23-001] Promotional Card Promotion Pack EX Vol.4"
   },
   {
     "cardId": "JP::ST23-002",

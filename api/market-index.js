@@ -43,7 +43,10 @@ function normalizeCondition(value) {
 }
 
 function toDateKey(value) {
-  return String(value || '').slice(0, 10);
+  const text = String(value || '').replace(/\b(\d+)(st|nd|rd|th)\b/gi, '$1').trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
+  const parsed = Date.parse(`${text} UTC`);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : '';
 }
 
 function percentChange(current, previous) {
@@ -141,6 +144,7 @@ function applyRange(points, range) {
   const days = range === '1y' ? 365 : range === '6m' ? 183 : range === '3m' ? 92 : range === '1m' ? 31 : range === '7d' ? 7 : range === '1d' ? 1 : 0;
   if (!days) return points;
   const lastDate = new Date(`${points[points.length - 1].date}T00:00:00Z`);
+  if (Number.isNaN(lastDate.getTime())) return points;
   lastDate.setUTCDate(lastDate.getUTCDate() - days);
   const cutoff = lastDate.toISOString().slice(0, 10);
   return points.filter((point) => point.date >= cutoff);
