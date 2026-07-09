@@ -1382,6 +1382,47 @@ function aggregateMarketDailyChartPoints(points = []) {
     });
 }
 
+function compressMarketAllChartPoints(points = [], maxPoints = 96) {
+  if (!Array.isArray(points) || points.length <= maxPoints) return points;
+  const sorted = points
+    .filter((point) => Number(point?.timestamp || 0) > 0 && Number(point?.price || 0) > 0)
+    .sort((a, b) => Number(a.timestamp || 0) - Number(b.timestamp || 0));
+  if (sorted.length <= maxPoints) return sorted;
+
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  const minTime = Number(first.timestamp || 0);
+  const maxTime = Number(last.timestamp || 0);
+  const timeRange = Math.max(maxTime - minTime, 1);
+  const bucketCount = Math.max(1, maxPoints - 2);
+  const buckets = Array.from({ length: bucketCount }, () => []);
+
+  for (const point of sorted.slice(1, -1)) {
+    const ratio = Math.min(0.999999, Math.max(0, (Number(point.timestamp || 0) - minTime) / timeRange));
+    buckets[Math.floor(ratio * bucketCount)].push(point);
+  }
+
+  const compressed = [first];
+  for (const bucket of buckets) {
+    if (!bucket.length) continue;
+    const prices = bucket.map((point) => Number(point.price || 0)).filter((price) => price > 0);
+    if (!prices.length) continue;
+    const timestamps = bucket.map((point) => Number(point.timestamp || 0)).filter((timestamp) => timestamp > 0).sort((a, b) => a - b);
+    const middleTimestamp = timestamps[Math.floor(timestamps.length / 2)] || Number(bucket[bucket.length - 1]?.timestamp || 0);
+    compressed.push({
+      ...bucket[bucket.length - 1],
+      timestamp: middleTimestamp,
+      price: medianMarketNumber(prices),
+      minPrice: Math.min(...prices),
+      maxPrice: Math.max(...prices),
+      count: bucket.reduce((sum, point) => sum + Number(point.count || 1), 0),
+      source: 'all_range_bucket_median'
+    });
+  }
+  if (compressed[compressed.length - 1]?.timestamp !== last.timestamp) compressed.push(last);
+  return compressed.sort((a, b) => Number(a.timestamp || 0) - Number(b.timestamp || 0));
+}
+
 function formatChartAxisDate(timestamp) {
   const date = new Date(Number(timestamp || 0));
   if (Number.isNaN(date.getTime())) return '';
@@ -6042,7 +6083,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     media.addEventListener?.('change', update);
     return () => media.removeEventListener?.('change', update);
   }, []);
-  const orderedPoints = aggregateMarketDailyChartPoints(points)
+  const aggregatedPoints = aggregateMarketDailyChartPoints(points)
     .map((point) => ({
       ...point,
       timestamp: Number(point.timestamp || 0),
@@ -6050,6 +6091,9 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     }))
     .filter((point) => Number.isFinite(point.timestamp) && point.timestamp > 0 && point.price > 0)
     .sort((a, b) => a.timestamp - b.timestamp);
+  const orderedPoints = range === 'all'
+    ? compressMarketAllChartPoints(aggregatedPoints, isMobileChart ? 72 : 108)
+    : aggregatedPoints;
   if (!orderedPoints.length) {
     return <div className="renew-chart-placeholder"><span>{t('noChart')}</span></div>;
   }
@@ -6074,8 +6118,12 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   const q1 = percentile(0.25);
   const q3 = percentile(0.75);
   const iqr = q3 - q1;
-  const outlierMin = iqr > 0 ? Math.max(min, q1 - iqr * 1.5) : min;
-  const outlierMax = iqr > 0 ? Math.min(max, q3 + iqr * 1.5) : max;
+  const outlierMin = range === 'all' && orderedPoints.length >= 12
+    ? percentile(0.04)
+    : iqr > 0 ? Math.max(min, q1 - iqr * 1.5) : min;
+  const outlierMax = range === 'all' && orderedPoints.length >= 12
+    ? percentile(0.96)
+    : iqr > 0 ? Math.min(max, q3 + iqr * 1.5) : max;
   const useOutlierScale = orderedPoints.length >= 4 && outlierMax > outlierMin && (outlierMin > min || outlierMax < max);
   const scaleMinBase = useOutlierScale ? outlierMin : min;
   const scaleMaxBase = useOutlierScale ? outlierMax : max;
@@ -6100,6 +6148,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     const y = padTop + ((scaleMax - clampedPrice) / priceRange) * (height - padTop - padBottom);
     return { ...point, x, y, isClamped: price !== clampedPrice };
   });
+  const showPointDots = range !== 'all' || plotted.length <= 36;
   const linePath = plotted.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
   const smoothPath = plotted.length > 2
     ? plotted.reduce((path, point, index) => {
@@ -6112,7 +6161,8 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     : linePath;
   const path = range === 'all' ? smoothPath : linePath;
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
-  const active = plotted[hoverIndex ?? plotted.length - 1];
+  const activeIndex = hoverIndex != null && hoverIndex >= 0 && hoverIndex < plotted.length ? hoverIndex : plotted.length - 1;
+  const active = plotted[activeIndex];
   const tipX = active ? Math.min(active.x + 12, width - tipWidth - 8) : 0;
   const tipY = active ? Math.max(active.y - tipHeight - 10, 8) : 0;
   const midPoint = plotted[Math.floor((plotted.length - 1) / 2)] || plotted[0];
@@ -6155,15 +6205,22 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             {item.text}
           </text>
         ))}
-        {plotted.map((point, index) => (
+        {showPointDots ? plotted.map((point, index) => (
           <circle
             key={`${point.timestamp}-${index}`}
             className={`renew-chart-point ${point.isClamped ? 'is-clamped' : ''}`}
             cx={point.x}
             cy={point.y}
-            r={index === hoverIndex || (hoverIndex == null && index === plotted.length - 1) ? activePointRadius : pointRadius}
+            r={index === activeIndex ? activePointRadius : pointRadius}
           />
-        ))}
+        )) : active ? (
+          <circle
+            className={`renew-chart-point ${active.isClamped ? 'is-clamped' : ''}`}
+            cx={active.x}
+            cy={active.y}
+            r={activePointRadius}
+          />
+        ) : null}
         {plotted.map((point, index) => (
           <circle
             key={`hit-${point.timestamp}-${index}`}
