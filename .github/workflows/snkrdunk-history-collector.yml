@@ -1,0 +1,86 @@
+name: SNKRDUNK history collector
+
+on:
+  workflow_dispatch:
+    inputs:
+      offset:
+        description: Start offset, or auto for daily rotation
+        required: false
+        default: auto
+      limit:
+        description: Cards per page
+        required: false
+        default: "25"
+      max_pages:
+        description: Number of pages to collect
+        required: false
+        default: "4"
+      delay_ms:
+        description: Page wait time in milliseconds
+        required: false
+        default: "3200"
+      active_only:
+        description: Collect only cards with active listings
+        required: false
+        default: "true"
+  schedule:
+    # 04:37 KST daily
+    - cron: "37 19 * * *"
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Collect visible trading history
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          HISTORY_OFFSET: ${{ github.event.inputs.offset || 'auto' }}
+          HISTORY_LIMIT: ${{ github.event.inputs.limit || '25' }}
+          HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '4' }}
+          HISTORY_DELAY_MS: ${{ github.event.inputs.delay_ms || '3200' }}
+          HISTORY_ACTIVE_ONLY: ${{ github.event.inputs.active_only || 'true' }}
+        run: |
+          if [ -z "$MARKET_COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+
+          mkdir -p tmp
+
+          offset="$HISTORY_OFFSET"
+          limit="$HISTORY_LIMIT"
+          max_pages="$HISTORY_MAX_PAGES"
+          if [ "$offset" = "auto" ]; then
+            total=$(node -e 'import("./src/data/market-cards.js").then(({default:cards})=>{const activeOnly=process.env.HISTORY_ACTIVE_ONLY==="true"; console.log(cards.filter((item)=>item.locale==="JP"&&item.apparelId&&(!activeOnly||Number(item.listingCount||0)>0)).length);})')
+            batch=$((limit * max_pages))
+            if [ "$total" -le 0 ] || [ "$batch" -le 0 ]; then
+              echo "Invalid total or batch size: total=$total batch=$batch"
+              exit 1
+            fi
+            day_of_year=$(date -u +%j)
+            offset=$(( ((10#$day_of_year - 1) * batch) % total ))
+          fi
+
+          echo "Collecting SNKRDUNK history: offset=$offset limit=$limit max_pages=$max_pages active_only=$HISTORY_ACTIVE_ONLY"
+          node scripts/runSnkrdunkTradeHistoryCycle.js \
+            --offset="$offset" \
+            --limit="$limit" \
+            --max-pages="$max_pages" \
+            --delay-ms="$HISTORY_DELAY_MS" \
+            --active-only="$HISTORY_ACTIVE_ONLY" \
+            --headless=true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snkrdunk-history-collector-output
+          path: tmp/snkrdunk-visible-history-*.json
+          if-no-files-found: warn
