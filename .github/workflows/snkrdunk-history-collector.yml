@@ -23,10 +23,6 @@ on:
         description: Collect only cards with active listings
         required: false
         default: "true"
-  schedule:
-    # 04:37 KST daily
-    - cron: "37 19 * * *"
-
 jobs:
   collect:
     runs-on: ubuntu-latest
