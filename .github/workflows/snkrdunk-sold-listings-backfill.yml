@@ -127,6 +127,24 @@ jobs:
           BACKFILL_PROGRESS_PATH: sold-listings-backfill-progress.jsonl
         run: npm run backfill:sold-listings
 
+      - name: Notify Telegram on success
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notification."
+            exit 0
+          fi
+          message="SNKRDUNK history refresh succeeded.
+          Workflow: $GITHUB_WORKFLOW
+          Run: $RUN_URL"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+
       - name: Notify Telegram on failure
         if: failure()
         env:
@@ -144,7 +162,7 @@ jobs:
           Check SNKRDUNK_COOKIE if the error is 401/403."
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${message}"
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
 
       - name: Upload progress
         if: always()
