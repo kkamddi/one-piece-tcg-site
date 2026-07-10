@@ -169,6 +169,7 @@ export const marketIndexes = [
     name: 'OPTCG Premium Art Index',
     baseDate: '2025-01-01',
     baseValue: 100,
+    psa10MinimumBaseCoverage: 0.5,
     components: premiumArtIndexComponents
   },
   {

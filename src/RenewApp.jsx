@@ -3744,7 +3744,7 @@ function RenewPartnerShopSeoPage({ uiLang }) {
   );
 }
 
-const MARKET_INDEX_CONDITION = 'a';
+const MARKET_INDEX_CONDITION = 'psa10';
 
 function RenewHomeCollectorIndex({ onOpen }) {
   const [payload, setPayload] = useState(null);
@@ -7132,7 +7132,6 @@ function isMarketIndexPath(path) {
 
 function RenewMarketIndex({ onOpenComponent } = {}) {
   const [payload, setPayload] = useState(null);
-  const [condition, setCondition] = useState(MARKET_INDEX_CONDITION);
   const [indexType, setIndexType] = useState(() => {
     if (typeof window === 'undefined') return 'collector';
     const path = normalizeSitePath(window.location.pathname);
@@ -7150,7 +7149,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     setPayload(null);
     setComponentPage(1);
     setLoading(true);
-    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${condition}&range=${range}`, { cache: 'no-store' })
+    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${MARKET_INDEX_CONDITION}&range=${range}`, { cache: 'no-store' })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!cancelled) setPayload(data);
@@ -7164,7 +7163,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [condition, indexType, range]);
+  }, [indexType, range]);
 
   const components = Array.isArray(payload?.components) ? payload.components.filter((item) => item.hasData) : [];
   const sortedComponents = useMemo(() => {
@@ -7189,7 +7188,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     <section className="renew-box-market renew-index-market">
       <div className="renew-index-head">
         <div>
-          <span>Index</span>
+          <span>Index / PSA10</span>
           <h2>{selectedIndex.title}</h2>
         </div>
         <div className="renew-chip-group">
@@ -7199,22 +7198,6 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <button type="button" className={range === '6m' ? 'is-active' : ''} onClick={() => setRange('6m')}>6M</button>
           <button type="button" className={range === 'all' ? 'is-active' : ''} onClick={() => setRange('all')}>ALL</button>
         </div>
-      </div>
-      <div className="renew-index-tabs" aria-label="Index price condition">
-        <button
-          type="button"
-          className={condition === 'a' ? 'is-active' : ''}
-          onClick={() => setCondition('a')}
-        >
-          Single
-        </button>
-        <button
-          type="button"
-          className={condition === 'psa10' ? 'is-active' : ''}
-          onClick={() => setCondition('psa10')}
-        >
-          PSA10
-        </button>
       </div>
       <div className="renew-index-primary" aria-label="Representative market index">
         <button
@@ -7273,7 +7256,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
         <>
           <div className="renew-index-meta">
             <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
-            <span>{condition === 'psa10' ? 'PSA10' : 'Single'} SNKRDUNK 일별 중앙값 기준</span>
+            <span>PSA10 SNKRDUNK 일별 중앙값 기준</span>
           </div>
           <div className="renew-index-component-sort" aria-label="Index component sort">
             <button
