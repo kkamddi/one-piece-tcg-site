@@ -7086,6 +7086,17 @@ const MARKET_INDEX_OPTIONS = [
 const MARKET_SECTOR_INDEX_OPTIONS = MARKET_INDEX_OPTIONS.filter((item) => item.key !== 'collector');
 const MARKET_INDEX_COMPONENTS_PER_PAGE = 8;
 
+function getMarketIndexComponentHref(item) {
+  const apparelId = String(item?.apparelId || '').trim();
+  const params = new URLSearchParams();
+  if (item?.code) params.set('code', item.code);
+  if (apparelId) params.set('apparelId', apparelId);
+  const query = params.toString();
+  return apparelId
+    ? `/prices/product/${encodeURIComponent(apparelId)}${query ? `?${query}` : ''}`
+    : `/prices${query ? `?${query}` : ''}`;
+}
+
 function getMarketIndexTypeFromPath(path) {
   const aliasMap = {
     '/prices/collector-index': 'collector',
@@ -7224,7 +7235,12 @@ function RenewMarketIndex() {
           </div>
           <div className="renew-index-components">
             {visibleComponents.map((item) => (
-              <article key={item.apparelId}>
+              <a
+                key={item.apparelId}
+                className="renew-index-component"
+                href={getMarketIndexComponentHref(item)}
+                aria-label={`${item.code || item.name} mapped market price`}
+              >
                 <b>{item.code}</b>
                 <strong>{item.name}</strong>
                 <span>{item.note} · #{item.apparelId}</span>
@@ -7232,7 +7248,7 @@ function RenewMarketIndex() {
                   <em>{formatIndexValue(item.currentIndex)}</em>
                   <i className={Number.isFinite(Number(item.change?.d1)) ? Number(item.change?.d1) >= 0 ? 'is-up' : 'is-down' : ''}>1D {formatIndexChange(item.change?.d1)}</i>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
           {componentPageCount > 1 ? (
