@@ -7,6 +7,7 @@ const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1
 const CACHE_SECONDS = 60 * 60;
 const INDEX_MIN_DATE = '2024-01-01';
 const CURRENT_OVERLAY_MAX_CHANGE_PERCENT = 20;
+const MIN_BASE_COVERAGE_RATIO = 0.8;
 const INDEX_TYPE_ALIASES = {
   waifu: 'premium_art',
   premium: 'premium_art',
@@ -370,54 +371,65 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
 
   const components = indexConfig.components.map((component) => {
     const series = (rowsByApparelId.get(Number(component.apparelId)) || []).sort((a, b) => a.date.localeCompare(b.date));
-    const basePoint = series.find((point) => point.date >= indexConfig.baseDate) || series[0] || null;
     const latestPoint = series[series.length - 1] || null;
     const previousPoint = latestPoint ? [...series].reverse().find((point) => point.date < latestPoint.date) || null : null;
-    const basePrice = basePoint?.price || 0;
-    const latestPrice = latestPoint?.price || 0;
-    const previousPrice = previousPoint?.price || 0;
-    const currentIndex = latestPrice && basePrice ? componentIndexValue(latestPrice, basePrice, indexConfig.baseValue) : null;
-    const previousIndex = previousPrice && basePrice ? componentIndexValue(previousPrice, basePrice, indexConfig.baseValue) : null;
     return {
       ...component,
-      baseDate: basePoint?.date || null,
-      basePrice,
       latestDate: latestPoint?.date || null,
-      latestPrice,
+      latestPrice: latestPoint?.price || 0,
       previousDate: previousPoint?.date || null,
-      previousPrice,
-      previousIndex,
-      currentIndex,
-      change: {
-        d1: consecutiveIndexChange(
-          { date: latestPoint?.date, value: currentIndex },
-          { date: previousPoint?.date, value: previousIndex }
-        )
-      },
-      hasData: Boolean(basePoint && latestPoint),
       currentSource: 'snkrdunk_index_daily',
       series
     };
   });
-  const dataComponents = components.filter((component) => component.hasData);
-  const minimumActiveCount = Math.max(3, Math.ceil(dataComponents.length * 0.2));
+  const dataComponents = components.filter((component) => component.series.length);
 
   const dateSet = new Set();
   for (const component of dataComponents) {
     for (const point of component.series) {
-      if (point.date >= (component.baseDate || indexConfig.baseDate)) dateSet.add(point.date);
+      dateSet.add(point.date);
     }
   }
   const dates = [...dateSet].sort();
+  const minimumBaseCoverage = Math.max(3, Math.ceil(dataComponents.length * MIN_BASE_COVERAGE_RATIO));
+  const effectiveBaseDate = dates.find((date) => (
+    dataComponents.filter((component) => component.series[0]?.date <= date).length >= minimumBaseCoverage
+  )) || null;
+  const basketComponents = effectiveBaseDate
+    ? dataComponents
+      .map((component) => {
+        const basePoint = component.series.filter((point) => point.date <= effectiveBaseDate).at(-1) || null;
+        if (!basePoint) return null;
+        const latestPoint = component.series.at(-1) || null;
+        const previousPoint = latestPoint ? [...component.series].reverse().find((point) => point.date < latestPoint.date) || null : null;
+        const currentIndex = latestPoint ? componentIndexValue(latestPoint.price, basePoint.price, indexConfig.baseValue) : null;
+        const previousIndex = previousPoint ? componentIndexValue(previousPoint.price, basePoint.price, indexConfig.baseValue) : null;
+        return {
+          ...component,
+          baseDate: effectiveBaseDate,
+          basePrice: basePoint.price,
+          previousPrice: previousPoint?.price || 0,
+          previousIndex,
+          currentIndex,
+          change: {
+            d1: consecutiveIndexChange(
+              { date: latestPoint?.date, value: currentIndex },
+              { date: previousPoint?.date, value: previousIndex }
+            )
+          },
+          hasData: true
+        };
+      })
+      .filter(Boolean)
+    : [];
   const cursorById = new Map();
   const latestById = new Map();
   const points = [];
 
-  for (const date of dates) {
+  for (const date of dates.filter((item) => effectiveBaseDate && item >= effectiveBaseDate)) {
     let total = 0;
     let activeCount = 0;
-    for (const component of dataComponents) {
-      if (!component.hasData || date < component.baseDate) continue;
+    for (const component of basketComponents) {
       const series = component.series;
       let cursor = cursorById.get(component.apparelId) || 0;
       while (cursor < series.length && series[cursor].date <= date) {
@@ -430,7 +442,7 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
       total += (latestPrice / component.basePrice) * indexConfig.baseValue;
       activeCount += 1;
     }
-    if (activeCount >= minimumActiveCount) {
+    if (activeCount === basketComponents.length) {
       points.push({
         date,
         value: Number((total / activeCount).toFixed(2)),
@@ -459,7 +471,7 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
     index: {
       code: indexConfig.code,
       name: indexConfig.name,
-      baseDate: indexConfig.baseDate,
+      baseDate: effectiveBaseDate || indexConfig.baseDate,
       baseValue: indexConfig.baseValue,
       condition: conditionKey
     },
@@ -472,10 +484,10 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
       m6: percentChange(current?.value, point183d?.value),
       all: percentChange(current?.value, pointAll?.value)
     },
-    componentCount: dataComponents.length,
+    componentCount: basketComponents.length,
     activeComponentCount: current?.activeCount || 0,
     points: scopedPoints,
-    components: dataComponents.map(({ series, ...component }) => component)
+    components: basketComponents.map(({ series, ...component }) => component)
   };
 }
 
@@ -493,6 +505,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     })
     .sort((a, b) => a.date.localeCompare(b.date));
   if (!points.length) return null;
+  const effectiveBaseDate = points[0].date;
 
   const componentRowsById = new Map();
   for (const row of componentRows || []) {
@@ -554,7 +567,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     index: {
       code: indexConfig.code,
       name: indexConfig.name,
-      baseDate: indexConfig.baseDate,
+      baseDate: effectiveBaseDate,
       baseValue: indexConfig.baseValue,
       condition: conditionKey
     },

@@ -5,6 +5,7 @@ const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const CONDITION_KEY = String(process.env.MARKET_INDEX_CONDITION || 'a').trim().toLowerCase() === 'psa10' ? 'psa10' : 'a';
 const REBUILD_WINDOW_DAYS = Math.max(0, Number(process.env.MARKET_INDEX_REBUILD_WINDOW_DAYS || 14) || 0);
+const MIN_BASE_COVERAGE_RATIO = 0.8;
 const INDEX_CODE_FILTER = new Set(
   String(process.env.MARKET_INDEX_CODES || '')
     .split(',')
@@ -101,36 +102,45 @@ function buildIndexRows(indexConfig, rows) {
 
   const components = indexConfig.components.map((component) => {
     const series = (rowsByApparelId.get(Number(component.apparelId)) || []).sort((a, b) => a.date.localeCompare(b.date));
-    const basePoint = series.find((point) => point.date >= indexConfig.baseDate) || series[0] || null;
     return {
       ...component,
-      baseDate: basePoint?.date || null,
-      basePrice: basePoint?.price || 0,
       series
     };
   });
-  const dataComponents = components.filter((component) => component.baseDate && component.basePrice && component.series.length);
-  const minimumActiveCount = Math.max(3, Math.ceil(dataComponents.length * 0.2));
+  const dataComponents = components.filter((component) => component.series.length);
 
   const dateSet = new Set();
   for (const component of dataComponents) {
     for (const point of component.series) {
-      if (component.baseDate && point.date >= component.baseDate) dateSet.add(point.date);
+      dateSet.add(point.date);
     }
   }
 
   const dates = [...dateSet].sort();
+  const minimumBaseCoverage = Math.max(3, Math.ceil(dataComponents.length * MIN_BASE_COVERAGE_RATIO));
+  const effectiveBaseDate = dates.find((date) => (
+    dataComponents.filter((component) => component.series[0]?.date <= date).length >= minimumBaseCoverage
+  )) || null;
+  const basketComponents = effectiveBaseDate
+    ? dataComponents
+      .map((component) => {
+        const basePoint = component.series.filter((point) => point.date <= effectiveBaseDate).at(-1) || null;
+        return basePoint
+          ? { ...component, baseDate: effectiveBaseDate, basePrice: basePoint.price }
+          : null;
+      })
+      .filter(Boolean)
+    : [];
   const cursorById = new Map();
   const latestById = new Map();
   const indexRows = [];
   const componentRows = [];
 
-  for (const date of dates) {
+  for (const date of dates.filter((item) => effectiveBaseDate && item >= effectiveBaseDate)) {
     let totalWeighted = 0;
     let totalWeight = 0;
     let activeCount = 0;
-    for (const component of dataComponents) {
-      if (!component.baseDate || !component.basePrice || date < component.baseDate) continue;
+    for (const component of basketComponents) {
       let cursor = cursorById.get(component.apparelId) || 0;
       while (cursor < component.series.length && component.series[cursor].date <= date) {
         latestById.set(component.apparelId, component.series[cursor].price);
@@ -155,19 +165,19 @@ function buildIndexRows(indexConfig, rows) {
       totalWeight += weight;
       activeCount += 1;
     }
-    if (activeCount >= minimumActiveCount && totalWeight > 0) {
+    if (activeCount === basketComponents.length && totalWeight > 0) {
       indexRows.push({
         index_code: indexConfig.code,
         condition_key: CONDITION_KEY,
         point_date: date,
         index_value: Number((totalWeighted / totalWeight).toFixed(4)),
         active_component_count: activeCount,
-        component_count: dataComponents.length,
+        component_count: basketComponents.length,
         source: 'snkrdunk'
       });
     }
   }
-  return { indexRows, componentRows, dataComponents };
+  return { indexRows, componentRows, dataComponents: basketComponents, effectiveBaseDate };
 }
 
 async function rebuildIndex(indexConfig) {
@@ -181,7 +191,7 @@ async function rebuildIndex(indexConfig) {
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK ${CONDITION_KEY.toUpperCase()} daily median prices`]
+    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate || indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK ${CONDITION_KEY.toUpperCase()} daily median prices`]
   );
   await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [

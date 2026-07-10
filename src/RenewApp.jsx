@@ -7256,7 +7256,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
         <>
           <div className="renew-index-meta">
             <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
-            <span>PSA10 SNKRDUNK 일별 중앙값 기준</span>
+            <span>Single SNKRDUNK 일별 중앙값 기준</span>
           </div>
           <div className="renew-index-component-sort" aria-label="Index component sort">
             <button
