@@ -43,15 +43,15 @@ jobs:
           if ! [[ "$delay" =~ ^[0-9]+$ ]]; then
             delay=900
           fi
-          echo "Waiting ${delay}s before PSA10 index rebuild."
+          echo "Waiting ${delay}s before Single index rebuild."
           sleep "$delay"
 
-      - name: Rebuild PSA10 market indexes
+      - name: Rebuild Single market indexes
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
           D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
-          MARKET_INDEX_CONDITION: psa10
+          MARKET_INDEX_CONDITION: a
           MARKET_INDEX_REBUILD_WINDOW_DAYS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rebuild_window_days || '14' }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then

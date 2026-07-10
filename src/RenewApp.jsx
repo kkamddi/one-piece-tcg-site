@@ -3744,7 +3744,7 @@ function RenewPartnerShopSeoPage({ uiLang }) {
   );
 }
 
-const MARKET_INDEX_CONDITION = 'psa10';
+const MARKET_INDEX_CONDITION = 'a';
 
 function RenewHomeCollectorIndex({ onOpen }) {
   const [payload, setPayload] = useState(null);
