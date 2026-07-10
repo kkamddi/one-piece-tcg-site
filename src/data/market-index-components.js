@@ -155,6 +155,7 @@ export const marketIndexes = [
     name: 'OPTCG Collector Index',
     baseDate: '2025-01-01',
     baseValue: 100,
+    psa10MinimumBaseCoverage: 0.5,
     components: collectorIndexComponents
   },
   {
@@ -162,6 +163,7 @@ export const marketIndexes = [
     name: 'OPTCG Manga Index',
     baseDate: '2025-01-01',
     baseValue: 100,
+    psa10MinimumBaseCoverage: 0.5,
     components: mangaIndexComponents
   },
   {
@@ -177,6 +179,7 @@ export const marketIndexes = [
     name: 'OPTCG SP Index',
     baseDate: '2025-01-01',
     baseValue: 100,
+    psa10MinimumBaseCoverage: 0.5,
     components: spIndexComponents
   },
   {
@@ -184,6 +187,7 @@ export const marketIndexes = [
     name: 'OPTCG Luffy Index',
     baseDate: '2025-01-01',
     baseValue: 100,
+    psa10MinimumBaseCoverage: 0.5,
     components: luffyIndexComponents
   }
 ];
