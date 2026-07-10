@@ -20,7 +20,7 @@ on:
       index_rebuild_window_days:
         description: Index rebuild window days. Use 0 for full rebuild.
         required: false
-        default: "14"
+        default: "0"
       apparel_ids:
         description: Optional comma-separated SNKRDUNK apparel IDs for a focused run
         required: false
@@ -121,7 +121,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
           D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
           MARKET_INDEX_CONDITION: a
-          MARKET_INDEX_REBUILD_WINDOW_DAYS: ${{ github.event.inputs.index_rebuild_window_days || '14' }}
+          MARKET_INDEX_REBUILD_WINDOW_DAYS: ${{ github.event.inputs.index_rebuild_window_days || '0' }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
             echo "CLOUDFLARE_API_TOKEN secret is missing."

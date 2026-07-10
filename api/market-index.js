@@ -359,7 +359,7 @@ function applyCurrentIndexPoint(points = [], currentPoint = null) {
 
 function buildIndexPayload(indexConfig, rows, conditionKey, range) {
   const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const built = buildChainLinkedMarketIndex(indexConfig, rows, { endDate: kstToday, staleDays: 30 });
+  const built = buildChainLinkedMarketIndex(indexConfig, rows, { endDate: kstToday });
   return buildStoredIndexPayload(
     indexConfig,
     built.indexPoints.map((point) => ({

@@ -5,8 +5,9 @@ const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const CONDITION_KEY = String(process.env.MARKET_INDEX_CONDITION || 'a').trim().toLowerCase() === 'psa10' ? 'psa10' : 'a';
-const REBUILD_WINDOW_DAYS = Math.max(0, Number(process.env.MARKET_INDEX_REBUILD_WINDOW_DAYS || 14) || 0);
+const REBUILD_WINDOW_DAYS = Math.max(0, Number(process.env.MARKET_INDEX_REBUILD_WINDOW_DAYS ?? 0) || 0);
 const COMPONENT_HISTORY_DAYS = 31;
+const DRY_RUN = String(process.env.MARKET_INDEX_DRY_RUN || '').trim() === '1';
 const INDEX_CODE_FILTER = new Set(
   String(process.env.MARKET_INDEX_CODES || '')
     .split(',')
@@ -90,7 +91,7 @@ function shiftDate(dateKey, days) {
 
 function buildIndexRows(indexConfig, rows) {
   const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const built = buildChainLinkedMarketIndex(indexConfig, rows, { endDate: kstToday, staleDays: 30 });
+  const built = buildChainLinkedMarketIndex(indexConfig, rows, { endDate: kstToday });
   const componentStartDate = shiftDate(built.endDate, -(COMPONENT_HISTORY_DAYS - 1));
   return {
     dataComponents: built.dataComponents,
@@ -124,6 +125,18 @@ async function rebuildIndex(indexConfig) {
 
   const builtRows = buildIndexRows(indexConfig, rows);
   const dataComponents = builtRows.dataComponents || [];
+
+  if (DRY_RUN) {
+    const last = builtRows.indexRows.at(-1) || null;
+    let maxDailyChange = 0;
+    for (let index = 1; index < builtRows.indexRows.length; index += 1) {
+      const previous = Number(builtRows.indexRows[index - 1].index_value || 0);
+      const current = Number(builtRows.indexRows[index].index_value || 0);
+      if (previous > 0 && current > 0) maxDailyChange = Math.max(maxDailyChange, Math.abs((current / previous) - 1) * 100);
+    }
+    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}`);
+    return;
+  }
 
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
