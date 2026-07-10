@@ -7179,6 +7179,31 @@
   line-height: 1;
 }
 
+.renew-index-component-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.renew-index-component-sort button {
+  min-height: 34px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 999px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4b5563;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-index-component-sort button.is-active {
+  border-color: #17191c;
+  background: #17191c;
+  color: #fff;
+}
+
 .renew-index-components {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -7916,6 +7941,7 @@
 .renew-app.is-dark .renew-box-market-card,
 .renew-app.is-dark .renew-market-card-preview,
 .renew-app.is-dark .renew-index-component,
+.renew-app.is-dark .renew-index-component-sort button,
 .renew-app.is-dark .renew-index-primary button,
 .renew-app.is-dark .renew-index-summary,
 .renew-app.is-dark .renew-index-chart,
@@ -7936,6 +7962,7 @@
 .renew-app.is-dark .renew-index-summary span,
 .renew-app.is-dark .renew-index-meta,
 .renew-app.is-dark .renew-index-components span,
+.renew-app.is-dark .renew-index-component-sort button,
 .renew-app.is-dark .renew-index-tabs button,
 .renew-app.is-dark .renew-index-disclosure,
 .renew-app.is-dark .renew-market-card p {
@@ -7943,6 +7970,7 @@
 }
 
 .renew-app.is-dark .renew-index-tabs button.is-active,
+.renew-app.is-dark .renew-index-component-sort button.is-active,
 .renew-app.is-dark .renew-index-primary button.is-active,
 .renew-app.is-dark .renew-index-pagination button.is-active,
 .renew-app.is-dark .renew-index-disclosure b {
@@ -11077,6 +11105,7 @@
   .renew-index-chart,
   .renew-index-disclosure,
   .renew-index-meta,
+  .renew-index-component-sort,
   .renew-index-components {
     max-width: 100%;
     min-width: 0;

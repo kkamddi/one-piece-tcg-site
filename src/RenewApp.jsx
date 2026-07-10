@@ -7132,6 +7132,7 @@ function RenewMarketIndex() {
   const [range, setRange] = useState('all');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [componentPage, setComponentPage] = useState(1);
+  const [componentSort, setComponentSort] = useState('default');
   const [loading, setLoading] = useState(false);
   const selectedIndex = MARKET_INDEX_OPTIONS.find((item) => item.key === indexType) || MARKET_INDEX_OPTIONS[0];
 
@@ -7157,8 +7158,24 @@ function RenewMarketIndex() {
   }, [indexType, range]);
 
   const components = Array.isArray(payload?.components) ? payload.components.filter((item) => item.hasData) : [];
-  const componentPageCount = Math.max(1, Math.ceil(components.length / MARKET_INDEX_COMPONENTS_PER_PAGE));
-  const visibleComponents = components.slice((componentPage - 1) * MARKET_INDEX_COMPONENTS_PER_PAGE, componentPage * MARKET_INDEX_COMPONENTS_PER_PAGE);
+  const sortedComponents = useMemo(() => {
+    if (componentSort === 'default') return components;
+    return components
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => {
+        const aChange = Number(a.item?.change?.d1);
+        const bChange = Number(b.item?.change?.d1);
+        const aHasChange = Number.isFinite(aChange);
+        const bHasChange = Number.isFinite(bChange);
+        if (aHasChange !== bHasChange) return aHasChange ? -1 : 1;
+        if (!aHasChange && !bHasChange) return a.index - b.index;
+        const sortDelta = componentSort === 'gainers' ? bChange - aChange : aChange - bChange;
+        return sortDelta || a.index - b.index;
+      })
+      .map(({ item }) => item);
+  }, [components, componentSort]);
+  const componentPageCount = Math.max(1, Math.ceil(sortedComponents.length / MARKET_INDEX_COMPONENTS_PER_PAGE));
+  const visibleComponents = sortedComponents.slice((componentPage - 1) * MARKET_INDEX_COMPONENTS_PER_PAGE, componentPage * MARKET_INDEX_COMPONENTS_PER_PAGE);
   return (
     <section className="renew-box-market renew-index-market">
       <div className="renew-index-head">
@@ -7232,6 +7249,38 @@ function RenewMarketIndex() {
           <div className="renew-index-meta">
             <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
             <span>Single SNKRDUNK 일별 중앙값 기준</span>
+          </div>
+          <div className="renew-index-component-sort" aria-label="Index component sort">
+            <button
+              type="button"
+              className={componentSort === 'default' ? 'is-active' : ''}
+              onClick={() => {
+                setComponentSort('default');
+                setComponentPage(1);
+              }}
+            >
+              기본
+            </button>
+            <button
+              type="button"
+              className={componentSort === 'gainers' ? 'is-active' : ''}
+              onClick={() => {
+                setComponentSort('gainers');
+                setComponentPage(1);
+              }}
+            >
+              상승률
+            </button>
+            <button
+              type="button"
+              className={componentSort === 'losers' ? 'is-active' : ''}
+              onClick={() => {
+                setComponentSort('losers');
+                setComponentPage(1);
+              }}
+            >
+              하락률
+            </button>
           </div>
           <div className="renew-index-components">
             {visibleComponents.map((item) => (
