@@ -17,6 +17,10 @@ on:
         description: Maximum 50-item pages to collect
         required: false
         default: "120"
+      start_offset:
+        description: Zero-based offset used to resume a manual run
+        required: false
+        default: "0"
       index_rebuild_window_days:
         description: Index rebuild window days. Use 0 for full rebuild.
         required: false
@@ -38,8 +42,15 @@ on:
         required: false
         default: "1"
   schedule:
-    # 03:17 / 09:17 / 15:17 / 21:17 KST
-    - cron: "17 0,6,12,18 * * *"
+    # Four daily shards: 09:17 / 15:17 / 21:17 / 03:17 KST
+    - cron: "17 0 * * *"
+    - cron: "17 6 * * *"
+    - cron: "17 12 * * *"
+    - cron: "17 18 * * *"
+
+concurrency:
+  group: market-price-collector
+  cancel-in-progress: false
 
 jobs:
   collect:
@@ -54,6 +65,8 @@ jobs:
           COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
           COLLECTOR_SCOPE: ${{ github.event.inputs.scope || 'all-jp' }}
           COLLECTOR_MAX_PAGES: ${{ github.event.inputs.max_pages || '120' }}
+          COLLECTOR_START_OFFSET: ${{ github.event.inputs.start_offset || '0' }}
+          SCHEDULE_EXPRESSION: ${{ github.event.schedule || '' }}
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           COLLECT_SOLD_LISTINGS: ${{ github.event.inputs.collect_sold_listings || 'false' }}
           SOLD_LISTING_PAGES: ${{ github.event.inputs.sold_listing_pages || '1' }}
@@ -63,29 +76,84 @@ jobs:
             exit 1
           fi
 
-          offset=0
-          limit=50
-          for i in $(seq 1 "$COLLECTOR_MAX_PAGES"); do
-            url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${limit}&offset=${offset}&concurrency=5&listingSnapshots=1"
-            if [ -n "$APPAREL_IDS" ]; then
-              url="${url}&apparelIds=${APPAREL_IDS}"
+          base_limit=50
+          base_concurrency=4
+          offset=$((10#$COLLECTOR_START_OFFSET))
+          stop_offset=$((offset + (10#$COLLECTOR_MAX_PAGES * base_limit)))
+
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            case "$SCHEDULE_EXPRESSION" in
+              "17 0 * * *") offset=0; stop_offset=1300 ;;
+              "17 6 * * *") offset=1300; stop_offset=2600 ;;
+              "17 12 * * *") offset=2600; stop_offset=3900 ;;
+              "17 18 * * *") offset=3900; stop_offset=0 ;;
+              *) echo "Unknown schedule expression: $SCHEDULE_EXPRESSION"; exit 1 ;;
+            esac
+          fi
+
+          max_requests=$((10#$COLLECTOR_MAX_PAGES * 5))
+          request_count=0
+          done_flag=0
+          while [ "$request_count" -lt "$max_requests" ]; do
+            if [ "$stop_offset" -gt 0 ] && [ "$offset" -ge "$stop_offset" ]; then
+              break
             fi
-            if [ "$COLLECT_SOLD_LISTINGS" = "true" ]; then
-              url="${url}&soldListings=1&soldListingPages=${SOLD_LISTING_PAGES}"
+
+            request_limit=$base_limit
+            if [ "$stop_offset" -gt 0 ] && [ $((offset + request_limit)) -gt "$stop_offset" ]; then
+              request_limit=$((stop_offset - offset))
             fi
-            json=$(curl -fsS --retry 10 --retry-delay 15 --retry-max-time 300 --retry-all-errors --connect-timeout 20 --max-time 120 -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url")
+            request_concurrency=$base_concurrency
+
+            while true; do
+              url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${request_limit}&offset=${offset}&concurrency=${request_concurrency}&listingSnapshots=1"
+              if [ -n "$APPAREL_IDS" ]; then
+                url="${url}&apparelIds=${APPAREL_IDS}"
+              fi
+              if [ "$COLLECT_SOLD_LISTINGS" = "true" ]; then
+                url="${url}&soldListings=1&soldListingPages=${SOLD_LISTING_PAGES}"
+              fi
+
+              if json=$(curl -fsS --retry 3 --retry-delay 15 --retry-max-time 120 --retry-all-errors --connect-timeout 20 --max-time 120 -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url"); then
+                break
+              fi
+
+              if [ "$request_limit" -gt 25 ]; then
+                request_limit=25
+                request_concurrency=3
+              elif [ "$request_limit" -gt 10 ]; then
+                request_limit=10
+                request_concurrency=2
+              else
+                echo "Collector failed at offset=$offset after adaptive retries."
+                exit 1
+              fi
+              echo "Collector unavailable at offset=$offset; retrying limit=$request_limit concurrency=$request_concurrency after cooldown."
+              sleep 30
+            done
+
+            request_count=$((request_count + 1))
             echo "$json"
             done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")
             next_offset=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.nextOffset || 0)" "$json")
             if [ "$done_flag" = "1" ]; then
               break
             fi
+            if [ "$next_offset" -le "$offset" ]; then
+              echo "Collector did not advance: offset=$offset next_offset=$next_offset"
+              exit 1
+            fi
             offset="$next_offset"
-            sleep 2
+            sleep 3
           done
 
+          if [ "$done_flag" != "1" ] && { [ "$stop_offset" -eq 0 ] || [ "$offset" -lt "$stop_offset" ]; }; then
+            echo "Collector stopped before completing its assigned range at offset=$offset."
+            exit 1
+          fi
+
       - name: Collect approved listing floor snapshots
-        if: ${{ github.event_name == 'schedule' || github.event.inputs.apparel_ids == '' }}
+        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '17 18 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.apparel_ids == '') }}
         env:
           COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
           COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
@@ -115,7 +183,7 @@ jobs:
           done
 
       - name: Rebuild PSA10 market indexes
-        if: ${{ github.event_name == 'schedule' || github.event.inputs.scope != 'all-en' }}
+        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '17 18 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.scope != 'all-en') }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
