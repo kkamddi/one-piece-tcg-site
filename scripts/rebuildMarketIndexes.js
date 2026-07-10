@@ -1,11 +1,12 @@
 import marketIndexes from '../src/data/market-index-components.js';
+import { buildChainLinkedMarketIndex } from '../lib/market-index-chain.js';
 
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const CONDITION_KEY = String(process.env.MARKET_INDEX_CONDITION || 'a').trim().toLowerCase() === 'psa10' ? 'psa10' : 'a';
 const REBUILD_WINDOW_DAYS = Math.max(0, Number(process.env.MARKET_INDEX_REBUILD_WINDOW_DAYS || 14) || 0);
-const MIN_BASE_COVERAGE_RATIO = 0.8;
+const COMPONENT_HISTORY_DAYS = 31;
 const INDEX_CODE_FILTER = new Set(
   String(process.env.MARKET_INDEX_CODES || '')
     .split(',')
@@ -81,103 +82,39 @@ function getRebuildStartDate() {
   return kstNow.toISOString().slice(0, 10);
 }
 
-function toDateKey(value) {
-  const text = String(value || '').replace(/\b(\d+)(st|nd|rd|th)\b/gi, '$1').trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
-  const parsed = Date.parse(`${text} UTC`);
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : '';
+function shiftDate(dateKey, days) {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 function buildIndexRows(indexConfig, rows) {
-  const rowsByApparelId = new Map();
-  for (const row of rows || []) {
-    const apparelId = Number(row.apparel_id || 0);
-    const price = Number(row.median_price_jpy || 0);
-    const date = toDateKey(row.point_date);
-    if (!apparelId || !price || !date) continue;
-    const list = rowsByApparelId.get(apparelId) || [];
-    list.push({ date, price: Math.round(price) });
-    rowsByApparelId.set(apparelId, list);
-  }
-
-  const components = indexConfig.components.map((component) => {
-    const series = (rowsByApparelId.get(Number(component.apparelId)) || []).sort((a, b) => a.date.localeCompare(b.date));
-    return {
-      ...component,
-      series
-    };
-  });
-  const dataComponents = components.filter((component) => component.series.length);
-
-  const dateSet = new Set();
-  for (const component of dataComponents) {
-    for (const point of component.series) {
-      dateSet.add(point.date);
-    }
-  }
-
-  const dates = [...dateSet].sort();
-  const minimumBaseCoverage = Math.max(3, Math.ceil(dataComponents.length * MIN_BASE_COVERAGE_RATIO));
-  const effectiveBaseDate = dates.find((date) => (
-    dataComponents.filter((component) => component.series[0]?.date <= date).length >= minimumBaseCoverage
-  )) || null;
-  const basketComponents = effectiveBaseDate
-    ? dataComponents
-      .map((component) => {
-        const basePoint = component.series.filter((point) => point.date <= effectiveBaseDate).at(-1) || null;
-        return basePoint
-          ? { ...component, baseDate: effectiveBaseDate, basePrice: basePoint.price }
-          : null;
-      })
-      .filter(Boolean)
-    : [];
-  const cursorById = new Map();
-  const latestById = new Map();
-  const indexRows = [];
-  const componentRows = [];
-
-  for (const date of dates.filter((item) => effectiveBaseDate && item >= effectiveBaseDate)) {
-    let totalWeighted = 0;
-    let totalWeight = 0;
-    let activeCount = 0;
-    for (const component of basketComponents) {
-      let cursor = cursorById.get(component.apparelId) || 0;
-      while (cursor < component.series.length && component.series[cursor].date <= date) {
-        latestById.set(component.apparelId, component.series[cursor].price);
-        cursor += 1;
-      }
-      cursorById.set(component.apparelId, cursor);
-      const price = latestById.get(component.apparelId);
-      if (!price) continue;
-      const weight = Number(component.weight || 1);
-      const componentIndexValue = Number(((price / component.basePrice) * indexConfig.baseValue).toFixed(4));
-      componentRows.push({
-        index_code: indexConfig.code,
-        condition_key: CONDITION_KEY,
-        apparel_id: Number(component.apparelId),
-        point_date: date,
-        price_jpy: price,
-        base_price_jpy: component.basePrice,
-        component_index_value: componentIndexValue,
-        source: 'snkrdunk'
-      });
-      totalWeighted += componentIndexValue * weight;
-      totalWeight += weight;
-      activeCount += 1;
-    }
-    if (activeCount === basketComponents.length && totalWeight > 0) {
-      indexRows.push({
-        index_code: indexConfig.code,
-        condition_key: CONDITION_KEY,
-        point_date: date,
-        index_value: Number((totalWeighted / totalWeight).toFixed(4)),
-        active_component_count: activeCount,
-        component_count: basketComponents.length,
-        source: 'snkrdunk'
-      });
-    }
-  }
-  return { indexRows, componentRows, dataComponents: basketComponents, effectiveBaseDate };
+  const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const built = buildChainLinkedMarketIndex(indexConfig, rows, { endDate: kstToday, staleDays: 30 });
+  const componentStartDate = shiftDate(built.endDate, -(COMPONENT_HISTORY_DAYS - 1));
+  return {
+    dataComponents: built.dataComponents,
+    effectiveBaseDate: built.baseDate,
+    indexRows: built.indexPoints.map((point) => ({
+      index_code: indexConfig.code,
+      condition_key: CONDITION_KEY,
+      point_date: point.date,
+      index_value: point.value,
+      active_component_count: point.activeCount,
+      component_count: point.componentCount,
+      source: 'snkrdunk'
+    })),
+    componentRows: built.componentPoints.filter((point) => point.date >= componentStartDate).map((point) => ({
+      index_code: indexConfig.code,
+      condition_key: CONDITION_KEY,
+      apparel_id: point.apparelId,
+      point_date: point.date,
+      price_jpy: point.price,
+      base_price_jpy: point.basePrice,
+      component_index_value: point.componentIndexValue,
+      source: 'snkrdunk'
+    }))
+  };
 }
 
 async function rebuildIndex(indexConfig) {
@@ -235,6 +172,8 @@ async function rebuildIndex(indexConfig) {
     await queryD1('delete from market_index_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
     await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
   }
+  const componentHistoryStartDate = shiftDate(builtRows.indexRows.at(-1)?.point_date || indexConfig.baseDate, -(COMPONENT_HISTORY_DAYS - 1));
+  await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ? and point_date < ?', [indexConfig.code, CONDITION_KEY, componentHistoryStartDate]);
   await insertRows('market_index_daily_points', [
     'index_code',
     'condition_key',

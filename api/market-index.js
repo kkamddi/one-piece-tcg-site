@@ -1,4 +1,5 @@
 import marketIndexes from '../src/data/market-index-components.js';
+import { buildChainLinkedMarketIndex } from '../lib/market-index-chain.js';
 
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -7,7 +8,6 @@ const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1
 const CACHE_SECONDS = 60 * 60;
 const INDEX_MIN_DATE = '2024-01-01';
 const CURRENT_OVERLAY_MAX_CHANGE_PERCENT = 20;
-const MIN_BASE_COVERAGE_RATIO = 0.8;
 const INDEX_TYPE_ALIASES = {
   waifu: 'premium_art',
   premium: 'premium_art',
@@ -358,137 +358,26 @@ function applyCurrentIndexPoint(points = [], currentPoint = null) {
 }
 
 function buildIndexPayload(indexConfig, rows, conditionKey, range) {
-  const rowsByApparelId = new Map();
-  for (const row of rows || []) {
-    const apparelId = Number(row.apparel_id || 0);
-    const price = Number(row.median_price_jpy || 0);
-    const date = toDateKey(row.point_date);
-    if (!apparelId || !price || !isSaneIndexDate(date, indexConfig.baseDate)) continue;
-    const list = rowsByApparelId.get(apparelId) || [];
-    list.push({ date, price: Math.round(price) });
-    rowsByApparelId.set(apparelId, list);
-  }
-
-  const components = indexConfig.components.map((component) => {
-    const series = (rowsByApparelId.get(Number(component.apparelId)) || []).sort((a, b) => a.date.localeCompare(b.date));
-    const latestPoint = series[series.length - 1] || null;
-    const previousPoint = latestPoint ? [...series].reverse().find((point) => point.date < latestPoint.date) || null : null;
-    return {
-      ...component,
-      latestDate: latestPoint?.date || null,
-      latestPrice: latestPoint?.price || 0,
-      previousDate: previousPoint?.date || null,
-      currentSource: 'snkrdunk_index_daily',
-      series
-    };
-  });
-  const dataComponents = components.filter((component) => component.series.length);
-
-  const dateSet = new Set();
-  for (const component of dataComponents) {
-    for (const point of component.series) {
-      dateSet.add(point.date);
-    }
-  }
-  const dates = [...dateSet].sort();
-  const minimumBaseCoverage = Math.max(3, Math.ceil(dataComponents.length * MIN_BASE_COVERAGE_RATIO));
-  const effectiveBaseDate = dates.find((date) => (
-    dataComponents.filter((component) => component.series[0]?.date <= date).length >= minimumBaseCoverage
-  )) || null;
-  const basketComponents = effectiveBaseDate
-    ? dataComponents
-      .map((component) => {
-        const basePoint = component.series.filter((point) => point.date <= effectiveBaseDate).at(-1) || null;
-        if (!basePoint) return null;
-        const latestPoint = component.series.at(-1) || null;
-        const previousPoint = latestPoint ? [...component.series].reverse().find((point) => point.date < latestPoint.date) || null : null;
-        const currentIndex = latestPoint ? componentIndexValue(latestPoint.price, basePoint.price, indexConfig.baseValue) : null;
-        const previousIndex = previousPoint ? componentIndexValue(previousPoint.price, basePoint.price, indexConfig.baseValue) : null;
-        return {
-          ...component,
-          baseDate: effectiveBaseDate,
-          basePrice: basePoint.price,
-          previousPrice: previousPoint?.price || 0,
-          previousIndex,
-          currentIndex,
-          change: {
-            d1: consecutiveIndexChange(
-              { date: latestPoint?.date, value: currentIndex },
-              { date: previousPoint?.date, value: previousIndex }
-            )
-          },
-          hasData: true
-        };
-      })
-      .filter(Boolean)
-    : [];
-  const cursorById = new Map();
-  const latestById = new Map();
-  const points = [];
-
-  for (const date of dates.filter((item) => effectiveBaseDate && item >= effectiveBaseDate)) {
-    let total = 0;
-    let activeCount = 0;
-    for (const component of basketComponents) {
-      const series = component.series;
-      let cursor = cursorById.get(component.apparelId) || 0;
-      while (cursor < series.length && series[cursor].date <= date) {
-        latestById.set(component.apparelId, series[cursor].price);
-        cursor += 1;
-      }
-      cursorById.set(component.apparelId, cursor);
-      const latestPrice = latestById.get(component.apparelId);
-      if (!latestPrice || !component.basePrice) continue;
-      total += (latestPrice / component.basePrice) * indexConfig.baseValue;
-      activeCount += 1;
-    }
-    if (activeCount === basketComponents.length) {
-      points.push({
-        date,
-        value: Number((total / activeCount).toFixed(2)),
-        activeCount
-      });
-    }
-  }
-
-  const displayPoints = smoothIndexPoints(points);
-  const scopedPoints = applyRange(displayPoints, range);
-  const current = displayPoints[displayPoints.length - 1] || null;
-  const previous = displayPoints[displayPoints.length - 2] || null;
-  const currentDate = current?.date ? new Date(`${current.date}T00:00:00Z`) : null;
-  const dateAgo = (days) => {
-    if (!currentDate) return '';
-    const date = new Date(currentDate);
-    date.setUTCDate(date.getUTCDate() - days);
-    return date.toISOString().slice(0, 10);
-  };
-  const point7d = closestPointAtOrBefore(displayPoints, dateAgo(7));
-  const point30d = closestPointAtOrBefore(displayPoints, dateAgo(30));
-  const point183d = closestPointAtOrBefore(displayPoints, dateAgo(183));
-  const pointAll = displayPoints[0] || null;
-
-  return {
-    index: {
-      code: indexConfig.code,
-      name: indexConfig.name,
-      baseDate: effectiveBaseDate || indexConfig.baseDate,
-      baseValue: indexConfig.baseValue,
-      condition: conditionKey
-    },
-    currentValue: current?.value || null,
-    currentDate: current?.date || null,
-    change: {
-      d1: consecutiveIndexChange(current, previous),
-      d7: percentChange(current?.value, point7d?.value),
-      m1: percentChange(current?.value, point30d?.value),
-      m6: percentChange(current?.value, point183d?.value),
-      all: percentChange(current?.value, pointAll?.value)
-    },
-    componentCount: basketComponents.length,
-    activeComponentCount: current?.activeCount || 0,
-    points: scopedPoints,
-    components: basketComponents.map(({ series, ...component }) => component)
-  };
+  const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const built = buildChainLinkedMarketIndex(indexConfig, rows, { endDate: kstToday, staleDays: 30 });
+  return buildStoredIndexPayload(
+    indexConfig,
+    built.indexPoints.map((point) => ({
+      point_date: point.date,
+      index_value: point.value,
+      active_component_count: point.activeCount,
+      component_count: point.componentCount
+    })),
+    built.componentPoints.map((point) => ({
+      apparel_id: point.apparelId,
+      point_date: point.date,
+      price_jpy: point.price,
+      base_price_jpy: point.basePrice,
+      component_index_value: point.componentIndexValue
+    })),
+    conditionKey,
+    range
+  );
 }
 
 function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditionKey, range) {
@@ -499,10 +388,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
       activeCount: Number(row.active_component_count || 0),
       componentCount: Number(row.component_count || indexConfig.components.length || 0)
     }))
-    .filter((point) => {
-      const minimumActiveCount = Math.max(3, Math.ceil(Number(point.componentCount || 0) * 0.2));
-      return point.value > 0 && point.activeCount >= minimumActiveCount && isSaneIndexDate(point.date, indexConfig.baseDate);
-    })
+    .filter((point) => point.value > 0 && isSaneIndexDate(point.date, indexConfig.baseDate))
     .sort((a, b) => a.date.localeCompare(b.date));
   if (!points.length) return null;
   const effectiveBaseDate = points[0].date;
