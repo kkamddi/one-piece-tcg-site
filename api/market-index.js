@@ -92,7 +92,7 @@ function smoothIndexPoints(points = [], windowSize = 3) {
     return {
       ...point,
       rawValue: point.value,
-      value: smoothedValue ? Number(smoothedValue.toFixed(2)) : point.value
+      smoothedValue: smoothedValue ? Number(smoothedValue.toFixed(2)) : point.value
     };
   });
 }
