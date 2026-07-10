@@ -174,6 +174,42 @@ async function fetchApprovedOverrideIds() {
   }
 }
 
+function normalizeMissingCondition(value) {
+  const condition = String(value || '').trim().toLowerCase();
+  if (condition === 'a') return 'single';
+  return ['any', 'single', 'psa10', 'either'].includes(condition) ? condition : 'none';
+}
+
+async function filterTargetsByMissingCondition(targets) {
+  const missingCondition = normalizeMissingCondition(process.env.BACKFILL_MISSING_CONDITION);
+  if (missingCondition === 'none' || !targets.length) return targets;
+  if (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID) {
+    throw new Error('Missing-condition filtering requires Cloudflare D1 credentials');
+  }
+
+  const rows = await queryD1(`
+    SELECT apparel_id,
+           MAX(CASE WHEN condition_key = 'a' THEN 1 ELSE 0 END) AS has_single,
+           MAX(CASE WHEN condition_key = 'psa10' THEN 1 ELSE 0 END) AS has_psa10
+    FROM market_chart_daily_points
+    WHERE source = 'snkrdunk'
+      AND condition_key IN ('a', 'psa10')
+    GROUP BY apparel_id
+  `);
+  const coverageById = new Map(rows.map((row) => [Number(row.apparel_id || 0), {
+    single: Number(row.has_single || 0) > 0,
+    psa10: Number(row.has_psa10 || 0) > 0,
+  }]));
+
+  return targets.filter((item) => {
+    const coverage = coverageById.get(Number(item.apparelId)) || { single: false, psa10: false };
+    if (missingCondition === 'single') return !coverage.single;
+    if (missingCondition === 'psa10') return !coverage.psa10;
+    if (missingCondition === 'either') return !coverage.single || !coverage.psa10;
+    return !coverage.single && !coverage.psa10;
+  });
+}
+
 async function buildTargets() {
   const explicitIds = parseIds(process.env.APPAREL_IDS || process.env.BACKFILL_APPAREL_IDS);
   const scope = String(process.env.BACKFILL_SCOPE || 'approved').trim().toLowerCase();
@@ -182,24 +218,24 @@ async function buildTargets() {
   const byApparelId = new Map(allMarketCards.map((item) => [Number(item.apparelId), item]));
 
   if (explicitIds.length) {
-    return explicitIds.map((apparelId) => byApparelId.get(apparelId) || {
+    return filterTargetsByMissingCondition(explicitIds.map((apparelId) => byApparelId.get(apparelId) || {
       source: 'snkrdunk',
       apparelId,
       locale: 'JP',
       code: '',
       name: '',
-    });
+    }));
   }
 
   const jpMarketCards = allMarketCards.filter((item) => item?.locale === 'JP');
-  if (scope === 'all-jp') return jpMarketCards;
-  if (scope === 'all-market' || scope === 'all') return allMarketCards;
+  if (scope === 'all-jp') return filterTargetsByMissingCondition(jpMarketCards);
+  if (scope === 'all-market' || scope === 'all') return filterTargetsByMissingCondition(allMarketCards);
 
   const approvedIds = new Set((Array.isArray(cardMarketLinks) ? cardMarketLinks : [])
     .filter((link) => link?.locale === 'JP' && link?.status === 'approved' && link?.apparelId)
     .map((link) => Number(link.apparelId)));
   for (const apparelId of await fetchApprovedOverrideIds()) approvedIds.add(apparelId);
-  return jpMarketCards.filter((item) => approvedIds.has(Number(item.apparelId)));
+  return filterTargetsByMissingCondition(jpMarketCards.filter((item) => approvedIds.has(Number(item.apparelId))));
 }
 
 function decodeUlidTimestamp(value) {
@@ -703,6 +739,7 @@ async function main() {
     mode,
     historySource,
     scope: process.env.BACKFILL_SCOPE || 'approved',
+    missingCondition: normalizeMissingCondition(process.env.BACKFILL_MISSING_CONDITION),
     totalTargets: allTargets.length,
     startIndex,
     selectedTargets: targets.length,

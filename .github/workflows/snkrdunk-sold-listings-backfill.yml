@@ -4,6 +4,8 @@ on:
   schedule:
     # Daily incremental trading-history refresh at 04:00 KST.
     - cron: "0 19 * * *"
+    # Monthly one-year retry for approved cards that still have no daily history.
+    - cron: "0 21 1 * *"
   push:
     branches:
       - main
@@ -20,6 +22,17 @@ on:
           - approved
           - all-jp
           - all-market
+      missing_condition:
+        description: Only collect cards missing this daily-history condition
+        required: false
+        default: none
+        type: choice
+        options:
+          - none
+          - any
+          - single
+          - psa10
+          - either
       apparel_ids:
         description: Optional comma-separated SNKRDUNK apparel IDs
         required: false
@@ -87,7 +100,7 @@ on:
 
 concurrency:
   group: snkrdunk-sold-listings-backfill
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   backfill:
@@ -111,17 +124,18 @@ jobs:
           SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
           SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
           BACKFILL_SCOPE: ${{ github.event.inputs.scope || 'approved' }}
+          BACKFILL_MISSING_CONDITION: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 1 * *' && 'any' || github.event.inputs.missing_condition || 'none' }}
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           BACKFILL_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
           BACKFILL_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
           BACKFILL_MODE: ${{ github.event.inputs.mode || 'aggregate' }}
-          BACKFILL_RECENT_RAW_DAYS: ${{ github.event_name == 'schedule' && '7' || github.event.inputs.recent_raw_days || '30' }}
-          BACKFILL_DAILY_DAYS: ${{ github.event_name == 'schedule' && '7' || github.event.inputs.daily_days || '365' }}
+          BACKFILL_RECENT_RAW_DAYS: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 1 * *' && '30' || github.event_name == 'schedule' && '7' || github.event.inputs.recent_raw_days || '30' }}
+          BACKFILL_DAILY_DAYS: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 1 * *' && '365' || github.event_name == 'schedule' && '7' || github.event.inputs.daily_days || '365' }}
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
           BACKFILL_TRADING_HISTORIES: ${{ (github.event_name == 'schedule' || github.event.inputs.history_source == 'trading-histories') && '1' || '0' }}
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.trading_history_per_page || '12' }}
-          TRADING_HISTORY_MAX_PAGES: ${{ github.event_name == 'schedule' && '5' || github.event.inputs.trading_history_max_pages || '120' }}
+          TRADING_HISTORY_MAX_PAGES: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 1 * *' && '120' || github.event_name == 'schedule' && '5' || github.event.inputs.trading_history_max_pages || '120' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '1000' }}
           BACKFILL_HISTORY_CHUNK_SIZE: ${{ github.event.inputs.history_chunk_size || '10' }}
           BACKFILL_PROGRESS_PATH: sold-listings-backfill-progress.jsonl
