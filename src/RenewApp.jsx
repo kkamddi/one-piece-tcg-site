@@ -3744,12 +3744,14 @@ function RenewPartnerShopSeoPage({ uiLang }) {
   );
 }
 
+const MARKET_INDEX_CONDITION = 'psa10';
+
 function RenewHomeCollectorIndex({ onOpen }) {
   const [payload, setPayload] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/market-index?type=collector&condition=a&range=7d', { cache: 'no-store' })
+    fetch(`/api/market-index?type=collector&condition=${MARKET_INDEX_CONDITION}&range=7d`, { cache: 'no-store' })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!cancelled) setPayload(data);
@@ -7147,7 +7149,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     setPayload(null);
     setComponentPage(1);
     setLoading(true);
-    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=a&range=${range}`, { cache: 'no-store' })
+    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${MARKET_INDEX_CONDITION}&range=${range}`, { cache: 'no-store' })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!cancelled) setPayload(data);
@@ -7254,7 +7256,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
         <>
           <div className="renew-index-meta">
             <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
-            <span>Single SNKRDUNK 일별 중앙값 기준</span>
+            <span>PSA10 SNKRDUNK 일별 중앙값 기준</span>
           </div>
           <div className="renew-index-component-sort" aria-label="Index component sort">
             <button

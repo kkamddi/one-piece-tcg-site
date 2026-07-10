@@ -109,9 +109,10 @@ function buildIndexRows(indexConfig, rows) {
       series
     };
   });
+  const dataComponents = components.filter((component) => component.baseDate && component.basePrice && component.series.length);
 
   const dateSet = new Set();
-  for (const component of components) {
+  for (const component of dataComponents) {
     for (const point of component.series) {
       if (component.baseDate && point.date >= component.baseDate) dateSet.add(point.date);
     }
@@ -127,7 +128,7 @@ function buildIndexRows(indexConfig, rows) {
     let totalWeighted = 0;
     let totalWeight = 0;
     let activeCount = 0;
-    for (const component of components) {
+    for (const component of dataComponents) {
       if (!component.baseDate || !component.basePrice || date < component.baseDate) continue;
       let cursor = cursorById.get(component.apparelId) || 0;
       while (cursor < component.series.length && component.series[cursor].date <= date) {
@@ -160,12 +161,12 @@ function buildIndexRows(indexConfig, rows) {
         point_date: date,
         index_value: Number((totalWeighted / totalWeight).toFixed(4)),
         active_component_count: activeCount,
-        component_count: indexConfig.components.length,
+        component_count: dataComponents.length,
         source: 'snkrdunk'
       });
     }
   }
-  return { indexRows, componentRows };
+  return { indexRows, componentRows, dataComponents };
 }
 
 async function rebuildIndex(indexConfig) {
@@ -173,12 +174,15 @@ async function rebuildIndex(indexConfig) {
   const rows = await fetchDailyPointRows(apparelIds, indexConfig.baseDate);
   const rebuildStartDate = getRebuildStartDate();
 
+  const builtRows = buildIndexRows(indexConfig, rows);
+  const dataComponents = builtRows.dataComponents || [];
+
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK daily median prices`]
+    [indexConfig.code, indexConfig.name, indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK ${CONDITION_KEY.toUpperCase()} daily median prices`]
   );
-
+  await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [
     'index_code',
     'apparel_id',
@@ -192,7 +196,7 @@ async function rebuildIndex(indexConfig) {
     'note',
     'weight',
     'active'
-  ], indexConfig.components.map((component) => ({
+  ], dataComponents.map((component) => ({
     index_code: indexConfig.code,
     apparel_id: Number(component.apparelId),
     card_id: component.cardId || '',
@@ -207,7 +211,6 @@ async function rebuildIndex(indexConfig) {
     active: 1
   })));
 
-  const builtRows = buildIndexRows(indexConfig, rows);
   const indexRows = rebuildStartDate
     ? builtRows.indexRows.filter((row) => row.point_date >= rebuildStartDate)
     : builtRows.indexRows;

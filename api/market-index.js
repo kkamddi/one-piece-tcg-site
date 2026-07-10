@@ -399,9 +399,10 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
       series
     };
   });
+  const dataComponents = components.filter((component) => component.hasData);
 
   const dateSet = new Set();
-  for (const component of components) {
+  for (const component of dataComponents) {
     for (const point of component.series) {
       if (point.date >= (component.baseDate || indexConfig.baseDate)) dateSet.add(point.date);
     }
@@ -414,7 +415,7 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
   for (const date of dates) {
     let total = 0;
     let activeCount = 0;
-    for (const component of components) {
+    for (const component of dataComponents) {
       if (!component.hasData || date < component.baseDate) continue;
       const series = component.series;
       let cursor = cursorById.get(component.apparelId) || 0;
@@ -470,10 +471,10 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
       m6: percentChange(current?.value, point183d?.value),
       all: percentChange(current?.value, pointAll?.value)
     },
-    componentCount: indexConfig.components.length,
+    componentCount: dataComponents.length,
     activeComponentCount: current?.activeCount || 0,
     points: scopedPoints,
-    components: components.map(({ series, ...component }) => component)
+    components: dataComponents.map(({ series, ...component }) => component)
   };
 }
 
@@ -522,10 +523,12 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
       currentSource: 'snkrdunk_index_daily'
     });
   }
-  const baseComponents = indexConfig.components.map((component) => ({
-    ...component,
-    ...(componentIndexById.get(Number(component.apparelId)) || { hasData: false, currentIndex: null })
-  }));
+  const baseComponents = indexConfig.components
+    .map((component) => ({
+      ...component,
+      ...(componentIndexById.get(Number(component.apparelId)) || { hasData: false, currentIndex: null })
+    }))
+    .filter((component) => component.hasData);
   const displayPoints = smoothIndexPoints(points);
   const scopedPoints = applyRange(displayPoints, range);
   const current = displayPoints[displayPoints.length - 1] || null;
@@ -559,7 +562,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
       m6: percentChange(current?.value, point183d?.value),
       all: percentChange(current?.value, pointAll?.value)
     },
-    componentCount: indexConfig.components.length,
+    componentCount: baseComponents.length,
     activeComponentCount: current?.activeCount || 0,
     points: scopedPoints,
     components: baseComponents
