@@ -141,7 +141,7 @@ async function rebuildIndex(indexConfig) {
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate || indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK ${CONDITION_KEY.toUpperCase()} daily median prices`]
+    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate || indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK chain-linked daily median prices`]
   );
   await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [
@@ -157,7 +157,7 @@ async function rebuildIndex(indexConfig) {
     'note',
     'weight',
     'active'
-  ], dataComponents.map((component) => ({
+  ], indexConfig.components.map((component) => ({
     index_code: indexConfig.code,
     apparel_id: Number(component.apparelId),
     card_id: component.cardId || '',
