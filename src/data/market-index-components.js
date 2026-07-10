@@ -136,7 +136,7 @@ export const luffyIndexComponents = [
   { cardId: 'JP::LUFFY::605546', code: 'ST21-014', apparelId: 605546, set: 'ST21', name: 'Monkey.D.Luffy', nameKo: '몽키 D. 루피', rarity: 'SR', note: 'SR' },
   { cardId: 'JP::LUFFY::709874', code: 'P-106', apparelId: 709874, set: 'P', name: 'Monkey.D.Luffy', nameKo: '몽키 D. 루피', rarity: 'P', note: 'P' },
   { cardId: 'JP::LUFFY::676009', code: 'OP13-118', apparelId: 676009, set: 'OP13', name: 'Monkey.D.Luffy', nameKo: '몽키 D. 루피', rarity: 'SEC-SPC', note: 'Wanted SEC-SPC' }
-];
+].filter((component) => Number(component.apparelId) !== 709874);
 
 export const collectorIndexComponents = Array.from(
   new Map(

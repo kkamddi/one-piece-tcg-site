@@ -7097,6 +7097,12 @@ function getMarketIndexComponentHref(item) {
     : `/prices${query ? `?${query}` : ''}`;
 }
 
+function getMarketIndexComponentLocale(item) {
+  const explicitLocale = String(item?.locale || '').trim().toUpperCase();
+  if (explicitLocale) return explicitLocale;
+  return String(item?.cardId || '').startsWith('EN::') ? 'EN' : 'JP';
+}
+
 function getMarketIndexTypeFromPath(path) {
   const aliasMap = {
     '/prices/collector-index': 'collector',
@@ -7122,7 +7128,7 @@ function isMarketIndexPath(path) {
     || path.startsWith('/prices/index');
 }
 
-function RenewMarketIndex() {
+function RenewMarketIndex({ onOpenComponent } = {}) {
   const [payload, setPayload] = useState(null);
   const [indexType, setIndexType] = useState(() => {
     if (typeof window === 'undefined') return 'collector';
@@ -7289,6 +7295,15 @@ function RenewMarketIndex() {
                 className="renew-index-component"
                 href={getMarketIndexComponentHref(item)}
                 aria-label={`${item.code || item.name} mapped market price`}
+                onClick={(event) => {
+                  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault();
+                  if (onOpenComponent) {
+                    onOpenComponent(item);
+                    return;
+                  }
+                  window.location.assign(getMarketIndexComponentHref(item));
+                }}
               >
                 <b>{item.code}</b>
                 <strong>{item.name}</strong>
@@ -7624,7 +7639,20 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   useEffect(() => {
     if (initialCode) {
       setCode(initialCode);
-      searchMarket(initialCode, initialApparelId);
+      if (initialApparelId) {
+        loadMarketCards()
+          .then((items) => {
+            const item = items.find((candidate) => String(candidate.apparelId) === String(initialApparelId));
+            const itemLocale = String(item?.locale || 'JP').toUpperCase();
+            setMarketProductLocale(itemLocale);
+            searchMarket(initialCode, initialApparelId, itemLocale);
+          })
+          .catch(() => {
+            searchMarket(initialCode, initialApparelId);
+          });
+        return;
+      }
+      searchMarket(initialCode);
       return;
     }
     if (initialApparelId) {
@@ -7632,8 +7660,10 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
         .then((items) => {
           const item = items.find((candidate) => String(candidate.apparelId) === String(initialApparelId));
           if (!item?.code) return;
+          const itemLocale = String(item.locale || 'JP').toUpperCase();
           setCode(item.code);
-          searchMarket(item.code, initialApparelId);
+          setMarketProductLocale(itemLocale);
+          searchMarket(item.code, initialApparelId, itemLocale);
         })
         .catch(() => {});
     }
@@ -7660,7 +7690,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     return Array.isArray(mod.default) ? mod.default : [];
   }
 
-  async function searchMarket(nextCode = code, targetApparelId = null) {
+  async function searchMarket(nextCode = code, targetApparelId = null, targetLocale = marketProductLocale) {
     const rawQuery = String(nextCode || '').trim();
     const normalized = normalizeCode(rawQuery);
     if (!normalized) return;
@@ -7673,7 +7703,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     try {
       const items = await loadMarketCards();
       const marketItems = items.filter((item) => item?.apparelId);
-      const primaryLocale = String(marketProductLocale || 'JP').toUpperCase();
+      const primaryLocale = String(targetLocale || marketProductLocale || 'JP').toUpperCase();
       const primaryItems = marketItems.filter((item) => String(item.locale || '').toUpperCase() === primaryLocale);
       const exactCodeResult = primaryItems.filter((item) => normalizeCode(item.code) === normalized);
       const normalizedText = normalizeMarketText(rawQuery);
@@ -7857,6 +7887,23 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
     window.alert(`${gradeLabel} ${t('addedToPortfolio')}`);
   }
 
+  function openMarketIndexComponent(item) {
+    const nextApparelId = item?.apparelId || null;
+    const nextCode = String(item?.code || '').trim();
+    const nextLocale = getMarketIndexComponentLocale(item);
+    if (!nextApparelId && !nextCode) return;
+    setHomeTab('card');
+    setCode(nextCode);
+    setMarketProductLocale(nextLocale);
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', getMarketIndexComponentHref(item));
+    }
+    searchMarket(nextCode || String(nextApparelId), nextApparelId, nextLocale);
+    window.setTimeout(() => {
+      marketDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+  }
+
   function selectMarketCandidate(item) {
     marketCandidateScrollYRef.current = window.scrollY || 0;
     setSelected(item);
@@ -7983,7 +8030,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
               <button type="button" className={homeTab === 'card' ? 'is-active' : ''} onClick={() => setHomeTab('card')}>{t('marketHomeCardTab')}</button>
               <button type="button" className={homeTab === 'index' ? 'is-active' : ''} onClick={() => setHomeTab('index')}>Index</button>
             </div>
-            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : <RenewMarketIndex />}
+            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : <RenewMarketIndex onOpenComponent={openMarketIndexComponent} />}
           </>
         ) : null}
 
