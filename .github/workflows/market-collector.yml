@@ -76,10 +76,16 @@ jobs:
             exit 1
           fi
 
-          base_limit=50
+          page_size=50
+          base_limit=$page_size
           base_concurrency=4
           offset=$((10#$COLLECTOR_START_OFFSET))
-          stop_offset=$((offset + (10#$COLLECTOR_MAX_PAGES * base_limit)))
+          stop_offset=$((offset + (10#$COLLECTOR_MAX_PAGES * page_size)))
+
+          if [ "$COLLECT_SOLD_LISTINGS" = "true" ]; then
+            base_limit=10
+            base_concurrency=2
+          fi
 
           if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
             case "$SCHEDULE_EXPRESSION" in
@@ -152,38 +158,8 @@ jobs:
             exit 1
           fi
 
-      - name: Collect approved listing floor snapshots
-        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '17 18 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.apparel_ids == '') }}
-        env:
-          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
-          COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
-        run: |
-          if [ -z "$COLLECTOR_TOKEN" ]; then
-            echo "MARKET_COLLECTOR_TOKEN secret is missing."
-            exit 1
-          fi
-
-          offset=0
-          limit=50
-          max_pages=30
-          for i in $(seq 1 "$max_pages"); do
-            url="${COLLECTOR_URL}?scope=approved&limit=${limit}&offset=${offset}&concurrency=4&listingSnapshots=1&soldListings=1&soldListingPages=1"
-            if ! json=$(curl -fsS --retry 10 --retry-delay 15 --retry-max-time 300 --retry-all-errors --connect-timeout 20 --max-time 120 -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url"); then
-              echo "Approved snapshot collection failed; continuing to index rebuild."
-              break
-            fi
-            echo "$json"
-            done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")
-            next_offset=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.nextOffset || 0)" "$json")
-            if [ "$done_flag" = "1" ]; then
-              break
-            fi
-            offset="$next_offset"
-            sleep 2
-          done
-
       - name: Rebuild PSA10 market indexes
-        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '17 18 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.scope != 'all-en') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.scope != 'all-en' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
