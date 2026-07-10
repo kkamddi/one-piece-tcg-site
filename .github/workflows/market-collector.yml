@@ -152,6 +152,12 @@ jobs:
               elif [ "$request_limit" -gt 10 ]; then
                 request_limit=10
                 request_concurrency=2
+              elif [ "$request_limit" -gt 5 ]; then
+                request_limit=5
+                request_concurrency=1
+              elif [ "$request_limit" -gt 1 ]; then
+                request_limit=1
+                request_concurrency=1
               else
                 echo "Collector failed at offset=$offset after adaptive retries."
                 exit 1
