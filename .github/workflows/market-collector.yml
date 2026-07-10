@@ -21,10 +21,6 @@ on:
         description: Zero-based offset used to resume a manual run
         required: false
         default: "0"
-      index_rebuild_window_days:
-        description: Index rebuild window days. Use 0 for full rebuild.
-        required: false
-        default: "0"
       apparel_ids:
         description: Optional comma-separated SNKRDUNK apparel IDs for a focused run
         required: false
@@ -42,11 +38,8 @@ on:
         required: false
         default: "1"
   schedule:
-    # Four daily shards: 09:17 / 15:17 / 21:17 / 03:17 KST
-    - cron: "17 0 * * *"
-    - cron: "17 6 * * *"
-    - cron: "17 12 * * *"
-    - cron: "17 18 * * *"
+    # Four complete JP market refreshes per day.
+    - cron: "17 0,6,12,18 * * *"
 
 concurrency:
   group: market-price-collector
@@ -54,8 +47,30 @@ concurrency:
 
 jobs:
   collect:
+    name: Collect market prices (${{ matrix.shard_name }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - shard_id: 0
+            shard_name: 0-1299
+            shard_start: 0
+            shard_stop: 1300
+          - shard_id: 1
+            shard_name: 1300-2599
+            shard_start: 1300
+            shard_stop: 2600
+          - shard_id: 2
+            shard_name: 2600-3899
+            shard_start: 2600
+            shard_stop: 3900
+          - shard_id: 3
+            shard_name: 3900-end
+            shard_start: 3900
+            shard_stop: 0
     steps:
       - uses: actions/checkout@v4
 
@@ -66,7 +81,9 @@ jobs:
           COLLECTOR_SCOPE: ${{ github.event.inputs.scope || 'all-jp' }}
           COLLECTOR_MAX_PAGES: ${{ github.event.inputs.max_pages || '120' }}
           COLLECTOR_START_OFFSET: ${{ github.event.inputs.start_offset || '0' }}
-          SCHEDULE_EXPRESSION: ${{ github.event.schedule || '' }}
+          SHARD_ID: ${{ matrix.shard_id }}
+          SHARD_START: ${{ matrix.shard_start }}
+          SHARD_STOP: ${{ matrix.shard_stop }}
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           COLLECT_SOLD_LISTINGS: ${{ github.event.inputs.collect_sold_listings || 'false' }}
           SOLD_LISTING_PAGES: ${{ github.event.inputs.sold_listing_pages || '1' }}
@@ -87,14 +104,19 @@ jobs:
             base_concurrency=2
           fi
 
+          use_shards=false
           if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
-            case "$SCHEDULE_EXPRESSION" in
-              "17 0 * * *") offset=0; stop_offset=1300 ;;
-              "17 6 * * *") offset=1300; stop_offset=2600 ;;
-              "17 12 * * *") offset=2600; stop_offset=3900 ;;
-              "17 18 * * *") offset=3900; stop_offset=0 ;;
-              *) echo "Unknown schedule expression: $SCHEDULE_EXPRESSION"; exit 1 ;;
-            esac
+            use_shards=true
+          elif [ "$COLLECTOR_START_OFFSET" = "0" ] && [ -z "$APPAREL_IDS" ]; then
+            use_shards=true
+          fi
+
+          if [ "$use_shards" = "true" ]; then
+            offset=$((10#$SHARD_START))
+            stop_offset=$((10#$SHARD_STOP))
+          elif [ "$SHARD_ID" != "0" ]; then
+            echo "Focused or resumed manual run uses shard 0 only."
+            exit 0
           fi
 
           max_requests=$((10#$COLLECTOR_MAX_PAGES * 5))
@@ -158,22 +180,13 @@ jobs:
             exit 1
           fi
 
-      - name: Rebuild PSA10 market indexes
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.scope != 'all-en' }}
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
-          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
-          MARKET_INDEX_REBUILD_WINDOW_DAYS: ${{ github.event.inputs.index_rebuild_window_days || '0' }}
-        run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "CLOUDFLARE_API_TOKEN secret is missing."
-            exit 1
-          fi
-          MARKET_INDEX_CONDITION=psa10 node scripts/rebuildMarketIndexes.js
-
-      - name: Notify Telegram on failure
-        if: failure()
+  notify-failure:
+    name: Notify Telegram on failure
+    needs: collect
+    if: ${{ always() && needs.collect.result == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
