@@ -4780,18 +4780,6 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter]);
 
   useEffect(() => {
-    if (!selectedCard) return undefined;
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousHtmlOverflow;
-    };
-  }, [selectedCard]);
-
-  useEffect(() => {
     if (loading || restoreScrollY == null || typeof window === 'undefined') return undefined;
     const targetY = Math.max(0, Number(restoreScrollY) || 0);
     const restore = () => window.scrollTo({ top: targetY, left: 0, behavior: 'auto' });
@@ -6021,17 +6009,8 @@ function RenewMarketplace({ authUser, marketListings, setMarketListings, filterC
       setInquirySending(false);
     }
   };
-  useEffect(() => {
-    if (!verificationOpen && !registerOpen && !marketGuideOpen && !marketNotice && !inquiryOpen && !conversationOpen && !statusModalOpen && !marketImageViewerOpen) return undefined;
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousHtmlOverflow;
-    };
-  }, [verificationOpen, registerOpen, marketGuideOpen, marketNotice, inquiryOpen, conversationOpen, statusModalOpen, marketImageViewerOpen]);
+  const marketplaceModalOpen = Boolean(verificationOpen || registerOpen || marketGuideOpen || marketNotice || inquiryOpen || conversationOpen || statusModalOpen || marketImageViewerOpen);
+  useBodyScrollLock(marketplaceModalOpen);
   useEffect(() => {
     setVerificationOpen(false);
     setVerificationSubmitted(false);
@@ -6084,7 +6063,7 @@ function RenewMarketplace({ authUser, marketListings, setMarketListings, filterC
   }, [registerPhotos]);
 
   return (
-    <main className={`renew-subpage ${registerOpen || verificationOpen || marketGuideOpen || inquiryOpen || conversationOpen || statusModalOpen || marketImageViewerOpen || marketNotice ? 'is-marketplace-modal-open' : ''}`}>
+    <main className={`renew-subpage ${marketplaceModalOpen ? 'is-marketplace-modal-open' : ''}`}>
       <section className="renew-panel renew-marketplace">
         <div className="renew-marketplace-head">
           <div>
