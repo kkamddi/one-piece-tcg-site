@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { buildFilteredDailyRows } from '../lib/market-outlier-filter.js';
 
 function loadEnvFile(filePath = '.env.local') {
   if (!fs.existsSync(filePath)) return;
@@ -106,13 +107,6 @@ function parsePathPoints(pathText) {
 function addDailyValue(group, amountJpy) {
   if (!amountJpy) return;
   group.values.push(amountJpy);
-}
-
-function median(values) {
-  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
-  if (!sorted.length) return 0;
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
 }
 
 async function queryD1(sql, params = []) {
@@ -228,8 +222,7 @@ for (const row of trades) {
 }
 
 let dailyCount = 0;
-for (const group of dailyGroups.values()) {
-  const values = group.values;
+for (const group of buildFilteredDailyRows([...dailyGroups.values()], { now })) {
   await queryD1(
     `insert or replace into market_chart_daily_points
       (source, apparel_id, locale, code, condition_key, point_date, median_price_jpy, min_price_jpy, max_price_jpy, trade_count, source_count, updated_at)
@@ -241,11 +234,11 @@ for (const group of dailyGroups.values()) {
       group.code,
       group.condition_key,
       group.point_date,
-      median(values),
-      Math.min(...values),
-      Math.max(...values),
-      values.length,
-      values.length,
+      group.median_price_jpy,
+      group.min_price_jpy,
+      group.max_price_jpy,
+      group.trade_count,
+      group.source_count,
       now,
     ],
   );

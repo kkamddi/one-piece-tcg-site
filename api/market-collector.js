@@ -1,6 +1,7 @@
 import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
 import { collectMarketSnapshot } from './market.js';
+import { filterDailyTradePrices, medianNumber } from '../lib/market-outlier-filter.js';
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 50;
@@ -300,13 +301,6 @@ function inferHistoryItem(rawItem) {
   };
 }
 
-function median(values) {
-  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
-  if (!sorted.length) return 0;
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
-}
-
 async function upsertDailyPoint({ source, apparelId, locale, code, condition, day }) {
   const rows = await queryD1(`
     SELECT price_amount_jpy AS price
@@ -319,6 +313,29 @@ async function upsertDailyPoint({ source, apparelId, locale, code, condition, da
   `, [source, apparelId, condition, day]);
   const values = rows.map((row) => Number(row.price || 0)).filter((value) => value > 0);
   if (!values.length) return false;
+  const referenceRows = await queryD1(`
+    SELECT median_price_jpy AS price
+    FROM market_chart_daily_points
+    WHERE source = ?
+      AND apparel_id = ?
+      AND condition_key = ?
+      AND point_date < ?
+      AND median_price_jpy > 0
+    ORDER BY point_date DESC
+    LIMIT 10
+  `, [source, apparelId, condition, day]);
+  const referencePrice = medianNumber(referenceRows.map((row) => Number(row.price || 0)));
+  const filteredValues = filterDailyTradePrices(values, { referencePrice });
+  if (!filteredValues.length) {
+    await runD1(`
+      DELETE FROM market_chart_daily_points
+      WHERE source = ?
+        AND apparel_id = ?
+        AND condition_key = ?
+        AND point_date = ?
+    `, [source, apparelId, condition, day]);
+    return false;
+  }
 
   const now = new Date().toISOString();
   await runD1(`
@@ -344,10 +361,10 @@ async function upsertDailyPoint({ source, apparelId, locale, code, condition, da
     code,
     condition,
     day,
-    median(values),
-    Math.min(...values),
-    Math.max(...values),
-    values.length,
+    medianNumber(filteredValues),
+    Math.min(...filteredValues),
+    Math.max(...filteredValues),
+    filteredValues.length,
     values.length,
     now,
   ]);

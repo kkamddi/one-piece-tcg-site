@@ -110,6 +110,7 @@ function buildIndexRows(indexConfig, rows) {
     };
   });
   const dataComponents = components.filter((component) => component.baseDate && component.basePrice && component.series.length);
+  const minimumActiveCount = Math.max(3, Math.ceil(dataComponents.length * 0.2));
 
   const dateSet = new Set();
   for (const component of dataComponents) {
@@ -154,7 +155,7 @@ function buildIndexRows(indexConfig, rows) {
       totalWeight += weight;
       activeCount += 1;
     }
-    if (activeCount && totalWeight > 0) {
+    if (activeCount >= minimumActiveCount && totalWeight > 0) {
       indexRows.push({
         index_code: indexConfig.code,
         condition_key: CONDITION_KEY,

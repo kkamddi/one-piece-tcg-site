@@ -2,6 +2,7 @@ import { appendFile } from 'node:fs/promises';
 import fs from 'node:fs';
 import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
+import { buildFilteredDailyRows } from '../lib/market-outlier-filter.js';
 
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_COLLECTOR_URL = 'https://www.optcgkorea.com/api/market-collector';
@@ -321,13 +322,6 @@ function parsePriceAmountJpy(trade) {
   return Number.isFinite(directJpy) && directJpy > 0 ? Math.round(directJpy) : 0;
 }
 
-function median(values) {
-  const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
-  if (!sorted.length) return 0;
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
-}
-
 function recentRawCutoffDate(days) {
   const kstNow = new Date(Date.now() + KST_OFFSET_MS);
   kstNow.setUTCDate(kstNow.getUTCDate() - days);
@@ -497,27 +491,7 @@ function addDailyHistory(dailyBuckets, item, history) {
 }
 
 function buildDailyRows(dailyBuckets) {
-  const now = new Date().toISOString();
-  return [...dailyBuckets.values()]
-    .map((bucket) => {
-      const prices = bucket.prices.filter((price) => Number.isFinite(price) && price > 0);
-      if (!prices.length) return null;
-      return {
-        source: bucket.source,
-        apparel_id: bucket.apparel_id,
-        locale: bucket.locale,
-        code: bucket.code,
-        condition_key: bucket.condition_key,
-        point_date: bucket.point_date,
-        median_price_jpy: median(prices),
-        min_price_jpy: Math.min(...prices),
-        max_price_jpy: Math.max(...prices),
-        trade_count: prices.length,
-        source_count: prices.length,
-        updated_at: now,
-      };
-    })
-    .filter(Boolean);
+  return buildFilteredDailyRows([...dailyBuckets.values()]);
 }
 
 async function upsertDailyRows(rows) {

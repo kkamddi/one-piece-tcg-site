@@ -400,6 +400,7 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
     };
   });
   const dataComponents = components.filter((component) => component.hasData);
+  const minimumActiveCount = Math.max(3, Math.ceil(dataComponents.length * 0.2));
 
   const dateSet = new Set();
   for (const component of dataComponents) {
@@ -429,7 +430,7 @@ function buildIndexPayload(indexConfig, rows, conditionKey, range) {
       total += (latestPrice / component.basePrice) * indexConfig.baseValue;
       activeCount += 1;
     }
-    if (activeCount) {
+    if (activeCount >= minimumActiveCount) {
       points.push({
         date,
         value: Number((total / activeCount).toFixed(2)),
@@ -483,9 +484,13 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
     .map((row) => ({
       date: toDateKey(row.point_date),
       value: Number(Number(row.index_value || 0).toFixed(2)),
-      activeCount: Number(row.active_component_count || 0)
+      activeCount: Number(row.active_component_count || 0),
+      componentCount: Number(row.component_count || indexConfig.components.length || 0)
     }))
-    .filter((point) => point.value > 0 && isSaneIndexDate(point.date, indexConfig.baseDate))
+    .filter((point) => {
+      const minimumActiveCount = Math.max(3, Math.ceil(Number(point.componentCount || 0) * 0.2));
+      return point.value > 0 && point.activeCount >= minimumActiveCount && isSaneIndexDate(point.date, indexConfig.baseDate);
+    })
     .sort((a, b) => a.date.localeCompare(b.date));
   if (!points.length) return null;
 
