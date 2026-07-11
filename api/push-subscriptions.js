@@ -20,6 +20,10 @@ function safeString(value, max = 2000) {
   return String(value ?? '').trim().slice(0, max);
 }
 
+function isAdminUser(user) {
+  return String(user?.user_metadata?.username || '').toLowerCase() === 'admin';
+}
+
 async function getStatus(request, response, user) {
   const endpoint = safeString(request.query?.endpoint, 3000);
   let query = supabaseAdmin
@@ -88,6 +92,7 @@ export default async function handler(request, response) {
   try {
     const user = await getAuthenticatedUser(request);
     if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
+    if (!isAdminUser(user)) return response.status(403).json({ error: 'admin_only' });
     if (request.method === 'GET') return await getStatus(request, response, user);
     if (request.method === 'POST') return await saveSubscription(request, response, user);
     if (request.method === 'DELETE') return await deleteSubscription(request, response, user);

@@ -5609,7 +5609,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           </details>
           <div className="renew-modal-actions">
             <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
-            {snkrdunkApparelId ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>시세 알림</button> : null}
+            {snkrdunkApparelId && authUser?.user_metadata?.username === 'admin' ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>시세 알림</button> : null}
             {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
             {marketListingCount ? (
               <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
@@ -8472,19 +8472,15 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                   </button>
                 ) : null}
                 <a href={selected?.sourceUrl} target="_blank" rel="noreferrer"><span className="renew-action-full">{t('sourceMarket')}</span><span className="renew-action-compact">{t('sourceMarketShort')}</span></a>
-                <button
-                  type="button"
-                  className="renew-alert-button"
-                  onClick={() => {
-                    if (!authUser) {
-                      onRequireLogin?.();
-                      return;
-                    }
-                    setPriceAlertOpen(true);
-                  }}
-                >
-                  시세 알림
-                </button>
+                {authUser?.user_metadata?.username === 'admin' ? (
+                  <button
+                    type="button"
+                    className="renew-alert-button"
+                    onClick={() => setPriceAlertOpen(true)}
+                  >
+                    시세 알림
+                  </button>
+                ) : null}
                 <button type="button" onClick={() => addValuation('a')}><span className="renew-action-full">{t('addAGrade')}</span><span className="renew-action-compact">{t('addAGradeShort')}</span></button>
                 <button type="button" onClick={() => addValuation('psa10')}><span className="renew-action-full">{t('addPsa10')}</span><span className="renew-action-compact">{t('addPsa10Short')}</span></button>
               </div>
