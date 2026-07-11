@@ -9667,6 +9667,119 @@
 
   .renew-card-modal {
     grid-template-columns: 1fr;
+    gap: 0;
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 20px;
+    padding: 12px;
+    overscroll-behavior: contain;
+  }
+
+  .renew-card-modal-close {
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+    border: 1px solid rgba(23, 25, 28, 0.1);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 4px 14px rgba(23, 25, 28, 0.12);
+  }
+
+  .renew-card-modal-image {
+    display: grid;
+    min-height: 0;
+    max-height: 36dvh;
+    place-items: center;
+    border-radius: 12px;
+    padding: 10px;
+  }
+
+  .renew-card-modal-image img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: calc(36dvh - 20px);
+    aspect-ratio: auto;
+    border-radius: 8px;
+  }
+
+  .renew-card-modal-info {
+    gap: 10px;
+    padding: 16px 4px 4px;
+  }
+
+  .renew-modal-code {
+    font-size: 13px;
+  }
+
+  .renew-card-modal-info h2 {
+    font-size: clamp(22px, 7vw, 30px);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .renew-card-modal-info p {
+    font-size: 14px;
+  }
+
+  .renew-card-modal-info details {
+    border-radius: 10px;
+    padding: 11px 12px;
+  }
+
+  .renew-card-modal-info summary {
+    font-size: 14px;
+  }
+
+  .renew-card-modal-info details div {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .renew-modal-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .renew-modal-actions button,
+  .renew-modal-actions a {
+    min-width: 0;
+    min-height: 42px;
+    border: 1px solid rgba(23, 25, 28, 0.12);
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: #17191c;
+    background: #fff;
+    font-size: 13px;
+    line-height: 1.25;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .renew-modal-actions > :first-child,
+  .renew-modal-actions .renew-alert-button,
+  .renew-modal-actions .renew-modal-market-link {
+    border-color: #17191c;
+    color: #fff;
+    background: #17191c;
+  }
+
+  .renew-app.is-dark .renew-card-modal-close,
+  .renew-app.is-dark .renew-modal-actions button,
+  .renew-app.is-dark .renew-modal-actions a {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #f5f2ec;
+    background: #24272d;
+  }
+
+  .renew-app.is-dark .renew-modal-actions > :first-child,
+  .renew-app.is-dark .renew-modal-actions .renew-alert-button,
+  .renew-app.is-dark .renew-modal-actions .renew-modal-market-link {
+    border-color: #f5f2ec;
+    color: #17191c;
+    background: #f5f2ec;
   }
 
   .renew-market-card,
