@@ -108,6 +108,20 @@ export function fetchMarketplaceNotifications() {
   return requestJson('/api/marketplace?action=notifications', { auth: true });
 }
 
+export function markMarketplaceNotificationRead(id) {
+  return requestJson(`/api/marketplace?action=notification&id=${encodeURIComponent(id)}`, {
+    auth: true,
+    method: 'PATCH'
+  });
+}
+
+export function markAllMarketplaceNotificationsRead() {
+  return requestJson('/api/marketplace?action=notifications-read-all', {
+    auth: true,
+    method: 'PATCH'
+  });
+}
+
 export function submitMarketplaceVerification(payload) {
   return requestJson('/api/marketplace?action=verification', {
     auth: true,

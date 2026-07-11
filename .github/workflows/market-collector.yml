@@ -186,10 +186,33 @@ jobs:
             exit 1
           fi
 
+  evaluate-alerts:
+    name: Evaluate price alerts
+    needs: collect
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Evaluate registered price alerts
+        env:
+          ALERT_EVALUATOR_URL: https://www.optcgkorea.com/api/price-alerts?action=evaluate
+          COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+        run: |
+          if [ -z "$COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+          json=$(curl -fsS --retry 10 --retry-delay 15 --retry-max-time 300 --retry-all-errors --connect-timeout 20 --max-time 120 \
+            -X POST -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$ALERT_EVALUATOR_URL")
+          echo "$json"
+          node -e "const p=JSON.parse(process.argv[1]); if (!p.ok) process.exit(1)" "$json"
+
   notify-failure:
     name: Notify Telegram on failure
-    needs: collect
-    if: ${{ always() && needs.collect.result == 'failure' }}
+    needs:
+      - collect
+      - evaluate-alerts
+    if: ${{ always() && (needs.collect.result == 'failure' || needs.evaluate-alerts.result == 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify Telegram

@@ -203,6 +203,7 @@ function routeApi(pathParts) {
   if (first === 'market-collector') return { key: 'marketCollector' };
   if (first === 'box-market') return { key: 'boxMarket' };
   if (first === 'market-index') return { key: 'marketIndex' };
+  if (first === 'price-alerts') return { key: 'priceAlerts' };
   if (first === 'card-market-link-overrides') return { key: 'cardMarketLinkOverrides' };
   return null;
 }
@@ -227,6 +228,7 @@ async function loadHandler(key) {
   if (key === 'marketCollector') return (await import('../../api/market-collector.js')).default;
   if (key === 'boxMarket') return (await import('../../api/box-market.js')).default;
   if (key === 'marketIndex') return (await import('../../api/market-index.js')).default;
+  if (key === 'priceAlerts') return (await import('../../api/price-alerts.js')).default;
   if (key === 'cardMarketLinkOverrides') return (await import('../../api/card-market-link-overrides.js')).default;
   return null;
 }

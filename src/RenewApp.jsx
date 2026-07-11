@@ -5,7 +5,8 @@ import { resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
-import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceVerifications, incrementMarketplaceListingView, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
+import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
+import { deletePriceAlertRule, fetchPriceAlertRules, savePriceAlertRule } from './api/price-alerts';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
@@ -2889,7 +2890,8 @@ function MobileNavIcon({ type }) {
     account: <><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></>,
     supplies: <><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></>,
     dark: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9" />,
-    light: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></>
+    light: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></>,
+    bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>
   };
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2898,9 +2900,240 @@ function MobileNavIcon({ type }) {
   );
 }
 
-function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, displayName, onAuthClick, uiLang, onUiLangChange }) {
+function formatNotificationTime(value) {
+  const timestamp = Date.parse(value || '');
+  if (!Number.isFinite(timestamp)) return '';
+  return new Intl.DateTimeFormat('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(timestamp));
+}
+
+function RenewNotificationMenu({ notifications, onSelect, onMarkAll }) {
+  const unreadCount = notifications.filter((item) => !item.read_at).length;
+  return (
+    <div className="renew-notification-menu" role="dialog" aria-label="알림 목록">
+      <div className="renew-notification-head">
+        <strong>알림</strong>
+        {unreadCount ? <button type="button" onClick={onMarkAll}>모두 읽음</button> : null}
+      </div>
+      <div className="renew-notification-list">
+        {notifications.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={!item.read_at ? 'is-unread' : ''}
+            onClick={() => onSelect(item)}
+          >
+            <span className="renew-notification-item-title">
+              {!item.read_at ? <i aria-hidden="true" /> : null}
+              <strong>{item.title || '알림'}</strong>
+              <small>{formatNotificationTime(item.created_at)}</small>
+            </span>
+            {item.body ? <span>{item.body}</span> : null}
+          </button>
+        ))}
+        {!notifications.length ? <div className="renew-notification-empty">새 알림이 없습니다.</div> : null}
+      </div>
+    </div>
+  );
+}
+
+function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}, onClose }) {
+  useBodyScrollLock();
+  const [rules, setRules] = useState([]);
+  const [conditionKey, setConditionKey] = useState(normalizeMarketConditionKey(defaultCondition));
+  const [triggerType, setTriggerType] = useState('price');
+  const [direction, setDirection] = useState('below');
+  const [thresholdInput, setThresholdInput] = useState('');
+  const [resolvedPrices, setResolvedPrices] = useState(currentPrices || {});
+  const [editingId, setEditingId] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const apparelId = Number(item?.apparelId || 0);
+  const jpyToKrw = MARKET_USD_TO_KRW / MARKET_USD_TO_JPY;
+  const currentPrice = Number(resolvedPrices?.[conditionKey] || 0);
+
+  const loadRules = useCallback(async () => {
+    const payload = await fetchPriceAlertRules();
+    setRules((payload?.rules || []).filter((rule) => Number(rule.apparelId) === apparelId));
+  }, [apparelId]);
+
+  useEffect(() => {
+    loadRules().catch(() => setMessage('알림 설정을 불러오지 못했습니다.'));
+  }, [loadRules]);
+
+  useEffect(() => {
+    if (!apparelId || Number(resolvedPrices?.a || 0) || Number(resolvedPrices?.psa10 || 0)) return undefined;
+    let cancelled = false;
+    fetchMarketPrice({ code: item?.code || '', apparelId })
+      .then((detail) => {
+        if (cancelled) return;
+        setResolvedPrices({
+          a: Number(getMarketConditionBucket(detail?.latestByCondition, 'a')?.price || 0),
+          psa10: Number(getMarketConditionBucket(detail?.latestByCondition, 'psa10')?.price || 0)
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [apparelId, item?.code, resolvedPrices?.a, resolvedPrices?.psa10]);
+
+  useEffect(() => {
+    if (editingId || thresholdInput) return;
+    if (triggerType === 'percent') {
+      setThresholdInput('10');
+      return;
+    }
+    if (currentPrice > 0) {
+      const targetJpy = direction === 'above' ? currentPrice * 1.1 : currentPrice * 0.9;
+      setThresholdInput(String(Math.round(targetJpy * jpyToKrw / 1000) * 1000));
+    }
+  }, [currentPrice, direction, editingId, jpyToKrw, thresholdInput, triggerType]);
+
+  function resetForm(nextCondition = conditionKey) {
+    setEditingId('');
+    setConditionKey(nextCondition);
+    setTriggerType('price');
+    setDirection('below');
+    setThresholdInput('');
+    setMessage('');
+  }
+
+  function editRule(rule) {
+    setEditingId(rule.id);
+    setConditionKey(rule.conditionKey);
+    setTriggerType(rule.triggerType);
+    setDirection(rule.direction);
+    setThresholdInput(String(rule.triggerType === 'percent' ? rule.thresholdValue : Math.round(rule.thresholdValue * jpyToKrw)));
+    setMessage('');
+  }
+
+  async function submitRule(event) {
+    event.preventDefault();
+    const inputValue = Number(thresholdInput || 0);
+    if (!inputValue || inputValue <= 0) {
+      setMessage('알림 기준값을 입력해 주세요.');
+      return;
+    }
+    setBusy(true);
+    setMessage('');
+    try {
+      await savePriceAlertRule({
+        id: editingId || undefined,
+        apparelId,
+        cardId: item?.cardId || '',
+        code: item?.code || '',
+        cardName: item?.name || '',
+        previewImageUrl: item?.previewImageUrl || '',
+        conditionKey,
+        triggerType,
+        direction,
+        thresholdValue: triggerType === 'percent' ? inputValue : Math.round(inputValue / jpyToKrw),
+        currentPriceJpy: currentPrice || null
+      });
+      await loadRules();
+      resetForm(conditionKey);
+      setMessage('가격 알림을 등록했습니다.');
+    } catch (error) {
+      setMessage(error?.message || '가격 알림 등록에 실패했습니다.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeRule(id) {
+    setBusy(true);
+    setMessage('');
+    try {
+      await deletePriceAlertRule(id);
+      await loadRules();
+      if (editingId === id) resetForm();
+    } catch (error) {
+      setMessage(error?.message || '가격 알림 삭제에 실패했습니다.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const modal = (
+    <div className="renew-modal-backdrop renew-price-alert-backdrop" onClick={onClose}>
+      <section className="renew-price-alert-modal" onClick={(event) => event.stopPropagation()} aria-label="가격 알림 등록">
+        <header>
+          <div>
+            <span>PRICE ALERT</span>
+            <h2>{item?.name || item?.code || '카드'} 시세 알림</h2>
+            <p>{item?.code || ''}</p>
+          </div>
+          <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
+        </header>
+
+        <form onSubmit={submitRule}>
+          <div className="renew-alert-segment" aria-label="가격 조건">
+            <button type="button" className={conditionKey === 'a' ? 'is-active' : ''} onClick={() => resetForm('a')}>Single</button>
+            <button type="button" className={conditionKey === 'psa10' ? 'is-active' : ''} onClick={() => resetForm('psa10')}>PSA10</button>
+          </div>
+          <div className="renew-alert-current">
+            <span>현재 시세</span>
+            <strong>{currentPrice ? formatUsdWonFromYen(currentPrice) : '시세 없음'}</strong>
+          </div>
+          <div className="renew-alert-segment" aria-label="알림 유형">
+            <button type="button" className={triggerType === 'price' ? 'is-active' : ''} onClick={() => { setTriggerType('price'); setThresholdInput(''); setEditingId(''); }}>목표가</button>
+            <button type="button" className={triggerType === 'percent' ? 'is-active' : ''} onClick={() => { setTriggerType('percent'); setThresholdInput('10'); setEditingId(''); }}>24시간 등락률</button>
+          </div>
+          <div className="renew-alert-segment" aria-label="상승 또는 하락">
+            <button type="button" className={direction === 'below' ? 'is-active' : ''} onClick={() => { setDirection('below'); setThresholdInput(''); }}>하락</button>
+            <button type="button" className={direction === 'above' ? 'is-active' : ''} onClick={() => { setDirection('above'); setThresholdInput(''); }}>상승</button>
+          </div>
+          <label className="renew-alert-input">
+            <span>{triggerType === 'percent' ? '변동률 기준' : '목표 가격'}</span>
+            <span>
+              <input
+                type="number"
+                min={triggerType === 'percent' ? '0.1' : '1'}
+                max={triggerType === 'percent' ? '100' : undefined}
+                step={triggerType === 'percent' ? '0.1' : '1000'}
+                value={thresholdInput}
+                onChange={(event) => setThresholdInput(event.target.value)}
+              />
+              <em>{triggerType === 'percent' ? '%' : '원'}</em>
+            </span>
+          </label>
+          <button type="submit" className="renew-alert-submit" disabled={busy || !apparelId}>
+            {editingId ? '알림 수정' : '알림 등록'}
+          </button>
+          {message ? <p className="renew-alert-message">{message}</p> : null}
+        </form>
+
+        <div className="renew-alert-rules">
+          <strong>등록된 알림</strong>
+          {rules.map((rule) => (
+            <div key={rule.id}>
+              <button type="button" onClick={() => editRule(rule)}>
+                <span>{rule.conditionKey === 'psa10' ? 'PSA10' : 'Single'} · {rule.direction === 'above' ? '상승' : '하락'}</span>
+                <strong>{rule.triggerType === 'percent' ? `${rule.thresholdValue}%` : formatUsdWonFromYen(rule.thresholdValue)}</strong>
+              </button>
+              <button type="button" onClick={() => removeRule(rule.id)} disabled={busy}>삭제</button>
+            </div>
+          ))}
+          {!rules.length ? <p>이 카드에 등록된 알림이 없습니다.</p> : null}
+        </div>
+      </section>
+    </div>
+  );
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
+}
+
+function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const unreadCount = notifications.filter((item) => !item.read_at).length;
+  const handleNotificationClick = () => {
+    if (!isLoggedIn) {
+      onAuthClick('login');
+      return;
+    }
+    setNotificationMenuOpen((value) => !value);
+  };
   const handleAccountClick = () => {
     if (isLoggedIn) {
       setAccountMenuOpen((value) => !value);
@@ -2919,6 +3152,19 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <img src={LOGO_SRC} alt="Card Pone" />
         </button>
         <div className="renew-mobile-actions">
+          <div className={`renew-notification-shell ${notificationMenuOpen ? 'is-open' : ''}`}>
+            <button type="button" onClick={handleNotificationClick} aria-label="알림">
+              <MobileNavIcon type="bell" />
+              {unreadCount ? <span className="renew-notification-dot" aria-label={`읽지 않은 알림 ${unreadCount}개`} /> : null}
+            </button>
+            {notificationMenuOpen && isLoggedIn ? (
+              <RenewNotificationMenu
+                notifications={notifications}
+                onSelect={(item) => { setNotificationMenuOpen(false); onNotificationSelect?.(item); }}
+                onMarkAll={() => onNotificationsReadAll?.()}
+              />
+            ) : null}
+          </div>
           <button type="button" onClick={onToggleTheme} aria-label="테마 전환">
             <MobileNavIcon type={isDark ? 'light' : 'dark'} />
           </button>
@@ -2971,6 +3217,19 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
                 {lang}
               </button>
             ))}
+          </div>
+          <div className={`renew-notification-shell ${notificationMenuOpen ? 'is-open' : ''}`}>
+            <button type="button" className="renew-mode" onClick={handleNotificationClick} aria-label="알림">
+              <MobileNavIcon type="bell" />
+              {unreadCount ? <span className="renew-notification-dot" aria-label={`읽지 않은 알림 ${unreadCount}개`} /> : null}
+            </button>
+            {notificationMenuOpen && isLoggedIn ? (
+              <RenewNotificationMenu
+                notifications={notifications}
+                onSelect={(item) => { setNotificationMenuOpen(false); onNotificationSelect?.(item); }}
+                onMarkAll={() => onNotificationsReadAll?.()}
+              />
+            ) : null}
           </div>
           <button type="button" className="renew-mode" onClick={onToggleTheme} aria-label="테마 전환">
             {isDark ? '☀' : '☾'}
@@ -4665,7 +4924,7 @@ function RenewLegalModal({ type, onClose }) {
   );
 }
 
-function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, marketListings = [], uiLang }) {
+function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, onRequireLogin, marketListings = [], uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const hasInitialSearch = Boolean(initialSearch?.q);
   const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (initialViewState?.locale || 'JP');
@@ -5210,6 +5469,8 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
             setSelectedCard(null);
           }}
           marketListingCount={MARKETPLACE_ENABLED ? (listingCountByCardId.get(selectedCard.id) || 0) : 0}
+          authUser={authUser}
+          onRequireLogin={onRequireLogin}
           onOpenMarketplace={MARKETPLACE_ENABLED ? ((card) => {
             setSelectedCard(null);
             onOpenMarketplace?.(card);
@@ -5221,10 +5482,11 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   );
 }
 
-function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketListingCount = 0, onOpenMarketplace, uiLang }) {
+function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketListingCount = 0, onOpenMarketplace, authUser, onRequireLogin, uiLang }) {
   useBodyScrollLock();
   const t = (key) => getUiText(uiLang, key);
   const [snkrdunkApparelId, setSnkrdunkApparelId] = useState(null);
+  const [priceAlertOpen, setPriceAlertOpen] = useState(false);
   useEffect(() => {
     let cancelled = false;
     setSnkrdunkApparelId(null);
@@ -5242,7 +5504,15 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
   const snkrdunkUrl = snkrdunkApparelId
     ? `https://snkrdunk.com/en/trading-cards/${snkrdunkApparelId}?slide=right`
     : '';
+  const openPriceAlert = () => {
+    if (!authUser) {
+      onRequireLogin?.();
+      return;
+    }
+    setPriceAlertOpen(true);
+  };
   return (
+    <>
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-card-modal" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="renew-modal-close renew-card-modal-close" onClick={onClose}>×</button>
@@ -5263,6 +5533,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           </details>
           <div className="renew-modal-actions">
             <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
+            {snkrdunkApparelId ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>시세 알림</button> : null}
             {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
             {marketListingCount ? (
               <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
@@ -5275,6 +5546,19 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
         </div>
       </div>
     </div>
+    {priceAlertOpen && snkrdunkApparelId ? (
+      <RenewPriceAlertModal
+        item={{
+          apparelId: snkrdunkApparelId,
+          cardId: card?.id || card?.cardId || '',
+          code: card?.marketCode || card?.cardNo || '',
+          name: card?.name || '',
+          previewImageUrl: getCardImageSrc(card)
+        }}
+        onClose={() => setPriceAlertOpen(false)}
+      />
+    ) : null}
+    </>
   );
 }
 
@@ -7609,7 +7893,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, userState, setUserState, initialCode, initialApparelId, initialCardId, onBackToCatalog, uiLang }) {
+function RenewMarket({ authUser, userState, setUserState, initialCode, initialApparelId, initialCardId, onBackToCatalog, onRequireLogin, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const [code, setCode] = useState(initialCode || '');
   const [marketProductLocale, setMarketProductLocale] = useState('JP');
@@ -7634,6 +7918,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const [mappingBusyId, setMappingBusyId] = useState(null);
   const [mappingMessage, setMappingMessage] = useState('');
   const [candidatePanelCollapsed, setCandidatePanelCollapsed] = useState(false);
+  const [priceAlertOpen, setPriceAlertOpen] = useState(false);
   const marketDetailRef = useRef(null);
   const marketCandidateRef = useRef(null);
   const marketCandidateScrollYRef = useRef(0);
@@ -8111,6 +8396,19 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                   </button>
                 ) : null}
                 <a href={selected?.sourceUrl} target="_blank" rel="noreferrer"><span className="renew-action-full">{t('sourceMarket')}</span><span className="renew-action-compact">{t('sourceMarketShort')}</span></a>
+                <button
+                  type="button"
+                  className="renew-alert-button"
+                  onClick={() => {
+                    if (!authUser) {
+                      onRequireLogin?.();
+                      return;
+                    }
+                    setPriceAlertOpen(true);
+                  }}
+                >
+                  시세 알림
+                </button>
                 <button type="button" onClick={() => addValuation('a')}><span className="renew-action-full">{t('addAGrade')}</span><span className="renew-action-compact">{t('addAGradeShort')}</span></button>
                 <button type="button" onClick={() => addValuation('psa10')}><span className="renew-action-full">{t('addPsa10')}</span><span className="renew-action-compact">{t('addPsa10Short')}</span></button>
               </div>
@@ -8154,6 +8452,23 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
           </div>
         ) : null}
       </section>
+      {priceAlertOpen && selected ? (
+        <RenewPriceAlertModal
+          item={{
+            apparelId: selected.apparelId,
+            cardId: initialCardId || '',
+            code: selected.code || '',
+            name: selected.name || '',
+            previewImageUrl: selected.previewImageUrl || ''
+          }}
+          defaultCondition={normalizedCondition}
+          currentPrices={{
+            a: Number(getMarketConditionBucket(marketDetail?.latestByCondition, 'a')?.price || 0),
+            psa10: Number(getMarketConditionBucket(marketDetail?.latestByCondition, 'psa10')?.price || 0)
+          }}
+          onClose={() => setPriceAlertOpen(false)}
+        />
+      ) : null}
       <RenewSeoSummary page="prices" titleAs="h1" placement="footer" />
     </main>
   );
@@ -8508,6 +8823,7 @@ export default function RenewApp() {
     return window.localStorage.getItem(UI_LANG_STORAGE_KEY) === 'EN' ? 'EN' : 'KR';
   });
   const [authUser, setAuthUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [userState, setUserState] = useState(null);
@@ -8535,6 +8851,14 @@ export default function RenewApp() {
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const t = (key) => getUiText(uiLang, key);
+  const refreshNotifications = useCallback(async () => {
+    if (!authUser?.id) {
+      setNotifications([]);
+      return;
+    }
+    const payload = await fetchMarketplaceNotifications();
+    setNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
+  }, [authUser?.id]);
 
   useEffect(() => {
     applyPageSeo(activePage);
@@ -8656,6 +8980,26 @@ export default function RenewApp() {
   }, []);
 
   useEffect(() => {
+    if (!authUser?.id) {
+      setNotifications([]);
+      return undefined;
+    }
+    let cancelled = false;
+    const load = () => refreshNotifications().catch(() => {
+      if (!cancelled) setNotifications([]);
+    });
+    load();
+    const timer = window.setInterval(load, 60_000);
+    const handleFocus = () => load();
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [authUser?.id, refreshNotifications]);
+
+  useEffect(() => {
     let cancelled = false;
     if (!authUser) {
       setUserState(null);
@@ -8715,6 +9059,31 @@ export default function RenewApp() {
       setAuthUser(null);
     }
     setAccountOpen(false);
+  }
+
+  async function handleNotificationSelect(notification) {
+    if (!notification) return;
+    if (!notification.read_at) {
+      const readAt = new Date().toISOString();
+      setNotifications((items) => items.map((item) => (item.id === notification.id ? { ...item, read_at: readAt } : item)));
+      try {
+        await markMarketplaceNotificationRead(notification.id);
+      } catch {
+        refreshNotifications().catch(() => {});
+      }
+    }
+    const link = String(notification.link_url || '');
+    if (link.startsWith('/')) window.location.assign(link);
+  }
+
+  async function handleNotificationsReadAll() {
+    const readAt = new Date().toISOString();
+    setNotifications((items) => items.map((item) => ({ ...item, read_at: item.read_at || readAt })));
+    try {
+      await markAllMarketplaceNotificationsRead();
+    } catch {
+      refreshNotifications().catch(() => {});
+    }
   }
 
   function navigatePage(page, options = {}) {
@@ -8794,6 +9163,9 @@ export default function RenewApp() {
         onAuthClick={handleAuthClick}
         uiLang={uiLang}
         onUiLangChange={setUiLang}
+        notifications={notifications}
+        onNotificationSelect={handleNotificationSelect}
+        onNotificationsReadAll={handleNotificationsReadAll}
       />
       {routeBackInfo ? <RenewRouteBackButton label={routeBackInfo.label} onClick={handleRouteBack} /> : null}
       {activePage === 'home' ? (
@@ -8855,6 +9227,7 @@ export default function RenewApp() {
             if (cardId) query.set('cardId', cardId);
             navigatePage('marketplace', { query: query.toString() });
           }) : undefined}
+          onRequireLogin={() => handleAuthClick('login')}
           marketListings={MARKETPLACE_ENABLED ? marketListings : []}
           uiLang={uiLang}
         />
@@ -8867,6 +9240,7 @@ export default function RenewApp() {
           initialApparelId={marketInitialApparelId}
           initialCardId={marketInitialCardId}
           onBackToCatalog={canReturnToCatalog ? () => navigatePage('cards') : null}
+          onRequireLogin={() => handleAuthClick('login')}
           uiLang={uiLang}
         />
       ) : activePage === 'marketplace' ? (

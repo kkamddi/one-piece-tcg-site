@@ -463,6 +463,413 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.renew-notification-shell {
+  position: relative;
+  display: inline-flex;
+}
+
+.renew-notification-shell > button {
+  position: relative;
+}
+
+.renew-notification-shell svg,
+.renew-mode svg {
+  width: 20px;
+  height: 20px;
+}
+
+.renew-notification-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d84b36;
+}
+
+.renew-app.is-dark .renew-notification-dot {
+  border-color: #17191f;
+}
+
+.renew-notification-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 120;
+  width: min(380px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(23, 25, 28, 0.16);
+}
+
+.renew-notification-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.1);
+  padding: 0 14px;
+}
+
+.renew-notification-head button {
+  border: 0;
+  padding: 6px;
+  color: #c94d35;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-notification-list {
+  max-height: min(520px, 70vh);
+  overflow-y: auto;
+}
+
+.renew-notification-list > button {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  border: 0;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.08);
+  padding: 13px 14px;
+  color: #17191c;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-notification-list > button.is-unread {
+  background: #fff5f1;
+}
+
+.renew-notification-item-title {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.renew-notification-item-title i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d84b36;
+}
+
+.renew-notification-item-title strong,
+.renew-notification-list > button > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.renew-notification-item-title small {
+  color: #858994;
+  font-size: 11px;
+}
+
+.renew-notification-list > button > span:last-child {
+  color: #666b75;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.renew-notification-empty {
+  padding: 36px 16px;
+  color: #858994;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.renew-app.is-dark .renew-notification-menu {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #17191f;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+}
+
+.renew-app.is-dark .renew-notification-head,
+.renew-app.is-dark .renew-notification-list > button {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.renew-app.is-dark .renew-notification-list > button {
+  color: #f5f2ec;
+  background: #17191f;
+}
+
+.renew-app.is-dark .renew-notification-list > button.is-unread {
+  background: #30201d;
+}
+
+.renew-app.is-dark .renew-notification-list > button > span:last-child {
+  color: #c2c5cc;
+}
+
+.renew-price-alert-backdrop {
+  z-index: 220;
+}
+
+.renew-price-alert-modal {
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(760px, calc(100vh - 32px));
+  overflow-y: auto;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 8px;
+  padding: 22px;
+  color: #17191c;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(23, 25, 28, 0.22);
+}
+
+.renew-price-alert-modal > header {
+  position: relative;
+  padding-right: 42px;
+}
+
+.renew-price-alert-modal > header span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 1000;
+}
+
+.renew-price-alert-modal > header h2 {
+  margin: 5px 0 3px;
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+.renew-price-alert-modal > header p {
+  margin: 0;
+  color: #777b84;
+  font-weight: 800;
+}
+
+.renew-price-alert-modal > header .renew-modal-close {
+  top: -8px;
+  right: -8px;
+}
+
+.renew-price-alert-modal form {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.renew-alert-segment {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 8px;
+  padding: 3px;
+  background: #f4f4f2;
+}
+
+.renew-alert-segment button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 6px;
+  color: #666b75;
+  background: transparent;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-alert-segment button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-alert-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.1);
+}
+
+.renew-alert-current span,
+.renew-alert-input > span:first-child {
+  color: #70747d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.renew-alert-current strong {
+  font-size: 15px;
+}
+
+.renew-alert-input {
+  display: grid;
+  gap: 7px;
+}
+
+.renew-alert-input > span:last-child {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(23, 25, 28, 0.16);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.renew-alert-input input {
+  min-width: 0;
+  height: 46px;
+  border: 0;
+  padding: 0 13px;
+  color: inherit;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.renew-alert-input em {
+  padding: 0 13px;
+  color: #777b84;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.renew-alert-submit {
+  min-height: 46px;
+  border: 1px solid #17191c;
+  border-radius: 8px;
+  color: #fff;
+  background: #17191c;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.renew-alert-submit:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.renew-alert-message {
+  margin: 0;
+  color: #c94d35;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.renew-alert-rules {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+  border-top: 1px solid rgba(23, 25, 28, 0.1);
+  padding-top: 16px;
+}
+
+.renew-alert-rules > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.renew-alert-rules > div > button {
+  border: 0;
+  padding: 10px 12px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-alert-rules > div > button:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.renew-alert-rules > div > button:last-child {
+  border-left: 1px solid rgba(23, 25, 28, 0.1);
+  color: #c94d35;
+  font-weight: 900;
+}
+
+.renew-alert-rules p {
+  margin: 5px 0 0;
+  color: #858994;
+  font-size: 13px;
+}
+
+.renew-app.is-dark .renew-price-alert-modal {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: #17191f;
+}
+
+.renew-app.is-dark .renew-alert-segment,
+.renew-app.is-dark .renew-alert-input > span:last-child {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #24272e;
+}
+
+.renew-app.is-dark .renew-alert-segment button.is-active,
+.renew-app.is-dark .renew-alert-submit {
+  border-color: #f5f2ec;
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-alert-current,
+.renew-app.is-dark .renew-alert-rules,
+.renew-app.is-dark .renew-alert-rules > div,
+.renew-app.is-dark .renew-alert-rules > div > button:last-child {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 760px) {
+  .renew-mobile-actions .renew-notification-shell > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(17, 24, 39, 0.18);
+    border-radius: 999px;
+    color: #17191c;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .renew-mobile-actions .renew-notification-menu {
+    position: fixed;
+    top: 66px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-height: calc(100vh - 82px);
+  }
+
+  .renew-app.is-dark .renew-mobile-actions .renew-notification-shell > button {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #f5f2ec;
+    background: rgba(23, 25, 31, 0.92);
+  }
+
+  .renew-price-alert-modal {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    padding: 18px 14px;
+  }
+
+  .renew-alert-rules > div > button:first-child {
+    display: grid;
+    gap: 3px;
+  }
+}
+
 .renew-app button:focus-visible,
 .renew-app a:focus-visible,
 .renew-app input:focus-visible,

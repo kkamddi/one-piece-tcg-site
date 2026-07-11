@@ -731,10 +731,37 @@ async function listNotifications(response, user) {
     .from(NOTIFICATIONS_TABLE)
     .select('*')
     .eq('user_id', user.id)
+    .neq('type', 'price_alert_rule')
     .order('created_at', { ascending: false })
     .limit(30);
   if (error) throw error;
   return response.status(200).json({ notifications: data ?? [] });
+}
+
+async function markNotificationRead(request, response, user) {
+  const id = safeString(request.query?.id, 80);
+  if (!id) return response.status(400).json({ error: 'missing_notification_id' });
+  const { data, error } = await supabaseAdmin
+    .from(NOTIFICATIONS_TABLE)
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .neq('type', 'price_alert_rule')
+    .select('*')
+    .single();
+  if (error) throw error;
+  return response.status(200).json({ notification: data });
+}
+
+async function markAllNotificationsRead(response, user) {
+  const { error } = await supabaseAdmin
+    .from(NOTIFICATIONS_TABLE)
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .is('read_at', null)
+    .neq('type', 'price_alert_rule');
+  if (error) throw error;
+  return response.status(200).json({ ok: true });
 }
 
 async function submitVerification(request, response, user) {
@@ -853,6 +880,8 @@ export default async function handler(request, response) {
   if (request.method === 'GET' && action === 'messages') return listConversationMessages(request, response, user);
   if (request.method === 'POST' && action === 'message') return sendConversationMessage(request, response, user);
   if (request.method === 'GET' && action === 'notifications') return listNotifications(response, user);
+  if (request.method === 'PATCH' && action === 'notification') return markNotificationRead(request, response, user);
+  if (request.method === 'PATCH' && action === 'notifications-read-all') return markAllNotificationsRead(response, user);
   if (request.method === 'POST' && action === 'image') return uploadListingImage(request, response, user);
   if (request.method === 'POST' && action === 'listing-interest') return updateListingInterest(request, response, user);
   if (request.method === 'POST' && action === 'listing') return createListing(request, response, user);
