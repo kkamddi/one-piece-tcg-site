@@ -5305,9 +5305,17 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     await persistState({ ...(userState || {}), [field]: nextList }, [field]);
   }
 
-  async function openCard(cardId) {
-    const detail = await fetchCardById(cardId).catch(() => null);
-    setSelectedCard(detail || cards.find((card) => card.id === cardId) || null);
+  function openCard(cardId) {
+    const summary = cards.find((card) => card.id === cardId) || null;
+    setSelectedCard(summary);
+    fetchCardById(cardId)
+      .then((detail) => {
+        if (!detail) return;
+        setSelectedCard((current) => (
+          current?.id === cardId ? { ...current, ...detail } : current
+        ));
+      })
+      .catch(() => {});
   }
 
   useEffect(() => {
@@ -5597,6 +5605,10 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
   const t = (key) => getUiText(uiLang, key);
   const [snkrdunkApparelId, setSnkrdunkApparelId] = useState(null);
   const [priceAlertOpen, setPriceAlertOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [card?.id, card?.cardId]);
   useEffect(() => {
     let cancelled = false;
     setSnkrdunkApparelId(null);
@@ -5626,8 +5638,16 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-card-modal" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="renew-modal-close renew-card-modal-close" onClick={onClose}>×</button>
-        <div className="renew-card-modal-image">
-          <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} />
+        <div className={`renew-card-modal-image ${imageLoaded ? 'is-loaded' : 'is-loading'}`}>
+          <img
+            src={getCardThumbnailSrc(card)}
+            data-fallback-src={getCardImageSrc(card)}
+            alt={card.name}
+            onLoad={() => setImageLoaded(true)}
+            onError={fallbackToOriginalCardImage}
+            decoding="async"
+            fetchPriority="high"
+          />
         </div>
         <div className="renew-card-modal-info">
           <div className="renew-modal-code">{card.cardNo} · {card.rarity}</div>
