@@ -61,3 +61,7 @@ export async function enablePushNotifications() {
   await requestJson('/api/push-subscriptions', { method: 'POST', body: { subscription: subscription.toJSON() } });
   return { permission, subscribed: true, registration };
 }
+
+export function sendTestPushNotification() {
+  return requestJson('/api/push-subscriptions?action=test', { method: 'POST', body: {} });
+}

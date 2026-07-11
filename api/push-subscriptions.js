@@ -73,6 +73,18 @@ async function saveSubscription(request, response, user) {
   return response.status(200).json({ subscription: data, push });
 }
 
+async function sendTestPush(response, user) {
+  const push = await sendPushToUser(user.id, {
+    title: 'Card Pone 테스트 알림',
+    body: 'ADMIN 시세 알림 Push가 정상적으로 연결되어 있습니다.',
+    url: '/prices',
+    icon: '/card-pone-app-icon-192.png',
+    tag: `card-pone-admin-test-${Date.now()}`
+  });
+  if (!push.sent) return response.status(502).json({ error: 'push_test_failed', push });
+  return response.status(200).json({ ok: true, push });
+}
+
 async function deleteSubscription(request, response, user) {
   const endpoint = safeString(request.body?.endpoint || request.query?.endpoint, 3000);
   if (!endpoint) return response.status(400).json({ error: 'missing_push_endpoint' });
@@ -94,6 +106,7 @@ export default async function handler(request, response) {
     if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
     if (!isAdminUser(user)) return response.status(403).json({ error: 'admin_only' });
     if (request.method === 'GET') return await getStatus(request, response, user);
+    if (request.method === 'POST' && safeString(request.query?.action, 40) === 'test') return await sendTestPush(response, user);
     if (request.method === 'POST') return await saveSubscription(request, response, user);
     if (request.method === 'DELETE') return await deleteSubscription(request, response, user);
     return response.status(405).json({ error: 'method_not_allowed' });

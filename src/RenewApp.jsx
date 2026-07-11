@@ -7,7 +7,7 @@ import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
 import { deletePriceAlertRule, fetchPriceAlertRules, savePriceAlertRule } from './api/price-alerts';
-import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability } from './api/push-notifications';
+import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability, sendTestPushNotification } from './api/push-notifications';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
@@ -3009,6 +3009,21 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
     }
   }
 
+  async function testPushNotification() {
+    setPushBusy(true);
+    setMessage('');
+    try {
+      await sendTestPushNotification();
+      setMessage('테스트 알림을 이 기기로 전송했습니다.');
+    } catch (error) {
+      setMessage(error?.message === 'push_test_failed'
+        ? '테스트 알림 발송에 실패했습니다. 기기 알림 설정을 확인해 주세요.'
+        : '테스트 알림을 전송하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
   useEffect(() => {
     if (!apparelId || Number(resolvedPrices?.a || 0) || Number(resolvedPrices?.psa10 || 0)) return undefined;
     let cancelled = false;
@@ -3136,6 +3151,11 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
           {pushStatus === 'ready' ? (
             <button type="button" onClick={requestPushPermission} disabled={pushBusy}>
               {pushBusy ? '연결 중' : '알림 허용'}
+            </button>
+          ) : null}
+          {pushStatus === 'enabled' ? (
+            <button type="button" onClick={testPushNotification} disabled={pushBusy}>
+              {pushBusy ? '전송 중' : '테스트 알림'}
             </button>
           ) : null}
         </div>
