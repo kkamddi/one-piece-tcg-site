@@ -650,6 +650,7 @@
 }
 
 .renew-price-alert-modal > header .renew-modal-close {
+  position: absolute;
   top: -8px;
   right: -8px;
 }
