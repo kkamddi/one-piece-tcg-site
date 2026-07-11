@@ -7,6 +7,7 @@ import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
 import { deletePriceAlertRule, fetchPriceAlertRules, savePriceAlertRule } from './api/price-alerts';
+import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability } from './api/push-notifications';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
@@ -2947,6 +2948,8 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
   const [editingId, setEditingId] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [pushStatus, setPushStatus] = useState('loading');
+  const [pushBusy, setPushBusy] = useState(false);
   const apparelId = Number(item?.apparelId || 0);
   const jpyToKrw = MARKET_USD_TO_KRW / MARKET_USD_TO_JPY;
   const currentPrice = Number(resolvedPrices?.[conditionKey] || 0);
@@ -2959,6 +2962,52 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
   useEffect(() => {
     loadRules().catch(() => setMessage('알림 설정을 불러오지 못했습니다.'));
   }, [loadRules]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const capability = getPushCapability();
+    if (!capability.supported) {
+      setPushStatus('unsupported');
+      return undefined;
+    }
+    fetchPushNotificationStatus()
+      .then((status) => {
+        if (cancelled) return;
+        if (!status.configured) setPushStatus('unconfigured');
+        else if (status.permission === 'denied') setPushStatus('denied');
+        else if (status.permission === 'granted' && status.subscribed) setPushStatus('enabled');
+        else setPushStatus('ready');
+      })
+      .catch(() => {
+        if (!cancelled) setPushStatus('unavailable');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function requestPushPermission() {
+    setPushBusy(true);
+    setMessage('');
+    try {
+      await enablePushNotifications();
+      setPushStatus('enabled');
+      setMessage('이 기기에서 시세 푸시 알림을 받을 수 있습니다.');
+    } catch (error) {
+      const code = error?.message || '';
+      if (code === 'push_denied' || code === 'push_not_granted') {
+        setPushStatus('denied');
+        setMessage('알림 권한이 거절되어 시세 알림을 등록할 수 없습니다. 브라우저 설정에서 알림을 허용해 주세요.');
+      } else if (code === 'push_unsupported') {
+        setPushStatus('unsupported');
+      } else {
+        setPushStatus('unavailable');
+        setMessage('푸시 알림을 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!apparelId || Number(resolvedPrices?.a || 0) || Number(resolvedPrices?.psa10 || 0)) return undefined;
@@ -3009,6 +3058,10 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
 
   async function submitRule(event) {
     event.preventDefault();
+    if (pushStatus !== 'enabled') {
+      setMessage('먼저 이 기기에서 알림 권한을 허용해 주세요.');
+      return;
+    }
     const inputValue = Number(thresholdInput || 0);
     if (!inputValue || inputValue <= 0) {
       setMessage('알림 기준값을 입력해 주세요.');
@@ -3066,6 +3119,24 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </header>
 
+        <div className={`renew-alert-permission is-${pushStatus}`}>
+          <div>
+            <strong>{pushStatus === 'enabled' ? '푸시 알림 사용 중' : '기기 알림 권한'}</strong>
+            {pushStatus === 'enabled' ? <p>조건 충족 시 앱 알림함과 이 기기의 알림 배너로 알려드립니다.</p> : null}
+            {pushStatus === 'ready' ? <p>알림을 등록하려면 먼저 이 기기에서 알림 수신을 허용해야 합니다.</p> : null}
+            {pushStatus === 'denied' ? <p>브라우저에서 알림 권한이 차단되어 있습니다. 사이트 설정에서 알림을 허용한 뒤 다시 열어 주세요.</p> : null}
+            {pushStatus === 'unsupported' ? <p>이 환경에서는 웹 푸시를 사용할 수 없습니다. iPhone과 iPad는 Card Pone을 홈 화면에 추가한 뒤 설치된 앱에서 다시 열어 주세요.</p> : null}
+            {pushStatus === 'unconfigured' ? <p>푸시 알림 서버 설정을 준비하고 있습니다.</p> : null}
+            {pushStatus === 'unavailable' ? <p>푸시 알림 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.</p> : null}
+            {pushStatus === 'loading' ? <p>이 기기의 알림 상태를 확인하고 있습니다.</p> : null}
+          </div>
+          {pushStatus === 'ready' ? (
+            <button type="button" onClick={requestPushPermission} disabled={pushBusy}>
+              {pushBusy ? '연결 중' : '알림 허용'}
+            </button>
+          ) : null}
+        </div>
+
         <form onSubmit={submitRule}>
           <div className="renew-alert-segment" aria-label="가격 조건">
             <button type="button" className={conditionKey === 'a' ? 'is-active' : ''} onClick={() => resetForm('a')}>Single</button>
@@ -3097,7 +3168,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
               <em>{triggerType === 'percent' ? '%' : '원'}</em>
             </span>
           </label>
-          <button type="submit" className="renew-alert-submit" disabled={busy || !apparelId}>
+          <button type="submit" className="renew-alert-submit" disabled={busy || !apparelId || pushStatus !== 'enabled'}>
             {editingId ? '알림 수정' : '알림 등록'}
           </button>
           {message ? <p className="renew-alert-message">{message}</p> : null}

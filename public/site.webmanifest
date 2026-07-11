@@ -3,6 +3,7 @@
   "short_name": "Card Pone",
   "description": "카드포네 Card Pone - 원피스카드 도감, 시세, 구매처, 수집 가이드",
   "start_url": "/",
+  "id": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#fbfaf8",

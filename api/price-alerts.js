@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
+import { sendPushToUser } from './lib/web-push.js';
 
 const NOTIFICATIONS_TABLE = process.env.SUPABASE_USER_NOTIFICATIONS_TABLE || 'user_notifications';
 const RULE_TYPE = 'price_alert_rule';
@@ -146,8 +147,8 @@ async function saveRule(request, response, user) {
     direction,
     thresholdValue,
     active: true,
-    lastObservedPriceJpy: Math.max(0, Math.round(Number(body.currentPriceJpy || 0))) || null,
-    lastObservedAt: body.currentPriceJpy ? new Date().toISOString() : null,
+    lastObservedPriceJpy: null,
+    lastObservedAt: null,
     lastEvaluatedAt: null,
     lastConditionMet: false,
     lastTriggeredAt: null
@@ -201,24 +202,9 @@ async function deleteRule(request, response, user) {
   return response.status(200).json({ ok: true, id });
 }
 
-async function fetchCurrentRows(apparelIds) {
-  const rows = [];
-  for (let start = 0; start < apparelIds.length; start += 80) {
-    const chunk = apparelIds.slice(start, start + 80);
-    const placeholders = chunk.map(() => '?').join(',');
-    rows.push(...await queryD1(
-      `select apparel_id, latest_a_price_jpy, latest_psa10_price_jpy, latest_captured_at
-       from market_products
-       where source = 'snkrdunk' and apparel_id in (${placeholders})`,
-      chunk
-    ));
-  }
-  return rows;
-}
-
 async function fetchSnapshotRows(apparelIds) {
   const rows = [];
-  const cutoff = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
   for (let start = 0; start < apparelIds.length; start += 80) {
     const chunk = apparelIds.slice(start, start + 80);
     const placeholders = chunk.map(() => '?').join(',');
@@ -240,18 +226,51 @@ function snapshotKey(apparelId, conditionKey) {
   return `${Number(apparelId)}:${normalizeCondition(conditionKey)}`;
 }
 
-function snapshotPair(rows = []) {
+function medianNumber(values = []) {
+  const sorted = values
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : Math.round((sorted[middle - 1] + sorted[middle]) / 2);
+}
+
+export function stabilizedSnapshotPair(rows = []) {
   const sorted = rows
     .map((row) => ({ at: row.captured_at, timestamp: Date.parse(row.captured_at || ''), price: Number(row.price_amount_jpy || 0) }))
     .filter((row) => Number.isFinite(row.timestamp) && row.price > 0)
     .sort((a, b) => b.timestamp - a.timestamp);
   const latest = sorted[0];
   if (!latest) return null;
-  const previous = sorted.find((row) => {
+  const currentCluster = sorted.filter((row) => {
+    const age = latest.timestamp - row.timestamp;
+    const ratio = row.price / latest.price;
+    return age >= 0 && age <= 13 * 60 * 60 * 1000 && ratio >= 0.8 && ratio <= 1.25;
+  }).slice(0, 4);
+  if (currentCluster.length < 2) return null;
+
+  const referenceRows = sorted.filter((row) => {
+    const age = latest.timestamp - row.timestamp;
+    return age >= 18 * 60 * 60 * 1000 && age <= 7 * 24 * 60 * 60 * 1000;
+  });
+  const reference = medianNumber(referenceRows.map((row) => row.price));
+  const currentPrice = medianNumber(currentCluster.map((row) => row.price));
+  const ratioToReference = reference ? currentPrice / reference : 1;
+  const isExtreme = ratioToReference > 2 || ratioToReference < 0.5;
+  if (isExtreme && currentCluster.length < 3) return null;
+
+  const previousRows = sorted.filter((row) => {
     const age = latest.timestamp - row.timestamp;
     return age >= 18 * 60 * 60 * 1000 && age <= 36 * 60 * 60 * 1000;
   });
-  return previous ? { latest, previous } : null;
+  const previousPrice = previousRows.length >= 2 ? medianNumber(previousRows.map((row) => row.price)) : 0;
+  return {
+    latest: { ...latest, price: currentPrice },
+    previous: previousPrice ? { ...previousRows[0], price: previousPrice } : null,
+    samples: currentCluster.length,
+    isExtreme
+  };
 }
 
 function formatJpy(value) {
@@ -277,32 +296,42 @@ async function insertPriceNotification(row, payload, evaluation, eventKey) {
   const body = payload.triggerType === 'percent'
     ? `${condition} 시세가 24시간 대비 ${Math.abs(evaluation.percentChange).toFixed(1)}% ${movement}했습니다. 현재 ${formatJpy(evaluation.currentPrice)}`
     : `${condition} 시세가 목표가 ${formatJpy(payload.thresholdValue)} ${payload.direction === 'above' ? '이상' : '이하'}에 도달했습니다. 현재 ${formatJpy(evaluation.currentPrice)}`;
+  const title = `${payload.cardName || payload.code || '카드'} 가격 ${movement} 알림`;
+  const notificationPayload = {
+    eventKey,
+    ruleId: row.id,
+    apparelId: payload.apparelId,
+    cardId: payload.cardId || '',
+    code: payload.code || '',
+    cardName: payload.cardName || '',
+    previewImageUrl: payload.previewImageUrl || '',
+    conditionKey: payload.conditionKey,
+    triggerType: payload.triggerType,
+    direction: payload.direction,
+    thresholdValue: payload.thresholdValue,
+    currentPriceJpy: evaluation.currentPrice,
+    previousPriceJpy: evaluation.previousPrice || null,
+    percentChange: evaluation.percentChange ?? null,
+    observedAt: evaluation.observedAt
+  };
+  const linkUrl = `/prices?code=${encodeURIComponent(payload.code || '')}&apparelId=${payload.apparelId}`;
   const { error } = await supabaseAdmin.from(NOTIFICATIONS_TABLE).insert({
     user_id: row.user_id,
     type: ALERT_TYPE,
-    title: `${payload.cardName || payload.code || '카드'} 가격 ${movement} 알림`,
+    title,
     body,
-    link_url: `/prices?code=${encodeURIComponent(payload.code || '')}&apparelId=${payload.apparelId}`,
-    payload_json: {
-      eventKey,
-      ruleId: row.id,
-      apparelId: payload.apparelId,
-      cardId: payload.cardId || '',
-      code: payload.code || '',
-      cardName: payload.cardName || '',
-      previewImageUrl: payload.previewImageUrl || '',
-      conditionKey: payload.conditionKey,
-      triggerType: payload.triggerType,
-      direction: payload.direction,
-      thresholdValue: payload.thresholdValue,
-      currentPriceJpy: evaluation.currentPrice,
-      previousPriceJpy: evaluation.previousPrice || null,
-      percentChange: evaluation.percentChange ?? null,
-      observedAt: evaluation.observedAt
-    }
+    link_url: linkUrl,
+    payload_json: notificationPayload
   });
   if (error) throw error;
-  return true;
+  const push = await sendPushToUser(row.user_id, {
+    title,
+    body,
+    url: linkUrl,
+    icon: payload.previewImageUrl || '/card-pone-app-icon-192.png',
+    tag: `price-alert-${row.id}`
+  });
+  return { inserted: true, push };
 }
 
 async function evaluateRules(response) {
@@ -313,8 +342,7 @@ async function evaluateRules(response) {
     return response.status(200).json({ ok: true, evaluated: 0, triggered: 0, updated: 0 });
   }
 
-  const [currentRows, snapshotRows] = await Promise.all([fetchCurrentRows(apparelIds), fetchSnapshotRows(apparelIds)]);
-  const currentById = new Map(currentRows.map((row) => [Number(row.apparel_id), row]));
+  const snapshotRows = await fetchSnapshotRows(apparelIds);
   const snapshotsByKey = new Map();
   for (const row of snapshotRows) {
     const key = snapshotKey(row.apparel_id, row.condition_key);
@@ -326,19 +354,20 @@ async function evaluateRules(response) {
   let evaluated = 0;
   let triggered = 0;
   let updated = 0;
+  let pushSent = 0;
+  let pushFailed = 0;
   const errors = [];
   for (const row of activeRows) {
     try {
       const payload = payloadObject(row.payload_json);
       const conditionKey = normalizeCondition(payload.conditionKey);
-      const currentRow = currentById.get(Number(payload.apparelId));
-      const currentPrice = Number(conditionKey === 'psa10' ? currentRow?.latest_psa10_price_jpy : currentRow?.latest_a_price_jpy) || 0;
-      const observedAt = currentRow?.latest_captured_at || '';
+      const pair = stabilizedSnapshotPair(snapshotsByKey.get(snapshotKey(payload.apparelId, conditionKey)) || []);
+      const currentPrice = Number(pair?.latest?.price || 0);
+      const observedAt = pair?.latest?.at || '';
       if (!currentPrice || !observedAt || payload.lastEvaluatedAt === observedAt) continue;
 
       const previousObserved = Number(payload.lastObservedPriceJpy || 0) || null;
-      const pair = snapshotPair(snapshotsByKey.get(snapshotKey(payload.apparelId, conditionKey)) || []);
-      const percentChange = pair ? ((pair.latest.price / pair.previous.price) - 1) * 100 : null;
+      const percentChange = pair?.previous ? ((pair.latest.price / pair.previous.price) - 1) * 100 : null;
       const threshold = Number(payload.thresholdValue || 0);
       let conditionMet = false;
       let previousPrice = previousObserved;
@@ -355,8 +384,13 @@ async function evaluateRules(response) {
       evaluated += 1;
       const shouldTrigger = conditionMet && payload.lastConditionMet !== true;
       const eventKey = `${row.id}:${payload.triggerType}:${observedAt}`;
-      if (shouldTrigger && await insertPriceNotification(row, payload, { currentPrice, previousPrice, percentChange, observedAt }, eventKey)) {
-        triggered += 1;
+      if (shouldTrigger) {
+        const result = await insertPriceNotification(row, payload, { currentPrice, previousPrice, percentChange, observedAt }, eventKey);
+        if (result?.inserted) {
+          triggered += 1;
+          pushSent += Number(result.push?.sent || 0);
+          pushFailed += Number(result.push?.failed || 0);
+        }
       }
       const nextPayload = {
         ...payload,
@@ -377,7 +411,7 @@ async function evaluateRules(response) {
       if (errors.length < 10) errors.push({ id: row.id, error: error?.message || 'price_alert_evaluation_failed' });
     }
   }
-  return response.status(errors.length ? 500 : 200).json({ ok: !errors.length, evaluated, triggered, updated, errors });
+  return response.status(errors.length ? 500 : 200).json({ ok: !errors.length, evaluated, triggered, updated, pushSent, pushFailed, errors });
 }
 
 export default async function handler(request, response) {
