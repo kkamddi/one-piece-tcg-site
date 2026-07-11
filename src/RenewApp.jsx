@@ -4128,7 +4128,7 @@ function RenewHomeCollectorIndex({ onOpen }) {
         <strong>{formatIndexValue(payload.currentValue)}</strong>
       </div>
       <div className="renew-home-index-change">
-        <em className={Number(payload?.change?.d1) >= 0 ? 'is-up' : 'is-down'}>1D {formatIndexChange(payload?.change?.d1)}</em>
+        <em className={indexChangeClass(payload?.change?.d1)}>1D {formatIndexDailyChange(payload?.change?.d1)}</em>
         <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
       </div>
     </button>
@@ -7391,6 +7391,15 @@ function formatIndexChange(value) {
   return `${prefix}${number.toFixed(2)}%`;
 }
 
+function formatIndexDailyChange(value) {
+  return value == null || !Number.isFinite(Number(value)) ? '집계 중' : formatIndexChange(value);
+}
+
+function indexChangeClass(value) {
+  if (value == null || !Number.isFinite(Number(value))) return '';
+  return Number(value) >= 0 ? 'is-up' : 'is-down';
+}
+
 function formatIndexAxisDate(value) {
   const text = String(value || '');
   return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text.slice(2) : text;
@@ -7616,7 +7625,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
         <strong>{loading ? '...' : formatIndexValue(payload?.currentValue)}</strong>
         <span>Base 100 · {payload?.index?.baseDate || '2025-01-01'}</span>
         <div>
-          <em className={Number(payload?.change?.d1) >= 0 ? 'is-up' : 'is-down'}>1D {formatIndexChange(payload?.change?.d1)}</em>
+          <em className={indexChangeClass(payload?.change?.d1)}>1D {formatIndexDailyChange(payload?.change?.d1)}</em>
           <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
           <em className={Number(payload?.change?.m1) >= 0 ? 'is-up' : 'is-down'}>1M {formatIndexChange(payload?.change?.m1)}</em>
           <em className={Number(payload?.change?.m6) >= 0 ? 'is-up' : 'is-down'}>6M {formatIndexChange(payload?.change?.m6)}</em>
@@ -7693,7 +7702,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
                 <span>{item.note} · #{item.apparelId}</span>
                 <div className="renew-index-component-metrics">
                   <em>{formatIndexValue(item.currentIndex)}</em>
-                  <i className={Number.isFinite(Number(item.change?.d1)) ? Number(item.change?.d1) >= 0 ? 'is-up' : 'is-down' : ''}>1D {formatIndexChange(item.change?.d1)}</i>
+                  <i className={indexChangeClass(item.change?.d1)}>1D {formatIndexDailyChange(item.change?.d1)}</i>
                 </div>
               </a>
             ))}

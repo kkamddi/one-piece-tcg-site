@@ -90,9 +90,7 @@ function shiftDate(dateKey, days) {
 }
 
 function buildIndexRows(indexConfig, rows) {
-  const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const built = buildChainLinkedMarketIndex(indexConfig, rows, {
-    endDate: kstToday,
     minimumBaseCoverage: CONDITION_KEY === 'psa10' ? indexConfig.psa10MinimumBaseCoverage : 0
   });
   const componentStartDate = shiftDate(built.endDate, -(COMPONENT_HISTORY_DAYS - 1));
