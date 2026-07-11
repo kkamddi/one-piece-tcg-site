@@ -63,7 +63,7 @@ const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
-const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-06-30-kr-op13';
+const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-11-price-alerts';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
@@ -125,6 +125,17 @@ function useBodyScrollLock(active = true) {
 }
 
 const RENEW_HOME_UPDATES = [
+  {
+    id: '2026-07-11-price-alerts',
+    title: '[26.07.11] 업데이트 안내',
+    summary: '카드 시세 알림 기능 추가',
+    details: [
+      '카드도감과 시세 상세 화면에서 원하는 카드의 시세 알림 등록 가능',
+      'Single·PSA10을 선택하고 목표 가격 또는 상승·하락률 조건 설정 가능',
+      '조건 충족 시 브라우저 푸시와 상단 알림센터에서 확인 가능',
+      '알림 기능 사용을 위해 로그인과 브라우저 알림 권한 허용 필요'
+    ]
+  },
   {
     id: '2026-06-30-kr-op13',
     title: '[26.06.30] 업데이트 안내',
@@ -3684,6 +3695,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
   const [valueModalGrade, setValueModalGrade] = useState(null);
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [renewalNoticeOpen, setRenewalNoticeOpen] = useState(false);
+  const [renewalNoticeChecked, setRenewalNoticeChecked] = useState(false);
   const [partnerNewsOpen, setPartnerNewsOpen] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
   const [progressLocale, setProgressLocale] = useState('KR');
@@ -3789,17 +3801,19 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (window.localStorage.getItem(RENEWAL_NOTICE_KEY)) return;
-    window.localStorage.setItem(RENEWAL_NOTICE_KEY, '1');
-    setRenewalNoticeOpen(true);
+    if (!window.localStorage.getItem(RENEWAL_NOTICE_KEY)) {
+      window.localStorage.setItem(RENEWAL_NOTICE_KEY, '1');
+      setRenewalNoticeOpen(true);
+    }
+    setRenewalNoticeChecked(true);
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !latestPartnerNews || renewalNoticeOpen) return;
+    if (typeof window === 'undefined' || !latestPartnerNews || !renewalNoticeChecked || renewalNoticeOpen) return;
     const storageKey = `card-pone-partner-news-${latestPartnerNews.id}`;
     if (window.localStorage.getItem(storageKey)) return;
     setPartnerNewsOpen(true);
-  }, [latestPartnerNews, renewalNoticeOpen]);
+  }, [latestPartnerNews, renewalNoticeChecked, renewalNoticeOpen]);
 
   function closePartnerNews() {
     if (typeof window !== 'undefined' && latestPartnerNews) {
