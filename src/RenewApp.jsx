@@ -2937,7 +2937,7 @@ function RenewNotificationMenu({ notifications, onSelect, onMarkAll }) {
   );
 }
 
-function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}, onClose }) {
+function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}, isAdmin = false, onClose }) {
   useBodyScrollLock();
   const [rules, setRules] = useState([]);
   const [conditionKey, setConditionKey] = useState(normalizeMarketConditionKey(defaultCondition));
@@ -3153,7 +3153,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
               {pushBusy ? '연결 중' : '알림 허용'}
             </button>
           ) : null}
-          {pushStatus === 'enabled' ? (
+          {pushStatus === 'enabled' && isAdmin ? (
             <button type="button" onClick={testPushNotification} disabled={pushBusy}>
               {pushBusy ? '전송 중' : '테스트 알림'}
             </button>
@@ -5629,7 +5629,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           </details>
           <div className="renew-modal-actions">
             <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
-            {snkrdunkApparelId && authUser?.user_metadata?.username === 'admin' ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>시세 알림</button> : null}
+            {snkrdunkApparelId ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>시세 알림</button> : null}
             {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
             {marketListingCount ? (
               <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
@@ -5651,6 +5651,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           name: card?.name || '',
           previewImageUrl: getCardImageSrc(card)
         }}
+        isAdmin={authUser?.user_metadata?.username === 'admin'}
         onClose={() => setPriceAlertOpen(false)}
       />
     ) : null}
@@ -8492,15 +8493,19 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
                   </button>
                 ) : null}
                 <a href={selected?.sourceUrl} target="_blank" rel="noreferrer"><span className="renew-action-full">{t('sourceMarket')}</span><span className="renew-action-compact">{t('sourceMarketShort')}</span></a>
-                {authUser?.user_metadata?.username === 'admin' ? (
-                  <button
-                    type="button"
-                    className="renew-alert-button"
-                    onClick={() => setPriceAlertOpen(true)}
-                  >
-                    시세 알림
-                  </button>
-                ) : null}
+                <button
+                  type="button"
+                  className="renew-alert-button"
+                  onClick={() => {
+                    if (!authUser) {
+                      onRequireLogin?.();
+                      return;
+                    }
+                    setPriceAlertOpen(true);
+                  }}
+                >
+                  시세 알림
+                </button>
                 <button type="button" onClick={() => addValuation('a')}><span className="renew-action-full">{t('addAGrade')}</span><span className="renew-action-compact">{t('addAGradeShort')}</span></button>
                 <button type="button" onClick={() => addValuation('psa10')}><span className="renew-action-full">{t('addPsa10')}</span><span className="renew-action-compact">{t('addPsa10Short')}</span></button>
               </div>
@@ -8558,6 +8563,7 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
             a: Number(getMarketConditionBucket(marketDetail?.latestByCondition, 'a')?.price || 0),
             psa10: Number(getMarketConditionBucket(marketDetail?.latestByCondition, 'psa10')?.price || 0)
           }}
+          isAdmin={authUser?.user_metadata?.username === 'admin'}
           onClose={() => setPriceAlertOpen(false)}
         />
       ) : null}

@@ -1,4 +1,4 @@
-import { listAllAuthUsers, supabaseAdmin } from '../lib/supabase-admin.js';
+import { supabaseAdmin } from '../lib/supabase-admin.js';
 import { sendPushToUser } from './lib/web-push.js';
 
 const NOTIFICATIONS_TABLE = process.env.SUPABASE_USER_NOTIFICATIONS_TABLE || 'user_notifications';
@@ -283,10 +283,6 @@ function formatKrw(value) {
   return `₩${Math.round(Number(value || 0)).toLocaleString('ko-KR')}`;
 }
 
-function isAdminUser(user) {
-  return String(user?.user_metadata?.username || '').toLowerCase() === 'admin';
-}
-
 async function hasNotificationEvent(userId, eventKey) {
   const { data, error } = await supabaseAdmin
     .from(NOTIFICATIONS_TABLE)
@@ -347,10 +343,7 @@ async function insertPriceNotification(row, payload, evaluation, eventKey) {
 
 async function evaluateRules(response) {
   const rows = await listRuleRows();
-  const adminUserIds = new Set((await listAllAuthUsers())
-    .filter(isAdminUser)
-    .map((user) => user.id));
-  const activeRows = rows.filter((row) => adminUserIds.has(row.user_id) && payloadObject(row.payload_json).active !== false);
+  const activeRows = rows.filter((row) => payloadObject(row.payload_json).active !== false);
   const apparelIds = [...new Set(activeRows.map((row) => Number(payloadObject(row.payload_json).apparelId || 0)).filter(Boolean))];
   if (!activeRows.length || !apparelIds.length) {
     return response.status(200).json({ ok: true, evaluated: 0, triggered: 0, updated: 0 });
@@ -441,7 +434,6 @@ export default async function handler(request, response) {
     }
     const user = await getAuthenticatedUser(request);
     if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
-    if (!isAdminUser(user)) return response.status(403).json({ error: 'admin_only' });
     if (request.method === 'GET') return await listRules(response, user);
     if (request.method === 'POST' || request.method === 'PATCH') return await saveRule(request, response, user);
     if (request.method === 'DELETE') return await deleteRule(request, response, user);

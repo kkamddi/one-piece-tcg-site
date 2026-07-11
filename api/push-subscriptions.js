@@ -104,9 +104,11 @@ export default async function handler(request, response) {
   try {
     const user = await getAuthenticatedUser(request);
     if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
-    if (!isAdminUser(user)) return response.status(403).json({ error: 'admin_only' });
     if (request.method === 'GET') return await getStatus(request, response, user);
-    if (request.method === 'POST' && safeString(request.query?.action, 40) === 'test') return await sendTestPush(response, user);
+    if (request.method === 'POST' && safeString(request.query?.action, 40) === 'test') {
+      if (!isAdminUser(user)) return response.status(403).json({ error: 'admin_only' });
+      return await sendTestPush(response, user);
+    }
     if (request.method === 'POST') return await saveSubscription(request, response, user);
     if (request.method === 'DELETE') return await deleteSubscription(request, response, user);
     return response.status(405).json({ error: 'method_not_allowed' });
