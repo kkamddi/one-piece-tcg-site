@@ -1,0 +1,143 @@
+name: Daily market trading history
+
+on:
+  workflow_dispatch:
+    inputs:
+      conditions:
+        description: Trading conditions to collect
+        required: false
+        default: "a,psa10"
+      per_page:
+        description: Recent trades requested per card
+        required: false
+        default: "50"
+      max_pages:
+        description: Trading History pages per card
+        required: false
+        default: "1"
+      recent_days:
+        description: Recent days retained and rebuilt during this run
+        required: false
+        default: "2"
+      delay_ms:
+        description: Delay between SNKRDUNK requests
+        required: false
+        default: "750"
+  schedule:
+    # 22:30 KST. This avoids the existing market and index refresh windows.
+    - cron: "30 13 * * *"
+
+concurrency:
+  group: daily-market-trading-history
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: Collect history (${{ matrix.shard_name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - shard_name: 0-629
+            shard_start: 0
+            shard_limit: 630
+          - shard_name: 630-1259
+            shard_start: 630
+            shard_limit: 630
+          - shard_name: 1260-1889
+            shard_start: 1260
+            shard_limit: 630
+          - shard_name: 1890-2519
+            shard_start: 1890
+            shard_limit: 630
+          - shard_name: 2520-3149
+            shard_start: 2520
+            shard_limit: 630
+          - shard_name: 3150-3779
+            shard_start: 3150
+            shard_limit: 630
+          - shard_name: 3780-4409
+            shard_start: 3780
+            shard_limit: 630
+          - shard_name: 4410-end
+            shard_start: 4410
+            shard_limit: 0
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Collect recent Single and PSA10 trading history
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+          SNKRDUNK_COOKIE: ${{ secrets.SNKRDUNK_COOKIE }}
+          SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
+          SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
+          BACKFILL_SCOPE: all-jp
+          BACKFILL_MISSING_CONDITION: none
+          BACKFILL_START_INDEX: ${{ matrix.shard_start }}
+          BACKFILL_CARD_LIMIT: ${{ matrix.shard_limit }}
+          BACKFILL_MODE: aggregate
+          BACKFILL_RECENT_RAW_DAYS: ${{ github.event.inputs.recent_days || '2' }}
+          BACKFILL_DAILY_DAYS: ${{ github.event.inputs.recent_days || '2' }}
+          BACKFILL_TRADING_HISTORIES: "1"
+          TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.per_page || '50' }}
+          TRADING_HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '1' }}
+          BACKFILL_CONDITIONS: ${{ github.event.inputs.conditions || 'a,psa10' }}
+          BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '750' }}
+          BACKFILL_HISTORY_CHUNK_SIZE: "20"
+          BACKFILL_PROGRESS_PATH: daily-market-history-${{ matrix.shard_start }}.jsonl
+        run: |
+          if [ -z "$MARKET_COLLECTOR_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "Required collector or Cloudflare secret is missing."
+            exit 1
+          fi
+          if [ -z "$SNKRDUNK_COOKIE" ] && [ -z "$SNKRDUNK_AUTHORIZATION" ]; then
+            echo "SNKRDUNK trading-history authentication is missing."
+            exit 1
+          fi
+          npm run backfill:sold-listings
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daily-market-history-${{ matrix.shard_start }}
+          path: daily-market-history-${{ matrix.shard_start }}.jsonl
+          if-no-files-found: warn
+
+  notify:
+    name: Notify collection result
+    if: always()
+    needs: collect
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram result
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COLLECT_RESULT: ${{ needs.collect.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notification."
+            exit 0
+          fi
+          message="Daily market trading history ${COLLECT_RESULT}.
+          Scope: all JP cards / Single + PSA10 / recent page
+          Run: ${RUN_URL}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+
+      - name: Fail when collection failed
+        if: needs.collect.result != 'success'
+        run: exit 1
