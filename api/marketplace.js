@@ -707,22 +707,6 @@ async function sendConversationMessage(request, response, user) {
     .update({ last_message_at: now, updated_at: now })
     .eq('id', conversationId);
 
-  const receiverId = conversation.seller_user_id === user.id ? conversation.buyer_user_id : conversation.seller_user_id;
-  await supabaseAdmin
-    .from(NOTIFICATIONS_TABLE)
-    .insert({
-      user_id: receiverId,
-      type: 'market_message',
-      title: '거래방 새 메시지',
-      body: message.slice(0, 120),
-      link_url: `/market?conversationId=${conversationId}`,
-      payload_json: {
-        listingId: conversation.listing_id,
-        conversationId,
-        messageId: messageRow.id
-      }
-    });
-
   return response.status(201).json({ message: mapMarketMessage(messageRow, user.id) });
 }
 
@@ -732,6 +716,7 @@ async function listNotifications(response, user) {
     .select('*')
     .eq('user_id', user.id)
     .neq('type', 'price_alert_rule')
+    .neq('type', 'market_message')
     .order('created_at', { ascending: false })
     .limit(30);
   if (error) throw error;
@@ -747,6 +732,7 @@ async function markNotificationRead(request, response, user) {
     .eq('id', id)
     .eq('user_id', user.id)
     .neq('type', 'price_alert_rule')
+    .neq('type', 'market_message')
     .select('*')
     .single();
   if (error) throw error;
@@ -759,7 +745,8 @@ async function markAllNotificationsRead(response, user) {
     .update({ read_at: new Date().toISOString() })
     .eq('user_id', user.id)
     .is('read_at', null)
-    .neq('type', 'price_alert_rule');
+    .neq('type', 'price_alert_rule')
+    .neq('type', 'market_message');
   if (error) throw error;
   return response.status(200).json({ ok: true });
 }
