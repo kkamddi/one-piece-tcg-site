@@ -20,17 +20,21 @@ function safeString(value, max = 2000) {
   return String(value ?? '').trim().slice(0, max);
 }
 
-async function getStatus(response, user) {
-  const { count, error } = await supabaseAdmin
+async function getStatus(request, response, user) {
+  const endpoint = safeString(request.query?.endpoint, 3000);
+  let query = supabaseAdmin
     .from(SUBSCRIPTIONS_TABLE)
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .eq('active', true);
+  if (endpoint) query = query.eq('endpoint', endpoint);
+  const { count, error } = await query;
   if (error) throw error;
   return response.status(200).json({
     configured: Boolean(getVapidPublicKey()),
     publicKey: getVapidPublicKey(),
-    activeSubscriptions: Number(count || 0)
+    activeSubscriptions: Number(count || 0),
+    subscribed: Boolean(endpoint && count)
   });
 }
 
@@ -84,7 +88,7 @@ export default async function handler(request, response) {
   try {
     const user = await getAuthenticatedUser(request);
     if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
-    if (request.method === 'GET') return await getStatus(response, user);
+    if (request.method === 'GET') return await getStatus(request, response, user);
     if (request.method === 'POST') return await saveSubscription(request, response, user);
     if (request.method === 'DELETE') return await deleteSubscription(request, response, user);
     return response.status(405).json({ error: 'method_not_allowed' });

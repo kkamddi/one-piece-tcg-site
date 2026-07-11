@@ -33,12 +33,11 @@ export function getPushCapability() {
 export async function fetchPushNotificationStatus() {
   const capability = getPushCapability();
   if (!capability.supported) return { ...capability, subscribed: false, configured: false };
-  const [status, registration] = await Promise.all([
-    requestJson('/api/push-subscriptions'),
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-  ]);
+  const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
   const subscription = await registration.pushManager.getSubscription();
-  return { ...capability, ...status, subscribed: Boolean(subscription), registration };
+  const endpoint = subscription?.endpoint || '';
+  const status = await requestJson(`/api/push-subscriptions${endpoint ? `?endpoint=${encodeURIComponent(endpoint)}` : ''}`);
+  return { ...capability, ...status, subscribed: Boolean(subscription && status.subscribed), registration };
 }
 
 export async function enablePushNotifications() {
