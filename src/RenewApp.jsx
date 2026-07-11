@@ -3052,7 +3052,9 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
     setConditionKey(rule.conditionKey);
     setTriggerType(rule.triggerType);
     setDirection(rule.direction);
-    setThresholdInput(String(rule.triggerType === 'percent' ? rule.thresholdValue : Math.round(rule.thresholdValue * jpyToKrw)));
+    setThresholdInput(String(rule.triggerType === 'percent'
+      ? rule.thresholdValue
+      : rule.thresholdDisplayKrw || Math.round(rule.thresholdValue * jpyToKrw)));
     setMessage('');
   }
 
@@ -3081,6 +3083,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
         triggerType,
         direction,
         thresholdValue: triggerType === 'percent' ? inputValue : Math.round(inputValue / jpyToKrw),
+        thresholdDisplayKrw: triggerType === 'price' ? Math.round(inputValue) : null,
         currentPriceJpy: currentPrice || null
       });
       await loadRules();
@@ -3161,7 +3164,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
                 type="number"
                 min={triggerType === 'percent' ? '0.1' : '1'}
                 max={triggerType === 'percent' ? '100' : undefined}
-                step={triggerType === 'percent' ? '0.1' : '1000'}
+                step={triggerType === 'percent' ? '0.1' : '1'}
                 value={thresholdInput}
                 onChange={(event) => setThresholdInput(event.target.value)}
               />
@@ -3180,7 +3183,9 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
             <div key={rule.id}>
               <button type="button" onClick={() => editRule(rule)}>
                 <span>{rule.conditionKey === 'psa10' ? 'PSA10' : 'Single'} · {rule.direction === 'above' ? '상승' : '하락'}</span>
-                <strong>{rule.triggerType === 'percent' ? `${rule.thresholdValue}%` : formatUsdWonFromYen(rule.thresholdValue)}</strong>
+                <strong>{rule.triggerType === 'percent'
+                  ? `${rule.thresholdValue}%`
+                  : `₩${Number(rule.thresholdDisplayKrw || Math.round(rule.thresholdValue * jpyToKrw)).toLocaleString('ko-KR')}`}</strong>
               </button>
               <button type="button" onClick={() => removeRule(rule.id)} disabled={busy}>삭제</button>
             </div>

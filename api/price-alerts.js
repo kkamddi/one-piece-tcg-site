@@ -5,6 +5,7 @@ const NOTIFICATIONS_TABLE = process.env.SUPABASE_USER_NOTIFICATIONS_TABLE || 'us
 const RULE_TYPE = 'price_alert_rule';
 const ALERT_TYPE = 'price_alert';
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
+const MARKET_JPY_TO_KRW = 9.4;
 
 function getBearerToken(request) {
   const header = String(request.headers?.authorization || request.headers?.Authorization || '');
@@ -92,6 +93,7 @@ function mapRule(row) {
     triggerType: normalizeTriggerType(payload.triggerType),
     direction: normalizeDirection(payload.direction),
     thresholdValue: Number(payload.thresholdValue || 0),
+    thresholdDisplayKrw: Number(payload.thresholdDisplayKrw || 0) || null,
     active: payload.active !== false,
     lastObservedPriceJpy: Number(payload.lastObservedPriceJpy || 0) || null,
     lastTriggeredAt: payload.lastTriggeredAt || null,
@@ -121,7 +123,7 @@ function ruleSummary(payload) {
   const direction = payload.direction === 'above' ? '상승' : '하락';
   const target = payload.triggerType === 'percent'
     ? `24시간 ${payload.thresholdValue}% ${direction}`
-    : `JPY ${Number(payload.thresholdValue).toLocaleString('en-US')} ${payload.direction === 'above' ? '이상' : '이하'}`;
+    : `₩${Number(payload.thresholdDisplayKrw || Math.round(payload.thresholdValue * MARKET_JPY_TO_KRW)).toLocaleString('ko-KR')} ${payload.direction === 'above' ? '이상' : '이하'}`;
   return `${condition} · ${target}`;
 }
 
@@ -132,6 +134,7 @@ async function saveRule(request, response, user) {
   const direction = normalizeDirection(body.direction);
   const conditionKey = normalizeCondition(body.conditionKey);
   const thresholdValue = normalizeThreshold(body.thresholdValue, triggerType);
+  const requestedThresholdKrw = Math.round(Number(body.thresholdDisplayKrw || 0));
   if (!Number.isInteger(apparelId) || apparelId <= 0 || !thresholdValue) {
     return response.status(400).json({ error: 'invalid_price_alert' });
   }
@@ -146,6 +149,9 @@ async function saveRule(request, response, user) {
     triggerType,
     direction,
     thresholdValue,
+    thresholdDisplayKrw: triggerType === 'price'
+      ? (requestedThresholdKrw > 0 ? requestedThresholdKrw : Math.round(thresholdValue * MARKET_JPY_TO_KRW))
+      : null,
     active: true,
     lastObservedPriceJpy: null,
     lastObservedAt: null,
@@ -273,8 +279,8 @@ export function stabilizedSnapshotPair(rows = []) {
   };
 }
 
-function formatJpy(value) {
-  return `JPY ${Math.round(Number(value || 0)).toLocaleString('en-US')}`;
+function formatKrw(value) {
+  return `₩${Math.round(Number(value || 0)).toLocaleString('ko-KR')}`;
 }
 
 async function hasNotificationEvent(userId, eventKey) {
@@ -294,8 +300,8 @@ async function insertPriceNotification(row, payload, evaluation, eventKey) {
   const condition = payload.conditionKey === 'psa10' ? 'PSA10' : 'Single';
   const movement = payload.direction === 'above' ? '상승' : '하락';
   const body = payload.triggerType === 'percent'
-    ? `${condition} 시세가 24시간 대비 ${Math.abs(evaluation.percentChange).toFixed(1)}% ${movement}했습니다. 현재 ${formatJpy(evaluation.currentPrice)}`
-    : `${condition} 시세가 목표가 ${formatJpy(payload.thresholdValue)} ${payload.direction === 'above' ? '이상' : '이하'}에 도달했습니다. 현재 ${formatJpy(evaluation.currentPrice)}`;
+    ? `${condition} 시세가 24시간 대비 ${Math.abs(evaluation.percentChange).toFixed(1)}% ${movement}했습니다. 현재 ${formatKrw(evaluation.currentPrice * MARKET_JPY_TO_KRW)}`
+    : `${condition} 시세가 목표가 ${formatKrw(payload.thresholdDisplayKrw || payload.thresholdValue * MARKET_JPY_TO_KRW)} ${payload.direction === 'above' ? '이상' : '이하'}에 도달했습니다. 현재 ${formatKrw(evaluation.currentPrice * MARKET_JPY_TO_KRW)}`;
   const title = `${payload.cardName || payload.code || '카드'} 가격 ${movement} 알림`;
   const notificationPayload = {
     eventKey,
@@ -309,6 +315,7 @@ async function insertPriceNotification(row, payload, evaluation, eventKey) {
     triggerType: payload.triggerType,
     direction: payload.direction,
     thresholdValue: payload.thresholdValue,
+    thresholdDisplayKrw: payload.thresholdDisplayKrw || null,
     currentPriceJpy: evaluation.currentPrice,
     previousPriceJpy: evaluation.previousPrice || null,
     percentChange: evaluation.percentChange ?? null,
