@@ -2,6 +2,19 @@ import boxMarketItems from '../src/data/box-market-items.js';
 
 const CACHE_SECONDS = 60 * 60 * 3;
 
+function formatReleaseDate(value) {
+  if (!(value instanceof Date) || Number.isNaN(value.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(value);
+  const date = Object.fromEntries(parts.map(({ type, value: part }) => [type, part]));
+  if (Number(date.year) < 2000) return '';
+  return `${date.year}-${date.month}-${date.day}`;
+}
+
 function findFirstImage(value) {
   if (!value) return '';
   if (typeof value === 'string') {
@@ -61,14 +74,14 @@ function normalizeReleaseDate(value) {
   if (!value) return '';
   if (typeof value === 'number' && Number.isFinite(value)) {
     const timestamp = value > 1000000000000 ? value : value * 1000;
-    return new Date(timestamp).toISOString().slice(0, 10);
+    return formatReleaseDate(new Date(timestamp));
   }
   if (typeof value !== 'string') return '';
   const text = value.trim();
   if (!text) return '';
   const normalized = text.replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, '$1');
   const parsed = Date.parse(normalized);
-  return Number.isFinite(parsed) ? new Date(parsed).toISOString().slice(0, 10) : text;
+  return Number.isFinite(parsed) ? formatReleaseDate(new Date(parsed)) : text;
 }
 
 function findReleaseDate(value) {
@@ -129,6 +142,18 @@ function findReleaseDateInHtml(html) {
   return match?.[1] ? normalizeReleaseDate(match[1]) : '';
 }
 
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)))
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&');
+}
+
 function parseJsonBlocks(html) {
   const blocks = [];
   const nextMatch = html.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
@@ -137,6 +162,8 @@ function parseJsonBlocks(html) {
   for (const match of jsonLdMatches) {
     if (match[1]) blocks.push(match[1]);
   }
+  const tradingCardMatch = html.match(/<trading-card-detail\b[^>]*\s:trading-card=(["'])([\s\S]*?)\1/i);
+  if (tradingCardMatch?.[2]) blocks.push(decodeHtmlEntities(tradingCardMatch[2]));
   return blocks;
 }
 
@@ -147,7 +174,7 @@ function parseProductHtml(html) {
   let releaseDate = '';
   for (const block of parseJsonBlocks(html)) {
     try {
-      const data = JSON.parse(block.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+      const data = JSON.parse(decodeHtmlEntities(block));
       imageUrl ||= findFirstImage(data);
       minPrice ||= findPrice(data);
       listingCount ||= findListingCount(data);
