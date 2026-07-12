@@ -7306,10 +7306,16 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     ? plotted.reduce((path, point, index) => {
       if (index === 0) return `M ${point.x} ${point.y}`;
       const previous = plotted[index - 1];
-      const midX = (previous.x + point.x) / 2;
-      const midY = (previous.y + point.y) / 2;
-      return `${path} Q ${previous.x} ${previous.y} ${midX} ${midY}`;
-    }, '') + ` L ${plotted[plotted.length - 1].x} ${plotted[plotted.length - 1].y}`
+      const beforePrevious = plotted[index - 2] || previous;
+      const next = plotted[index + 1] || point;
+      const minY = Math.min(previous.y, point.y);
+      const maxY = Math.max(previous.y, point.y);
+      const control1X = Math.min(point.x, Math.max(previous.x, previous.x + (point.x - beforePrevious.x) / 6));
+      const control1Y = Math.min(maxY, Math.max(minY, previous.y + (point.y - beforePrevious.y) / 6));
+      const control2X = Math.min(point.x, Math.max(previous.x, point.x - (next.x - previous.x) / 6));
+      const control2Y = Math.min(maxY, Math.max(minY, point.y - (next.y - previous.y) / 6));
+      return `${path} C ${control1X} ${control1Y} ${control2X} ${control2Y} ${point.x} ${point.y}`;
+    }, '')
     : linePath;
   const path = isLongMarketRange ? smoothPath : linePath;
   const area = `${path} L ${plotted[plotted.length - 1].x} ${height - padBottom} L ${plotted[0].x} ${height - padBottom} Z`;
