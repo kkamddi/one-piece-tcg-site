@@ -3255,9 +3255,9 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
   return (
     <header className="renew-header" data-nosnippet>
       <div className="renew-mobile-topbar">
-        <button type="button" className="renew-mobile-logo" onClick={() => onNavigate('home')} aria-label="메인으로 이동">
+        <a href="/" className="renew-mobile-logo" onClick={(event) => { event.preventDefault(); onNavigate('home'); }} aria-label="메인으로 이동">
           <img src={LOGO_SRC} alt="Card Pone" />
-        </button>
+        </a>
         <div className="renew-mobile-actions">
           <div className={`renew-notification-shell ${notificationMenuOpen ? 'is-open' : ''}`}>
             <button type="button" onClick={handleNotificationClick} aria-label="알림">
@@ -3289,20 +3289,20 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </div>
       </div>
       <div className="renew-nav">
-        <button type="button" className="renew-logo-button" onClick={() => onNavigate('home')} aria-label="메인으로 이동">
+        <a href="/" className="renew-logo-button" onClick={(event) => { event.preventDefault(); onNavigate('home'); }} aria-label="메인으로 이동">
           <img src={LOGO_SRC} alt="Card Pone" className="renew-logo" />
-        </button>
+        </a>
 
         <nav className="renew-tabs" aria-label="주요 메뉴">
           {NAV_ITEMS.map((item) => (
-            <button
+            <a
               key={item.id}
-              type="button"
+              href={PAGE_PATHS[item.id] || '/'}
               className={`renew-tab ${activePage === item.id ? 'is-active' : ''}`}
-              onClick={() => onNavigate(item.id)}
+              onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
             >
               {t(item.labelKey)}
-            </button>
+            </a>
           ))}
         </nav>
 
@@ -3344,28 +3344,28 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </div>
       </div>
       <nav className="renew-bottom-nav" aria-label="모바일 하단 메뉴">
-        <button type="button" className={activePage === 'cards' ? 'is-active' : ''} onClick={() => onNavigate('cards')} aria-label="도감">
+        <a href="/cards" className={activePage === 'cards' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('cards'); }} aria-label="도감">
           <MobileNavIcon type="cards" />
           <span>{t('navCards')}</span>
-        </button>
-        <button type="button" className={activePage === 'prices' ? 'is-active' : ''} onClick={() => onNavigate('prices')} aria-label="시세">
+        </a>
+        <a href="/prices" className={activePage === 'prices' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('prices'); }} aria-label="시세">
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
-        </button>
+        </a>
         {MARKETPLACE_TAB_VISIBLE ? (
-          <button type="button" className={activePage === 'marketplace' ? 'is-active' : ''} onClick={() => onNavigate('marketplace')} aria-label="거래">
+          <a href="/market" className={activePage === 'marketplace' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('marketplace'); }} aria-label="거래">
             <MobileNavIcon type="marketplace" />
             <span>{t('navMarketplace')}</span>
-          </button>
+          </a>
         ) : null}
-        <button type="button" className={activePage === 'news' ? 'is-active' : ''} onClick={onMobileNews} aria-label="정보">
+        <a href="/news" className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
-        </button>
-        <button type="button" className={activePage === 'shops' ? 'is-active' : ''} onClick={() => onNavigate('shops')} aria-label="구매처">
+        </a>
+        <a href="/shops" className={activePage === 'shops' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('shops'); }} aria-label="구매처">
           <MobileNavIcon type="shops" />
           <span>{t('navShops')}</span>
-        </button>
+        </a>
       </nav>
     </header>
   );

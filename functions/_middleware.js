@@ -343,6 +343,88 @@ const SITE_NAVIGATION_ITEMS = [
   { name: '가이드/Q&A', url: `${SITE_ORIGIN}/guide`, description: '원피스카드 입문 및 수집 가이드' }
 ];
 
+const SERVER_PAGE_CONTENT = {
+  '/': {
+    heading: '원피스카드 도감과 시세를 한곳에서',
+    paragraphs: [
+      'Card Pone은 한글판과 일본판 원피스카드를 검색하고, 보유 카드와 위시리스트를 관리하며, 카드별 시세 흐름을 확인할 수 있는 수집 도구입니다.',
+      '카드 시세는 공개 시장 데이터를 정리해 조건별 최근 거래와 기간별 흐름으로 제공하며, Collector Index는 PSA10 거래 데이터가 있는 구성 종목의 일별 변화를 연결해 보여줍니다.'
+    ],
+    links: ['/cards', '/prices', '/guide', '/shops']
+  },
+  '/cards': {
+    heading: '원피스카드 도감',
+    paragraphs: [
+      '한글판과 일본판 카드를 카드명, 일련번호, OP·EB·ST·PR 시리즈로 검색할 수 있습니다.',
+      '로그인하면 보유중과 위시리스트 상태를 저장하고, 카드 상세에서 연결된 시세와 가격 알림을 이용할 수 있습니다.'
+    ],
+    links: ['/cards/jp', '/cards/kr', '/prices', '/guide/card-catalog']
+  },
+  '/prices': {
+    heading: '원피스카드 시세와 Collector Index',
+    paragraphs: [
+      '카드 일련번호나 이름으로 SNKRDUNK에 매핑된 상품을 찾고 Single과 PSA10의 최근 시세, 거래 기록, 7일·1개월·1년 가격 흐름을 확인할 수 있습니다.',
+      'Collector Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 비정상적인 묶음 거래와 일시적인 급등락을 완화한 뒤 종목별 수익률을 연결해 시장 흐름을 비교합니다.'
+    ],
+    links: ['/prices/cards', '/prices/boxes', '/prices/index', '/guide/card-price']
+  },
+  '/news': {
+    heading: '원피스카드 정보',
+    paragraphs: [
+      '공식 공지, 사전예약, 카드 보관용품과 수집 가이드를 주제별로 확인할 수 있습니다.',
+      '외부 공지는 원문으로 연결하고 Card Pone의 도감, 시세, 구매처 기능을 함께 활용할 수 있도록 정리합니다.'
+    ],
+    links: ['/news/official', '/news/preorder', '/guide', '/faq']
+  },
+  '/shops': {
+    heading: '원피스카드 구매처',
+    paragraphs: [
+      '국내 원피스카드 공인점포와 취급점포를 지역, 시군구, 매장명으로 검색할 수 있습니다.',
+      '매장 정보는 공식 안내와 공개된 매장 정보를 기준으로 정리하며 방문 전 영업시간과 재고를 해당 매장에 다시 확인하는 것을 권장합니다.'
+    ],
+    links: ['/shops/official', '/guide/shops', '/cards', '/prices']
+  },
+  '/guide': {
+    heading: '원피스카드 입문과 수집 가이드',
+    paragraphs: [
+      '카드 도감 검색, 시세 확인, 카드 보관, 구매처 탐색처럼 수집을 시작할 때 필요한 절차를 주제별로 정리합니다.',
+      '카드 상태와 언어판, 최근 거래 기록을 구분해 확인하는 방법과 Card Pone의 각 도구를 사용하는 기준을 안내합니다.'
+    ],
+    links: ['/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops']
+  },
+  '/faq': {
+    heading: '원피스카드 자주 묻는 질문',
+    paragraphs: [
+      '언어판 구분, 카드 검색, 시세 데이터, 보관 방법과 구매처에 관한 자주 묻는 질문을 확인할 수 있습니다.',
+      '시세는 실제 거래 시점과 카드 상태에 따라 달라질 수 있으므로 단일 가격보다 최근 거래와 기간별 흐름을 함께 확인해야 합니다.'
+    ],
+    links: ['/guide', '/cards', '/prices', '/shops']
+  }
+};
+
+function createServerPageContent(pathname, seo) {
+  const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const content = SERVER_PAGE_CONTENT[normalized] || {
+    heading: seo.title.split('|')[0].trim(),
+    paragraphs: [seo.description],
+    links: ['/cards', '/prices', '/guide', '/shops']
+  };
+  const links = content.links
+    .map((path) => {
+      const item = SITE_NAVIGATION_ITEMS.find((entry) => new URL(entry.url).pathname === path);
+      const label = item?.name || getPageSeo(path)?.title?.split('|')[0]?.trim() || path;
+      return `<li><a href="${escapeHtml(path)}">${escapeHtml(label)}</a></li>`;
+    })
+    .join('');
+  const paragraphs = content.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
+
+  return `<main class="server-page-content">
+      <h1>${escapeHtml(content.heading)}</h1>
+      ${paragraphs}
+      <nav aria-label="관련 페이지"><ul>${links}</ul></nav>
+    </main>`;
+}
+
 function getFixedPageSeo(normalized) {
   const indexAliases = {
     '/prices/collector-index': '/prices/index',
@@ -640,6 +722,11 @@ function applySeo(html, pathname, seo) {
   } else {
     nextHtml = nextHtml.replace('</head>', `    ${pageJsonLd}\n  </head>`);
   }
+  const serverContent = createServerPageContent(pathname, seo);
+  nextHtml = nextHtml.replace(
+    /<div id="root"><\/div>/i,
+    `<div id="root">${serverContent}</div>`
+  );
   return nextHtml;
 }
 

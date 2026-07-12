@@ -86,6 +86,7 @@
   border-radius: 16px;
   background: transparent;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .renew-app.is-dark .renew-logo-button {
@@ -120,6 +121,7 @@
   letter-spacing: -0.025em;
   text-shadow: 0.28px 0 currentColor;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .renew-tab.is-active {
@@ -11169,7 +11171,8 @@
     backdrop-filter: blur(16px);
   }
 
-  .renew-bottom-nav button {
+  .renew-bottom-nav button,
+  .renew-bottom-nav a {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -11181,9 +11184,11 @@
     background: transparent;
     font-size: 22px;
     font-weight: 900;
+    text-decoration: none;
   }
 
-  .renew-bottom-nav button span {
+  .renew-bottom-nav button span,
+  .renew-bottom-nav a span {
     display: block;
     max-width: 100%;
     font-size: 10px;
@@ -11193,7 +11198,8 @@
     white-space: nowrap;
   }
 
-  .renew-bottom-nav button.is-active {
+  .renew-bottom-nav button.is-active,
+  .renew-bottom-nav a.is-active {
     color: #fff;
     background: #17191c;
   }
@@ -11223,11 +11229,13 @@
     background: rgba(18, 20, 27, 0.92);
   }
 
-  .renew-app.is-dark .renew-bottom-nav button {
+  .renew-app.is-dark .renew-bottom-nav button,
+  .renew-app.is-dark .renew-bottom-nav a {
     color: #c9c1b7;
   }
 
-  .renew-app.is-dark .renew-bottom-nav button.is-active {
+  .renew-app.is-dark .renew-bottom-nav button.is-active,
+  .renew-app.is-dark .renew-bottom-nav a.is-active {
     color: #17191c;
     background: #f5f2ec;
   }
