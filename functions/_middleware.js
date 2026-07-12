@@ -4,7 +4,25 @@ const LEGACY_REDIRECTS = {
   '/deck': '/news',
   '/deck-simulator': '/news',
   '/community': '/',
-  '/collection': '/'
+  '/collection': '/',
+  '/guide/buying': '/guide/shops',
+  '/guide/catalog': '/guide/card-catalog',
+  '/guide/collecting': '/guide',
+  '/guide/grading': '/guide/card-price',
+  '/guide/market-price': '/guide/card-price',
+  '/guide/portfolio': '/guide',
+  '/guide/storage': '/guide/card-storage',
+  '/faq/booster-box': '/faq',
+  '/faq/market-price': '/faq',
+  '/faq/parallel': '/faq',
+  '/faq/rarity': '/faq',
+  '/faq/start': '/faq',
+  '/faq/storage': '/faq',
+  '/prices/collector-index': '/prices/index',
+  '/prices/manga-index': '/prices/index/manga',
+  '/prices/premium-art-index': '/prices/index/premium-art',
+  '/prices/sp-index': '/prices/index/sp',
+  '/prices/luffy-index': '/prices/index/luffy'
 };
 
 const PAGE_SEO = {
