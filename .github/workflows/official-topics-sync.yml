@@ -3,8 +3,8 @@ name: Official topics sync
 on:
   workflow_dispatch:
   schedule:
-    # 03:07 / 09:07 / 15:07 / 21:07 KST
-    - cron: "7 0,6,12,18 * * *"
+    # 09:07 KST
+    - cron: "7 0 * * *"
 
 permissions:
   contents: write
