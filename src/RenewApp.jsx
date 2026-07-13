@@ -97,10 +97,16 @@ function getCalendarTodayKey() {
 }
 
 function getCalendarTopicKind(topic) {
+  if (['release', 'event', 'notice'].includes(topic?.calendarKind)) return topic.calendarKind;
   const category = String(topic?.category || '').toUpperCase();
   if (category.includes('이벤트') || category.includes('イベント') || category.includes('EVENT')) return 'event';
   if (category.includes('상품') || category.includes('商品') || category.includes('PRODUCT')) return 'notice';
   return '';
+}
+
+function getCalendarProductCode(value) {
+  const match = String(value || '').toUpperCase().match(/(?:OP|EB|ST|PRB|DP|EX|TS|DF|AC)-?\d{2}(?:-EB\d{2})?/);
+  return match ? match[0].replaceAll('-', '') : '';
 }
 
 function buildCalendarEvents(boxes = []) {
@@ -116,10 +122,11 @@ function buildCalendarEvents(boxes = []) {
       title: `${item.code} · ${BOX_SHORT_TITLES[item.code] || item.name}`,
       sourceLabel: 'SNKRDUNK',
       url: item.sourceUrl || `/prices/box/${encodeURIComponent(item.code)}`,
-      imageUrl: item.previewImageUrl || ''
+      imageUrl: item.previewImageUrl || '',
+      productCode: getCalendarProductCode(item.code)
     }));
   const notices = topicsData
-    .map((item) => ({ ...item, kind: getCalendarTopicKind(item), date: toCalendarDateKey(item.date) }))
+    .map((item) => ({ ...item, kind: getCalendarTopicKind(item), date: toCalendarDateKey(item.scheduleDate || item.date) }))
     .filter((item) => item.kind && item.date)
     .map((item) => ({
       id: `topic-${item.id}`,
@@ -130,9 +137,14 @@ function buildCalendarEvents(boxes = []) {
       title: item.title,
       sourceLabel: item.source === 'JP_OFFICIAL' ? 'JP OFFICIAL' : 'KR OFFICIAL',
       url: item.url || '',
-      imageUrl: item.imageUrl || ''
+      imageUrl: item.imageUrl || '',
+      endDate: toCalendarDateKey(item.endDate),
+      isSchedule: Boolean(item.calendarOnly),
+      productCode: item.calendarKind === 'release' ? getCalendarProductCode(item.title) : ''
     }));
-  return [...releases, ...notices]
+  const officialReleaseCodes = new Set(notices.filter((item) => item.kind === 'release' && item.locale === 'JP' && item.productCode).map((item) => item.productCode));
+  const fallbackReleases = releases.filter((item) => !item.productCode || !officialReleaseCodes.has(item.productCode));
+  return [...fallbackReleases, ...notices]
     .filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index)
     .sort((a, b) => a.date.localeCompare(b.date) || a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title));
 }
@@ -333,7 +345,7 @@ function writeMarketInterestIds(userId, ids) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(getMarketInterestStorageKey(userId), JSON.stringify([...ids]));
 }
-const OFFICIAL_TOPIC_ITEMS = Array.isArray(topicsData) ? topicsData : [];
+const OFFICIAL_TOPIC_ITEMS = Array.isArray(topicsData) ? topicsData.filter((item) => !item.calendarOnly) : [];
 const TOPIC_SOURCE_LABEL = {
   KR_OFFICIAL: '한국 공식',
   JP_OFFICIAL: '일본 공식'
@@ -4513,7 +4525,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
   const kindLabel = event.kind === 'release'
     ? (isEn ? 'Release' : '발매')
     : event.kind === 'event'
-      ? (isEn ? 'Event notice' : '이벤트 공지')
+      ? (event.isSchedule ? (isEn ? 'Event' : '이벤트') : (isEn ? 'Event notice' : '이벤트 공지'))
       : (isEn ? 'Product notice' : '상품 공지');
   const actionLabel = event.kind === 'release'
     ? (isEn ? 'View product' : '상품 보기')
@@ -4530,7 +4542,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
           <small>{event.sourceLabel}</small>
         </div>
         <strong>{event.title}</strong>
-        <small>{event.date} · {event.category}</small>
+        <small>{event.endDate ? `${event.date} - ${event.endDate}` : event.date} · {event.category}</small>
       </div>
       {event.url ? <a href={event.url} target={event.url.startsWith('http') ? '_blank' : undefined} rel={event.url.startsWith('http') ? 'noreferrer' : undefined}>{actionLabel}</a> : null}
     </article>
@@ -4564,12 +4576,21 @@ function RenewCalendar({ uiLang }) {
     (localeFilter === 'ALL' || event.locale === localeFilter)
     && (kindFilter === 'all' || event.kind === kindFilter)
   )), [events, kindFilter, localeFilter]);
+  const [calendarYear, calendarMonth] = monthKey.split('-').map(Number);
+  const monthStart = `${monthKey}-01`;
+  const monthEnd = [calendarYear, String(calendarMonth).padStart(2, '0'), String(new Date(calendarYear, calendarMonth, 0).getDate()).padStart(2, '0')].join('-');
+  const getEventDisplayDate = (event) => (event.date < monthStart && event.endDate >= monthStart ? monthStart : event.date);
   const eventsByDate = useMemo(() => {
     const map = new Map();
-    filteredEvents.forEach((event) => map.set(event.date, [...(map.get(event.date) || []), event]));
+    filteredEvents
+      .filter((event) => event.date <= monthEnd && (event.endDate || event.date) >= monthStart)
+      .forEach((event) => {
+        const displayDate = getEventDisplayDate(event);
+        map.set(displayDate, [...(map.get(displayDate) || []), event]);
+      });
     return map;
-  }, [filteredEvents]);
-  const monthEvents = useMemo(() => filteredEvents.filter((event) => event.date.startsWith(`${monthKey}-`)), [filteredEvents, monthKey]);
+  }, [filteredEvents, monthEnd, monthStart]);
+  const monthEvents = useMemo(() => filteredEvents.filter((event) => event.date <= monthEnd && (event.endDate || event.date) >= monthStart), [filteredEvents, monthEnd, monthStart]);
   const selectedEvents = eventsByDate.get(selectedDate) || [];
   const monthCells = useMemo(() => getCalendarMonthCells(monthKey), [monthKey]);
   const monthDate = new Date(`${monthKey}-01T00:00:00`);
@@ -4577,9 +4598,12 @@ function RenewCalendar({ uiLang }) {
   const selectedDateLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${selectedDate}T00:00:00`));
   const mobileGroups = useMemo(() => {
     const groups = new Map();
-    monthEvents.forEach((event) => groups.set(event.date, [...(groups.get(event.date) || []), event]));
+    monthEvents.forEach((event) => {
+      const displayDate = getEventDisplayDate(event);
+      groups.set(displayDate, [...(groups.get(displayDate) || []), event]);
+    });
     return [...groups.entries()];
-  }, [monthEvents]);
+  }, [monthEvents, monthStart]);
 
   const changeMonth = (delta) => {
     const [year, month] = monthKey.split('-').map(Number);
@@ -4608,6 +4632,7 @@ function RenewCalendar({ uiLang }) {
     { key: 'event', label: isEn ? 'Events' : '이벤트' },
     { key: 'notice', label: isEn ? 'Official notices' : '공식 공지' }
   ];
+  const hasActiveFilters = localeFilter !== 'ALL' || kindFilter !== 'all';
 
   return (
     <main className="renew-subpage renew-calendar-main">
@@ -4629,12 +4654,26 @@ function RenewCalendar({ uiLang }) {
             <button type="button" className="renew-calendar-today" onClick={goToday}>{isEn ? 'Today' : '오늘'}</button>
           </div>
           <div className="renew-calendar-filters">
-            <div role="group" aria-label={isEn ? 'Region filter' : '국가 필터'}>
-              {localeOptions.map((option) => <button key={option.key} type="button" className={localeFilter === option.key ? 'is-active' : ''} onClick={() => setLocaleFilter(option.key)}>{option.label}</button>)}
+            <div className="renew-calendar-filter-group">
+              <span>{isEn ? 'Region' : '지역'}</span>
+              <div role="group" aria-label={isEn ? 'Region filter' : '국가 필터'}>
+                {localeOptions.map((option) => <button key={option.key} type="button" className={localeFilter === option.key ? 'is-active' : ''} onClick={() => setLocaleFilter(option.key)}>{option.label}</button>)}
+              </div>
             </div>
-            <div role="group" aria-label={isEn ? 'Schedule type filter' : '일정 유형 필터'}>
-              {kindOptions.map((option) => <button key={option.key} type="button" className={kindFilter === option.key ? 'is-active' : ''} onClick={() => setKindFilter(option.key)}>{option.label}</button>)}
+            <div className="renew-calendar-filter-group">
+              <span>{isEn ? 'Type' : '유형'}</span>
+              <div role="group" aria-label={isEn ? 'Schedule type filter' : '일정 유형 필터'}>
+                {kindOptions.map((option) => <button key={option.key} type="button" className={kindFilter === option.key ? 'is-active' : ''} onClick={() => setKindFilter(option.key)}>{option.label}</button>)}
+              </div>
             </div>
+            <button
+              type="button"
+              className="renew-calendar-filter-reset"
+              disabled={!hasActiveFilters}
+              onClick={() => { setLocaleFilter('ALL'); setKindFilter('all'); }}
+            >
+              {isEn ? 'Reset' : '초기화'}
+            </button>
           </div>
         </div>
 

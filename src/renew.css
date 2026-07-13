@@ -3749,22 +3749,41 @@
 .renew-calendar-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 14px;
+  align-items: flex-end;
+  gap: 10px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  background: #f7f7f7;
 }
 
-.renew-calendar-filters > div {
-  display: flex;
-  flex-wrap: wrap;
+.renew-calendar-filter-group {
+  display: grid;
   gap: 6px;
 }
 
-.renew-calendar-filters button {
-  min-height: 34px;
-  border: 1px solid rgba(23, 25, 28, 0.12);
-  border-radius: 999px;
-  padding: 0 12px;
-  color: #555d69;
+.renew-calendar-filter-group > span {
+  color: #737b87;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.renew-calendar-filter-group > div {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  padding: 3px;
   background: #fff;
+}
+
+.renew-calendar-filters button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 11px;
+  color: #555d69;
+  background: transparent;
   font-size: 12px;
   font-weight: 900;
   cursor: pointer;
@@ -3774,6 +3793,17 @@
   border-color: #17191c;
   color: #fff;
   background: #17191c;
+}
+
+.renew-calendar-filters .renew-calendar-filter-reset {
+  margin-left: auto;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  background: #fff;
+}
+
+.renew-calendar-filters .renew-calendar-filter-reset:disabled {
+  opacity: 0.42;
+  cursor: default;
 }
 
 .renew-calendar-layout {
@@ -4089,6 +4119,25 @@
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+.renew-app.is-dark .renew-calendar-filters {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.renew-app.is-dark .renew-calendar-filter-group > div {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #17191c;
+}
+
+.renew-app.is-dark .renew-calendar-filter-group > span {
+  color: #aab2bf;
+}
+
+.renew-app.is-dark .renew-calendar-filters .renew-calendar-filter-reset {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .renew-app.is-dark .renew-calendar-weekdays,
 .renew-app.is-dark .renew-calendar-agenda,
 .renew-app.is-dark .renew-calendar-grid button.is-outside {
@@ -4178,20 +4227,31 @@
 
   .renew-calendar-filters {
     display: grid;
+    align-items: stretch;
   }
 
-  .renew-calendar-filters > div {
+  .renew-calendar-filter-group {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .renew-calendar-filter-group > div {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .renew-calendar-filters > div:last-child {
+  .renew-calendar-filter-group:nth-child(2) > div {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .renew-calendar-filters button {
     width: 100%;
     padding: 0 7px;
+  }
+
+  .renew-calendar-filters .renew-calendar-filter-reset {
+    margin-left: 0;
   }
 
   .renew-calendar-layout {
