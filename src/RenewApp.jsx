@@ -4676,8 +4676,7 @@ function RenewCalendar({ uiLang }) {
         <header className="renew-calendar-head">
           <div>
             <span>SCHEDULE</span>
-            <h1>{isEn ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</h1>
-            <p>{isEn ? 'Release dates and official event or product notices are separated by source.' : '상품 발매일과 공식 이벤트·상품 공지를 출처 기준으로 구분해 확인합니다.'}</p>
+            <h1 className="renew-sr-only">{isEn ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</h1>
           </div>
           <strong>{monthEvents.length}{isEn ? ' schedules' : '개 일정'}</strong>
         </header>

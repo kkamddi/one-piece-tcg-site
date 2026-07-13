@@ -147,8 +147,11 @@ function toAbsoluteJpUrl(href) {
 
 function toAbsoluteJpImage(src) {
   if (!src) return '';
-  if (src.startsWith('http://') || src.startsWith('https://')) return src;
-  return `${JP_OFFICIAL_BASE}/${src.replace(/^\//, '')}`;
+  try {
+    return new URL(src, `${JP_OFFICIAL_BASE}/`).href;
+  } catch {
+    return src;
+  }
 }
 
 function toAbsoluteKrImage(src) {
