@@ -334,6 +334,12 @@ const SEO_PRIMARY = {
     keywords: '원피스카드 정보, 원피스카드 공지, 원피스카드 사전예약, 카드포네 뉴스',
     schemaType: 'CollectionPage'
   },
+  '/calendar': {
+    title: '원피스카드 캘린더 - 발매일·이벤트·공식 공지 | 카드포네',
+    description: '원피스카드 한글판과 일본판 상품 발매일, 이벤트 공지와 공식 상품 소식을 월별 일정으로 확인할 수 있습니다.',
+    keywords: '원피스카드 캘린더, 원피스카드 발매일, 원피스카드 이벤트, 원피스카드 일정',
+    schemaType: 'CollectionPage'
+  },
   '/shops': {
     title: '원피스카드 구매처 - 지역별 공인점포·취급점포 | 카드포네',
     description: '원피스카드 오프라인 구매처를 지역, 시군구, 매장 유형으로 검색하고 가까운 매장과 지도 바로가기를 확인할 수 있습니다.',
@@ -357,6 +363,7 @@ const SEO_PRIMARY = {
 const SITE_NAVIGATION_ITEMS = [
   { name: '도감', url: `${SITE_ORIGIN}/cards`, description: '한글판·일본판 원피스카드 도감 검색' },
   { name: '시세', url: `${SITE_ORIGIN}/prices`, description: '카드 시세, 박스 가격, 카드 인덱스' },
+  { name: '일정', url: `${SITE_ORIGIN}/calendar`, description: '상품 발매일과 공식 이벤트 공지 캘린더' },
   { name: '정보', url: `${SITE_ORIGIN}/news`, description: '공식공지, 사전예약, 가이드와 Q&A' },
   { name: '구매처', url: `${SITE_ORIGIN}/shops`, description: '지역별 공인점포와 취급점포 검색' },
   { name: '가이드/Q&A', url: `${SITE_ORIGIN}/guide`, description: '원피스카드 입문 및 수집 가이드' }
@@ -394,6 +401,14 @@ const SERVER_PAGE_CONTENT = {
       '외부 공지는 원문으로 연결하고 Card Pone의 도감, 시세, 구매처 기능을 함께 활용할 수 있도록 정리합니다.'
     ],
     links: ['/news/official', '/news/preorder', '/guide', '/faq']
+  },
+  '/calendar': {
+    heading: '원피스카드 발매와 이벤트 캘린더',
+    paragraphs: [
+      '한글판과 일본판 상품 발매일, 공식 이벤트 공지와 상품 공지를 월별로 확인할 수 있습니다.',
+      '공식 공지는 게시일을 기준으로 표시하며 상품 발매일은 연결된 상품 출처 기준으로 구분해 제공합니다.'
+    ],
+    links: ['/news/official', '/prices/boxes', '/cards', '/shops']
   },
   '/shops': {
     heading: '원피스카드 구매처',

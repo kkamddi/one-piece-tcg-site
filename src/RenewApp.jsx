@@ -81,6 +81,73 @@ function getBoxReleaseSortValue(item) {
   return Number(item?.sortOrder ?? String(item?.code || '').match(/\d+/)?.[0]) || 0;
 }
 
+const CALENDAR_WEEKDAYS = {
+  KR: ['일', '월', '화', '수', '목', '금', '토'],
+  EN: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+};
+
+function toCalendarDateKey(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[1]}-${match[2]}-${match[3]}` : '';
+}
+
+function getCalendarTodayKey() {
+  const today = new Date();
+  return [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+}
+
+function getCalendarTopicKind(topic) {
+  const category = String(topic?.category || '').toUpperCase();
+  if (category.includes('이벤트') || category.includes('イベント') || category.includes('EVENT')) return 'event';
+  if (category.includes('상품') || category.includes('商品') || category.includes('PRODUCT')) return 'notice';
+  return '';
+}
+
+function buildCalendarEvents(boxes = []) {
+  const releases = boxes
+    .map((item) => ({ item, date: toCalendarDateKey(item?.releaseDate) }))
+    .filter(({ date }) => date)
+    .map(({ item, date }) => ({
+      id: `release-${item.code}-${date}`,
+      date,
+      kind: 'release',
+      locale: 'JP',
+      category: 'RELEASE',
+      title: `${item.code} · ${BOX_SHORT_TITLES[item.code] || item.name}`,
+      sourceLabel: 'SNKRDUNK',
+      url: item.sourceUrl || `/prices/box/${encodeURIComponent(item.code)}`,
+      imageUrl: item.previewImageUrl || ''
+    }));
+  const notices = topicsData
+    .map((item) => ({ ...item, kind: getCalendarTopicKind(item), date: toCalendarDateKey(item.date) }))
+    .filter((item) => item.kind && item.date)
+    .map((item) => ({
+      id: `topic-${item.id}`,
+      date: item.date,
+      kind: item.kind,
+      locale: String(item.locale || '').toUpperCase() === 'JP' ? 'JP' : 'KR',
+      category: item.category || 'NOTICE',
+      title: item.title,
+      sourceLabel: item.source === 'JP_OFFICIAL' ? 'JP OFFICIAL' : 'KR OFFICIAL',
+      url: item.url || '',
+      imageUrl: item.imageUrl || ''
+    }));
+  return [...releases, ...notices]
+    .filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title));
+}
+
+function getCalendarMonthCells(monthKey) {
+  const [year, month] = String(monthKey || '').split('-').map(Number);
+  const firstDate = new Date(year, month - 1, 1);
+  const gridStart = new Date(year, month - 1, 1 - firstDate.getDay());
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + index);
+    const key = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+    return { key, day: date.getDate(), weekday: date.getDay(), inMonth: date.getMonth() === month - 1 };
+  });
+}
+
 function useBodyScrollLock(active = true) {
   useEffect(() => {
     if (!active || typeof window === 'undefined' || typeof document === 'undefined' || !document.body) return undefined;
@@ -1855,6 +1922,7 @@ const NAV_ITEMS = [
   { id: 'cards', labelKey: 'navCards' },
   { id: 'prices', labelKey: 'navPrices' },
   ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
+  { id: 'calendar', labelKey: 'navCalendar' },
   { id: 'news', labelKey: 'navNews' },
   { id: 'shops', labelKey: 'navShops' }
 ];
@@ -1864,6 +1932,7 @@ const UI_TEXT = {
     navCards: '도감',
     navPrices: '시세',
     navMarketplace: '거래',
+    navCalendar: '일정',
     navNews: '정보',
     navShops: '구매처',
     login: '로그인',
@@ -1974,6 +2043,7 @@ const UI_TEXT = {
     navCards: 'Cards',
     navPrices: 'Prices',
     navMarketplace: 'Trade',
+    navCalendar: 'Calendar',
     navNews: 'Info',
     navShops: 'Shops',
     login: 'Login',
@@ -2090,6 +2160,7 @@ const PAGE_PATHS = {
   cards: '/cards',
   prices: '/prices',
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
+  calendar: '/calendar',
   news: '/news',
   shops: '/shops',
   partnerShops: '/shops/partners',
@@ -2113,6 +2184,7 @@ function getRouteSeoPage(pathname = '/') {
   if (PATH_PAGES[path]) return PATH_PAGES[path];
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
+  if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
   if (path.startsWith('/shops/partners')) return 'partnerShops';
   if (path.startsWith('/shops')) return 'shops';
@@ -2234,6 +2306,13 @@ const PAGE_SEO = {
     description: '원피스카드 공식 소식, 업데이트 공지, 이용 가이드, 사전예약, 온라인 오리파, 카드 보관용품 정보를 확인할 수 있습니다.',
     keywords: 'Card Pone 정보, 원피스카드 공지사항, 원피스카드 뉴스, 원피스카드 가이드, 원피스카드 Q&A',
     body: '정보 영역에서는 업데이트 공지, 공식 소식, 사전예약, 온라인 오리파, 카드 보관용품, 이용 가이드를 확인할 수 있습니다.'
+  },
+  calendar: {
+    title: '원피스카드 캘린더 - 발매일·이벤트·공식 공지 | Card Pone',
+    h1: '원피스카드 캘린더',
+    description: '원피스카드 한글판과 일본판 상품 발매일, 이벤트 공지와 공식 소식을 월별 일정으로 확인할 수 있습니다.',
+    keywords: '원피스카드 캘린더, 원피스카드 발매일, 원피스카드 이벤트, 원피스카드 일정',
+    body: '원피스카드 캘린더에서는 한글판과 일본판 상품 발매 정보와 공식 이벤트·상품 공지를 날짜별로 확인할 수 있습니다.'
   },
   shops: {
     title: '원피스카드 구매처 - 지역별 공인점포 취급점포 | Card Pone',
@@ -2518,7 +2597,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
   if (path.startsWith('/shops/partners/')) return { label: '제휴 카드샵으로 돌아가기', page: 'partnerShops' };
   if (path === '/shops/partners') return { label: '구매처로 돌아가기', page: 'shops' };
-  if (path === '/' || (['/cards', '/prices', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
+  if (path === '/' || (['/cards', '/prices', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
   if (path.startsWith('/cards')) return { label: '도감으로 돌아가기', page: 'cards' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { label: '시세로 돌아가기', page: 'prices' };
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { label: '정보로 돌아가기', page: 'news' };
@@ -3312,7 +3391,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             <span>{t('navMarketplace')}</span>
           </a>
         ) : null}
-        <a href="/news" className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
+        <a href="/news" className={activePage === 'news' || activePage === 'calendar' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
         </a>
@@ -4429,7 +4508,194 @@ function RenewUpdateModal({ onClose }) {
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewNews({ uiLang }) {
+function RenewCalendarEventCard({ event, uiLang }) {
+  const isEn = uiLang === 'EN';
+  const kindLabel = event.kind === 'release'
+    ? (isEn ? 'Release' : '발매')
+    : event.kind === 'event'
+      ? (isEn ? 'Event notice' : '이벤트 공지')
+      : (isEn ? 'Product notice' : '상품 공지');
+  const actionLabel = event.kind === 'release'
+    ? (isEn ? 'View product' : '상품 보기')
+    : (isEn ? 'View source' : '원문 보기');
+  return (
+    <article className="renew-calendar-event-card">
+      <span className={`renew-calendar-event-mark is-${event.kind}`} aria-hidden="true">
+        {event.imageUrl ? <img src={event.imageUrl} alt="" loading="lazy" onError={(error) => { error.currentTarget.hidden = true; }} /> : null}
+      </span>
+      <div>
+        <div className="renew-calendar-event-meta">
+          <span className={`is-${event.kind}`}>{kindLabel}</span>
+          <span>{event.locale}</span>
+          <small>{event.sourceLabel}</small>
+        </div>
+        <strong>{event.title}</strong>
+        <small>{event.date} · {event.category}</small>
+      </div>
+      {event.url ? <a href={event.url} target={event.url.startsWith('http') ? '_blank' : undefined} rel={event.url.startsWith('http') ? 'noreferrer' : undefined}>{actionLabel}</a> : null}
+    </article>
+  );
+}
+
+function RenewCalendar({ uiLang }) {
+  const isEn = uiLang === 'EN';
+  const todayKey = getCalendarTodayKey();
+  const [monthKey, setMonthKey] = useState(todayKey.slice(0, 7));
+  const [selectedDate, setSelectedDate] = useState(todayKey);
+  const [localeFilter, setLocaleFilter] = useState('ALL');
+  const [kindFilter, setKindFilter] = useState('all');
+  const [boxes, setBoxes] = useState(boxMarketItems);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/box-market', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (!cancelled && Array.isArray(payload?.items)) setBoxes(payload.items);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const events = useMemo(() => buildCalendarEvents(boxes), [boxes]);
+  const filteredEvents = useMemo(() => events.filter((event) => (
+    (localeFilter === 'ALL' || event.locale === localeFilter)
+    && (kindFilter === 'all' || event.kind === kindFilter)
+  )), [events, kindFilter, localeFilter]);
+  const eventsByDate = useMemo(() => {
+    const map = new Map();
+    filteredEvents.forEach((event) => map.set(event.date, [...(map.get(event.date) || []), event]));
+    return map;
+  }, [filteredEvents]);
+  const monthEvents = useMemo(() => filteredEvents.filter((event) => event.date.startsWith(`${monthKey}-`)), [filteredEvents, monthKey]);
+  const selectedEvents = eventsByDate.get(selectedDate) || [];
+  const monthCells = useMemo(() => getCalendarMonthCells(monthKey), [monthKey]);
+  const monthDate = new Date(`${monthKey}-01T00:00:00`);
+  const monthLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { year: 'numeric', month: 'long' }).format(monthDate);
+  const selectedDateLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${selectedDate}T00:00:00`));
+  const mobileGroups = useMemo(() => {
+    const groups = new Map();
+    monthEvents.forEach((event) => groups.set(event.date, [...(groups.get(event.date) || []), event]));
+    return [...groups.entries()];
+  }, [monthEvents]);
+
+  const changeMonth = (delta) => {
+    const [year, month] = monthKey.split('-').map(Number);
+    const next = new Date(year, month - 1 + delta, 1);
+    const nextMonth = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    setMonthKey(nextMonth);
+    setSelectedDate(`${nextMonth}-01`);
+  };
+  const goToday = () => {
+    setMonthKey(todayKey.slice(0, 7));
+    setSelectedDate(todayKey);
+  };
+  const selectDate = (dateKey) => {
+    setSelectedDate(dateKey);
+    if (!dateKey.startsWith(`${monthKey}-`)) setMonthKey(dateKey.slice(0, 7));
+  };
+
+  const localeOptions = [
+    { key: 'ALL', label: isEn ? 'All regions' : '전체 국가' },
+    { key: 'KR', label: isEn ? 'Korea' : '한글판' },
+    { key: 'JP', label: isEn ? 'Japan' : '일본판' }
+  ];
+  const kindOptions = [
+    { key: 'all', label: isEn ? 'All schedules' : '전체 일정' },
+    { key: 'release', label: isEn ? 'Releases' : '발매' },
+    { key: 'event', label: isEn ? 'Events' : '이벤트' },
+    { key: 'notice', label: isEn ? 'Official notices' : '공식 공지' }
+  ];
+
+  return (
+    <main className="renew-subpage renew-calendar-main">
+      <section className="renew-panel renew-calendar-panel">
+        <header className="renew-calendar-head">
+          <div>
+            <span>SCHEDULE</span>
+            <h1>{isEn ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</h1>
+            <p>{isEn ? 'Release dates and official event or product notices are separated by source.' : '상품 발매일과 공식 이벤트·상품 공지를 출처 기준으로 구분해 확인합니다.'}</p>
+          </div>
+          <strong>{monthEvents.length}{isEn ? ' schedules' : '개 일정'}</strong>
+        </header>
+
+        <div className="renew-calendar-toolbar">
+          <div className="renew-calendar-month-control">
+            <button type="button" onClick={() => changeMonth(-1)} aria-label={isEn ? 'Previous month' : '이전 달'}>‹</button>
+            <h2>{monthLabel}</h2>
+            <button type="button" onClick={() => changeMonth(1)} aria-label={isEn ? 'Next month' : '다음 달'}>›</button>
+            <button type="button" className="renew-calendar-today" onClick={goToday}>{isEn ? 'Today' : '오늘'}</button>
+          </div>
+          <div className="renew-calendar-filters">
+            <div role="group" aria-label={isEn ? 'Region filter' : '국가 필터'}>
+              {localeOptions.map((option) => <button key={option.key} type="button" className={localeFilter === option.key ? 'is-active' : ''} onClick={() => setLocaleFilter(option.key)}>{option.label}</button>)}
+            </div>
+            <div role="group" aria-label={isEn ? 'Schedule type filter' : '일정 유형 필터'}>
+              {kindOptions.map((option) => <button key={option.key} type="button" className={kindFilter === option.key ? 'is-active' : ''} onClick={() => setKindFilter(option.key)}>{option.label}</button>)}
+            </div>
+          </div>
+        </div>
+
+        <div className="renew-calendar-layout">
+          <div className="renew-calendar-grid-wrap">
+            <div className="renew-calendar-weekdays" aria-hidden="true">
+              {CALENDAR_WEEKDAYS[isEn ? 'EN' : 'KR'].map((day, index) => <span key={day} className={index === 0 ? 'is-sunday' : index === 6 ? 'is-saturday' : ''}>{day}</span>)}
+            </div>
+            <div className="renew-calendar-grid">
+              {monthCells.map((cell) => {
+                const dayEvents = eventsByDate.get(cell.key) || [];
+                return (
+                  <button
+                    key={cell.key}
+                    type="button"
+                    className={`${cell.inMonth ? '' : 'is-outside'}${cell.key === todayKey ? ' is-today' : ''}${cell.key === selectedDate ? ' is-selected' : ''}${cell.weekday === 0 ? ' is-sunday' : cell.weekday === 6 ? ' is-saturday' : ''}`}
+                    onClick={() => selectDate(cell.key)}
+                    aria-label={`${cell.key}, ${dayEvents.length}${isEn ? ' schedules' : '개 일정'}`}
+                  >
+                    <time dateTime={cell.key}>{cell.day}</time>
+                    <span className="renew-calendar-day-events">
+                      {dayEvents.slice(0, 3).map((event) => <span key={event.id} className={`is-${event.kind}`}>{event.title}</span>)}
+                      {dayEvents.length > 3 ? <small>+{dayEvents.length - 3}</small> : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <aside className="renew-calendar-agenda">
+            <div>
+              <span>{isEn ? 'Selected date' : '선택한 날짜'}</span>
+              <h2>{selectedDateLabel}</h2>
+            </div>
+            <div className="renew-calendar-agenda-list">
+              {selectedEvents.map((event) => <RenewCalendarEventCard key={event.id} event={event} uiLang={uiLang} />)}
+              {!selectedEvents.length ? <p>{isEn ? 'No schedules on this date.' : '이 날짜에 등록된 일정이 없습니다.'}</p> : null}
+            </div>
+          </aside>
+        </div>
+
+        <div className="renew-calendar-mobile-list">
+          {mobileGroups.map(([date, dayEvents]) => (
+            <section key={date}>
+              <time dateTime={date}>{new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T00:00:00`))}</time>
+              <div>{dayEvents.map((event) => <RenewCalendarEventCard key={event.id} event={event} uiLang={uiLang} />)}</div>
+            </section>
+          ))}
+          {!mobileGroups.length ? <p>{isEn ? 'No schedules match the selected filters.' : '선택한 조건에 맞는 일정이 없습니다.'}</p> : null}
+        </div>
+
+        <footer className="renew-calendar-note">
+          <p>{isEn ? 'Official notices are shown on their publication date. Release dates come from the linked product source and may change.' : '공식 공지는 게시일 기준입니다. 발매일은 연결된 상품 출처 기준이며 변경될 수 있습니다.'}</p>
+        </footer>
+      </section>
+    </main>
+  );
+}
+
+function RenewNews({ uiLang, onOpenCalendar }) {
   const t = (key) => getUiText(uiLang, key);
   const initialParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const initialPath = typeof window !== 'undefined' ? normalizeSitePath(window.location.pathname) : '/news';
@@ -4470,6 +4736,14 @@ function RenewNews({ uiLang }) {
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
   return (
     <main className="renew-main renew-news-main">
+      <a className="renew-news-calendar-link" href="/calendar" onClick={(event) => { event.preventDefault(); onOpenCalendar?.(); }}>
+        <span>SCHEDULE</span>
+        <div>
+          <strong>{uiLang === 'EN' ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</strong>
+          <small>{uiLang === 'EN' ? 'Check releases and official event notices by month.' : '발매일과 공식 이벤트 공지를 월별로 확인하세요.'}</small>
+        </div>
+        <b aria-hidden="true">›</b>
+      </a>
       <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.map((item) => (
           <button
@@ -9370,8 +9644,10 @@ export default function RenewApp() {
         ) : (
           <RenewMarketplaceHidden />
         )
+      ) : activePage === 'calendar' ? (
+        <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'news' ? (
-        <RenewNews uiLang={uiLang} />
+        <RenewNews uiLang={uiLang} onOpenCalendar={() => navigatePage('calendar')} />
       ) : activePage === 'partnerShops' ? (
         <RenewPartnerShopSeoPage uiLang={uiLang} />
       ) : activePage === 'shops' ? (
