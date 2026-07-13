@@ -1693,16 +1693,8 @@ const MARKET_DETAIL_RANGES = [
 ];
 const MARKET_DETAIL_RANGE_KEYS = new Set(MARKET_DETAIL_RANGES.map((item) => item.key));
 
-function getMarketRangeChartPoints(conditionSeries = {}, listingConditionSeries = {}, range = '7d') {
-  const primary = conditionSeries?.[range] || (range === '1y' ? conditionSeries?.all : []) || [];
-  const listing = listingConditionSeries?.[range] || (range === '1y' ? listingConditionSeries?.all : []) || [];
-  return primary.length ? primary : listing;
-}
-
-function resolveMarketChartRange(conditionSeries = {}, listingConditionSeries = {}, requestedRange = '7d') {
-  const safeRange = MARKET_DETAIL_RANGE_KEYS.has(requestedRange) ? requestedRange : '7d';
-  if (getMarketRangeChartPoints(conditionSeries, listingConditionSeries, safeRange).length) return safeRange;
-  return MARKET_DETAIL_RANGES.find((item) => getMarketRangeChartPoints(conditionSeries, listingConditionSeries, item.key).length)?.key || safeRange;
+function getMarketRangeChartPoints(conditionSeries = {}, range = '7d') {
+  return conditionSeries?.[range] || (range === '1y' ? conditionSeries?.all : []) || [];
 }
 
 function medianMarketNumber(values = []) {
@@ -1833,37 +1825,12 @@ function mergePsa10MarketDetail(detail, psaDetail) {
     ? baseConditions
     : [...baseConditions, { key: 'psa10', label: 'PSA10' }];
   const getTime = (record) => Number(record?.timestamp || 0) || Date.parse(record?.date || record?.soldAt || '') || 0;
-  const getKey = (record) => {
-    if (record?.sourceUrl) return `url:${record.sourceUrl}`;
-    return [record?.date || record?.soldAt || '', record?.price || '', record?.platform || record?.source || '', record?.title || ''].join('|');
-  };
-  const mergeRecords = (base = [], extra = [], order = 'desc') => {
-    const merged = new Map();
-    [...base, ...extra].filter(Boolean).forEach((record) => {
-      const key = getKey(record);
-      if (!merged.has(key)) merged.set(key, record);
-    });
-    return [...merged.values()].sort((a, b) => (
-      order === 'asc' ? getTime(a) - getTime(b) : getTime(b) - getTime(a)
-    ));
-  };
   const pickLatest = (base, extra) => {
     if (!base) return extra || null;
     if (!extra) return base;
     return getTime(extra) > getTime(base) ? extra : base;
   };
-  const basePsaSeries = detail.series?.psa10 || {};
-  const extraPsaSeries = psaDetail.series?.psa10 || {};
-  const basePsaRecent = detail.recentSalesByCondition?.psa10 || [];
-  const extraPsaRecent = psaDetail.recentSalesByCondition?.psa10 || [];
-  const hasPsaSupplement = Boolean(
-    psaDetail.latestByCondition?.psa10
-    || extraPsaRecent.length
-    || extraPsaSeries['7d']?.length
-    || extraPsaSeries['1m']?.length
-    || extraPsaSeries['1y']?.length
-    || extraPsaSeries.all?.length
-  );
+  const hasPsaSupplement = Boolean(psaDetail.latestByCondition?.psa10);
   if (!hasPsaSupplement) return detail;
   return {
     ...detail,
@@ -1871,20 +1838,6 @@ function mergePsa10MarketDetail(detail, psaDetail) {
     latestByCondition: {
       ...(detail.latestByCondition || {}),
       psa10: pickLatest(detail.latestByCondition?.psa10, psaDetail.latestByCondition?.psa10)
-    },
-    series: {
-      ...(detail.series || {}),
-      psa10: {
-        ...basePsaSeries,
-        ...extraPsaSeries,
-        '7d': mergeRecords(basePsaSeries['7d'], extraPsaSeries['7d'], 'asc'),
-        '1m': mergeRecords(basePsaSeries['1m'], extraPsaSeries['1m'], 'asc'),
-        '1y': mergeRecords(basePsaSeries['1y'] || basePsaSeries.all, extraPsaSeries['1y'] || extraPsaSeries.all, 'asc')
-      }
-    },
-    recentSalesByCondition: {
-      ...(detail.recentSalesByCondition || {}),
-      psa10: mergeRecords(basePsaRecent, extraPsaRecent, 'desc')
     }
   };
 }
@@ -2369,12 +2322,12 @@ const CLIENT_ROUTE_SEO = {
     keywords: '원피스카드 수배서, 프리미엄 아트, 금배경 은배경',
     body: '원피스카드 프리미엄 아트 계열 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
   },
-  '/prices/index/sp': {
-    title: 'OPTCG SP Index | Card Pone',
-    h1: 'OPTCG SP Index',
-    description: '원피스카드 SP 계열 카드 가격 흐름을 지수로 확인할 수 있습니다.',
-    keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index',
-    body: '원피스카드 SP 계열 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
+  '/prices/index/heroines': {
+    title: 'OPTCG Heroines Index | Card Pone',
+    h1: 'OPTCG Heroines Index',
+    description: '원피스카드 여성 캐릭터 카드의 가격 흐름을 지수로 확인할 수 있습니다.',
+    keywords: '원피스카드 여캐, 히로인즈 인덱스, OPTCG Heroines Index',
+    body: '원피스카드 여성 캐릭터 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
   },
   '/prices/index/luffy': {
     title: 'OPTCG Luffy Index | Card Pone',
@@ -2406,7 +2359,8 @@ function getClientRouteSeo(page) {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
     '/prices/premium-art-index': '/prices/index/premium-art',
-    '/prices/sp-index': '/prices/index/sp',
+    '/prices/sp-index': '/prices/index/heroines',
+    '/prices/index/sp': '/prices/index/heroines',
     '/prices/luffy-index': '/prices/index/luffy'
   };
   if (seoAliases[path] && CLIENT_ROUTE_SEO[seoAliases[path]]) return CLIENT_ROUTE_SEO[seoAliases[path]];
@@ -7246,8 +7200,12 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   const orderedPoints = isLongMarketRange
     ? compressMarketAllChartPoints(aggregatedPoints, isMobileChart ? 72 : 108)
     : aggregatedPoints;
+  const rangeLabel = range === '1d' ? '1D' : range === '1m' ? '1M' : range === '1y' ? '1Y' : range === '6m' ? '6M' : range === 'all' ? 'ALL' : '7D';
   if (!orderedPoints.length) {
-    return <div className="renew-chart-placeholder"><span>{t('noChart')}</span></div>;
+    const emptyText = range === '7d'
+      ? (uiLang === 'en' ? 'No trades in the last 7 days.' : '최근 7일간 거래 데이터가 없습니다.')
+      : (uiLang === 'en' ? `No trades in the selected ${rangeLabel} range.` : `${rangeLabel} 기간 내 거래 데이터가 없습니다.`);
+    return <div className="renew-chart-placeholder"><span>{emptyText}</span></div>;
   }
   const width = isMobileChart ? 430 : 920;
   const height = 340;
@@ -7333,8 +7291,6 @@ function RenewMarketChart({ points = [], uiLang, range }) {
       { key: 'middle', className: 'is-middle', x: midPoint?.x || width / 2, text: formatChartAxisDate(midPoint?.timestamp) },
       { key: 'end', className: 'is-end', x: width - padX, text: formatChartAxisDate(plotted[plotted.length - 1]?.timestamp) }
     ].filter((item) => item.text);
-  const rangeLabel = range === '1d' ? '1D' : range === '1m' ? '1M' : range === '1y' ? '1Y' : range === '6m' ? '6M' : range === 'all' ? 'ALL' : '7D';
-
   return (
     <div className="renew-market-chart-box">
       <span className="renew-chart-range-label">{rangeLabel}</span>
@@ -7512,7 +7468,7 @@ const MARKET_INDEX_OPTIONS = [
   { key: 'collector', label: 'Collector', title: 'OPTCG Collector Index' },
   { key: 'manga', label: 'Manga', title: 'OPTCG Manga Index' },
   { key: 'premium_art', label: 'Premium Art', title: 'OPTCG Premium Art Index' },
-  { key: 'sp', label: 'SP', title: 'OPTCG SP Index' },
+  { key: 'heroines', label: 'Heroines', title: 'OPTCG Heroines Index' },
   { key: 'luffy', label: 'Luffy', title: 'OPTCG Luffy Index' },
 ];
 const MARKET_SECTOR_INDEX_OPTIONS = MARKET_INDEX_OPTIONS.filter((item) => item.key !== 'collector');
@@ -7541,12 +7497,12 @@ function getMarketIndexTypeFromPath(path) {
     '/prices/manga-index': 'manga',
     '/prices/waifu-index': 'premium_art',
     '/prices/premium-art-index': 'premium_art',
-    '/prices/sp-index': 'sp',
+    '/prices/sp-index': 'heroines',
     '/prices/luffy-index': 'luffy'
   };
   if (aliasMap[path]) return aliasMap[path];
   const slug = path.startsWith('/prices/index/') ? path.slice('/prices/index/'.length) : '';
-  const legacyMap = { collector: 'collector', manga: 'manga', waifu: 'premium_art', premium: 'premium_art', 'premium-art': 'premium_art', sp: 'sp', luffy: 'luffy' };
+  const legacyMap = { collector: 'collector', manga: 'manga', waifu: 'premium_art', premium: 'premium_art', 'premium-art': 'premium_art', sp: 'heroines', heroines: 'heroines', luffy: 'luffy' };
   return legacyMap[slug] || 'collector';
 }
 
@@ -7626,6 +7582,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <button type="button" className={range === '7d' ? 'is-active' : ''} onClick={() => setRange('7d')}>7D</button>
           <button type="button" className={range === '1m' ? 'is-active' : ''} onClick={() => setRange('1m')}>1M</button>
           <button type="button" className={range === '6m' ? 'is-active' : ''} onClick={() => setRange('6m')}>6M</button>
+          <button type="button" className={range === '1y' ? 'is-active' : ''} onClick={() => setRange('1y')}>1Y</button>
           <button type="button" className={range === 'all' ? 'is-active' : ''} onClick={() => setRange('all')}>ALL</button>
         </div>
       </div>
@@ -7644,7 +7601,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
       </div>
       <div className="renew-index-sector-head">
         <span>Sector Index</span>
-        <em>Manga, Premium Art, SP, Luffy</em>
+        <em>Manga, Premium Art, Heroines, Luffy</em>
       </div>
       <div className="renew-index-tabs" aria-label="Market sector index type">
         {MARKET_SECTOR_INDEX_OPTIONS.map((option) => (
@@ -8389,9 +8346,8 @@ function RenewMarket({ authUser, userState, setUserState, initialCode, initialAp
   const marketRange = MARKET_DETAIL_RANGE_KEYS.has(range) ? range : '7d';
   const selectedLatest = getMarketConditionBucket(marketDetail?.latestByCondition, normalizedCondition);
   const conditionSeries = getMarketConditionBucket(marketDetail?.series, normalizedCondition) || {};
-  const listingConditionSeries = getMarketConditionBucket(marketDetail?.listingSeriesByCondition, normalizedCondition) || {};
-  const chartRange = resolveMarketChartRange(conditionSeries, listingConditionSeries, marketRange);
-  const chartPoints = getMarketRangeChartPoints(conditionSeries, listingConditionSeries, chartRange);
+  const chartRange = marketRange;
+  const chartPoints = getMarketRangeChartPoints(conditionSeries, chartRange);
   const recentSales = getMarketConditionBucket(marketDetail?.recentSalesByCondition, normalizedCondition) || [];
   const recentSalesInRange = recentSales.filter((sale) => {
     const timestamp = Number(sale?.timestamp || 0);

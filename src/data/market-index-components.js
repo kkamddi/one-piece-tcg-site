@@ -57,41 +57,7 @@ export const premiumArtIndexComponents = [
   { cardId: 'JP::OP05-119_silver', code: 'OP05-119', apparelId: 515454, set: 'OP11', name: 'Monkey.D.Luffy', nameKo: '몽키 D. 루피', rarity: 'SEC', note: 'Silver Background' }
 ];
 
-export const spIndexComponents = [
-  { cardId: 'JP::EB03-003_spc', code: 'EB03-003', apparelId: 710426, set: 'EB03', name: 'Uta', nameKo: '우타', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-018_spc', code: 'EB03-018', apparelId: 710428, set: 'EB03', name: 'Tashigi', nameKo: '타시기', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-024_spc', code: 'EB03-024', apparelId: 710429, set: 'EB03', name: 'Nefeltari Vivi', nameKo: '네펠타리 비비', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-026_spc', code: 'EB03-026', apparelId: 710430, set: 'EB03', name: 'Boa Hancock', nameKo: '보아 핸콕', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-031_spc', code: 'EB03-031', apparelId: 710431, set: 'EB03', name: 'Vinsmoke Reiju', nameKo: '빈스모크 레이쥬', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-042_spc', code: 'EB03-042', apparelId: 710434, set: 'EB03', name: 'Koala', nameKo: '코알라', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-045_spc', code: 'EB03-045', apparelId: 710435, set: 'EB03', name: 'Perona', nameKo: '페로나', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-053_spc', code: 'EB03-053', apparelId: 710436, set: 'EB03', name: 'Nami', nameKo: '나미', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::EB03-055_spc', code: 'EB03-055', apparelId: 710437, set: 'EB03', name: 'Nico Robin', nameKo: '니코 로빈', rarity: 'SR', note: 'Heroines SPC' },
-  { cardId: 'JP::OP01-078_spc', code: 'OP01-078', apparelId: 126178, set: 'OP04', name: 'Boa Hancock', nameKo: '보아 핸콕', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP01-016_spc', code: 'OP01-016', apparelId: 135442, set: 'OP05', name: 'Nami', nameKo: '나미', rarity: 'R', note: 'SPC' },
-  { cardId: 'JP::OP01-121_spc', code: 'OP01-121', apparelId: 135443, set: 'OP05', name: 'Yamato', nameKo: '야마토', rarity: 'SEC', note: 'SPC' },
-  { cardId: 'JP::OP02-120_spc', code: 'OP02-120', apparelId: 135445, set: 'OP05', name: 'Uta', nameKo: '우타', rarity: 'SEC', note: 'SPC' },
-  { cardId: 'JP::OP03-112_spc', code: 'OP03-112', apparelId: 265751, set: 'OP08', name: 'Charlotte Pudding', nameKo: '샬롯 푸딩', rarity: 'R', note: 'SPC' },
-  { cardId: 'JP::ST02-007_spc', code: 'ST02-007', apparelId: 265749, set: 'OP08', name: 'Jewelry Bonney', nameKo: '쥬얼리 보니', rarity: 'C', note: 'SPC' },
-  { cardId: 'JP::ST06-006_spc', code: 'ST06-006', apparelId: 265750, set: 'OP08', name: 'Tashigi', nameKo: '타시기', rarity: 'C', note: 'SPC' },
-  { cardId: 'JP::OP07-051_spc', code: 'OP07-051', apparelId: 349478, set: 'OP09', name: 'Boa Hancock', nameKo: '보아 핸콕', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP08-106_spc', code: 'OP08-106', apparelId: 349482, set: 'OP09', name: 'Nami', nameKo: '나미', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::EB01-057_spc', code: 'EB01-057', apparelId: 520532, set: 'OP11', name: 'Shirahoshi', nameKo: '시라호시', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP07-085_spc', code: 'OP07-085', apparelId: 520534, set: 'OP11', name: 'Stussy', nameKo: '스튜시', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP06-050_spc', code: 'OP06-050', apparelId: 588859, set: 'OP12', name: 'Tashigi', nameKo: '타시기', rarity: 'R', note: 'SPC' },
-  { cardId: 'JP::OP09-037_spc', code: 'OP09-037', apparelId: 588858, set: 'OP12', name: 'Lim', nameKo: '림', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP07-111_spc', code: 'OP07-111', apparelId: 676015, set: 'OP13', name: 'Lilith', nameKo: '릴리스', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP10-030_spc', code: 'OP10-030', apparelId: 676014, set: 'OP13', name: 'Smoker', nameKo: '스모커', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP06-093_spc', code: 'OP06-093', apparelId: 728126, set: 'OP14', name: 'Perona', nameKo: '페로나', rarity: 'SR', note: 'Japanese Pattern SPC' },
-  { cardId: 'JP::OP10-065_spc', code: 'OP10-065', apparelId: 728130, set: 'OP14', name: 'Sugar', nameKo: '슈거', rarity: 'R', note: 'Japanese Pattern SPC' },
-  { cardId: 'JP::OP14-112_spc', code: 'OP14-112', apparelId: 728156, set: 'OP14', name: 'Boa Hancock', nameKo: '보아 핸콕', rarity: 'SR', note: 'Japanese Pattern SPC' },
-  { cardId: 'JP::OP12-014_spc', code: 'OP12-014', apparelId: 764614, set: 'OP15', name: 'Boa Hancock', nameKo: '보아 핸콕', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::OP14-029_spc', code: 'OP14-029', apparelId: 822581, set: 'OP16', name: 'Tashigi', nameKo: '타시기', rarity: 'R', note: 'SPC' },
-  { cardId: 'JP::OP14-084_spc', code: 'OP14-084', apparelId: 822582, set: 'OP16', name: 'Ms. All Sunday', nameKo: '미스 올 선데이', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::PRB02-006_spc', code: 'PRB02-006', apparelId: 751310, set: 'EB04', name: 'Roronoa Zoro', nameKo: '롤로노아 조로', rarity: 'R', note: 'SPC' },
-  { cardId: 'JP::ST18-005_spc', code: 'ST18-005', apparelId: 520558, set: 'OP11', name: 'Luffy-Tarou', nameKo: '루피타로', rarity: 'SR', note: 'SPC' },
-  { cardId: 'JP::ST16-004_spc', code: 'ST16-004', apparelId: 520557, set: 'OP11', name: 'Shanks', nameKo: '샹크스', rarity: 'SR', note: 'SPC' }
-];
+export const heroinesIndexComponents = [];
 
 export const luffyIndexComponents = [
   { cardId: 'JP::LUFFY::135439', code: 'OP05-119', apparelId: 135439, set: 'OP05', name: 'Monkey.D.Luffy', nameKo: '몽키 D. 루피', rarity: 'SEC-SP', note: 'SEC-SP (Comic Parallel)' },
@@ -143,7 +109,6 @@ export const collectorIndexComponents = Array.from(
     [
       ...mangaIndexComponents,
       ...premiumArtIndexComponents,
-      ...spIndexComponents,
       ...luffyIndexComponents
     ].map((component) => [Number(component.apparelId), component])
   ).values()
@@ -172,11 +137,11 @@ export const marketIndexes = [
     components: premiumArtIndexComponents
   },
   {
-    code: 'sp',
-    name: 'OPTCG SP Index',
+    code: 'heroines',
+    name: 'OPTCG Heroines Index',
     baseDate: '2025-01-01',
     baseValue: 100,
-    components: spIndexComponents
+    components: heroinesIndexComponents
   },
   {
     code: 'luffy',

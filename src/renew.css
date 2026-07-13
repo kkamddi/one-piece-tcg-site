@@ -11354,21 +11354,25 @@
   }
 
   .renew-partner-ad-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .renew-partner-ad-card {
-    min-height: 132px;
-    padding: 14px;
+    align-content: start;
+    min-width: 0;
+    min-height: 100%;
+    padding: 12px;
   }
 
   .renew-partner-ad-card.has-logo {
-    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .renew-partner-ad-logo {
-    width: 92px;
-    height: 92px;
+    grid-row: auto;
+    width: 64px;
+    height: 64px;
   }
 
   .renew-partner-ad-card strong {
@@ -11377,7 +11381,21 @@
 
   .renew-partner-ad-card span,
   .renew-partner-ad-card em {
-    font-size: 12px;
+    overflow-wrap: anywhere;
+    font-size: 11px;
+  }
+
+  .renew-partner-ad-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .renew-partner-ad-actions a {
+    width: 100%;
+    min-width: 0;
+    padding: 0 8px;
+    white-space: normal;
+    text-align: center;
   }
 
   .renew-partner-ad-news {
@@ -11824,7 +11842,7 @@
 
   .renew-index-head .renew-chip-group {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 6px;
     width: 100%;
   }

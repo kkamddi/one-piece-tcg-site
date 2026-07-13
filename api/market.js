@@ -495,26 +495,10 @@ async function fetchPriceChartingSupplement(item) {
   }
 }
 
-function priceChartingPointsToRecentSales(points = [], label = 'PSA10') {
-  return (Array.isArray(points) ? points : [])
-    .slice()
-    .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
-    .slice(0, 10)
-    .map((point) => ({
-      date: formatSnapshotDate(point.timestamp),
-      timestamp: point.timestamp,
-      price: point.price,
-      condition: label,
-      source: point.source || 'pricecharting'
-    }));
-}
-
 function applyPriceChartingSupplement(detail, supplement) {
   if (!supplement?.psa10Price && !supplement?.psa10Points?.length) return detail;
-  const existingAll = detail?.series?.psa10?.['1y'] || detail?.series?.psa10?.all || [];
-  const psa10Points = mergeUniquePoints(existingAll, supplement.psa10Points || []);
   const psa10Price = Number(supplement.psa10Price || detail?.latestByCondition?.psa10?.price || 0) || 0;
-  if (!psa10Points.length && !psa10Price) return detail;
+  if (!psa10Price) return detail;
 
   return {
     ...detail,
@@ -523,19 +507,6 @@ function applyPriceChartingSupplement(detail, supplement) {
       psa10: psa10Price
         ? { timestamp: Date.now(), price: psa10Price, source: 'pricecharting_psa10' }
         : detail.latestByCondition?.psa10
-    },
-    series: {
-      ...detail.series,
-      psa10: buildSeries(psa10Points, psa10Price)
-    },
-    recentSalesByCondition: {
-      ...detail.recentSalesByCondition,
-      psa10: [
-        ...priceChartingPointsToRecentSales(supplement.psa10Points || [], 'PSA10'),
-        ...(detail.recentSalesByCondition?.psa10 || [])
-      ]
-        .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0))
-        .slice(0, 10)
     },
     sources: {
       ...(detail.sources || {}),
@@ -1190,23 +1161,18 @@ function saneCurrentPrice(currentPrice = 0, historyPoints = [], fallbackPrice = 
 
 async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot = false } = {}) {
   const storedTrades = await readStoredMarketTrades(item?.apparelId);
-  const storedChartPoints = await readStoredMarketChartPoints(item?.apparelId);
   const listingFloorPoints = await readListingFloorChartPoints(item?.apparelId);
   if (persistSnapshot) await saveMarketSnapshots(item, conditionPrices);
-  const aTradeHistory = filterChartOutliers([...storedChartPoints.a, ...storedTrades.a]);
-  const psa10TradeHistory = filterChartOutliers([...storedChartPoints.psa10, ...storedTrades.psa10]);
+  const aTradeHistory = filterChartOutliers(storedTrades.a);
+  const psa10TradeHistory = filterChartOutliers(storedTrades.psa10);
   const aListingHistory = filterChartOutliers(listingFloorPoints.a || []);
   const psa10ListingHistory = filterChartOutliers(listingFloorPoints.psa10 || []);
   const aCurrentPrice = getConditionPrice(conditionPrices, 'a');
   const psa10CurrentPrice = getConditionPrice(conditionPrices, 'psa10');
-  const aHasTradeHistory = aTradeHistory.length > 0;
-  const psa10HasTradeHistory = psa10TradeHistory.length > 0;
-  const aHistory = aHasTradeHistory ? aTradeHistory : aListingHistory;
-  const psa10History = psa10HasTradeHistory ? psa10TradeHistory : psa10ListingHistory;
+  const aHistory = aTradeHistory.length ? aTradeHistory : aListingHistory;
+  const psa10History = psa10TradeHistory.length ? psa10TradeHistory : psa10ListingHistory;
   const aPrice = saneCurrentPrice(aCurrentPrice, aHistory, latestPointPrice(aHistory));
   const psa10Price = saneCurrentPrice(psa10CurrentPrice, psa10History, latestPointPrice(psa10History));
-  const aSeriesPrice = aCurrentPrice || aPrice;
-  const psa10SeriesPrice = psa10CurrentPrice || psa10Price;
   const latestByCondition = {};
   if (aPrice) latestByCondition.a = { timestamp: Date.now(), price: aPrice, source: aCurrentPrice || aListingHistory.length ? 'snkrdunk_listing_floor' : 'snkrdunk_chart_daily' };
   if (psa10Price) latestByCondition.psa10 = { timestamp: Date.now(), price: psa10Price, source: psa10CurrentPrice || psa10ListingHistory.length ? 'snkrdunk_listing_floor' : 'snkrdunk_chart_daily' };
@@ -1230,8 +1196,8 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
       { key: '1y', label: '1Y' }
     ],
     series: {
-      a: buildSeries(aHistory, aHasTradeHistory ? 0 : aSeriesPrice, aCurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known', { includeCurrent: !aHasTradeHistory }),
-      psa10: buildSeries(psa10History, psa10HasTradeHistory ? 0 : psa10SeriesPrice, psa10CurrentPrice ? 'snkrdunk_current_floor' : 'snkrdunk_latest_known', { includeCurrent: !psa10HasTradeHistory })
+      a: buildSeries(aTradeHistory, 0, 'snkrdunk_trade_history', { includeCurrent: false }),
+      psa10: buildSeries(psa10TradeHistory, 0, 'snkrdunk_trade_history', { includeCurrent: false })
     },
     listingSeriesByCondition: {
       a: buildSeries(aListingHistory, aCurrentPrice, 'snkrdunk_listing_floor'),
@@ -1239,12 +1205,8 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
     },
     latestByCondition,
     recentSalesByCondition: {
-      a: storedTrades.a?.length
-        ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.a), 'Single')
-        : buildRecentSnapshots(filterChartOutliers(aTradeHistory), 0, 'Single', 'snkrdunk_trade_history'),
-      psa10: storedTrades.psa10?.length
-        ? buildRecentTradeSnapshots(filterChartOutliers(storedTrades.psa10), 'PSA10')
-        : buildRecentSnapshots(filterChartOutliers(psa10TradeHistory), 0, 'PSA10', 'snkrdunk_trade_history')
+      a: buildRecentTradeSnapshots(aTradeHistory, 'Single'),
+      psa10: buildRecentTradeSnapshots(psa10TradeHistory, 'PSA10')
     }
   };
 }

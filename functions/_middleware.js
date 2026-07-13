@@ -21,7 +21,8 @@ const LEGACY_REDIRECTS = {
   '/prices/collector-index': '/prices/index',
   '/prices/manga-index': '/prices/index/manga',
   '/prices/premium-art-index': '/prices/index/premium-art',
-  '/prices/sp-index': '/prices/index/sp',
+  '/prices/sp-index': '/prices/index/heroines',
+  '/prices/index/sp': '/prices/index/heroines',
   '/prices/luffy-index': '/prices/index/luffy'
 };
 
@@ -114,10 +115,10 @@ const ROUTE_SEO = {
     description: '수배서, 금배경, 은배경 등 프리미엄 아트 카드 중심의 지수를 확인할 수 있습니다.',
     keywords: '원피스카드 수배서, 프리미엄 아트, 금배경 은배경'
   },
-  '/prices/index/sp': {
-    title: 'OPTCG SP Index | Card Pone',
-    description: '원피스카드 SP 계열 카드 가격 흐름을 지수로 확인할 수 있습니다.',
-    keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index'
+  '/prices/index/heroines': {
+    title: 'OPTCG Heroines Index | Card Pone',
+    description: '원피스카드 여성 캐릭터 카드의 가격 흐름을 지수로 확인할 수 있습니다.',
+    keywords: '원피스카드 여캐, 히로인즈 인덱스, OPTCG Heroines Index'
   },
   '/prices/index/luffy': {
     title: 'OPTCG Luffy Index | Card Pone',
@@ -194,7 +195,7 @@ const SEO_FIXES = {
   },
   '/prices/index': {
     title: 'OPTCG Collector Index - 원피스카드 가격 지수 | Card Pone',
-    description: 'Card Pone가 추적하는 원피스카드 대표 가격 지수와 Manga, Premium Art, SP, Luffy 하위 지수를 확인할 수 있습니다.',
+    description: 'Card Pone가 추적하는 원피스카드 대표 가격 지수와 Manga, Premium Art, Heroines, Luffy 하위 지수를 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표, 망가카드 시세',
     schemaType: 'WebPage'
   },
@@ -210,10 +211,10 @@ const SEO_FIXES = {
     keywords: '원피스카드 수배서, 프리미엄 아트, 금배경, 은배경, OPTCG Premium Art Index',
     schemaType: 'WebPage'
   },
-  '/prices/index/sp': {
-    title: 'OPTCG SP Index - 원피스카드 SP 지수 | Card Pone',
-    description: '원피스카드 SP 계열 카드 가격 흐름과 구성 종목을 지수로 확인할 수 있습니다.',
-    keywords: '원피스카드 SP, SP 카드 시세, OPTCG SP Index',
+  '/prices/index/heroines': {
+    title: 'OPTCG Heroines Index - 원피스카드 히로인즈 지수 | Card Pone',
+    description: '원피스카드 여성 캐릭터 카드 가격 흐름과 구성 종목을 지수로 확인할 수 있습니다.',
+    keywords: '원피스카드 여캐, 히로인즈 인덱스, OPTCG Heroines Index',
     schemaType: 'WebPage'
   },
   '/prices/index/luffy': {
@@ -323,7 +324,7 @@ const SEO_PRIMARY = {
   },
   '/prices/index': {
     title: 'OPTCG Collector Index - 원피스카드 가격 지수 | 카드포네',
-    description: '대표 원피스카드 가격 흐름을 Collector Index와 Manga, Premium Art, SP, Luffy 하위 지수로 확인할 수 있습니다.',
+    description: '대표 원피스카드 가격 흐름을 Collector Index와 Manga, Premium Art, Heroines, Luffy 하위 지수로 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 가격 지표, 카드포네 인덱스',
     schemaType: 'WebPage'
   },
@@ -448,7 +449,7 @@ function getFixedPageSeo(normalized) {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
     '/prices/premium-art-index': '/prices/index/premium-art',
-    '/prices/sp-index': '/prices/index/sp',
+    '/prices/sp-index': '/prices/index/heroines',
     '/prices/luffy-index': '/prices/index/luffy'
   };
   const aliasTarget = indexAliases[normalized];

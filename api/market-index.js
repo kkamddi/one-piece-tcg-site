@@ -12,7 +12,8 @@ const INDEX_TYPE_ALIASES = {
   waifu: 'premium_art',
   premium: 'premium_art',
   premiumart: 'premium_art',
-  'premium-art': 'premium_art'
+  'premium-art': 'premium_art',
+  sp: 'heroines'
 };
 
 function getD1Binding() {
