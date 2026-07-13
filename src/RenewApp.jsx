@@ -68,7 +68,7 @@ const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
 const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
-const MARKETPLACE_TAB_VISIBLE = true;
+const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
@@ -2959,6 +2959,11 @@ function MobileNavIcon({ type }) {
     cards: <><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1 1-1h5a3 3 0 0 1 3 3 3 3 0 0 1 3-3h5a1 1 0 0 1 1 1V5a1 1 0 0 0-1-1h-5a3 3 0 0 0-3 3 3 3 0 0 0-3-3H4a1 1 0 0 0-1 1z" /></>,
     prices: <><path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" /></>,
     marketplace: <><path d="M7 7h11l-3-3" /><path d="M18 7l-3 3" /><path d="M17 17H6l3 3" /><path d="M6 17l3-3" /></>,
+    calendar: <><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></>,
+    details: <><path d="M2.1 12a10.2 10.2 0 0 1 19.8 0 10.2 10.2 0 0 1-19.8 0" /><circle cx="12" cy="12" r="3" /></>,
+    store: <><path d="M6 2 3 6v2a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0V6l-3-4Z" /><path d="M5 11v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" /><path d="M9 22v-6h6v6" /></>,
+    instagram: <><rect width="18" height="18" x="3" y="3" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" /></>,
+    external: <><path d="M15 3h6v6" /><path d="m10 14 11-11" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></>,
     news: <><path d="M15 18h-5" /><path d="M18 14h-8" /><path d="M18 10h-8" /><path d="M4 22h16a2 2 0 0 0 2-2V4H8a2 2 0 0 0-2 2v14a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2" /></>,
     shops: <><path d="M20 10c0 4.5-8 12-8 12S4 14.5 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" /></>,
     account: <><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></>,
@@ -3414,13 +3419,11 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        {MARKETPLACE_TAB_VISIBLE ? (
-          <a href="/market" className={activePage === 'marketplace' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('marketplace'); }} aria-label="거래">
-            <MobileNavIcon type="marketplace" />
-            <span>{t('navMarketplace')}</span>
-          </a>
-        ) : null}
-        <a href="/news" className={activePage === 'news' || activePage === 'calendar' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
+        <a href="/calendar" className={activePage === 'calendar' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('calendar'); }} aria-label="캘린더">
+          <MobileNavIcon type="calendar" />
+          <span>{t('navCalendar')}</span>
+        </a>
+        <a href="/news" className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
         </a>
@@ -4023,6 +4026,13 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
 
 function RenewPartnerAdSection({ uiLang }) {
   const isEn = uiLang === 'EN';
+  const getActionPresentation = (action) => {
+    const actionKey = `${action?.labelEn || ''} ${action?.href || ''}`.toLowerCase();
+    if (actionKey.includes('instagram')) return { icon: 'instagram', label: isEn ? 'Insta' : '인스타' };
+    if (actionKey.includes('map.naver') || actionKey.includes('naver.me')) return { icon: 'shops', label: isEn ? 'Map' : '지도' };
+    if (actionKey.includes('smartstore')) return { icon: 'store', label: isEn ? 'Store' : '스토어' };
+    return { icon: 'external', label: isEn ? action.labelEn : action.labelKr };
+  };
   return (
     <section className="renew-partner-ad" aria-label={isEn ? 'Partner card shop news' : '제휴 카드샵 소식'}>
       <div className="renew-partner-ad-head">
@@ -4034,6 +4044,7 @@ function RenewPartnerAdSection({ uiLang }) {
       <div className="renew-partner-ad-grid">
         {PARTNER_AD_ITEMS.map((item) => {
           const shopNews = null;
+          const shopActions = (item.actions || []).filter((action) => action?.href);
           return (
             <article key={item.key} className={`renew-partner-ad-card${item.imageUrl ? ' has-logo' : ''}`}>
               {item.imageUrl ? (
@@ -4055,15 +4066,18 @@ function RenewPartnerAdSection({ uiLang }) {
                   </div>
                 </div>
               ) : null}
-              <div className="renew-partner-ad-actions">
+              <div className="renew-partner-ad-actions" style={{ '--partner-action-count': shopActions.length + 1 }}>
                 <a href={getPartnerShopUrl(item)}>
-                  {isEn ? 'Details' : '상세 보기'}
+                  <MobileNavIcon type="details" />
+                  <span>{isEn ? 'Details' : '상세'}</span>
                 </a>
-                {(item.actions || []).filter((action) => action?.href).map((action) => {
+                {shopActions.map((action) => {
                   const isExternal = action.href.startsWith('http');
+                  const presentation = getActionPresentation(action);
                   return (
                   <a key={action.href} href={action.href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noreferrer' : undefined}>
-                    {isEn ? action.labelEn : action.labelKr}
+                    <MobileNavIcon type={presentation.icon} />
+                    <span>{presentation.label}</span>
                   </a>
                   );
                 })}

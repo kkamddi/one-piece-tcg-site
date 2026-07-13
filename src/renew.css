@@ -1409,6 +1409,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 32px;
   border: 1px solid rgba(23, 25, 28, 0.1);
   border-radius: 999px;
@@ -1419,6 +1420,21 @@
   font-weight: 900;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.renew-partner-ad-actions a span {
+  color: inherit;
+  font-size: inherit;
+}
+
+.renew-partner-ad-actions svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .renew-partner-ad-news {
@@ -12187,6 +12203,9 @@
 
   .renew-partner-ad {
     order: 2;
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
     padding: 16px;
   }
 
@@ -12224,15 +12243,30 @@
 
   .renew-partner-ad-actions {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(var(--partner-action-count), minmax(0, 1fr));
+    gap: 4px;
   }
 
   .renew-partner-ad-actions a {
+    flex-direction: column;
+    gap: 3px;
     width: 100%;
     min-width: 0;
-    padding: 0 8px;
-    white-space: normal;
+    min-height: 48px;
+    border-radius: 10px;
+    padding: 5px 2px;
+    white-space: nowrap;
     text-align: center;
+  }
+
+  .renew-partner-ad-actions a span {
+    overflow: hidden;
+    width: 100%;
+    color: inherit;
+    font-size: 9px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .renew-partner-ad-news {
