@@ -63,7 +63,7 @@ const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
-const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-11-price-alerts';
+const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-13-calendar';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
@@ -231,6 +231,17 @@ function useBodyScrollLock(active = true) {
 }
 
 const RENEW_HOME_UPDATES = [
+  {
+    id: '2026-07-13-calendar',
+    title: '[26.07.13] 업데이트 안내',
+    summary: '원피스카드 일정 캘린더 추가',
+    details: [
+      '한글판·일본판 신규 상품, 프로모 카드와 공식 일정을 캘린더에서 확인 가능',
+      '모바일에서는 주간 날짜를 선택해 해당 날짜의 상세 일정을 크게 확인 가능',
+      '신규 팩·박스 등 주요 발매 일정을 우선해서 표시',
+      '일본판 공식 일정의 한글 요약과 미리보기 이미지 제공'
+    ]
+  },
   {
     id: '2026-07-11-price-alerts',
     title: '[26.07.11] 업데이트 안내',
