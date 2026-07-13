@@ -3925,6 +3925,10 @@
   min-width: 0;
 }
 
+.renew-calendar-mobile-week {
+  display: none;
+}
+
 .renew-calendar-weekdays,
 .renew-calendar-grid {
   display: grid;
@@ -4251,6 +4255,28 @@
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+.renew-app.is-dark .renew-calendar-mobile-week {
+  color: #f8fafc;
+  background: #17191c;
+}
+
+.renew-app.is-dark .renew-calendar-week-control button,
+.renew-app.is-dark .renew-calendar-week-days button {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-calendar-week-days button.is-selected {
+  border-color: #f5f2ec;
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-calendar-week-days button.is-selected > span {
+  color: #5f6672;
+}
+
 .renew-app.is-dark .renew-calendar-filters {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
@@ -4345,6 +4371,7 @@
 
 @media (max-width: 720px) {
   .renew-calendar-panel {
+    min-width: 0;
     border: 0;
     border-radius: 0;
     padding: 0 2px;
@@ -4423,7 +4450,121 @@
   .renew-calendar-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
     order: 3;
+  }
+
+  .renew-calendar-grid-wrap {
+    display: none;
+  }
+
+  .renew-calendar-mobile-week {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px;
+    background: #fff;
+  }
+
+  .renew-calendar-week-control {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .renew-calendar-week-control strong {
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .renew-calendar-week-control button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(23, 25, 28, 0.12);
+    border-radius: 50%;
+    color: #17191c;
+    background: #fff;
+    font-size: 23px;
+    font-weight: 900;
+  }
+
+  .renew-calendar-week-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .renew-calendar-week-days button {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    place-items: center;
+    gap: 3px;
+    min-width: 0;
+    height: 76px;
+    border: 1px solid rgba(23, 25, 28, 0.1);
+    border-radius: 9px;
+    padding: 7px 2px;
+    color: #17191c;
+    background: #fff;
+  }
+
+  .renew-calendar-week-days button > span {
+    color: #747b86;
+    font-size: 9px;
+    font-weight: 950;
+  }
+
+  .renew-calendar-week-days button > time {
+    font-size: 17px;
+    font-weight: 950;
+  }
+
+  .renew-calendar-week-days button > small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    color: #fff;
+    background: #c94d35;
+    font-size: 9px;
+    font-weight: 950;
+  }
+
+  .renew-calendar-week-days button > small:only-child,
+  .renew-calendar-week-days button > small[aria-hidden="true"] {
+    visibility: hidden;
+  }
+
+  .renew-calendar-week-days button.is-selected {
+    border-color: #17191c;
+    color: #fff;
+    background: #17191c;
+  }
+
+  .renew-calendar-week-days button.is-selected > span {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .renew-calendar-week-days button.is-today:not(.is-selected) {
+    border-color: #c94d35;
+    box-shadow: inset 0 0 0 1px #c94d35;
+  }
+
+  .renew-calendar-week-days button.is-sunday:not(.is-selected) > time {
+    color: #c94d35;
+  }
+
+  .renew-calendar-week-days button.is-saturday:not(.is-selected) > time {
+    color: #44619d;
   }
 
   .renew-calendar-highlights {
@@ -4476,7 +4617,12 @@
 
   .renew-calendar-agenda {
     gap: 12px;
-    padding: 14px;
+    min-width: 0;
+    padding: 16px 14px;
+  }
+
+  .renew-calendar-agenda h2 {
+    font-size: 22px;
   }
 
   .renew-calendar-agenda-list {
@@ -4495,17 +4641,24 @@
   }
 
   .renew-calendar-event-card {
-    grid-template-columns: 54px minmax(0, 1fr);
-    padding: 12px;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    min-width: 0;
+    padding: 13px;
+  }
+
+  .renew-calendar-event-card > div {
+    min-width: 0;
   }
 
   .renew-calendar-event-mark {
-    width: 54px;
-    height: 54px;
+    width: 72px;
+    height: 72px;
   }
 
   .renew-calendar-event-card strong {
-    font-size: 13px;
+    font-size: 15px;
+    line-height: 1.4;
   }
 
   .renew-news-calendar-link {
@@ -12871,5 +13024,26 @@
     min-height: 34px;
     padding: 0 13px;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 720px) {
+  .renew-panel.renew-calendar-panel {
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0 2px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-calendar-main,
+  .renew-calendar-toolbar,
+  .renew-calendar-layout,
+  .renew-calendar-mobile-week,
+  .renew-calendar-agenda {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 }

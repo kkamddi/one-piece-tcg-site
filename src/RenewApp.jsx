@@ -177,6 +177,16 @@ function getCalendarMonthCells(monthKey) {
   });
 }
 
+function getCalendarWeekCells(dateKey) {
+  const selected = new Date(`${dateKey}T00:00:00`);
+  const weekStart = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate() - selected.getDay());
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + index);
+    const key = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+    return { key, day: date.getDate(), weekday: date.getDay() };
+  });
+}
+
 function useBodyScrollLock(active = true) {
   useEffect(() => {
     if (!active || typeof window === 'undefined' || typeof document === 'undefined' || !document.body) return undefined;
@@ -4566,7 +4576,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
   return (
     <article className={`renew-calendar-event-card is-priority-${event.priority || 'low'}`}>
       <span className={`renew-calendar-event-mark is-${event.kind}`} aria-hidden="true">
-        {event.imageUrl ? <img src={event.imageUrl} alt="" loading="lazy" onError={(error) => { error.currentTarget.hidden = true; }} /> : null}
+        {event.imageUrl ? <img src={getCardImageSrc(event)} alt="" loading="lazy" onError={(error) => { error.currentTarget.hidden = true; }} /> : null}
       </span>
       <div>
         <div className="renew-calendar-event-meta">
@@ -4629,9 +4639,18 @@ function RenewCalendar({ uiLang }) {
   const highlightedEvents = useMemo(() => monthEvents.filter((event) => event.priority === 'high' && event.kind !== 'event'), [monthEvents]);
   const selectedEvents = eventsByDate.get(selectedDate) || [];
   const monthCells = useMemo(() => getCalendarMonthCells(monthKey), [monthKey]);
+  const weekCells = useMemo(() => getCalendarWeekCells(selectedDate), [selectedDate]);
+  const weekEventsByDate = useMemo(() => {
+    const map = new Map();
+    filteredEvents.forEach((event) => map.set(event.date, [...(map.get(event.date) || []), event]));
+    return map;
+  }, [filteredEvents]);
   const monthDate = new Date(`${monthKey}-01T00:00:00`);
   const monthLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { year: 'numeric', month: 'long' }).format(monthDate);
   const selectedDateLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${selectedDate}T00:00:00`));
+  const weekRangeLabel = weekCells.length
+    ? `${new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[0].key}T00:00:00`))} - ${new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[6].key}T00:00:00`))}`
+    : '';
   const mobileGroups = useMemo(() => {
     const groups = new Map();
     monthEvents.forEach((event) => {
@@ -4655,6 +4674,11 @@ function RenewCalendar({ uiLang }) {
   const selectDate = (dateKey) => {
     setSelectedDate(dateKey);
     if (!dateKey.startsWith(`${monthKey}-`)) setMonthKey(dateKey.slice(0, 7));
+  };
+  const changeWeek = (delta) => {
+    const next = new Date(`${selectedDate}T00:00:00`);
+    next.setDate(next.getDate() + (delta * 7));
+    selectDate([next.getFullYear(), String(next.getMonth() + 1).padStart(2, '0'), String(next.getDate()).padStart(2, '0')].join('-'));
   };
 
   const localeOptions = [
@@ -4740,6 +4764,32 @@ function RenewCalendar({ uiLang }) {
         ) : null}
 
         <div className="renew-calendar-layout">
+          <div className="renew-calendar-mobile-week">
+            <div className="renew-calendar-week-control">
+              <button type="button" onClick={() => changeWeek(-1)} aria-label={isEn ? 'Previous week' : '이전 주'}>‹</button>
+              <strong>{weekRangeLabel}</strong>
+              <button type="button" onClick={() => changeWeek(1)} aria-label={isEn ? 'Next week' : '다음 주'}>›</button>
+            </div>
+            <div className="renew-calendar-week-days">
+              {weekCells.map((cell) => {
+                const eventCount = (weekEventsByDate.get(cell.key) || []).length;
+                return (
+                  <button
+                    key={cell.key}
+                    type="button"
+                    className={`${cell.key === todayKey ? 'is-today' : ''}${cell.key === selectedDate ? ' is-selected' : ''}${cell.weekday === 0 ? ' is-sunday' : cell.weekday === 6 ? ' is-saturday' : ''}`}
+                    onClick={() => selectDate(cell.key)}
+                    aria-label={`${cell.key}, ${eventCount}${isEn ? ' schedules' : '개 일정'}`}
+                  >
+                    <span>{CALENDAR_WEEKDAYS[isEn ? 'EN' : 'KR'][cell.weekday]}</span>
+                    <time dateTime={cell.key}>{cell.day}</time>
+                    {eventCount ? <small>{eventCount}</small> : <small aria-hidden="true">0</small>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="renew-calendar-grid-wrap">
             <div className="renew-calendar-weekdays" aria-hidden="true">
               {CALENDAR_WEEKDAYS[isEn ? 'EN' : 'KR'].map((day, index) => <span key={day} className={index === 0 ? 'is-sunday' : index === 6 ? 'is-saturday' : ''}>{day}</span>)}
