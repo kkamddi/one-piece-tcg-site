@@ -3806,6 +3806,97 @@
   cursor: default;
 }
 
+.renew-calendar-highlights {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(201, 77, 53, 0.24);
+  border-radius: 10px;
+  padding: 14px;
+  background: #fff8f5;
+}
+
+.renew-calendar-highlights > header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.renew-calendar-highlights > header span {
+  color: #c94d35;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.renew-calendar-highlights > header h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.renew-calendar-highlights > header small {
+  color: #777e88;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.renew-calendar-highlights > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+.renew-calendar-highlights > div > a {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  border: 1px solid rgba(201, 77, 53, 0.18);
+  border-radius: 8px;
+  padding: 11px;
+  color: #17191c;
+  background: #fff;
+  text-decoration: none;
+}
+
+.renew-calendar-highlights > div > a > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.renew-calendar-highlights time {
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.renew-calendar-highlights > div > a > div > span {
+  border-radius: 999px;
+  padding: 3px 6px;
+  color: #9d3e2b;
+  background: #fff0ea;
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.renew-calendar-highlights strong {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-calendar-highlights > div > a > small {
+  overflow: hidden;
+  color: #858b94;
+  font-size: 10px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .renew-calendar-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
@@ -3932,6 +4023,12 @@
   background: #edf2ff;
 }
 
+.renew-calendar-day-events > span.is-priority-high {
+  border-left-width: 4px;
+  color: #8f321f;
+  font-weight: 950;
+}
+
 .renew-calendar-day-events small {
   color: #6b7280;
   font-size: 10px;
@@ -3984,6 +4081,12 @@
   border-radius: 12px;
   padding: 10px;
   background: #fff;
+}
+
+.renew-calendar-event-card.is-priority-high {
+  border-color: rgba(201, 77, 53, 0.32);
+  box-shadow: inset 3px 0 0 #c94d35;
+  background: #fffaf8;
 }
 
 .renew-calendar-event-mark {
@@ -4053,6 +4156,11 @@
   background: #edf2ff;
 }
 
+.renew-calendar-event-meta span.is-priority {
+  color: #fff;
+  background: #c94d35;
+}
+
 .renew-calendar-event-card strong {
   font-size: 12px;
   line-height: 1.35;
@@ -4062,6 +4170,14 @@
   color: #7b818c;
   font-size: 10px;
   font-weight: 750;
+}
+
+.renew-calendar-event-card .renew-calendar-event-original {
+  overflow: hidden;
+  color: #8a9099;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .renew-calendar-event-card > a {
@@ -4136,6 +4252,28 @@
 .renew-app.is-dark .renew-calendar-filters .renew-calendar-filter-reset {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-calendar-highlights {
+  border-color: rgba(239, 117, 90, 0.28);
+  background: rgba(201, 77, 53, 0.09);
+}
+
+.renew-app.is-dark .renew-calendar-highlights > div > a {
+  border-color: rgba(239, 117, 90, 0.24);
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.renew-app.is-dark .renew-calendar-highlights > header small,
+.renew-app.is-dark .renew-calendar-highlights > div > a > small,
+.renew-app.is-dark .renew-calendar-event-card .renew-calendar-event-original {
+  color: #aab2bf;
+}
+
+.renew-app.is-dark .renew-calendar-event-card.is-priority-high {
+  border-color: rgba(239, 117, 90, 0.34);
+  background: rgba(201, 77, 53, 0.1);
 }
 
 .renew-app.is-dark .renew-calendar-weekdays,
@@ -4252,6 +4390,21 @@
 
   .renew-calendar-filters .renew-calendar-filter-reset {
     margin-left: 0;
+  }
+
+  .renew-calendar-highlights > header {
+    display: grid;
+    align-items: start;
+    gap: 4px;
+  }
+
+  .renew-calendar-highlights > header small {
+    max-width: none;
+    text-align: left;
+  }
+
+  .renew-calendar-highlights > div {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .renew-calendar-layout {

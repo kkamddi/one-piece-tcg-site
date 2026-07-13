@@ -64,6 +64,75 @@ function stripHtml(value) {
     .replace(/\s+/g, ' '));
 }
 
+function extractProductCode(value) {
+  return String(value || '').toUpperCase().match(/(?:OP|EB|ST|PRB|DP|EX|TS|DF|AC)-?\d{2}(?:-EB\d{2})?/)?.[0] ?? '';
+}
+
+function getCalendarPriority(title, kind) {
+  if (kind === 'event') return 'low';
+  const text = String(title || '').toUpperCase();
+  if (/(BOOSTER|ブースター|부스터|BOX|ボックス|프로모|PROMO|プロモ|CARD COLLECTION|カードコレクション|카드 컬렉션|CARD SET|カードセット|카드 세트)/.test(text)) return 'high';
+  return kind === 'release' ? 'medium' : 'low';
+}
+
+function summarizeJapaneseTitle(title, kind = 'notice') {
+  const original = stripHtml(title);
+  const code = extractProductCode(original);
+  const codeLabel = code ? ` [${code}]` : '';
+  const month = original.match(/(\d{1,2})月/)?.[1] ?? '';
+  const monthLabel = month ? `${Number(month)}월 ` : '';
+
+  if (kind === 'event') {
+    if (/発売記念イベント/.test(original)) return `${code || '신상품'} 발매 기념 이벤트`;
+    if (/スタンダードバトル/.test(original)) return `${monthLabel}스탠다드 배틀`;
+    if (/フラッグシップバトル/.test(original)) return `${monthLabel}플래그십 배틀`;
+    if (/8パックバトル/.test(original)) return `${monthLabel}8팩 배틀`;
+    if (/交流会/.test(original)) return `${monthLabel}교류회`;
+    if (/あそびかた教室/.test(original)) return `${monthLabel}초보자 체험 교실`;
+    if (/ルーキーズバトル/.test(original)) return `${monthLabel}루키즈 배틀`;
+    if (/クルーバトル/.test(original)) return `${monthLabel}크루 배틀`;
+    if (/親子マッチングバトル/.test(original)) return `${monthLabel}부모·자녀 매칭 배틀`;
+    if (/マッチングバトル/.test(original)) return `${monthLabel}매칭 배틀`;
+    if (/メタロビWeekend/.test(original)) return `${monthLabel}메타버스 로비 주말 이벤트`;
+    if (/3on3 LIMITED BATTLE/i.test(original)) return '3대3 리미티드 배틀';
+    if (/チャンピオンシップ/.test(original)) {
+      const season = original.match(/\d{2}-\d{2}/)?.[0] ?? '';
+      const round = original.match(/Season\s*\d+/i)?.[0] ?? '';
+      return ['챔피언십', season, round].filter(Boolean).join(' ');
+    }
+    return `일본 공식 이벤트${codeLabel}`;
+  }
+
+  if (/プロモーションパック|プロモパック/.test(original)) return `프로모션 팩${codeLabel}`;
+  if (/プロモーションカード|プロモカード/.test(original)) return `프로모션 카드${codeLabel}`;
+  if (/プレミアムブースター/.test(original)) return `프리미엄 부스터 팩${codeLabel}`;
+  if (/エクストラブースター/.test(original)) return `엑스트라 부스터 팩${codeLabel}`;
+  if (/ブースターパック|ブースター/.test(original)) return `부스터 팩${codeLabel}`;
+  if (/スタートデッキEX/.test(original)) return `스타트 덱 EX${codeLabel}`;
+  if (/スタートデッキ/.test(original)) return `스타트 덱${codeLabel}`;
+  if (/プレミアムカードコレクション/.test(original)) return `프리미엄 카드 컬렉션${codeLabel}`;
+  if (/カードコレクション/.test(original)) return `카드 컬렉션${codeLabel}`;
+  if (/カードセット/.test(original)) return `카드 세트${codeLabel}`;
+  if (/オフィシャルカードスリーブ|カードスリーブ/.test(original)) return `오피셜 카드 슬리브${codeLabel}`;
+  if (/プレイマット/.test(original)) return `오피셜 플레이매트${codeLabel}`;
+  if (/ストレージボックス/.test(original)) return `오피셜 스토리지 박스${codeLabel}`;
+  if (/カードケース/.test(original)) return `오피셜 카드 케이스${codeLabel}`;
+  const replacements = [
+    ['ONE PIECEカードゲーム', '원피스 카드게임'],
+    ['オフィシャル', '오피셜'],
+    ['リミテッドエディション', '리미티드 에디션'],
+    ['プレミアム', '프리미엄'],
+    ['アニバーサリー', '애니버서리'],
+    ['キャンペーン', '캠페인'],
+    ['イベント', '이벤트'],
+    ['バトル', '배틀'],
+    ['カード', '카드']
+  ];
+  const translated = replacements.reduce((value, [from, to]) => value.replaceAll(from, to), original);
+  if (translated !== original && !/[ぁ-んァ-ヶ一-龯]/.test(translated)) return translated;
+  return `${kind === 'event' ? '일본 공식 이벤트' : kind === 'release' ? '일본 공식 상품' : '일본 공식 소식'}${codeLabel}`;
+}
+
 function toAbsoluteUrl(href) {
   if (!href) return KR_TOPICS_URL;
   if (href.startsWith('http://') || href.startsWith('https://')) return href;
@@ -193,6 +262,7 @@ function parseOfficialDateRanges(value) {
 }
 
 function buildCalendarItem({ id, locale, kind, category, title, schedule, url, imageUrl }) {
+  const titleKo = locale === 'JP' ? summarizeJapaneseTitle(title, kind) : '';
   return {
     id: `calendar-${locale.toLowerCase()}-${kind}-${schedule.date}-${encodeURIComponent(id)}`,
     locale,
@@ -204,8 +274,10 @@ function buildCalendarItem({ id, locale, kind, category, title, schedule, url, i
     ...(schedule.endDate ? { endDate: schedule.endDate } : {}),
     scheduleLabel: schedule.scheduleLabel,
     calendarKind: kind,
+    calendarPriority: getCalendarPriority(title, kind),
     calendarOnly: true,
     url,
+    ...(titleKo ? { titleKo } : {}),
     ...(imageUrl ? { imageUrl } : {})
   };
 }
@@ -312,12 +384,16 @@ function parseJpTopics(html) {
     const title = decodeHtml(block.match(/<h3 class="newsTitle">([\s\S]*?)<\/h3>/)?.[1] ?? 'NEWS');
     const imageUrl = toAbsoluteJpImage(block.match(/data-src="([^"]+)"/)?.[1] ?? block.match(/<img[^>]+src="([^"]+)"/)?.[1] ?? '');
 
+    const normalizedCategory = category.toUpperCase();
+    const kind = normalizedCategory.includes('EVENT') || category.includes('イベント') ? 'event' : 'notice';
     return {
       id: `jp-${date}-${index}-${title}`,
       locale: 'JP',
       source: 'JP_OFFICIAL',
       category,
       title,
+      titleKo: summarizeJapaneseTitle(title, kind),
+      calendarPriority: getCalendarPriority(title, kind),
       date,
       url: toAbsoluteJpUrl(href),
       imageUrl

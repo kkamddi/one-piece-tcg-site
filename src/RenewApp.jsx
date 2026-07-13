@@ -109,6 +109,20 @@ function getCalendarProductCode(value) {
   return match ? match[0].replaceAll('-', '') : '';
 }
 
+const CALENDAR_PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+
+function getCalendarEventPriority(item) {
+  if (CALENDAR_PRIORITY_ORDER[item?.calendarPriority] !== undefined) return item.calendarPriority;
+  if (item?.kind === 'event' || item?.calendarKind === 'event') return 'low';
+  const text = String(item?.title || '').toUpperCase();
+  if (/(BOOSTER|ブースター|부스터|BOX|ボックス|프로모|PROMO|プロモ|CARD COLLECTION|カードコレクション|카드 컬렉션|CARD SET|カードセット|카드 세트)/.test(text)) return 'high';
+  return item?.kind === 'release' || item?.calendarKind === 'release' ? 'medium' : 'low';
+}
+
+function getCalendarDisplayTitle(event, isEn) {
+  return !isEn && event?.titleKo ? event.titleKo : event?.title;
+}
+
 function buildCalendarEvents(boxes = []) {
   const releases = boxes
     .map((item) => ({ item, date: toCalendarDateKey(item?.releaseDate) }))
@@ -123,7 +137,8 @@ function buildCalendarEvents(boxes = []) {
       sourceLabel: 'SNKRDUNK',
       url: item.sourceUrl || `/prices/box/${encodeURIComponent(item.code)}`,
       imageUrl: item.previewImageUrl || '',
-      productCode: getCalendarProductCode(item.code)
+      productCode: getCalendarProductCode(item.code),
+      priority: 'high'
     }));
   const notices = topicsData
     .map((item) => ({ ...item, kind: getCalendarTopicKind(item), date: toCalendarDateKey(item.scheduleDate || item.date) }))
@@ -135,18 +150,20 @@ function buildCalendarEvents(boxes = []) {
       locale: String(item.locale || '').toUpperCase() === 'JP' ? 'JP' : 'KR',
       category: item.category || 'NOTICE',
       title: item.title,
+      titleKo: item.titleKo || '',
       sourceLabel: item.source === 'JP_OFFICIAL' ? 'JP OFFICIAL' : 'KR OFFICIAL',
       url: item.url || '',
       imageUrl: item.imageUrl || '',
       endDate: toCalendarDateKey(item.endDate),
       isSchedule: Boolean(item.calendarOnly),
-      productCode: item.calendarKind === 'release' ? getCalendarProductCode(item.title) : ''
+      productCode: item.calendarKind === 'release' ? getCalendarProductCode(item.title) : '',
+      priority: getCalendarEventPriority(item)
     }));
   const officialReleaseCodes = new Set(notices.filter((item) => item.kind === 'release' && item.locale === 'JP' && item.productCode).map((item) => item.productCode));
   const fallbackReleases = releases.filter((item) => !item.productCode || !officialReleaseCodes.has(item.productCode));
   return [...fallbackReleases, ...notices]
     .filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index)
-    .sort((a, b) => a.date.localeCompare(b.date) || a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title));
+    .sort((a, b) => a.date.localeCompare(b.date) || CALENDAR_PRIORITY_ORDER[a.priority] - CALENDAR_PRIORITY_ORDER[b.priority] || a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title));
 }
 
 function getCalendarMonthCells(monthKey) {
@@ -4522,6 +4539,8 @@ function RenewUpdateModal({ onClose }) {
 
 function RenewCalendarEventCard({ event, uiLang }) {
   const isEn = uiLang === 'EN';
+  const displayTitle = getCalendarDisplayTitle(event, isEn);
+  const showOriginalTitle = !isEn && event.locale === 'JP' && event.titleKo && event.titleKo !== event.title;
   const kindLabel = event.kind === 'release'
     ? (isEn ? 'Release' : '발매')
     : event.kind === 'event'
@@ -4531,18 +4550,20 @@ function RenewCalendarEventCard({ event, uiLang }) {
     ? (isEn ? 'View product' : '상품 보기')
     : (isEn ? 'View source' : '원문 보기');
   return (
-    <article className="renew-calendar-event-card">
+    <article className={`renew-calendar-event-card is-priority-${event.priority || 'low'}`}>
       <span className={`renew-calendar-event-mark is-${event.kind}`} aria-hidden="true">
         {event.imageUrl ? <img src={event.imageUrl} alt="" loading="lazy" onError={(error) => { error.currentTarget.hidden = true; }} /> : null}
       </span>
       <div>
         <div className="renew-calendar-event-meta">
+          {event.priority === 'high' ? <span className="is-priority">{isEn ? 'Featured release' : '주요 발매'}</span> : null}
           <span className={`is-${event.kind}`}>{kindLabel}</span>
           <span>{event.locale}</span>
           <small>{event.sourceLabel}</small>
         </div>
-        <strong>{event.title}</strong>
-        <small>{event.endDate ? `${event.date} - ${event.endDate}` : event.date} · {event.category}</small>
+        <strong>{displayTitle}</strong>
+        {showOriginalTitle ? <small className="renew-calendar-event-original" lang="ja">{event.title}</small> : null}
+        <small className="renew-calendar-event-date">{event.endDate ? `${event.date} - ${event.endDate}` : event.date} · {event.category}</small>
       </div>
       {event.url ? <a href={event.url} target={event.url.startsWith('http') ? '_blank' : undefined} rel={event.url.startsWith('http') ? 'noreferrer' : undefined}>{actionLabel}</a> : null}
     </article>
@@ -4591,6 +4612,7 @@ function RenewCalendar({ uiLang }) {
     return map;
   }, [filteredEvents, monthEnd, monthStart]);
   const monthEvents = useMemo(() => filteredEvents.filter((event) => event.date <= monthEnd && (event.endDate || event.date) >= monthStart), [filteredEvents, monthEnd, monthStart]);
+  const highlightedEvents = useMemo(() => monthEvents.filter((event) => event.priority === 'high' && event.kind !== 'event'), [monthEvents]);
   const selectedEvents = eventsByDate.get(selectedDate) || [];
   const monthCells = useMemo(() => getCalendarMonthCells(monthKey), [monthKey]);
   const monthDate = new Date(`${monthKey}-01T00:00:00`);
@@ -4677,6 +4699,33 @@ function RenewCalendar({ uiLang }) {
           </div>
         </div>
 
+        {highlightedEvents.length ? (
+          <section className="renew-calendar-highlights" aria-label={isEn ? 'Featured product schedules this month' : '이번 달 주요 상품 일정'}>
+            <header>
+              <div>
+                <span>MONTHLY PICK</span>
+                <h2>{isEn ? 'Featured product schedules' : '이번 달 주요 상품 일정'}</h2>
+              </div>
+              <small>{isEn ? 'New packs, boxes and promo cards' : '신규 팩·박스·프로모 우선'}</small>
+            </header>
+            <div>
+              {highlightedEvents.map((event) => {
+                const external = event.url?.startsWith('http');
+                return (
+                  <a key={`highlight-${event.id}`} href={event.url || '#'} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+                    <div>
+                      <time dateTime={event.date}>{event.date.slice(5).replace('-', '.')}</time>
+                      <span>{event.locale} · {event.kind === 'release' ? (isEn ? 'Release' : '발매') : (isEn ? 'Official news' : '공식 소식')}</span>
+                    </div>
+                    <strong>{getCalendarDisplayTitle(event, isEn)}</strong>
+                    {!isEn && event.locale === 'JP' && event.titleKo !== event.title ? <small lang="ja">{event.title}</small> : null}
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
         <div className="renew-calendar-layout">
           <div className="renew-calendar-grid-wrap">
             <div className="renew-calendar-weekdays" aria-hidden="true">
@@ -4695,7 +4744,7 @@ function RenewCalendar({ uiLang }) {
                   >
                     <time dateTime={cell.key}>{cell.day}</time>
                     <span className="renew-calendar-day-events">
-                      {dayEvents.slice(0, 3).map((event) => <span key={event.id} className={`is-${event.kind}`}>{event.title}</span>)}
+                      {dayEvents.slice(0, 3).map((event) => <span key={event.id} className={`is-${event.kind} is-priority-${event.priority || 'low'}`}>{getCalendarDisplayTitle(event, isEn)}</span>)}
                       {dayEvents.length > 3 ? <small>+{dayEvents.length - 3}</small> : null}
                     </span>
                   </button>
