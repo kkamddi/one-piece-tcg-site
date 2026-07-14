@@ -3587,6 +3587,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
   const [checkState, setCheckState] = useState({ username: null, nickname: null });
   const [checkingField, setCheckingField] = useState('');
   const [agreements, setAgreements] = useState({ terms: false, privacy: false });
+  const [legalType, setLegalType] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const isSignup = mode === 'signup';
@@ -3712,8 +3713,9 @@ function RenewAuthModal({ onClose, onSignedIn }) {
   }
 
   return (
-    <div className="renew-modal-backdrop" onClick={onClose}>
-      <div className={`renew-auth-modal${isSignup ? ' is-signup' : ''}`} onClick={(event) => event.stopPropagation()}>
+    <>
+      <div className="renew-modal-backdrop" onClick={onClose}>
+        <div className={`renew-auth-modal${isSignup ? ' is-signup' : ''}`} onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
             <h2>{isSignup ? '회원가입' : '로그인'}</h2>
@@ -3798,11 +3800,11 @@ function RenewAuthModal({ onClose, onSignedIn }) {
                 </label>
                 <label>
                   <input type="checkbox" checked={agreements.terms} onChange={(event) => setAgreements((current) => ({ ...current, terms: event.target.checked }))} />
-                  <span>[필수] <a href="/terms" target="_blank" rel="noreferrer">이용약관</a> 동의</span>
+                  <span>[필수] <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setLegalType('terms'); }}>이용약관</button> 동의</span>
                 </label>
                 <label>
                   <input type="checkbox" checked={agreements.privacy} onChange={(event) => setAgreements((current) => ({ ...current, privacy: event.target.checked }))} />
-                  <span>[필수] <a href="/privacy" target="_blank" rel="noreferrer">개인정보처리방침</a> 동의</span>
+                  <span>[필수] <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setLegalType('privacy'); }}>개인정보처리방침</button> 동의</span>
                 </label>
               </div>
             </>
@@ -3823,9 +3825,15 @@ function RenewAuthModal({ onClose, onSignedIn }) {
               {isSignup ? '로그인' : '회원가입'}
             </button>
           </p>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+      {legalType ? (
+        <div className="renew-modal-backdrop renew-auth-legal-backdrop" onClick={() => setLegalType(null)}>
+          <RenewLegalDialog type={legalType} onClose={() => setLegalType(null)} />
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -5613,29 +5621,35 @@ function RenewStaticInfoPage({ type }) {
   );
 }
 
-function RenewLegalModal({ type, onClose }) {
-  useBodyScrollLock();
+function RenewLegalDialog({ type, onClose }) {
   const isPrivacy = type === 'privacy';
   const sections = isPrivacy ? PRIVACY_SECTIONS : TERMS_SECTIONS;
   return (
-    <div className="renew-modal-backdrop" onClick={onClose}>
-      <div className="renew-info-modal renew-legal-modal" onClick={(event) => event.stopPropagation()}>
-        <div className="renew-modal-head">
-          <div>
-            <h2>{isPrivacy ? '개인정보처리방침' : '이용약관'}</h2>
-            {isPrivacy ? <p>Card Pone는 이용자의 개인정보를 중요하게 생각하며, 관련 법령에 따라 개인정보를 안전하게 관리합니다.</p> : null}
-          </div>
-          <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
+    <div className="renew-info-modal renew-legal-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+      <div className="renew-modal-head">
+        <div>
+          <h2>{isPrivacy ? '개인정보처리방침' : '이용약관'}</h2>
+          {isPrivacy ? <p>Card Pone는 이용자의 개인정보를 중요하게 생각하며, 관련 법령에 따라 개인정보를 안전하게 관리합니다.</p> : null}
         </div>
-        <div className="renew-legal-body">
-          {sections.map(([title, body]) => (
-            <section key={title}>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </section>
-          ))}
-        </div>
+        <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
       </div>
+      <div className="renew-legal-body">
+        {sections.map(([title, body]) => (
+          <section key={title}>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RenewLegalModal({ type, onClose }) {
+  useBodyScrollLock();
+  return (
+    <div className="renew-modal-backdrop" onClick={onClose}>
+      <RenewLegalDialog type={type} onClose={onClose} />
     </div>
   );
 }

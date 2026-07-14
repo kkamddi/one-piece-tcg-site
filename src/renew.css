@@ -5932,11 +5932,21 @@
   padding-bottom: 12px;
 }
 
-.renew-auth-consent a {
+.renew-auth-consent a,
+.renew-auth-consent button {
+  border: 0;
+  padding: 0;
   color: inherit;
+  background: transparent;
+  font: inherit;
   font-weight: 900;
   text-decoration: underline;
   text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.renew-auth-legal-backdrop {
+  z-index: 1120;
 }
 
 .renew-app.is-dark .renew-auth-consent {
@@ -6089,6 +6099,17 @@
   .renew-auth-inline-field button {
     min-width: 78px;
     padding: 0 10px;
+  }
+
+  .renew-modal-backdrop.renew-auth-legal-backdrop {
+    padding: 0;
+  }
+
+  .renew-auth-legal-backdrop .renew-legal-modal {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
   }
 }
 
