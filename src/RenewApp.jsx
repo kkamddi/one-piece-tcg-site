@@ -3007,7 +3007,18 @@ function MobileNavIcon({ type }) {
 function formatNotificationTime(value) {
   const timestamp = Date.parse(value || '');
   if (!Number.isFinite(timestamp)) return '';
-  return new Intl.DateTimeFormat('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(timestamp));
+  const date = new Date(timestamp);
+  const pad = (part) => String(part).padStart(2, '0');
+  return `${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function getNotificationPayload(item) {
+  if (item?.payload_json && typeof item.payload_json === 'object') return item.payload_json;
+  try {
+    return JSON.parse(item?.payload_json || '{}');
+  } catch {
+    return {};
+  }
 }
 
 function RenewNotificationMenu({ notifications, onSelect, onMarkAll }) {
@@ -3015,25 +3026,44 @@ function RenewNotificationMenu({ notifications, onSelect, onMarkAll }) {
   return (
     <div className="renew-notification-menu" role="dialog" aria-label="알림 목록">
       <div className="renew-notification-head">
-        <strong>알림</strong>
+        <div>
+          <strong>알림</strong>
+          {unreadCount ? <span>새 알림 {unreadCount}개</span> : null}
+        </div>
         {unreadCount ? <button type="button" onClick={onMarkAll}>모두 읽음</button> : null}
       </div>
       <div className="renew-notification-list">
-        {notifications.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={!item.read_at ? 'is-unread' : ''}
-            onClick={() => onSelect(item)}
-          >
-            <span className="renew-notification-item-title">
-              {!item.read_at ? <i aria-hidden="true" /> : null}
-              <strong>{item.title || '알림'}</strong>
-              <small>{formatNotificationTime(item.created_at)}</small>
-            </span>
-            {item.body ? <span>{item.body}</span> : null}
-          </button>
-        ))}
+        {notifications.map((item) => {
+          const payload = getNotificationPayload(item);
+          const isPriceAlert = item.type === 'price_alert';
+          const context = isPriceAlert
+            ? `${payload.conditionKey === 'psa10' ? 'PSA10' : 'Single'} · ${payload.direction === 'above' ? '상승' : '하락'} 알림`
+            : '알림';
+          const title = payload.cardName || item.title || '알림';
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={!item.read_at ? 'is-unread' : ''}
+              onClick={() => onSelect(item)}
+            >
+              <span className="renew-notification-item-meta">
+                <span>
+                  {!item.read_at ? <i aria-hidden="true" /> : null}
+                  <b>{context}</b>
+                </span>
+                <time dateTime={item.created_at || undefined}>{formatNotificationTime(item.created_at)}</time>
+              </span>
+              <span className="renew-notification-item-content">
+                {payload.previewImageUrl ? <img src={payload.previewImageUrl} alt="" loading="lazy" /> : null}
+                <span className="renew-notification-item-copy">
+                  <strong className="renew-notification-item-title">{title}</strong>
+                  {item.body ? <span className="renew-notification-item-body">{item.body}</span> : null}
+                </span>
+              </span>
+            </button>
+          );
+        })}
         {!notifications.length ? <div className="renew-notification-empty">새 알림이 없습니다.</div> : null}
       </div>
     </div>

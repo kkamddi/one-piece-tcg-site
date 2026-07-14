@@ -500,7 +500,7 @@
   top: calc(100% + 10px);
   right: 0;
   z-index: 120;
-  width: min(380px, calc(100vw - 32px));
+  width: min(420px, calc(100vw - 32px));
   overflow: hidden;
   border: 1px solid rgba(23, 25, 28, 0.14);
   border-radius: 8px;
@@ -512,14 +512,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 48px;
+  min-height: 58px;
   border-bottom: 1px solid rgba(23, 25, 28, 0.1);
-  padding: 0 14px;
+  padding: 0 16px;
+}
+
+.renew-notification-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.renew-notification-head > div > strong {
+  font-size: 16px;
+}
+
+.renew-notification-head > div > span {
+  color: #858994;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .renew-notification-head button {
-  border: 0;
-  padding: 6px;
+  border: 1px solid rgba(201, 77, 53, 0.28);
+  border-radius: 6px;
+  padding: 7px 9px;
   color: #c94d35;
   background: transparent;
   font-size: 12px;
@@ -535,49 +551,102 @@
 .renew-notification-list > button {
   display: grid;
   width: 100%;
-  gap: 6px;
+  gap: 8px;
   border: 0;
   border-bottom: 1px solid rgba(23, 25, 28, 0.08);
-  padding: 13px 14px;
+  padding: 15px 16px 16px;
   color: #17191c;
   background: #fff;
   text-align: left;
   cursor: pointer;
 }
 
+.renew-notification-list > button:hover,
+.renew-notification-list > button:focus-visible {
+  background: #f7f7f8;
+}
+
 .renew-notification-list > button.is-unread {
   background: #fff5f1;
+  box-shadow: inset 3px 0 #d84b36;
 }
 
-.renew-notification-item-title {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+.renew-notification-list > button.is-unread:hover,
+.renew-notification-list > button.is-unread:focus-visible {
+  background: #ffede7;
+}
+
+.renew-notification-item-meta {
+  display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 6px;
 }
 
-.renew-notification-item-title i {
+.renew-notification-item-meta > span {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+
+.renew-notification-item-meta i {
   width: 7px;
   height: 7px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: #d84b36;
 }
 
-.renew-notification-item-title strong,
-.renew-notification-list > button > span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.renew-notification-item-meta b {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 800;
 }
 
-.renew-notification-item-title small {
+.renew-notification-item-meta time {
   color: #858994;
   font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.renew-notification-list > button > span:last-child {
+.renew-notification-item-content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  min-width: 0;
+  gap: 12px;
+}
+
+.renew-notification-item-content > img {
+  width: 50px;
+  height: 68px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 5px;
+  background: #f2f2f3;
+  object-fit: cover;
+}
+
+.renew-notification-item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.renew-notification-item-title {
+  color: #17191c;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.renew-notification-item-body {
   color: #666b75;
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .renew-notification-empty {
@@ -608,7 +677,26 @@
   background: #30201d;
 }
 
-.renew-app.is-dark .renew-notification-list > button > span:last-child {
+.renew-app.is-dark .renew-notification-list > button:hover,
+.renew-app.is-dark .renew-notification-list > button:focus-visible {
+  background: #22252c;
+}
+
+.renew-app.is-dark .renew-notification-list > button.is-unread:hover,
+.renew-app.is-dark .renew-notification-list > button.is-unread:focus-visible {
+  background: #3a2521;
+}
+
+.renew-app.is-dark .renew-notification-item-title {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-notification-item-content > img {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #22252c;
+}
+
+.renew-app.is-dark .renew-notification-item-body {
   color: #c2c5cc;
 }
 
