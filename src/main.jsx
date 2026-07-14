@@ -2,7 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import RenewApp from './RenewApp';
+import { configureNativeRuntime } from './lib/native-runtime';
 import './index.css';
+
+configureNativeRuntime();
 
 const RootApp = new URLSearchParams(window.location.search).has('legacy') ? App : RenewApp;
 

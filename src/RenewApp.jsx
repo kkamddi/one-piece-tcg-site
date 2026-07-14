@@ -9,6 +9,7 @@ import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVe
 import { deletePriceAlertRule, fetchPriceAlertRules, savePriceAlertRule } from './api/price-alerts';
 import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability, sendTestPushNotification } from './api/push-notifications';
 import { fetchShopRegions, fetchShops } from './api/shops';
+import { resolveApiUrl } from './lib/native-runtime';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
 import seriesData from './data/series.json';
@@ -1426,7 +1427,7 @@ function getCardImageSrc(card) {
     if (typeof window !== 'undefined' && /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)) {
       return source;
     }
-    return `/api/card-image?url=${encodeURIComponent(source)}`;
+    return resolveApiUrl(`/api/card-image?url=${encodeURIComponent(source)}`);
   }
   return source;
 }
@@ -1439,7 +1440,7 @@ function getCardThumbnailKey(card) {
 function getCardThumbnailSrc(card) {
   const key = getCardThumbnailKey(card);
   if (CARD_THUMBNAIL_BASE_URL === '/api/card-thumb' && key) {
-    return `/api/card-thumb?key=${encodeURIComponent(key)}`;
+    return resolveApiUrl(`/api/card-thumb?key=${encodeURIComponent(key)}`);
   }
   return CARD_THUMBNAIL_BASE_URL && key
     ? `${CARD_THUMBNAIL_BASE_URL}/${key}`

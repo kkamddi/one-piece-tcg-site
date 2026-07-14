@@ -7,6 +7,8 @@
     "dev": "node ./node_modules/vite/bin/vite.js --host 0.0.0.0",
     "build": "node ./node_modules/vite/bin/vite.js build",
     "start": "node ./node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port 4173",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android",
     "sync:cards": "node ./scripts/syncOfficialCards.js",
     "prepare:card-db": "node ./scripts/prepareCardDbSeed.js",
     "validate:card-api": "node ./scripts/validateCardApiContract.js",
@@ -20,11 +22,14 @@
     "rebuild:market-indexes": "node ./scripts/rebuildMarketIndexes.js"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "@supabase/supabase-js": "^2.105.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "sharp": "^0.34.5",

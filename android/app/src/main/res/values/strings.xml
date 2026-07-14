@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Card Pone</string>
+    <string name="title_activity_main">Card Pone</string>
+    <string name="package_name">com.optcgkorea.cardpone</string>
+    <string name="custom_url_scheme">com.optcgkorea.cardpone</string>
+</resources>
