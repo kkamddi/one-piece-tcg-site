@@ -3721,10 +3721,6 @@ function RenewAuthModal({ onClose, onSignedIn }) {
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
         <form className="renew-login-form" onSubmit={submitLogin}>
-          <div className="renew-auth-tabs" role="tablist" aria-label="인증 방식">
-            <button type="button" className={!isSignup ? 'is-active' : ''} onClick={() => changeMode('login')} role="tab" aria-selected={!isSignup}>로그인</button>
-            <button type="button" className={isSignup ? 'is-active' : ''} onClick={() => changeMode('signup')} role="tab" aria-selected={isSignup}>회원가입</button>
-          </div>
           <div className="renew-auth-provider-grid">
             <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig}>
               카카오톡으로 계속하기
@@ -3821,6 +3817,12 @@ function RenewAuthModal({ onClose, onSignedIn }) {
           >
             {loading ? '처리 중...' : isSignup ? '회원가입' : '로그인'}
           </button>
+          <p className="renew-auth-mode-switch">
+            {isSignup ? '이미 계정이 있으신가요?' : '계정이 없으신가요?'}
+            <button type="button" onClick={() => changeMode(isSignup ? 'login' : 'signup')}>
+              {isSignup ? '로그인' : '회원가입'}
+            </button>
+          </p>
         </form>
       </div>
     </div>

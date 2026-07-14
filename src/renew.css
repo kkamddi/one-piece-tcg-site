@@ -5827,13 +5827,13 @@
   padding: 18px 24px 22px;
 }
 
-.renew-auth-modal.is-signup .renew-auth-tabs,
 .renew-auth-modal.is-signup .renew-auth-provider-grid,
 .renew-auth-modal.is-signup .renew-divider,
 .renew-auth-modal.is-signup .renew-auth-field-wide,
 .renew-auth-modal.is-signup .renew-auth-consent,
 .renew-auth-modal.is-signup .renew-form-message,
-.renew-auth-modal.is-signup .renew-submit {
+.renew-auth-modal.is-signup .renew-submit,
+.renew-auth-modal.is-signup .renew-auth-mode-switch {
   grid-column: 1 / -1;
 }
 
@@ -5841,44 +5841,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-}
-
-.renew-auth-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-  padding: 4px;
-  border-radius: 14px;
-  background: #f0f1f3;
-}
-
-.renew-auth-tabs button {
-  height: 42px;
-  border: 0;
-  border-radius: 10px;
-  color: #6b7280;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.renew-auth-tabs button.is-active {
-  color: #fff;
-  background: #17191c;
-}
-
-.renew-app.is-dark .renew-auth-tabs {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.renew-app.is-dark .renew-auth-tabs button {
-  color: #cbd5e1;
-}
-
-.renew-app.is-dark .renew-auth-tabs button.is-active {
-  color: #17191c;
-  background: #f5f2ec;
 }
 
 .renew-login-form label {
@@ -6065,6 +6027,37 @@
   color: #c94d35;
   font-size: 13px;
   font-weight: 700;
+}
+
+.renew-auth-mode-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.renew-auth-mode-switch button {
+  border: 0;
+  padding: 0;
+  color: #17191c;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.renew-app.is-dark .renew-auth-mode-switch {
+  color: #9ca3af;
+}
+
+.renew-app.is-dark .renew-auth-mode-switch button {
+  color: #f5f2ec;
 }
 
 @media (max-width: 640px) {
