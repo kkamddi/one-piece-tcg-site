@@ -5,6 +5,7 @@ import { supabase } from './supabase';
 
 const WEB_AUTH_REDIRECT = 'https://www.optcgkorea.com/';
 const NATIVE_AUTH_REDIRECT = 'com.optcgkorea.cardpone://auth/callback';
+const NATIVE_AUTH_START = `${WEB_AUTH_REDIRECT}native-auth-start.html`;
 const NATIVE_AUTH_EVENT = 'card-pone:native-auth';
 
 let nativeAuthConfigured = false;
@@ -79,14 +80,15 @@ export async function signInWithSocialProvider(provider) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: NATIVE_AUTH_REDIRECT,
+      redirectTo: WEB_AUTH_REDIRECT,
       skipBrowserRedirect: true
     }
   });
   if (error) throw error;
   if (!data?.url) throw new Error('로그인 페이지를 열 수 없습니다.');
 
-  await Browser.open({ url: data.url, toolbarColor: '#ffffff', presentationStyle: 'fullscreen' });
+  const startUrl = `${NATIVE_AUTH_START}?oauth=${encodeURIComponent(data.url)}`;
+  await Browser.open({ url: startUrl, toolbarColor: '#ffffff', presentationStyle: 'fullscreen' });
   return { data, error: null };
 }
 

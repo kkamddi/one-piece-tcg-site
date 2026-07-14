@@ -18,9 +18,9 @@ The Play build contains the tested React UI and uses the production `/api` endpo
 ## Authentication
 
 - Email/password, Google, and Kakao use the existing Supabase Auth project.
-- Android OAuth callback: `com.optcgkorea.cardpone://auth/callback`
-- Add that exact callback to Supabase Authentication > URL Configuration > Redirect URLs.
-- Keep `https://www.optcgkorea.com/` as the web redirect.
+- Supabase OAuth callback: `https://www.optcgkorea.com/`
+- Android app callback: `com.optcgkorea.cardpone://auth/callback` (the production callback bridge opens the app)
+- Keep `https://www.optcgkorea.com/` as the Supabase web redirect. The custom app scheme is not added to Supabase.
 - Google and Kakao provider credentials stay in Supabase. They are not bundled into the app.
 
 ## Native push

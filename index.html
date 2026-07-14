@@ -32,6 +32,21 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/card-pone-apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <script>
+      (() => {
+        const marker = 'card-pone:native-auth';
+        const query = new URLSearchParams(window.location.search);
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const hasAuthResult = query.has('code') || query.has('error') || hash.has('access_token') || hash.has('error');
+        if (sessionStorage.getItem(marker) !== '1' || !hasAuthResult) return;
+
+        sessionStorage.removeItem(marker);
+        const callback = new URL('com.optcgkorea.cardpone://auth/callback');
+        callback.search = window.location.search;
+        callback.hash = window.location.hash;
+        window.location.replace(callback.toString());
+      })();
+    </script>
+    <script>
       if (!navigator.userAgent.includes('CardPoneAndroid/')) {
         const adsScript = document.createElement('script');
         adsScript.async = true;
