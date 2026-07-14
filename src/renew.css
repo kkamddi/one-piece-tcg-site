@@ -5837,6 +5837,7 @@
 }
 
 .renew-kakao,
+.renew-google,
 .renew-submit {
   height: 52px;
   border: 0;
@@ -5851,6 +5852,18 @@
   color: #3b1e1e;
 }
 
+.renew-google {
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  background: #fff;
+  color: #17191c;
+}
+
+.renew-app.is-dark .renew-google {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f2ec;
+}
+
 .renew-submit {
   margin-top: 4px;
   background: #17191c;
@@ -5858,7 +5871,8 @@
 }
 
 .renew-submit:disabled,
-.renew-kakao:disabled {
+.renew-kakao:disabled,
+.renew-google:disabled {
   cursor: default;
   opacity: 0.48;
 }
