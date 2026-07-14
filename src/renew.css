@@ -3187,11 +3187,24 @@
 
 .renew-auth-modal {
   width: min(520px, 100%);
-  overflow: hidden;
+  max-height: min(90vh, 820px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid rgba(23, 25, 28, 0.1);
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: rgba(0, 0, 0, 0.16) 0 26px 70px -28px;
+}
+
+.renew-auth-modal.is-signup {
+  width: min(680px, 100%);
+  max-height: min(94vh, 820px);
+}
+
+.renew-auth-modal.is-signup .renew-modal-head {
+  align-items: center;
+  padding: 20px 24px 16px;
 }
 
 .renew-app.is-dark .renew-auth-modal {
@@ -5808,6 +5821,66 @@
   padding: 24px 28px 30px;
 }
 
+.renew-auth-modal.is-signup .renew-login-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  padding: 18px 24px 22px;
+}
+
+.renew-auth-modal.is-signup .renew-auth-tabs,
+.renew-auth-modal.is-signup .renew-auth-provider-grid,
+.renew-auth-modal.is-signup .renew-divider,
+.renew-auth-modal.is-signup .renew-auth-field-wide,
+.renew-auth-modal.is-signup .renew-auth-consent,
+.renew-auth-modal.is-signup .renew-form-message,
+.renew-auth-modal.is-signup .renew-submit {
+  grid-column: 1 / -1;
+}
+
+.renew-auth-provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #f0f1f3;
+}
+
+.renew-auth-tabs button {
+  height: 42px;
+  border: 0;
+  border-radius: 10px;
+  color: #6b7280;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-auth-tabs button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-app.is-dark .renew-auth-tabs {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-auth-tabs button {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-auth-tabs button.is-active {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
 .renew-login-form label {
   display: grid;
   gap: 8px;
@@ -5834,6 +5907,87 @@
 .renew-app.is-dark .renew-login-form input {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-auth-inline-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.renew-auth-inline-field button {
+  min-width: 86px;
+  border: 1px solid rgba(23, 25, 28, 0.18);
+  border-radius: 14px;
+  padding: 0 14px;
+  color: #17191c;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-auth-inline-field button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.renew-app.is-dark .renew-auth-inline-field button {
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-auth-consent {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+.renew-login-form .renew-auth-consent label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.renew-login-form .renew-auth-consent input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: #17191c;
+}
+
+.renew-auth-consent-all {
+  border-bottom: 1px solid rgba(23, 25, 28, 0.1);
+  padding-bottom: 12px;
+}
+
+.renew-auth-consent a {
+  color: inherit;
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.renew-app.is-dark .renew-auth-consent {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-login-form .renew-auth-consent label {
+  color: #d1d5db;
+}
+
+.renew-app.is-dark .renew-auth-consent-all {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .renew-kakao,
@@ -5911,6 +6065,38 @@
   color: #c94d35;
   font-size: 13px;
   font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .renew-auth-modal {
+    width: 100%;
+    max-height: calc(100dvh - 28px);
+    border-radius: 20px;
+  }
+
+  .renew-login-form {
+    gap: 12px;
+    padding: 18px 18px 22px;
+  }
+
+  .renew-auth-modal.is-signup .renew-login-form,
+  .renew-auth-provider-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .renew-auth-modal.is-signup .renew-login-form {
+    gap: 12px;
+    padding: 18px 18px 22px;
+  }
+
+  .renew-auth-modal.is-signup .renew-login-form > * {
+    grid-column: 1;
+  }
+
+  .renew-auth-inline-field button {
+    min-width: 78px;
+    padding: 0 10px;
+  }
 }
 
 .renew-subpage {

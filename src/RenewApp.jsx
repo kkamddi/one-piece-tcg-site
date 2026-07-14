@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
-import { resolveLoginEmail } from './api/auth';
+import { checkAuthAvailability, resolveLoginEmail, signupWithProfile } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
@@ -19,6 +19,8 @@ import './renew.css';
 const LOGO_SRC = '/optcg-logo-light.png';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || '/api/card-thumb').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = 'https://snkrdunk.com/en/invitation/AGJ872';
+const AUTH_CONSENT_VERSION = '2026-07-14';
+const PENDING_SOCIAL_CONSENT_KEY = 'card-pone-pending-social-consent';
 const ALL_SERIES_ID = '__ALL_SERIES__';
 const BOX_SHORT_TITLES = {
   'OP-01': 'Romance Dawn',
@@ -3540,12 +3542,91 @@ function RenewSeoSummary({ page, titleAs = 'h1', placement = 'page' }) {
   );
 }
 
+function savePendingSocialConsent() {
+  window.localStorage.setItem(PENDING_SOCIAL_CONSENT_KEY, JSON.stringify({
+    acceptedAt: new Date().toISOString(),
+    version: AUTH_CONSENT_VERSION
+  }));
+}
+
+async function applyPendingSocialConsent(user) {
+  if (!supabase || !user?.id) return user;
+  const rawConsent = window.localStorage.getItem(PENDING_SOCIAL_CONSENT_KEY);
+  if (!rawConsent) return user;
+  window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
+  try {
+    const consent = JSON.parse(rawConsent);
+    const acceptedAt = consent?.acceptedAt || new Date().toISOString();
+    const version = consent?.version || AUTH_CONSENT_VERSION;
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        ...(user.user_metadata || {}),
+        terms_accepted_at: acceptedAt,
+        terms_version: version,
+        privacy_accepted_at: acceptedAt,
+        privacy_version: version
+      }
+    });
+    if (error) throw error;
+    return data?.user || user;
+  } catch {
+    window.localStorage.setItem(PENDING_SOCIAL_CONSENT_KEY, rawConsent);
+    return user;
+  }
+}
+
 function RenewAuthModal({ onClose, onSignedIn }) {
   useBodyScrollLock();
+  const [mode, setMode] = useState('login');
   const [identifier, setIdentifier] = useState('');
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [checkState, setCheckState] = useState({ username: null, nickname: null });
+  const [checkingField, setCheckingField] = useState('');
+  const [agreements, setAgreements] = useState({ terms: false, privacy: false });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const isSignup = mode === 'signup';
+  const requiredAgreed = agreements.terms && agreements.privacy;
+
+  function changeMode(nextMode) {
+    setMode(nextMode);
+    setPassword('');
+    setPasswordConfirm('');
+    setMessage('');
+  }
+
+  function getAuthErrorMessage(error) {
+    const raw = String(error?.message || '').trim();
+    if (raw === 'email_taken') return '이미 사용 중인 이메일입니다.';
+    if (raw === 'username_taken') return '이미 사용 중인 아이디입니다.';
+    if (raw === 'nickname_taken') return '이미 사용 중인 닉네임입니다.';
+    if (raw === 'consent_required') return '필수 약관에 동의해 주세요.';
+    return raw || `${isSignup ? '회원가입' : '로그인'}에 실패했습니다.`;
+  }
+
+  async function checkDuplicate(type) {
+    const value = (type === 'username' ? username : nickname).trim();
+    const label = type === 'username' ? '아이디' : '닉네임';
+    if (!value) {
+      setMessage(`${label}를 먼저 입력해 주세요.`);
+      return;
+    }
+    setCheckingField(type);
+    setMessage('');
+    try {
+      const result = await checkAuthAvailability(type, value);
+      setCheckState((current) => ({ ...current, [type]: result.available }));
+      setMessage(result.available ? `사용 가능한 ${label}입니다.` : `이미 사용 중인 ${label}입니다.`);
+    } catch (error) {
+      setMessage(error?.message || '중복확인에 실패했습니다.');
+    } finally {
+      setCheckingField('');
+    }
+  }
 
   async function submitLogin(event) {
     event.preventDefault();
@@ -3556,14 +3637,35 @@ function RenewAuthModal({ onClose, onSignedIn }) {
     setLoading(true);
     setMessage('');
     try {
+      if (isSignup) {
+        if (password.length < 8) throw new Error('비밀번호는 8자 이상 입력해 주세요.');
+        if (password !== passwordConfirm) throw new Error('비밀번호 확인이 일치하지 않습니다.');
+        if (checkState.username !== true) throw new Error('아이디 중복확인을 완료해 주세요.');
+        if (checkState.nickname !== true) throw new Error('닉네임 중복확인을 완료해 주세요.');
+        if (!requiredAgreed) throw new Error('필수 약관에 동의해 주세요.');
+        await signupWithProfile({
+          email: email.trim(),
+          password,
+          username: username.trim(),
+          nickname: nickname.trim(),
+          termsAccepted: true,
+          privacyAccepted: true,
+          consentVersion: AUTH_CONSENT_VERSION
+        });
+        const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        if (error) throw error;
+        onSignedIn(data?.user || null);
+        onClose();
+        return;
+      }
       const lookup = await resolveLoginEmail(identifier.trim());
-      const email = lookup?.email || identifier.trim();
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const loginEmail = lookup?.email || identifier.trim();
+      const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
       if (error) throw error;
       onSignedIn(data?.user || null);
       onClose();
     } catch (error) {
-      setMessage(error?.message || '로그인에 실패했습니다.');
+      setMessage(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -3574,11 +3676,19 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
       return;
     }
+    if (isSignup && !requiredAgreed) {
+      setMessage('필수 약관에 동의해 주세요.');
+      return;
+    }
+    if (isSignup) savePendingSocialConsent();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: { redirectTo: 'https://www.optcgkorea.com/' }
     });
-    if (error) setMessage(error.message);
+    if (error) {
+      if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
+      setMessage(error.message);
+    }
   }
 
   async function loginWithGoogle() {
@@ -3586,41 +3696,130 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
       return;
     }
+    if (isSignup && !requiredAgreed) {
+      setMessage('필수 약관에 동의해 주세요.');
+      return;
+    }
+    if (isSignup) savePendingSocialConsent();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: 'https://www.optcgkorea.com/' }
     });
-    if (error) setMessage(error.message);
+    if (error) {
+      if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
+      setMessage(error.message);
+    }
   }
 
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
-      <div className="renew-auth-modal" onClick={(event) => event.stopPropagation()}>
+      <div className={`renew-auth-modal${isSignup ? ' is-signup' : ''}`} onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
-            <h2>로그인</h2>
+            <h2>{isSignup ? '회원가입' : '로그인'}</h2>
           </div>
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
         <form className="renew-login-form" onSubmit={submitLogin}>
-          <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig}>
-            카카오톡으로 계속하기
-          </button>
-          <button type="button" className="renew-google" onClick={loginWithGoogle} disabled={!hasSupabaseAuthConfig}>
-            Google로 계속하기
-          </button>
+          <div className="renew-auth-tabs" role="tablist" aria-label="인증 방식">
+            <button type="button" className={!isSignup ? 'is-active' : ''} onClick={() => changeMode('login')} role="tab" aria-selected={!isSignup}>로그인</button>
+            <button type="button" className={isSignup ? 'is-active' : ''} onClick={() => changeMode('signup')} role="tab" aria-selected={isSignup}>회원가입</button>
+          </div>
+          <div className="renew-auth-provider-grid">
+            <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig}>
+              카카오톡으로 계속하기
+            </button>
+            <button type="button" className="renew-google" onClick={loginWithGoogle} disabled={!hasSupabaseAuthConfig}>
+              Google로 계속하기
+            </button>
+          </div>
           <div className="renew-divider"><span>또는</span></div>
-          <label>
-            <span>아이디 또는 이메일</span>
-            <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} autoComplete="username" />
-          </label>
+          {isSignup ? (
+            <>
+              <label>
+                <span>아이디</span>
+                <div className="renew-auth-inline-field">
+                  <input
+                    value={username}
+                    onChange={(event) => {
+                      setUsername(event.target.value);
+                      setCheckState((current) => ({ ...current, username: null }));
+                    }}
+                    autoComplete="username"
+                    placeholder="로그인에 사용할 아이디"
+                  />
+                  <button type="button" onClick={() => checkDuplicate('username')} disabled={checkingField === 'username'}>
+                    {checkingField === 'username' ? '확인 중' : '중복확인'}
+                  </button>
+                </div>
+              </label>
+              <label>
+                <span>닉네임</span>
+                <div className="renew-auth-inline-field">
+                  <input
+                    value={nickname}
+                    onChange={(event) => {
+                      setNickname(event.target.value);
+                      setCheckState((current) => ({ ...current, nickname: null }));
+                    }}
+                    autoComplete="nickname"
+                    placeholder="사이트에 표시될 이름"
+                  />
+                  <button type="button" onClick={() => checkDuplicate('nickname')} disabled={checkingField === 'nickname'}>
+                    {checkingField === 'nickname' ? '확인 중' : '중복확인'}
+                  </button>
+                </div>
+              </label>
+              <label className="renew-auth-field-wide">
+                <span>이메일</span>
+                <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="your@email.com" />
+              </label>
+            </>
+          ) : (
+            <label>
+              <span>아이디 또는 이메일</span>
+              <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} autoComplete="username" />
+            </label>
+          )}
           <label>
             <span>비밀번호</span>
-            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" />
+            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete={isSignup ? 'new-password' : 'current-password'} />
           </label>
-          {message ? <p className="renew-form-message">{message}</p> : null}
-          <button type="submit" className="renew-submit" disabled={loading || !identifier.trim() || !password.trim()}>
-            {loading ? '로그인 중...' : '로그인'}
+          {isSignup ? (
+            <>
+              <label>
+                <span>비밀번호 확인</span>
+                <input value={passwordConfirm} onChange={(event) => setPasswordConfirm(event.target.value)} type="password" autoComplete="new-password" />
+              </label>
+              <div className="renew-auth-consent">
+                <label className="renew-auth-consent-all">
+                  <input
+                    type="checkbox"
+                    checked={requiredAgreed}
+                    onChange={(event) => setAgreements({ terms: event.target.checked, privacy: event.target.checked })}
+                  />
+                  <strong>필수 약관 전체 동의</strong>
+                </label>
+                <label>
+                  <input type="checkbox" checked={agreements.terms} onChange={(event) => setAgreements((current) => ({ ...current, terms: event.target.checked }))} />
+                  <span>[필수] <a href="/terms" target="_blank" rel="noreferrer">이용약관</a> 동의</span>
+                </label>
+                <label>
+                  <input type="checkbox" checked={agreements.privacy} onChange={(event) => setAgreements((current) => ({ ...current, privacy: event.target.checked }))} />
+                  <span>[필수] <a href="/privacy" target="_blank" rel="noreferrer">개인정보처리방침</a> 동의</span>
+                </label>
+              </div>
+            </>
+          ) : null}
+          {message ? <p className="renew-form-message" aria-live="polite">{message}</p> : null}
+          <button
+            type="submit"
+            className="renew-submit"
+            disabled={loading || !password || (isSignup
+              ? !email.trim() || !username.trim() || !nickname.trim() || !passwordConfirm || !requiredAgreed
+              : !identifier.trim())}
+          >
+            {loading ? '처리 중...' : isSignup ? '회원가입' : '로그인'}
           </button>
         </form>
       </div>
@@ -9530,6 +9729,17 @@ export default function RenewApp() {
       listener?.subscription?.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!authUser?.id || !window.localStorage.getItem(PENDING_SOCIAL_CONSENT_KEY)) return undefined;
+    let cancelled = false;
+    applyPendingSocialConsent(authUser).then((nextUser) => {
+      if (!cancelled && nextUser?.id) setAuthUser(nextUser);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id]);
 
   useEffect(() => {
     if (!authUser?.id) {
