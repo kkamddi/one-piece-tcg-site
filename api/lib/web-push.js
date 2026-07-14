@@ -2,6 +2,7 @@ import { supabaseAdmin } from '../../lib/supabase-admin.js';
 
 const SUBSCRIPTIONS_TABLE = process.env.SUPABASE_USER_PUSH_SUBSCRIPTIONS_TABLE || 'user_push_subscriptions';
 const encoder = new TextEncoder();
+let firebaseAccessToken = null;
 
 function base64UrlToBytes(value = '') {
   const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');
@@ -54,6 +55,107 @@ function vapidConfig() {
   const privateKey = String(process.env.VAPID_PRIVATE_KEY || '').trim();
   const subject = String(process.env.VAPID_SUBJECT || 'mailto:admin@optcgkorea.com').trim();
   return { publicKey, privateKey, subject, ready: Boolean(publicKey && privateKey && subject) };
+}
+
+function firebaseConfig() {
+  let serviceAccount = null;
+  try {
+    serviceAccount = JSON.parse(String(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '').trim() || 'null');
+  } catch {
+    serviceAccount = null;
+  }
+  const projectId = String(serviceAccount?.project_id || process.env.FIREBASE_PROJECT_ID || '').trim();
+  const clientEmail = String(serviceAccount?.client_email || process.env.FIREBASE_CLIENT_EMAIL || '').trim();
+  const privateKey = String(serviceAccount?.private_key || process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n').trim();
+  return { projectId, clientEmail, privateKey, ready: Boolean(projectId && clientEmail && privateKey) };
+}
+
+function pemToBytes(value) {
+  const base64 = String(value || '')
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/\s+/g, '');
+  const binary = atob(base64);
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+async function getFirebaseAccessToken(config) {
+  if (firebaseAccessToken?.expiresAt > Date.now() + 60_000) return firebaseAccessToken.value;
+  const now = Math.floor(Date.now() / 1000);
+  const header = bytesToBase64Url(encoder.encode(JSON.stringify({ alg: 'RS256', typ: 'JWT' })));
+  const claim = bytesToBase64Url(encoder.encode(JSON.stringify({
+    iss: config.clientEmail,
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600
+  })));
+  const unsigned = `${header}.${claim}`;
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    pemToBytes(config.privateKey),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, encoder.encode(unsigned));
+  const assertion = `${unsigned}.${bytesToBase64Url(signature)}`;
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion
+    })
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.access_token) throw new Error(data?.error_description || 'firebase_access_token_failed');
+  firebaseAccessToken = {
+    value: data.access_token,
+    expiresAt: Date.now() + Math.max(300, Number(data.expires_in || 3600)) * 1000
+  };
+  return firebaseAccessToken.value;
+}
+
+async function sendFirebasePush(token, payload, config) {
+  const accessToken = await getFirebaseAccessToken(config);
+  const data = Object.fromEntries(Object.entries({
+    url: payload?.url || '/prices',
+    tag: payload?.tag || 'card-pone-price-alert'
+  }).map(([key, value]) => [key, String(value)]));
+  const response = await fetch(`https://fcm.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/messages:send`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: {
+        token,
+        notification: {
+          title: String(payload?.title || 'Card Pone'),
+          body: String(payload?.body || '새 알림이 도착했습니다.')
+        },
+        data,
+        android: {
+          priority: 'high',
+          notification: {
+            channel_id: 'price_alerts',
+            icon: 'ic_stat_notification',
+            color: '#D04A35',
+            tag: data.tag
+          }
+        }
+      }
+    })
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    const failure = new Error(error?.error?.message || `firebase_push_${response.status}`);
+    failure.status = response.status;
+    failure.code = error?.error?.details?.[0]?.errorCode || '';
+    throw failure;
+  }
 }
 
 async function createVapidAuthorization(endpoint, config) {
@@ -124,9 +226,14 @@ export function getVapidPublicKey() {
   return vapidConfig().publicKey;
 }
 
+export function isFirebasePushConfigured() {
+  return firebaseConfig().ready;
+}
+
 export async function sendPushToUser(userId, payload) {
   const config = vapidConfig();
-  if (!config.ready || !supabaseAdmin || !userId) return { sent: 0, failed: 0, skipped: true };
+  const firebase = firebaseConfig();
+  if ((!config.ready && !firebase.ready) || !supabaseAdmin || !userId) return { sent: 0, failed: 0, skipped: true };
   const { data, error } = await supabaseAdmin
     .from(SUBSCRIPTIONS_TABLE)
     .select('id,endpoint,p256dh,auth')
@@ -139,6 +246,13 @@ export async function sendPushToUser(userId, payload) {
   let failed = 0;
   for (const subscription of data || []) {
     try {
+      if (subscription.endpoint.startsWith('fcm:')) {
+        if (!firebase.ready) continue;
+        await sendFirebasePush(subscription.endpoint.slice(4), payload, firebase);
+        sent += 1;
+        continue;
+      }
+      if (!config.ready) continue;
       const [authorization, body] = await Promise.all([
         createVapidAuthorization(subscription.endpoint, config),
         encryptPayload(subscription, payload)
@@ -160,8 +274,11 @@ export async function sendPushToUser(userId, payload) {
         failed += 1;
         if (response.status === 404 || response.status === 410) await deactivateSubscription(subscription.id);
       }
-    } catch {
+    } catch (error) {
       failed += 1;
+      if (subscription.endpoint.startsWith('fcm:') && (error?.status === 404 || error?.code === 'UNREGISTERED')) {
+        await deactivateSubscription(subscription.id);
+      }
     }
   }
   return { sent, failed, skipped: false };

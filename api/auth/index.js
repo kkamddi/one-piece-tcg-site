@@ -1,5 +1,67 @@
 import { hasSupabaseAdmin, listAllAuthUsers, supabaseAdmin } from '../../lib/supabase-admin.js';
 
+const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
+const NOTIFICATIONS_TABLE = process.env.SUPABASE_USER_NOTIFICATIONS_TABLE || 'user_notifications';
+const PUSH_SUBSCRIPTIONS_TABLE = process.env.SUPABASE_USER_PUSH_SUBSCRIPTIONS_TABLE || 'user_push_subscriptions';
+const MARKET_LISTINGS_TABLE = process.env.SUPABASE_MARKET_LISTINGS_TABLE || 'market_listings';
+const MARKET_LISTING_IMAGES_TABLE = process.env.SUPABASE_MARKET_LISTING_IMAGES_TABLE || 'market_listing_images';
+const MARKET_VERIFICATIONS_TABLE = process.env.SUPABASE_MARKET_VERIFICATIONS_TABLE || 'market_seller_verifications';
+const MARKET_INQUIRIES_TABLE = process.env.SUPABASE_MARKET_INQUIRIES_TABLE || 'market_inquiries';
+const MARKET_CONVERSATIONS_TABLE = process.env.SUPABASE_MARKET_CONVERSATIONS_TABLE || 'market_conversations';
+const MARKET_MESSAGES_TABLE = process.env.SUPABASE_MARKET_MESSAGES_TABLE || 'market_messages';
+
+function getBearerToken(request) {
+  const header = String(request.headers?.authorization || request.headers?.Authorization || '');
+  return header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+}
+
+function isMissingTableError(error) {
+  return error?.code === '42P01' || /relation .* does not exist/i.test(String(error?.message || ''));
+}
+
+async function runCleanup(query) {
+  const { error } = await query;
+  if (error && !isMissingTableError(error)) throw error;
+}
+
+async function deleteAccountData(user) {
+  const userId = user.id;
+  if (String(user.user_metadata?.username || '').toLowerCase() === 'admin') throw new Error('admin_account_cannot_be_deleted');
+
+  const { data: listings, error: listingsError } = await supabaseAdmin
+    .from(MARKET_LISTINGS_TABLE)
+    .select('id')
+    .eq('seller_user_id', userId);
+  if (listingsError && !isMissingTableError(listingsError)) throw listingsError;
+  const listingIds = (listings || []).map((row) => row.id).filter(Boolean);
+
+  const { data: conversations, error: conversationsError } = await supabaseAdmin
+    .from(MARKET_CONVERSATIONS_TABLE)
+    .select('id')
+    .or(`seller_user_id.eq.${userId},buyer_user_id.eq.${userId}`);
+  if (conversationsError && !isMissingTableError(conversationsError)) throw conversationsError;
+  const conversationIds = (conversations || []).map((row) => row.id).filter(Boolean);
+
+  if (conversationIds.length) {
+    await runCleanup(supabaseAdmin.from(MARKET_MESSAGES_TABLE).delete().in('conversation_id', conversationIds));
+  }
+  await runCleanup(supabaseAdmin.from(MARKET_MESSAGES_TABLE).delete().eq('sender_user_id', userId));
+  await runCleanup(supabaseAdmin.from(MARKET_INQUIRIES_TABLE).delete().eq('buyer_user_id', userId));
+  await runCleanup(supabaseAdmin.from(MARKET_CONVERSATIONS_TABLE).delete().or(`seller_user_id.eq.${userId},buyer_user_id.eq.${userId}`));
+  if (listingIds.length) {
+    await runCleanup(supabaseAdmin.from(MARKET_LISTING_IMAGES_TABLE).delete().in('listing_id', listingIds));
+  }
+  await runCleanup(supabaseAdmin.from(MARKET_LISTINGS_TABLE).delete().eq('seller_user_id', userId));
+  await runCleanup(supabaseAdmin.from(MARKET_VERIFICATIONS_TABLE).delete().eq('user_id', userId));
+  await runCleanup(supabaseAdmin.from(NOTIFICATIONS_TABLE).delete().eq('user_id', userId));
+  await runCleanup(supabaseAdmin.from(PUSH_SUBSCRIPTIONS_TABLE).delete().eq('user_id', userId));
+  await runCleanup(supabaseAdmin.from(COMMUNITY_TABLE).delete().eq('id', `state-${userId}`));
+  await runCleanup(supabaseAdmin.from(COMMUNITY_TABLE).delete().eq('author_token', `user:${userId}`));
+
+  const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+  if (deleteError) throw deleteError;
+}
+
 export default async function handler(request, response) {
   if (!hasSupabaseAdmin) return response.status(500).json({ error: 'supabase_admin_not_configured' });
 
@@ -70,6 +132,15 @@ export default async function handler(request, response) {
       });
       if (error) throw error;
       return response.status(201).json({ ok: true, userId: data.user?.id ?? null });
+    }
+
+    if (action === 'delete-account' && request.method === 'DELETE') {
+      const token = getBearerToken(request);
+      if (!token) return response.status(401).json({ error: 'unauthorized' });
+      const { data, error } = await supabaseAdmin.auth.getUser(token);
+      if (error || !data?.user?.id) return response.status(401).json({ error: 'unauthorized' });
+      await deleteAccountData(data.user);
+      return response.status(200).json({ ok: true });
     }
 
     return response.status(405).json({ error: 'method_not_allowed' });

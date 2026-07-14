@@ -9,6 +9,7 @@
     "start": "node ./node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port 4173",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android",
+    "android:assets": "node ./scripts/generateAndroidReleaseAssets.js",
     "sync:cards": "node ./scripts/syncOfficialCards.js",
     "prepare:card-db": "node ./scripts/prepareCardDbSeed.js",
     "validate:card-api": "node ./scripts/validateCardApiContract.js",
@@ -23,7 +24,10 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.4.1",
+    "@capacitor/push-notifications": "^8.0.0",
     "@supabase/supabase-js": "^2.105.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

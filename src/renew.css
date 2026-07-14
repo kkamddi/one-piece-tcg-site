@@ -3508,6 +3508,12 @@
   background: rgba(255, 255, 255, 0.78);
 }
 
+.renew-account-actions .renew-account-delete-button {
+  border: 0;
+  color: #b42318;
+  background: transparent;
+}
+
 .renew-account-help,
 .renew-account-message {
   margin: 12px 20px 0;
@@ -3534,6 +3540,27 @@
 
 .renew-password-panel button {
   width: 100%;
+}
+
+.renew-account-delete-panel strong {
+  font-size: 15px;
+}
+
+.renew-account-delete-panel p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.renew-account-delete-panel button[type="submit"] {
+  color: #fff;
+  background: #b42318;
+}
+
+.renew-account-delete-panel button[type="submit"]:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .renew-account-logout-button {
@@ -3587,6 +3614,20 @@
   border-color: rgba(255, 255, 255, 0.14);
   color: #f5f2ec;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-account-actions .renew-account-delete-button {
+  color: #fda29b;
+  background: transparent;
+}
+
+.renew-app.is-dark .renew-account-delete-panel p {
+  color: #d1d5db;
+}
+
+.renew-app.is-dark .renew-account-delete-panel button[type="submit"] {
+  color: #fff;
+  background: #b42318;
 }
 
 .renew-app.is-dark .renew-password-panel {
@@ -5719,6 +5760,21 @@
   gap: 8px;
   margin: 0;
   padding-left: 18px;
+}
+
+.renew-static-info-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 12px;
+  border-radius: 999px;
+  padding: 0 18px;
+  color: #fff;
+  background: #17191c;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
 }
 
 .renew-progress-detail {
@@ -10750,6 +10806,11 @@
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(17, 24, 39, 0.82);
   box-shadow: none;
+}
+
+.renew-app.is-dark .renew-static-info-action {
+  color: #17191c;
+  background: #f5f2ec;
 }
 
 .renew-app.is-dark input::placeholder {

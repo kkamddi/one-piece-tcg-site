@@ -31,7 +31,15 @@
     <link rel="shortcut icon" href="/card-pone-favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/card-pone-apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5802425633398708" crossorigin="anonymous"></script>
+    <script>
+      if (!navigator.userAgent.includes('CardPoneAndroid/')) {
+        const adsScript = document.createElement('script');
+        adsScript.async = true;
+        adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5802425633398708';
+        adsScript.crossOrigin = 'anonymous';
+        document.head.appendChild(adsScript);
+      }
+    </script>
     <script type="application/ld+json" id="optcg-base-jsonld">
       {
         "@context": "https://schema.org",

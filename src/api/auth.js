@@ -1,3 +1,5 @@
+import { supabase } from '../lib/supabase';
+
 function normalizeAuthApiError(message) {
   const raw = String(message ?? '').trim();
   if (!raw) return raw;
@@ -61,5 +63,15 @@ export function resolveLoginEmail(identifier) {
     const localEmail = getLocalPreviewEmail(identifier);
     if (localEmail) return { email: localEmail };
     throw error;
+  });
+}
+
+export async function deleteMyAccount() {
+  const { data } = supabase ? await supabase.auth.getSession() : { data: null };
+  const token = data?.session?.access_token || '';
+  if (!token) throw new Error('로그인이 필요합니다.');
+  return requestJson('/api/auth?action=delete-account', {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
   });
 }

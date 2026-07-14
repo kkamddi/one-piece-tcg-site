@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
-import { getVapidPublicKey, sendPushToUser } from './lib/web-push.js';
+import { getVapidPublicKey, isFirebasePushConfigured, sendPushToUser } from './lib/web-push.js';
 
 const SUBSCRIPTIONS_TABLE = process.env.SUPABASE_USER_PUSH_SUBSCRIPTIONS_TABLE || 'user_push_subscriptions';
 
@@ -35,7 +35,8 @@ async function getStatus(request, response, user) {
   const { count, error } = await query;
   if (error) throw error;
   return response.status(200).json({
-    configured: Boolean(getVapidPublicKey()),
+    configured: endpoint.startsWith('fcm:') ? isFirebasePushConfigured() : Boolean(getVapidPublicKey()),
+    nativeConfigured: isFirebasePushConfigured(),
     publicKey: getVapidPublicKey(),
     activeSubscriptions: Number(count || 0),
     subscribed: Boolean(endpoint && count)
@@ -44,6 +45,35 @@ async function getStatus(request, response, user) {
 
 async function saveSubscription(request, response, user) {
   const subscription = request.body?.subscription || request.body || {};
+  const platform = safeString(request.body?.platform, 40).toLowerCase();
+  const nativeToken = safeString(request.body?.token, 3000);
+  if (platform === 'android') {
+    if (!nativeToken) return response.status(400).json({ error: 'invalid_push_token' });
+    if (!isFirebasePushConfigured()) return response.status(503).json({ error: 'native_push_not_configured' });
+    const now = new Date().toISOString();
+    const endpoint = `fcm:${nativeToken}`;
+    const { data, error } = await supabaseAdmin
+      .from(SUBSCRIPTIONS_TABLE)
+      .upsert({
+        user_id: user.id,
+        endpoint,
+        p256dh: 'fcm',
+        auth: 'fcm',
+        user_agent: safeString(request.headers?.['user-agent'], 1000),
+        active: true,
+        updated_at: now
+      }, { onConflict: 'endpoint' })
+      .select('id,active,created_at,updated_at')
+      .single();
+    if (error) throw error;
+    const push = request.body?.silent ? { sent: 0, failed: 0, skipped: true } : await sendPushToUser(user.id, {
+      title: 'Card Pone 알림이 연결되었습니다',
+      body: '등록한 카드가 설정한 가격 조건에 도달하면 알려드리겠습니다.',
+      url: '/prices',
+      tag: 'card-pone-push-connected'
+    });
+    return response.status(200).json({ subscription: data, push });
+  }
   const endpoint = safeString(subscription.endpoint, 3000);
   const p256dh = safeString(subscription.keys?.p256dh, 500);
   const auth = safeString(subscription.keys?.auth, 500);

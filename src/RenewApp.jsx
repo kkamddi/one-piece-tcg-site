@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
-import { checkAuthAvailability, resolveLoginEmail, signupWithProfile } from './api/auth';
+import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail, signupWithProfile } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
 import { deletePriceAlertRule, fetchPriceAlertRules, savePriceAlertRule } from './api/price-alerts';
-import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability, sendTestPushNotification } from './api/push-notifications';
+import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability, sendTestPushNotification, syncNativePushRegistration } from './api/push-notifications';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { resolveApiUrl } from './lib/native-runtime';
+import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
 import seriesData from './data/series.json';
@@ -2817,9 +2818,9 @@ function applyPageSeo(page) {
 const TERMS_SECTIONS = [
   ['제1조 목적', '본 약관은 Card Pone가 제공하는 카드 도감, 시세 확인, 컬렉션 관리 및 관련 서비스의 이용 조건과 절차를 정함을 목적으로 합니다.'],
   ['제2조 서비스의 성격', '본 사이트는 원피스 카드게임 유저를 위한 비공식 정보 제공 서비스입니다.\n본 사이트는 BANDAI, ONE PIECE CARD GAME 공식 유통사 및 관련 권리자와 제휴되어 있지 않습니다.'],
-  ['제3조 제공 서비스', '본 사이트는 카드 정보, 카드 시세, 컬렉션 관리, 위시리스트, 덱 시뮬레이터, 공지사항 등의 기능을 제공할 수 있습니다.'],
+  ['제3조 제공 서비스', '본 서비스는 웹사이트와 Android 앱에서 카드 정보, 카드 시세, 컬렉션 관리, 위시리스트, 시세 알림, 공지사항 등의 기능을 제공할 수 있습니다.'],
   ['제4조 시세 정보의 이용', '본 사이트에서 제공하는 시세 정보는 외부 거래 플랫폼, 공개 정보 또는 자체 수집 데이터를 기반으로 한 참고용 정보입니다.\n실제 거래 가격과 차이가 있을 수 있으며, 카드 구매·판매·투자 판단의 책임은 이용자 본인에게 있습니다.'],
-  ['제5조 회원 및 계정', '이용자는 카카오 및 Google 로그인 등 소셜 로그인 기능을 통해 서비스를 이용할 수 있습니다.\n이용자는 본인의 계정 정보를 안전하게 관리해야 하며, 계정 사용으로 발생하는 책임은 이용자에게 있습니다.'],
+  ['제5조 회원 및 계정', '이용자는 이메일 또는 카카오 및 Google 로그인 등 소셜 로그인 기능을 통해 서비스를 이용할 수 있습니다.\n이용자는 본인의 계정 정보를 안전하게 관리해야 하며, 마이페이지의 계정 삭제 기능을 통해 언제든지 탈퇴할 수 있습니다.'],
   ['제6조 금지행위', '이용자는 다음 행위를 해서는 안 됩니다.\n- 사이트의 정상적인 운영을 방해하는 행위\n- 허위 정보 입력 또는 타인의 계정 도용\n- 무단 크롤링, 자동화 프로그램을 이용한 과도한 접근\n- 저작권, 상표권 등 제3자의 권리를 침해하는 행위\n- 기타 법령 또는 공서양속에 반하는 행위'],
   ['제7조 광고 및 제휴', '본 사이트에는 Google AdSense 등 제3자 광고 서비스 또는 제휴 링크가 포함될 수 있습니다.\n광고 및 제휴 링크를 통해 발생하는 외부 사이트 이용에 대해서는 해당 외부 사이트의 정책이 적용됩니다.\n본 사이트는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.'],
   ['제8조 저작권 및 지식재산권', '본 사이트의 디자인, 데이터 구성, 자체 제작 콘텐츠의 권리는 운영자에게 있습니다.\nONE PIECE CARD GAME 및 관련 이미지, 명칭, 상표의 권리는 각 권리자에게 있습니다.'],
@@ -2829,13 +2830,13 @@ const TERMS_SECTIONS = [
 ];
 
 const PRIVACY_SECTIONS = [
-  ['1. 수집하는 개인정보 항목', '본 사이트는 서비스 제공을 위해 다음 정보를 수집할 수 있습니다.\n- 소셜 로그인 정보: 카카오 또는 Google 계정 식별자, 닉네임, 프로필 이미지, 이메일\n- 서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 덱 시뮬레이터 저장 정보\n- 자동 수집 정보: 접속 IP, 브라우저 정보, 접속 기록, 쿠키, 기기 정보\n- 문의 시 수집 정보: 이메일 주소, 문의 내용'],
+  ['1. 수집하는 개인정보 항목', '본 서비스는 기능 제공을 위해 다음 정보를 수집할 수 있습니다.\n- 계정 정보: 이메일, 아이디, 닉네임, 소셜 로그인 제공자의 계정 식별자 및 프로필 정보\n- 서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 시세 알림 조건\n- 알림 정보: Android 앱의 푸시 알림 기기 토큰 및 알림 수신 상태\n- 자동 수집 정보: 접속 IP, 브라우저·앱·기기 정보, 접속 기록, 쿠키\n- 문의 시 수집 정보: 이메일 주소, 문의 내용'],
   ['2. 개인정보의 이용 목적', '수집한 개인정보는 다음 목적으로 이용됩니다.\n- 회원 식별 및 로그인 기능 제공\n- 컬렉션 관리, 위시리스트, 보유 카드 저장 기능 제공\n- 서비스 이용 기록 관리 및 부정 이용 방지\n- 문의 응대 및 공지사항 전달\n- 서비스 개선 및 통계 분석\n- 광고 표시 및 광고 성과 분석'],
-  ['3. 개인정보의 보유 및 이용 기간', '개인정보는 서비스 제공 목적이 달성될 때까지 보관하며, 회원 탈퇴 또는 삭제 요청 시 지체 없이 삭제합니다.\n다만 관련 법령에 따라 보관이 필요한 정보는 해당 기간 동안 보관할 수 있습니다.'],
+  ['3. 개인정보의 보유 및 이용 기간', '개인정보는 서비스 제공 목적이 달성될 때까지 보관합니다. 이용자는 웹과 앱의 마이페이지에서 계정을 직접 삭제할 수 있으며, 탈퇴 시 계정 정보, 컬렉션, 시세 알림과 푸시 토큰을 지체 없이 삭제합니다.\n다만 관련 법령에 따라 보관이 필요한 정보는 해당 기간 동안 분리 보관할 수 있습니다.'],
   ['4. 쿠키 및 광고 서비스 이용', '본 사이트는 서비스 이용 분석, 사용자 편의 제공 및 광고 표시를 위해 쿠키를 사용할 수 있습니다.\n또한 Google AdSense 등 제3자 광고 서비스를 이용할 수 있으며, 이 과정에서 광고 제공자가 쿠키를 사용하여 이용자의 관심사에 기반한 광고를 표시할 수 있습니다.\n이용자는 브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수 있습니다.\n단, 쿠키를 차단할 경우 일부 서비스 이용에 제한이 있을 수 있습니다.'],
   ['5. 개인정보의 제3자 제공', '본 사이트는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.\n다만 법령에 따른 요청이 있거나 이용자의 동의가 있는 경우에는 예외로 합니다.'],
-  ['6. 개인정보 처리의 위탁', '본 사이트는 서비스 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.\n- Supabase: 회원 정보 및 컬렉션 데이터 저장\n- Kakao Login 및 Google Identity: 소셜 로그인 제공\n- Google AdSense: 광고 제공\n- Google Analytics 또는 Vercel Analytics: 방문 통계 분석\n사용하는 서비스가 변경될 경우 본 방침을 통해 안내합니다.'],
-  ['7. 이용자의 권리', '이용자는 언제든지 본인의 개인정보 조회, 수정, 삭제, 처리 정지를 요청할 수 있습니다.\n요청은 아래 이메일을 통해 접수할 수 있습니다.\n이메일: optkr26@gmail.com'],
+  ['6. 개인정보 처리의 위탁', '본 서비스는 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.\n- Supabase: 회원 인증, 계정 및 컬렉션 데이터 저장\n- Kakao Login 및 Google Identity: 소셜 로그인 제공\n- Firebase Cloud Messaging: Android 푸시 알림 전송\n- Cloudflare: 웹·API 제공 및 보안\n- Google AdSense: 웹사이트 광고 제공\n사용하는 서비스가 변경될 경우 본 방침을 통해 안내합니다.'],
+  ['7. 이용자의 권리', '이용자는 언제든지 본인의 개인정보를 조회·수정하거나 마이페이지에서 계정을 삭제할 수 있습니다. 별도 요청이 필요한 경우 아래 이메일로 접수할 수 있습니다.\n이메일: optkr26@gmail.com'],
   ['8. 개인정보 보호책임자', '개인정보 관련 문의는 아래 연락처로 문의할 수 있습니다.\n운영자: Card Pone\n이메일: optkr26@gmail.com'],
   ['9. 개인정보처리방침 변경', '본 개인정보처리방침은 법령, 서비스 변경 사항에 따라 수정될 수 있으며, 변경 시 사이트 공지사항 또는 본 페이지를 통해 안내합니다.\n시행일: 2026년 7월 14일']
 ];
@@ -2948,9 +2949,10 @@ const STATIC_INFO_PAGES = {
       {
         title: '수집하는 정보',
         list: [
-          '소셜 로그인 정보: 카카오 또는 Google 계정 식별자, 닉네임, 프로필 이미지, 이메일',
-          '서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보',
-          '자동 수집 정보: 접속 IP, 브라우저 정보, 접속 기록, 쿠키, 기기 정보',
+          '계정 정보: 이메일, 아이디, 닉네임, 카카오 또는 Google 계정 식별자와 프로필 정보',
+          '서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 시세 알림 조건',
+          '알림 정보: Android 앱의 푸시 기기 토큰과 알림 수신 상태',
+          '자동 수집 정보: 접속 IP, 브라우저·앱·기기 정보, 접속 기록, 쿠키',
           '문의 시 수집 정보: 이메일 주소, 문의 내용'
         ]
       },
@@ -2967,13 +2969,19 @@ const STATIC_INFO_PAGES = {
       {
         title: '외부 서비스',
         body: [
-          '본 사이트는 Supabase, Kakao Login, Google Identity, Google AdSense, 방문 통계 분석 도구를 사용할 수 있습니다.',
+          '본 서비스는 Supabase, Kakao Login, Google Identity, Firebase Cloud Messaging, Cloudflare를 사용하며 웹사이트에서 Google AdSense를 사용할 수 있습니다.',
           '사용하는 외부 서비스가 변경될 경우 본 방침 또는 공지사항을 통해 안내합니다.'
         ]
       },
       {
-        title: '문의 및 삭제 요청',
-        body: ['개인정보 조회, 수정, 삭제, 처리 정지 요청은 optkr26@gmail.com 으로 접수할 수 있습니다.']
+        id: 'account-deletion',
+        title: '계정 및 데이터 삭제',
+        body: [
+          '로그인 가능한 이용자는 웹과 Android 앱의 마이페이지에서 계정 삭제를 완료할 수 있습니다.',
+          '앱을 삭제했거나 로그인할 수 없는 경우 아래 이메일로 계정 이메일과 삭제 요청 사실을 보내 주세요. 본인 확인 후 계정, 컬렉션, 시세 알림과 푸시 토큰을 삭제합니다.'
+        ],
+        actionUrl: 'mailto:optkr26@gmail.com?subject=Card%20Pone%20계정%20삭제%20요청',
+        actionLabel: '계정 삭제 요청 이메일 보내기'
       }
     ]
   }
@@ -3626,6 +3634,21 @@ function RenewAuthModal({ onClose, onSignedIn }) {
   const isSignup = mode === 'signup';
   const requiredAgreed = agreements.terms && agreements.privacy;
 
+  useEffect(() => {
+    const handleNativeAuth = (event) => {
+      if (event.detail?.error) {
+        setMessage(event.detail.error);
+        return;
+      }
+      if (event.detail?.user) {
+        onSignedIn(event.detail.user);
+        onClose();
+      }
+    };
+    window.addEventListener(NATIVE_AUTH_EVENT, handleNativeAuth);
+    return () => window.removeEventListener(NATIVE_AUTH_EVENT, handleNativeAuth);
+  }, [onClose, onSignedIn]);
+
   function changeMode(nextMode) {
     setMode(nextMode);
     setPassword('');
@@ -3715,11 +3738,10 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       return;
     }
     if (isSignup) savePendingSocialConsent();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: { redirectTo: 'https://www.optcgkorea.com/' }
-    });
-    if (error) {
+    try {
+      const { error } = await signInWithSocialProvider('kakao');
+      if (error) throw error;
+    } catch (error) {
       if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
       setMessage(error.message);
     }
@@ -3735,11 +3757,10 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       return;
     }
     if (isSignup) savePendingSocialConsent();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'https://www.optcgkorea.com/' }
-    });
-    if (error) {
+    try {
+      const { error } = await signInWithSocialProvider('google');
+      if (error) throw error;
+    } catch (error) {
       if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
       setMessage(error.message);
     }
@@ -3875,7 +3896,8 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
   const email = authUser?.email || '';
   const username = authUser?.user_metadata?.username || email.split('@')[0] || '-';
   const provider = authUser?.app_metadata?.provider || 'email';
-  const [unlocked, setUnlocked] = useState(false);
+  const isSocialAccount = provider !== 'email';
+  const [unlocked, setUnlocked] = useState(isSocialAccount);
   const [currentPassword, setCurrentPassword] = useState('');
   const [nickname, setNickname] = useState(displayName || '');
   const [message, setMessage] = useState('');
@@ -3883,6 +3905,8 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
 
   async function unlockAccount(event) {
     event.preventDefault();
@@ -3941,6 +3965,26 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
     }
   }
 
+  async function deleteAccount(event) {
+    event.preventDefault();
+    if (deleteConfirm.trim() !== '탈퇴') return;
+    setLoading(true);
+    setMessage('');
+    try {
+      await deleteMyAccount();
+      await supabase?.auth.signOut({ scope: 'local' });
+      onUserUpdated(null);
+      onClose();
+      window.location.assign('/');
+    } catch (error) {
+      setMessage(error?.message || '계정 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const providerLabel = provider === 'kakao' ? '카카오' : provider === 'google' ? 'Google' : '일반 계정';
+
   return (
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-info-modal renew-account-modal" onClick={(event) => event.stopPropagation()}>
@@ -3980,14 +4024,15 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
               </div>
               <div>
                 <span>로그인 방식</span>
-                <strong>{provider === 'kakao' ? '카카오' : '일반 계정'}</strong>
+                <strong>{providerLabel}</strong>
               </div>
             </div>
             <div className="renew-account-actions">
-              <button type="button" onClick={() => setPasswordOpen(true)} disabled={provider === 'kakao'}>비밀번호 변경</button>
+              <button type="button" onClick={() => setPasswordOpen(true)} disabled={isSocialAccount}>비밀번호 변경</button>
               <button type="button" onClick={onLogout}>로그아웃</button>
+              <button type="button" className="renew-account-delete-button" onClick={() => setDeleteOpen(true)}>계정 삭제</button>
             </div>
-            {provider === 'kakao' ? <p className="renew-account-help">카카오 로그인 계정은 비밀번호 변경을 지원하지 않습니다.</p> : null}
+            {isSocialAccount ? <p className="renew-account-help">소셜 로그인 계정의 비밀번호는 해당 서비스에서 관리합니다.</p> : null}
             {message ? <p className="renew-form-message renew-account-message">{message}</p> : null}
           </>
         )}
@@ -4005,6 +4050,22 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
               <div>
                 <button type="button" onClick={() => setPasswordOpen(false)}>취소</button>
                 <button type="submit" disabled={loading || !newPassword || !newPasswordConfirm}>변경</button>
+              </div>
+            </form>
+          </div>
+        ) : null}
+        {deleteOpen ? (
+          <div className="renew-password-panel renew-account-delete-panel">
+            <form onSubmit={deleteAccount}>
+              <strong>계정을 삭제하시겠습니까?</strong>
+              <p>보유 카드, 위시리스트, 시세 알림과 계정 정보가 삭제되며 복구할 수 없습니다.</p>
+              <label>
+                <span>확인을 위해 ‘탈퇴’를 입력해 주세요.</span>
+                <input value={deleteConfirm} onChange={(event) => setDeleteConfirm(event.target.value)} autoComplete="off" />
+              </label>
+              <div>
+                <button type="button" onClick={() => { setDeleteOpen(false); setDeleteConfirm(''); }}>취소</button>
+                <button type="submit" disabled={loading || deleteConfirm.trim() !== '탈퇴'}>계정 삭제</button>
               </div>
             </form>
           </div>
@@ -5637,7 +5698,7 @@ function RenewStaticInfoPage({ type }) {
         </header>
         <div className="renew-static-info-grid">
           {page.sections.map((section) => (
-            <section key={section.title} className="renew-static-info-card">
+            <section id={section.id || undefined} key={section.title} className="renew-static-info-card">
               <h2>{section.title}</h2>
               {Array.isArray(section.body) ? section.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -5647,6 +5708,7 @@ function RenewStaticInfoPage({ type }) {
                   {section.list.map((item) => <li key={item}>{item}</li>)}
                 </ul>
               ) : null}
+              {section.actionUrl ? <a className="renew-static-info-action" href={section.actionUrl}>{section.actionLabel}</a> : null}
             </section>
           ))}
         </div>
@@ -9818,6 +9880,11 @@ export default function RenewApp() {
     return () => {
       cancelled = true;
     };
+  }, [authUser?.id]);
+
+  useEffect(() => {
+    if (!authUser?.id) return;
+    syncNativePushRegistration().catch(() => {});
   }, [authUser?.id]);
 
   useEffect(() => {

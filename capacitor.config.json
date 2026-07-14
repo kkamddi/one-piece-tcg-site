@@ -2,12 +2,19 @@
   "appId": "com.optcgkorea.cardpone",
   "appName": "Card Pone",
   "webDir": "dist",
+  "appendUserAgent": " CardPoneAndroid/0.2.0",
   "server": {
     "androidScheme": "https"
   },
   "plugins": {
     "CapacitorHttp": {
       "enabled": true
+    },
+    "App": {
+      "disableBackButtonHandler": false
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
     }
   }
 }
