@@ -597,7 +597,7 @@ const CARD_PRICE_GUIDE = {
       title: '최근 거래 기록과 그래프',
       items: [
         '최근 가격 기록은 실제 거래 또는 수집된 시세 기록을 기준으로 표시합니다.',
-        '7D, 1M, 6M, ALL 기간을 바꿔 가격 흐름을 비교할 수 있습니다.',
+        '7D, 1M, 1Y 기간을 바꿔 가격 흐름을 비교할 수 있습니다.',
         '거래가 적은 카드는 특정 기간에 그래프가 비어 있거나 변동 폭이 크게 보일 수 있습니다.'
       ]
     },
@@ -7632,11 +7632,11 @@ function RenewMarketChart({ points = [], uiLang, range }) {
     }))
     .filter((point) => Number.isFinite(point.timestamp) && point.timestamp > 0 && point.price > 0)
     .sort((a, b) => a.timestamp - b.timestamp);
-  const isLongMarketRange = range === '1y' || range === 'all';
+  const isLongMarketRange = range === '1y';
   const orderedPoints = isLongMarketRange
     ? compressMarketAllChartPoints(aggregatedPoints, isMobileChart ? 72 : 108)
     : aggregatedPoints;
-  const rangeLabel = range === '1d' ? '1D' : range === '1m' ? '1M' : range === '1y' ? '1Y' : range === '6m' ? '6M' : range === 'all' ? 'ALL' : '7D';
+  const rangeLabel = range === '1d' ? '1D' : range === '1m' ? '1M' : range === '1y' ? '1Y' : range === '6m' ? '6M' : '7D';
   if (!orderedPoints.length) {
     const emptyText = range === '7d'
       ? (uiLang === 'en' ? 'No trades in the last 7 days.' : '최근 7일간 거래 데이터가 없습니다.')
@@ -7959,7 +7959,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     const path = normalizeSitePath(window.location.pathname);
     return getMarketIndexTypeFromPath(path);
   });
-  const [range, setRange] = useState('all');
+  const [range, setRange] = useState('1y');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [componentPage, setComponentPage] = useState(1);
   const [componentSort, setComponentSort] = useState('default');
@@ -8019,7 +8019,6 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <button type="button" className={range === '1m' ? 'is-active' : ''} onClick={() => setRange('1m')}>1M</button>
           <button type="button" className={range === '6m' ? 'is-active' : ''} onClick={() => setRange('6m')}>6M</button>
           <button type="button" className={range === '1y' ? 'is-active' : ''} onClick={() => setRange('1y')}>1Y</button>
-          <button type="button" className={range === 'all' ? 'is-active' : ''} onClick={() => setRange('all')}>ALL</button>
         </div>
       </div>
       <div className="renew-index-primary" aria-label="Representative market index">
@@ -8062,7 +8061,6 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
           <em className={Number(payload?.change?.m1) >= 0 ? 'is-up' : 'is-down'}>1M {formatIndexChange(payload?.change?.m1)}</em>
           <em className={Number(payload?.change?.m6) >= 0 ? 'is-up' : 'is-down'}>6M {formatIndexChange(payload?.change?.m6)}</em>
-          <em className={Number(payload?.change?.all) >= 0 ? 'is-up' : 'is-down'}>ALL {formatIndexChange(payload?.change?.all)}</em>
         </div>
       </div>
       <RenewIndexChart points={payload?.points || []} />
