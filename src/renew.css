@@ -2017,6 +2017,16 @@
   font-weight: 700;
 }
 
+.renew-admin-stats article.is-live span::before {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  content: '';
+}
+
 .renew-admin-stats strong {
   display: block;
   margin-top: 8px;

@@ -2072,6 +2072,7 @@ const UI_TEXT = {
     updateHelp: '클릭하면 이전 공지까지 확인할 수 있습니다.',
     visitorsTotal: '누적 고유 방문자',
     visitorsToday: '오늘 고유 방문자',
+    visitorsOnline: '현재 접속 중',
     usersTotal: '전체 회원 수',
     signupsToday: '오늘 가입자',
     footerIntro: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감·시세·컬렉션 관리 서비스입니다.',
@@ -2183,6 +2184,7 @@ const UI_TEXT = {
     updateHelp: 'Click to view previous updates.',
     visitorsTotal: 'Total unique visitors',
     visitorsToday: 'Unique visitors today',
+    visitorsOnline: 'Online now',
     usersTotal: 'Total users',
     signupsToday: 'New users today',
     footerIntro: 'Card Pone is an unofficial card database, market price, and collection management service for ONE PIECE CARD GAME players.',
@@ -3999,7 +4001,7 @@ function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle
   );
 }
 
-function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
+function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
   const [valueModalGrade, setValueModalGrade] = useState(null);
@@ -4224,14 +4226,15 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
       {adminStats ? (
         <section className="renew-admin-stats" aria-label="관리자 통계">
           {[
-            [t('visitorsTotal'), adminStats.totalVisits],
-            [t('visitorsToday'), adminStats.todayVisits],
-            [t('usersTotal'), adminStats.totalUsers],
-            [t('signupsToday'), adminStats.todaySignups]
-          ].map(([label, value]) => (
-            <article key={label}>
+            [t('visitorsOnline'), onlineVisitors, true],
+            [t('visitorsTotal'), adminStats.totalVisits, false],
+            [t('visitorsToday'), adminStats.todayVisits, false],
+            [t('usersTotal'), adminStats.totalUsers, false],
+            [t('signupsToday'), adminStats.todaySignups, false]
+          ].map(([label, value, isLive]) => (
+            <article key={label} className={isLive ? 'is-live' : undefined}>
               <span>{label}</span>
-              <strong>{Number(value || 0).toLocaleString('ko-KR')}</strong>
+              <strong aria-live={isLive ? 'polite' : undefined}>{Number(value || 0).toLocaleString('ko-KR')}</strong>
             </article>
           ))}
         </section>
@@ -9596,6 +9599,7 @@ export default function RenewApp() {
   const [userState, setUserState] = useState(null);
   const [stateLoading, setStateLoading] = useState(false);
   const [adminStats, setAdminStats] = useState(null);
+  const [onlineVisitors, setOnlineVisitors] = useState(0);
   const [visitorToken, setVisitorToken] = useState('');
   const [legalOpen, setLegalOpen] = useState(null);
   const [catalogInitialSearch, setCatalogInitialSearch] = useState(null);
@@ -9729,6 +9733,34 @@ export default function RenewApp() {
     }
     const timer = window.setTimeout(reportVisit, 1500);
     return () => window.clearTimeout(timer);
+  }, [visitorToken]);
+
+  useEffect(() => {
+    if (!supabase || !visitorToken) return undefined;
+
+    const channel = supabase.channel('site-presence-v1', {
+      config: { presence: { key: visitorToken } }
+    });
+    const syncOnlineVisitors = () => {
+      setOnlineVisitors(Object.keys(channel.presenceState() || {}).length);
+    };
+
+    channel
+      .on('presence', { event: 'sync' }, syncOnlineVisitors)
+      .on('presence', { event: 'join' }, syncOnlineVisitors)
+      .on('presence', { event: 'leave' }, syncOnlineVisitors)
+      .subscribe(async (status) => {
+        if (status !== 'SUBSCRIBED') return;
+        await channel.track({
+          page: window.location.pathname,
+          onlineAt: new Date().toISOString()
+        });
+      });
+
+    return () => {
+      channel.untrack().catch(() => {});
+      supabase.removeChannel(channel);
+    };
   }, [visitorToken]);
 
   useEffect(() => {
@@ -9953,6 +9985,7 @@ export default function RenewApp() {
           setUserState={setUserState}
           stateLoading={stateLoading}
           adminStats={adminStats}
+          onlineVisitors={onlineVisitors}
           uiLang={uiLang}
           onSubmitSearch={(search) => {
             setCatalogViewState(null);
