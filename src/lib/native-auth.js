@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 
 const WEB_AUTH_REDIRECT = 'https://www.optcgkorea.com/';
 const NATIVE_AUTH_REDIRECT = 'com.optcgkorea.cardpone://auth/callback';
-const NATIVE_AUTH_START = `${WEB_AUTH_REDIRECT}native-auth-start.html`;
+const NATIVE_AUTH_START = `${WEB_AUTH_REDIRECT}native-auth-start`;
 const NATIVE_AUTH_EVENT = 'card-pone:native-auth';
 
 let nativeAuthConfigured = false;
