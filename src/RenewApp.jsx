@@ -69,7 +69,7 @@ const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
-const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-13-calendar';
+const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-15-portfolio-return';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
@@ -240,6 +240,18 @@ function useBodyScrollLock(active = true) {
 }
 
 const RENEW_HOME_UPDATES = [
+  {
+    id: '2026-07-15-portfolio-return',
+    title: '[26.07.15] 업데이트 안내',
+    summary: '포트폴리오 수익률 기능 추가',
+    details: [
+      '카드별 매입일, 매입가와 수량 기록 가능',
+      '현재 시세를 기준으로 평가손익과 수익률 자동 계산',
+      'Single과 PSA10을 구분하여 포트폴리오 관리',
+      '매입 기록 추가·수정·삭제 지원',
+      '로그인 계정에 포트폴리오와 매입 기록 저장'
+    ]
+  },
   {
     id: '2026-07-13-calendar',
     title: '[26.07.13] 업데이트 안내',
@@ -1324,11 +1336,45 @@ const NEWS_GUIDE_CONTENT = {
 };
 const COUPANG_DISCLOSURE = '이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.';
 const OFFICIAL_LINK_ITEMS = [
-  { labelKr: '공식카페', labelEn: 'Official Cafe', href: 'https://cafe.naver.com/onepiecetcg', external: true },
-  { labelKr: '공식사이트 KR', labelEn: 'Official KR', href: 'https://onepiece-cardgame.kr/', external: true },
-  { labelKr: '공식사이트 JP', labelEn: 'Official JP', href: 'https://www.onepiece-cardgame.com/', external: true },
-  { labelKr: 'Instagram', labelEn: 'Instagram', href: 'https://www.instagram.com/onepiece_tcg_kr/', external: true }
+  { labelKr: '공식카페', labelEn: 'Official Cafe', href: 'https://cafe.naver.com/onepiecetcg', external: true, locales: ['KR', 'EN'] },
+  { labelKr: '공식사이트 KR', labelEn: 'Official KR', href: 'https://onepiece-cardgame.kr/', external: true, locales: ['KR', 'EN'] },
+  { labelKr: '공식사이트 JP', labelEn: 'Official JP', href: 'https://www.onepiece-cardgame.com/', external: true, locales: ['KR', 'EN'] },
+  { labelKr: 'Instagram', labelEn: 'Instagram', href: 'https://www.instagram.com/onepiece_tcg_kr/', external: true, locales: ['KR', 'EN'] },
+  { labelJp: '公式サイト', href: 'https://www.onepiece-cardgame.com/', external: true, locales: ['JP'] },
+  { labelJp: '公式ショップ', href: 'https://bandainamco-am.co.jp/official_shop/onepiece-cardgame/index.html', external: true, locales: ['JP'] },
+  { labelJp: '公認店を探す', href: 'https://www.carddass.com/onepiece-tcg/shoplist/', external: true, locales: ['JP'] }
 ];
+
+const JP_OFFICIAL_SHOP_SOURCE_URL = 'https://bandainamco-am.co.jp/official_shop/onepiece-cardgame/index.html';
+const JP_CERTIFIED_SHOP_SOURCE_URL = 'https://www.carddass.com/onepiece-tcg/shoplist/';
+const JP_EVENT_SOURCE_URL = 'https://www.onepiece-cardgame.com/events/index.php';
+const JP_OFFICIAL_SHOPS = [
+  ['北海道', '札幌店', '北海道札幌市中央区北4条西2-1 東急百貨店札幌店 9階', '10:00〜20:00'],
+  ['宮城県', '宮城名取店', '宮城県名取市杜せきのした5-3-1 イオンモール名取 3階', '10:00〜21:00'],
+  ['宮城県', '仙台店', '宮城県仙台市青葉区中央1-2-3 仙台PARCO1 7F', '10:00〜20:00'],
+  ['埼玉県', '埼玉越谷店', '埼玉県越谷市レイクタウン3-1-1 イオンレイクタウンmori 3F', '10:00〜21:00'],
+  ['東京都', '東京池袋店', '東京都豊島区東池袋3-1-3 サンシャインシティ ワールドインポートマートビル3F', '10:00〜21:00'],
+  ['東京都', '東京新宿店', '東京都新宿区歌舞伎町1-29-1 東急歌舞伎町タワー3F', '月〜木 11:00〜23:00 / 金〜日 11:00〜25:00'],
+  ['東京都', '東京渋谷店', '東京都渋谷区神南1-23-10 MAGNET by SHIBUYA109 B1F', '10:00〜21:00'],
+  ['神奈川県', '横浜店', '神奈川県横浜市中区新港2-2-1 横浜ワールドポーターズ2階', '10:30〜21:00'],
+  ['富山県', '富山高岡店', '富山県高岡市下伏間江383番地 イオンモール高岡 西館2F', '10:00〜21:00'],
+  ['愛知県', '愛知名古屋店', '愛知県名古屋市西区二方町40番 mozo ワンダーシティ 4F', '10:00〜21:00'],
+  ['愛知県', '愛知大高店', '愛知県名古屋市緑区南大高2-450 イオンモール大高3F', '10:00〜21:00'],
+  ['岐阜県', '岐阜店', '岐阜県各務原市那加萱場町3-8 イオンモール各務原インター店 2F', '9:00〜21:00'],
+  ['京都府', '京都店', '京都府京都市南区西九条鳥居口町1 イオンモールKYOTO 4F', '10:00〜21:00'],
+  ['大阪府', '大阪梅田店', '大阪府大阪市北区角田町5-15 HEP FIVE 8階', '11:00〜21:00'],
+  ['大阪府', '大阪心斎橋店', '大阪府大阪市中央区心斎橋筋1-8-3 心斎橋PARCO 5F', '10:00〜20:00'],
+  ['広島県', '広島店', '広島県安芸郡府中町大須2-1-1 イオンモール広島府中 3F', '10:00〜21:00'],
+  ['愛媛県', '愛媛店', '愛媛県伊予郡松前町筒井850 エミフルMASAKI 別棟 2F', '10:00〜21:00'],
+  ['福岡県', '博多店', '福岡県福岡市博多区住吉1-2-74 キャナルシティ博多 サウスビルB1', '10:00〜21:00'],
+  ['熊本県', '熊本店', '熊本県菊池郡菊陽町光の森7-39-1 ゆめタウン光の森 南館3F', '10:00〜20:30'],
+  ['沖縄県', '沖縄店', '沖縄県那覇市おもろまち4-4-9 サンエー那覇メインプレイス 2F', '9:00〜22:00']
+].map(([prefecture, name, address, hours]) => ({
+  prefecture,
+  name: `ONE PIECEカードゲーム 公式ショップ ${name}`,
+  address,
+  hours
+}));
 
 function getBaseSeriesId(seriesOrId) {
   if (typeof seriesOrId === 'object' && seriesOrId) return seriesOrId.baseSeriesId ?? seriesOrId.id ?? '';
@@ -1340,7 +1386,7 @@ function normalizeSeriesSlug(value) {
 }
 
 function getSeriesSlug(series) {
-  return normalizeSeriesSlug(series?.officialSeriesKeyword || getBaseSeriesId(series) || series?.id);
+  return normalizeSeriesSlug(getBaseSeriesId(series) || series?.officialSeriesKeyword || series?.id);
 }
 
 function getSeriesRoutePath(series) {
@@ -1791,6 +1837,12 @@ function formatSignedWonFromYen(value) {
   return `${sign}₩${Math.round(Math.abs(amount) * (MARKET_USD_TO_KRW / MARKET_USD_TO_JPY)).toLocaleString('ko-KR')}`;
 }
 
+function formatSignedYen(value) {
+  const amount = Number(value || 0);
+  if (!Number.isFinite(amount) || amount === 0) return '¥0';
+  return `${amount > 0 ? '+' : '-'}¥${Math.round(Math.abs(amount)).toLocaleString('ja-JP')}`;
+}
+
 function formatSignedPortfolioPercent(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount === 0) return '0.00%';
@@ -2172,6 +2224,8 @@ const UI_TEXT = {
     catalogSortPrice: '가격순',
     cardOwned: '보유',
     cardNotOwned: '미보유',
+    about: '소개',
+    dataPolicy: '데이터 운영 원칙',
     terms: '이용약관',
     privacy: '개인정보처리방침',
     contact: '문의하기',
@@ -2285,6 +2339,8 @@ const UI_TEXT = {
     catalogSortPrice: 'By Price',
     cardOwned: 'Owned',
     cardNotOwned: 'Not Owned',
+    about: 'About',
+    dataPolicy: 'Data Policy',
     terms: 'Terms',
     privacy: 'Privacy Policy',
     contact: 'Contact',
@@ -2398,6 +2454,8 @@ const UI_TEXT = {
     catalogSortPrice: '価格順',
     cardOwned: '所持',
     cardNotOwned: '未所持',
+    about: '運営情報',
+    dataPolicy: 'データポリシー',
     terms: '利用規約',
     privacy: 'プライバシーポリシー',
     contact: 'お問い合わせ',
@@ -2407,6 +2465,24 @@ const UI_TEXT = {
 
 function getUiText(lang, key) {
   return UI_TEXT[lang]?.[key] || UI_TEXT.KR[key] || key;
+}
+
+function getLocaleText(uiLang, kr, en, jp) {
+  if (uiLang === 'JP') return jp ?? en ?? kr;
+  if (uiLang === 'EN') return en ?? kr;
+  return kr;
+}
+
+function isJapaneseUi(uiLang) {
+  return uiLang === 'JP';
+}
+
+function getGoogleMapsSearchUrl({ name = '', address = '' } = {}) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([name, address].filter(Boolean).join(' '))}`;
+}
+
+function getLocalizedCurrencyText(value, uiLang) {
+  return isJapaneseUi(uiLang) ? formatYen(value) : formatUsdWonFromYen(value);
 }
 const PAGE_PATHS = {
   home: '/',
@@ -2743,18 +2819,24 @@ const JP_PAGE_SEO = {
     body: '公式情報、新商品、予約情報とコレクションガイドを確認できます。'
   },
   shops: {
-    title: 'ワンピースカードゲーム ショップ情報 | Card Pone',
-    h1: 'ワンピースカードゲーム ショップ情報',
-    description: 'Card Poneに登録されたONE PIECE CARD GAMEのショップ情報を確認できます。',
-    keywords: 'ワンピースカードゲーム ショップ,ワンピカード 店舗,Card Pone',
-    body: '登録ショップの場所と基本情報を確認できます。'
+    title: 'ワンピースカードゲーム 公式ショップ・公認店 | Card Pone',
+    h1: 'ONE PIECEカードゲーム 公式ショップ・公認店',
+    description: '日本全国のONE PIECE CARD GAME公式ショップを地域や店舗名から検索し、住所、営業時間、Googleマップ、公認店検索を確認できます。',
+    keywords: 'ワンピースカードゲーム 公式ショップ,ワンピカード 公認店,ワンピカード 店舗,ONE PIECEカードゲーム ショップ',
+    body: '日本全国の公式ショップ情報と公認店検索を確認できます。'
   }
 };
 
 function getJapaneseRouteSeo(pathname, page) {
   const path = getAppPath(pathname);
-  if (path.startsWith('/cards/series/')) {
-    const series = getBaseSeriesId(findSeriesByRouteSlug(path.slice('/cards/series/'.length)) || path.split('/').pop()?.toUpperCase() || 'SERIES');
+  const directSeriesSlug = path.startsWith('/cards/') ? path.slice('/cards/'.length) : '';
+  const seriesSlug = path.startsWith('/cards/series/')
+    ? path.slice('/cards/series/'.length)
+    : directSeriesSlug && !directSeriesSlug.includes('/') && !['jp', 'kr'].includes(directSeriesSlug.toLowerCase())
+      ? directSeriesSlug
+      : '';
+  if (seriesSlug) {
+    const series = getBaseSeriesId(findSeriesByRouteSlug(seriesSlug) || seriesSlug.toUpperCase() || 'SERIES');
     return {
       title: `${series} ワンピースカードゲーム カードリスト | Card Pone`,
       h1: `${series} カードリスト`,
@@ -3763,7 +3845,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             </button>
             {isLoggedIn ? (
               <div className="renew-account-dropdown">
-                <button type="button" onClick={() => handleAccountMenu('mypage')}>마이페이지</button>
+                <button type="button" onClick={() => handleAccountMenu('mypage')}>{getLocaleText(uiLang, '마이페이지', 'My page', 'マイページ')}</button>
                 <button type="button" onClick={() => handleAccountMenu('logout')}>{t('logout')}</button>
               </div>
             ) : null}
@@ -3795,7 +3877,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             </button>
             {isLoggedIn ? (
               <div className="renew-account-dropdown">
-                <button type="button" onClick={() => handleAccountMenu('mypage')}>마이페이지</button>
+                <button type="button" onClick={() => handleAccountMenu('mypage')}>{getLocaleText(uiLang, '마이페이지', 'My page', 'マイページ')}</button>
                 <button type="button" onClick={() => handleAccountMenu('logout')}>{t('logout')}</button>
               </div>
             ) : null}
@@ -3878,9 +3960,13 @@ function RenewSuppliesModal({ onClose }) {
 }
 
 function RenewSearch({ onSubmitSearch, uiLang }) {
-  const [locale, setLocale] = useState('KR');
+  const [locale, setLocale] = useState(() => isJapaneseUi(uiLang) ? 'JP' : 'KR');
   const [keyword, setKeyword] = useState('');
   const t = (key) => getUiText(uiLang, key);
+
+  useEffect(() => {
+    if (isJapaneseUi(uiLang)) setLocale('JP');
+  }, [uiLang]);
 
   function submitSearch(event) {
     event.preventDefault();
@@ -3907,16 +3993,17 @@ function RenewSearch({ onSubmitSearch, uiLang }) {
 }
 
 function RenewOfficialLinks({ uiLang }) {
+  const items = OFFICIAL_LINK_ITEMS.filter((item) => !item.locales || item.locales.includes(uiLang));
   return (
     <nav className="renew-official-links" aria-label="공식 링크">
-      {OFFICIAL_LINK_ITEMS.map((item) => (
+      {items.map((item) => (
         <a
-          key={item.labelKr}
+          key={item.href}
           href={item.href}
           target={item.external ? '_blank' : undefined}
           rel={item.external ? 'noreferrer' : undefined}
         >
-          {uiLang === 'EN' ? item.labelEn : item.labelKr}
+          {getLocaleText(uiLang, item.labelKr, item.labelEn, item.labelJp)}
         </a>
       ))}
     </nav>
@@ -4446,12 +4533,12 @@ function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle
 
 function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initialDetail = null, onSave, onDeleteLot, onClose, uiLang }) {
   useBodyScrollLock();
-  const isEnglish = uiLang === 'en';
+  const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
   const [grade, setGrade] = useState(normalizeMarketConditionKey(initialGrade));
   const [mode, setMode] = useState('manual');
   const [quantity, setQuantity] = useState(1);
   const [purchaseDate, setPurchaseDate] = useState(getKstDateKey(Date.now()));
-  const [currency, setCurrency] = useState('KRW');
+  const [currency, setCurrency] = useState(() => isJapaneseUi(uiLang) ? 'JPY' : 'KRW');
   const [unitPrice, setUnitPrice] = useState('');
   const [editingLotId, setEditingLotId] = useState('');
   const [detail, setDetail] = useState(initialDetail);
@@ -4487,7 +4574,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
         if (!cancelled) setDetail(mergePsa10MarketDetail(marketPriceDetail, psaDetail));
       })
       .catch(() => {
-        if (!cancelled) setMessage(isEnglish ? 'Could not load historical prices.' : '과거 시세를 불러오지 못했습니다.');
+        if (!cancelled) setMessage(text('과거 시세를 불러오지 못했습니다.', 'Could not load historical prices.', '過去の相場を読み込めませんでした。'));
       })
       .finally(() => {
         if (!cancelled) setDetailLoading(false);
@@ -4495,14 +4582,14 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
     return () => {
       cancelled = true;
     };
-  }, [mode, detail, item?.apparelId, item?.code, item?.cardId, isEnglish]);
+  }, [mode, detail, item?.apparelId, item?.code, item?.cardId, uiLang]);
 
   function resetForm(nextGrade = grade) {
     setGrade(normalizeMarketConditionKey(nextGrade));
     setMode('manual');
     setQuantity(1);
     setPurchaseDate(getKstDateKey(Date.now()));
-    setCurrency('KRW');
+    setCurrency(isJapaneseUi(uiLang) ? 'JPY' : 'KRW');
     setUnitPrice('');
     setEditingLotId('');
     setMessage('');
@@ -4541,9 +4628,9 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
     try {
       await onSave?.({ grade, holdingId: holding?.id || '', lot });
       resetForm(grade);
-      setMessage(isEnglish ? 'Purchase record saved.' : '매입 기록을 저장했습니다.');
+      setMessage(text('매입 기록을 저장했습니다.', 'Purchase record saved.', '購入記録を保存しました。'));
     } catch (error) {
-      setMessage(error?.message || (isEnglish ? 'Failed to save.' : '저장하지 못했습니다.'));
+      setMessage(error?.message || text('저장하지 못했습니다.', 'Failed to save.', '保存できませんでした。'));
     } finally {
       setSaving(false);
     }
@@ -4555,9 +4642,9 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
         <div className="renew-modal-head">
           <div>
             <small>PORTFOLIO</small>
-            <h2>{isEnglish ? 'Add to Portfolio' : '포트폴리오에 추가'}</h2>
+            <h2>{text('포트폴리오에 추가', 'Add to Portfolio', 'ポートフォリオに追加')}</h2>
           </div>
-          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>×</button>
+          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
         </div>
 
         <div className="renew-portfolio-editor-card">
@@ -4569,7 +4656,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
           </div>
         </div>
 
-        <div className="renew-portfolio-grade-tabs" aria-label={isEnglish ? 'Card grade' : '카드 등급'}>
+        <div className="renew-portfolio-grade-tabs" aria-label={text('카드 등급', 'Card grade', 'カードグレード')}>
           {['a', 'psa10'].map((gradeKey) => (
             <button
               key={gradeKey}
@@ -4585,17 +4672,17 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
         {lots.length ? (
           <div className="renew-portfolio-lot-history">
             <div className="renew-portfolio-section-title">
-              <strong>{isEnglish ? 'Purchase history' : '매입 기록'}</strong>
+              <strong>{text('매입 기록', 'Purchase history', '購入記録')}</strong>
               <span>{lots.length}</span>
             </div>
             {lots.map((lot) => (
               <div key={lot.id} className="renew-portfolio-lot-row">
                 <button type="button" className="renew-portfolio-lot-edit" onClick={() => editLot(lot)}>
-                  <span>{lot.purchaseDate || (isEnglish ? 'Date not set' : '날짜 미등록')}</span>
-                  <strong>{lot.quantity}{isEnglish ? ' card(s)' : '장'} · {lot.unitPriceJpy > 0 ? formatWonFromYen(lot.unitPriceJpy) : (isEnglish ? 'Price later' : '가격 나중에 입력')}</strong>
-                  <small>{lot.mode === 'estimate' ? (isEnglish ? 'Date price estimate' : '날짜 시세 추정') : lot.mode === 'manual' ? (isEnglish ? 'Manual' : '직접 입력') : (isEnglish ? 'Pending' : '미입력')}</small>
+                  <span>{lot.purchaseDate || text('날짜 미등록', 'Date not set', '日付未入力')}</span>
+                  <strong>{lot.quantity}{text('장', ' card(s)', '枚')} · {lot.unitPriceJpy > 0 ? getLocalizedCurrencyText(lot.unitPriceJpy, uiLang) : text('가격 나중에 입력', 'Price later', '価格は後で入力')}</strong>
+                  <small>{lot.mode === 'estimate' ? text('날짜 시세 추정', 'Date price estimate', '日付相場から推定') : lot.mode === 'manual' ? text('직접 입력', 'Manual', '直接入力') : text('미입력', 'Pending', '未入力')}</small>
                 </button>
-                <button type="button" className="renew-portfolio-lot-delete" onClick={() => onDeleteLot?.({ holdingId: holding?.id || '', purchaseId: lot.id })} aria-label={isEnglish ? 'Delete purchase record' : '매입 기록 삭제'}>×</button>
+                <button type="button" className="renew-portfolio-lot-delete" onClick={() => onDeleteLot?.({ holdingId: holding?.id || '', purchaseId: lot.id })} aria-label={text('매입 기록 삭제', 'Delete purchase record', '購入記録を削除')}>×</button>
               </div>
             ))}
           </div>
@@ -4603,31 +4690,31 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 
         <form className="renew-portfolio-form" onSubmit={submit}>
           <div className="renew-portfolio-section-title">
-            <strong>{editingLotId ? (isEnglish ? 'Edit record' : '매입 기록 수정') : (lots.length ? (isEnglish ? 'Add another purchase' : '추가 매입 기록') : (isEnglish ? 'Purchase information' : '매입 정보'))}</strong>
-            {editingLotId ? <button type="button" onClick={() => resetForm(grade)}>{isEnglish ? 'Cancel edit' : '수정 취소'}</button> : null}
+            <strong>{editingLotId ? text('매입 기록 수정', 'Edit record', '購入記録を編集') : (lots.length ? text('추가 매입 기록', 'Add another purchase', '追加の購入記録') : text('매입 정보', 'Purchase information', '購入情報'))}</strong>
+            {editingLotId ? <button type="button" onClick={() => resetForm(grade)}>{text('수정 취소', 'Cancel edit', '編集を取り消す')}</button> : null}
           </div>
           <div className="renew-portfolio-mode-tabs">
             {[
-              ['manual', isEnglish ? 'Enter price' : '직접 입력'],
-              ['estimate', isEnglish ? 'Estimate by date' : '날짜로 추정'],
-              ['later', isEnglish ? 'Later' : '나중에 입력']
+              ['manual', text('직접 입력', 'Enter price', '価格を入力')],
+              ['estimate', text('날짜로 추정', 'Estimate by date', '日付から推定')],
+              ['later', text('나중에 입력', 'Later', '後で入力')]
             ].map(([modeKey, label]) => (
               <button key={modeKey} type="button" className={mode === modeKey ? 'is-active' : ''} onClick={() => { setMode(modeKey); setMessage(''); }}>{label}</button>
             ))}
           </div>
 
           <label className="renew-portfolio-quantity">
-            <span>{isEnglish ? 'Quantity' : '수량'}</span>
+            <span>{text('수량', 'Quantity', '数量')}</span>
             <div>
-              <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label={isEnglish ? 'Decrease quantity' : '수량 줄이기'}>−</button>
+              <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label={text('수량 줄이기', 'Decrease quantity', '数量を減らす')}>−</button>
               <input type="number" min="1" max="9999" value={quantity} onChange={(event) => setQuantity(Math.min(9999, Math.max(1, Number(event.target.value || 1))))} />
-              <button type="button" onClick={() => setQuantity((value) => Math.min(9999, value + 1))} aria-label={isEnglish ? 'Increase quantity' : '수량 늘리기'}>+</button>
+              <button type="button" onClick={() => setQuantity((value) => Math.min(9999, value + 1))} aria-label={text('수량 늘리기', 'Increase quantity', '数量を増やす')}>+</button>
             </div>
           </label>
 
           {mode !== 'later' ? (
             <label>
-              <span>{isEnglish ? 'Purchase date' : '매입 날짜'}</span>
+              <span>{text('매입 날짜', 'Purchase date', '購入日')}</span>
               <input type="date" value={purchaseDate} max={getKstDateKey(Date.now())} onChange={(event) => setPurchaseDate(event.target.value)} />
             </label>
           ) : null}
@@ -4635,7 +4722,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
           {mode === 'manual' ? (
             <div className="renew-portfolio-price-input">
               <label>
-                <span>{isEnglish ? 'Currency' : '통화'}</span>
+                <span>{text('통화', 'Currency', '通貨')}</span>
                 <select value={currency} onChange={(event) => setCurrency(event.target.value)}>
                   <option value="KRW">KRW ₩</option>
                   <option value="JPY">JPY ¥</option>
@@ -4643,7 +4730,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
                 </select>
               </label>
               <label>
-                <span>{isEnglish ? 'Price per card' : '1장당 매입가'}</span>
+                <span>{text('1장당 매입가', 'Price per card', '1枚あたりの購入価格')}</span>
                 <input type="number" min="0" step={currency === 'USD' ? '0.01' : '1'} value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} placeholder="0" />
               </label>
             </div>
@@ -4651,23 +4738,23 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 
           {mode === 'estimate' ? (
             <div className={`renew-portfolio-estimate ${estimatePriceJpy > 0 ? 'has-price' : ''}`}>
-              <small>{isEnglish ? 'Reference price' : '기준 시세'}</small>
-              <strong>{detailLoading ? (isEnglish ? 'Loading...' : '불러오는 중...') : estimatePriceJpy > 0 ? formatUsdWonFromYen(estimatePriceJpy) : (isEnglish ? 'No valid price within the previous 7 days' : '이전 7일 내 유효한 시세 기록이 없습니다.')}</strong>
-              {estimatePoint ? <span>{estimatePoint.dateKey} · {estimatePoint.referenceSource === 'listing' ? 'SNKRDUNK 시세' : '거래 중앙값'} · 추정값</span> : null}
+              <small>{text('기준 시세', 'Reference price', '参考相場')}</small>
+              <strong>{detailLoading ? text('불러오는 중...', 'Loading...', '読み込み中...') : estimatePriceJpy > 0 ? getLocalizedCurrencyText(estimatePriceJpy, uiLang) : text('이전 7일 내 유효한 시세 기록이 없습니다.', 'No valid price within the previous 7 days', '過去7日以内の有効な相場記録はありません。')}</strong>
+              {estimatePoint ? <span>{estimatePoint.dateKey} · {estimatePoint.referenceSource === 'listing' ? 'SNKRDUNK' : text('거래 중앙값', 'Median sale price', '取引中央値')} · {text('추정값', 'Estimate', '推定値')}</span> : null}
             </div>
           ) : null}
 
           {projectedPercent != null ? (
             <div className="renew-portfolio-preview">
-              <span>{isEnglish ? 'Estimated return at current price' : '현재 시세 기준 예상 수익률'}</span>
+              <span>{text('현재 시세 기준 예상 수익률', 'Estimated return at current price', '現在相場に基づく予想収益率')}</span>
               <strong className={projectedPercent > 0 ? 'is-up' : projectedPercent < 0 ? 'is-down' : ''}>{formatSignedPortfolioPercent(projectedPercent)}</strong>
             </div>
           ) : null}
 
           {message ? <p className="renew-portfolio-message" aria-live="polite">{message}</p> : null}
           <div className="renew-portfolio-form-actions">
-            <button type="button" onClick={onClose}>{isEnglish ? 'Close' : '닫기'}</button>
-            <button type="submit" disabled={!canSave}>{saving ? (isEnglish ? 'Saving...' : '저장 중...') : editingLotId ? (isEnglish ? 'Save changes' : '수정 저장') : (isEnglish ? 'Add' : '추가')}</button>
+            <button type="button" onClick={onClose}>{text('닫기', 'Close', '閉じる')}</button>
+            <button type="submit" disabled={!canSave}>{saving ? text('저장 중...', 'Saving...', '保存中...') : editingLotId ? text('수정 저장', 'Save changes', '変更を保存') : text('추가', 'Add', '追加')}</button>
           </div>
         </form>
       </div>
@@ -4678,6 +4765,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 }
 
 function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
+  const isJp = isJapaneseUi(uiLang);
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
   const [valueModalGrade, setValueModalGrade] = useState(null);
@@ -4805,18 +4893,33 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 
   const modalCards = valueModalGrade ? marketCards : [];
   const t = (key) => getUiText(uiLang, key);
-  const portfolioTotalParts = authUser ? formatUsdWonFromYen(totalJpy).split(' / ') : [t('portfolioLoginRequired')];
-  const homeNewsLinks = useMemo(() => getHomeNewsLinks(), []);
-  const latestPartnerNews = useMemo(() => getActivePartnerShopNews()[0] || null, []);
+  const portfolioTotalParts = authUser ? (isJp ? [formatYen(totalJpy)] : formatUsdWonFromYen(totalJpy).split(' / ')) : [t('portfolioLoginRequired')];
+  const homeNewsLinks = useMemo(() => {
+    if (!isJp) return getHomeNewsLinks();
+    return OFFICIAL_TOPIC_ITEMS
+      .filter((item) => (item.locale || '').toUpperCase() === 'JP')
+      .slice(0, 3)
+      .map((item) => ({
+        label: item.category || '公式ニュース',
+        description: item.title,
+        query: 'section=notice&locale=JP'
+      }));
+  }, [isJp]);
+  const latestPartnerNews = useMemo(() => isJp ? null : getActivePartnerShopNews()[0] || null, [isJp]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (isJp) {
+      setRenewalNoticeOpen(false);
+      setRenewalNoticeChecked(true);
+      return;
+    }
     if (!window.localStorage.getItem(RENEWAL_NOTICE_KEY)) {
       window.localStorage.setItem(RENEWAL_NOTICE_KEY, '1');
       setRenewalNoticeOpen(true);
     }
     setRenewalNoticeChecked(true);
-  }, []);
+  }, [isJp]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !latestPartnerNews || !renewalNoticeChecked || renewalNoticeOpen) return;
@@ -4851,7 +4954,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 
   async function removeValuationCard(holdingId) {
     if (!authUser) {
-      window.alert('로그인 후 이용해 주세요.');
+      window.alert(t('loginRequired'));
       return;
     }
     const payload = await deletePortfolioHolding(holdingId);
@@ -4867,12 +4970,12 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
         <RenewOfficialLinks uiLang={uiLang} />
       </section>
 
-      <section className="renew-dashboard" aria-label="메인 현황">
+      <section className="renew-dashboard" aria-label={getLocaleText(uiLang, '메인 현황', 'Site overview', 'サイト概要')}>
         <button type="button" className="renew-float-card renew-progress" onClick={() => setProgressOpen(true)}>
           <div className="renew-card-title">{t('progress')}</div>
           {[
-            ['KR', '한글판'],
-            ['JP', '일본판']
+            ['KR', getLocaleText(uiLang, '한글판', 'Korean', '韓国版')],
+            ['JP', getLocaleText(uiLang, '일본판', 'Japanese', '日本版')]
           ].map(([locale, label]) => (
             <div key={locale} className="renew-progress-category-row">
               <div>
@@ -4889,7 +4992,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
         <article className="renew-float-card renew-value">
           <div className="renew-value-head">
             <div className="renew-card-title">Portfolio</div>
-            {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{uiLang === 'en' ? 'View all' : '전체 보기'}</button> : null}
+            {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{getLocaleText(uiLang, '전체 보기', 'View all', 'すべて見る')}</button> : null}
           </div>
           <div className="renew-value-total">
             {portfolioTotalParts.map((part, index) => (
@@ -4902,17 +5005,17 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           {authUser ? (
             <div className="renew-value-performance">
               <div>
-                <span>{uiLang === 'en' ? 'Total return' : '총 평가손익'}</span>
+                <span>{getLocaleText(uiLang, '총 평가손익', 'Total return', '評価損益')}</span>
                 {portfolioReturnPercent == null ? (
-                  <strong className="is-empty">{uiLang === 'en' ? 'Add purchase price' : '매입가 입력 필요'}</strong>
+                  <strong className="is-empty">{getLocaleText(uiLang, '매입가 입력 필요', 'Add purchase price', '購入価格の入力が必要です')}</strong>
                 ) : (
                   <strong className={portfolioProfitJpy > 0 ? 'is-up' : portfolioProfitJpy < 0 ? 'is-down' : ''}>
-                    {formatSignedWonFromYen(portfolioProfitJpy)} <small>{formatSignedPortfolioPercent(portfolioReturnPercent)}</small>
+                    {isJp ? formatSignedYen(portfolioProfitJpy) : formatSignedWonFromYen(portfolioProfitJpy)} <small>{formatSignedPortfolioPercent(portfolioReturnPercent)}</small>
                   </strong>
                 )}
               </div>
               <p>
-                {uiLang === 'en' ? 'Cost coverage' : '원가 반영'} {costCards.length} / {marketCards.length}
+                {getLocaleText(uiLang, '원가 반영', 'Cost coverage', '購入価格入力済み')} {costCards.length} / {marketCards.length}
               </p>
             </div>
           ) : null}
@@ -4930,7 +5033,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
         </article>
 
         <article className="renew-float-card renew-home-news">
-          <div className="renew-card-title">새 소식</div>
+          <div className="renew-card-title">{getLocaleText(uiLang, '새 소식', 'Latest news', '最新情報')}</div>
           <div className="renew-home-news-list">
             {homeNewsLinks.map((item) => (
               <button key={item.label} type="button" onClick={() => onNavigateNews?.(item.query)}>
@@ -4940,11 +5043,11 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
             ))}
           </div>
           <button type="button" className="renew-home-news-more" onClick={() => onNavigateNews?.('section=all')}>
-            전체 소식 보기
+            {getLocaleText(uiLang, '전체 소식 보기', 'View all news', 'すべてのお知らせを見る')}
           </button>
         </article>
       </section>
-      <RenewPartnerAdSection uiLang={uiLang} />
+      {!isJp ? <RenewPartnerAdSection uiLang={uiLang} /> : null}
       {adminStats ? (
         <section className="renew-admin-stats" aria-label="관리자 통계">
           {[
@@ -4961,9 +5064,9 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           ))}
         </section>
       ) : null}
-      <button type="button" className="renew-home-updates-mini" onClick={() => setUpdatesOpen(true)}>
+      {!isJp ? <button type="button" className="renew-home-updates-mini" onClick={() => setUpdatesOpen(true)}>
         <span>업데이트 내역</span>
-      </button>
+      </button> : null}
       {valueModalGrade ? (
         <RenewValueModal
           initialGrade={valueModalGrade}
@@ -4989,8 +5092,8 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           uiLang={uiLang}
         />
       ) : null}
-      {updatesOpen ? <RenewUpdateModal onClose={() => setUpdatesOpen(false)} /> : null}
-      {renewalNoticeOpen ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
+      {updatesOpen && !isJp ? <RenewUpdateModal onClose={() => setUpdatesOpen(false)} /> : null}
+      {renewalNoticeOpen && !isJp ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
       {partnerNewsOpen && latestPartnerNews ? (
         <PartnerShopNewsModal news={latestPartnerNews} uiLang={uiLang} onClose={closePartnerNews} />
       ) : null}
@@ -5000,6 +5103,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           locale={progressLocale}
           onLocaleChange={setProgressLocale}
           onClose={() => setProgressOpen(false)}
+          uiLang={uiLang}
         />
       ) : null}
     </main>
@@ -5295,8 +5399,9 @@ function PartnerShopNewsModal({ news, uiLang, onClose }) {
   );
 }
 
-function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
+function RenewProgressModal({ progressData, locale, onLocaleChange, onClose, uiLang }) {
   useBodyScrollLock();
+  const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
   const [progressGroup, setProgressGroup] = useState('OP');
   const current = progressData[locale] || { owned: 0, total: 0, percent: 0, series: [] };
   const progressGroups = ['OP', 'EB', 'ST', 'PR'];
@@ -5309,17 +5414,17 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
       <div className="renew-info-modal renew-progress-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
-            <h2>수집 진행도</h2>
+            <h2>{text('수집 진행도', 'Collection progress', 'コレクション進捗')}</h2>
             <p>{current.owned} / {current.total} · {formatPercent(current.percent)}</p>
           </div>
-          <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
+          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
         </div>
         <div className="renew-progress-detail">
           <div className="renew-progress-locale">
-            <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => onLocaleChange('KR')}>한글판</button>
-            <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => onLocaleChange('JP')}>일본판</button>
+            <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => onLocaleChange('KR')}>{text('한글판', 'Korean', '韓国版')}</button>
+            <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => onLocaleChange('JP')}>{text('일본판', 'Japanese', '日本版')}</button>
           </div>
-          <div className="renew-progress-groups" role="tablist" aria-label="시리즈 분류">
+          <div className="renew-progress-groups" role="tablist" aria-label={text('시리즈 분류', 'Series category', 'シリーズ分類')}>
             {progressGroups.map((group) => (
               <button
                 key={group}
@@ -5344,7 +5449,7 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
               </article>
             ))}
             {!visibleSeries.length ? (
-              <div className="renew-progress-empty">{progressGroup} 시리즈가 없습니다.</div>
+              <div className="renew-progress-empty">{text(`${progressGroup} 시리즈가 없습니다.`, `No ${progressGroup} series found.`, `${progressGroup}シリーズはありません。`)}</div>
             ) : null}
           </div>
         </div>
@@ -5356,7 +5461,7 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose }) {
 function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdit, onOpenPrices, uiLang }) {
   useBodyScrollLock();
   const t = (key) => getUiText(uiLang, key);
-  const isEnglish = uiLang === 'en';
+  const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
   const [gradeFilter, setGradeFilter] = useState(['a', 'psa10'].includes(initialGrade) ? initialGrade : 'all');
   const [sortMode, setSortMode] = useState('value');
   const [page, setPage] = useState(0);
@@ -5446,14 +5551,14 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
         <div className="renew-modal-head">
           <div>
             <h2>PORTFOLIO</h2>
-            <p>{totalQuantity}{isEnglish ? ' card(s)' : '장'} · {formatUsdWonFromYen(total)}</p>
+            <p>{totalQuantity}{text('장', ' card(s)', '枚')} · {getLocalizedCurrencyText(total, uiLang)}</p>
           </div>
-          <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
+          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
         </div>
         <div className="renew-portfolio-list-tools">
-          <div className="renew-portfolio-grade-tabs" aria-label={isEnglish ? 'Portfolio grade filter' : '포트폴리오 등급 필터'}>
+          <div className="renew-portfolio-grade-tabs" aria-label={text('포트폴리오 등급 필터', 'Portfolio grade filter', 'ポートフォリオのグレード絞り込み')}>
             {[
-              ['all', isEnglish ? 'All' : '전체'],
+              ['all', text('전체', 'All', 'すべて')],
               ['a', 'Single'],
               ['psa10', 'PSA10']
             ].map(([key, label]) => (
@@ -5461,11 +5566,11 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
             ))}
           </div>
           <label>
-            <span className="renew-sr-only">{isEnglish ? 'Sort portfolio' : '포트폴리오 정렬'}</span>
+            <span className="renew-sr-only">{text('포트폴리오 정렬', 'Sort portfolio', 'ポートフォリオを並び替え')}</span>
             <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
-              <option value="value">{isEnglish ? 'Highest value' : '평가액 높은 순'}</option>
-              <option value="gain">{isEnglish ? 'Highest return' : '수익률 높은 순'}</option>
-              <option value="loss">{isEnglish ? 'Lowest return' : '수익률 낮은 순'}</option>
+              <option value="value">{text('평가액 높은 순', 'Highest value', '評価額が高い順')}</option>
+              <option value="gain">{text('수익률 높은 순', 'Highest return', '収益率が高い順')}</option>
+              <option value="loss">{text('수익률 낮은 순', 'Lowest return', '収益率が低い順')}</option>
             </select>
           </label>
         </div>
@@ -5483,27 +5588,27 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
               <div className="renew-value-row-identity">
                 <strong>{item.code}</strong>
                 <span>{item.name}</span>
-                <small>{item.grade === 'psa10' ? 'PSA10' : 'Single'} · {item.quantity}{isEnglish ? ' card(s)' : '장'}</small>
+                <small>{item.grade === 'psa10' ? 'PSA10' : 'Single'} · {item.quantity}{text('장', ' card(s)', '枚')}</small>
               </div>
               <div className="renew-value-row-metrics">
                 <div className="renew-value-row-metric">
-                  <span>{isEnglish ? 'Current value' : '현재 평가액'}</span>
-                  <strong>{formatWonFromYen(item.price * item.quantity)}</strong>
-                  <small>{isEnglish ? 'Per card' : '1장당'} {formatWonFromYen(item.price)}</small>
+                  <span>{text('현재 평가액', 'Current value', '現在評価額')}</span>
+                  <strong>{getLocalizedCurrencyText(item.price * item.quantity, uiLang)}</strong>
+                  <small>{text('1장당', 'Per card', '1枚あたり')} {getLocalizedCurrencyText(item.price, uiLang)}</small>
                 </div>
                 <div className="renew-value-row-metric">
-                  <span>{isEnglish ? 'Valuation P/L' : '평가손익'}</span>
+                  <span>{text('평가손익', 'Valuation P/L', '評価損益')}</span>
                   {item.returnPercent == null ? (
-                    <strong className="is-empty">{isEnglish ? 'Price needed' : '매입가 필요'}</strong>
+                    <strong className="is-empty">{text('매입가 필요', 'Price needed', '購入価格が必要です')}</strong>
                   ) : (
                     <strong className={itemProfitJpy > 0 ? 'is-up' : itemProfitJpy < 0 ? 'is-down' : ''}>{formatSignedPortfolioPercent(item.returnPercent)}</strong>
                   )}
-                  <small>{itemProfitJpy == null ? '-' : formatSignedWonFromYen(itemProfitJpy)}</small>
+                  <small>{itemProfitJpy == null ? '-' : isJapaneseUi(uiLang) ? formatSignedYen(itemProfitJpy) : formatSignedWonFromYen(itemProfitJpy)}</small>
                 </div>
               </div>
               <div className="renew-value-row-actions">
-                <button type="button" onClick={() => onEdit?.(item)}>{isEnglish ? 'Purchase info' : '매입 정보'}</button>
-                <button type="button" className="renew-value-remove" onClick={() => onRemove?.(item.key)} aria-label={isEnglish ? 'Remove from portfolio' : '포트폴리오에서 제거'}>×</button>
+                <button type="button" onClick={() => onEdit?.(item)}>{text('매입 정보', 'Purchase info', '購入情報')}</button>
+                <button type="button" className="renew-value-remove" onClick={() => onRemove?.(item.key)} aria-label={text('포트폴리오에서 제거', 'Remove from portfolio', 'ポートフォリオから削除')}>×</button>
               </div>
             </article>
           );
@@ -5903,6 +6008,7 @@ function RenewCalendar({ uiLang }) {
 
 function RenewNews({ uiLang, onOpenCalendar }) {
   const t = (key) => getUiText(uiLang, key);
+  const isJp = isJapaneseUi(uiLang);
   const initialParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const initialPath = typeof window !== 'undefined' ? getAppPath(window.location.pathname) : '/news';
   const isCardStorageGuide = initialPath === '/guide/card-storage';
@@ -5922,7 +6028,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             ? 'supplies'
             : '';
   const initialSection = initialRouteState.section || routeSection || initialParams.get('section') || 'all';
-  const initialLocale = (initialParams.get('locale') || 'KR').toUpperCase();
+  const initialLocale = (initialParams.get('locale') || (isJp ? 'JP' : 'KR')).toUpperCase();
   const [newsFilter, setNewsFilter] = useState(NEWS_FILTERS.some((item) => item.id === initialSection) ? initialSection : 'all');
   const [noticeLocale, setNoticeLocale] = useState(initialLocale === 'JP' ? 'JP' : 'KR');
   const [supplyFilter, setSupplyFilter] = useState('all');
@@ -5934,13 +6040,17 @@ function RenewNews({ uiLang, onOpenCalendar }) {
     .slice(0, 3);
   const supplyItems = COUPANG_PARTNER_ITEMS
     .filter((item) => supplyFilter === 'all' || item.category === supplyFilter);
-  const visibleLinkGroups = NEWS_LINK_GROUPS
+  const visibleLinkGroups = (isJp ? [] : NEWS_LINK_GROUPS)
     .filter((item) => newsFilter === 'all' || item.id === newsFilter);
-  const showNotice = newsFilter === 'all' || newsFilter === 'notice';
-  const showGuide = newsFilter === 'all' || newsFilter === 'guide';
-  const showSupplies = newsFilter === 'all' || newsFilter === 'supplies';
+  const showNotice = isJp || newsFilter === 'all' || newsFilter === 'notice';
+  const showGuide = !isJp && (newsFilter === 'all' || newsFilter === 'guide');
+  const showSupplies = !isJp && (newsFilter === 'all' || newsFilter === 'supplies');
   const showTopSection = showNotice || visibleLinkGroups.length > 0;
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
+
+  useEffect(() => {
+    if (isJp) setNoticeLocale('JP');
+  }, [isJp]);
   return (
     <main className="renew-main renew-news-main">
       <a className="renew-news-calendar-link" href={getLocalizedPagePath('calendar', uiLang)} onClick={(event) => { event.preventDefault(); onOpenCalendar?.(); }}>
@@ -5951,7 +6061,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
         </div>
         <b aria-hidden="true">›</b>
       </a>
-      <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
+      {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.map((item) => (
           <button
             key={item.id}
@@ -5962,7 +6072,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             {item.label}
           </button>
         ))}
-      </div>
+      </div> : null}
 
       {showTopSection ? (
         <div className={`renew-news-overview ${newsFilter !== 'all' ? 'is-filtered' : ''}`}>
@@ -5971,12 +6081,12 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             <div className="renew-news-card-head">
               <div>
                 <span>OFFICIAL NEWS</span>
-                <h2 id="official-news-heading">공지사항</h2>
+                <h2 id="official-news-heading">{isJp ? '公式ニュース' : '공지사항'}</h2>
               </div>
-              <div className="renew-news-toggle" role="group" aria-label="공지 언어 선택">
+              {!isJp ? <div className="renew-news-toggle" role="group" aria-label="공지 언어 선택">
                 <button type="button" className={noticeLocale === 'KR' ? 'is-active' : ''} onClick={() => setNoticeLocale('KR')}>한글판</button>
                 <button type="button" className={noticeLocale === 'JP' ? 'is-active' : ''} onClick={() => setNoticeLocale('JP')}>일본판</button>
-              </div>
+              </div> : null}
             </div>
             <div className="renew-topic-list renew-topic-list-compact">
               {officialTopics.map((item) => (
@@ -5986,12 +6096,14 @@ function RenewNews({ uiLang, onOpenCalendar }) {
                   </a>
                   <div className="renew-topic-body">
                     <div className="renew-topic-meta">
-                      <span>{TOPIC_SOURCE_LABEL[item.source] || item.locale || '공식'}</span>
+                      <span>{isJp ? '公式' : TOPIC_SOURCE_LABEL[item.source] || item.locale || '공식'}</span>
                       <span>{item.category}</span>
                       <time dateTime={item.date}>{item.date}</time>
                     </div>
                     <h2>{uiLang === 'KR' && item.titleKo ? item.titleKo : item.title}</h2>
-                    <a href={item.url} target="_blank" rel="noreferrer">원문 보기</a>
+                    <a href={item.url} target="_blank" rel="noreferrer">
+                      {isJp ? '公式サイトで見る' : uiLang === 'EN' ? 'View original' : '원문 보기'}
+                    </a>
                   </div>
                 </article>
               ))}
@@ -6773,9 +6885,9 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       image: selectedCard.imageUrl,
       inLanguage: locale === 'JP' ? 'ja-JP' : 'ko-KR',
       description: `${selectedCard.cardNo} ${selectedCard.rarity} ${selectedCard.seriesName || ''}`.trim(),
-      url: `${SITE_ORIGIN}/cards`
+      url: `${SITE_ORIGIN}${localizeAppPath(`/prices/card/${encodeURIComponent(selectedCard.cardNo)}`, uiLang)}`
     });
-  }, [selectedCard, locale]);
+  }, [selectedCard, locale, uiLang]);
 
   const selectCatalogSeries = (series, options = {}) => {
     setSelectedSeries(series.id);
@@ -6783,7 +6895,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     setActiveRarity('ALL');
     if (options.closeSection) setOpenSection('');
     if (typeof window !== 'undefined') {
-      const nextPath = getSeriesRoutePath(series);
+      const nextPath = localizeAppPath(getSeriesRoutePath(series), uiLang);
       if (window.location.pathname !== nextPath) {
         window.history.pushState(null, '', nextPath);
       }
@@ -6823,14 +6935,17 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
             <div className="renew-mobile-series-list">
               <div className="renew-mobile-series-heading">{activeMobileSection.label} 전체</div>
               {activeMobileSection.children.map((series) => (
-                <button
+                <a
                   key={series.id}
-                  type="button"
+                  href={localizeAppPath(getSeriesRoutePath(series), uiLang)}
                   className={`renew-series-item ${selectedSeries === series.id && !searchKeyword.trim() ? 'is-active' : ''}`}
-                  onClick={() => selectCatalogSeries(series, { closeSection: true })}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    selectCatalogSeries(series, { closeSection: true });
+                  }}
                 >
                   <RenewSeriesOptionContent series={series} boxImageByCode={seriesBoxImageByCode} />
-                </button>
+                </a>
               ))}
             </div>
           ) : null}
@@ -6847,14 +6962,17 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
               {openSection === section.id ? (
                 <div className="renew-series-list">
                   {section.children.map((series) => (
-                    <button
+                    <a
                       key={series.id}
-                      type="button"
+                      href={localizeAppPath(getSeriesRoutePath(series), uiLang)}
                       className={`renew-series-item ${selectedSeries === series.id && !searchKeyword.trim() ? 'is-active' : ''}`}
-                      onClick={() => selectCatalogSeries(series)}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        selectCatalogSeries(series);
+                      }}
                     >
                       <RenewSeriesOptionContent series={series} boxImageByCode={seriesBoxImageByCode} />
-                    </button>
+                    </a>
                   ))}
                 </div>
               ) : null}
@@ -6898,13 +7016,13 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
 
         <div className="renew-filter-line">
           <div className="renew-chip-group renew-catalog-view-group">
-            <span className="renew-chip-group-label">{uiLang === 'EN' ? 'View' : '보기'}</span>
+            <span className="renew-chip-group-label">{getLocaleText(uiLang, '보기', 'View', '表示')}</span>
             <button type="button" className={collectionFilter === 'all' ? 'is-active' : ''} onClick={() => setCollectionFilter('all')}>{t('all')}</button>
             <button type="button" className={collectionFilter === 'owned' ? 'is-active' : ''} onClick={() => setCollectionFilter('owned')}>{t('owned')}</button>
             <button type="button" className={collectionFilter === 'wish' ? 'is-active' : ''} onClick={() => setCollectionFilter('wish')}>{t('wishlist')}</button>
           </div>
           <div className="renew-chip-group renew-catalog-sort-group">
-            <span className="renew-chip-group-label">{uiLang === 'EN' ? 'Sort' : '정렬'}</span>
+            <span className="renew-chip-group-label">{getLocaleText(uiLang, '정렬', 'Sort', '並び替え')}</span>
             <button type="button" className={catalogSortMode === 'rarity' ? 'is-active' : ''} onClick={() => setCatalogSortMode('rarity')}>{t('catalogSortRarity')}</button>
             <button type="button" className={catalogSortMode === 'price' ? 'is-active' : ''} onClick={() => setCatalogSortMode('price')}>{t('catalogSortPrice')}</button>
           </div>
@@ -6969,15 +7087,26 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                       {listingCount ? <span className="renew-market-badge">매물 {listingCount}</span> : null}
                     </div>
                       <div className="renew-card-body">
-                        <b>{card.cardNo}</b>
+                        <a
+                          className="renew-card-code-link"
+                          href={localizeAppPath(`/prices/card/${encodeURIComponent(card.cardNo)}`, uiLang)}
+                          title={`${card.cardNo} ${card.name} ${getLocaleText(uiLang, '시세', 'price', '相場')}`}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            openCard(card.id);
+                          }}
+                        >
+                          {card.cardNo}
+                        </a>
                         <div className="renew-card-price-row" title={card.name}>
                           <span className="renew-card-price-chip">
                             <em>Single</em>
-                            <b>{catalogMarketPrice?.priceUsd ? formatCatalogWonFromUsd(catalogMarketPrice.priceUsd) : '-'}</b>
+                            <b>{catalogMarketPrice?.priceUsd ? (isJapaneseUi(uiLang) ? formatYen(catalogMarketPrice.priceUsd * MARKET_USD_TO_JPY) : formatCatalogWonFromUsd(catalogMarketPrice.priceUsd)) : '-'}</b>
                           </span>
                           <span className="renew-card-price-chip">
                             <em>PSA10</em>
-                            <b>{catalogMarketPrice?.psa10PriceUsd ? formatCatalogWonFromUsd(catalogMarketPrice.psa10PriceUsd) : '-'}</b>
+                            <b>{catalogMarketPrice?.psa10PriceUsd ? (isJapaneseUi(uiLang) ? formatYen(catalogMarketPrice.psa10PriceUsd * MARKET_USD_TO_JPY) : formatCatalogWonFromUsd(catalogMarketPrice.psa10PriceUsd)) : '-'}</b>
                           </span>
                         </div>
                         <div className="renew-card-actions" onClick={(event) => event.stopPropagation()}>
@@ -7105,11 +7234,11 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           </details>
           <div className="renew-modal-actions">
             <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
-            {snkrdunkApparelId ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>시세 알림</button> : null}
+            {snkrdunkApparelId && !isJapaneseUi(uiLang) ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>{getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}</button> : null}
             {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
             {marketListingCount ? (
               <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
-                관련 매물 {marketListingCount}개 보기
+                {getLocaleText(uiLang, `관련 매물 ${marketListingCount}개 보기`, `View ${marketListingCount} related listings`, `関連出品 ${marketListingCount}件を見る`)}
               </button>
             ) : null}
             <button type="button" onClick={() => onSearchSameName?.(card.name)}>{t('searchSameName')}</button>
@@ -8691,8 +8820,8 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   const rangeLabel = range === '1d' ? '1D' : range === '1m' ? '1M' : range === '1y' ? '1Y' : range === '6m' ? '6M' : '7D';
   if (!orderedPoints.length) {
     const emptyText = range === '7d'
-      ? (uiLang === 'en' ? 'No trades in the last 7 days.' : '최근 7일간 거래 데이터가 없습니다.')
-      : (uiLang === 'en' ? `No trades in the selected ${rangeLabel} range.` : `${rangeLabel} 기간 내 거래 데이터가 없습니다.`);
+      ? getLocaleText(uiLang, '최근 7일간 거래 데이터가 없습니다.', 'No trades in the last 7 days.', '直近7日間の取引データはありません。')
+      : getLocaleText(uiLang, `${rangeLabel} 기간 내 거래 데이터가 없습니다.`, `No trades in the selected ${rangeLabel} range.`, `選択した${rangeLabel}期間の取引データはありません。`);
     return <div className="renew-chart-placeholder"><span>{emptyText}</span></div>;
   }
   const width = isMobileChart ? 430 : 920;
@@ -8782,7 +8911,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
   return (
     <div className="renew-market-chart-box">
       <span className="renew-chart-range-label">{rangeLabel}</span>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="시세 그래프" preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={getLocaleText(uiLang, '시세 그래프', 'Market price chart', '相場グラフ')} preserveAspectRatio="none">
         <defs>
           <linearGradient id="renew-chart-fill" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="#c94d35" stopOpacity="0.28" />
@@ -8800,8 +8929,8 @@ function RenewMarketChart({ points = [], uiLang, range }) {
         })}
         <line className="renew-chart-boundary" x1={padX} y1={maxLabelY} x2={width - padX} y2={maxLabelY} />
         <line className="renew-chart-boundary" x1={padX} y1={minLabelY} x2={width - padX} y2={minLabelY} />
-        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{formatUsd(maxBoundaryPrice / MARKET_USD_TO_JPY)}</text>
-        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{formatUsd(minBoundaryPrice / MARKET_USD_TO_JPY)}</text>
+        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{getLocalizedCurrencyText(maxBoundaryPrice, uiLang)}</text>
+        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{getLocalizedCurrencyText(minBoundaryPrice, uiLang)}</text>
         {!hasSinglePoint ? <path d={area} className="renew-chart-area" /> : null}
         {!hasSinglePoint ? <path d={path} className="renew-chart-line" /> : null}
         {axisLabels.map((item) => (
@@ -8834,7 +8963,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             r={hitRadius}
             tabIndex="0"
             role="button"
-            aria-label={`${formatMarketDate(point.timestamp)} ${formatUsdWonFromYen(point.price)}`}
+            aria-label={`${formatMarketDate(point.timestamp)} ${getLocalizedCurrencyText(point.price, uiLang)}`}
             onClick={() => setSelectedIndex(index)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -8855,7 +8984,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             />
             <rect x={tipX} y={tipY} width={tipWidth} height={tipHeight} rx="10" />
             <text className="renew-chart-tip-date" x={tipX + 14} y={tipY + 24}>{formatMarketDate(active.timestamp)}</text>
-            <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{formatUsdWonFromYen(active.price)}</text>
+            <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{getLocalizedCurrencyText(active.price, uiLang)}</text>
           </g>
         ) : null}
       </svg>
@@ -9272,9 +9401,9 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
         ))}
       </div>
       {totalBoxPages > 1 && (
-        <div className="renew-box-market-pager" aria-label={uiLang === 'en' ? 'Box price pages' : '박스 시세 페이지'}>
+        <div className="renew-box-market-pager" aria-label={getLocaleText(uiLang, '박스 시세 페이지', 'Box price pages', 'ボックス相場ページ')}>
           <button type="button" disabled={currentBoxPage <= 1} onClick={() => setBoxPage((page) => Math.max(1, page - 1))}>
-            {uiLang === 'en' ? 'Prev' : '이전'}
+            {getLocaleText(uiLang, '이전', 'Prev', '前へ')}
           </button>
           {Array.from({ length: totalBoxPages }, (_, index) => index + 1).map((page) => (
             <button
@@ -9288,7 +9417,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
             </button>
           ))}
           <button type="button" disabled={currentBoxPage >= totalBoxPages} onClick={() => setBoxPage((page) => Math.min(totalBoxPages, page + 1))}>
-            {uiLang === 'en' ? 'Next' : '다음'}
+            {getLocaleText(uiLang, '다음', 'Next', '次へ')}
           </button>
         </div>
       )}
@@ -9343,11 +9472,12 @@ function getMarketMetaLine(item) {
   return [item?.locale || 'JP', rarity, ...variants].filter(Boolean).join(' · ');
 }
 
-function getMarketCandidatePriceText(item, fallbackText) {
+function getMarketCandidatePriceText(item, fallbackText, uiLang = 'KR') {
   const livePriceJpy = Number(item?.displayPriceJpy || item?.latestPriceJpy || 0);
-  if (livePriceJpy > 0) return formatUsdWonFromYen(livePriceJpy);
+  if (livePriceJpy > 0) return getLocalizedCurrencyText(livePriceJpy, uiLang);
   const staticPriceUsd = Number(item?.minPrice || 0);
-  return staticPriceUsd > 0 ? formatUsdWonFromUsd(staticPriceUsd) : fallbackText;
+  if (staticPriceUsd <= 0) return fallbackText;
+  return isJapaneseUi(uiLang) ? formatYen(staticPriceUsd * MARKET_USD_TO_JPY) : formatUsdWonFromUsd(staticPriceUsd);
 }
 
 function getMarketCandidateStockScore(item) {
@@ -9813,7 +9943,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
   });
   const recentSalesVisible = recentSalesInRange.length ? recentSalesInRange : recentSales;
-  const currentPrice = selectedLatest?.price ? formatUsdWonFromYen(selectedLatest.price) : getMarketCandidatePriceText(selected, t('checkPrice'));
+  const currentPrice = selectedLatest?.price ? getLocalizedCurrencyText(selectedLatest.price, uiLang) : getMarketCandidatePriceText(selected, t('checkPrice'), uiLang);
   const latestSourceUrl = selectedLatest?.sourceUrl || '';
   const psaSourceUrl = normalizedCondition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
     ? latestSourceUrl
@@ -9912,7 +10042,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                           <small>{getMarketMetaLine(item)}</small>
                           <small className="renew-market-candidate-set">{item.setName}</small>
                           <div className="renew-market-candidate-bottom">
-                            <b>{getMarketCandidatePriceText(item, t('checkPrice'))}</b>
+                            <b>{getMarketCandidatePriceText(item, t('checkPrice'), uiLang)}</b>
                             <small className="renew-market-candidate-id">#{item.apparelId}</small>
                           </div>
                           {canMapInitialCard ? (
@@ -9962,7 +10092,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                   </button>
                 ) : null}
                 <a href={selected?.sourceUrl} target="_blank" rel="noreferrer"><span className="renew-action-full">{t('sourceMarket')}</span><span className="renew-action-compact">{t('sourceMarketShort')}</span></a>
-                <button
+                {!isJapaneseUi(uiLang) ? <button
                   type="button"
                   className="renew-alert-button"
                   onClick={() => {
@@ -9974,7 +10104,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                   }}
                 >
                   시세 알림
-                </button>
+                </button> : null}
                 <button
                   type="button"
                   className="renew-portfolio-add-button"
@@ -9987,7 +10117,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                   }}
                 >
                   <span aria-hidden="true">+</span>
-                  {uiLang === 'en' ? 'Add to Portfolio' : '포트폴리오 추가'}
+                  {getLocaleText(uiLang, '포트폴리오 추가', 'Add to Portfolio', 'ポートフォリオに追加')}
                 </button>
               </div>
             </div>
@@ -10021,7 +10151,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                   <div key={`${sale.date}-${sale.price}-${index}`} className="renew-market-sale">
                     <span>{getMarketSaleSourceLabel(sale, normalizedCondition === 'a' ? 'Single' : normalizedCondition.toUpperCase())}</span>
                     <small>{formatMarketSaleDate(sale)}</small>
-                    <strong>{formatUsdWonFromYen(sale.price)}</strong>
+                    <strong>{getLocalizedCurrencyText(sale.price, uiLang)}</strong>
                   </div>
                 ))}
                 {!recentSalesVisible.length ? <div className="renew-empty">{t('noRecentSales')}</div> : null}
@@ -10272,6 +10402,72 @@ function formatShopDistance(distanceKm) {
   if (!Number.isFinite(distanceKm)) return '';
   if (distanceKm < 1) return `${Math.max(10, Math.round(distanceKm * 1000 / 10) * 10)}m`;
   return `${distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm)}km`;
+}
+
+function RenewJapaneseShops() {
+  const [prefecture, setPrefecture] = useState('');
+  const [query, setQuery] = useState('');
+  const prefectures = useMemo(() => [...new Set(JP_OFFICIAL_SHOPS.map((shop) => shop.prefecture))], []);
+  const shops = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return JP_OFFICIAL_SHOPS.filter((shop) => {
+      if (prefecture && shop.prefecture !== prefecture) return false;
+      if (!normalizedQuery) return true;
+      return `${shop.name} ${shop.address}`.toLowerCase().includes(normalizedQuery);
+    });
+  }, [prefecture, query]);
+
+  return (
+    <main className="renew-subpage">
+      <section className="renew-panel renew-shops renew-jp-shops">
+        <div className="renew-jp-shop-intro">
+          <div>
+            <span>OFFICIAL SHOP</span>
+            <h1>ONE PIECEカードゲーム 公式ショップ</h1>
+            <p>公式ショップの住所・営業時間を確認できます。商品在庫とイベントは公式サイトの最新案内をご確認ください。</p>
+          </div>
+          <a href={JP_OFFICIAL_SHOP_SOURCE_URL} target="_blank" rel="noreferrer">公式サイト</a>
+        </div>
+
+        <div className="renew-shop-filters renew-jp-shop-filters">
+          <select value={prefecture} onChange={(event) => setPrefecture(event.target.value)} aria-label="都道府県を選択">
+            <option value="">すべての地域</option>
+            {prefectures.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+          <label className="renew-shop-search">
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="店舗名または住所で検索" aria-label="店舗を検索" />
+          </label>
+        </div>
+
+        <aside className="renew-jp-shop-resources" aria-label="公式ショップ情報">
+          <a href={JP_CERTIFIED_SHOP_SOURCE_URL} target="_blank" rel="noreferrer">
+            <strong>公認店を探す</strong>
+            <span>地域・市区町村ごとの公認店は公式検索で確認</span>
+          </a>
+          <a href={JP_EVENT_SOURCE_URL} target="_blank" rel="noreferrer">
+            <strong>公式イベント一覧</strong>
+            <span>大会・ティーチング会の最新開催情報を確認</span>
+          </a>
+        </aside>
+
+        <div className="renew-shop-grid">
+          {shops.map((shop) => (
+            <article key={shop.name}>
+              <b>{shop.name}</b>
+              <p>{shop.address}</p>
+              <small>{shop.prefecture} · 営業時間 {shop.hours}</small>
+              <div className="renew-shop-map-links">
+                <a href={getGoogleMapsSearchUrl(shop)} target="_blank" rel="noreferrer">Google マップ</a>
+                <a href={JP_OFFICIAL_SHOP_SOURCE_URL} target="_blank" rel="noreferrer">公式情報</a>
+              </div>
+            </article>
+          ))}
+          {!shops.length ? <p className="renew-jp-shop-empty">条件に一致する公式ショップはありません。</p> : null}
+        </div>
+        <p className="renew-jp-shop-source">店舗情報の出典: ONE PIECEカードゲーム 公式ショップ（最終確認 2026.07.15）</p>
+      </section>
+    </main>
+  );
 }
 
 function RenewShops({ uiLang }) {
@@ -10940,9 +11136,9 @@ export default function RenewApp() {
       ) : activePage === 'news' ? (
         <RenewNews uiLang={uiLang} onOpenCalendar={() => navigatePage('calendar')} />
       ) : activePage === 'partnerShops' ? (
-        <RenewPartnerShopSeoPage uiLang={uiLang} />
+        isJapaneseUi(uiLang) ? <RenewJapaneseShops /> : <RenewPartnerShopSeoPage uiLang={uiLang} />
       ) : activePage === 'shops' ? (
-        <RenewShops uiLang={uiLang} />
+        isJapaneseUi(uiLang) ? <RenewJapaneseShops /> : <RenewShops uiLang={uiLang} />
       ) : activePage === 'about' || activePage === 'dataPolicy' || activePage === 'terms' || activePage === 'privacy' ? (
         <RenewStaticInfoPage type={activePage} />
       ) : activePage === 'statsPrototype' ? (
@@ -10987,13 +11183,13 @@ export default function RenewApp() {
         <p>{t('footerIntro')}</p>
         <p>{t('footerDisclaimer')}</p>
         <div className="renew-footer-links">
-          <a href="/about">소개</a>
+          <a href={getLocalizedPagePath('about', uiLang)}>{t('about')}</a>
           <span>·</span>
-          <a href="/data-policy">데이터 운영 정책</a>
+          <a href={getLocalizedPagePath('dataPolicy', uiLang)}>{t('dataPolicy')}</a>
           <span>·</span>
-          <a href="/terms">{t('terms')}</a>
+          <a href={getLocalizedPagePath('terms', uiLang)}>{t('terms')}</a>
           <span>·</span>
-          <a href="/privacy">{t('privacy')}</a>
+          <a href={getLocalizedPagePath('privacy', uiLang)}>{t('privacy')}</a>
         </div>
       </footer>
       {legalOpen ? <RenewLegalModal type={legalOpen} onClose={closeLegal} /> : null}

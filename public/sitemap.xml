@@ -37,6 +37,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.optcgkorea.com/jp/shops</loc>
+    <lastmod>2026-07-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.optcgkorea.com/about</loc>
     <lastmod>2026-06-29</lastmod>
     <changefreq>monthly</changefreq>
