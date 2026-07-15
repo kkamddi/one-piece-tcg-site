@@ -13904,13 +13904,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::OP08-106_p5",
+    "cardId": "JP::OP08-106_p4",
     "cardNo": "OP08-106",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p4",
     "apparelId": 349482,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Nami SR-SPC [OP08-106](Booster Pack \"Emperors In The New World\")"
+    "note": "image-audited correction: 0.87684"
   },
   {
     "cardId": "JP::OP08-109",
@@ -18192,13 +18192,13 @@ const cardMarketLinks = [
     "note": "auto approved base-clean: Monkey.D.Luffy L [OP13-001](Booster Pack \"CARRYING ON HIS WILL\")"
   },
   {
-    "cardId": "JP::OP13-001_p1",
+    "cardId": "JP::OP13-001_p2",
     "cardNo": "OP13-001",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p2",
     "apparelId": 676019,
     "status": "approved",
-    "note": "auto approved p1 parallel: Monkey.D.Luffy L-P [OP13-001](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "image-audited correction: 0.9466"
   },
   {
     "cardId": "JP::OP13-001_p2",
@@ -19119,13 +19119,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::OP13-118_p5",
+    "cardId": "JP::OP13-118_p4",
     "cardNo": "OP13-118",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p4",
     "apparelId": 676009,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Monkey.D.Luffy : Wanted SEC-SPC [OP13-118](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "image-audited correction: 0.93623"
   },
   {
     "cardId": "JP::OP13-119",
@@ -19197,13 +19197,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::OP13-119_p5",
+    "cardId": "JP::OP13-119_p4",
     "cardNo": "OP13-119",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p4",
     "apparelId": 676010,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Portgas.D.Ace : Wanted SEC-SPC [OP13-119](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "image-audited correction: 0.91098"
   },
   {
     "cardId": "JP::OP13-120",
@@ -19275,13 +19275,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::OP13-120_p5",
+    "cardId": "JP::OP13-120_p4",
     "cardNo": "OP13-120",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p4",
     "apparelId": 676011,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Sabo : Wanted SEC-SPC [OP13-120](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "image-audited correction: 0.92462"
   },
   {
     "cardId": "JP::OP14-001",
@@ -20759,13 +20759,13 @@ const cardMarketLinks = [
     "note": "auto-approved: single JP market candidate (eustace kid [P-003]  (CHAMPIONSHIP Set Privilege))"
   },
   {
-    "cardId": "JP::P-011",
+    "cardId": "JP::P-011_p1",
     "cardNo": "P-011",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 140963,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Uta L [P-011] (Premium Card Collection - Uta -))"
+    "note": "image-audited correction: 0.98163"
   },
   {
     "cardId": "JP::P-014",
@@ -20887,40 +20887,22 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::P-019",
-    "cardNo": "P-019",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 198711,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Bepo P [P-019] (Standard Battle Pack Vol.7))"
-  },
-  {
     "cardId": "JP::P-019_p1",
     "cardNo": "P-019",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 198711,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Bepo P [P-019] (Standard Battle Pack Vol.7))"
+    "note": "image-audited correction: 0.98291"
   },
   {
-    "cardId": "JP::P-022",
+    "cardId": "JP::P-022_p2",
     "cardNo": "P-022",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p2",
     "apparelId": 134316,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Monkey D Luffy P [P-022] (Premium Card Collection -ONE PIECE FILM RED-))"
-  },
-  {
-    "cardId": "JP::P-022_p1",
-    "cardNo": "P-022",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 134316,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Monkey D Luffy P [P-022] (Premium Card Collection -ONE PIECE FILM RED-))"
+    "note": "image-audited correction: 0.85834"
   },
   {
     "cardId": "JP::P-025",
@@ -20941,31 +20923,13 @@ const cardMarketLinks = [
     "note": "auto-approved: single JP market candidate (Morgan [P-026]  (Meetup Souvenir))"
   },
   {
-    "cardId": "JP::P-028",
-    "cardNo": "P-028",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 157941,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Portgas D Ace P [P-028] (Promotion Card Set 3))"
-  },
-  {
-    "cardId": "JP::P-028_p1",
-    "cardNo": "P-028",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 157941,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Portgas D Ace P [P-028] (Promotion Card Set 3))"
-  },
-  {
     "cardId": "JP::P-028_p2",
     "cardNo": "P-028",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p2",
     "apparelId": 157941,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Portgas D Ace P [P-028] (Promotion Card Set 3))"
+    "note": "image-audited correction: 0.94682"
   },
   {
     "cardId": "JP::P-029",
@@ -21063,13 +21027,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::P-031",
+    "cardId": "JP::P-031_p1",
     "cardNo": "P-031",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 140967,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Uta P [P-031] (Premium Card Collection - Uta -))"
+    "note": "image-audited correction: 0.98317"
   },
   {
     "cardId": "JP::P-033",
@@ -21232,31 +21196,13 @@ const cardMarketLinks = [
     "note": "auto-approved: single JP market candidate (Monkey D Luffy P [P-043]  (Weekly Shonen  JUMP 2023 36/37 combined issue supplement))"
   },
   {
-    "cardId": "JP::P-044",
-    "cardNo": "P-044",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 660046,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Sabo P : Foil [P-044](Premium Booster \"One Piece Card The Best vol.2\"))"
-  },
-  {
     "cardId": "JP::P-044_p1",
     "cardNo": "P-044",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 660046,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Sabo P : Foil [P-044](Premium Booster \"One Piece Card The Best vol.2\"))"
-  },
-  {
-    "cardId": "JP::P-044_r1",
-    "cardNo": "P-044",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 660046,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Sabo P : Foil [P-044](Premium Booster \"One Piece Card The Best vol.2\"))"
+    "note": "image-audited correction: 0.89438"
   },
   {
     "cardId": "JP::P-047",
@@ -21817,31 +21763,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::P-070",
-    "cardNo": "P-070",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 660050,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Carrot P : Foil [P-070](Premium Booster \"One Piece Card The Best vol.2\"))"
-  },
-  {
     "cardId": "JP::P-070_p1",
     "cardNo": "P-070",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 660050,
     "status": "approved",
-    "note": "auto-approved: single JP market candidate (Carrot P : Foil [P-070](Premium Booster \"One Piece Card The Best vol.2\"))"
-  },
-  {
-    "cardId": "JP::P-070_r1",
-    "cardNo": "P-070",
-    "locale": "JP",
-    "variantKey": "",
-    "apparelId": 660050,
-    "status": "approved",
-    "note": "auto-approved: single JP market candidate (Carrot P : Foil [P-070](Premium Booster \"One Piece Card The Best vol.2\"))"
+    "note": "image-audited correction: 0.88563"
   },
   {
     "cardId": "JP::P-072",
@@ -21858,13 +21786,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::P-073",
+    "cardId": "JP::P-073_p1",
     "cardNo": "P-073",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 380950,
     "status": "approved",
-    "note": "auto approved base-clean: Sabo P [P-073](Premium Card Collection \"Best Selection vol.3\")"
+    "note": "image-audited correction: 0.85938"
   },
   {
     "cardId": "JP::P-073_p2",
@@ -21897,13 +21825,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::P-074",
+    "cardId": "JP::P-074_p1",
     "cardNo": "P-074",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 380951,
     "status": "approved",
-    "note": "auto approved base-clean: Portgas.D.Ace P [P-074](Premium Card Collection \"Best Selection vol.3\")"
+    "note": "image-audited correction: 0.84125"
   },
   {
     "cardId": "JP::P-074_p2",
@@ -21936,13 +21864,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::P-075",
+    "cardId": "JP::P-075_p1",
     "cardNo": "P-075",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 380952,
     "status": "approved",
-    "note": "auto approved base-clean: Monkey.D.Luffy P [P-075](Premium Card Collection \"Best Selection vol.3\")"
+    "note": "image-audited correction: 0.88617"
   },
   {
     "cardId": "JP::P-075_p2",
@@ -23378,13 +23306,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::ST01-012_p5",
+    "cardId": "JP::ST01-012_p1",
     "cardNo": "ST01-012",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 112982,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Monkey.D.Luffy : Wanted SR-SPC [ST01-012](Booster Pack Formidable Enemy)"
+    "note": "image-audited correction: 0.84504"
   },
   {
     "cardId": "JP::ST01-012_p6",
@@ -23720,13 +23648,13 @@ const cardMarketLinks = [
     ]
   },
   {
-    "cardId": "JP::ST04-003_p5",
+    "cardId": "JP::ST04-003_p1",
     "cardNo": "ST04-003",
     "locale": "JP",
-    "variantKey": "",
+    "variantKey": "p1",
     "apparelId": 112985,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Kaido : Wanted SR-SPC [ST04-003] (Booster Pack Formidable Enemy)"
+    "note": "image-audited correction: 0.86415"
   },
   {
     "cardId": "JP::ST04-003_r1",
@@ -26527,6 +26455,2976 @@ const cardMarketLinks = [
     "apparelId": null,
     "status": "pending",
     "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::P-001",
+    "cardNo": "P-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98592,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86203, Promotion Pack 2022"
+  },
+  {
+    "cardId": "JP::P-002",
+    "cardNo": "P-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98593,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90745, Promotion Pack 2022"
+  },
+  {
+    "cardId": "JP::P-004",
+    "cardNo": "P-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98595,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90352, Promotion Pack 2022"
+  },
+  {
+    "cardId": "JP::P-005",
+    "cardNo": "P-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98596,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93096, Promotion Pack 2022"
+  },
+  {
+    "cardId": "JP::P-006",
+    "cardNo": "P-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98597,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90341, V JUMP 2022.9 Freebie"
+  },
+  {
+    "cardId": "JP::P-007",
+    "cardNo": "P-007",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98662,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89066, Sikyo JUMP 2022.9 Freebie"
+  },
+  {
+    "cardId": "JP::P-008",
+    "cardNo": "P-008",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98665,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89755, Sikyo JUMP 2022.9 Freebie"
+  },
+  {
+    "cardId": "JP::P-009",
+    "cardNo": "P-009",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98667,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88354, Sikyo JUMP 2022.9 Freebie"
+  },
+  {
+    "cardId": "JP::P-010",
+    "cardNo": "P-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98668,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88895, Sikyo JUMP 2022.9 Freebie"
+  },
+  {
+    "cardId": "JP::P-024",
+    "cardNo": "P-024",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 98689,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89511, Meetup Souvenir"
+  },
+  {
+    "cardId": "JP::ST01-006_p6",
+    "cardNo": "ST01-006",
+    "locale": "JP",
+    "variantKey": "p6",
+    "apparelId": 102651,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89351, Flagship Battle Best 8"
+  },
+  {
+    "cardId": "JP::ST01-013_p5",
+    "cardNo": "ST01-013",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 102903,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.91124, Championship Battle Best 16"
+  },
+  {
+    "cardId": "JP::OP01-004_p2",
+    "cardNo": "OP01-004",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 102904,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85773, Championship Best 32"
+  },
+  {
+    "cardId": "JP::P-028",
+    "cardNo": "P-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 104498,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.888, Promotion Pack 2022 Vol.2"
+  },
+  {
+    "cardId": "JP::P-032",
+    "cardNo": "P-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 104502,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90299, Promotion Pack 2022 Vol.2"
+  },
+  {
+    "cardId": "JP::ST01-007_p1",
+    "cardNo": "ST01-007",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 105466,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88748, Standard Battle Trophy"
+  },
+  {
+    "cardId": "JP::ST01-007_p2",
+    "cardNo": "ST01-007",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 105467,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89178, Standard Battle Pack Vol.2"
+  },
+  {
+    "cardId": "JP::ST01-009_p1",
+    "cardNo": "ST01-009",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 106738,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84879, JUMPGIGA 2023 WINTER"
+  },
+  {
+    "cardId": "JP::OP01-025_p4",
+    "cardNo": "OP01-025",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 106779,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85396, Flagship Battle Victory souvenir"
+  },
+  {
+    "cardId": "JP::ST04-005_p2",
+    "cardNo": "ST04-005",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 106780,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90685, Flagship Battle Victory souvenir"
+  },
+  {
+    "cardId": "JP::P-016_p1",
+    "cardNo": "P-016",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110713,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88184, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::ST01-007_p3",
+    "cardNo": "ST01-007",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 110715,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8656, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::ST01-002_p2",
+    "cardNo": "ST01-002",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 110716,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87202, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::ST01-004_p1",
+    "cardNo": "ST01-004",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110717,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8495, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::OP01-017_p1",
+    "cardNo": "OP01-017",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110719,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88669, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::OP01-021_p1",
+    "cardNo": "OP01-021",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110721,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85723, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::OP02-114_p3",
+    "cardNo": "OP02-114",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 117168,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85666, Champion Ship Prize"
+  },
+  {
+    "cardId": "JP::OP02-096_p3",
+    "cardNo": "OP02-096",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 117169,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94182, Champion Ship Prize"
+  },
+  {
+    "cardId": "JP::OP01-120_p4",
+    "cardNo": "OP01-120",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 222162,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94893, Shanks SEC-P (Opened) [OP01-120](Flagship Battle Victory souvenir) for Asia"
+  },
+  {
+    "cardId": "JP::OP01-016_p6",
+    "cardNo": "OP01-016",
+    "locale": "JP",
+    "variantKey": "p6",
+    "apparelId": 129616,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90635, Challenge Kaido!! 1st Season"
+  },
+  {
+    "cardId": "JP::OP04-083_p3",
+    "cardNo": "OP04-083",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 129621,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87349, 8 Pack Battle Winner Prize"
+  },
+  {
+    "cardId": "JP::OP02-098_p3",
+    "cardNo": "OP02-098",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 129626,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93329, Flagship Battle Best 8"
+  },
+  {
+    "cardId": "JP::OP02-029_p2",
+    "cardNo": "OP02-029",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 129627,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98732, Premium Card Collection Girls Edition"
+  },
+  {
+    "cardId": "JP::OP02-105_p3",
+    "cardNo": "OP02-105",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 129629,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98966, Premium Card Collection Girls Edition"
+  },
+  {
+    "cardId": "JP::ST04-011_p3",
+    "cardNo": "ST04-011",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 129631,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97735, Premium Card Collection Girls Edition"
+  },
+  {
+    "cardId": "JP::OP01-077_p3",
+    "cardNo": "OP01-077",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 129632,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98214, Premium Card Collection Girls Edition"
+  },
+  {
+    "cardId": "JP::P-001_p4",
+    "cardNo": "P-001",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 134160,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86351, Promotion Card Seven-Eleven Collaboration"
+  },
+  {
+    "cardId": "JP::ST03-008_p3",
+    "cardNo": "ST03-008",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 134161,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88122, Promotion Card Seven-Eleven Collaboration"
+  },
+  {
+    "cardId": "JP::P-041_p3",
+    "cardNo": "P-041",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 134163,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94447, Promotion Card Seven-Eleven Collaboration"
+  },
+  {
+    "cardId": "JP::P-042",
+    "cardNo": "P-042",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 135104,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97031, Sikyo JUMP 2023.9 Freebie [Revised]"
+  },
+  {
+    "cardId": "JP::P-044",
+    "cardNo": "P-044",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 135105,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97543, Sikyo JUMP 2023.10 Freebie"
+  },
+  {
+    "cardId": "JP::P-045",
+    "cardNo": "P-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 136541,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89255, Meetup Souvenir"
+  },
+  {
+    "cardId": "JP::P-047",
+    "cardNo": "P-047",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 138415,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95965, Promotion Pack Vol.4"
+  },
+  {
+    "cardId": "JP::P-051",
+    "cardNo": "P-051",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 138419,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98355, Promotion Pack Vol.4"
+  },
+  {
+    "cardId": "JP::P-056",
+    "cardNo": "P-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 138424,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85091, Promotion Pack Vol.4"
+  },
+  {
+    "cardId": "JP::OP01-094_p3",
+    "cardNo": "OP01-094",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 138425,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88002, Flagship Battle October Victory souvenir"
+  },
+  {
+    "cardId": "JP::ST07-010_p2",
+    "cardNo": "ST07-010",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 138426,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88884, flagship battle October Best 8 Souvenirs"
+  },
+  {
+    "cardId": "JP::ST10-006_p2",
+    "cardNo": "ST10-006",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 138476,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89522, Champion Ship Prize"
+  },
+  {
+    "cardId": "JP::ST01-012_p6",
+    "cardNo": "ST01-012",
+    "locale": "JP",
+    "variantKey": "p6",
+    "apparelId": 141290,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85413, Standard Battle Pack Vol.5"
+  },
+  {
+    "cardId": "JP::ST11-003_p1",
+    "cardNo": "ST11-003",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 155969,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98372, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::ST11-004_p1",
+    "cardNo": "ST11-004",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 155970,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97778, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::ST11-005_p1",
+    "cardNo": "ST11-005",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 155971,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97875, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::P-057",
+    "cardNo": "P-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 155972,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98807, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::P-058",
+    "cardNo": "P-058",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 155973,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98321, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::P-059",
+    "cardNo": "P-059",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 155974,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98742, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::P-060",
+    "cardNo": "P-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 155975,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98943, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::ST01-013_p4",
+    "cardNo": "ST01-013",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 157930,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97594, Promotion Card Set 1"
+  },
+  {
+    "cardId": "JP::P-001_p5",
+    "cardNo": "P-001",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 157931,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97287, Promotion Card Set 1"
+  },
+  {
+    "cardId": "JP::ST09-012_p1",
+    "cardNo": "ST09-012",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 157932,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97355, Promotion Card Set 1"
+  },
+  {
+    "cardId": "JP::OP01-013_p3",
+    "cardNo": "OP01-013",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 157933,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98873, Promotion Card Set 2"
+  },
+  {
+    "cardId": "JP::ST01-005_p3",
+    "cardNo": "ST01-005",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 157934,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97095, Promotion Card Set 2"
+  },
+  {
+    "cardId": "JP::ST03-008_p4",
+    "cardNo": "ST03-008",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 157935,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97649, Promotion Card Set 2"
+  },
+  {
+    "cardId": "JP::OP02-059_p2",
+    "cardNo": "OP02-059",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 157936,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.92525, Promotion Card Set 2"
+  },
+  {
+    "cardId": "JP::ST01-006_p7",
+    "cardNo": "ST01-006",
+    "locale": "JP",
+    "variantKey": "p7",
+    "apparelId": 157937,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97965, Promotion Card Set 3"
+  },
+  {
+    "cardId": "JP::OP01-021_p5",
+    "cardNo": "OP01-021",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 157938,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97576, Promotion Card Set 3"
+  },
+  {
+    "cardId": "JP::ST01-008_p3",
+    "cardNo": "ST01-008",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 157939,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98275, Promotion Card Set 3"
+  },
+  {
+    "cardId": "JP::OP01-005_p4",
+    "cardNo": "OP01-005",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 157940,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9276, Promotion Card Set 3"
+  },
+  {
+    "cardId": "JP::OP03-044_p1",
+    "cardNo": "OP03-044",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 159279,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86262, Standard Battle Pack Vol.6"
+  },
+  {
+    "cardId": "JP::OP03-116_p1",
+    "cardNo": "OP03-116",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 159282,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98289, Standard Battle Pack Vol.6"
+  },
+  {
+    "cardId": "JP::ST01-012_p5",
+    "cardNo": "ST01-012",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 161040,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88667, Standard Battle Trophy"
+  },
+  {
+    "cardId": "JP::OP01-070_p2",
+    "cardNo": "OP01-070",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 222164,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88195, Dracule Mihawk SR [OP01-070](Flagship Battle Victory Souvenir) for Asia"
+  },
+  {
+    "cardId": "JP::OP06-093_p2",
+    "cardNo": "OP06-093",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 222165,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9116, Perona SR [OP06-093](Flagship Battle Top 8 Souvenirs) for Asia"
+  },
+  {
+    "cardId": "JP::P-066",
+    "cardNo": "P-066",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 205880,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.91785, Sikyo JUMP 2024.4 Freebie"
+  },
+  {
+    "cardId": "JP::OP06-069_p2",
+    "cardNo": "OP06-069",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 214795,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97728, Flagship Battle Victory Souvenir"
+  },
+  {
+    "cardId": "JP::EB01-012_p2",
+    "cardNo": "EB01-012",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 222160,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98016, Cavendish SR [EB01-012](Flagship Battle Top 8 Souvenirs) for Asia"
+  },
+  {
+    "cardId": "JP::OP07-119_p2",
+    "cardNo": "OP07-119",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 216889,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9811, Portgas D Ace SEC-P Serial Number (Opened) [OP07-119] (Flagship Battle Souvenir)for Japan"
+  },
+  {
+    "cardId": "JP::OP05-060_p2",
+    "cardNo": "OP05-060",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 237288,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96822, ONE PIECE Card Game \"SOUND LOADER Volume.1\""
+  },
+  {
+    "cardId": "JP::OP05-098_p2",
+    "cardNo": "OP05-098",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 237289,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98024, ONE PIECE Card Game \"SOUND LOADER Volume.2\""
+  },
+  {
+    "cardId": "JP::OP03-123_p2",
+    "cardNo": "OP03-123",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 237290,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97855, Promotional Card \"Championship 2024 Souvenir\""
+  },
+  {
+    "cardId": "JP::OP03-112_p3",
+    "cardNo": "OP03-112",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 237291,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9797, Promotional Card \"Championship 2024 Souvenir\""
+  },
+  {
+    "cardId": "JP::OP01-039_p1",
+    "cardNo": "OP01-039",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 252654,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97855, \"Promotion Pack EX Vol.1\""
+  },
+  {
+    "cardId": "JP::OP02-004_p3",
+    "cardNo": "OP02-004",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 252656,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8886, \"Promotion Pack EX Vol.1\""
+  },
+  {
+    "cardId": "JP::OP07-053_p2",
+    "cardNo": "OP07-053",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 259894,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87498, Promotional Card \"Standard Battle June 2024 Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::OP06-101_p3",
+    "cardNo": "OP06-101",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 297575,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88021, Promotional Card \"ONE PIECE CARD GAME 2nd ANNIVERSARY COMPLETE GUIDE\""
+  },
+  {
+    "cardId": "JP::OP05-067_p2",
+    "cardNo": "OP05-067",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 297576,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87492, Promotional Card \"ONE PIECE CARD GAME 2nd ANNIVERSARY COMPLETE GUIDE\""
+  },
+  {
+    "cardId": "JP::P-080",
+    "cardNo": "P-080",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 315323,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95224, Promotional Card \"BANDAI CARD GAMES Fest24-25 World Tour\""
+  },
+  {
+    "cardId": "JP::ST10-006_p3",
+    "cardNo": "ST10-006",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 315324,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86879, Promotional Card \"ONE PIECE DAY'24 Visitor Benefits\""
+  },
+  {
+    "cardId": "JP::OP07-109_p5",
+    "cardNo": "OP07-109",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 337446,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97909, Promotional Card \"Luffy Get Campaign With Serial Number\""
+  },
+  {
+    "cardId": "JP::OP06-047_p1",
+    "cardNo": "OP06-047",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 342319,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.883, Promotional Card \"Standard Battle September 2024 Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::P-078_p1",
+    "cardNo": "P-078",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 342329,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90756, Promotional Card \"Exchange Meeting Souvenirs\""
+  },
+  {
+    "cardId": "JP::P-079_p1",
+    "cardNo": "P-079",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 342330,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89837, Promotional Card \"Exchange Meeting Souvenirs\""
+  },
+  {
+    "cardId": "JP::ST10-004_p1",
+    "cardNo": "ST10-004",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 342331,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86994, Promotional Card \"8 Pack Battle Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::P-081_p1",
+    "cardNo": "P-081",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 362047,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85833, Promotional Card \"V Jump October 2024 Special Issue Supplement\""
+  },
+  {
+    "cardId": "JP::OP07-047_p2",
+    "cardNo": "OP07-047",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 362049,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9161, Promotional Card \"V JUMP 2024 October Special Edition Service for All Applicants\""
+  },
+  {
+    "cardId": "JP::EB01-003_p2",
+    "cardNo": "EB01-003",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 362050,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89731, Promotional Card \"V JUMP 2024 October Special Edition Service for All Applicants\""
+  },
+  {
+    "cardId": "JP::OP03-116_p4",
+    "cardNo": "OP03-116",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 364786,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93292, Promotional Card \"Championships 2024 Souvenirs\""
+  },
+  {
+    "cardId": "JP::OP05-086_p1",
+    "cardNo": "OP05-086",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 364787,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94481, Promotional Card \"Championships 2024 Souvenirs\""
+  },
+  {
+    "cardId": "JP::OP05-091_p3",
+    "cardNo": "OP05-091",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 364788,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97161, Promotional Card \"Championships 2024 Souvenirs\""
+  },
+  {
+    "cardId": "JP::OP09-002_p2",
+    "cardNo": "OP09-002",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 372848,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97662, Promotional Card \"Flagship Battle Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::OP08-084_p2",
+    "cardNo": "OP08-084",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 372849,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97607, Promotional Card \"Flagship Battle Top 8 Souvenirs\""
+  },
+  {
+    "cardId": "JP::P-083",
+    "cardNo": "P-083",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 397091,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87005, Promotional Card \"Weekly Shonen Jump 2024 Issue 45 Appendix\""
+  },
+  {
+    "cardId": "JP::OP04-092_p1",
+    "cardNo": "OP04-092",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 435352,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89667, Promotional Card \"Standard Battle December 2024 Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::P-088",
+    "cardNo": "P-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 437450,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98333, Promotional Card \"V Jump January 2025 Issue Supplement\""
+  },
+  {
+    "cardId": "JP::P-080_p1",
+    "cardNo": "P-080",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 462619,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89304, Promotional Card \"Mos Burger Collaboration Lucky Bag\""
+  },
+  {
+    "cardId": "JP::OP08-067_p2",
+    "cardNo": "OP08-067",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 467306,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97841, Promotional Card \"Flagship Battle Top 8 Commemorative Item\""
+  },
+  {
+    "cardId": "JP::OP09-069_p2",
+    "cardNo": "OP09-069",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 467307,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96817, Promotional Card \"Flagship Battle Winner's Memento\""
+  },
+  {
+    "cardId": "JP::EB01-006_p4",
+    "cardNo": "EB01-006",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 503854,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95935, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::EB01-046_p2",
+    "cardNo": "EB01-046",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 503855,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97315, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP01-077_p4",
+    "cardNo": "OP01-077",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 503856,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97299, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP07-021_p2",
+    "cardNo": "OP07-021",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 503857,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96473, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP08-074_p2",
+    "cardNo": "OP08-074",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 503858,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96982, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP09-050_p2",
+    "cardNo": "OP09-050",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 503859,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96929, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP09-106_p1",
+    "cardNo": "OP09-106",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 503860,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98371, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::EB01-006_p5",
+    "cardNo": "EB01-006",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 503861,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97044, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::EB01-046_p3",
+    "cardNo": "EB01-046",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 503862,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97799, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP01-077_p5",
+    "cardNo": "OP01-077",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 503863,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97509, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP07-021_p3",
+    "cardNo": "OP07-021",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 503864,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97191, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP08-074_p3",
+    "cardNo": "OP08-074",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 503865,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97713, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP09-050_p3",
+    "cardNo": "OP09-050",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 503866,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97713, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP09-106_p2",
+    "cardNo": "OP09-106",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 503867,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.978, Promotional Card \"Let's Get Started Campaign Promotion Pack\""
+  },
+  {
+    "cardId": "JP::OP11-010_p2",
+    "cardNo": "OP11-010",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 537524,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97103, Promotional Card \"Flagship Battle April\""
+  },
+  {
+    "cardId": "JP::P-069_p1",
+    "cardNo": "P-069",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 537525,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97012, Promotional Card \"Promotion Pack Vol.7\""
+  },
+  {
+    "cardId": "JP::OP09-043_p1",
+    "cardNo": "OP09-043",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 537527,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96979, Promotional Card \"Promotion Pack Vol.7\""
+  },
+  {
+    "cardId": "JP::ST18-002_p1",
+    "cardNo": "ST18-002",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 537530,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97234, Promotional Card \"8 Pack Battle Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::OP09-004_p4",
+    "cardNo": "OP09-004",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 549022,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94807, Promotional Card \"Championship 2025\""
+  },
+  {
+    "cardId": "JP::OP10-033_p1",
+    "cardNo": "OP10-033",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 553413,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96128, Promotional Card \"Saikyo Jump May 2025 Service for All Applicants\""
+  },
+  {
+    "cardId": "JP::OP07-066_p1",
+    "cardNo": "OP07-066",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 553414,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94118, Promotional Card \"Saikyo Jump May 2025 Service for All Applicants\""
+  },
+  {
+    "cardId": "JP::ST17-003_p1",
+    "cardNo": "ST17-003",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 553415,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94285, Promotional Card \"Saikyo Jump May 2025 Service for All Applicants\""
+  },
+  {
+    "cardId": "JP::ST01-012_p7",
+    "cardNo": "ST01-012",
+    "locale": "JP",
+    "variantKey": "p7",
+    "apparelId": 568241,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9772, Promotional Card \"Weekly Shonen Jump 2025 Issue 19 All Applicants Gift\""
+  },
+  {
+    "cardId": "JP::OP07-053_p3",
+    "cardNo": "OP07-053",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 568242,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9721, Promotional Card \"Weekly Shonen Jump 2025 Issue 19 All Applicants Gift\""
+  },
+  {
+    "cardId": "JP::OP09-027_p1",
+    "cardNo": "OP09-027",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 568243,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98156, Promotional Card \"Weekly Shonen Jump 2025 Issue 19 All Applicants Gift\""
+  },
+  {
+    "cardId": "JP::OP06-025_p2",
+    "cardNo": "OP06-025",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 575843,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97394, Promotional Card \"Promotion Pack EX Vol.7\""
+  },
+  {
+    "cardId": "JP::OP08-020_p1",
+    "cardNo": "OP08-020",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 575845,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97452, Promotional Card \"Promotion Pack EX Vol.7\""
+  },
+  {
+    "cardId": "JP::OP07-064_p3",
+    "cardNo": "OP07-064",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 575846,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96602, Promotional Card \"Promotion Pack EX Vol.7\""
+  },
+  {
+    "cardId": "JP::OP09-065_p2",
+    "cardNo": "OP09-065",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 575847,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95135, Promotional Card \"Promotion Pack EX Vol.7\""
+  },
+  {
+    "cardId": "JP::OP09-076_p2",
+    "cardNo": "OP09-076",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 575848,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96249, Promotional Card \"Promotion Pack EX Vol.7\""
+  },
+  {
+    "cardId": "JP::P-066_p1",
+    "cardNo": "P-066",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 575849,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98102, Promotional Card \"Promotion Pack EX Vol.7\""
+  },
+  {
+    "cardId": "JP::OP12-106_p2",
+    "cardNo": "OP12-106",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 626235,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95539, Promotional Card \"ONE PIECE Gakuen Volume 10 Issue Supplement\""
+  },
+  {
+    "cardId": "JP::OP12-028_p2",
+    "cardNo": "OP12-028",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 667232,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96941, Promotional Card \"Junior Exchange Event on Amazon\""
+  },
+  {
+    "cardId": "JP::OP13-057_p1",
+    "cardNo": "OP13-057",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 677616,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97693, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::OP13-019_p1",
+    "cardNo": "OP13-019",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 677617,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97891, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::OP13-040_p1",
+    "cardNo": "OP13-040",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 677618,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97853, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::ST10-006_p4",
+    "cardNo": "ST10-006",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 677619,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98163, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::OP07-033_p2",
+    "cardNo": "OP07-033",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 677620,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96106, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::OP07-053_p4",
+    "cardNo": "OP07-053",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 677621,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97661, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::OP10-049_p2",
+    "cardNo": "OP10-049",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 677622,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9679, Promotional Card \"3th ! ONE PIECE Card Treasure Campaign\""
+  },
+  {
+    "cardId": "JP::P-110",
+    "cardNo": "P-110",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 686000,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94579, Premium Card Collection \"ONE PIECE DAY'25\""
+  },
+  {
+    "cardId": "JP::ST21-014_p2",
+    "cardNo": "ST21-014",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 706813,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.91724, Promotional Card \"ONE PIECE magazine Special Feature Weekly Shonen Jump & ONE PIECE 020\""
+  },
+  {
+    "cardId": "JP::P-101",
+    "cardNo": "P-101",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 709869,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97194, Promotional Card \"Promotion Card Set 2025\""
+  },
+  {
+    "cardId": "JP::P-102",
+    "cardNo": "P-102",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 709870,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97701, Promotional Card \"Promotion Card Set 2025\""
+  },
+  {
+    "cardId": "JP::P-103",
+    "cardNo": "P-103",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 709871,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96895, Promotional Card \"Promotion Card Set 2025\""
+  },
+  {
+    "cardId": "JP::P-104",
+    "cardNo": "P-104",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 709872,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97061, Promotional Card \"Promotion Card Set 2025\""
+  },
+  {
+    "cardId": "JP::P-105",
+    "cardNo": "P-105",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 709873,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96933, Promotional Card \"Promotion Card Set 2025\""
+  },
+  {
+    "cardId": "JP::P-106",
+    "cardNo": "P-106",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 709874,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98121, Promotional Card \"Promotion Card Set 2025\""
+  },
+  {
+    "cardId": "JP::EB02-026_p2",
+    "cardNo": "EB02-026",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 714193,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95966, \"Promotion Pack EX Vol.3\""
+  },
+  {
+    "cardId": "JP::OP07-015_p3",
+    "cardNo": "OP07-015",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 714195,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94236, \"Promotion Pack EX Vol.3\""
+  },
+  {
+    "cardId": "JP::OP08-106_p5",
+    "cardNo": "OP08-106",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 714196,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93881, \"Promotion Pack EX Vol.3\""
+  },
+  {
+    "cardId": "JP::OP10-032_p2",
+    "cardNo": "OP10-032",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 714197,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96889, \"Promotion Pack EX Vol.3\""
+  },
+  {
+    "cardId": "JP::OP11-071_p1",
+    "cardNo": "OP11-071",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 714198,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95741, \"Promotion Pack EX Vol.3\""
+  },
+  {
+    "cardId": "JP::OP12-071_p1",
+    "cardNo": "OP12-071",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 714199,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95458, \"Promotion Pack EX Vol.3\""
+  },
+  {
+    "cardId": "JP::OP13-119_p5",
+    "cardNo": "OP13-119",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 714209,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95994, Promotional Card \"Season 2 Area Finals Tournament Top-Tier Prize\""
+  },
+  {
+    "cardId": "JP::OP13-120_p5",
+    "cardNo": "OP13-120",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 714210,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97221, Promotional Card \"Season 2 Area Finals Tournament Top-Tier Prize\""
+  },
+  {
+    "cardId": "JP::ST12-003_p1",
+    "cardNo": "ST12-003",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 725657,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96331, Promotional Card \"V Jump October 2025 Issue Supplement for All Applicants\""
+  },
+  {
+    "cardId": "JP::OP07-113_p1",
+    "cardNo": "OP07-113",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 725658,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9688, Promotional Card \"V Jump October 2025 Issue Supplement for All Applicants\""
+  },
+  {
+    "cardId": "JP::OP09-034_p2",
+    "cardNo": "OP09-034",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 725659,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96244, Promotional Card \"V Jump October 2025 Issue Supplement for All Applicants\""
+  },
+  {
+    "cardId": "JP::OP08-106_p3",
+    "cardNo": "OP08-106",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 729311,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97479, Promotional Card \"Nami Get Campaign With Serial Number\""
+  },
+  {
+    "cardId": "JP::OP12-020_p3",
+    "cardNo": "OP12-020",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 735734,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96309, Promotional Card \"Flagship Battle 2026 January Winner's Memento\""
+  },
+  {
+    "cardId": "JP::OP13-108_p2",
+    "cardNo": "OP13-108",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 735736,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96903, Promotional Card \"Flagship Battle 2026 January Best 8 Commemorative Item\""
+  },
+  {
+    "cardId": "JP::OP13-118_p5",
+    "cardNo": "OP13-118",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 735737,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96819, Promotional Card \"Championship 25-26 Season 2 Finals Best 32 Commemorative Item\""
+  },
+  {
+    "cardId": "JP::P-106_p2",
+    "cardNo": "P-106",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 735753,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97454, Promotional Card \"Standard Battle December 2025 Victory Souvenir\""
+  },
+  {
+    "cardId": "JP::P-101_p1",
+    "cardNo": "P-101",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760234,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97487, Promotional Card \"Standard Battle Pack Vol.14\""
+  },
+  {
+    "cardId": "JP::P-102_p1",
+    "cardNo": "P-102",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760237,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98425, Promotional Card \"Standard Battle Pack Vol.14\""
+  },
+  {
+    "cardId": "JP::P-105_p1",
+    "cardNo": "P-105",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760240,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97838, Promotional Card \"Standard Battle Pack Vol.14\""
+  },
+  {
+    "cardId": "JP::P-106_p1",
+    "cardNo": "P-106",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760241,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97599, Promotional Card \"Standard Battle Pack Vol.14\""
+  },
+  {
+    "cardId": "JP::EB04-023_p1",
+    "cardNo": "EB04-023",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760266,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98275, Promotional Card \"Standard Battle Pack Vol.15\""
+  },
+  {
+    "cardId": "JP::OP14-023_p1",
+    "cardNo": "OP14-023",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760274,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9773, Promotional Card \"Standard Battle Pack Vol.15\""
+  },
+  {
+    "cardId": "JP::OP14-087_p1",
+    "cardNo": "OP14-087",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760275,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97876, Promotional Card \"Standard Battle Pack Vol.15\""
+  },
+  {
+    "cardId": "JP::OP14-105_p1",
+    "cardNo": "OP14-105",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 760278,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98051, Promotional Card \"Standard Battle Pack Vol.15\""
+  },
+  {
+    "cardId": "JP::OP13-001_p1",
+    "cardNo": "OP13-001",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 763301,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94812, Promotional Card \"Ichibansho ONE PIECE CARD GAME Purchase Bonus\""
+  },
+  {
+    "cardId": "JP::EB02-035_p2",
+    "cardNo": "EB02-035",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 764509,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95543, Promotional Card \"8 Pack Battle\""
+  },
+  {
+    "cardId": "JP::EB04-061_p2",
+    "cardNo": "EB04-061",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 764510,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95423, Promotional Card \"Flagship Battle\""
+  },
+  {
+    "cardId": "JP::OP15-060_p2",
+    "cardNo": "OP15-060",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 764512,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9369, Promotional Card \"Flagship Battle\""
+  },
+  {
+    "cardId": "JP::OP10-005_p2",
+    "cardNo": "OP10-005",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 765619,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98057, Promotional Card \"Flagship Battle\""
+  },
+  {
+    "cardId": "JP::OP12-031_p2",
+    "cardNo": "OP12-031",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 765620,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97499, Promotional Card \"Flagship Battle\""
+  },
+  {
+    "cardId": "JP::OP07-073_p1",
+    "cardNo": "OP07-073",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 770153,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95194, Promotional Card \"BANDAI CARD GAMES Fest 25-26 in Tokyo\""
+  },
+  {
+    "cardId": "JP::EB03-027_p1",
+    "cardNo": "EB03-027",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 819284,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97033, Promotional Card \"Promotion Pack EX Vol.4\""
+  },
+  {
+    "cardId": "JP::EB04-058_p2",
+    "cardNo": "EB04-058",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 819285,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9809, Promotional Card \"Promotion Pack EX Vol.4\""
+  },
+  {
+    "cardId": "JP::OP08-047_p1",
+    "cardNo": "OP08-047",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 819286,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98137, Promotional Card \"Promotion Pack EX Vol.4\""
+  },
+  {
+    "cardId": "JP::OP13-067_p1",
+    "cardNo": "OP13-067",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 819287,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97545, Promotional Card \"Promotion Pack EX Vol.4\""
+  },
+  {
+    "cardId": "JP::OP14-083_p1",
+    "cardNo": "OP14-083",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 819288,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97443, Promotional Card \"Promotion Pack EX Vol.4\""
+  },
+  {
+    "cardId": "JP::ST29-009_p2",
+    "cardNo": "ST29-009",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 819291,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97675, Promotional Card \"Promotion Pack EX Vol.4\""
+  },
+  {
+    "cardId": "JP::P-040",
+    "cardNo": "P-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 823289,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97758, Promotional Card \"1st ANNIVERSARY COMPLETE GUIDE\""
+  },
+  {
+    "cardId": "JP::OP05-006_p3",
+    "cardNo": "OP05-006",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 825096,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98843, Promotional Card \"8 Pack Battle 2026 March\""
+  },
+  {
+    "cardId": "JP::P-150",
+    "cardNo": "P-150",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 826700,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93182, Promotional Card \"V Jump July 2026 Special Issue Supplement\""
+  },
+  {
+    "cardId": "JP::P-151",
+    "cardNo": "P-151",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 835597,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96883, Promotional Card \"Saikyo Jump July 2026 Issue Supplement\""
+  },
+  {
+    "cardId": "JP::P-112",
+    "cardNo": "P-112",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 837244,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97719, Promotional Card \"Crew Battle Straw Hat Crew Only Tournament\""
+  },
+  {
+    "cardId": "JP::P-114",
+    "cardNo": "P-114",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 837245,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97626, Promotional Card \"Crew Battle Straw Hat Crew Only Tournament\""
+  },
+  {
+    "cardId": "JP::OP07-107_p2",
+    "cardNo": "OP07-107",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 838504,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97463, Promotional Card \"ONE PIECE CARD GAME 3rd ANNIVERSARY COMPLETE GUIDE\""
+  },
+  {
+    "cardId": "JP::ST02-007_p1",
+    "cardNo": "ST02-007",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 105468,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95212, Standard Battle Pack Vol.2"
+  },
+  {
+    "cardId": "JP::OP01-014_p1",
+    "cardNo": "OP01-014",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110722,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8532, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::OP11-119_p2",
+    "cardNo": "OP11-119",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 537523,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96891, Promotional Card \"Flagship Battle April\""
+  },
+  {
+    "cardId": "JP::ST01-010_p1",
+    "cardNo": "ST01-010",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94904,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84605, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::ST01-008_p1",
+    "cardNo": "ST01-008",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94908,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87627, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::P-001_p1",
+    "cardNo": "P-001",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94909,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.91215, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::OP01-001_p1",
+    "cardNo": "OP01-001",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94915,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87252, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::ST01-005_p1",
+    "cardNo": "ST01-005",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94916,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87017, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::OP01-013_p1",
+    "cardNo": "OP01-013",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94917,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88682, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::OP01-016_p1",
+    "cardNo": "OP01-016",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94918,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85157, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::ST01-002_p1",
+    "cardNo": "ST01-002",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94919,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87754, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::OP01-022_p1",
+    "cardNo": "OP01-022",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94920,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93097, Premium Card Collection 25th Anniversary Edition"
+  },
+  {
+    "cardId": "JP::P-022_p1",
+    "cardNo": "P-022",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110712,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88777, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::ST01-002_p4",
+    "cardNo": "ST01-002",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 134320,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86656, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::ST01-011_p4",
+    "cardNo": "ST01-011",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 134324,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89077, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::OP01-014_p2",
+    "cardNo": "OP01-014",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 134325,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8544, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::OP01-005_p2",
+    "cardNo": "OP01-005",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 134326,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84089, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::P-016_p2",
+    "cardNo": "P-016",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 134327,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89108, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::ST05-004_p2",
+    "cardNo": "ST05-004",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 140964,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98313, Premium Card Collection - Uta -"
+  },
+  {
+    "cardId": "JP::OP01-005_p3",
+    "cardNo": "OP01-005",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 140965,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97771, Premium Card Collection - Uta -"
+  },
+  {
+    "cardId": "JP::OP02-120_p3",
+    "cardNo": "OP02-120",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 140966,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97497, Premium Card Collection - Uta -"
+  },
+  {
+    "cardId": "JP::ST08-002_p2",
+    "cardNo": "ST08-002",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 140968,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97575, Premium Card Collection - Uta -"
+  },
+  {
+    "cardId": "JP::OP02-001_p3",
+    "cardNo": "OP02-001",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 140969,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8853, Championship Set Benefits"
+  },
+  {
+    "cardId": "JP::OP01-029_p2",
+    "cardNo": "OP01-029",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 141829,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97309, Premium Card Collection -Best Selection vol.1-"
+  },
+  {
+    "cardId": "JP::OP02-036_p3",
+    "cardNo": "OP02-036",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 141832,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97455, Premium Card Collection -Best Selection vol.1-"
+  },
+  {
+    "cardId": "JP::OP04-105_p2",
+    "cardNo": "OP04-105",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 141836,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98452, Premium Card Collection -Best Selection vol.1-"
+  },
+  {
+    "cardId": "JP::ST03-017_p2",
+    "cardNo": "ST03-017",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 141838,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97732, Premium Card Collection -Best Selection vol.1-"
+  },
+  {
+    "cardId": "JP::OP03-013_p3",
+    "cardNo": "OP03-013",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 142187,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90645, 1st ANNIVERSARY SET"
+  },
+  {
+    "cardId": "JP::OP02-015_p3",
+    "cardNo": "OP02-015",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 142188,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89077, 1st ANNIVERSARY SET"
+  },
+  {
+    "cardId": "JP::OP01-006_p4",
+    "cardNo": "OP01-006",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 142189,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87005, 1st ANNIVERSARY SET"
+  },
+  {
+    "cardId": "JP::P-047_p1",
+    "cardNo": "P-047",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 147940,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88167, Premium Card Collection -Live Action Edition-"
+  },
+  {
+    "cardId": "JP::P-048_p1",
+    "cardNo": "P-048",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 147941,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88853, Premium Card Collection -Live Action Edition-"
+  },
+  {
+    "cardId": "JP::P-049_p1",
+    "cardNo": "P-049",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 147942,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85777, Premium Card Collection -Live Action Edition-"
+  },
+  {
+    "cardId": "JP::P-053_p1",
+    "cardNo": "P-053",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 147946,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84949, Premium Card Collection -Live Action Edition-"
+  },
+  {
+    "cardId": "JP::P-055_p1",
+    "cardNo": "P-055",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 147947,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89607, Premium Card Collection -Live Action Edition-"
+  },
+  {
+    "cardId": "JP::P-056_p1",
+    "cardNo": "P-056",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 147948,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90201, Premium Card Collection -Live Action Edition-"
+  },
+  {
+    "cardId": "JP::P-075",
+    "cardNo": "P-075",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 230771,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88509, Promotional Card \"The Strongest Three Brothers Pack\""
+  },
+  {
+    "cardId": "JP::P-074",
+    "cardNo": "P-074",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 230772,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87253, Promotional Card \"The Strongest Three Brothers Pack\""
+  },
+  {
+    "cardId": "JP::P-073",
+    "cardNo": "P-073",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 230773,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9027, Promotional Card \"The Strongest Three Brothers Pack\""
+  },
+  {
+    "cardId": "JP::ST03-013_p1",
+    "cardNo": "ST03-013",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 237321,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87896, Premium Card Collection \"Best Selection Vol.2\""
+  },
+  {
+    "cardId": "JP::ST06-008_p1",
+    "cardNo": "ST06-008",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 237323,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.88233, Premium Card Collection \"Best Selection Vol.2\""
+  },
+  {
+    "cardId": "JP::OP05-019_p1",
+    "cardNo": "OP05-019",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 237325,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84338, Premium Card Collection \"Best Selection Vol.2\""
+  },
+  {
+    "cardId": "JP::OP01-030_p1",
+    "cardNo": "OP01-030",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 300059,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8419, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP03-044_p3",
+    "cardNo": "OP03-044",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 300061,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84689, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP04-083_p5",
+    "cardNo": "OP04-083",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 300062,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85488, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP05-030_p1",
+    "cardNo": "OP05-030",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 300063,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84793, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP07-064_p2",
+    "cardNo": "OP07-064",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 300065,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.84087, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::ST13-015_p2",
+    "cardNo": "ST13-015",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 300067,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85244, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP06-022_p4",
+    "cardNo": "OP06-022",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 333635,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87665, Promotional Card \"Weekly Shonen JUMP 2023 No.36 and 37 Service for All Applicants LECAFIG\""
+  },
+  {
+    "cardId": "JP::OP06-090_p1",
+    "cardNo": "OP06-090",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 380944,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.89473, Premium Card Collection \"Best Selection vol.3\""
+  },
+  {
+    "cardId": "JP::P-072_p1",
+    "cardNo": "P-072",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 380949,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86992, Premium Card Collection \"Best Selection vol.3\""
+  },
+  {
+    "cardId": "JP::EB01-007_p1",
+    "cardNo": "EB01-007",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549072,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93109, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP07-037_p1",
+    "cardNo": "OP07-037",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549073,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9502, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP07-057_p1",
+    "cardNo": "OP07-057",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549074,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97376, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP08-099_p2",
+    "cardNo": "OP08-099",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 549075,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94158, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP09-008_p1",
+    "cardNo": "OP09-008",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549076,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93907, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP09-070_p1",
+    "cardNo": "OP09-070",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549077,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94058, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP09-077_p2",
+    "cardNo": "OP09-077",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 549078,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94951, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP09-095_p1",
+    "cardNo": "OP09-095",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549079,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.92175, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP09-117_p1",
+    "cardNo": "OP09-117",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549080,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.92157, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP10-028_p1",
+    "cardNo": "OP10-028",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549081,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.91489, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP10-049_p1",
+    "cardNo": "OP10-049",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549082,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95967, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP10-092_p1",
+    "cardNo": "OP10-092",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 549083,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94896, Premium Card Collection \"Best Selection vol.4\""
+  },
+  {
+    "cardId": "JP::OP10-042_p2",
+    "cardNo": "OP10-042",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 556949,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87602, Promotional Card \"Official Playmat Limited Edition vol.3\""
+  },
+  {
+    "cardId": "JP::OP07-051_p5",
+    "cardNo": "OP07-051",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 562155,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95049, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP07-051_p4",
+    "cardNo": "OP07-051",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 562156,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87346, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP05-011_p1",
+    "cardNo": "OP05-011",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 562157,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95618, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::EB01-023_p1",
+    "cardNo": "EB01-023",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 562159,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96089, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP07-040_p3",
+    "cardNo": "OP07-040",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 562160,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.93381, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP07-044_p1",
+    "cardNo": "OP07-044",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 562161,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95504, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP07-047_p3",
+    "cardNo": "OP07-047",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 562163,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9172, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP07-048_p1",
+    "cardNo": "OP07-048",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 562164,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8786, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::ST17-003_p3",
+    "cardNo": "ST17-003",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 562165,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95001, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::ST17-005_p2",
+    "cardNo": "ST17-005",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 562166,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.90925, ONE PIECE Card Game \"China 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP13-012_p1",
+    "cardNo": "OP13-012",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 691537,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9823, Promotional Card \"Official Playmat Nefeltari Vivi\""
+  },
+  {
+    "cardId": "JP::EB02-041_p1",
+    "cardNo": "EB02-041",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 710519,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.94973, Premium Card Collection \"Best Selection vol.5\""
+  },
+  {
+    "cardId": "JP::OP11-060_p1",
+    "cardNo": "OP11-060",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 710522,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95739, Premium Card Collection \"Best Selection vol.5\""
+  },
+  {
+    "cardId": "JP::OP12-006_p1",
+    "cardNo": "OP12-006",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 710523,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95778, Premium Card Collection \"Best Selection vol.5\""
+  },
+  {
+    "cardId": "JP::OP12-112_p2",
+    "cardNo": "OP12-112",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 710527,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95352, Premium Card Collection \"Best Selection vol.5\""
+  },
+  {
+    "cardId": "JP::OP13-063_p1",
+    "cardNo": "OP13-063",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 710528,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95677, Premium Card Collection \"Best Selection vol.5\""
+  },
+  {
+    "cardId": "JP::ST21-017_p1",
+    "cardNo": "ST21-017",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 710530,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95778, Premium Card Collection \"Best Selection vol.5\""
+  },
+  {
+    "cardId": "JP::OP12-020_p2",
+    "cardNo": "OP12-020",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 710532,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97087, Promotional Card \"Official Playmat Limited Edition vol.4\""
+  },
+  {
+    "cardId": "JP::ST21-001_p2",
+    "cardNo": "ST21-001",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 730901,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97716, Limited Card Collection \"BASE SHOP vol.1\""
+  },
+  {
+    "cardId": "JP::OP05-098_p4",
+    "cardNo": "OP05-098",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 730902,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95168, Limited Card Collection \"BASE SHOP vol.1\""
+  },
+  {
+    "cardId": "JP::OP06-021_p3",
+    "cardNo": "OP06-021",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 730903,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95184, Limited Card Collection \"BASE SHOP vol.1\""
+  },
+  {
+    "cardId": "JP::OP08-001_p3",
+    "cardNo": "OP08-001",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 730904,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97149, Limited Card Collection \"BASE SHOP vol.1\""
+  },
+  {
+    "cardId": "JP::OP10-003_p2",
+    "cardNo": "OP10-003",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 730905,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95394, Limited Card Collection \"BASE SHOP vol.1\""
+  },
+  {
+    "cardId": "JP::OP10-042_p3",
+    "cardNo": "OP10-042",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 730906,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.97097, Limited Card Collection \"BASE SHOP vol.1\""
+  },
+  {
+    "cardId": "JP::OP05-119_p8",
+    "cardNo": "OP05-119",
+    "locale": "JP",
+    "variantKey": "p8",
+    "apparelId": 744848,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87857, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-001_p3",
+    "cardNo": "OP09-001",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 744849,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8562, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-004_p7",
+    "cardNo": "OP09-004",
+    "locale": "JP",
+    "variantKey": "p7",
+    "apparelId": 744850,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87361, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-042_p3",
+    "cardNo": "OP09-042",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 744851,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.86454, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-051_p4",
+    "cardNo": "OP09-051",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 744852,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87923, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-061_p3",
+    "cardNo": "OP09-061",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 744853,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87842, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-081_p3",
+    "cardNo": "OP09-081",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 744854,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.85338, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP09-093_p6",
+    "cardNo": "OP09-093",
+    "locale": "JP",
+    "variantKey": "p6",
+    "apparelId": 744855,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8963, ANNIVERSARY SET \"English 2nd ANNIVERSARY SET Japanese Ver.\""
+  },
+  {
+    "cardId": "JP::OP13-037_p1",
+    "cardNo": "OP13-037",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 767990,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95795, Premium Card Collection \"Best Selection vol.6\""
+  },
+  {
+    "cardId": "JP::OP15-108_p1",
+    "cardNo": "OP15-108",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 767998,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.9593, Premium Card Collection \"Best Selection vol.6\""
+  },
+  {
+    "cardId": "JP::EB02-010_p2",
+    "cardNo": "EB02-010",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 769718,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95805, \"Official Playmat Limited Edition vol.5\""
+  },
+  {
+    "cardId": "JP::ST01-001_p1",
+    "cardNo": "ST01-001",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 836444,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.95724, \"Family Deck Set\""
+  },
+  {
+    "cardId": "JP::ST02-001_p1",
+    "cardNo": "ST02-001",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 836445,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.96636, \"Family Deck Set\""
+  },
+  {
+    "cardId": "JP::ST01-006_p1",
+    "cardNo": "ST01-006",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 94921,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.82687, Premium Card Collection 25th Anniversary Editionl"
+  },
+  {
+    "cardId": "JP::P-001_p2",
+    "cardNo": "P-001",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 95888,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83617, CHAMPIONSHIP Set Privilege"
+  },
+  {
+    "cardId": "JP::OP01-021_p2",
+    "cardNo": "OP01-021",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 95890,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.82293, Standard Battle"
+  },
+  {
+    "cardId": "JP::ST01-001_p3",
+    "cardNo": "ST01-001",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 102650,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83902, Flagship Battle Victory souvenir"
+  },
+  {
+    "cardId": "JP::P-027",
+    "cardNo": "P-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 103296,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.80682, Sikyo JUMP 2022.12 Freebie"
+  },
+  {
+    "cardId": "JP::P-031",
+    "cardNo": "P-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 104501,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83134, Promotion Pack 2022 Vol.2"
+  },
+  {
+    "cardId": "JP::ST01-013_p1",
+    "cardNo": "ST01-013",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 110714,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.81776, ONE PIECE FILM RED Finale Set"
+  },
+  {
+    "cardId": "JP::ST03-005_p2",
+    "cardNo": "ST03-005",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 111758,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83156, Standard Battle Trophy"
+  },
+  {
+    "cardId": "JP::P-028_p1",
+    "cardNo": "P-028",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 114668,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83763, ONE PIECE magazine Vol.16"
+  },
+  {
+    "cardId": "JP::ST01-013_p3",
+    "cardNo": "ST01-013",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 134317,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83104, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::ST01-004_p4",
+    "cardNo": "ST01-004",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 134318,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83656, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::OP01-017_p2",
+    "cardNo": "OP01-017",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 134322,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.87261, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::OP01-021_p4",
+    "cardNo": "OP01-021",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 134323,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.81344, Premium Card Collection -ONE PIECE FILM RED-"
+  },
+  {
+    "cardId": "JP::ST10-010_p2",
+    "cardNo": "ST10-010",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 138477,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.81127, Champion Ship Prize"
+  },
+  {
+    "cardId": "JP::ST10-013_p2",
+    "cardNo": "ST10-013",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 138478,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.81728, Champion Ship Prize"
+  },
+  {
+    "cardId": "JP::ST03-003_p2",
+    "cardNo": "ST03-003",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 141292,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.82819, Standard Battle Pack Vol.5"
+  },
+  {
+    "cardId": "JP::P-061",
+    "cardNo": "P-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 155976,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.98366, ONE PIECE Card Game Encore Pack"
+  },
+  {
+    "cardId": "JP::P-041_p4",
+    "cardNo": "P-041",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 159276,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.81557, BANDAI CARD GAMES Fest23-24 World Tour"
+  },
+  {
+    "cardId": "JP::OP01-001_p3",
+    "cardNo": "OP01-001",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 171996,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.823, Weekly Shonen Jump 2024 Issue 3 All Applicants Service Recafig"
+  },
+  {
+    "cardId": "JP::P-017_p2",
+    "cardNo": "P-017",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 185183,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.82426, Standard Battle Trophy"
+  },
+  {
+    "cardId": "JP::ST04-017_p1",
+    "cardNo": "ST04-017",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 237328,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83279, Premium Card Collection \"Best Selection Vol.2\""
+  },
+  {
+    "cardId": "JP::OP05-114_p1",
+    "cardNo": "OP05-114",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 237330,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83741, Premium Card Collection \"Best Selection Vol.2\""
+  },
+  {
+    "cardId": "JP::OP03-013_p2",
+    "cardNo": "OP03-013",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 252658,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.82173, \"Promotion Pack EX Vol.1\""
+  },
+  {
+    "cardId": "JP::OP02-013_p5",
+    "cardNo": "OP02-013",
+    "locale": "JP",
+    "variantKey": "p5",
+    "apparelId": 300060,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83564, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP06-118_p4",
+    "cardNo": "OP06-118",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 300064,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83749, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP08-069_p2",
+    "cardNo": "OP08-069",
+    "locale": "JP",
+    "variantKey": "p2",
+    "apparelId": 300066,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.82079, Special Goods Set \"2nd ANNIVERSARY SET\""
+  },
+  {
+    "cardId": "JP::OP07-019_p4",
+    "cardNo": "OP07-019",
+    "locale": "JP",
+    "variantKey": "p4",
+    "apparelId": 333636,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83458, Promotional Card \"Weekly Shonen JUMP 2023 No.35 Service for All Applicants LECAFIG\""
+  },
+  {
+    "cardId": "JP::OP07-091_p1",
+    "cardNo": "OP07-091",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 342328,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83469, Promotional Card \"Promotion Pack Vol.6\""
+  },
+  {
+    "cardId": "JP::OP04-032_p3",
+    "cardNo": "OP04-032",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 380941,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83208, Premium Card Collection \"Best Selection vol.3\""
+  },
+  {
+    "cardId": "JP::OP04-095_p1",
+    "cardNo": "OP04-095",
+    "locale": "JP",
+    "variantKey": "p1",
+    "apparelId": 237329,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.83736, Premium Card Collection \"Best Selection Vol.2\""
+  },
+  {
+    "cardId": "JP::OP02-034_p3",
+    "cardNo": "OP02-034",
+    "locale": "JP",
+    "variantKey": "p3",
+    "apparelId": 250560,
+    "status": "approved",
+    "note": "image-audited promo mapping: score 0.8146, Promotion Pack Vol.5"
   }
 ];
 
