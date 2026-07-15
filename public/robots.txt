@@ -27,3 +27,4 @@ User-agent: ClaudeBot
 Disallow: /
 
 Sitemap: https://www.optcgkorea.com/sitemap.xml
+Sitemap: https://www.optcgkorea.com/sitemap-jp.xml

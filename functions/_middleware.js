@@ -110,6 +110,12 @@ const JAPANESE_SEO = {
     description: 'ONE PIECE CARD GAMEの公式情報、新商品、予約情報、コレクションガイドをまとめて確認できます。',
     keywords: 'ワンピースカードゲーム 情報,ワンピカード 新商品,ワンピースカード 公式,ワンピカード 予約',
     schemaType: 'CollectionPage'
+  },
+  '/shops': {
+    title: 'ワンピースカードゲーム 公式ショップ・公認店 | Card Pone',
+    description: '日本全国のONE PIECE CARD GAME公式ショップを地域や店舗名から検索し、住所、営業時間、Googleマップ、公認店検索を確認できます。',
+    keywords: 'ワンピースカードゲーム 公式ショップ,ワンピカード 公認店,ワンピカード 店舗,ONE PIECEカードゲーム ショップ',
+    schemaType: 'CollectionPage'
   }
 };
 
@@ -125,7 +131,8 @@ function getJapaneseBasePath(pathname) {
 function getJapaneseSeo(pathname) {
   const basePath = getJapaneseBasePath(pathname);
   if (JAPANESE_SEO[basePath]) return JAPANESE_SEO[basePath];
-  if (basePath.startsWith('/cards/series/')) {
+  const directSeriesSlug = basePath.startsWith('/cards/') ? basePath.slice('/cards/'.length) : '';
+  if (basePath.startsWith('/cards/series/') || (directSeriesSlug && !directSeriesSlug.includes('/') && !['jp', 'kr'].includes(directSeriesSlug.toLowerCase()))) {
     const series = basePath.split('/').pop()?.toUpperCase() || 'SERIES';
     return {
       title: `${series} ワンピースカードゲーム カードリスト | Card Pone`,
@@ -454,6 +461,14 @@ const SITE_NAVIGATION_ITEMS = [
   { name: '가이드/Q&A', url: `${SITE_ORIGIN}/guide`, description: '원피스카드 입문 및 수집 가이드' }
 ];
 
+const JAPANESE_SITE_NAVIGATION_ITEMS = [
+  { name: 'カード図鑑', url: `${SITE_ORIGIN}/jp/cards`, description: '日本版ONE PIECE CARD GAMEのカードをシリーズやカード番号から検索' },
+  { name: '相場', url: `${SITE_ORIGIN}/jp/prices`, description: 'Single・PSA10の相場、ボックス価格、価格チャート' },
+  { name: 'スケジュール', url: `${SITE_ORIGIN}/jp/calendar`, description: '新商品、プロモカード、公式イベントの日程' },
+  { name: '公式情報', url: `${SITE_ORIGIN}/jp/news`, description: '新商品と公式告知の最新情報' },
+  { name: 'ショップ', url: `${SITE_ORIGIN}/jp/shops`, description: '公式ショップと公認店の検索' }
+];
+
 const SERVER_PAGE_CONTENT = {
   '/': {
     heading: '원피스카드 도감과 시세를 한곳에서',
@@ -528,7 +543,7 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
       'Card Poneは、ONE PIECE CARD GAMEの日本版カードを検索し、コレクション管理とカードごとの価格推移を確認できる非公式サービスです。',
       '相場は公開市場データを整理して表示します。カードの状態や取引時点により実際の価格と差が出る場合があります。'
     ],
-    links: ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news']
+    links: ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news', '/jp/shops']
   },
   '/cards': {
     heading: 'ワンピースカードゲーム カード図鑑',
@@ -560,7 +575,15 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
       'ONE PIECE CARD GAMEの公式情報、新商品、予約情報、コレクションガイドをまとめて確認できます。',
       '外部の公式情報は原文へのリンクを使用し、カード図鑑と相場機能もあわせて利用できます。'
     ],
-    links: ['/jp/calendar', '/jp/cards', '/jp/prices', '/jp']
+    links: ['/jp/calendar', '/jp/cards', '/jp/prices', '/jp/shops', '/jp']
+  },
+  '/shops': {
+    heading: 'ONE PIECEカードゲーム 公式ショップ・公認店',
+    paragraphs: [
+      '日本全国のONE PIECE CARD GAME公式ショップを都道府県や店舗名から検索し、住所と営業時間を確認できます。',
+      '店舗ごとのGoogleマップ、公式ショップ情報、公認店検索、公式イベント一覧へ移動できます。'
+    ],
+    links: ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news', '/jp']
   }
 };
 
@@ -572,7 +595,7 @@ function createServerPageContent(pathname, seo) {
   const content = contentMap[contentKey] || {
     heading: seo.title.split('|')[0].trim(),
     paragraphs: [seo.description],
-    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news'] : ['/cards', '/prices', '/guide', '/shops']
+    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/guide', '/shops']
   };
   const links = content.links
     .map((path) => {
@@ -839,7 +862,7 @@ function createJsonLd(pathname, seo) {
           'query-input': 'required name=search_term_string'
         }
       },
-      ...SITE_NAVIGATION_ITEMS.map((item, index) => ({
+      ...(isJapanese ? JAPANESE_SITE_NAVIGATION_ITEMS : SITE_NAVIGATION_ITEMS).map((item, index) => ({
         '@type': 'SiteNavigationElement',
         '@id': `${item.url}#navigation`,
         position: index + 1,

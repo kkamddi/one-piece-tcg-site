@@ -2368,6 +2368,8 @@
   border-radius: 14px;
   padding: 10px;
   color: inherit;
+  font: inherit;
+  text-decoration: none;
   background: rgba(255, 255, 255, 0.72);
   text-align: left;
   cursor: pointer;
@@ -2761,6 +2763,19 @@
   font-size: 13px;
   color: #4b5563;
   font-weight: 600;
+}
+
+.renew-card-code-link {
+  width: fit-content;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.renew-card-code-link:hover {
+  color: #c94d35;
+  text-decoration: underline;
 }
 
 .renew-card-body strong {
@@ -10569,6 +10584,131 @@
   min-width: 0;
 }
 
+.renew-jp-shops {
+  display: grid;
+  gap: 18px;
+}
+
+.renew-jp-shop-intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.1);
+}
+
+.renew-jp-shop-intro > div {
+  display: grid;
+  gap: 6px;
+}
+
+.renew-jp-shop-intro span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.renew-jp-shop-intro h1 {
+  margin: 0;
+  font-size: 25px;
+  line-height: 1.22;
+}
+
+.renew-jp-shop-intro p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-jp-shop-intro > a,
+.renew-jp-shop-resources a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 999px;
+  background: #17191c;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-jp-shop-intro > a {
+  min-height: 42px;
+  padding: 0 16px;
+  flex: 0 0 auto;
+}
+
+.renew-jp-shop-filters {
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.renew-jp-shop-filters .renew-shop-search {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.renew-jp-shop-resources {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-jp-shop-resources a {
+  min-height: 78px;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 16px;
+  background: rgba(201, 77, 53, 0.06);
+  color: #17191c;
+}
+
+.renew-jp-shop-resources strong,
+.renew-jp-shop-resources span {
+  display: block;
+}
+
+.renew-jp-shop-resources strong {
+  font-size: 14px;
+}
+
+.renew-jp-shop-resources span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.renew-jp-shop-empty,
+.renew-jp-shop-source {
+  margin: 0;
+  color: #71757f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.renew-app.is-dark .renew-jp-shop-intro {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-jp-shop-intro p,
+.renew-app.is-dark .renew-jp-shop-resources span,
+.renew-app.is-dark .renew-jp-shop-empty,
+.renew-app.is-dark .renew-jp-shop-source {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-jp-shop-resources a {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
 .renew-shop-search button {
   display: inline-flex;
   align-items: center;
@@ -14129,6 +14269,25 @@
 
   .renew-index-components {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .renew-jp-shop-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .renew-jp-shop-intro h1 {
+    font-size: 20px;
+  }
+
+  .renew-jp-shop-intro > a {
+    width: 100%;
+  }
+
+  .renew-jp-shop-filters,
+  .renew-jp-shop-resources {
+    grid-template-columns: 1fr;
   }
 }
 
