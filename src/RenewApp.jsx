@@ -88,7 +88,8 @@ function getBoxReleaseSortValue(item) {
 
 const CALENDAR_WEEKDAYS = {
   KR: ['일', '월', '화', '수', '목', '금', '토'],
-  EN: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+  EN: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+  JP: ['日', '月', '火', '水', '木', '金', '土']
 };
 
 function toCalendarDateKey(value) {
@@ -124,8 +125,9 @@ function getCalendarEventPriority(item) {
   return item?.kind === 'release' || item?.calendarKind === 'release' ? 'medium' : 'low';
 }
 
-function getCalendarDisplayTitle(event, isEn) {
-  return !isEn && event?.titleKo ? event.titleKo : event?.title;
+function getCalendarDisplayTitle(event, uiLang) {
+  if (uiLang === 'JP') return event?.title || event?.titleKo;
+  return uiLang !== 'EN' && event?.titleKo ? event.titleKo : event?.title;
 }
 
 function buildCalendarEvents(boxes = []) {
@@ -2281,6 +2283,118 @@ const UI_TEXT = {
     privacy: 'Privacy Policy',
     contact: 'Contact',
     partnership: 'Ads / Partnerships'
+  },
+  JP: {
+    navCards: 'カード図鑑',
+    navPrices: '相場',
+    navMarketplace: '取引',
+    navCalendar: 'カレンダー',
+    navNews: '情報',
+    navShops: 'ショップ',
+    login: 'ログイン',
+    logout: 'ログアウト',
+    cardSupplies: 'カード用品',
+    searchKr: '韓国版',
+    searchJp: '日本版',
+    searchPlaceholder: 'カード名またはカード番号を検索',
+    category: 'カテゴリー',
+    all: 'すべて',
+    owned: '所持中',
+    wishlist: 'ウィッシュリスト',
+    search: '検索',
+    searchResults: '検索結果',
+    loading: '読み込み中...',
+    noResults: '検索結果はありません。',
+    cardsUnit: '枚',
+    cardInfo: 'カード情報',
+    effect: '効果',
+    effectPending: '効果情報を準備中です。',
+    cost: 'コスト',
+    power: 'パワー',
+    openMarket: 'カード相場を見る',
+    searchSameName: '同じ名前のカードを検索',
+    officialInfo: '公式情報を見る',
+    openSnkrdunk: 'SNKRDUNKを開く',
+    loginRequired: 'ログイン後にご利用いただけます。',
+    backToCatalog: '← カード図鑑に戻る',
+    marketCodePlaceholder: 'カード番号 例: OP05-119',
+    marketSearch: '相場を検索',
+    marketLoading: '相場候補を検索中...',
+    marketNoCandidates: '対応する相場候補がありません。',
+    marketFallback: '正確な相場マッピングが見つからないため、カード番号検索で表示しています。',
+    marketDetailError: '相場詳細を読み込めませんでした。',
+    variantSelect: 'グレード / バージョンを選択',
+    sourceMarket: 'SNKRDUNKで見る',
+    sourceMarketShort: 'SNKRDUNK',
+    sourcePsa: 'PSAで見る',
+    sourcePsaShort: 'PSA',
+    snkrShortcut: '開く',
+    addAGrade: 'Singleを追加',
+    addAGradeShort: 'Singleを追加',
+    addPsa10: 'PSA10を追加',
+    addPsa10Short: 'PSA10を追加',
+    aGrade: 'Single',
+    addedToPortfolio: 'ポートフォリオに追加しました。',
+    noChart: 'グラフデータがありません。',
+    recentSales: '最近の価格記録',
+    noRecentSales: '価格記録はまだありません。',
+    boxMarketTitle: 'ボックス相場',
+    boxMarketHelp: 'SNKRDUNK基準の人気ボックス価格',
+    boxSortLatest: '新着順',
+    boxSortHigh: '価格が高い順',
+    boxSortLow: '価格が低い順',
+    marketHomeBoxTab: 'ボックス',
+    marketHomeCardTab: 'カード',
+    marketCardTitle: 'カード相場',
+    marketCardHelp: 'SNKRDUNK基準の注目カード相場',
+    marketCardSortFocus: '注目順',
+    marketCardSortHigh: '価格が高い順',
+    marketCandidateSelect: '選択',
+    selectedVariant: '選択中のバージョン',
+    reselectVariant: '選び直す',
+    snkrLowestPrice: 'SNKRDUNK 最近の相場',
+    psa10IntegratedPrice: 'PSA10 統合相場',
+    checkPrice: '価格を確認',
+    deckSearchPlaceholder: 'デッキに入れるカードを検索',
+    currentDeck: '現在のデッキ',
+    deckComingSoonTitle: 'デッキシミュレーター準備中',
+    deckComingSoonBody: 'デッキ保存と共有機能を整備後に公開します。',
+    newsComingSoonTitle: 'ニュース準備中',
+    newsComingSoonBody: '公式ニュースと更新情報を見やすく整理して公開します。',
+    close: '閉じる',
+    allShops: '全店舗',
+    officialShop: '公認店',
+    searchShop: '取扱店',
+    allRegions: 'すべての地域',
+    allDistricts: 'すべての市区町村',
+    shopSearchPlaceholder: '店舗名または住所で検索',
+    naverMap: 'Naver Map',
+    kakaoMap: 'Kakao Map',
+    progress: 'コレクション進捗',
+    updateNotice: '更新のお知らせ',
+    updateTitle: 'OP-16 アップデート完了',
+    updateHelp: 'クリックして過去のお知らせを確認できます。',
+    visitorsTotal: '累計ユニーク訪問者',
+    visitorsToday: '本日のユニーク訪問者',
+    visitorsOnline: '現在オンライン',
+    usersTotal: '総会員数',
+    signupsToday: '本日の登録者',
+    footerIntro: 'Card Poneは、ONE PIECE CARD GAMEユーザーのための非公式カード図鑑・相場・コレクション管理サービスです。',
+    footerRights: 'ONE PIECE CARD GAMEおよび関連する画像、名称、商標の権利は各権利者に帰属します。',
+    footerNoAffiliation: '本サイトはBANDAIおよび公式流通事業者と提携していません。',
+    footerPriceNotice: '相場情報は参考情報であり、実際の取引価格と異なる場合があります。',
+    footerResponsibility: '購入・販売の判断は利用者ご自身の責任で行ってください。',
+    portfolioLoginRequired: 'ログイン後に利用できます。',
+    portfolioEmptyHelp: '相場タブからカードを追加できます。',
+    goToPrices: '相場を見る',
+    catalogSortRarity: 'レアリティ順',
+    catalogSortPrice: '価格順',
+    cardOwned: '所持',
+    cardNotOwned: '未所持',
+    terms: '利用規約',
+    privacy: 'プライバシーポリシー',
+    contact: 'お問い合わせ',
+    partnership: '広告・提携のお問い合わせ'
   }
 };
 
@@ -2306,13 +2420,35 @@ const PATH_PAGES = Object.fromEntries(Object.entries(PAGE_PATHS).map(([page, pat
 PATH_PAGES['/deck'] = 'news';
 PATH_PAGES['/deck-simulator'] = 'news';
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
+const JAPANESE_ROUTE_PREFIX = '/jp';
 function normalizeSitePath(pathname = '/') {
   const normalized = String(pathname || '/').split('?')[0].replace(/\/+$/, '') || '/';
   return normalized === '' ? '/' : normalized;
 }
 
-function getRouteSeoPage(pathname = '/') {
+function getPathLocale(pathname = '/') {
   const path = normalizeSitePath(pathname);
+  return path === JAPANESE_ROUTE_PREFIX || path.startsWith(`${JAPANESE_ROUTE_PREFIX}/`) ? 'JP' : null;
+}
+
+function getAppPath(pathname = '/') {
+  const path = normalizeSitePath(pathname);
+  if (path === JAPANESE_ROUTE_PREFIX) return '/';
+  if (path.startsWith(`${JAPANESE_ROUTE_PREFIX}/`)) return path.slice(JAPANESE_ROUTE_PREFIX.length) || '/';
+  return path;
+}
+
+function localizeAppPath(pathname = '/', uiLang = 'KR') {
+  const path = getAppPath(pathname);
+  return uiLang === 'JP' ? `${JAPANESE_ROUTE_PREFIX}${path === '/' ? '' : path}` : path;
+}
+
+function getLocalizedPagePath(page, uiLang = 'KR') {
+  return localizeAppPath(PAGE_PATHS[page] || '/', uiLang);
+}
+
+function getRouteSeoPage(pathname = '/') {
+  const path = getAppPath(pathname);
   if (PATH_PAGES[path]) return PATH_PAGES[path];
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
@@ -2325,7 +2461,7 @@ function getRouteSeoPage(pathname = '/') {
 }
 
 function getCatalogRouteViewState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
-  const path = normalizeSitePath(pathname);
+  const path = getAppPath(pathname);
   if (path === '/cards/jp') return { locale: 'JP' };
   if (path === '/cards/kr') return { locale: 'KR' };
   if (path.startsWith('/cards/series/')) {
@@ -2343,7 +2479,7 @@ function getCatalogRouteViewState(pathname = typeof window !== 'undefined' ? win
 }
 
 function getMarketRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/', search = typeof window !== 'undefined' ? window.location.search : '') {
-  const path = normalizeSitePath(pathname);
+  const path = getAppPath(pathname);
   const params = new URLSearchParams(search);
   const state = {
     code: params.get('code') || '',
@@ -2360,13 +2496,13 @@ function getMarketRouteState(pathname = typeof window !== 'undefined' ? window.l
 }
 
 function getBoxRouteCode(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
-  const path = normalizeSitePath(pathname);
+  const path = getAppPath(pathname);
   if (!path.startsWith('/prices/box/')) return '';
   return path.slice('/prices/box/'.length).toUpperCase();
 }
 
 function getNewsRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/', search = typeof window !== 'undefined' ? window.location.search : '') {
-  const path = normalizeSitePath(pathname);
+  const path = getAppPath(pathname);
   const params = new URLSearchParams(search);
   if (path.startsWith('/guide')) return { section: 'guide', mode: 'guide' };
   if (path.startsWith('/faq')) return { section: 'guide', mode: 'qa' };
@@ -2377,7 +2513,7 @@ function getNewsRouteState(pathname = typeof window !== 'undefined' ? window.loc
 }
 
 function getShopRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
-  const path = normalizeSitePath(pathname);
+  const path = getAppPath(pathname);
   if (path === '/shops/official') return { type: 'official' };
   if (!path.startsWith('/shops/')) return null;
   const slug = decodeURIComponent(path.slice('/shops/'.length)).toLowerCase();
@@ -2563,9 +2699,100 @@ const CLIENT_ROUTE_SEO = {
   }
 };
 
-function getClientRouteSeo(page) {
+const JP_PAGE_SEO = {
+  home: {
+    title: 'ワンピースカードゲームのカード図鑑・相場 | Card Pone',
+    h1: 'ワンピースカードゲームのカード図鑑・相場',
+    description: 'ONE PIECE CARD GAMEの日本版カードを中心に、カード図鑑、SNKRDUNK基準の相場、価格チャート、コレクション管理を確認できる非公式サービスです。',
+    keywords: 'ワンピースカードゲーム,ワンピカード,ワンピースカード 相場,ワンピカード 相場,ワンピースカード 図鑑,SNKRDUNK,Card Pone',
+    body: 'ONE PIECE CARD GAMEのカード図鑑、相場、コレクション管理をひとつにまとめた非公式サービスです。'
+  },
+  cards: {
+    title: 'ワンピースカードゲーム カード図鑑 | Card Pone',
+    h1: 'ワンピースカードゲーム カード図鑑',
+    description: 'ONE PIECE CARD GAMEの日本版カードをOP、EB、ST、プロモシリーズごとに検索し、カード名や番号から確認できます。',
+    keywords: 'ワンピースカードゲーム カードリスト,ワンピカード 図鑑,ワンピースカード 検索,OPカード,Card Pone',
+    body: '日本版ONE PIECE CARD GAMEのカードをシリーズ、カード番号、カード名から検索できます。'
+  },
+  prices: {
+    title: 'ワンピースカードゲーム 相場・価格チャート | Card Pone',
+    h1: 'ワンピースカードゲーム 相場',
+    description: 'SNKRDUNK基準でONE PIECE CARD GAMEのSingle・PSA10の価格、最近の取引記録、7日・1か月・1年チャートを確認できます。',
+    keywords: 'ワンピースカードゲーム 相場,ワンピカード 相場,ワンピースカード 価格,SNKRDUNK,PSA10,Card Pone',
+    body: 'カードごとの最近の取引価格、価格チャート、ボックス相場を確認できます。'
+  },
+  calendar: {
+    title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
+    h1: 'ワンピースカードゲーム カレンダー',
+    description: 'ONE PIECE CARD GAMEの新商品、パック、ボックス、プロモカードの発売日と公式イベント情報を月別に確認できます。',
+    keywords: 'ワンピースカードゲーム 発売日,ワンピカード 発売日,ワンピカード カレンダー,ワンピースカード イベント',
+    body: '新商品とプロモカードの発売日、公式イベント情報をカレンダーで確認できます。'
+  },
+  news: {
+    title: 'ワンピースカードゲーム 公式情報・新商品情報 | Card Pone',
+    h1: 'ワンピースカードゲーム 情報',
+    description: 'ONE PIECE CARD GAMEの公式情報、新商品、予約情報、コレクションガイドをまとめて確認できます。',
+    keywords: 'ワンピースカードゲーム 情報,ワンピカード 新商品,ワンピースカード 公式,ワンピカード 予約',
+    body: '公式情報、新商品、予約情報とコレクションガイドを確認できます。'
+  },
+  shops: {
+    title: 'ワンピースカードゲーム ショップ情報 | Card Pone',
+    h1: 'ワンピースカードゲーム ショップ情報',
+    description: 'Card Poneに登録されたONE PIECE CARD GAMEのショップ情報を確認できます。',
+    keywords: 'ワンピースカードゲーム ショップ,ワンピカード 店舗,Card Pone',
+    body: '登録ショップの場所と基本情報を確認できます。'
+  }
+};
+
+function getJapaneseRouteSeo(pathname, page) {
+  const path = getAppPath(pathname);
+  if (path.startsWith('/cards/series/')) {
+    const series = getBaseSeriesId(findSeriesByRouteSlug(path.slice('/cards/series/'.length)) || path.split('/').pop()?.toUpperCase() || 'SERIES');
+    return {
+      title: `${series} ワンピースカードゲーム カードリスト | Card Pone`,
+      h1: `${series} カードリスト`,
+      description: `${series}シリーズのONE PIECE CARD GAMEカードをカード番号、レアリティ、カード名から確認できます。`,
+      keywords: `${series},ワンピースカードゲーム,ワンピカード,カードリスト`,
+      body: `${series}シリーズのカードリストです。`
+    };
+  }
+  if (path.startsWith('/prices/product/')) {
+    const id = path.slice('/prices/product/'.length);
+    return {
+      title: `SNKRDUNK 商品 #${id} 相場 | Card Pone`,
+      h1: `SNKRDUNK 商品 #${id} 相場`,
+      description: `SNKRDUNK商品 #${id} のONE PIECE CARD GAME価格チャートと最近の取引記録を確認できます。`,
+      keywords: `SNKRDUNK ${id},ワンピースカードゲーム 相場,ワンピカード 価格`,
+      body: `SNKRDUNK商品 #${id} の相場詳細です。`
+    };
+  }
+  if (path.startsWith('/prices/card/')) {
+    const code = path.slice('/prices/card/'.length).toUpperCase();
+    return {
+      title: `${code} ワンピースカードゲーム 相場 | Card Pone`,
+      h1: `${code} 相場`,
+      description: `${code}のONE PIECE CARD GAME相場候補と価格を確認できます。`,
+      keywords: `${code},ワンピースカードゲーム 相場,ワンピカード 価格`,
+      body: `${code}の相場候補です。`
+    };
+  }
+  if (path.startsWith('/prices/box/')) {
+    const code = path.slice('/prices/box/'.length).toUpperCase();
+    return {
+      title: `${code} ボックス相場 | Card Pone`,
+      h1: `${code} ボックス相場`,
+      description: `ONE PIECE CARD GAME ${code}のボックス価格とSNKRDUNK商品情報を確認できます。`,
+      keywords: `${code},ワンピースカードゲーム ボックス 相場,ワンピカード ボックス`,
+      body: `${code}ボックスの相場詳細です。`
+    };
+  }
+  return JP_PAGE_SEO[page] || JP_PAGE_SEO.home;
+}
+
+function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
-  const path = normalizeSitePath(window.location.pathname);
+  const path = getAppPath(window.location.pathname);
+  if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, page);
   const seoAliases = {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
@@ -2725,7 +2952,7 @@ function getPageFromPath(pathname = '/') {
 }
 
 function getRouteBackInfo(pathname = '/', search = '') {
-  const path = normalizeSitePath(pathname);
+  const path = getAppPath(pathname);
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
   if (path.startsWith('/shops/partners/')) return { label: '제휴 카드샵으로 돌아가기', page: 'partnerShops' };
   if (path === '/shops/partners') return { label: '구매처로 돌아가기', page: 'shops' };
@@ -2775,7 +3002,7 @@ function setJsonLd(id, data) {
   el.textContent = JSON.stringify(data);
 }
 
-function getPageJsonLd(page, seo) {
+function getPageJsonLd(page, seo, uiLang = 'KR') {
   const url = getCanonicalUrl(page);
   const breadcrumb = [
     { '@type': 'ListItem', position: 1, name: 'Card Pone', item: SITE_ORIGIN },
@@ -2803,7 +3030,7 @@ function getPageJsonLd(page, seo) {
       url,
       name: seo.title,
       description: seo.description,
-      inLanguage: 'ko-KR',
+      inLanguage: uiLang === 'JP' ? 'ja-JP' : uiLang === 'EN' ? 'en-US' : 'ko-KR',
       about: seo.keywords,
       isPartOf: { '@id': `${SITE_ORIGIN}/#website` }
     },
@@ -2870,15 +3097,37 @@ function getPageJsonLd(page, seo) {
   return { '@context': 'https://schema.org', '@graph': graph };
 }
 
-function applyPageSeo(page) {
-  const seo = getClientRouteSeo(page) || PAGE_SEO[page] || PAGE_SEO.home;
+function setHreflangLinks() {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  document.head.querySelectorAll('link[data-card-pone-hreflang]').forEach((element) => element.remove());
+  const path = getAppPath(window.location.pathname);
+  const baseHref = `${SITE_ORIGIN}${path === '/' ? '/' : path}`;
+  const japaneseHref = `${SITE_ORIGIN}${JAPANESE_ROUTE_PREFIX}${path === '/' ? '' : path}`;
+  [
+    ['ko', baseHref],
+    ['ja', japaneseHref],
+    ['x-default', baseHref]
+  ].forEach(([hrefLang, href]) => {
+    const link = document.createElement('link');
+    link.rel = 'alternate';
+    link.hreflang = hrefLang;
+    link.href = href;
+    link.dataset.cardPoneHreflang = 'true';
+    document.head.appendChild(link);
+  });
+}
+
+function applyPageSeo(page, uiLang = 'KR') {
+  const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[page] || PAGE_SEO.home;
   const url = getCanonicalUrl(page);
+  const isJapanese = uiLang === 'JP' || (typeof window !== 'undefined' && getPathLocale(window.location.pathname) === 'JP');
   document.title = seo.title;
+  document.documentElement.lang = isJapanese ? 'ja' : uiLang === 'EN' ? 'en' : 'ko';
   setHeadMeta('meta[name="description"]', { content: seo.description });
   setHeadMeta('meta[name="keywords"]', { content: seo.keywords || '' });
   setHeadMeta('link[rel="canonical"]', { rel: 'canonical', href: url });
   setHeadMeta('meta[property="og:type"]', { property: 'og:type', content: 'website' });
-  setHeadMeta('meta[property="og:locale"]', { property: 'og:locale', content: 'ko_KR' });
+  setHeadMeta('meta[property="og:locale"]', { property: 'og:locale', content: isJapanese ? 'ja_JP' : uiLang === 'EN' ? 'en_US' : 'ko_KR' });
   setHeadMeta('meta[property="og:title"]', { property: 'og:title', content: seo.title });
   setHeadMeta('meta[property="og:description"]', { property: 'og:description', content: seo.description });
   setHeadMeta('meta[property="og:url"]', { property: 'og:url', content: url });
@@ -2888,7 +3137,8 @@ function applyPageSeo(page) {
   setHeadMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: seo.title });
   setHeadMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: seo.description });
   setHeadMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: `${SITE_ORIGIN}/og-card-pone.jpg` });
-  setJsonLd('optcg-page-jsonld', getPageJsonLd(page, seo));
+  setHreflangLinks();
+  setJsonLd('optcg-page-jsonld', getPageJsonLd(page, seo, isJapanese ? 'JP' : uiLang));
 }
 
 const TERMS_SECTIONS = [
@@ -3462,7 +3712,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
   return (
     <header className="renew-header" data-nosnippet>
       <div className="renew-mobile-topbar">
-        <a href="/" className="renew-mobile-logo" onClick={(event) => { event.preventDefault(); onNavigate('home'); }} aria-label="메인으로 이동">
+        <a href={getLocalizedPagePath('home', uiLang)} className="renew-mobile-logo" onClick={(event) => { event.preventDefault(); onNavigate('home'); }} aria-label="메인으로 이동">
           <img src={LOGO_SRC} alt="Card Pone" />
         </a>
         <div className="renew-mobile-actions">
@@ -3496,7 +3746,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </div>
       </div>
       <div className="renew-nav">
-        <a href="/" className="renew-logo-button" onClick={(event) => { event.preventDefault(); onNavigate('home'); }} aria-label="메인으로 이동">
+        <a href={getLocalizedPagePath('home', uiLang)} className="renew-logo-button" onClick={(event) => { event.preventDefault(); onNavigate('home'); }} aria-label="메인으로 이동">
           <img src={LOGO_SRC} alt="Card Pone" className="renew-logo" />
         </a>
 
@@ -3504,7 +3754,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           {NAV_ITEMS.map((item) => (
             <a
               key={item.id}
-              href={PAGE_PATHS[item.id] || '/'}
+              href={getLocalizedPagePath(item.id, uiLang)}
               className={`renew-tab ${activePage === item.id ? 'is-active' : ''}`}
               onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
             >
@@ -3526,7 +3776,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             ) : null}
           </div>
           <div className="renew-ui-lang" aria-label="UI language">
-            {['KR', 'EN'].map((lang) => (
+            {['KR', 'EN', 'JP'].map((lang) => (
               <button key={lang} type="button" className={uiLang === lang ? 'is-active' : ''} onClick={() => onUiLangChange(lang)}>
                 {lang}
               </button>
@@ -3551,23 +3801,23 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </div>
       </div>
       <nav className="renew-bottom-nav" aria-label="모바일 하단 메뉴">
-        <a href="/cards" className={activePage === 'cards' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('cards'); }} aria-label="도감">
+        <a href={getLocalizedPagePath('cards', uiLang)} className={activePage === 'cards' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('cards'); }} aria-label="도감">
           <MobileNavIcon type="cards" />
           <span>{t('navCards')}</span>
         </a>
-        <a href="/prices" className={activePage === 'prices' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('prices'); }} aria-label="시세">
+        <a href={getLocalizedPagePath('prices', uiLang)} className={activePage === 'prices' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('prices'); }} aria-label="시세">
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        <a href="/calendar" className={activePage === 'calendar' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('calendar'); }} aria-label="캘린더">
+        <a href={getLocalizedPagePath('calendar', uiLang)} className={activePage === 'calendar' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('calendar'); }} aria-label="캘린더">
           <MobileNavIcon type="calendar" />
           <span>{t('navCalendar')}</span>
         </a>
-        <a href="/news" className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
+        <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
         </a>
-        <a href="/shops" className={activePage === 'shops' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('shops'); }} aria-label="구매처">
+        <a href={getLocalizedPagePath('shops', uiLang)} className={activePage === 'shops' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('shops'); }} aria-label="구매처">
           <MobileNavIcon type="shops" />
           <span>{t('navShops')}</span>
         </a>
@@ -5314,16 +5564,17 @@ function RenewUpdateModal({ onClose }) {
 
 function RenewCalendarEventCard({ event, uiLang }) {
   const isEn = uiLang === 'EN';
-  const displayTitle = getCalendarDisplayTitle(event, isEn);
-  const showOriginalTitle = !isEn && event.locale === 'JP' && event.titleKo && event.titleKo !== event.title;
+  const isJp = uiLang === 'JP';
+  const displayTitle = getCalendarDisplayTitle(event, uiLang);
+  const showOriginalTitle = !isEn && !isJp && event.locale === 'JP' && event.titleKo && event.titleKo !== event.title;
   const kindLabel = event.kind === 'release'
-    ? (isEn ? 'Release' : '발매')
+    ? (isJp ? '発売' : isEn ? 'Release' : '발매')
     : event.kind === 'event'
-      ? (event.isSchedule ? (isEn ? 'Event' : '이벤트') : (isEn ? 'Event notice' : '이벤트 공지'))
-      : (isEn ? 'Product notice' : '상품 공지');
+      ? (event.isSchedule ? (isJp ? 'イベント' : isEn ? 'Event' : '이벤트') : (isJp ? 'イベント告知' : isEn ? 'Event notice' : '이벤트 공지'))
+      : (isJp ? '商品告知' : isEn ? 'Product notice' : '상품 공지');
   const actionLabel = event.kind === 'release'
-    ? (isEn ? 'View product' : '상품 보기')
-    : (isEn ? 'View source' : '원문 보기');
+    ? (isJp ? '商品を見る' : isEn ? 'View product' : '상품 보기')
+    : (isJp ? '元の情報を見る' : isEn ? 'View source' : '원문 보기');
   return (
     <article className={`renew-calendar-event-card is-priority-${event.priority || 'low'}`}>
       <span className={`renew-calendar-event-mark is-${event.kind}`} aria-hidden="true">
@@ -5331,7 +5582,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
       </span>
       <div>
         <div className="renew-calendar-event-meta">
-          {event.priority === 'high' ? <span className="is-priority">{isEn ? 'Featured release' : '주요 발매'}</span> : null}
+          {event.priority === 'high' ? <span className="is-priority">{isJp ? '注目の発売' : isEn ? 'Featured release' : '주요 발매'}</span> : null}
           <span className={`is-${event.kind}`}>{kindLabel}</span>
           <span>{event.locale}</span>
           <small>{event.sourceLabel}</small>
@@ -5347,6 +5598,8 @@ function RenewCalendarEventCard({ event, uiLang }) {
 
 function RenewCalendar({ uiLang }) {
   const isEn = uiLang === 'EN';
+  const isJp = uiLang === 'JP';
+  const dateLocale = isJp ? 'ja-JP' : isEn ? 'en-US' : 'ko-KR';
   const todayKey = getCalendarTodayKey();
   const [monthKey, setMonthKey] = useState(todayKey.slice(0, 7));
   const [selectedDate, setSelectedDate] = useState(todayKey);
@@ -5397,10 +5650,10 @@ function RenewCalendar({ uiLang }) {
     return map;
   }, [filteredEvents]);
   const monthDate = new Date(`${monthKey}-01T00:00:00`);
-  const monthLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { year: 'numeric', month: 'long' }).format(monthDate);
-  const selectedDateLabel = new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${selectedDate}T00:00:00`));
+  const monthLabel = new Intl.DateTimeFormat(dateLocale, { year: 'numeric', month: 'long' }).format(monthDate);
+  const selectedDateLabel = new Intl.DateTimeFormat(dateLocale, { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${selectedDate}T00:00:00`));
   const weekRangeLabel = weekCells.length
-    ? `${new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[0].key}T00:00:00`))} - ${new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[6].key}T00:00:00`))}`
+    ? `${new Intl.DateTimeFormat(dateLocale, { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[0].key}T00:00:00`))} - ${new Intl.DateTimeFormat(dateLocale, { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[6].key}T00:00:00`))}`
     : '';
   const mobileGroups = useMemo(() => {
     const groups = new Map();
@@ -5433,15 +5686,15 @@ function RenewCalendar({ uiLang }) {
   };
 
   const localeOptions = [
-    { key: 'ALL', label: isEn ? 'All regions' : '전체 국가' },
-    { key: 'KR', label: isEn ? 'Korea' : '한글판' },
-    { key: 'JP', label: isEn ? 'Japan' : '일본판' }
+    { key: 'ALL', label: isJp ? 'すべての地域' : isEn ? 'All regions' : '전체 국가' },
+    { key: 'KR', label: isJp ? '韓国版' : isEn ? 'Korea' : '한글판' },
+    { key: 'JP', label: isJp ? '日本版' : isEn ? 'Japan' : '일본판' }
   ];
   const kindOptions = [
-    { key: 'all', label: isEn ? 'All schedules' : '전체 일정' },
-    { key: 'release', label: isEn ? 'Releases' : '발매' },
-    { key: 'event', label: isEn ? 'Events' : '이벤트' },
-    { key: 'notice', label: isEn ? 'Official notices' : '공식 공지' }
+    { key: 'all', label: isJp ? 'すべての日程' : isEn ? 'All schedules' : '전체 일정' },
+    { key: 'release', label: isJp ? '発売' : isEn ? 'Releases' : '발매' },
+    { key: 'event', label: isJp ? 'イベント' : isEn ? 'Events' : '이벤트' },
+    { key: 'notice', label: isJp ? '公式告知' : isEn ? 'Official notices' : '공식 공지' }
   ];
   const hasActiveFilters = localeFilter !== 'ALL' || kindFilter !== 'all';
 
@@ -5451,28 +5704,28 @@ function RenewCalendar({ uiLang }) {
         <header className="renew-calendar-head">
           <div>
             <span>SCHEDULE</span>
-            <h1 className="renew-sr-only">{isEn ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</h1>
+            <h1 className="renew-sr-only">{isJp ? 'ONE PIECE CARD GAME カレンダー' : isEn ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</h1>
           </div>
-          <strong>{monthEvents.length}{isEn ? ' schedules' : '개 일정'}</strong>
+          <strong>{monthEvents.length}{isJp ? '件の日程' : isEn ? ' schedules' : '개 일정'}</strong>
         </header>
 
         <div className="renew-calendar-toolbar">
           <div className="renew-calendar-month-control">
-            <button type="button" onClick={() => changeMonth(-1)} aria-label={isEn ? 'Previous month' : '이전 달'}>‹</button>
+            <button type="button" onClick={() => changeMonth(-1)} aria-label={isJp ? '前の月' : isEn ? 'Previous month' : '이전 달'}>‹</button>
             <h2>{monthLabel}</h2>
-            <button type="button" onClick={() => changeMonth(1)} aria-label={isEn ? 'Next month' : '다음 달'}>›</button>
-            <button type="button" className="renew-calendar-today" onClick={goToday}>{isEn ? 'Today' : '오늘'}</button>
+            <button type="button" onClick={() => changeMonth(1)} aria-label={isJp ? '次の月' : isEn ? 'Next month' : '다음 달'}>›</button>
+            <button type="button" className="renew-calendar-today" onClick={goToday}>{isJp ? '今日' : isEn ? 'Today' : '오늘'}</button>
           </div>
           <div className="renew-calendar-filters">
             <div className="renew-calendar-filter-group">
-              <span>{isEn ? 'Region' : '지역'}</span>
-              <div role="group" aria-label={isEn ? 'Region filter' : '국가 필터'}>
+              <span>{isJp ? '地域' : isEn ? 'Region' : '지역'}</span>
+              <div role="group" aria-label={isJp ? '地域フィルター' : isEn ? 'Region filter' : '국가 필터'}>
                 {localeOptions.map((option) => <button key={option.key} type="button" className={localeFilter === option.key ? 'is-active' : ''} onClick={() => setLocaleFilter(option.key)}>{option.label}</button>)}
               </div>
             </div>
             <div className="renew-calendar-filter-group">
-              <span>{isEn ? 'Type' : '유형'}</span>
-              <div role="group" aria-label={isEn ? 'Schedule type filter' : '일정 유형 필터'}>
+              <span>{isJp ? '種類' : isEn ? 'Type' : '유형'}</span>
+              <div role="group" aria-label={isJp ? '日程の種類フィルター' : isEn ? 'Schedule type filter' : '일정 유형 필터'}>
                 {kindOptions.map((option) => <button key={option.key} type="button" className={kindFilter === option.key ? 'is-active' : ''} onClick={() => setKindFilter(option.key)}>{option.label}</button>)}
               </div>
             </div>
@@ -5482,19 +5735,19 @@ function RenewCalendar({ uiLang }) {
               disabled={!hasActiveFilters}
               onClick={() => { setLocaleFilter('ALL'); setKindFilter('all'); }}
             >
-              {isEn ? 'Reset' : '초기화'}
+              {isJp ? 'リセット' : isEn ? 'Reset' : '초기화'}
             </button>
           </div>
         </div>
 
         {highlightedEvents.length ? (
-          <section className="renew-calendar-highlights" aria-label={isEn ? 'Featured product schedules this month' : '이번 달 주요 상품 일정'}>
+          <section className="renew-calendar-highlights" aria-label={isJp ? '今月の注目商品スケジュール' : isEn ? 'Featured product schedules this month' : '이번 달 주요 상품 일정'}>
             <header>
               <div>
                 <span>MONTHLY PICK</span>
-                <h2>{isEn ? 'Featured product schedules' : '이번 달 주요 상품 일정'}</h2>
+                <h2>{isJp ? '今月の注目商品スケジュール' : isEn ? 'Featured product schedules' : '이번 달 주요 상품 일정'}</h2>
               </div>
-              <small>{isEn ? 'New packs, boxes and promo cards' : '신규 팩·박스·프로모 우선'}</small>
+              <small>{isJp ? '新パック・ボックス・プロモカードを優先表示' : isEn ? 'New packs, boxes and promo cards' : '신규 팩·박스·프로모 우선'}</small>
             </header>
             <div>
               {highlightedEvents.map((event) => {
@@ -5503,10 +5756,10 @@ function RenewCalendar({ uiLang }) {
                   <a key={`highlight-${event.id}`} href={event.url || '#'} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
                     <div>
                       <time dateTime={event.date}>{event.date.slice(5).replace('-', '.')}</time>
-                      <span>{event.locale} · {event.kind === 'release' ? (isEn ? 'Release' : '발매') : (isEn ? 'Official news' : '공식 소식')}</span>
+                      <span>{event.locale} · {event.kind === 'release' ? (isJp ? '発売' : isEn ? 'Release' : '발매') : (isJp ? '公式情報' : isEn ? 'Official news' : '공식 소식')}</span>
                     </div>
-                    <strong>{getCalendarDisplayTitle(event, isEn)}</strong>
-                    {!isEn && event.locale === 'JP' && event.titleKo !== event.title ? <small lang="ja">{event.title}</small> : null}
+                    <strong>{getCalendarDisplayTitle(event, uiLang)}</strong>
+                    {!isEn && !isJp && event.locale === 'JP' && event.titleKo !== event.title ? <small lang="ja">{event.title}</small> : null}
                   </a>
                 );
               })}
@@ -5517,9 +5770,9 @@ function RenewCalendar({ uiLang }) {
         <div className="renew-calendar-layout">
           <div className="renew-calendar-mobile-week">
             <div className="renew-calendar-week-control">
-              <button type="button" onClick={() => changeWeek(-1)} aria-label={isEn ? 'Previous week' : '이전 주'}>‹</button>
+              <button type="button" onClick={() => changeWeek(-1)} aria-label={isJp ? '前の週' : isEn ? 'Previous week' : '이전 주'}>‹</button>
               <strong>{weekRangeLabel}</strong>
-              <button type="button" onClick={() => changeWeek(1)} aria-label={isEn ? 'Next week' : '다음 주'}>›</button>
+              <button type="button" onClick={() => changeWeek(1)} aria-label={isJp ? '次の週' : isEn ? 'Next week' : '다음 주'}>›</button>
             </div>
             <div className="renew-calendar-week-days">
               {weekCells.map((cell) => {
@@ -5532,7 +5785,7 @@ function RenewCalendar({ uiLang }) {
                     onClick={() => selectDate(cell.key)}
                     aria-label={`${cell.key}, ${eventCount}${isEn ? ' schedules' : '개 일정'}`}
                   >
-                    <span>{CALENDAR_WEEKDAYS[isEn ? 'EN' : 'KR'][cell.weekday]}</span>
+                    <span>{CALENDAR_WEEKDAYS[isJp ? 'JP' : isEn ? 'EN' : 'KR'][cell.weekday]}</span>
                     <time dateTime={cell.key}>{cell.day}</time>
                     {eventCount ? <small>{eventCount}</small> : <small aria-hidden="true">0</small>}
                   </button>
@@ -5543,7 +5796,7 @@ function RenewCalendar({ uiLang }) {
 
           <div className="renew-calendar-grid-wrap">
             <div className="renew-calendar-weekdays" aria-hidden="true">
-              {CALENDAR_WEEKDAYS[isEn ? 'EN' : 'KR'].map((day, index) => <span key={day} className={index === 0 ? 'is-sunday' : index === 6 ? 'is-saturday' : ''}>{day}</span>)}
+              {CALENDAR_WEEKDAYS[isJp ? 'JP' : isEn ? 'EN' : 'KR'].map((day, index) => <span key={day} className={index === 0 ? 'is-sunday' : index === 6 ? 'is-saturday' : ''}>{day}</span>)}
             </div>
             <div className="renew-calendar-grid">
               {monthCells.map((cell) => {
@@ -5558,7 +5811,7 @@ function RenewCalendar({ uiLang }) {
                   >
                     <time dateTime={cell.key}>{cell.day}</time>
                     <span className="renew-calendar-day-events">
-                      {dayEvents.slice(0, 3).map((event) => <span key={event.id} className={`is-${event.kind} is-priority-${event.priority || 'low'}`}>{getCalendarDisplayTitle(event, isEn)}</span>)}
+                      {dayEvents.slice(0, 3).map((event) => <span key={event.id} className={`is-${event.kind} is-priority-${event.priority || 'low'}`}>{getCalendarDisplayTitle(event, uiLang)}</span>)}
                       {dayEvents.length > 3 ? <small>+{dayEvents.length - 3}</small> : null}
                     </span>
                   </button>
@@ -5569,12 +5822,12 @@ function RenewCalendar({ uiLang }) {
 
           <aside className="renew-calendar-agenda">
             <div>
-              <span>{isEn ? 'Selected date' : '선택한 날짜'}</span>
+              <span>{isJp ? '選択した日付' : isEn ? 'Selected date' : '선택한 날짜'}</span>
               <h2>{selectedDateLabel}</h2>
             </div>
             <div className="renew-calendar-agenda-list">
               {selectedEvents.map((event) => <RenewCalendarEventCard key={event.id} event={event} uiLang={uiLang} />)}
-              {!selectedEvents.length ? <p>{isEn ? 'No schedules on this date.' : '이 날짜에 등록된 일정이 없습니다.'}</p> : null}
+              {!selectedEvents.length ? <p>{isJp ? 'この日に登録された予定はありません。' : isEn ? 'No schedules on this date.' : '이 날짜에 등록된 일정이 없습니다.'}</p> : null}
             </div>
           </aside>
         </div>
@@ -5582,15 +5835,15 @@ function RenewCalendar({ uiLang }) {
         <div className="renew-calendar-mobile-list">
           {mobileGroups.map(([date, dayEvents]) => (
             <section key={date}>
-              <time dateTime={date}>{new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T00:00:00`))}</time>
+              <time dateTime={date}>{new Intl.DateTimeFormat(dateLocale, { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T00:00:00`))}</time>
               <div>{dayEvents.map((event) => <RenewCalendarEventCard key={event.id} event={event} uiLang={uiLang} />)}</div>
             </section>
           ))}
-          {!mobileGroups.length ? <p>{isEn ? 'No schedules match the selected filters.' : '선택한 조건에 맞는 일정이 없습니다.'}</p> : null}
+          {!mobileGroups.length ? <p>{isJp ? '選択した条件に一致する予定はありません。' : isEn ? 'No schedules match the selected filters.' : '선택한 조건에 맞는 일정이 없습니다.'}</p> : null}
         </div>
 
         <footer className="renew-calendar-note">
-          <p>{isEn ? 'Official notices are shown on their publication date. Release dates come from the linked product source and may change.' : '공식 공지는 게시일 기준입니다. 발매일은 연결된 상품 출처 기준이며 변경될 수 있습니다.'}</p>
+          <p>{isJp ? '公式告知は掲載日を基準に表示します。発売日はリンク先の商品情報を基準としており、変更される場合があります。' : isEn ? 'Official notices are shown on their publication date. Release dates come from the linked product source and may change.' : '공식 공지는 게시일 기준입니다. 발매일은 연결된 상품 출처 기준이며 변경될 수 있습니다.'}</p>
         </footer>
       </section>
     </main>
@@ -5600,7 +5853,7 @@ function RenewCalendar({ uiLang }) {
 function RenewNews({ uiLang, onOpenCalendar }) {
   const t = (key) => getUiText(uiLang, key);
   const initialParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
-  const initialPath = typeof window !== 'undefined' ? normalizeSitePath(window.location.pathname) : '/news';
+  const initialPath = typeof window !== 'undefined' ? getAppPath(window.location.pathname) : '/news';
   const isCardStorageGuide = initialPath === '/guide/card-storage';
   const isShopBuyingGuide = initialPath === '/guide/shops';
   const isCardPriceGuide = initialPath === '/guide/card-price';
@@ -5638,11 +5891,11 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
   return (
     <main className="renew-main renew-news-main">
-      <a className="renew-news-calendar-link" href="/calendar" onClick={(event) => { event.preventDefault(); onOpenCalendar?.(); }}>
+      <a className="renew-news-calendar-link" href={getLocalizedPagePath('calendar', uiLang)} onClick={(event) => { event.preventDefault(); onOpenCalendar?.(); }}>
         <span>SCHEDULE</span>
         <div>
-          <strong>{uiLang === 'EN' ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</strong>
-          <small>{uiLang === 'EN' ? 'Check releases and official event notices by month.' : '발매일과 공식 이벤트 공지를 월별로 확인하세요.'}</small>
+          <strong>{uiLang === 'JP' ? 'ONE PIECE CARD GAME カレンダー' : uiLang === 'EN' ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</strong>
+          <small>{uiLang === 'JP' ? '発売日と公式イベント告知を月別に確認できます。' : uiLang === 'EN' ? 'Check releases and official event notices by month.' : '발매일과 공식 이벤트 공지를 월별로 확인하세요.'}</small>
         </div>
         <b aria-hidden="true">›</b>
       </a>
@@ -8703,7 +8956,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
   const [payload, setPayload] = useState(null);
   const [indexType, setIndexType] = useState(() => {
     if (typeof window === 'undefined') return 'collector';
-    const path = normalizeSitePath(window.location.pathname);
+    const path = getAppPath(window.location.pathname);
     return getMarketIndexTypeFromPath(path);
   });
   const [range, setRange] = useState('1y');
@@ -9183,7 +9436,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const [marketProductLocale, setMarketProductLocale] = useState('JP');
   const [homeTab, setHomeTab] = useState(() => {
     if (typeof window === 'undefined') return 'box';
-    const path = normalizeSitePath(window.location.pathname);
+    const path = getAppPath(window.location.pathname);
     if (isMarketIndexPath(path)) return 'index';
     if (path.startsWith('/prices/product/') || path.startsWith('/prices/card/')) return 'card';
     if (path.startsWith('/prices/box/')) return 'box';
@@ -10119,7 +10372,10 @@ export default function RenewApp() {
   });
   const [uiLang, setUiLang] = useState(() => {
     if (typeof window === 'undefined') return 'KR';
-    return window.localStorage.getItem(UI_LANG_STORAGE_KEY) === 'EN' ? 'EN' : 'KR';
+    const routeLocale = getPathLocale(window.location.pathname);
+    if (routeLocale) return routeLocale;
+    const savedLocale = window.localStorage.getItem(UI_LANG_STORAGE_KEY);
+    return ['EN', 'JP'].includes(savedLocale) ? savedLocale : 'KR';
   });
   const [authUser, setAuthUser] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -10162,8 +10418,8 @@ export default function RenewApp() {
   }, [authUser?.id]);
 
   useEffect(() => {
-    applyPageSeo(activePage);
-  }, [activePage]);
+    applyPageSeo(activePage, uiLang);
+  }, [activePage, uiLang]);
 
   useEffect(() => {
     if (window.location.pathname === '/deck' || window.location.pathname === '/deck-simulator') {
@@ -10217,6 +10473,9 @@ export default function RenewApp() {
 
   useEffect(() => {
     const handlePopState = () => {
+      const routeLocale = getPathLocale(window.location.pathname);
+      if (routeLocale) setUiLang(routeLocale);
+      else setUiLang((current) => current === 'JP' ? 'KR' : current);
       const nextPage = getPageFromPath(window.location.pathname);
       if (nextPage === 'home') {
         setCatalogInitialSearch(null);
@@ -10438,6 +10697,17 @@ export default function RenewApp() {
     }
   }
 
+  function changeUiLanguage(nextLanguage) {
+    const language = ['KR', 'EN', 'JP'].includes(nextLanguage) ? nextLanguage : 'KR';
+    const nextPath = localizeAppPath(window.location.pathname, language);
+    const nextUrl = `${nextPath}${window.location.search}`;
+    setUiLang(language);
+    if (window.location.pathname + window.location.search !== nextUrl) {
+      internalNavigationRef.current = true;
+      window.history.pushState(null, '', nextUrl);
+    }
+  }
+
   function navigatePage(page, options = {}) {
     if (page === 'marketplace' && !MARKETPLACE_TAB_VISIBLE) {
       page = 'home';
@@ -10446,7 +10716,7 @@ export default function RenewApp() {
       setDeckComingSoonOpen(true);
       return;
     }
-    const path = PAGE_PATHS[page] || '/';
+    const path = getLocalizedPagePath(page, uiLang);
     const query = options.query ? `?${options.query}` : '';
     const nextUrl = `${path}${query}`;
     if (page === 'marketplace') {
@@ -10476,13 +10746,14 @@ export default function RenewApp() {
   function openLegal(type) {
     setLegalOpen(type);
     internalNavigationRef.current = true;
-    window.history.pushState(null, '', `/${type}`);
+    window.history.pushState(null, '', localizeAppPath(`/${type}`, uiLang));
   }
 
   function closeLegal() {
     setLegalOpen(null);
-    if (window.location.pathname === '/privacy' || window.location.pathname === '/terms') {
-      window.history.pushState(null, '', PAGE_PATHS[activePage] || '/');
+    const path = getAppPath(window.location.pathname);
+    if (path === '/privacy' || path === '/terms') {
+      window.history.pushState(null, '', getLocalizedPagePath(activePage, uiLang));
     }
   }
 
@@ -10514,7 +10785,7 @@ export default function RenewApp() {
         displayName={displayName}
         onAuthClick={handleAuthClick}
         uiLang={uiLang}
-        onUiLangChange={setUiLang}
+        onUiLangChange={changeUiLanguage}
         notifications={notifications}
         onNotificationSelect={handleNotificationSelect}
         onNotificationsReadAll={handleNotificationsReadAll}

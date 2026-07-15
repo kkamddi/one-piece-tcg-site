@@ -79,6 +79,91 @@ const PAGE_SEO = {
   }
 };
 
+const JAPANESE_ROUTE_PREFIX = '/jp';
+const JAPANESE_SEO = {
+  '/': {
+    title: 'ワンピースカードゲームのカード図鑑・相場 | Card Pone',
+    description: 'ONE PIECE CARD GAMEの日本版カードを中心に、カード図鑑、SNKRDUNK基準の相場、価格チャート、コレクション管理を確認できる非公式サービスです。',
+    keywords: 'ワンピースカードゲーム,ワンピカード,ワンピースカード 相場,ワンピカード 相場,ワンピースカード 図鑑,SNKRDUNK,Card Pone',
+    schemaType: 'WebPage'
+  },
+  '/cards': {
+    title: 'ワンピースカードゲーム カード図鑑 | Card Pone',
+    description: 'ONE PIECE CARD GAMEの日本版カードをOP、EB、ST、プロモシリーズごとに検索し、カード名や番号から確認できます。',
+    keywords: 'ワンピースカードゲーム カードリスト,ワンピカード 図鑑,ワンピースカード 検索,OPカード,Card Pone',
+    schemaType: 'CollectionPage'
+  },
+  '/prices': {
+    title: 'ワンピースカードゲーム 相場・価格チャート | Card Pone',
+    description: 'SNKRDUNK基準でONE PIECE CARD GAMEのSingle・PSA10の価格、最近の取引記録、7日・1か月・1年チャートを確認できます。',
+    keywords: 'ワンピースカードゲーム 相場,ワンピカード 相場,ワンピースカード 価格,SNKRDUNK,PSA10,Card Pone',
+    schemaType: 'CollectionPage'
+  },
+  '/calendar': {
+    title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
+    description: 'ONE PIECE CARD GAMEの新商品、パック、ボックス、プロモカードの発売日と公式イベント情報を月別に確認できます。',
+    keywords: 'ワンピースカードゲーム 発売日,ワンピカード 発売日,ワンピカード カレンダー,ワンピースカード イベント',
+    schemaType: 'CollectionPage'
+  },
+  '/news': {
+    title: 'ワンピースカードゲーム 公式情報・新商品情報 | Card Pone',
+    description: 'ONE PIECE CARD GAMEの公式情報、新商品、予約情報、コレクションガイドをまとめて確認できます。',
+    keywords: 'ワンピースカードゲーム 情報,ワンピカード 新商品,ワンピースカード 公式,ワンピカード 予約',
+    schemaType: 'CollectionPage'
+  }
+};
+
+function isJapanesePath(pathname) {
+  return pathname === JAPANESE_ROUTE_PREFIX || pathname.startsWith(`${JAPANESE_ROUTE_PREFIX}/`);
+}
+
+function getJapaneseBasePath(pathname) {
+  if (pathname === JAPANESE_ROUTE_PREFIX) return '/';
+  return pathname.slice(JAPANESE_ROUTE_PREFIX.length) || '/';
+}
+
+function getJapaneseSeo(pathname) {
+  const basePath = getJapaneseBasePath(pathname);
+  if (JAPANESE_SEO[basePath]) return JAPANESE_SEO[basePath];
+  if (basePath.startsWith('/cards/series/')) {
+    const series = basePath.split('/').pop()?.toUpperCase() || 'SERIES';
+    return {
+      title: `${series} ワンピースカードゲーム カードリスト | Card Pone`,
+      description: `${series}シリーズのONE PIECE CARD GAMEカードをカード番号、レアリティ、カード名から確認できます。`,
+      keywords: `${series},ワンピースカードゲーム,ワンピカード,カードリスト`,
+      schemaType: 'CollectionPage'
+    };
+  }
+  if (basePath.startsWith('/prices/product/')) {
+    const id = basePath.slice('/prices/product/'.length);
+    return {
+      title: `SNKRDUNK 商品 #${id} 相場 | Card Pone`,
+      description: `SNKRDUNK商品 #${id} のONE PIECE CARD GAME価格チャートと最近の取引記録を確認できます。`,
+      keywords: `SNKRDUNK ${id},ワンピースカードゲーム 相場,ワンピカード 価格`,
+      schemaType: 'Product'
+    };
+  }
+  if (basePath.startsWith('/prices/card/')) {
+    const code = basePath.slice('/prices/card/'.length).toUpperCase();
+    return {
+      title: `${code} ワンピースカードゲーム 相場 | Card Pone`,
+      description: `${code}のONE PIECE CARD GAME相場候補と価格を確認できます。`,
+      keywords: `${code},ワンピースカードゲーム 相場,ワンピカード 価格`,
+      schemaType: 'Product'
+    };
+  }
+  if (basePath.startsWith('/prices/box/')) {
+    const code = basePath.slice('/prices/box/'.length).toUpperCase();
+    return {
+      title: `${code} ボックス相場 | Card Pone`,
+      description: `ONE PIECE CARD GAME ${code}のボックス価格とSNKRDUNK商品情報を確認できます。`,
+      keywords: `${code},ワンピースカードゲーム ボックス 相場,ワンピカード ボックス`,
+      schemaType: 'Product'
+    };
+  }
+  return JAPANESE_SEO['/'];
+}
+
 const ROUTE_SEO = {
   '/cards/jp': {
     title: '일본판 원피스카드 도감 | Card Pone',
@@ -436,12 +521,58 @@ const SERVER_PAGE_CONTENT = {
   }
 };
 
+const JAPANESE_SERVER_PAGE_CONTENT = {
+  '/': {
+    heading: 'ワンピースカードゲームのカード図鑑と相場をひとつに',
+    paragraphs: [
+      'Card Poneは、ONE PIECE CARD GAMEの日本版カードを検索し、コレクション管理とカードごとの価格推移を確認できる非公式サービスです。',
+      '相場は公開市場データを整理して表示します。カードの状態や取引時点により実際の価格と差が出る場合があります。'
+    ],
+    links: ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news']
+  },
+  '/cards': {
+    heading: 'ワンピースカードゲーム カード図鑑',
+    paragraphs: [
+      '日本版ONE PIECE CARD GAMEのカードを、カード名、カード番号、OP・EB・ST・プロモシリーズから検索できます。',
+      'ログイン後は所持カードとウィッシュリストを保存し、カード詳細から相場と価格アラートを確認できます。'
+    ],
+    links: ['/jp', '/jp/prices', '/jp/calendar', '/jp/news']
+  },
+  '/prices': {
+    heading: 'ワンピースカードゲーム 相場と価格チャート',
+    paragraphs: [
+      'カード番号または名前からSNKRDUNKにマッピングされた商品を検索し、SingleとPSA10の最近の相場、取引記録、価格チャートを確認できます。',
+      '価格情報は参考情報です。取引時の状態、複数枚販売、為替の変動によって実際の売買価格と異なる場合があります。'
+    ],
+    links: ['/jp/cards', '/jp/calendar', '/jp/news', '/jp']
+  },
+  '/calendar': {
+    heading: 'ワンピースカードゲーム 発売日とイベントカレンダー',
+    paragraphs: [
+      '新商品、パック、ボックス、プロモカードの発売日と公式イベント情報を月別に確認できます。',
+      '公式告知は掲載日、商品はリンク先の発売日を基準としており、予定は変更される場合があります。'
+    ],
+    links: ['/jp/news', '/jp/cards', '/jp/prices', '/jp']
+  },
+  '/news': {
+    heading: 'ワンピースカードゲーム 公式情報',
+    paragraphs: [
+      'ONE PIECE CARD GAMEの公式情報、新商品、予約情報、コレクションガイドをまとめて確認できます。',
+      '外部の公式情報は原文へのリンクを使用し、カード図鑑と相場機能もあわせて利用できます。'
+    ],
+    links: ['/jp/calendar', '/jp/cards', '/jp/prices', '/jp']
+  }
+};
+
 function createServerPageContent(pathname, seo) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
-  const content = SERVER_PAGE_CONTENT[normalized] || {
+  const isJapanese = isJapanesePath(normalized);
+  const contentMap = isJapanese ? JAPANESE_SERVER_PAGE_CONTENT : SERVER_PAGE_CONTENT;
+  const contentKey = isJapanese ? getJapaneseBasePath(normalized) : normalized;
+  const content = contentMap[contentKey] || {
     heading: seo.title.split('|')[0].trim(),
     paragraphs: [seo.description],
-    links: ['/cards', '/prices', '/guide', '/shops']
+    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news'] : ['/cards', '/prices', '/guide', '/shops']
   };
   const links = content.links
     .map((path) => {
@@ -455,7 +586,7 @@ function createServerPageContent(pathname, seo) {
   return `<main class="server-page-content">
       <h1>${escapeHtml(content.heading)}</h1>
       ${paragraphs}
-      <nav aria-label="관련 페이지"><ul>${links}</ul></nav>
+      <nav aria-label="${isJapanese ? '関連ページ' : '관련 페이지'}"><ul>${links}</ul></nav>
     </main>`;
 }
 
@@ -540,6 +671,7 @@ function getFixedPageSeo(normalized) {
 
 function getPageSeo(pathname) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  if (isJapanesePath(normalized)) return getJapaneseSeo(normalized);
   const fixedSeo = getFixedPageSeo(normalized);
   if (fixedSeo) return fixedSeo;
   if (ROUTE_SEO[normalized]) return ROUTE_SEO[normalized];
@@ -619,6 +751,7 @@ function replaceOrInsertMeta(html, selectorPattern, replacement) {
 function createJsonLd(pathname, seo) {
   const url = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const isJapanese = isJapanesePath(normalized);
   const schemaType = seo.schemaType || 'WebPage';
   const pageNode = {
     '@type': schemaType,
@@ -626,7 +759,7 @@ function createJsonLd(pathname, seo) {
     url,
     name: seo.title,
     description: seo.description,
-    inLanguage: 'ko-KR',
+    inLanguage: isJapanese ? 'ja-JP' : 'ko-KR',
     isPartOf: {
       '@type': 'WebSite',
       '@id': `${SITE_ORIGIN}/#website`,
@@ -697,7 +830,7 @@ function createJsonLd(pathname, seo) {
         '@type': 'WebSite',
         '@id': `${SITE_ORIGIN}/#website`,
         name: 'Card Pone',
-        alternateName: ['카드포네', '카드 포네', '원피스카드 도감', '원피스카드 시세'],
+        alternateName: isJapanese ? ['カードポネ', 'ワンピースカードゲーム 図鑑', 'ワンピースカードゲーム 相場'] : ['카드포네', '카드 포네', '원피스카드 도감', '원피스카드 시세'],
         url: `${SITE_ORIGIN}/`,
         publisher: { '@id': `${SITE_ORIGIN}/#organization` },
         potentialAction: {
@@ -728,6 +861,11 @@ function createJsonLd(pathname, seo) {
 
 function applySeo(html, pathname, seo) {
   const canonicalUrl = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
+  const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const isJapanese = isJapanesePath(normalized);
+  const basePath = isJapanese ? getJapaneseBasePath(normalized) : normalized;
+  const defaultUrl = `${SITE_ORIGIN}${basePath === '/' ? '/' : basePath}`;
+  const japaneseUrl = `${SITE_ORIGIN}${JAPANESE_ROUTE_PREFIX}${basePath === '/' ? '' : basePath}`;
   const title = escapeHtml(seo.title);
   const description = escapeHtml(seo.description);
   const keywords = escapeHtml(seo.keywords);
@@ -735,6 +873,7 @@ function applySeo(html, pathname, seo) {
   const image = `${SITE_ORIGIN}/og-card-pone.jpg`;
 
   let nextHtml = html
+    .replace(/<html\b[^>]*\blang="[^"]*"/i, `<html lang="${isJapanese ? 'ja' : 'ko'}"`)
     .replace(/<title>.*?<\/title>/is, `<title>${title}</title>`)
     .replace(/<link rel="canonical" href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${url}" />`);
 
@@ -744,11 +883,18 @@ function applySeo(html, pathname, seo) {
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:title" content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${title}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:description" content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${description}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:url" content="[^"]*"\s*\/?>/i, `<meta property="og:url" content="${url}" />`);
-  nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:locale" content="[^"]*"\s*\/?>/i, '<meta property="og:locale" content="ko_KR" />');
+  nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:locale" content="[^"]*"\s*\/?>/i, `<meta property="og:locale" content="${isJapanese ? 'ja_JP' : 'ko_KR'}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:image" content="[^"]*"\s*\/?>/i, `<meta property="og:image" content="${image}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:title" content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${title}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:description" content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${description}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:image" content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${image}" />`);
+  const hreflangLinks = [
+    `<link rel="alternate" hreflang="ko" href="${escapeHtml(defaultUrl)}" data-card-pone-hreflang="true" />`,
+    `<link rel="alternate" hreflang="ja" href="${escapeHtml(japaneseUrl)}" data-card-pone-hreflang="true" />`,
+    `<link rel="alternate" hreflang="x-default" href="${escapeHtml(defaultUrl)}" data-card-pone-hreflang="true" />`
+  ].join('\n    ');
+  nextHtml = nextHtml.replace(/\s*<link rel="alternate" hreflang="(?:ko|ja|x-default)"[^>]*data-card-pone-hreflang="true"\s*\/>/gi, '');
+  nextHtml = nextHtml.replace('</head>', `    ${hreflangLinks}\n  </head>`);
 
   const pageJsonLd = `<script type="application/ld+json" id="optcg-server-page-jsonld">${createJsonLd(pathname, seo)}</script>`;
   if (nextHtml.includes('id="optcg-server-page-jsonld"')) {
