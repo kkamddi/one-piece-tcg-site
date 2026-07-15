@@ -246,8 +246,6 @@ const RENEW_HOME_UPDATES = [
     summary: '원피스카드 일정 캘린더 추가',
     details: [
       '한글판·일본판 신규 상품, 프로모 카드와 공식 일정을 캘린더에서 확인 가능',
-      '모바일에서는 주간 날짜를 선택해 해당 날짜의 상세 일정을 크게 확인 가능',
-      '신규 팩·박스 등 주요 발매 일정을 우선해서 표시',
       '일본판 공식 일정의 한글 요약과 미리보기 이미지 제공'
     ]
   },
@@ -290,8 +288,7 @@ const RENEW_HOME_UPDATES = [
     details: [
       '판매자가 올린 게시물 사진이 거래 상세와 목록에 반영되도록 개선',
       '게시물 문의 후 거래방으로 바로 이어지는 흐름 개선',
-      '거래완료 게시물은 거래방 추가 메시지 입력 제한',
-      '모바일 거래 화면과 다크모드 가독성 개선'
+      '거래완료 게시물은 거래방 추가 메시지 입력 제한'
     ]
   },
   {
@@ -318,11 +315,9 @@ const RENEW_HOME_UPDATES = [
   },
   {
     id: '2026-05-29-renewal',
-    title: '[26.05.29] 홈페이지 리뉴얼 안내',
-    summary: '홈페이지 UI 리뉴얼 및 시세 매핑 개선',
+    title: '[26.05.29] 업데이트 안내',
+    summary: '카드 시세 매핑 기능 개선',
     details: [
-      '메인 화면을 리뉴얼 UI로 전환',
-      '도감·시세·덱 시뮬레이터·구매처 화면의 디자인 톤 정리',
       '카드도감에서 승인된 시세 상품은 정확한 상품 ID로 바로 이동',
       '시세 후보 선택 화면에 카드 이미지 미리보기 추가'
     ]
@@ -2165,6 +2160,7 @@ const UI_TEXT = {
     usersTotal: '전체 회원 수',
     signupsToday: '오늘 가입자',
     footerIntro: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감·시세·컬렉션 관리 서비스입니다.',
+    footerDisclaimer: 'BANDAI 및 공식 유통사와 제휴되어 있지 않으며, 시세 정보는 참고용입니다.',
     footerRights: 'ONE PIECE CARD GAME 및 관련 이미지, 명칭, 상표의 권리는 각 권리자에게 있으며,',
     footerNoAffiliation: '본 사이트는 BANDAI 및 공식 유통사와 제휴되어 있지 않습니다.',
     footerPriceNotice: '제공되는 시세 정보는 참고용이며, 실제 거래 가격과 차이가 있을 수 있습니다.',
@@ -2277,6 +2273,7 @@ const UI_TEXT = {
     usersTotal: 'Total users',
     signupsToday: 'New users today',
     footerIntro: 'Card Pone is an unofficial card database, market price, and collection management service for ONE PIECE CARD GAME players.',
+    footerDisclaimer: 'Not affiliated with BANDAI or official distributors. Market prices are for reference only.',
     footerRights: 'ONE PIECE CARD GAME images, names, and trademarks belong to their respective rights holders.',
     footerNoAffiliation: 'This site is not affiliated with BANDAI or official distributors.',
     footerPriceNotice: 'Market price information is provided for reference only and may differ from actual transaction prices.',
@@ -2389,6 +2386,7 @@ const UI_TEXT = {
     usersTotal: '総会員数',
     signupsToday: '本日の登録者',
     footerIntro: 'Card Poneは、ONE PIECE CARD GAMEユーザーのための非公式カード図鑑・相場・コレクション管理サービスです。',
+    footerDisclaimer: '本サイトはBANDAIおよび公式流通事業者と提携しておらず、相場情報は参考情報です。',
     footerRights: 'ONE PIECE CARD GAMEおよび関連する画像、名称、商標の権利は各権利者に帰属します。',
     footerNoAffiliation: '本サイトはBANDAIおよび公式流通事業者と提携していません。',
     footerPriceNotice: '相場情報は参考情報であり、実際の取引価格と異なる場合があります。',
@@ -3700,8 +3698,10 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
   const t = (key) => getUiText(uiLang, key);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
   const unreadCount = notifications.filter((item) => !item.read_at).length;
   const handleNotificationClick = () => {
+    setMobileLanguageOpen(false);
     if (!isLoggedIn) {
       onAuthClick('login');
       return;
@@ -3709,6 +3709,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
     setNotificationMenuOpen((value) => !value);
   };
   const handleAccountClick = () => {
+    setMobileLanguageOpen(false);
     if (isLoggedIn) {
       setAccountMenuOpen((value) => !value);
       return;
@@ -3726,6 +3727,20 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <img src={LOGO_SRC} alt="Card Pone" />
         </a>
         <div className="renew-mobile-actions">
+          <div className={`renew-mobile-language ${mobileLanguageOpen ? 'is-open' : ''}`}>
+            <button type="button" onClick={() => setMobileLanguageOpen((value) => !value)} aria-label="언어 변경" aria-expanded={mobileLanguageOpen}>
+              {uiLang}
+            </button>
+            {mobileLanguageOpen ? (
+              <div className="renew-mobile-language-menu" role="menu" aria-label="언어 선택">
+                {['KR', 'EN', 'JP'].map((lang) => (
+                  <button key={lang} type="button" className={uiLang === lang ? 'is-active' : ''} onClick={() => { setMobileLanguageOpen(false); onUiLangChange(lang); }} role="menuitem">
+                    {lang}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
           <div className={`renew-notification-shell ${notificationMenuOpen ? 'is-open' : ''}`}>
             <button type="button" onClick={handleNotificationClick} aria-label="알림">
               <MobileNavIcon type="bell" />
@@ -10969,15 +10984,8 @@ export default function RenewApp() {
       ) : null}
       <footer className="renew-footer" data-nosnippet>
         <strong>© 2026 Card Pone. All rights reserved.</strong>
-        <p>
-          {t('footerIntro')}<br />
-          {t('footerRights')}<br />
-          {t('footerNoAffiliation')}
-        </p>
-        <p>
-          {t('footerPriceNotice')}<br />
-          {t('footerResponsibility')}
-        </p>
+        <p>{t('footerIntro')}</p>
+        <p>{t('footerDisclaimer')}</p>
         <div className="renew-footer-links">
           <a href="/about">소개</a>
           <span>·</span>
@@ -10986,10 +10994,6 @@ export default function RenewApp() {
           <a href="/terms">{t('terms')}</a>
           <span>·</span>
           <a href="/privacy">{t('privacy')}</a>
-          <span>·</span>
-          <span>{t('contact')}: optkr26@gmail.com</span>
-          <span>·</span>
-          <span>{t('partnership')}: optkr26@gmail.com</span>
         </div>
       </footer>
       {legalOpen ? <RenewLegalModal type={legalOpen} onClose={closeLegal} /> : null}
