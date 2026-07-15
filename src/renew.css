@@ -3769,9 +3769,13 @@
   padding: 0 24px;
 }
 
+.renew-value-modal {
+  overflow-x: hidden;
+}
+
 .renew-value-row {
   display: grid;
-  grid-template-columns: 58px minmax(190px, 1.35fr) repeat(2, minmax(118px, 0.7fr)) auto;
+  grid-template-columns: 58px minmax(190px, 1.35fr) minmax(250px, 1.4fr) auto;
   gap: 14px;
   align-items: center;
   min-width: 0;
@@ -3791,6 +3795,13 @@
 .renew-value-row-metric {
   display: grid;
   gap: 4px;
+  min-width: 0;
+}
+
+.renew-value-row-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
   min-width: 0;
 }
 
@@ -13424,16 +13435,31 @@
   }
 
   .renew-portfolio-list-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
+    gap: 8px;
     padding: 12px 14px;
   }
 
+  .renew-portfolio-list-tools > label {
+    display: block;
+    min-width: 0;
+  }
+
   .renew-portfolio-list-tools select {
-    width: 132px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .renew-portfolio-grade-tabs {
-    grid-auto-columns: minmax(58px, auto);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: initial;
+    grid-auto-columns: initial;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .renew-portfolio-grade-tabs button,
@@ -13447,17 +13473,17 @@
   }
 
   .renew-value-row {
-    grid-template-columns: 50px minmax(0, 1fr) minmax(90px, auto);
+    grid-template-columns: 52px minmax(0, 1fr);
     grid-template-rows: auto auto auto;
-    gap: 8px 10px;
-    padding: 11px 0;
+    gap: 9px 11px;
+    padding: 13px 0;
   }
 
   .renew-value-row > img {
     grid-column: 1;
-    grid-row: 1 / 3;
-    width: 50px;
-    height: 70px;
+    grid-row: 1;
+    width: 52px;
+    height: 72px;
   }
 
   .renew-value-row-identity {
@@ -13469,24 +13495,23 @@
     font-size: 13px;
   }
 
+  .renew-value-row-metrics {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #f7f7f8;
+  }
+
   .renew-value-row-metric {
     align-content: center;
   }
 
-  .renew-value-row-metric:nth-of-type(2) {
-    grid-column: 3;
-    grid-row: 1;
-    text-align: right;
-  }
-
-  .renew-value-row-metric:nth-of-type(3) {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .renew-value-row-metric:nth-of-type(4) {
-    grid-column: 3;
-    grid-row: 2;
+  .renew-value-row-metric + .renew-value-row-metric {
+    border-left: 1px solid rgba(23, 25, 28, 0.1);
+    padding-left: 12px;
     text-align: right;
   }
 
@@ -13497,26 +13522,46 @@
   .renew-value-row-actions {
     grid-column: 1 / -1;
     grid-row: 3;
-    justify-content: flex-end;
+    width: 100%;
+    justify-content: stretch;
   }
 
   .renew-value-row-actions button:first-child {
     flex: 1;
   }
 
+  .renew-value-modal-backdrop,
   .renew-portfolio-editor-backdrop {
     align-items: flex-end;
     padding: 0;
   }
 
+  .renew-value-modal,
   .renew-portfolio-editor {
     width: 100%;
-    max-height: 92dvh;
+    max-width: 100vw;
+    max-height: 94dvh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
     border-radius: 18px 18px 0 0;
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .renew-portfolio-editor-backdrop {
+    z-index: 1020;
+  }
+
+  .renew-portfolio-editor {
+    max-height: 94dvh;
+  }
+
+  .renew-value-modal .renew-modal-head,
+  .renew-portfolio-editor .renew-modal-head {
+    padding: 18px 18px 14px;
   }
 
   .renew-portfolio-editor-card,
@@ -13527,14 +13572,19 @@
   }
 
   .renew-portfolio-editor > .renew-portfolio-grade-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: calc(100% - 28px);
     margin-right: 14px;
     margin-left: 14px;
   }
 
   .renew-portfolio-mode-tabs {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: initial;
+    grid-auto-columns: initial;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .renew-portfolio-lot-edit {
@@ -13543,6 +13593,45 @@
 
   .renew-portfolio-lot-edit small {
     grid-column: 1 / -1;
+  }
+
+  .renew-portfolio-lot-history {
+    max-height: 168px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .renew-portfolio-form,
+  .renew-portfolio-form > label,
+  .renew-portfolio-price-input,
+  .renew-portfolio-price-input label,
+  .renew-portfolio-form input,
+  .renew-portfolio-form select {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .renew-portfolio-form input,
+  .renew-portfolio-form select {
+    width: 100%;
+  }
+
+  .renew-portfolio-price-input {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .renew-portfolio-estimate strong,
+  .renew-portfolio-preview strong {
+    overflow-wrap: anywhere;
+  }
+
+  .renew-app.is-dark .renew-value-row-metrics {
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .renew-app.is-dark .renew-value-row-metric + .renew-value-row-metric {
+    border-left-color: rgba(255, 255, 255, 0.12);
   }
 
   .renew-value-pager {

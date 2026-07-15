@@ -5134,8 +5134,8 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
   }, [page, pageCount]);
 
   const modal = (
-    <div className="renew-modal-backdrop" onClick={onClose}>
-      <div className="renew-info-modal" onClick={(event) => event.stopPropagation()}>
+    <div className="renew-modal-backdrop renew-value-modal-backdrop" onClick={onClose}>
+      <div className="renew-info-modal renew-value-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
             <small>PORTFOLIO</small>
@@ -5179,19 +5179,21 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
                 <span>{item.name}</span>
                 <small>{item.grade === 'psa10' ? 'PSA10' : 'Single'} · {item.quantity}{isEnglish ? ' card(s)' : '장'}</small>
               </div>
-              <div className="renew-value-row-metric">
-                <span>{isEnglish ? 'Current value' : '현재 평가액'}</span>
-                <strong>{formatWonFromYen(item.price * item.quantity)}</strong>
-                <small>{isEnglish ? 'Per card' : '1장당'} {formatWonFromYen(item.price)}</small>
-              </div>
-              <div className="renew-value-row-metric">
-                <span>{isEnglish ? 'Valuation P/L' : '평가손익'}</span>
-                {item.returnPercent == null ? (
-                  <strong className="is-empty">{isEnglish ? 'Price needed' : '매입가 필요'}</strong>
-                ) : (
-                  <strong className={itemProfitJpy > 0 ? 'is-up' : itemProfitJpy < 0 ? 'is-down' : ''}>{formatSignedPortfolioPercent(item.returnPercent)}</strong>
-                )}
-                <small>{itemProfitJpy == null ? '-' : formatSignedWonFromYen(itemProfitJpy)}</small>
+              <div className="renew-value-row-metrics">
+                <div className="renew-value-row-metric">
+                  <span>{isEnglish ? 'Current value' : '현재 평가액'}</span>
+                  <strong>{formatWonFromYen(item.price * item.quantity)}</strong>
+                  <small>{isEnglish ? 'Per card' : '1장당'} {formatWonFromYen(item.price)}</small>
+                </div>
+                <div className="renew-value-row-metric">
+                  <span>{isEnglish ? 'Valuation P/L' : '평가손익'}</span>
+                  {item.returnPercent == null ? (
+                    <strong className="is-empty">{isEnglish ? 'Price needed' : '매입가 필요'}</strong>
+                  ) : (
+                    <strong className={itemProfitJpy > 0 ? 'is-up' : itemProfitJpy < 0 ? 'is-down' : ''}>{formatSignedPortfolioPercent(item.returnPercent)}</strong>
+                  )}
+                  <small>{itemProfitJpy == null ? '-' : formatSignedWonFromYen(itemProfitJpy)}</small>
+                </div>
               </div>
               <div className="renew-value-row-actions">
                 <button type="button" onClick={() => onEdit?.(item)}>{isEnglish ? 'Purchase info' : '매입 정보'}</button>
