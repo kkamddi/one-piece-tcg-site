@@ -4537,6 +4537,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 
   const modalCards = valueModalGrade ? marketCards : [];
   const t = (key) => getUiText(uiLang, key);
+  const portfolioTotalParts = authUser ? formatUsdWonFromYen(totalJpy).split(' / ') : [t('portfolioLoginRequired')];
   const homeNewsLinks = useMemo(() => getHomeNewsLinks(), []);
   const latestPartnerNews = useMemo(() => getActivePartnerShopNews()[0] || null, []);
 
@@ -4623,7 +4624,12 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
             {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{uiLang === 'en' ? 'View all' : '전체 보기'}</button> : null}
           </div>
           <div className="renew-value-total">
-            <span>{authUser ? formatUsdWonFromYen(totalJpy) : t('portfolioLoginRequired')}</span>
+            {portfolioTotalParts.map((part, index) => (
+              <span key={`${part}-${index}`}>
+                {index > 0 ? <i aria-hidden="true">/</i> : null}
+                {part}
+              </span>
+            ))}
           </div>
           {authUser ? (
             <div className="renew-value-performance">
@@ -5168,8 +5174,7 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
       <div className="renew-info-modal renew-value-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
-            <small>PORTFOLIO</small>
-            <h2>{isEnglish ? 'My Portfolio' : '내 포트폴리오'}</h2>
+            <h2>PORTFOLIO</h2>
             <p>{totalQuantity}{isEnglish ? ' card(s)' : '장'} · {formatUsdWonFromYen(total)}</p>
           </div>
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>

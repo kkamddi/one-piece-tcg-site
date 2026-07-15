@@ -1793,6 +1793,7 @@
 .renew-value-total {
   margin-top: 12px;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
   gap: 8px;
@@ -1806,11 +1807,13 @@
 }
 
 .renew-value-total span {
+  max-width: 100%;
   min-width: 0;
   white-space: nowrap;
 }
 
 .renew-value-total i {
+  margin-right: 8px;
   font-style: normal;
   color: #8a6d60;
 }
@@ -3784,6 +3787,11 @@
 
 .renew-value-modal {
   overflow-x: hidden;
+}
+
+.renew-value-modal .renew-modal-head h2 {
+  font-weight: 950;
+  letter-spacing: 0.02em;
 }
 
 .renew-value-row {
@@ -13648,7 +13656,7 @@
   }
 
   .renew-value-pager {
-    padding: 0 14px 16px;
+    padding: 16px 14px 18px;
     justify-content: center;
   }
 
