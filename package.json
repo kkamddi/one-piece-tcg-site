@@ -21,6 +21,7 @@
     "collect:market-history": "node ./scripts/runSnkrdunkTradeHistoryCycle.js",
     "rebuild:market-daily-points": "node ./scripts/rebuildFilteredMarketDailyPoints.js",
     "generate:card-thumbnails": "node ./scripts/generateCardThumbnails.js",
+    "verify:card-thumbnails": "node ./scripts/verifyCardThumbnails.js",
     "rebuild:market-indexes": "node ./scripts/rebuildMarketIndexes.js"
   },
   "dependencies": {

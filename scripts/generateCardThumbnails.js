@@ -1,6 +1,6 @@
 import { mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import sharp from 'sharp';
 import cards from '../src/data/cards.json' with { type: 'json' };
 
@@ -15,11 +15,16 @@ const LOCALES = new Set((getArg('--locales', 'KR,JP') || 'KR,JP').split(',').map
 const LIMIT = Number(getArg('--limit', '0')) || 0;
 const OUT_DIR = getArg('--out', 'data/card-thumbnails');
 const BUCKET = getArg('--bucket', 'optcg-card-thumbnails');
+const WRANGLER_PACKAGE = getArg('--wrangler', 'wrangler');
 const SHOULD_UPLOAD = args.has('--upload');
 const SHOULD_FORCE = args.has('--force');
 const WIDTH = Number(getArg('--width', '320')) || 320;
+const HEIGHT = Number(getArg('--height', String(Math.round(WIDTH * 7 / 5)))) || Math.round(WIDTH * 7 / 5);
 const QUALITY = Number(getArg('--quality', '74')) || 74;
 const CONCURRENCY = Math.max(1, Math.min(Number(getArg('--concurrency', '4')) || 4, 8));
+const SINCE_REF = getArg('--since', '');
+const UNTIL_REF = getArg('--until', '');
+const TARGET_IDS = new Set((getArg('--ids', '') || '').split(',').map((item) => item.trim()).filter(Boolean));
 
 function cardThumbKey(card) {
   const localId = String(card.id || '').replace(/^[A-Z]+::/, '');
@@ -58,8 +63,14 @@ async function fetchImageBuffer(url) {
 }
 
 function uploadToR2(filePath, key) {
-  const result = spawnSync(process.platform === 'win32' ? 'npx.cmd' : 'npx', [
-    'wrangler',
+  const npxScript = process.env.npm_execpath
+    ? path.join(path.dirname(process.env.npm_execpath), 'npx-cli.js')
+    : '';
+  const command = npxScript ? process.execPath : (process.platform === 'win32' ? 'npx.cmd' : 'npx');
+  const result = spawnSync(command, [
+    ...(npxScript ? [npxScript] : []),
+    '--yes',
+    WRANGLER_PACKAGE,
     'r2',
     'object',
     'put',
@@ -69,14 +80,33 @@ function uploadToR2(filePath, key) {
     '--remote',
     '--content-type',
     'image/webp'
-  ], { stdio: 'pipe', encoding: 'utf8', shell: process.platform === 'win32' });
+  ], { stdio: 'pipe', encoding: 'utf8', shell: !npxScript && process.platform === 'win32' });
   if (result.status !== 0) {
     throw new Error((result.error?.message || result.stderr || result.stdout || 'r2_upload_failed').trim());
   }
 }
 
+function getExistingCardIds(ref) {
+  if (!ref) return null;
+  try {
+    const snapshot = execFileSync('git', ['show', `${ref}:src/data/cards.json`], {
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024
+    });
+    return new Set(JSON.parse(snapshot).map((card) => card.id));
+  } catch (error) {
+    throw new Error(`invalid_since_ref:${ref}:${error.message}`);
+  }
+}
+
+const existingCardIds = getExistingCardIds(SINCE_REF);
+const includedCardIds = getExistingCardIds(UNTIL_REF);
+
 const targets = cards
   .filter((card) => LOCALES.has(card.locale) && card.imageUrl)
+  .filter((card) => !existingCardIds || !existingCardIds.has(card.id))
+  .filter((card) => !includedCardIds || includedCardIds.has(card.id))
+  .filter((card) => !TARGET_IDS.size || TARGET_IDS.has(card.id))
   .slice(0, LIMIT || undefined);
 
 const manifest = [];
@@ -97,7 +127,13 @@ async function processCard(card) {
     } else {
       const source = await fetchImageBuffer(card.imageUrl);
       const webp = await sharp(source, { failOn: 'none' })
-        .resize({ width: WIDTH, withoutEnlargement: true })
+        .trim({ background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .resize({
+          width: WIDTH,
+          height: HEIGHT,
+          fit: 'contain',
+          background: { r: 0, g: 0, b: 0, alpha: 0 }
+        })
         .webp({ quality: QUALITY, effort: 4 })
         .toBuffer();
       await writeFile(outputPath, webp);
@@ -140,6 +176,10 @@ console.log(JSON.stringify({
   uploaded: stats.uploaded,
   failed: stats.failed,
   concurrency: CONCURRENCY,
+  sinceRef: SINCE_REF || null,
+  untilRef: UNTIL_REF || null,
+  width: WIDTH,
+  height: HEIGHT,
   outDir: OUT_DIR,
   bucket: SHOULD_UPLOAD ? BUCKET : null
 }, null, 2));
