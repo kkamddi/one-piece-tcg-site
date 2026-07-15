@@ -19,6 +19,7 @@ const RATE_LIMITS = {
   psa10Market: 120,
   marketCollector: 120,
   pushSubscriptions: 60,
+  portfolio: 90,
   boxMarket: 30,
   cardMarketLinkOverrides: 120
 };
@@ -205,6 +206,7 @@ function routeApi(pathParts) {
   if (first === 'box-market') return { key: 'boxMarket' };
   if (first === 'market-index') return { key: 'marketIndex' };
   if (first === 'price-alerts') return { key: 'priceAlerts' };
+  if (first === 'portfolio') return { key: 'portfolio' };
   if (first === 'push-subscriptions') return { key: 'pushSubscriptions' };
   if (first === 'card-market-link-overrides') return { key: 'cardMarketLinkOverrides' };
   return null;
@@ -231,6 +233,7 @@ async function loadHandler(key) {
   if (key === 'boxMarket') return (await import('../../api/box-market.js')).default;
   if (key === 'marketIndex') return (await import('../../api/market-index.js')).default;
   if (key === 'priceAlerts') return (await import('../../api/price-alerts.js')).default;
+  if (key === 'portfolio') return (await import('../../api/portfolio.js')).default;
   if (key === 'pushSubscriptions') return (await import('../../api/push-subscriptions.js')).default;
   if (key === 'cardMarketLinkOverrides') return (await import('../../api/card-market-link-overrides.js')).default;
   return null;
