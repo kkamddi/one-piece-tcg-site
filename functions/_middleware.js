@@ -982,12 +982,13 @@ function renderMarketPasswordPage(errorMessage = '') {
 </html>`;
 }
 
-async function handleMarketPreviewGate(request) {
+async function handleMarketPreviewGate(request, env) {
   if (hasMarketPreviewAccess(request)) return null;
   if (request.method === 'POST') {
     const formData = await request.formData().catch(() => null);
     const password = String(formData?.get('password') || '');
-    if (password === MARKET_PREVIEW_PASSWORD) {
+    const expectedPassword = String(env?.MARKET_PREVIEW_PASSWORD || '');
+    if (expectedPassword && password === expectedPassword) {
       return new Response(null, {
         status: 303,
         headers: {
