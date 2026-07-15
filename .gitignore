@@ -3,6 +3,7 @@ dist
 .vite
 .vercel
 .wrangler
+supabase/.temp/
 .env
 .env.local
 .env.*.local

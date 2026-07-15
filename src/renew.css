@@ -1802,7 +1802,7 @@
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
   white-space: nowrap;
-  letter-spacing: -0.045em;
+  letter-spacing: 0;
 }
 
 .renew-value-total span {
@@ -1846,6 +1846,81 @@
   display: block;
   margin-top: 8px;
   font-size: 22px;
+}
+
+.renew-value-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.renew-value-head > button {
+  border: 0;
+  padding: 4px 0;
+  color: #6b7280;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.renew-value-performance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px 14px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  padding-top: 12px;
+}
+
+.renew-value-performance > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.renew-value-performance span,
+.renew-value-performance p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-value-performance strong {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-value-performance strong small {
+  margin-left: 3px;
+  font-size: 11px;
+}
+
+.renew-value-performance p {
+  grid-column: 1 / -1;
+}
+
+.renew-value-performance .is-up,
+.renew-value-row-metric .is-up,
+.renew-portfolio-preview .is-up {
+  color: #c94d35;
+}
+
+.renew-value-performance .is-down,
+.renew-value-row-metric .is-down,
+.renew-portfolio-preview .is-down {
+  color: #2563eb;
+}
+
+.renew-value-performance .is-empty,
+.renew-value-row-metric .is-empty {
+  color: #8a8f98;
 }
 
 .renew-home-index-summary {
@@ -3648,70 +3723,416 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-.renew-value-card-grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-  padding: 20px 24px 16px;
-}
-
-.renew-value-card {
-  position: relative;
-  display: grid;
-  gap: 7px;
-  min-width: 0;
-  padding: 8px;
-  border: 1px solid rgba(23, 25, 28, 0.1);
-  border-radius: 16px;
-  color: inherit;
-  background: rgba(244, 244, 245, 0.72);
-  text-decoration: none;
-}
-
-.renew-value-remove {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-  display: inline-flex;
+.renew-portfolio-list-tools {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(23, 25, 28, 0.18);
-  border-radius: 999px;
-  color: #ffffff;
-  background: rgba(23, 25, 28, 0.86);
-  font-size: 18px;
-  line-height: 1;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.08);
+}
+
+.renew-portfolio-list-tools select,
+.renew-portfolio-form input,
+.renew-portfolio-form select {
+  min-height: 40px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: inherit;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.renew-portfolio-grade-tabs,
+.renew-portfolio-mode-tabs {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(72px, auto);
+  gap: 4px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  background: #f4f4f5;
+}
+
+.renew-portfolio-grade-tabs button,
+.renew-portfolio-mode-tabs button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 12px;
+  color: #6b7280;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 900;
   cursor: pointer;
 }
 
-.renew-value-card img {
-  width: 100%;
-  aspect-ratio: 5 / 7;
-  border-radius: 12px;
+.renew-portfolio-grade-tabs button.is-active,
+.renew-portfolio-mode-tabs button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-value-list {
+  display: grid;
+  padding: 0 24px;
+}
+
+.renew-value-row {
+  display: grid;
+  grid-template-columns: 58px minmax(190px, 1.35fr) repeat(2, minmax(118px, 0.7fr)) auto;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.08);
+  padding: 12px 0;
+}
+
+.renew-value-row > img {
+  width: 58px;
+  height: 80px;
+  border-radius: 6px;
   object-fit: contain;
   background: #f4f4f5;
+}
+
+.renew-value-row-identity,
+.renew-value-row-metric {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.renew-value-row-identity strong {
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.renew-value-row-identity span {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-value-row-identity small,
+.renew-value-row-metric span,
+.renew-value-row-metric small {
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-value-row-metric strong {
+  font-size: 14px;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.renew-value-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.renew-value-row-actions button {
+  min-height: 36px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 8px;
+  padding: 0 11px;
+  color: inherit;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.renew-value-row-actions .renew-value-remove {
+  position: static;
+  width: 36px;
+  padding: 0;
+  color: #fff;
+  background: #17191c;
+  font-size: 17px;
 }
 
 .renew-value-pager {
   padding: 0 24px 22px;
 }
 
-.renew-value-card strong,
-.renew-value-card b {
-  font-size: 13px;
+.renew-portfolio-editor {
+  width: min(640px, 100%);
 }
 
-.renew-value-card span {
+.renew-portfolio-editor .renew-modal-head > div > small {
+  display: block;
+  margin-bottom: 5px;
+  color: #c94d35;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.renew-portfolio-editor-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 18px 24px 12px;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.08);
+  padding-bottom: 14px;
+}
+
+.renew-portfolio-editor-card img {
+  width: 58px;
+  height: 80px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: #f4f4f5;
+}
+
+.renew-portfolio-editor-card div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.renew-portfolio-editor-card strong {
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.renew-portfolio-editor-card span {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-portfolio-editor-card small {
   overflow: hidden;
   color: #6b7280;
   font-size: 12px;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-portfolio-editor > .renew-portfolio-grade-tabs {
+  margin: 0 24px 14px;
+}
+
+.renew-portfolio-lot-history,
+.renew-portfolio-form {
+  display: grid;
+  gap: 10px;
+  margin: 0 24px 16px;
+}
+
+.renew-portfolio-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.renew-portfolio-section-title strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.renew-portfolio-section-title span,
+.renew-portfolio-section-title button {
+  border: 0;
+  padding: 0;
+  color: #6b7280;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.renew-portfolio-section-title button {
+  cursor: pointer;
+}
+
+.renew-portfolio-lot-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  padding: 8px 9px 8px 12px;
+}
+
+.renew-portfolio-lot-edit {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-portfolio-lot-edit span,
+.renew-portfolio-lot-edit small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.renew-portfolio-lot-edit strong {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-portfolio-lot-delete {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #17191c;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.renew-portfolio-form {
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  padding-top: 14px;
+}
+
+.renew-portfolio-form > label,
+.renew-portfolio-price-input label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.renew-portfolio-form label > span {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.renew-portfolio-price-input {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 9px;
+}
+
+.renew-portfolio-quantity {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.renew-portfolio-quantity > div {
+  display: grid;
+  grid-template-columns: 38px 58px 38px;
+  gap: 4px;
+}
+
+.renew-portfolio-quantity button {
+  min-height: 38px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 8px;
+  color: inherit;
+  background: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.renew-portfolio-quantity input {
+  width: 58px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.renew-portfolio-estimate,
+.renew-portfolio-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: #f7f7f8;
+}
+
+.renew-portfolio-estimate {
+  display: grid;
+  gap: 4px;
+}
+
+.renew-portfolio-estimate small,
+.renew-portfolio-estimate span,
+.renew-portfolio-preview span {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.renew-portfolio-estimate strong,
+.renew-portfolio-preview strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.renew-portfolio-message {
+  margin: 0;
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-portfolio-form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.renew-portfolio-form-actions button {
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 8px;
+  color: inherit;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-portfolio-form-actions button[type="submit"] {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-portfolio-form-actions button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 
 .renew-empty-note {
@@ -9618,6 +10039,18 @@
   order: -1;
 }
 
+.renew-market-actions .renew-portfolio-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.renew-market-actions .renew-portfolio-add-button > span {
+  font-size: 17px;
+  line-height: 1;
+}
+
 .renew-action-compact {
   display: none;
 }
@@ -10467,6 +10900,46 @@
 
 .renew-app.is-dark .renew-progress-track {
   background: rgba(255, 255, 255, 0.16);
+}
+
+.renew-app.is-dark .renew-value-performance,
+.renew-app.is-dark .renew-portfolio-list-tools,
+.renew-app.is-dark .renew-value-row,
+.renew-app.is-dark .renew-portfolio-editor-card,
+.renew-app.is-dark .renew-portfolio-form {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-portfolio-list-tools select,
+.renew-app.is-dark .renew-portfolio-form input,
+.renew-app.is-dark .renew-portfolio-form select,
+.renew-app.is-dark .renew-portfolio-quantity button,
+.renew-app.is-dark .renew-value-row-actions button,
+.renew-app.is-dark .renew-portfolio-form-actions button,
+.renew-app.is-dark .renew-portfolio-lot-row {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.renew-app.is-dark .renew-portfolio-grade-tabs,
+.renew-app.is-dark .renew-portfolio-mode-tabs,
+.renew-app.is-dark .renew-portfolio-estimate,
+.renew-app.is-dark .renew-portfolio-preview,
+.renew-app.is-dark .renew-value-row > img,
+.renew-app.is-dark .renew-portfolio-editor-card img {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.renew-app.is-dark .renew-portfolio-grade-tabs button.is-active,
+.renew-app.is-dark .renew-portfolio-mode-tabs button.is-active,
+.renew-app.is-dark .renew-value-row-actions .renew-value-remove,
+.renew-app.is-dark .renew-portfolio-lot-delete,
+.renew-app.is-dark .renew-portfolio-form-actions button[type="submit"] {
+  border-color: #f5f2ec;
+  color: #17191c;
+  background: #f5f2ec;
 }
 
 .renew-app.is-dark .renew-partner-ad {
@@ -12963,38 +13436,126 @@
     padding: 10px;
   }
 
-  .renew-value-card-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    padding: 14px 14px 12px;
+  .renew-portfolio-list-tools {
+    align-items: stretch;
+    padding: 12px 14px;
   }
 
-  .renew-value-card {
-    gap: 4px;
-    padding: 6px;
-    border-radius: 12px;
+  .renew-portfolio-list-tools select {
+    width: 132px;
   }
 
-  .renew-value-card img {
-    border-radius: 9px;
+  .renew-portfolio-grade-tabs {
+    grid-auto-columns: minmax(58px, auto);
   }
 
-  .renew-value-card strong,
-  .renew-value-card b {
+  .renew-portfolio-grade-tabs button,
+  .renew-portfolio-mode-tabs button {
+    padding: 0 9px;
     font-size: 11px;
   }
 
-  .renew-value-card span {
-    font-size: 10px;
-    line-height: 1.25;
+  .renew-value-list {
+    padding: 0 14px;
   }
 
-  .renew-value-remove {
-    top: 5px;
-    right: 5px;
-    width: 22px;
-    height: 22px;
+  .renew-value-row {
+    grid-template-columns: 50px minmax(0, 1fr) minmax(90px, auto);
+    grid-template-rows: auto auto auto;
+    gap: 8px 10px;
+    padding: 11px 0;
+  }
+
+  .renew-value-row > img {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: 50px;
+    height: 70px;
+  }
+
+  .renew-value-row-identity {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .renew-value-row-identity span {
     font-size: 13px;
+  }
+
+  .renew-value-row-metric {
+    align-content: center;
+  }
+
+  .renew-value-row-metric:nth-of-type(2) {
+    grid-column: 3;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  .renew-value-row-metric:nth-of-type(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .renew-value-row-metric:nth-of-type(4) {
+    grid-column: 3;
+    grid-row: 2;
+    text-align: right;
+  }
+
+  .renew-value-row-metric strong {
+    font-size: 13px;
+  }
+
+  .renew-value-row-actions {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-content: flex-end;
+  }
+
+  .renew-value-row-actions button:first-child {
+    flex: 1;
+  }
+
+  .renew-portfolio-editor-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .renew-portfolio-editor {
+    width: 100%;
+    max-height: 92dvh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .renew-portfolio-editor-card,
+  .renew-portfolio-lot-history,
+  .renew-portfolio-form {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  .renew-portfolio-editor > .renew-portfolio-grade-tabs {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  .renew-portfolio-mode-tabs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+
+  .renew-portfolio-lot-edit {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .renew-portfolio-lot-edit small {
+    grid-column: 1 / -1;
   }
 
   .renew-value-pager {

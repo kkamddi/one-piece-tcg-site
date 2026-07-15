@@ -1231,13 +1231,24 @@ export async function collectMarketSnapshot(item, options = {}) {
 
 async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
-  if (String(params.get('summary') || '').toLowerCase() === 'latest') {
+  const summaryMode = String(params.get('summary') || '').toLowerCase();
+  if (summaryMode === 'latest' || summaryMode === 'portfolio') {
+    const requestedApparelIds = summaryMode === 'portfolio'
+      ? [...new Set(String(params.get('apparelIds') || '')
+        .split(',')
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value) && value > 0))].slice(0, 250)
+      : [];
+    if (summaryMode === 'portfolio' && !requestedApparelIds.length) return { items: [] };
+    const apparelIdPlaceholders = requestedApparelIds.map(() => '?').join(', ');
+    const productFilterSql = requestedApparelIds.length ? ` and apparel_id in (${apparelIdPlaceholders})` : '';
     const rows = shouldReadD1Market()
       ? await queryD1(
         `select apparel_id, latest_a_price_jpy, latest_psa10_price_jpy, latest_captured_at
          from market_products
-         where source = 'snkrdunk' and is_active = 1
-         order by apparel_id asc`
+         where source = 'snkrdunk' and is_active = 1${productFilterSql}
+         order by apparel_id asc`,
+        requestedApparelIds
       ).catch(() => [])
       : [];
     const latestByApparelId = new Map();
@@ -1262,6 +1273,7 @@ async function localFallback(params) {
              from market_chart_daily_points
              where source = 'snkrdunk'
                and condition_key in ('a', 'psa10')
+               ${requestedApparelIds.length ? `and apparel_id in (${apparelIdPlaceholders})` : ''}
                and (trade_count is null or trade_count > 0)
            group by source, apparel_id, condition_key
          )
@@ -1274,7 +1286,8 @@ async function localFallback(params) {
          and p.point_date = l.point_date
          where p.source = 'snkrdunk'
            and (p.trade_count is null or p.trade_count > 0)
-         order by p.apparel_id asc`
+         order by p.apparel_id asc`,
+        requestedApparelIds
       ).catch(() => []);
       for (const row of chartRows || []) {
         const apparelId = String(row.apparel_id || '');
