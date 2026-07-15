@@ -25,8 +25,9 @@ const CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.PROMO_AUDIT_CONC
 const regularSourcePattern = /^(?:Booster Pack|Extra Booster|Start(?:er)? Deck|Start Dacks|Ultimate Deck|Premium Booster)/i;
 const limitedSourcePattern = /(?:Premium Card Collection|Limited Card Collection|Admirable Collection|ANNIVERSARY SET|Anniversary set|Special Goods Set|FILM RED Finale Set|Encore Pack|Official Card Case|SOUND LOADER|9-Pocket Binder|Family Deck Set)/i;
 const promoSourcePattern = /(?:Promotional? Card|Promotion Pack|Promotion Card|Flagship|Standard Battle|Champion(?:ship| Ship)|Tournament|Prize|Souvenir|Freebie|Supplement|All Applicants|Meetup|Visitor Benefits|Participant Gifts|Challenge Kaido|JUMP|magazine|Collaboration|Official Playmat|Treasure|Judge|Campaign|ONE PIECE DAY|BANDAI CARD GAMES Fest|8 Pack Battle|Area Finals|World Final|Learn to Play Event)/i;
-const excludedForeignPattern = /(?:\[(?:CN|EN)\]|Aisa ver\.|Asia ver\.|Japan Expo Exclusive|BVB x ONE PIECE|Los Angeles Dodgers|COLLEGE BASKETBALL)/i;
+const excludedForeignPattern = /(?:\[(?:CN|CHN|EN)\]|Aisa ver\.|Asia ver\.|for Asia|Treasure Cup|Japan Expo Exclusive|BVB x ONE PIECE|Los Angeles Dodgers|COLLEGE BASKETBALL)/i;
 const excludedBundlePattern = /(?:Unopened set of|set of \d+ cards)/i;
+const knownMislabeledProductIds = new Set([134162]);
 
 function uniqueBy(items, getKey) {
   const seen = new Set();
@@ -61,6 +62,7 @@ function normalizedCardNo(item) {
 function exclusionReasons(item) {
   const name = String(item?.name || '');
   const reasons = [];
+  if (knownMislabeledProductIds.has(Number(item?.apparelId))) reasons.push('known_mislabeled_listing');
   if (/DON!! Card/i.test(name)) reasons.push('don_card');
   if (excludedForeignPattern.test(name)) reasons.push('non_japanese_variant');
   if (excludedBundlePattern.test(name)) reasons.push('sealed_bundle');
