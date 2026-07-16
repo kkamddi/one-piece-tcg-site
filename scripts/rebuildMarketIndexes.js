@@ -162,13 +162,16 @@ async function rebuildIndex(indexConfig) {
     for (const component of suspiciousBaselines) {
       console.log(`${indexConfig.code}: baseline correction apparel ${component.apparelId}, first ${component.firstObservedPrice} on ${component.firstObservedDate}, baseline ${component.basePrice} on ${component.firstDate}`);
     }
+    for (const component of excludedComponents) {
+      console.log(`${indexConfig.code}: excluded apparel ${component.apparelId}, first ${component.firstObservedDate || 'none'}, window end ${component.formationEndDate || 'none'}, trading days ${component.observationCount}/${component.requiredObservationCount}, trades ${component.tradeCount}/${component.requiredTradeCount}, reason ${component.reason}`);
+    }
     return;
   }
 
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from 10-trading-day formation baseline, composition-neutral SNKRDUNK component indexes v4`]
+    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from a bounded 30-day formation baseline, composition-neutral SNKRDUNK component indexes v5`]
   );
   await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [

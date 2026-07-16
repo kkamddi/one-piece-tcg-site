@@ -27,7 +27,12 @@ const row = (apparelId, pointDate, price) => ({
 const build = (components, rows, options = {}) => buildEqualWeightedMarketIndex(
   config(components),
   rows,
-  { initialObservationDays: 1, ...options }
+  {
+    initialFormationWindowDays: 1,
+    minimumInitialTradingDays: 1,
+    minimumInitialTradeCount: 1,
+    ...options
+  }
 );
 
 test('starts the sector at 100 on the earliest component first-trade date', () => {
@@ -129,40 +134,89 @@ test('is deterministic for the same complete history', () => {
   assert.deepEqual(second, first);
 });
 
-test('uses the median of the first 10 trading days instead of a single first-day outlier', () => {
-  const prices = [247489, 91262, 97964, 103120, 103120, 128901, 139110, 131994, 138181, 149525];
-  const dates = ['2025-12-14', '2025-12-15', '2025-12-18', '2025-12-22', '2025-12-23', '2025-12-24', '2025-12-25', '2025-12-29', '2025-12-31', '2026-01-02'];
+test('uses the median of the bounded 30-day formation window instead of a first-day outlier', () => {
+  const prices = [247489, 91262, 97964, 103120, 103120, 128901, 139110, 131994, 138181, 149525, 151000];
+  const dates = ['2025-12-14', '2025-12-15', '2025-12-18', '2025-12-22', '2025-12-23', '2025-12-24', '2025-12-25', '2025-12-29', '2025-12-31', '2026-01-02', '2026-01-11'];
   const series = prices.map((price, index) => ({
     date: dates[index],
     price
   }));
-  const baseline = buildInitialPriceFormationSeries(series);
+  const baseline = buildInitialPriceFormationSeries(series, { endDate: '2026-07-16' });
 
   assert.equal(baseline.firstObservedPrice, 247489);
-  assert.equal(baseline.baselinePrice, 130448);
-  assert.equal(baseline.baselineDate, '2026-01-02');
-  assert.deepEqual(baseline.series, [{ date: '2026-01-02', price: 130448 }]);
+  assert.equal(baseline.baselinePrice, 131994);
+  assert.equal(baseline.baselineDate, '2026-01-12');
+  assert.deepEqual(baseline.series, [{ date: '2026-01-12', price: 131994 }]);
 });
 
-test('admits a component at 100 only after 10 observed trading days form its baseline', () => {
-  const rows = [247489, 91262, 97964, 103120, 103120, 128901, 139110, 131994, 138181, 149525]
-    .map((price, index) => row(1, `2025-12-${String(index + 1).padStart(2, '0')}`, price));
-  rows.push(row(1, '2025-12-11', 195672));
-  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), rows);
+test('admits a component at 100 only after its 30-day formation window closes', () => {
+  const rows = [100, 110, 120, 130, 140].map((price, index) => ({
+    ...row(1, `2025-12-${String(index + 1).padStart(2, '0')}`, price),
+    trade_count: 1
+  }));
+  rows.push(row(1, '2026-02-01', 180));
+  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), rows, { endDate: '2026-02-01' });
 
-  assert.equal(built.baseDate, '2025-12-10');
-  assert.equal(built.dataComponents[0].basePrice, 130448);
+  assert.equal(built.baseDate, '2025-12-30');
+  assert.equal(built.dataComponents[0].basePrice, 120);
   assert.equal(built.componentPoints[0].componentIndexValue, 100);
   assert.ok(Math.abs(built.componentPoints.at(-1).componentIndexValue - 120) < 0.001);
   assertEqualWeightedMarketIndex(built);
 });
 
-test('excludes a component until 10 observed trading days are available', () => {
-  const rows = Array.from({ length: 9 }, (_, index) => row(1, `2025-12-${String(index + 1).padStart(2, '0')}`, 100 + index));
-  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), rows);
+test('does not fill a launch baseline with sparse trades from later months', () => {
+  const rows = [
+    row(1, '2025-01-01', 100),
+    row(1, '2025-01-15', 110),
+    row(1, '2025-03-01', 200),
+    row(1, '2025-04-01', 220),
+    row(1, '2025-05-01', 240)
+  ];
+  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), rows, { endDate: '2025-06-01' });
 
   assert.deepEqual(built.dataComponents, []);
   assert.equal(built.excludedComponents.length, 1);
-  assert.equal(built.excludedComponents[0].observationCount, 9);
-  assert.equal(built.excludedComponents[0].reason, 'insufficient-initial-observations');
+  assert.equal(built.excludedComponents[0].observationCount, 2);
+  assert.equal(built.excludedComponents[0].reason, 'insufficient-initial-formation-data');
+});
+
+test('does not accept high same-day volume without independent trading days', () => {
+  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), [
+    { ...row(1, '2025-01-01', 100), trade_count: 20 },
+    row(1, '2025-02-15', 120)
+  ], { endDate: '2025-03-01' });
+
+  assert.deepEqual(built.dataComponents, []);
+  assert.equal(built.excludedComponents[0].observationCount, 1);
+  assert.equal(built.excludedComponents[0].tradeCount, 20);
+});
+
+test('waits for the full formation window even when minimum trades arrive early', () => {
+  const rows = [
+    { ...row(1, '2025-01-01', 100), trade_count: 2 },
+    { ...row(1, '2025-01-02', 110), trade_count: 2 },
+    { ...row(1, '2025-01-03', 120), trade_count: 1 }
+  ];
+  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), rows, { endDate: '2025-01-20' });
+
+  assert.deepEqual(built.dataComponents, []);
+  assert.equal(built.excludedComponents[0].reason, 'initial-formation-window-open');
+});
+
+test('does not rewrite a closed formation baseline when later trades arrive', () => {
+  const initial = [
+    { date: '2025-01-01', price: 100, tradeCount: 2 },
+    { date: '2025-01-05', price: 110, tradeCount: 2 },
+    { date: '2025-01-10', price: 120, tradeCount: 1 }
+  ];
+  const before = buildInitialPriceFormationSeries(initial, { endDate: '2025-02-01' });
+  const after = buildInitialPriceFormationSeries([
+    ...initial,
+    { date: '2025-02-15', price: 200, tradeCount: 3 }
+  ], { endDate: '2025-03-01' });
+
+  assert.equal(before.baselineDate, '2025-01-30');
+  assert.equal(before.baselinePrice, 110);
+  assert.equal(after.baselineDate, before.baselineDate);
+  assert.equal(after.baselinePrice, before.baselinePrice);
 });
