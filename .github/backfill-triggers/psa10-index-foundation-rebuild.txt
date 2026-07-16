@@ -1,0 +1,1 @@
+Approved foundation rebuild: replace PSA10 index component history from 2025-01-01 Trading History, then rebuild the index once.
