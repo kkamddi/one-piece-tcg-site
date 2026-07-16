@@ -1859,7 +1859,7 @@
   padding: 13px 0 0;
   color: inherit;
   background: transparent;
-  text-align: left;
+  text-align: center;
 }
 
 .renew-home-index-label,
@@ -1883,13 +1883,13 @@
   padding: 0 8px;
   color: inherit;
   background: transparent;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 
 .renew-home-index-list button:first-child {
   border-left: 0;
-  padding-left: 0;
+  padding-left: 8px;
 }
 
 .renew-home-index-list strong {

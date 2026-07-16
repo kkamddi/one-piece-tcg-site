@@ -1780,6 +1780,11 @@ function normalizeMarketConditionKey(value) {
   return key;
 }
 
+function resolvePortfolioGrade(key, item, gradeMap = {}) {
+  const keyGrade = String(key || '').split('::').at(-1);
+  return normalizeMarketConditionKey(gradeMap[key] || item?.grade || keyGrade || 'a');
+}
+
 function getMarketConditionBucket(source, conditionKey) {
   if (!source || typeof source !== 'object') return undefined;
   const normalizedKey = normalizeMarketConditionKey(conditionKey);
@@ -4110,13 +4115,11 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
   const valuationGradeMap = userState?.valuationCardGrades && typeof userState.valuationCardGrades === 'object'
     ? userState.valuationCardGrades
     : {};
-  const valuationGrades = userState?.valuationCardGrades && typeof userState.valuationCardGrades === 'object'
-    ? Object.values(userState.valuationCardGrades).map((grade) => String(grade || '').toLowerCase())
-    : [];
   const valuationEntries = Array.from(new Map([
     ...(userState?.ownedMarketItems && typeof userState.ownedMarketItems === 'object' ? Object.entries(userState.ownedMarketItems) : []),
     ...(userState?.valuationMarketItems && typeof userState.valuationMarketItems === 'object' ? Object.entries(userState.valuationMarketItems) : [])
   ]).entries());
+  const valuationGrades = valuationEntries.map(([key, item]) => resolvePortfolioGrade(key, item, valuationGradeMap));
   const storedTotalJpy = valuationEntries.reduce((sum, [, item]) => sum + normalizePortfolioPriceJpy(item), 0);
   const totalJpy = marketTotalJpy ?? storedTotalJpy;
   const aCount = valuationGrades.filter((grade) => grade === 'a').length;
@@ -4136,7 +4139,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
     }
 
     Promise.all(entries.map(async ([key, item]) => {
-      const grade = normalizeMarketConditionKey(valuationGradeMap[key] || item.grade || 'a');
+      const grade = resolvePortfolioGrade(key, item, valuationGradeMap);
       try {
         const summary = await fetchMarketPrice({ code: item.code, apparelId: item.apparelId, summary: true });
         const livePrice = Number(getMarketConditionBucket(summary?.latestByCondition, grade)?.price || 0) || 0;

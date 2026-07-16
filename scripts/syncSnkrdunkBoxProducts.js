@@ -8,6 +8,7 @@ const DEFAULT_LOOKBACK_DAYS = 21;
 const FUTURE_WINDOW_DAYS = 45;
 const MAX_PAGES = 3;
 const PAGE_SIZE = 100;
+const EXCLUDED_PRODUCT_IDS = new Set([836518, 836519]);
 
 function readNumberFlag(name, fallback) {
   const index = process.argv.indexOf(name);
@@ -99,6 +100,7 @@ async function main() {
   const candidates = pages.flat()
     .filter(isJapaneseProduct)
     .filter(isBoxMarketProduct)
+    .filter((product) => !EXCLUDED_PRODUCT_IDS.has(Number(product.id)))
     .filter((product) => {
       const releasedAt = parseDateKey(toTokyoDate(product.releasedAt));
       return Number.isFinite(releasedAt) && releasedAt >= earliest && releasedAt <= latest;
