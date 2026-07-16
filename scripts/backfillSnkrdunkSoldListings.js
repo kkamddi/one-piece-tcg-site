@@ -559,6 +559,97 @@ async function upsertDailyRows(rows) {
   `);
 }
 
+async function auditDailyRows(item, rows, options) {
+  const conditionKeys = [...options.allowedConditions];
+  if (!conditionKeys.length) {
+    return {
+      candidateRows: rows.length,
+      existingRows: 0,
+      unchangedRows: 0,
+      priceChangedRows: 0,
+      tradeCountChangedRows: 0,
+      missingStoredRows: rows.length,
+      missingCandidateRows: 0,
+      maxMedianChangePercent: 0,
+    };
+  }
+
+  const placeholders = conditionKeys.map(() => '?').join(',');
+  const existingRows = await queryD1(
+    `select condition_key, point_date, median_price_jpy, trade_count
+     from market_chart_daily_points
+     where source = 'snkrdunk'
+       and apparel_id = ?
+       and condition_key in (${placeholders})
+       and point_date >= ?`,
+    [Number(item.apparelId), ...conditionKeys, options.dailyCutoffDate]
+  );
+  const keyOf = (row) => `${row.condition_key}|${row.point_date}`;
+  const existingByKey = new Map(existingRows.map((row) => [keyOf(row), row]));
+  const candidateByKey = new Map(rows.map((row) => [keyOf(row), row]));
+  let unchangedRows = 0;
+  let priceChangedRows = 0;
+  let tradeCountChangedRows = 0;
+  let missingStoredRows = 0;
+  let maxMedianChangePercent = 0;
+
+  for (const [key, row] of candidateByKey) {
+    const existing = existingByKey.get(key);
+    if (!existing) {
+      missingStoredRows += 1;
+      continue;
+    }
+    const candidateMedian = Number(row.median_price_jpy || 0);
+    const existingMedian = Number(existing.median_price_jpy || 0);
+    const candidateTrades = Number(row.trade_count || 0);
+    const existingTrades = Number(existing.trade_count || 0);
+    const priceChanged = candidateMedian !== existingMedian;
+    const tradeCountChanged = candidateTrades !== existingTrades;
+    if (!priceChanged && !tradeCountChanged) unchangedRows += 1;
+    if (priceChanged) {
+      priceChangedRows += 1;
+      if (existingMedian > 0) {
+        maxMedianChangePercent = Math.max(maxMedianChangePercent, Math.abs((candidateMedian / existingMedian) - 1) * 100);
+      }
+    }
+    if (tradeCountChanged) tradeCountChangedRows += 1;
+  }
+
+  let missingCandidateRows = 0;
+  for (const key of existingByKey.keys()) {
+    if (!candidateByKey.has(key)) missingCandidateRows += 1;
+  }
+
+  return {
+    candidateRows: rows.length,
+    existingRows: existingRows.length,
+    unchangedRows,
+    priceChangedRows,
+    tradeCountChangedRows,
+    missingStoredRows,
+    missingCandidateRows,
+    maxMedianChangePercent: Number(maxMedianChangePercent.toFixed(2)),
+  };
+}
+
+async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, options) {
+  const dailyRows = buildDailyRows(dailyBuckets);
+  result.dailyRowsPrepared = dailyRows.length;
+  result.recentHistoryPrepared = recentHistory.length;
+  if (options.dryRun) {
+    result.audit = await auditDailyRows(item, dailyRows, options);
+    return;
+  }
+
+  result.dailyPointsUpdated = await upsertDailyRows(dailyRows);
+  if (recentHistory.length) {
+    const posted = await postHistoryChunks(item, recentHistory, options);
+    result.historyPosted += recentHistory.length;
+    result.tradesSeen += Number(posted?.tradesSeen || 0);
+    result.tradesStored += Number(posted?.tradesStored || 0);
+  }
+}
+
 async function backfillTradingHistoryItem(item, options) {
   const result = {
     apparelId: Number(item.apparelId),
@@ -591,7 +682,7 @@ async function backfillTradingHistoryItem(item, options) {
     if (options.aggregateMode) {
       addDailyHistory(dailyBuckets, item, history.filter((trade) => isRecentHistoryItem(trade, options.dailyCutoffDate)));
       recentHistory.push(...history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate)));
-    } else if (history.length) {
+    } else if (!options.dryRun && history.length) {
       const posted = await postHistoryChunks(item, history, options);
       result.historyPosted += history.length;
       result.tradesSeen += Number(posted?.tradesSeen || 0);
@@ -610,16 +701,7 @@ async function backfillTradingHistoryItem(item, options) {
   }
 
   if (options.aggregateMode) {
-    const dailyRows = buildDailyRows(dailyBuckets);
-    result.dailyRowsPrepared = dailyRows.length;
-    result.recentHistoryPrepared = recentHistory.length;
-    result.dailyPointsUpdated = await upsertDailyRows(dailyRows);
-    if (recentHistory.length) {
-      const posted = await postHistoryChunks(item, recentHistory, options);
-      result.historyPosted += recentHistory.length;
-      result.tradesSeen += Number(posted?.tradesSeen || 0);
-      result.tradesStored += Number(posted?.tradesStored || 0);
-    }
+    await finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, options);
   }
 
   return result;
@@ -661,7 +743,7 @@ async function backfillItem(item, options) {
     if (options.aggregateMode) {
       addDailyHistory(dailyBuckets, item, history.filter((trade) => isRecentHistoryItem(trade, options.dailyCutoffDate)));
       recentHistory.push(...history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate)));
-    } else if (history.length) {
+    } else if (!options.dryRun && history.length) {
       const posted = await postHistoryChunks(item, history, options);
       result.historyPosted += history.length;
       result.tradesSeen += Number(posted?.tradesSeen || 0);
@@ -680,16 +762,7 @@ async function backfillItem(item, options) {
   }
 
   if (options.aggregateMode) {
-    const dailyRows = buildDailyRows(dailyBuckets);
-    result.dailyRowsPrepared = dailyRows.length;
-    result.recentHistoryPrepared = recentHistory.length;
-    result.dailyPointsUpdated = await upsertDailyRows(dailyRows);
-    if (recentHistory.length) {
-      const posted = await postHistoryChunks(item, recentHistory, options);
-      result.historyPosted += recentHistory.length;
-      result.tradesSeen += Number(posted?.tradesSeen || 0);
-      result.tradesStored += Number(posted?.tradesStored || 0);
-    }
+    await finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, options);
   }
 
   return result;
@@ -702,6 +775,7 @@ async function main() {
   const collectorUrl = String(process.env.COLLECTOR_URL || DEFAULT_COLLECTOR_URL).trim();
   const mode = String(process.env.BACKFILL_MODE || 'raw').trim().toLowerCase();
   const aggregateMode = ['aggregate', 'daily', 'efficient'].includes(mode);
+  const dryRun = parseEnabled(process.env.BACKFILL_DRY_RUN, false);
   if (aggregateMode && (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID)) {
     throw new Error('Aggregate mode requires CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, and D1_DATABASE_ID');
   }
@@ -737,6 +811,7 @@ async function main() {
   const targets = allTargets.slice(startIndex, cardLimit ? startIndex + cardLimit : undefined);
   const summary = {
     mode,
+    dryRun,
     historySource,
     scope: process.env.BACKFILL_SCOPE || 'approved',
     missingCondition: normalizeMissingCondition(process.env.BACKFILL_MISSING_CONDITION),
@@ -765,6 +840,14 @@ async function main() {
     failed: 0,
     capped: 0,
     stoppedAtDailyCutoff: 0,
+    auditCandidateRows: 0,
+    auditExistingRows: 0,
+    auditUnchangedRows: 0,
+    auditPriceChangedRows: 0,
+    auditTradeCountChangedRows: 0,
+    auditMissingStoredRows: 0,
+    auditMissingCandidateRows: 0,
+    auditMaxMedianChangePercent: 0,
   };
 
   console.log(JSON.stringify({ event: 'start', ...summary }));
@@ -780,6 +863,7 @@ async function main() {
         delayMs,
         historyChunkSize,
         aggregateMode,
+        dryRun,
         useTradingHistories,
         tradingHistoryMaxPages,
         tradingHistoryPerPage,
@@ -796,6 +880,16 @@ async function main() {
       summary.tradesSeen += result.tradesSeen;
       summary.tradesStored += result.tradesStored;
       summary.dailyPointsUpdated += result.dailyPointsUpdated;
+      if (result.audit) {
+        summary.auditCandidateRows += result.audit.candidateRows;
+        summary.auditExistingRows += result.audit.existingRows;
+        summary.auditUnchangedRows += result.audit.unchangedRows;
+        summary.auditPriceChangedRows += result.audit.priceChangedRows;
+        summary.auditTradeCountChangedRows += result.audit.tradeCountChangedRows;
+        summary.auditMissingStoredRows += result.audit.missingStoredRows;
+        summary.auditMissingCandidateRows += result.audit.missingCandidateRows;
+        summary.auditMaxMedianChangePercent = Math.max(summary.auditMaxMedianChangePercent, result.audit.maxMedianChangePercent);
+      }
       if (result.capped) summary.capped += 1;
       if (result.stoppedAtDailyCutoff) summary.stoppedAtDailyCutoff += 1;
       const payload = { event: 'card', index: startIndex + index, selectedIndex: index, ...result };

@@ -73,6 +73,11 @@ on:
         options:
           - aggregate
           - raw
+      dry_run:
+        description: Compare collected daily values with D1 without writing data.
+        required: false
+        default: false
+        type: boolean
       recent_raw_days:
         description: Raw recent trades to keep for recent history UI
         required: false
@@ -129,6 +134,7 @@ jobs:
           BACKFILL_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
           BACKFILL_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
           BACKFILL_MODE: ${{ github.event.inputs.mode || 'aggregate' }}
+          BACKFILL_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
           BACKFILL_RECENT_RAW_DAYS: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && '30' || github.event_name == 'schedule' && '7' || github.event.inputs.recent_raw_days || '30' }}
           BACKFILL_DAILY_DAYS: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && '365' || github.event_name == 'schedule' && '7' || github.event.inputs.daily_days || '365' }}
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}

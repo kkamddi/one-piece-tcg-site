@@ -1,0 +1,76 @@
+name: PSA10 index source audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/backfill-triggers/psa10-index-source-audit.txt
+
+concurrency:
+  group: psa10-index-source-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve PSA10 index cards
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import { collectorIndexComponents } from "./src/data/market-index-components.js";
+            const ids = [...new Set(collectorIndexComponents.map((item) => Number(item.apparelId)).filter(Boolean))];
+            fs.appendFileSync(process.env.GITHUB_ENV, `APPAREL_IDS=${ids.join(",")}\nINDEX_COMPONENT_COUNT=${ids.length}\n`);
+            console.log(`Resolved ${ids.length} PSA10 index component cards.`);
+          '
+
+      - name: Audit one-year Trading History against D1
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+          SNKRDUNK_COOKIE: ${{ secrets.SNKRDUNK_COOKIE }}
+          SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
+          SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
+          APPAREL_IDS: ${{ env.APPAREL_IDS }}
+          BACKFILL_SCOPE: approved
+          BACKFILL_MISSING_CONDITION: none
+          BACKFILL_MODE: aggregate
+          BACKFILL_DRY_RUN: "1"
+          BACKFILL_RECENT_RAW_DAYS: "30"
+          BACKFILL_DAILY_DAYS: "365"
+          BACKFILL_TRADING_HISTORIES: "1"
+          TRADING_HISTORY_PER_PAGE: "50"
+          TRADING_HISTORY_MAX_PAGES: "120"
+          BACKFILL_CONDITIONS: psa10
+          BACKFILL_DELAY_MS: "750"
+          BACKFILL_HISTORY_CHUNK_SIZE: "10"
+          BACKFILL_PROGRESS_PATH: psa10-index-source-audit.jsonl
+        run: npm run backfill:sold-listings
+
+      - name: Notify Telegram on completion
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            exit 0
+          fi
+          message="PSA10 index source audit ${JOB_STATUS}. No D1 data was written. Run: ${RUN_URL}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
