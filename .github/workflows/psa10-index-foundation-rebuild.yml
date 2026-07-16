@@ -1,0 +1,96 @@
+name: PSA10 index foundation rebuild
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/backfill-triggers/psa10-index-foundation-rebuild.txt
+  workflow_dispatch:
+
+concurrency:
+  group: psa10-index-foundation-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve PSA10 index cards
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import { collectorIndexComponents } from "./src/data/market-index-components.js";
+            const ids = [...new Set(collectorIndexComponents.map((item) => Number(item.apparelId)).filter(Boolean))];
+            fs.appendFileSync(process.env.GITHUB_ENV, `APPAREL_IDS=${ids.join(",")}\nINDEX_COMPONENT_COUNT=${ids.length}\n`);
+            console.log(`Resolved ${ids.length} PSA10 index component cards.`);
+          '
+
+      - name: Replace index history from 2025-01-01 Trading History
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+          SNKRDUNK_COOKIE: ${{ secrets.SNKRDUNK_COOKIE }}
+          SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
+          SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
+          BACKFILL_SCOPE: approved
+          BACKFILL_MODE: aggregate
+          BACKFILL_DRY_RUN: '0'
+          BACKFILL_REPLACE_DAILY_WINDOW: '1'
+          BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: '1'
+          BACKFILL_RECENT_RAW_DAYS: '30'
+          BACKFILL_DAILY_START_DATE: '2025-01-01'
+          BACKFILL_TRADING_HISTORIES: '1'
+          BACKFILL_CONDITIONS: psa10
+          TRADING_HISTORY_PER_PAGE: '50'
+          TRADING_HISTORY_MAX_PAGES: '400'
+          BACKFILL_DELAY_MS: '750'
+          BACKFILL_HISTORY_CHUNK_SIZE: '10'
+          BACKFILL_PROGRESS_PATH: psa10-index-foundation-rebuild.jsonl
+        run: npm run backfill:sold-listings
+
+      - name: Rebuild all PSA10 indexes from the fixed foundation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+          MARKET_INDEX_REBUILD_WINDOW_DAYS: '0'
+          MARKET_INDEX_DRY_RUN: '0'
+        run: MARKET_INDEX_CONDITION=psa10 npm run rebuild:market-indexes
+
+      - name: Notify Telegram on completion
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            exit 0
+          fi
+          if [ "${{ job.status }}" = "success" ]; then
+            message="PSA10 index foundation rebuild succeeded.\nWorkflow: $GITHUB_WORKFLOW\nRun: $RUN_URL"
+          else
+            message="PSA10 index foundation rebuild failed.\nWorkflow: $GITHUB_WORKFLOW\nRun: $RUN_URL"
+          fi
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+
+      - name: Upload progress
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psa10-index-foundation-rebuild-progress
+          path: psa10-index-foundation-rebuild.jsonl
+          if-no-files-found: ignore

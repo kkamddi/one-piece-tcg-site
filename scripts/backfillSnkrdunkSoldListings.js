@@ -561,6 +561,11 @@ async function upsertDailyRows(rows) {
   `);
 }
 
+function parseDateKey(value) {
+  const text = String(value || '').trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : '';
+}
+
 async function pruneMissingDailyRows(item, candidateRows, options) {
   const conditionKeys = [...options.allowedConditions];
   if (!conditionKeys.length) return 0;
@@ -838,6 +843,7 @@ async function main() {
   const aggregateMode = ['aggregate', 'daily', 'efficient'].includes(mode);
   const dryRun = parseEnabled(process.env.BACKFILL_DRY_RUN, false);
   const replaceDailyWindow = parseEnabled(process.env.BACKFILL_REPLACE_DAILY_WINDOW, false);
+  const requireCompleteDailyWindow = parseEnabled(process.env.BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW, false);
   if (aggregateMode && (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID)) {
     throw new Error('Aggregate mode requires CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, and D1_DATABASE_ID');
   }
@@ -847,7 +853,8 @@ async function main() {
   const recentRawDays = positiveInt(process.env.BACKFILL_RECENT_RAW_DAYS, DEFAULT_RECENT_RAW_DAYS, 365);
   const recentRawCutoff = recentRawCutoffDate(recentRawDays);
   const dailyDays = positiveInt(process.env.BACKFILL_DAILY_DAYS, DEFAULT_DAILY_DAYS, 3650);
-  const dailyCutoff = recentRawCutoffDate(dailyDays);
+  const dailyStartDate = parseDateKey(process.env.BACKFILL_DAILY_START_DATE);
+  const dailyCutoff = dailyStartDate || recentRawCutoffDate(dailyDays);
   const { maxPages, requestedAll } = parsePageLimit(process.env.SOLD_LISTING_MAX_PAGES || process.env.MAX_PAGES);
   const hasTradingHistoryAuth = hasSnkrdunkTradingHistoryAuth();
   const useTradingHistories = parseEnabled(process.env.BACKFILL_TRADING_HISTORIES, hasTradingHistoryAuth);
@@ -887,6 +894,7 @@ async function main() {
     tradingHistoryPerPage,
     historyChunkSize,
     dailyDays,
+    dailyStartDate: dailyStartDate || null,
     dailyCutoff,
     recentRawDays,
     recentRawCutoff,
@@ -901,6 +909,7 @@ async function main() {
     dailyPointsUpdated: 0,
     dailyPointsPruned: 0,
     dailyWindowsComplete: 0,
+    dailyWindowsIncomplete: 0,
     failed: 0,
     capped: 0,
     stoppedAtDailyCutoff: 0,
@@ -947,6 +956,7 @@ async function main() {
       summary.dailyPointsUpdated += result.dailyPointsUpdated;
       summary.dailyPointsPruned += result.dailyPointsPruned;
       if (result.dailyWindowComplete) summary.dailyWindowsComplete += 1;
+      else summary.dailyWindowsIncomplete += 1;
       if (result.audit) {
         summary.auditCandidateRows += result.audit.candidateRows;
         summary.auditExistingRows += result.audit.existingRows;
@@ -980,6 +990,9 @@ async function main() {
   }
 
   console.log(JSON.stringify({ event: 'done', ...summary }));
+  if (requireCompleteDailyWindow && (summary.failed > 0 || summary.dailyWindowsIncomplete > 0)) {
+    process.exitCode = 1;
+  }
 }
 
 main().catch((error) => {
