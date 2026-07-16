@@ -63,7 +63,7 @@ async function fetchDailyPointRows(apparelIds) {
     const chunk = apparelIds.slice(start, start + chunkSize);
     const placeholders = chunk.map(() => '?').join(',');
     const chunkRows = await queryD1(
-      `select apparel_id, point_date, median_price_jpy
+      `select apparel_id, point_date, median_price_jpy, trade_count
        from market_chart_daily_points
        where source = 'snkrdunk'
          and condition_key = ?
@@ -97,6 +97,7 @@ function buildIndexRows(indexConfig, rows) {
   const componentStartDate = shiftDate(built.endDate, -(COMPONENT_HISTORY_DAYS - 1));
   return {
     dataComponents: built.dataComponents,
+    excludedComponents: built.excludedComponents,
     audit,
     effectiveBaseDate: built.baseDate,
     indexRows: built.indexPoints.map((point) => ({
@@ -128,6 +129,7 @@ async function rebuildIndex(indexConfig) {
 
   const builtRows = buildIndexRows(indexConfig, rows);
   const dataComponents = builtRows.dataComponents || [];
+  const excludedComponents = builtRows.excludedComponents || [];
 
   if (!dataComponents.length) {
     console.log(`${indexConfig.code}: no valid ${CONDITION_KEY} component history; skipped`);
@@ -142,14 +144,24 @@ async function rebuildIndex(indexConfig) {
       const current = Number(builtRows.indexRows[index].index_value || 0);
       if (previous > 0 && current > 0) maxDailyChange = Math.max(maxDailyChange, Math.abs((current / previous) - 1) * 100);
     }
-    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}`);
+    const suspiciousBaselines = dataComponents.filter((component) => {
+      const firstPrice = Number(component.firstObservedPrice || 0);
+      const basePrice = Number(component.basePrice || 0);
+      if (!(firstPrice > 0) || !(basePrice > 0)) return false;
+      const ratio = firstPrice / basePrice;
+      return ratio >= 1.6 || ratio <= 0.625;
+    });
+    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}, excluded ${excludedComponents.length}, corrected initial outliers ${suspiciousBaselines.length}`);
+    for (const component of suspiciousBaselines) {
+      console.log(`${indexConfig.code}: baseline correction apparel ${component.apparelId}, first ${component.firstObservedPrice} on ${component.firstObservedDate}, baseline ${component.basePrice} on ${component.firstDate}`);
+    }
     return;
   }
 
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from first-trade-base, composition-neutral SNKRDUNK component indexes v3`]
+    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from 10-trading-day formation baseline, composition-neutral SNKRDUNK component indexes v4`]
   );
   await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [
