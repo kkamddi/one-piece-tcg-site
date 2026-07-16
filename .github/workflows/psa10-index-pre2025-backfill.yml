@@ -1,0 +1,86 @@
+name: PSA10 pre-2025 index history backfill
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: psa10-index-pre2025-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve pre-2025 PSA10 index cards
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import { pre2025IndexApparelIds, pre2025IndexComponents } from "./src/data/market-index-pre2025-components.js";
+            const configured = [...new Set(pre2025IndexApparelIds.map(Number).filter(Boolean))];
+            const resolved = [...new Set(pre2025IndexComponents.map((item) => Number(item.apparelId)).filter(Boolean))];
+            if (configured.length !== 44 || resolved.length !== configured.length) {
+              throw new Error(`Pre-2025 index target mismatch: configured=${configured.length}, resolved=${resolved.length}`);
+            }
+            fs.appendFileSync(process.env.GITHUB_ENV, `APPAREL_IDS=${resolved.join(",")}\nINDEX_COMPONENT_COUNT=${resolved.length}\n`);
+            console.log(`Resolved ${resolved.length} pre-2025 PSA10 index cards.`);
+          '
+
+      - name: Backfill pre-2025 PSA10 Trading History
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+          SNKRDUNK_COOKIE: ${{ secrets.SNKRDUNK_COOKIE }}
+          SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
+          SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
+          BACKFILL_SCOPE: approved
+          BACKFILL_MODE: aggregate
+          BACKFILL_DRY_RUN: '0'
+          BACKFILL_REPLACE_DAILY_WINDOW: '0'
+          BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: '1'
+          BACKFILL_RECENT_RAW_DAYS: '30'
+          BACKFILL_DAILY_START_DATE: '2022-06-01'
+          BACKFILL_TRADING_HISTORIES: '1'
+          BACKFILL_CONDITIONS: psa10
+          TRADING_HISTORY_PER_PAGE: '50'
+          TRADING_HISTORY_MAX_PAGES: '500'
+          BACKFILL_DELAY_MS: '750'
+          BACKFILL_HISTORY_CHUNK_SIZE: '10'
+          BACKFILL_PROGRESS_PATH: psa10-index-pre2025-backfill.jsonl
+        run: npm run backfill:sold-listings
+
+      - name: Notify Telegram on completion
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            exit 0
+          fi
+          if [ "${{ job.status }}" = "success" ]; then
+            message="PSA10 pre-2025 index history backfill succeeded.\nCards: ${INDEX_COMPONENT_COUNT}\nWorkflow: $GITHUB_WORKFLOW\nRun: $RUN_URL"
+          else
+            message="PSA10 pre-2025 index history backfill failed.\nCards: ${INDEX_COMPONENT_COUNT:-unknown}\nWorkflow: $GITHUB_WORKFLOW\nRun: $RUN_URL"
+          fi
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+
+      - name: Upload progress
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psa10-index-pre2025-backfill-progress
+          path: psa10-index-pre2025-backfill.jsonl
+          if-no-files-found: ignore
