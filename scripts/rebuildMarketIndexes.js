@@ -151,7 +151,14 @@ async function rebuildIndex(indexConfig) {
       const ratio = firstPrice / basePrice;
       return ratio >= 1.6 || ratio <= 0.625;
     });
-    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}, excluded ${excludedComponents.length}, corrected initial outliers ${suspiciousBaselines.length}`);
+    const currentRawValues = dataComponents
+      .map((component) => 100 * (Number(component.series.at(-1)?.price || 0) / Number(component.basePrice || 0)))
+      .filter((value) => Number.isFinite(value) && value > 0);
+    const currentRawAverage = currentRawValues.length
+      ? currentRawValues.reduce((sum, value) => sum + value, 0) / currentRawValues.length
+      : 0;
+    const belowBaseCount = currentRawValues.filter((value) => value < 100).length;
+    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, raw component average ${currentRawAverage.toFixed(4)}, below base ${belowBaseCount}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}, excluded ${excludedComponents.length}, corrected initial outliers ${suspiciousBaselines.length}`);
     for (const component of suspiciousBaselines) {
       console.log(`${indexConfig.code}: baseline correction apparel ${component.apparelId}, first ${component.firstObservedPrice} on ${component.firstObservedDate}, baseline ${component.basePrice} on ${component.firstDate}`);
     }

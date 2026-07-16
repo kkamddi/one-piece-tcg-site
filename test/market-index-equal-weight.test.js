@@ -131,16 +131,17 @@ test('is deterministic for the same complete history', () => {
 
 test('uses the median of the first 10 trading days instead of a single first-day outlier', () => {
   const prices = [247489, 91262, 97964, 103120, 103120, 128901, 139110, 131994, 138181, 149525];
+  const dates = ['2025-12-14', '2025-12-15', '2025-12-18', '2025-12-22', '2025-12-23', '2025-12-24', '2025-12-25', '2025-12-29', '2025-12-31', '2026-01-02'];
   const series = prices.map((price, index) => ({
-    date: `2025-12-${String(index + 1).padStart(2, '0')}`,
+    date: dates[index],
     price
   }));
   const baseline = buildInitialPriceFormationSeries(series);
 
   assert.equal(baseline.firstObservedPrice, 247489);
   assert.equal(baseline.baselinePrice, 130448);
-  assert.equal(baseline.baselineDate, '2025-12-10');
-  assert.deepEqual(baseline.series, [{ date: '2025-12-10', price: 130448 }]);
+  assert.equal(baseline.baselineDate, '2026-01-02');
+  assert.deepEqual(baseline.series, [{ date: '2026-01-02', price: 130448 }]);
 });
 
 test('admits a component at 100 only after 10 observed trading days form its baseline', () => {
