@@ -371,7 +371,7 @@ async function upsertDailyPoint({ source, apparelId, locale, code, condition, da
   return true;
 }
 
-async function ingestHistoryPayload(body) {
+async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
   const normalized = normalizeBody(body);
   const items = Array.isArray(normalized) ? normalized : Array.isArray(normalized.items) ? normalized.items : [normalized];
   const usdToJpy = Number(process.env.USD_TO_JPY || 155);
@@ -465,8 +465,10 @@ async function ingestHistoryPayload(body) {
   }
 
   let dailyPointsUpdated = 0;
-  for (const point of touched.values()) {
-    if (await upsertDailyPoint(point)) dailyPointsUpdated += 1;
+  if (updateDailyPoints) {
+    for (const point of touched.values()) {
+      if (await upsertDailyPoint(point)) dailyPointsUpdated += 1;
+    }
   }
 
   return {
@@ -592,7 +594,8 @@ export default async function handler(request, response) {
       return response.status(405).json({ error: 'history_ingest_requires_post' });
     }
     try {
-      const result = await ingestHistoryPayload(request.body);
+      const rawOnly = String(request.query?.daily || '').trim() === '0';
+      const result = await ingestHistoryPayload(request.body, { updateDailyPoints: !rawOnly });
       return response.status(200).json(result);
     } catch (error) {
       return response.status(500).json({ error: error?.message || 'history_ingest_failed' });

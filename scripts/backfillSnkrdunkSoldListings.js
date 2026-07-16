@@ -473,9 +473,10 @@ function oldestTradingHistoryDateKey(rows = []) {
   return new Date(Math.min(...timestamps)).toISOString().slice(0, 10);
 }
 
-async function postHistory(item, history, collectorUrl, token) {
+async function postHistory(item, history, collectorUrl, token, rawOnly = false) {
   const separator = collectorUrl.includes('?') ? '&' : '?';
-  return fetchJsonWithRetry(`${collectorUrl}${separator}mode=history`, {
+  const dailyMode = rawOnly ? '&daily=0' : '';
+  return fetchJsonWithRetry(`${collectorUrl}${separator}mode=history${dailyMode}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -493,7 +494,7 @@ async function postHistoryChunks(item, history, options) {
   };
   for (let start = 0; start < history.length; start += options.historyChunkSize) {
     const chunk = history.slice(start, start + options.historyChunkSize);
-    const posted = await postHistory(item, chunk, options.collectorUrl, options.token);
+    const posted = await postHistory(item, chunk, options.collectorUrl, options.token, options.rawOnly);
     result.tradesSeen += Number(posted?.tradesSeen || 0);
     result.tradesStored += Number(posted?.tradesStored || 0);
     result.dailyPointsUpdated += Number(posted?.dailyPointsUpdated || 0);
@@ -691,7 +692,7 @@ async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, resul
     result.dailyPointsPruned = await pruneMissingDailyRows(item, dailyRows, options);
   }
   if (recentHistory.length) {
-    const posted = await postHistoryChunks(item, recentHistory, options);
+    const posted = await postHistoryChunks(item, recentHistory, { ...options, rawOnly: true });
     result.historyPosted += recentHistory.length;
     result.tradesSeen += Number(posted?.tradesSeen || 0);
     result.tradesStored += Number(posted?.tradesStored || 0);
