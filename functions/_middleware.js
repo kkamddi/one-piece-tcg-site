@@ -496,7 +496,7 @@ function getFixedPageSeo(normalized) {
       title: `SNKRDUNK 상품 #${id} 원피스카드 시세 | Card Pone`,
       description: `SNKRDUNK 상품 #${id}의 원피스카드 시세, 가격 그래프, 최근 거래 기록을 확인할 수 있습니다.`,
       keywords: `SNKRDUNK ${id}, 원피스카드 시세, 원피스카드 가격`,
-      schemaType: 'Product'
+      schemaType: 'WebPage'
     };
   }
   if (normalized.startsWith('/prices/card/')) {
@@ -505,7 +505,7 @@ function getFixedPageSeo(normalized) {
       title: `${code} 원피스카드 시세 | Card Pone`,
       description: `${code} 일련번호의 원피스카드 시세 후보, 카드 버전, 가격 정보를 확인할 수 있습니다.`,
       keywords: `${code} 원피스카드 시세, ${code} 카드 가격, 원피스카드 일련번호`,
-      schemaType: 'Product'
+      schemaType: 'WebPage'
     };
   }
   if (normalized.startsWith('/prices/box/')) {
@@ -514,7 +514,7 @@ function getFixedPageSeo(normalized) {
       title: `${code} 원피스카드 박스 시세 | Card Pone`,
       description: `원피스 카드게임 ${code} 부스터 박스 가격과 SNKRDUNK 상품 정보를 확인할 수 있습니다.`,
       keywords: `${code} 박스 시세, 원피스카드 박스 가격, 원피스카드 부스터 박스`,
-      schemaType: 'Product'
+      schemaType: 'WebPage'
     };
   }
   if (normalized.startsWith('/guide/')) {

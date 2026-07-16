@@ -9549,10 +9549,11 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const canMapInitialCard = authUser?.user_metadata?.username === 'admin' && Boolean(initialCardId);
 
   useEffect(() => {
-    if (!selected) {
+    if (!selected || !selectedLatest?.price) {
       setJsonLd('optcg-market-detail-jsonld', null);
       return;
     }
+    const offerPrice = Math.round((selectedLatest.price / MARKET_USD_TO_JPY) * 100) / 100;
     setJsonLd('optcg-market-detail-jsonld', {
       '@context': 'https://schema.org',
       '@type': 'Product',
@@ -9560,14 +9561,18 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
       sku: selected.code,
       image: selected.previewImageUrl,
       description: selected.setName || selected.name,
+      brand: {
+        '@type': 'Brand',
+        name: 'ONE PIECE Card Game'
+      },
       url: `${SITE_ORIGIN}/prices?code=${encodeURIComponent(selected.code)}&apparelId=${encodeURIComponent(selected.apparelId || '')}`,
-      offers: selectedLatest?.price ? {
-        '@type': 'Offer',
-        price: Math.round((selectedLatest.price / MARKET_USD_TO_JPY) * 100) / 100,
+      offers: {
+        '@type': 'AggregateOffer',
+        lowPrice: offerPrice,
+        highPrice: offerPrice,
         priceCurrency: 'USD',
-        availability: 'https://schema.org/InStock',
-        url: selected.sourceUrl
-      } : undefined
+        offerCount: 1
+      }
     });
   }, [selected, selectedLatest]);
 
