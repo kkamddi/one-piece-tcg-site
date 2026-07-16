@@ -533,6 +533,49 @@ function buildDailyRows(dailyBuckets) {
   return buildFilteredDailyRows([...dailyBuckets.values()]);
 }
 
+function sourceFormationAudit(rows, condition = 'psa10') {
+  const observed = rows
+    .filter((row) => row.condition_key === condition)
+    .sort((a, b) => a.point_date.localeCompare(b.point_date));
+  if (!observed.length) return null;
+
+  let formation = null;
+  for (const point of observed) {
+    const end = new Date(`${point.point_date}T00:00:00Z`);
+    end.setUTCDate(end.getUTCDate() + 29);
+    const endDate = end.toISOString().slice(0, 10);
+    const window = observed.filter((row) => row.point_date >= point.point_date && row.point_date <= endDate);
+    const tradeCount = window.reduce((sum, row) => sum + Number(row.trade_count || 0), 0);
+    if (window.length < 3 || tradeCount < 5) continue;
+    const prices = window.map((row) => Number(row.median_price_jpy || 0)).sort((a, b) => a - b);
+    const middle = Math.floor(prices.length / 2);
+    const baselinePrice = prices.length % 2
+      ? prices[middle]
+      : Math.round((prices[middle - 1] + prices[middle]) / 2);
+    formation = {
+      startDate: point.point_date,
+      endDate,
+      tradingDays: window.length,
+      tradeCount,
+      baselinePrice,
+    };
+    break;
+  }
+
+  const latest = observed.at(-1);
+  return {
+    earliestDate: observed[0].point_date,
+    latestDate: latest.point_date,
+    tradingDays: observed.length,
+    tradeCount: observed.reduce((sum, row) => sum + Number(row.trade_count || 0), 0),
+    latestPrice: Number(latest.median_price_jpy || 0),
+    formation,
+    individualIndex: formation?.baselinePrice > 0
+      ? Number((100 * Number(latest.median_price_jpy || 0) / formation.baselinePrice).toFixed(2))
+      : null,
+  };
+}
+
 async function upsertDailyRows(rows) {
   if (!rows.length) return 0;
   return insertRows('market_chart_daily_points', [
@@ -682,6 +725,7 @@ async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, resul
   const dailyRows = buildDailyRows(dailyBuckets);
   result.dailyRowsPrepared = dailyRows.length;
   result.recentHistoryPrepared = recentHistory.length;
+  result.sourceAudit = sourceFormationAudit(dailyRows);
   if (options.dryRun) {
     result.audit = await auditDailyRows(item, dailyRows, options);
     return;
