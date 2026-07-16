@@ -1,5 +1,6 @@
 import marketIndexes from '../src/data/market-index-components.js';
-import { buildChainLinkedMarketIndex } from '../lib/market-index-chain.js';
+import { buildEqualWeightedMarketIndex } from '../lib/market-index-chain.js';
+import { assertEqualWeightedMarketIndex } from '../lib/market-index-audit.js';
 
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -55,7 +56,7 @@ async function insertRows(tableName, columns, rows, chunkSize = 40) {
   }
 }
 
-async function fetchDailyPointRows(apparelIds, baseDate) {
+async function fetchDailyPointRows(apparelIds) {
   const rows = [];
   const chunkSize = 80;
   for (let start = 0; start < apparelIds.length; start += chunkSize) {
@@ -67,9 +68,8 @@ async function fetchDailyPointRows(apparelIds, baseDate) {
        where source = 'snkrdunk'
          and condition_key = ?
          and apparel_id in (${placeholders})
-         and point_date >= ?
        order by apparel_id asc, point_date asc`,
-      [CONDITION_KEY, ...chunk, baseDate]
+      [CONDITION_KEY, ...chunk]
     );
     rows.push(...chunkRows);
   }
@@ -85,17 +85,19 @@ function getRebuildStartDate() {
 
 function shiftDate(dateKey, days) {
   const date = new Date(`${dateKey}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime())) return '';
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
 }
 
 function buildIndexRows(indexConfig, rows) {
-  const built = buildChainLinkedMarketIndex(indexConfig, rows, {
-    minimumBaseCoverage: CONDITION_KEY === 'psa10' ? indexConfig.psa10MinimumBaseCoverage : 0
-  });
+  const kstToday = new Date(Date.now() + (9 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+  const built = buildEqualWeightedMarketIndex(indexConfig, rows, { endDate: kstToday });
+  const audit = assertEqualWeightedMarketIndex(built);
   const componentStartDate = shiftDate(built.endDate, -(COMPONENT_HISTORY_DAYS - 1));
   return {
     dataComponents: built.dataComponents,
+    audit,
     effectiveBaseDate: built.baseDate,
     indexRows: built.indexPoints.map((point) => ({
       index_code: indexConfig.code,
@@ -121,11 +123,16 @@ function buildIndexRows(indexConfig, rows) {
 
 async function rebuildIndex(indexConfig) {
   const apparelIds = indexConfig.components.map((item) => Number(item.apparelId)).filter(Boolean);
-  const rows = await fetchDailyPointRows(apparelIds, indexConfig.baseDate);
+  const rows = await fetchDailyPointRows(apparelIds);
   const rebuildStartDate = getRebuildStartDate();
 
   const builtRows = buildIndexRows(indexConfig, rows);
   const dataComponents = builtRows.dataComponents || [];
+
+  if (!dataComponents.length) {
+    console.log(`${indexConfig.code}: no valid ${CONDITION_KEY} component history; skipped`);
+    return;
+  }
 
   if (DRY_RUN) {
     const last = builtRows.indexRows.at(-1) || null;
@@ -142,7 +149,7 @@ async function rebuildIndex(indexConfig) {
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate || indexConfig.baseDate, indexConfig.baseValue, `${indexConfig.name} from SNKRDUNK chain-linked daily median prices`]
+    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from first-trade-base, composition-neutral SNKRDUNK component indexes v3`]
   );
   await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [
@@ -186,7 +193,7 @@ async function rebuildIndex(indexConfig) {
     await queryD1('delete from market_index_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
     await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ?', [indexConfig.code, CONDITION_KEY]);
   }
-  const componentHistoryStartDate = shiftDate(builtRows.indexRows.at(-1)?.point_date || indexConfig.baseDate, -(COMPONENT_HISTORY_DAYS - 1));
+  const componentHistoryStartDate = shiftDate(builtRows.indexRows.at(-1)?.point_date, -(COMPONENT_HISTORY_DAYS - 1));
   await queryD1('delete from market_index_component_daily_points where index_code = ? and condition_key = ? and point_date < ?', [indexConfig.code, CONDITION_KEY, componentHistoryStartDate]);
   await insertRows('market_index_daily_points', [
     'index_code',

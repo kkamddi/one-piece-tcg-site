@@ -1,12 +1,12 @@
 import marketIndexes from '../src/data/market-index-components.js';
-import { buildChainLinkedMarketIndex } from '../lib/market-index-chain.js';
+import { buildEqualWeightedMarketIndex } from '../lib/market-index-chain.js';
 
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
 const CACHE_SECONDS = 60 * 60;
-const INDEX_MIN_DATE = '2024-01-01';
+const INDEX_MIN_DATE = '2022-01-01';
 const CURRENT_OVERLAY_MAX_CHANGE_PERCENT = 20;
 const INDEX_TYPE_ALIASES = {
   waifu: 'premium_art',
@@ -221,7 +221,7 @@ async function fetchCurrentSnapshotRows(apparelIds, conditionKey) {
   return rows;
 }
 
-async function fetchDailyPointRows(apparelIds, conditionKey, baseDate) {
+async function fetchDailyPointRows(apparelIds, conditionKey) {
   const rows = [];
   const chunkSize = 80;
   for (let start = 0; start < apparelIds.length; start += chunkSize) {
@@ -233,9 +233,8 @@ async function fetchDailyPointRows(apparelIds, conditionKey, baseDate) {
        where source = 'snkrdunk'
          and condition_key = ?
          and apparel_id in (${placeholders})
-         and point_date >= ?
        order by apparel_id asc, point_date asc`,
-      [conditionKey, ...chunk, baseDate]
+      [conditionKey, ...chunk]
     );
     rows.push(...chunkRows);
   }
@@ -359,9 +358,8 @@ function applyCurrentIndexPoint(points = [], currentPoint = null) {
 }
 
 function buildIndexPayload(indexConfig, rows, conditionKey, range) {
-  const built = buildChainLinkedMarketIndex(indexConfig, rows, {
-    minimumBaseCoverage: conditionKey === 'psa10' ? indexConfig.psa10MinimumBaseCoverage : 0
-  });
+  const kstToday = new Date(Date.now() + (9 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+  const built = buildEqualWeightedMarketIndex(indexConfig, rows, { endDate: kstToday });
   return buildStoredIndexPayload(
     indexConfig,
     built.indexPoints.map((point) => ({
@@ -390,7 +388,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
       activeCount: Number(row.active_component_count || 0),
       componentCount: Number(row.component_count || indexConfig.components.length || 0)
     }))
-    .filter((point) => point.value > 0 && isSaneIndexDate(point.date, indexConfig.baseDate))
+    .filter((point) => point.value > 0 && isSaneIndexDate(point.date, INDEX_MIN_DATE))
     .sort((a, b) => a.date.localeCompare(b.date));
   if (!points.length) return null;
   const effectiveBaseDate = points[0].date;
@@ -399,7 +397,7 @@ function buildStoredIndexPayload(indexConfig, pointRows, componentRows, conditio
   for (const row of componentRows || []) {
     const apparelId = Number(row.apparel_id || 0);
     const date = toDateKey(row.point_date);
-    if (!apparelId || !isSaneIndexDate(date, indexConfig.baseDate)) continue;
+    if (!apparelId || !isSaneIndexDate(date, INDEX_MIN_DATE)) continue;
     const rows = componentRowsById.get(apparelId) || [];
     rows.push({ ...row, point_date: date });
     componentRowsById.set(apparelId, rows);
@@ -515,13 +513,13 @@ export default async function handler(request, response) {
       }
     }
 
-    const rows = await fetchDailyPointRows(apparelIds, conditionKey, indexConfig.baseDate);
+    const rows = await fetchDailyPointRows(apparelIds, conditionKey);
     const payload = buildIndexPayload(indexConfig, rows, conditionKey, range);
     response.setHeader?.('Cache-Control', `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS}`);
     return response.status(200).json(payload);
   } catch (error) {
     return response.status(200).json({
-      index: { code: indexConfig.code, name: indexConfig.name, baseDate: indexConfig.baseDate, baseValue: indexConfig.baseValue, condition: conditionKey },
+      index: { code: indexConfig.code, name: indexConfig.name, baseDate: null, baseValue: indexConfig.baseValue, condition: conditionKey },
       error: 'index_data_unavailable',
       currentValue: null,
       currentDate: null,

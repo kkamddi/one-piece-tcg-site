@@ -118,35 +118,30 @@ export const marketIndexes = [
   {
     code: 'collector',
     name: 'OPTCG Collector Index',
-    baseDate: '2025-01-01',
     baseValue: 100,
     components: collectorIndexComponents
   },
   {
     code: 'manga',
     name: 'OPTCG Manga Index',
-    baseDate: '2025-01-01',
     baseValue: 100,
     components: mangaIndexComponents
   },
   {
     code: 'premium_art',
     name: 'OPTCG Premium Art Index',
-    baseDate: '2025-01-01',
     baseValue: 100,
     components: premiumArtIndexComponents
   },
   {
     code: 'heroines',
     name: 'OPTCG Heroines Index',
-    baseDate: '2025-01-01',
     baseValue: 100,
     components: heroinesIndexComponents
   },
   {
     code: 'luffy',
     name: 'OPTCG Luffy Index',
-    baseDate: '2025-01-01',
     baseValue: 100,
     components: luffyIndexComponents
   }

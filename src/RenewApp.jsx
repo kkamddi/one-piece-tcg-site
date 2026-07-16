@@ -8818,7 +8818,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
       </div>
       <div className="renew-index-summary">
         <strong>{loading ? '...' : formatIndexValue(payload?.currentValue)}</strong>
-        <span>Base 100 · {payload?.index?.baseDate || '2025-01-01'}</span>
+        <span>Base 100 · {payload?.index?.baseDate || '-'}</span>
         <div>
           <em className={indexChangeClass(payload?.change?.d1)}>1D {formatIndexDailyChange(payload?.change?.d1)}</em>
           <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
