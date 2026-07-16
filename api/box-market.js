@@ -55,6 +55,21 @@ function findPrice(value) {
   return 0;
 }
 
+function findCurrency(value) {
+  if (!value || typeof value !== 'object') return '';
+  for (const key of ['currency', 'priceCurrency', 'minPriceCurrency']) {
+    const currency = String(value[key] || '').trim().toUpperCase();
+    if (/^[A-Z]{3}$/.test(currency)) return currency;
+  }
+  for (const item of Object.values(value)) {
+    if (item && typeof item === 'object') {
+      const currency = findCurrency(item);
+      if (currency) return currency;
+    }
+  }
+  return '';
+}
+
 function findListingCount(value) {
   if (!value || typeof value !== 'object') return 0;
   for (const key of ['listingCount', 'listingsCount', 'sellCount', 'availableCount', 'stockCount']) {
@@ -170,6 +185,7 @@ function parseJsonBlocks(html) {
 function parseProductHtml(html) {
   let imageUrl = '';
   let minPrice = 0;
+  let priceCurrency = '';
   let listingCount = 0;
   let releaseDate = '';
   for (const block of parseJsonBlocks(html)) {
@@ -177,6 +193,7 @@ function parseProductHtml(html) {
       const data = JSON.parse(decodeHtmlEntities(block));
       imageUrl ||= findFirstImage(data);
       minPrice ||= findPrice(data);
+      priceCurrency ||= findCurrency(data);
       listingCount ||= findListingCount(data);
       releaseDate ||= findReleaseDate(data);
     } catch {
@@ -189,27 +206,52 @@ function parseProductHtml(html) {
     const priceMatch = html.match(/(?:JPY|¥|price["':\s]+)([0-9][0-9,]*)/i);
     minPrice = priceMatch ? Number(priceMatch[1].replace(/,/g, '')) || 0 : 0;
   }
-  return { imageUrl, minPrice, listingCount, releaseDate };
+  return { imageUrl, minPrice, priceCurrency, listingCount, releaseDate };
+}
+
+async function fetchProductSnapshot(item) {
+  const response = await fetch(`https://snkrdunk.com/en/v1/products/SW---${item.apparelId}`, {
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0'
+    },
+    cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true }
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return {
+    imageUrl: findFirstImage(data?.product?.thumbnailUrl),
+    minPrice: Number(data?.minPrice) || 0,
+    minPriceFormat: String(data?.minPriceFormat || ''),
+    priceCurrency: String(data?.currency || data?.productRetail?.currency || '').toUpperCase(),
+    listingCount: Number(data?.listingCount) || 0,
+    releaseDate: normalizeReleaseDate(data?.productRetail?.releaseDate)
+  };
 }
 
 async function fetchBox(item) {
   try {
-    const response = await fetch(item.sourceUrl, {
-      headers: {
-        Accept: 'text/html,application/xhtml+xml',
-        'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0'
-      },
-      cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true }
-    });
-    const html = await response.text();
-    const parsed = response.ok ? parseProductHtml(html) : {};
+    let snapshot = await fetchProductSnapshot(item).catch(() => null);
+    if (!snapshot?.imageUrl || !snapshot?.releaseDate) {
+      const response = await fetch(item.sourceUrl, {
+        headers: {
+          Accept: 'text/html,application/xhtml+xml',
+          'User-Agent': 'Mozilla/5.0 CardPoneBot/1.0'
+        },
+        cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true }
+      });
+      const html = await response.text();
+      const parsed = response.ok ? parseProductHtml(html) : {};
+      snapshot = { ...parsed, ...snapshot };
+    }
     return {
       ...item,
-      minPrice: parsed.minPrice || item.minPrice || 0,
-      minPriceFormat: parsed.minPrice ? `$${Math.round(parsed.minPrice).toLocaleString('ko-KR')}` : '',
-      listingCount: parsed.listingCount || item.listingCount || 0,
-      previewImageUrl: parsed.imageUrl || item.previewImageUrl || '',
-      releaseDate: parsed.releaseDate || item.releaseDate || ''
+      minPrice: snapshot?.minPrice || item.minPrice || 0,
+      minPriceFormat: snapshot?.minPriceFormat || '',
+      priceCurrency: snapshot?.priceCurrency || item.priceCurrency || '',
+      listingCount: snapshot?.listingCount || item.listingCount || 0,
+      previewImageUrl: snapshot?.imageUrl || item.previewImageUrl || '',
+      releaseDate: snapshot?.releaseDate || item.releaseDate || ''
     };
   } catch {
     return item;

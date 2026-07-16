@@ -59,6 +59,7 @@ const BOX_SHORT_TITLES = {
   'OPC-035': 'Promotion Card Set 3',
   'OPC-046': 'English 2nd Anniversary JP',
   'OJP-3': 'Official Judge Pack Vol.3',
+  'OPC-TCG-R1-PP': 'ROUND1 Promotion Pack',
   'P-2022': 'Promotional Pack 2022',
   'TPP-NFE': 'New Four Emperors Pack'
 };
@@ -82,7 +83,7 @@ function getBoxReleaseSortValue(item) {
   const normalizedDate = typeof rawDate === 'string' ? rawDate.replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, '$1') : rawDate;
   const releaseTime = normalizedDate ? Date.parse(normalizedDate) : NaN;
   if (Number.isFinite(releaseTime)) return releaseTime;
-  return Number(item?.sortOrder ?? String(item?.code || '').match(/\d+/)?.[0]) || 0;
+  return 0;
 }
 
 const CALENDAR_WEEKDAYS = {
@@ -4580,6 +4581,15 @@ function RenewHomeMarketIndex({ onOpen }) {
   );
 }
 
+function formatBoxMarketPrice(box) {
+  const amount = Number(box?.minPrice || 0);
+  if (!Number.isFinite(amount) || amount <= 0) return '';
+  const currency = String(box?.priceCurrency || box?.currency || '').toUpperCase();
+  if (currency === 'KRW') return `₩${Math.round(amount).toLocaleString('ko-KR')}`;
+  if (currency === 'JPY') return `¥${Math.round(amount).toLocaleString('ja-JP')}`;
+  return formatUsdWonFromUsd(amount);
+}
+
 function RenewalNoticeModal({ onClose }) {
   useBodyScrollLock();
   const latestUpdate = VISIBLE_RENEW_HOME_UPDATES[0] || RENEW_HOME_UPDATES[0];
@@ -8524,6 +8534,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
     return withIndex.sort((a, b) => {
       const releaseA = getBoxReleaseSortValue(a);
       const releaseB = getBoxReleaseSortValue(b);
+      if (!releaseA || !releaseB) return releaseA ? -1 : releaseB ? 1 : a.index - b.index;
       return releaseB - releaseA || a.index - b.index;
     });
   }, [boxes, sortMode, initialBoxCode]);
@@ -8555,7 +8566,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
                 <span>{BOX_SHORT_TITLES[box.code] || box.name}</span>
               </span>
               <small>SNKRDUNK #{box.apparelId}</small>
-              <b>{box.minPrice ? formatUsdWonFromUsd(box.minPrice) : t('checkPrice')}</b>
+              <b>{formatBoxMarketPrice(box) || t('checkPrice')}</b>
             </div>
           </a>
         ))}
