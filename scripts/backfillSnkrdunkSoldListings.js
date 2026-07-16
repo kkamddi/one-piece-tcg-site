@@ -2,7 +2,7 @@ import { appendFile } from 'node:fs/promises';
 import fs from 'node:fs';
 import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
-import { buildFilteredDailyRows } from '../lib/market-outlier-filter.js';
+import { buildFilteredDailyRows, medianNumber } from '../lib/market-outlier-filter.js';
 
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_COLLECTOR_URL = 'https://www.optcgkorea.com/api/market-collector';
@@ -533,6 +533,23 @@ function buildDailyRows(dailyBuckets) {
   return buildFilteredDailyRows([...dailyBuckets.values()]);
 }
 
+function buildUnfilteredDailyRows(dailyBuckets) {
+  return [...dailyBuckets.values()].map((bucket) => {
+    const prices = bucket.prices
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value) && value > 0);
+    if (!prices.length) return null;
+    return {
+      ...bucket,
+      median_price_jpy: medianNumber(prices),
+      min_price_jpy: Math.min(...prices),
+      max_price_jpy: Math.max(...prices),
+      trade_count: prices.length,
+      source_count: prices.length,
+    };
+  }).filter(Boolean);
+}
+
 function sourceFormationAudit(rows, condition = 'psa10') {
   const observed = rows
     .filter((row) => row.condition_key === condition)
@@ -722,9 +739,15 @@ async function auditDailyRows(item, rows, options) {
 }
 
 async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, options) {
+  const rawDailyRows = buildUnfilteredDailyRows(dailyBuckets);
   const dailyRows = buildDailyRows(dailyBuckets);
+  result.rawDailyRowsPrepared = rawDailyRows.length;
   result.dailyRowsPrepared = dailyRows.length;
   result.recentHistoryPrepared = recentHistory.length;
+  result.rawSourceAudits = {
+    a: sourceFormationAudit(rawDailyRows, 'a'),
+    psa10: sourceFormationAudit(rawDailyRows, 'psa10'),
+  };
   result.sourceAudits = {
     a: sourceFormationAudit(dailyRows, 'a'),
     psa10: sourceFormationAudit(dailyRows, 'psa10'),
