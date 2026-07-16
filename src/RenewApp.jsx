@@ -2437,8 +2437,8 @@ const CLIENT_ROUTE_SEO = {
     body: '원피스 카드게임 부스터 박스와 팩 가격을 확인할 수 있습니다.'
   },
   '/prices/index': {
-    title: 'OPTCG Collector Index | Card Pone',
-    h1: 'OPTCG Collector Index',
+    title: 'OPTCG Market Index | Card Pone',
+    h1: 'OPTCG Market Index',
     description: 'Card Pone가 추적하는 원피스카드 대표 지수와 하위 섹터 지수를 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표',
     body: '원피스카드 대표 카드와 섹터별 가격 흐름을 지수로 확인할 수 있습니다.'
@@ -2494,8 +2494,9 @@ function getClientRouteSeo(page) {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
     '/prices/premium-art-index': '/prices/index/premium-art',
-    '/prices/sp-index': '/prices/index/heroines',
-    '/prices/index/sp': '/prices/index/heroines',
+    '/prices/sp-index': '/prices/index',
+    '/prices/index/sp': '/prices/index',
+    '/prices/index/heroines': '/prices/index',
     '/prices/luffy-index': '/prices/index/luffy'
   };
   if (seoAliases[path] && CLIENT_ROUTE_SEO[seoAliases[path]]) return CLIENT_ROUTE_SEO[seoAliases[path]];
@@ -4296,7 +4297,7 @@ function RenewHome({ authUser, userState, setUserState, stateLoading, adminStats
               <strong>{psa10Count}</strong>
             </button>
           </div>
-          <RenewHomeCollectorIndex onOpen={onOpenIndex} />
+          <RenewHomeMarketIndex onOpen={onOpenIndex} />
         </article>
 
         <article className="renew-float-card renew-home-news">
@@ -4531,37 +4532,51 @@ function RenewPartnerShopSeoPage({ uiLang }) {
 
 const MARKET_INDEX_CONDITION = 'psa10';
 
-function RenewHomeCollectorIndex({ onOpen }) {
-  const [payload, setPayload] = useState(null);
+const HOME_MARKET_INDEX_OPTIONS = [
+  { key: 'manga', label: 'Manga' },
+  { key: 'premium_art', label: 'Premium Art' },
+  { key: 'luffy', label: 'Luffy' },
+];
+
+function RenewHomeMarketIndex({ onOpen }) {
+  const [payloads, setPayloads] = useState({});
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/market-index?type=collector&condition=${MARKET_INDEX_CONDITION}&range=7d`, { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (!cancelled) setPayload(data);
+    Promise.all(HOME_MARKET_INDEX_OPTIONS.map(async (option) => {
+      const response = await fetch(`/api/market-index?type=${option.key}&condition=${MARKET_INDEX_CONDITION}&range=7d`, { cache: 'no-store' });
+      return [option.key, response.ok ? await response.json() : null];
+    }))
+      .then((entries) => {
+        if (!cancelled) setPayloads(Object.fromEntries(entries));
       })
       .catch(() => {
-        if (!cancelled) setPayload(null);
+        if (!cancelled) setPayloads({});
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (!payload?.currentValue) return null;
+  const items = HOME_MARKET_INDEX_OPTIONS
+    .map((option) => ({ option, payload: payloads[option.key] }))
+    .filter(({ payload }) => payload?.currentValue != null && Number.isFinite(Number(payload.currentValue)));
+
+  if (!items.length) return null;
 
   return (
-    <button type="button" className="renew-home-index-summary" onClick={onOpen} aria-label="OPTCG Collector Index 바로가기">
-      <div>
-        <span>Collector Index</span>
-        <strong>{formatIndexValue(payload.currentValue)}</strong>
+    <section className="renew-home-index-summary" aria-label="OPTCG Market Index">
+      <span className="renew-home-index-label">Market Index</span>
+      <div className="renew-home-index-list">
+        {items.map(({ option, payload }) => (
+          <button key={option.key} type="button" onClick={() => onOpen(option.key)} aria-label={`${option.label} Index 바로가기`}>
+            <span>{option.label}</span>
+            <strong>{formatIndexValue(payload.currentValue)}</strong>
+            <em className={indexChangeClass(payload?.change?.d1)}>1D {formatIndexDailyChange(payload?.change?.d1)}</em>
+          </button>
+        ))}
       </div>
-      <div className="renew-home-index-change">
-        <em className={indexChangeClass(payload?.change?.d1)}>1D {formatIndexDailyChange(payload?.change?.d1)}</em>
-        <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
-      </div>
-    </button>
+    </section>
   );
 }
 
@@ -8227,13 +8242,10 @@ function RenewIndexChart({ points = [] }) {
 }
 
 const MARKET_INDEX_OPTIONS = [
-  { key: 'collector', label: 'Collector', title: 'OPTCG Collector Index' },
   { key: 'manga', label: 'Manga', title: 'OPTCG Manga Index' },
   { key: 'premium_art', label: 'Premium Art', title: 'OPTCG Premium Art Index' },
-  { key: 'heroines', label: 'Heroines', title: 'OPTCG Heroines Index' },
   { key: 'luffy', label: 'Luffy', title: 'OPTCG Luffy Index' },
 ];
-const MARKET_SECTOR_INDEX_OPTIONS = MARKET_INDEX_OPTIONS.filter((item) => item.key !== 'collector');
 const MARKET_INDEX_COMPONENTS_PER_PAGE = 8;
 
 function getMarketIndexComponentHref(item) {
@@ -8254,18 +8266,20 @@ function getMarketIndexComponentLocale(item) {
 }
 
 function getMarketIndexTypeFromPath(path) {
+  const requestedType = typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('index');
+  if (MARKET_INDEX_OPTIONS.some((item) => item.key === requestedType)) return requestedType;
   const aliasMap = {
-    '/prices/collector-index': 'collector',
+    '/prices/collector-index': 'manga',
     '/prices/manga-index': 'manga',
     '/prices/waifu-index': 'premium_art',
     '/prices/premium-art-index': 'premium_art',
-    '/prices/sp-index': 'heroines',
+    '/prices/sp-index': 'manga',
     '/prices/luffy-index': 'luffy'
   };
   if (aliasMap[path]) return aliasMap[path];
   const slug = path.startsWith('/prices/index/') ? path.slice('/prices/index/'.length) : '';
-  const legacyMap = { collector: 'collector', manga: 'manga', waifu: 'premium_art', premium: 'premium_art', 'premium-art': 'premium_art', sp: 'heroines', heroines: 'heroines', luffy: 'luffy' };
-  return legacyMap[slug] || 'collector';
+  const legacyMap = { collector: 'manga', manga: 'manga', waifu: 'premium_art', premium: 'premium_art', 'premium-art': 'premium_art', sp: 'manga', heroines: 'manga', luffy: 'luffy' };
+  return legacyMap[slug] || 'manga';
 }
 
 function isMarketIndexPath(path) {
@@ -8347,25 +8361,12 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <button type="button" className={range === '1y' ? 'is-active' : ''} onClick={() => setRange('1y')}>1Y</button>
         </div>
       </div>
-      <div className="renew-index-primary" aria-label="Representative market index">
-        <button
-          type="button"
-          className={indexType === 'collector' ? 'is-active' : ''}
-          onClick={() => {
-            setIndexType('collector');
-            setDetailsOpen(false);
-          }}
-        >
-          <span>Core Benchmark</span>
-          <strong>OPTCG Collector Index</strong>
-        </button>
-      </div>
       <div className="renew-index-sector-head">
         <span>Sector Index</span>
-        <em>Manga, Premium Art, Heroines, Luffy</em>
+        <em>Manga, Premium Art, Luffy</em>
       </div>
       <div className="renew-index-tabs" aria-label="Market sector index type">
-        {MARKET_SECTOR_INDEX_OPTIONS.map((option) => (
+        {MARKET_INDEX_OPTIONS.map((option) => (
           <button
             key={option.key}
             type="button"
@@ -10095,12 +10096,12 @@ export default function RenewApp() {
             navigatePage('cards');
           }}
           onNavigateNews={(query) => navigatePage('news', { query })}
-          onOpenIndex={() => {
+          onOpenIndex={(indexType = 'manga') => {
             setMarketInitialCode('');
             setMarketInitialApparelId(null);
             setMarketInitialCardId('');
             setCanReturnToCatalog(false);
-            navigatePage('prices', { query: 'tab=index' });
+            navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
           onOpenPrices={() => navigatePage('prices')}
         />

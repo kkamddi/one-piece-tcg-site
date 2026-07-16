@@ -1849,10 +1849,7 @@
 }
 
 .renew-home-index-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  display: block;
   width: 100%;
   margin-top: 14px;
   border-top: 1px solid rgba(23, 25, 28, 0.08);
@@ -1863,46 +1860,62 @@
   color: inherit;
   background: transparent;
   text-align: left;
-  cursor: pointer;
 }
 
-.renew-home-index-summary span {
+.renew-home-index-label,
+.renew-home-index-list span {
   display: block;
   color: #6b7280;
   font-size: 12px;
   font-weight: 900;
 }
 
-.renew-home-index-summary strong {
+.renew-home-index-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.renew-home-index-list button {
+  min-width: 0;
+  border: 0;
+  border-left: 1px solid rgba(23, 25, 28, 0.08);
+  padding: 0 8px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-home-index-list button:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.renew-home-index-list strong {
   display: block;
   margin-top: 3px;
   color: #17191c;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 900;
   letter-spacing: -0.045em;
 }
 
-.renew-home-index-change {
-  display: flex;
-  gap: 6px;
+.renew-home-index-list em {
+  display: block;
+  margin-top: 3px;
+  color: #6b7280;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
   white-space: nowrap;
 }
 
-.renew-home-index-change em {
-  border-radius: 999px;
-  padding: 6px 8px;
-  background: rgba(255, 255, 255, 0.72);
-  color: #6b7280;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 900;
-}
-
-.renew-home-index-change em.is-up {
+.renew-home-index-list em.is-up {
   color: #c94d35;
 }
 
-.renew-home-index-change em.is-down {
+.renew-home-index-list em.is-down {
   color: #2563eb;
 }
 
@@ -9959,7 +9972,8 @@
 .renew-app.is-dark .renew-market-sale small,
 .renew-app.is-dark .renew-box-market-head p,
 .renew-app.is-dark .renew-box-market-card small,
-.renew-app.is-dark .renew-home-index-summary span,
+.renew-app.is-dark .renew-home-index-label,
+.renew-app.is-dark .renew-home-index-list span,
 .renew-app.is-dark .renew-index-sector-head,
 .renew-app.is-dark .renew-index-sector-head em,
 .renew-app.is-dark .renew-index-summary span,
@@ -9970,6 +9984,10 @@
 .renew-app.is-dark .renew-index-disclosure,
 .renew-app.is-dark .renew-market-card p {
   color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-home-index-list button {
+  border-left-color: rgba(255, 255, 255, 0.12);
 }
 
 .renew-app.is-dark .renew-index-tabs button.is-active,
@@ -9983,7 +10001,7 @@
 }
 
 .renew-app.is-dark .renew-index-head h2,
-.renew-app.is-dark .renew-home-index-summary strong,
+.renew-app.is-dark .renew-home-index-list strong,
 .renew-app.is-dark .renew-index-primary strong,
 .renew-app.is-dark .renew-index-sector-head span,
 .renew-app.is-dark .renew-index-summary strong,
@@ -10870,14 +10888,6 @@
     position: static;
     width: 100%;
     transform: none;
-  }
-
-  .renew-home-index-summary {
-    align-items: flex-start;
-  }
-
-  .renew-home-index-change {
-    flex: 0 0 auto;
   }
 
   .renew-home-guide-links {
