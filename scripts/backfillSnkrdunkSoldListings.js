@@ -438,7 +438,7 @@ function historyFromListings(listings, allowedConditions) {
 }
 
 function historyFromTradingHistories(rows, allowedConditions) {
-  const seen = new Set();
+  const seenIds = new Set();
   const history = [];
 
   for (const row of rows || []) {
@@ -447,9 +447,11 @@ function historyFromTradingHistories(rows, allowedConditions) {
     const condition = tradingHistoryConditionName(row);
     const key = conditionKey(condition);
     const priceText = tradingHistoryPriceText(row);
-    const dedupeKey = `${dateText || day}|${key}|${priceText}`;
-    if (!day || !condition || !priceText || !allowedConditions.has(key) || seen.has(dedupeKey)) continue;
-    seen.add(dedupeKey);
+    const historyId = String(
+      row?.id || row?.historyId || row?.history_id || row?.tradeId || row?.trade_id || row?.transactionId || row?.transaction_id || '',
+    ).trim();
+    if (!day || !condition || !priceText || !allowedConditions.has(key) || (historyId && seenIds.has(historyId))) continue;
+    if (historyId) seenIds.add(historyId);
     history.push({
       date: day,
       dateText: dateText || day,
@@ -559,6 +561,44 @@ async function upsertDailyRows(rows) {
   `);
 }
 
+async function pruneMissingDailyRows(item, candidateRows, options) {
+  const conditionKeys = [...options.allowedConditions];
+  if (!conditionKeys.length) return 0;
+
+  const placeholders = conditionKeys.map(() => '?').join(',');
+  const existingRows = await queryD1(
+    `select condition_key, point_date
+     from market_chart_daily_points
+     where source = 'snkrdunk'
+       and apparel_id = ?
+       and condition_key in (${placeholders})
+       and point_date >= ?`,
+    [Number(item.apparelId), ...conditionKeys, options.dailyCutoffDate],
+  );
+  const candidateKeys = new Set(candidateRows.map((row) => `${row.condition_key}|${row.point_date}`));
+  const staleRows = existingRows.filter((row) => !candidateKeys.has(`${row.condition_key}|${row.point_date}`));
+
+  for (const condition of conditionKeys) {
+    const dates = staleRows
+      .filter((row) => row.condition_key === condition)
+      .map((row) => row.point_date);
+    for (let start = 0; start < dates.length; start += 40) {
+      const chunk = dates.slice(start, start + 40);
+      const datePlaceholders = chunk.map(() => '?').join(',');
+      await queryD1(
+        `delete from market_chart_daily_points
+         where source = 'snkrdunk'
+           and apparel_id = ?
+           and condition_key = ?
+           and point_date in (${datePlaceholders})`,
+        [Number(item.apparelId), condition, ...chunk],
+      );
+    }
+  }
+
+  return staleRows.length;
+}
+
 async function auditDailyRows(item, rows, options) {
   const conditionKeys = [...options.allowedConditions];
   if (!conditionKeys.length) {
@@ -642,6 +682,9 @@ async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, resul
   }
 
   result.dailyPointsUpdated = await upsertDailyRows(dailyRows);
+  if (options.replaceDailyWindow && result.dailyWindowComplete) {
+    result.dailyPointsPruned = await pruneMissingDailyRows(item, dailyRows, options);
+  }
   if (recentHistory.length) {
     const posted = await postHistoryChunks(item, recentHistory, options);
     result.historyPosted += recentHistory.length;
@@ -664,8 +707,10 @@ async function backfillTradingHistoryItem(item, options) {
     tradesSeen: 0,
     tradesStored: 0,
     dailyPointsUpdated: 0,
+    dailyPointsPruned: 0,
     capped: false,
     stoppedAtDailyCutoff: false,
+    dailyWindowComplete: false,
   };
   const dailyBuckets = new Map();
   const recentHistory = [];
@@ -676,7 +721,10 @@ async function backfillTradingHistoryItem(item, options) {
     result.listingsSeen += rows.length;
     result.soldSeen += rows.length;
 
-    if (!rows.length) break;
+    if (!rows.length) {
+      result.dailyWindowComplete = true;
+      break;
+    }
 
     const history = historyFromTradingHistories(rows, options.allowedConditions);
     if (options.aggregateMode) {
@@ -690,10 +738,14 @@ async function backfillTradingHistoryItem(item, options) {
       result.dailyPointsUpdated += Number(posted?.dailyPointsUpdated || 0);
     }
 
-    if (rows.length < options.tradingHistoryPerPage) break;
+    if (rows.length < options.tradingHistoryPerPage) {
+      result.dailyWindowComplete = true;
+      break;
+    }
     const oldestDay = oldestTradingHistoryDateKey(rows);
     if (oldestDay && oldestDay < options.dailyCutoffDate) {
       result.stoppedAtDailyCutoff = true;
+      result.dailyWindowComplete = true;
       break;
     }
     if (page === options.tradingHistoryMaxPages) result.capped = true;
@@ -725,8 +777,10 @@ async function backfillItem(item, options) {
     tradesSeen: 0,
     tradesStored: 0,
     dailyPointsUpdated: 0,
+    dailyPointsPruned: 0,
     capped: false,
     stoppedAtDailyCutoff: false,
+    dailyWindowComplete: false,
   };
   const dailyBuckets = new Map();
   const recentHistory = [];
@@ -736,7 +790,10 @@ async function backfillItem(item, options) {
     result.pagesFetched += 1;
     result.listingsSeen += listings.length;
 
-    if (!listings.length) break;
+    if (!listings.length) {
+      result.dailyWindowComplete = true;
+      break;
+    }
 
     const { history, soldSeen } = historyFromListings(listings, options.allowedConditions);
     result.soldSeen += soldSeen;
@@ -751,10 +808,14 @@ async function backfillItem(item, options) {
       result.dailyPointsUpdated += Number(posted?.dailyPointsUpdated || 0);
     }
 
-    if (listings.length < options.perPage) break;
+    if (listings.length < options.perPage) {
+      result.dailyWindowComplete = true;
+      break;
+    }
     const newestSoldDay = newestSoldListingDateKey(listings);
     if (options.aggregateMode && newestSoldDay && newestSoldDay < options.dailyCutoffDate) {
       result.stoppedAtDailyCutoff = true;
+      result.dailyWindowComplete = true;
       break;
     }
     if (page === options.maxPages) result.capped = true;
@@ -776,6 +837,7 @@ async function main() {
   const mode = String(process.env.BACKFILL_MODE || 'raw').trim().toLowerCase();
   const aggregateMode = ['aggregate', 'daily', 'efficient'].includes(mode);
   const dryRun = parseEnabled(process.env.BACKFILL_DRY_RUN, false);
+  const replaceDailyWindow = parseEnabled(process.env.BACKFILL_REPLACE_DAILY_WINDOW, false);
   if (aggregateMode && (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID)) {
     throw new Error('Aggregate mode requires CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, and D1_DATABASE_ID');
   }
@@ -837,6 +899,8 @@ async function main() {
     tradesSeen: 0,
     tradesStored: 0,
     dailyPointsUpdated: 0,
+    dailyPointsPruned: 0,
+    dailyWindowsComplete: 0,
     failed: 0,
     capped: 0,
     stoppedAtDailyCutoff: 0,
@@ -864,6 +928,7 @@ async function main() {
         historyChunkSize,
         aggregateMode,
         dryRun,
+        replaceDailyWindow,
         useTradingHistories,
         tradingHistoryMaxPages,
         tradingHistoryPerPage,
@@ -880,6 +945,8 @@ async function main() {
       summary.tradesSeen += result.tradesSeen;
       summary.tradesStored += result.tradesStored;
       summary.dailyPointsUpdated += result.dailyPointsUpdated;
+      summary.dailyPointsPruned += result.dailyPointsPruned;
+      if (result.dailyWindowComplete) summary.dailyWindowsComplete += 1;
       if (result.audit) {
         summary.auditCandidateRows += result.audit.candidateRows;
         summary.auditExistingRows += result.audit.existingRows;

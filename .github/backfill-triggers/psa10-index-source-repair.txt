@@ -1,0 +1,1 @@
+Approved correction: replace the one-year PSA10 index source data from SNKRDUNK Trading History, then rebuild with the unchanged calculation.

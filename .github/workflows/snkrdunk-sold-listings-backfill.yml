@@ -52,10 +52,9 @@ on:
       history_source:
         description: History source endpoint
         required: false
-        default: used-listings
+        default: trading-histories
         type: choice
         options:
-          - used-listings
           - trading-histories
       trading_history_per_page:
         description: Trading-history rows per page
@@ -139,7 +138,7 @@ jobs:
           BACKFILL_DAILY_DAYS: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && '365' || github.event_name == 'schedule' && '7' || github.event.inputs.daily_days || '365' }}
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
-          BACKFILL_TRADING_HISTORIES: ${{ (github.event_name == 'schedule' || github.event.inputs.history_source == 'trading-histories') && '1' || '0' }}
+          BACKFILL_TRADING_HISTORIES: '1'
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.trading_history_per_page || '12' }}
           TRADING_HISTORY_MAX_PAGES: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && '120' || github.event_name == 'schedule' && '5' || github.event.inputs.trading_history_max_pages || '120' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '1000' }}
