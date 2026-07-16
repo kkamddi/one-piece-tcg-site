@@ -33,7 +33,7 @@ jobs:
             console.log(`Resolved ${ids.length} PSA10 index component cards.`);
           '
 
-      - name: Replace index history from 2025-01-01 Trading History
+      - name: Replace complete PSA10 index history from Trading History
         env:
           COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
           MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
@@ -49,11 +49,11 @@ jobs:
           BACKFILL_REPLACE_DAILY_WINDOW: '1'
           BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: '1'
           BACKFILL_RECENT_RAW_DAYS: '30'
-          BACKFILL_DAILY_START_DATE: '2025-01-01'
+          BACKFILL_DAILY_START_DATE: '2022-06-01'
           BACKFILL_TRADING_HISTORIES: '1'
           BACKFILL_CONDITIONS: psa10
           TRADING_HISTORY_PER_PAGE: '50'
-          TRADING_HISTORY_MAX_PAGES: '400'
+          TRADING_HISTORY_MAX_PAGES: '500'
           BACKFILL_DELAY_MS: '750'
           BACKFILL_HISTORY_CHUNK_SIZE: '10'
           BACKFILL_PROGRESS_PATH: psa10-index-foundation-rebuild.jsonl

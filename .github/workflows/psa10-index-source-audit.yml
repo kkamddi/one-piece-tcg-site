@@ -15,7 +15,7 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +33,7 @@ jobs:
             console.log(`Resolved ${ids.length} PSA10 index component cards.`);
           '
 
-      - name: Audit one-year Trading History against D1
+      - name: Audit complete Trading History against D1
         env:
           COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
           MARKET_COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
@@ -49,10 +49,11 @@ jobs:
           BACKFILL_MODE: aggregate
           BACKFILL_DRY_RUN: "1"
           BACKFILL_RECENT_RAW_DAYS: "30"
-          BACKFILL_DAILY_DAYS: "365"
+          BACKFILL_DAILY_START_DATE: "2022-06-01"
+          BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
           TRADING_HISTORY_PER_PAGE: "50"
-          TRADING_HISTORY_MAX_PAGES: "120"
+          TRADING_HISTORY_MAX_PAGES: "500"
           BACKFILL_CONDITIONS: psa10
           BACKFILL_DELAY_MS: "750"
           BACKFILL_HISTORY_CHUNK_SIZE: "10"
