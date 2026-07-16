@@ -1,1 +1,1 @@
-Run the read-only PSA10 index source audit.
+Run the read-only PSA10 index source audit after the Trading History repair.
