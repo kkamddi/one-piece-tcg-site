@@ -725,7 +725,11 @@ async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, resul
   const dailyRows = buildDailyRows(dailyBuckets);
   result.dailyRowsPrepared = dailyRows.length;
   result.recentHistoryPrepared = recentHistory.length;
-  result.sourceAudit = sourceFormationAudit(dailyRows);
+  result.sourceAudits = {
+    a: sourceFormationAudit(dailyRows, 'a'),
+    psa10: sourceFormationAudit(dailyRows, 'psa10'),
+  };
+  result.sourceAudit = result.sourceAudits.psa10;
   if (options.dryRun) {
     result.audit = await auditDailyRows(item, dailyRows, options);
     return;
