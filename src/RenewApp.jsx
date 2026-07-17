@@ -4940,7 +4940,7 @@ function RenewHomeMarketIndex({ onOpen }) {
   return (
     <section className="renew-home-index-summary" aria-label="OPTCG Market Index">
       <span className="renew-home-index-label">Market Index</span>
-      <div className="renew-home-index-list">
+      <div className="renew-home-index-list" style={{ '--market-index-count': items.length }}>
         {items.map(({ option, payload }) => (
           <button key={option.key} type="button" onClick={() => onOpen(option.key)} aria-label={`${option.label} Index 바로가기`}>
             <span>{option.label}</span>

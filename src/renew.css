@@ -1950,7 +1950,7 @@
 
 .renew-home-index-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--market-index-count, 1), minmax(0, 1fr));
   margin-top: 8px;
 }
 
