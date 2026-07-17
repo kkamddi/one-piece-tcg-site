@@ -89,6 +89,7 @@ jobs:
           BACKFILL_MODE: aggregate
           BACKFILL_RECENT_RAW_DAYS: ${{ github.event.inputs.recent_days || '2' }}
           BACKFILL_DAILY_DAYS: ${{ github.event.inputs.recent_days || '2' }}
+          BACKFILL_REPLACE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.per_page || '50' }}
           TRADING_HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '1' }}

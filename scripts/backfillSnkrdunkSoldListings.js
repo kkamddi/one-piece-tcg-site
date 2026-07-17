@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
 import { buildFilteredDailyRows, medianNumber } from '../lib/market-outlier-filter.js';
+import { marketDateKeyFromTimestamp, marketTradeDateKey } from '../lib/market-trade-date.js';
 
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_COLLECTOR_URL = 'https://www.optcgkorea.com/api/market-collector';
@@ -319,8 +320,7 @@ function tradeDateTimestamp(value) {
 }
 
 function tradeDateKey(value) {
-  const timestamp = tradeDateTimestamp(value);
-  return timestamp > 0 ? new Date(timestamp).toISOString().slice(0, 10) : '';
+  return marketTradeDateKey(value);
 }
 
 function tradingHistoryDateText(row) {
@@ -470,7 +470,7 @@ function oldestTradingHistoryDateKey(rows = []) {
     .map((row) => tradeDateTimestamp(tradingHistoryDateText(row)))
     .filter((timestamp) => timestamp > 0);
   if (!timestamps.length) return '';
-  return new Date(Math.min(...timestamps)).toISOString().slice(0, 10);
+  return marketDateKeyFromTimestamp(Math.min(...timestamps));
 }
 
 async function postHistory(item, history, collectorUrl, token, rawOnly = false) {

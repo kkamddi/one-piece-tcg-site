@@ -2,6 +2,7 @@ import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
 import { collectMarketSnapshot } from './market.js';
 import { filterDailyTradePrices, medianNumber } from '../lib/market-outlier-filter.js';
+import { marketTradeDateKey } from '../lib/market-trade-date.js';
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 50;
@@ -100,26 +101,7 @@ function conditionKey(value) {
 }
 
 function parseTradeDate(value) {
-  const rawText = String(value || '').trim();
-  if (!rawText) return '';
-  if (/^\d{4}-\d{2}-\d{2}$/.test(rawText)) return rawText;
-
-  const directParsed = Date.parse(rawText);
-  if (Number.isFinite(directParsed)) return new Date(directParsed).toISOString().slice(0, 10);
-
-  const text = rawText.replace(/(\d+)(st|nd|rd|th)/gi, '$1').trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
-
-  const englishDate = text.match(/^([A-Za-z]{3,})\s+(\d{1,2}),\s+(\d{4})$/);
-  if (englishDate) {
-    const month = new Date(`${englishDate[1]} 1, 2000 UTC`).getUTCMonth();
-    if (Number.isFinite(month)) {
-      return new Date(Date.UTC(Number(englishDate[3]), month, Number(englishDate[2]))).toISOString().slice(0, 10);
-    }
-  }
-
-  const parsed = new Date(`${text} UTC`);
-  return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
+  return marketTradeDateKey(value);
 }
 
 function parsePriceAmountJpy(trade, usdToJpy) {
@@ -435,13 +417,14 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
 
       await runD1(`
         UPDATE market_recent_trades
-        SET last_seen_at = ?, raw_payload_json = ?
+        SET trade_date = ?, last_seen_at = ?, raw_payload_json = ?
         WHERE source = ?
           AND apparel_id = ?
           AND condition_key = ?
           AND trade_date_text = ?
           AND price_amount_jpy = ?
       `, [
+        day,
         now,
         rawPayload,
         item.source,
