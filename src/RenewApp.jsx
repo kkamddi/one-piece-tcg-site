@@ -390,7 +390,9 @@ function writeMarketInterestIds(userId, ids) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(getMarketInterestStorageKey(userId), JSON.stringify([...ids]));
 }
-const OFFICIAL_TOPIC_ITEMS = Array.isArray(topicsData) ? topicsData.filter((item) => !item.calendarOnly) : [];
+const OFFICIAL_TOPIC_ITEMS = Array.isArray(topicsData)
+  ? topicsData.filter((item) => !item.calendarOnly || item.calendarKind === 'release')
+  : [];
 const TOPIC_SOURCE_LABEL = {
   KR_OFFICIAL: '한국 공식',
   JP_OFFICIAL: '일본 공식'
@@ -5660,6 +5662,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const [guideTarget, setGuideTarget] = useState(null);
   const officialTopics = OFFICIAL_TOPIC_ITEMS
     .filter((item) => (item.locale || '').toUpperCase() === noticeLocale)
+    .filter((item, index, items) => !item.url || items.findIndex((candidate) => candidate.url === item.url) === index)
     .slice(0, 3);
   const supplyItems = COUPANG_PARTNER_ITEMS
     .filter((item) => supplyFilter === 'all' || item.category === supplyFilter);
@@ -5719,7 +5722,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
                       <span>{item.category}</span>
                       <time dateTime={item.date}>{item.date}</time>
                     </div>
-                    <h2>{item.title}</h2>
+                    <h2>{uiLang === 'KR' && item.titleKo ? item.titleKo : item.title}</h2>
                     <a href={item.url} target="_blank" rel="noreferrer">원문 보기</a>
                   </div>
                 </article>
