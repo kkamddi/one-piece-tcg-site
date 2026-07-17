@@ -138,8 +138,24 @@ function sqlLiteral(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
+async function insertLiteralRows(tableName, columns, rows, eventName) {
+  let written = 0;
+  for (let start = 0; start < rows.length; start += INSERT_CHUNK_SIZE) {
+    const chunk = rows.slice(start, start + INSERT_CHUNK_SIZE);
+    const values = chunk.map((row) => (
+      `(${columns.map((column) => sqlLiteral(row[column])).join(',')})`
+    )).join(',');
+    await callD1(
+      `insert into ${tableName} (${columns.join(',')}) values ${values}`
+    );
+    written += chunk.length;
+    console.log(JSON.stringify({ event: eventName, written, total: rows.length }));
+  }
+  return written;
+}
+
 async function insertStageRows(rows) {
-  const columns = [
+  return insertLiteralRows(STAGE_TABLE, [
     'source',
     'apparel_id',
     'locale',
@@ -152,20 +168,7 @@ async function insertStageRows(rows) {
     'trade_count',
     'source_count',
     'updated_at'
-  ];
-  let written = 0;
-  for (let start = 0; start < rows.length; start += INSERT_CHUNK_SIZE) {
-    const chunk = rows.slice(start, start + INSERT_CHUNK_SIZE);
-    const values = chunk.map((row) => (
-      `(${columns.map((column) => sqlLiteral(row[column])).join(',')})`
-    )).join(',');
-    await callD1(
-      `insert into ${STAGE_TABLE} (${columns.join(',')}) values ${values}`
-    );
-    written += chunk.length;
-    console.log(JSON.stringify({ event: 'stage', written, total: rows.length }));
-  }
-  return written;
+  ], rows, 'stage');
 }
 
 async function restoreBackups() {
@@ -233,16 +236,26 @@ for (const tableName of [RAW_BACKUP_TABLE, DAILY_BACKUP_TABLE, STAGE_TABLE]) {
 let repairStarted = false;
 try {
   await callD1(`
-    create table ${RAW_BACKUP_TABLE} as
-    select id, trade_date as old_trade_date,
-           date(trade_date_text, '+9 hours') as new_trade_date
-    from market_recent_trades
-    where source = '${SOURCE}'
-      and condition_key in ('a', 'psa10')
-      and trade_date_text like '____-__-__T%'
-      and date(trade_date_text, '+9 hours') is not null
-      and trade_date <> date(trade_date_text, '+9 hours')
+    create table ${RAW_BACKUP_TABLE} (
+      id integer primary key,
+      old_trade_date text,
+      new_trade_date text not null
+    )
   `);
+  const rawBackupRows = mismatches.map((trade) => ({
+    id: Number(trade.id),
+    old_trade_date: trade.trade_date,
+    new_trade_date: marketTradeDateKey(trade.trade_date_text)
+  }));
+  const rawBackupWritten = await insertLiteralRows(
+    RAW_BACKUP_TABLE,
+    ['id', 'old_trade_date', 'new_trade_date'],
+    rawBackupRows,
+    'raw-backup'
+  );
+  if (rawBackupWritten !== mismatches.length) {
+    throw new Error(`Raw backup row mismatch: ${rawBackupWritten}/${mismatches.length}`);
+  }
   await callD1(`
     create table ${DAILY_BACKUP_TABLE} as
     select * from market_chart_daily_points
@@ -273,21 +286,18 @@ try {
   repairStarted = true;
   await callD1(`
     update market_recent_trades
-    set trade_date = date(trade_date_text, '+9 hours')
-    where source = '${SOURCE}'
-      and condition_key in ('a', 'psa10')
-      and trade_date_text like '____-__-__T%'
-      and date(trade_date_text, '+9 hours') is not null
-      and trade_date <> date(trade_date_text, '+9 hours')
+    set trade_date = (
+      select backup.new_trade_date
+      from ${RAW_BACKUP_TABLE} backup
+      where backup.id = market_recent_trades.id
+    )
+    where id in (select id from ${RAW_BACKUP_TABLE})
   `);
   const remainingMismatches = Number((await queryD1(`
     select count(*) as count
-    from market_recent_trades
-    where source = '${SOURCE}'
-      and condition_key in ('a', 'psa10')
-      and trade_date_text like '____-__-__T%'
-      and date(trade_date_text, '+9 hours') is not null
-      and trade_date <> date(trade_date_text, '+9 hours')
+    from market_recent_trades trades
+    join ${RAW_BACKUP_TABLE} backup on backup.id = trades.id
+    where trades.trade_date <> backup.new_trade_date
   `))[0]?.count || 0);
   if (remainingMismatches !== 0) throw new Error(`Raw date audit failed: ${remainingMismatches}`);
 
