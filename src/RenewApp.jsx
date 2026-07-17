@@ -5035,8 +5035,8 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
         <article className="renew-float-card renew-home-news">
           <div className="renew-card-title">{getLocaleText(uiLang, '새 소식', 'Latest news', '最新情報')}</div>
           <div className="renew-home-news-list">
-            {homeNewsLinks.map((item) => (
-              <button key={item.label} type="button" onClick={() => onNavigateNews?.(item.query)}>
+            {homeNewsLinks.map((item, index) => (
+              <button key={`${item.query}-${item.description}-${index}`} type="button" onClick={() => onNavigateNews?.(item.query)}>
                 <strong>{item.label}</strong>
                 <span>{item.description}</span>
               </button>
