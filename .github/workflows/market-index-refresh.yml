@@ -22,7 +22,7 @@ on:
       index_codes:
         description: Comma-separated sector indexes to rebuild.
         required: false
-        default: "manga,premium_art,luffy"
+        default: "manga,luffy"
 
 concurrency:
   group: market-index-refresh
@@ -60,7 +60,7 @@ jobs:
           D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
           MARKET_INDEX_REBUILD_WINDOW_DAYS: ${{ github.event_name == 'workflow_run' && '3' || github.event.inputs.rebuild_window_days || '14' }}
           MARKET_INDEX_DRY_RUN: ${{ github.event_name == 'workflow_run' && '0' || github.event.inputs.dry_run == 'true' && '1' || '0' }}
-          MARKET_INDEX_CODES: ${{ github.event_name == 'workflow_run' && 'manga,premium_art,luffy' || github.event.inputs.index_codes || 'manga,premium_art,luffy' }}
+          MARKET_INDEX_CODES: ${{ github.event_name == 'workflow_run' && 'manga,luffy' || github.event.inputs.index_codes || 'manga,luffy' }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
             echo "CLOUDFLARE_API_TOKEN secret is missing."

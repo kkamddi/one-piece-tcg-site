@@ -20,7 +20,9 @@ const LEGACY_REDIRECTS = {
   '/faq/storage': '/faq',
   '/prices/collector-index': '/prices/index/manga',
   '/prices/manga-index': '/prices/index/manga',
-  '/prices/premium-art-index': '/prices/index/premium-art',
+  '/prices/waifu-index': '/prices/index/manga',
+  '/prices/premium-art-index': '/prices/index/manga',
+  '/prices/index/premium-art': '/prices/index/manga',
   '/prices/sp-index': '/prices/index/manga',
   '/prices/index/sp': '/prices/index/manga',
   '/prices/index/heroines': '/prices/index/manga',
@@ -196,7 +198,7 @@ const SEO_FIXES = {
   },
   '/prices/index': {
     title: 'OPTCG Market Index - 원피스카드 가격 지수 | Card Pone',
-    description: 'Card Pone가 추적하는 Manga, Premium Art, Luffy 원피스카드 가격 지수를 확인할 수 있습니다.',
+    description: 'Card Pone가 추적하는 Manga, Luffy 원피스카드 가격 지수를 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표, 망가카드 시세',
     schemaType: 'WebPage'
   },
@@ -325,7 +327,7 @@ const SEO_PRIMARY = {
   },
   '/prices/index': {
     title: 'OPTCG Market Index - 원피스카드 가격 지수 | 카드포네',
-    description: 'Manga, Premium Art, Luffy 카드의 가격 흐름을 동일 비중 섹터 지수로 확인할 수 있습니다.',
+    description: 'Manga, Luffy 카드의 가격 흐름을 동일 비중 섹터 지수로 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 가격 지표, 카드포네 인덱스',
     schemaType: 'WebPage'
   },
@@ -391,7 +393,7 @@ const SERVER_PAGE_CONTENT = {
     heading: '원피스카드 시세와 Market Index',
     paragraphs: [
       '카드 일련번호나 이름으로 SNKRDUNK에 매핑된 상품을 찾고 Single과 PSA10의 최근 시세, 거래 기록, 7일·1개월·1년 가격 흐름을 확인할 수 있습니다.',
-      'Market Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 이상 거래를 분리한 뒤 카드별 지수를 동일 비중 평균해 Manga, Premium Art, Luffy 섹터 흐름을 비교합니다.'
+      'Market Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 이상 거래를 분리한 뒤 카드별 지수를 동일 비중 평균해 Manga, Luffy 섹터 흐름을 비교합니다.'
     ],
     links: ['/prices/cards', '/prices/boxes', '/prices/index', '/guide/card-price']
   },
@@ -464,8 +466,9 @@ function getFixedPageSeo(normalized) {
   const indexAliases = {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
-    '/prices/premium-art-index': '/prices/index/premium-art',
-    '/prices/sp-index': '/prices/index/heroines',
+    '/prices/waifu-index': '/prices/index/manga',
+    '/prices/premium-art-index': '/prices/index/manga',
+    '/prices/sp-index': '/prices/index/manga',
     '/prices/luffy-index': '/prices/index/luffy'
   };
   const aliasTarget = indexAliases[normalized];

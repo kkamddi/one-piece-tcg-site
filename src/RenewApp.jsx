@@ -4908,7 +4908,6 @@ const MARKET_INDEX_CONDITION = 'psa10';
 
 const HOME_MARKET_INDEX_OPTIONS = [
   { key: 'manga', label: 'Manga' },
-  { key: 'premium_art', label: 'Premium Art' },
   { key: 'luffy', label: 'Luffy' },
 ];
 
@@ -8680,7 +8679,6 @@ function RenewIndexChart({ points = [] }) {
 
 const MARKET_INDEX_OPTIONS = [
   { key: 'manga', label: 'Manga', title: 'OPTCG Manga Index' },
-  { key: 'premium_art', label: 'Premium Art', title: 'OPTCG Premium Art Index' },
   { key: 'luffy', label: 'Luffy', title: 'OPTCG Luffy Index' },
 ];
 const MARKET_INDEX_COMPONENTS_PER_PAGE = 8;
@@ -8708,14 +8706,14 @@ function getMarketIndexTypeFromPath(path) {
   const aliasMap = {
     '/prices/collector-index': 'manga',
     '/prices/manga-index': 'manga',
-    '/prices/waifu-index': 'premium_art',
-    '/prices/premium-art-index': 'premium_art',
+    '/prices/waifu-index': 'manga',
+    '/prices/premium-art-index': 'manga',
     '/prices/sp-index': 'manga',
     '/prices/luffy-index': 'luffy'
   };
   if (aliasMap[path]) return aliasMap[path];
   const slug = path.startsWith('/prices/index/') ? path.slice('/prices/index/'.length) : '';
-  const legacyMap = { collector: 'manga', manga: 'manga', waifu: 'premium_art', premium: 'premium_art', 'premium-art': 'premium_art', sp: 'manga', heroines: 'manga', luffy: 'luffy' };
+  const legacyMap = { collector: 'manga', manga: 'manga', waifu: 'manga', premium: 'manga', 'premium-art': 'manga', sp: 'manga', heroines: 'manga', luffy: 'luffy' };
   return legacyMap[slug] || 'manga';
 }
 
@@ -8800,7 +8798,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
       </div>
       <div className="renew-index-sector-head">
         <span>Sector Index</span>
-        <em>Manga, Premium Art, Luffy</em>
+        <em>Manga, Luffy</em>
       </div>
       <div className="renew-index-tabs" aria-label="Market sector index type">
         {MARKET_INDEX_OPTIONS.map((option) => (
