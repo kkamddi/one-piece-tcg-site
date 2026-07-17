@@ -122,6 +122,12 @@ jobs:
           max_requests=$((10#$COLLECTOR_MAX_PAGES * 5))
           request_count=0
           done_flag=0
+          expected_total=0
+          strict_fixed_range=false
+          if [ "$use_shards" = "true" ] && [ "$COLLECTOR_SCOPE" = "all-jp" ] && [ -z "$APPAREL_IDS" ] && [ "$stop_offset" -gt 0 ]; then
+            strict_fixed_range=true
+          fi
+
           while [ "$request_count" -lt "$max_requests" ]; do
             if [ "$stop_offset" -gt 0 ] && [ "$offset" -ge "$stop_offset" ]; then
               break
@@ -132,6 +138,7 @@ jobs:
               request_limit=$((stop_offset - offset))
             fi
             request_concurrency=$base_concurrency
+            invalid_response_attempts=0
 
             while true; do
               url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${request_limit}&offset=${offset}&concurrency=${request_concurrency}&listingSnapshots=1"
@@ -143,7 +150,62 @@ jobs:
               fi
 
               if json=$(curl -fsS --retry 3 --retry-delay 15 --retry-max-time 120 --retry-all-errors --connect-timeout 20 --max-time 120 -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "$url"); then
-                break
+                request_count=$((request_count + 1))
+                if response_meta=$(node -e "
+                  const p = JSON.parse(process.argv[1]);
+                  const values = [p.offset, p.limit, p.total, p.nextOffset, p.collected, p.failed];
+                  if (!values.every(Number.isFinite)) process.exit(2);
+                  process.stdout.write([...values, p.done ? 1 : 0].join('|'));
+                " "$json"); then
+                  IFS='|' read -r response_offset response_limit response_total next_offset collected_count failed_count done_flag <<< "$response_meta"
+                  invalid_reason=""
+
+                  if [ "$response_offset" -ne "$offset" ]; then
+                    invalid_reason="response offset mismatch: requested=$offset response=$response_offset"
+                  elif [ "$response_limit" -le 0 ]; then
+                    invalid_reason="invalid response limit: $response_limit"
+                  elif [ "$response_total" -lt 0 ]; then
+                    invalid_reason="invalid response total: $response_total"
+                  elif [ "$next_offset" -lt "$offset" ]; then
+                    invalid_reason="collector moved backwards: offset=$offset next_offset=$next_offset"
+                  elif [ "$next_offset" -eq "$offset" ] && { [ "$done_flag" != "1" ] || [ "$response_total" -ne "$offset" ]; }; then
+                    invalid_reason="collector did not advance: offset=$offset next_offset=$next_offset total=$response_total done=$done_flag"
+                  elif [ "$collected_count" -ne $((next_offset - offset)) ]; then
+                    invalid_reason="collected count mismatch: offset=$offset next_offset=$next_offset collected=$collected_count"
+                  elif [ "$failed_count" -ne 0 ]; then
+                    invalid_reason="collector reported failed items: offset=$offset failed=$failed_count"
+                  fi
+
+                  if [ "$COLLECTOR_SCOPE" = "all-jp" ] && [ -z "$APPAREL_IDS" ]; then
+                    if [ "$response_total" -le 0 ]; then
+                      invalid_reason="all-jp returned an empty target set"
+                    elif [ "$expected_total" -eq 0 ]; then
+                      expected_total=$response_total
+                    elif [ "$response_total" -ne "$expected_total" ]; then
+                      invalid_reason="all-jp target total changed: expected=$expected_total response=$response_total"
+                    fi
+                  fi
+
+                  if [ "$strict_fixed_range" = "true" ] && [ "$done_flag" = "1" ] && [ "$next_offset" -lt "$stop_offset" ]; then
+                    invalid_reason="collector reported done before shard end: next_offset=$next_offset stop_offset=$stop_offset"
+                  fi
+
+                  if [ -z "$invalid_reason" ]; then
+                    break
+                  fi
+                else
+                  invalid_reason="collector returned malformed JSON metadata"
+                fi
+
+                invalid_response_attempts=$((invalid_response_attempts + 1))
+                echo "$json"
+                echo "Invalid collector response at offset=$offset ($invalid_response_attempts/5): $invalid_reason"
+                if [ "$invalid_response_attempts" -ge 5 ]; then
+                  echo "Collector response validation failed at offset=$offset."
+                  exit 1
+                fi
+              else
+                invalid_reason="collector request failed"
               fi
 
               if [ "$request_limit" -gt 25 ]; then
@@ -158,33 +220,31 @@ jobs:
               elif [ "$request_limit" -gt 1 ]; then
                 request_limit=1
                 request_concurrency=1
-              else
+              elif [ "$invalid_reason" = "collector request failed" ]; then
                 echo "Collector failed at offset=$offset after adaptive retries."
                 exit 1
               fi
-              echo "Collector unavailable at offset=$offset; retrying limit=$request_limit concurrency=$request_concurrency after cooldown."
+              echo "$invalid_reason at offset=$offset; retrying limit=$request_limit concurrency=$request_concurrency after cooldown."
               sleep 30
             done
 
-            request_count=$((request_count + 1))
             echo "$json"
-            done_flag=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.done ? '1' : '0')" "$json")
-            next_offset=$(node -e "const p=JSON.parse(process.argv[1]); console.log(p.nextOffset || 0)" "$json")
+            offset="$next_offset"
             if [ "$done_flag" = "1" ]; then
               break
             fi
-            if [ "$next_offset" -le "$offset" ]; then
-              echo "Collector did not advance: offset=$offset next_offset=$next_offset"
-              exit 1
-            fi
-            offset="$next_offset"
             sleep 3
           done
 
-          if [ "$done_flag" != "1" ] && { [ "$stop_offset" -eq 0 ] || [ "$offset" -lt "$stop_offset" ]; }; then
+          if [ "$strict_fixed_range" = "true" ] && [ "$offset" -lt "$stop_offset" ]; then
+            echo "Collector stopped before completing its fixed shard range at offset=$offset stop_offset=$stop_offset."
+            exit 1
+          fi
+          if [ "$strict_fixed_range" != "true" ] && [ "$done_flag" != "1" ] && { [ "$stop_offset" -eq 0 ] || [ "$offset" -lt "$stop_offset" ]; }; then
             echo "Collector stopped before completing its assigned range at offset=$offset."
             exit 1
           fi
+          echo "Collector coverage complete: shard=$SHARD_ID offset=$offset stop_offset=$stop_offset total=$expected_total done=$done_flag requests=$request_count"
 
   evaluate-alerts:
     name: Evaluate price alerts
