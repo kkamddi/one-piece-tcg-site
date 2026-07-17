@@ -220,3 +220,16 @@ test('does not rewrite a closed formation baseline when later trades arrive', ()
   assert.equal(after.baselineDate, before.baselineDate);
   assert.equal(after.baselinePrice, before.baselinePrice);
 });
+
+test('stops the index at the latest observed trading day by default', () => {
+  const built = buildEqualWeightedMarketIndex(config([{ apparelId: 1 }]), [
+    { ...row(1, '2025-01-01', 100), trade_count: 2 },
+    { ...row(1, '2025-01-05', 110), trade_count: 2 },
+    { ...row(1, '2025-01-10', 120), trade_count: 1 },
+    row(1, '2025-02-15', 150)
+  ]);
+
+  assert.equal(built.endDate, '2025-02-15');
+  assert.equal(built.indexPoints.at(-1).date, '2025-02-15');
+  assertEqualWeightedMarketIndex(built);
+});

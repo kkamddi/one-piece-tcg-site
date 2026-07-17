@@ -91,8 +91,7 @@ function shiftDate(dateKey, days) {
 }
 
 function buildIndexRows(indexConfig, rows) {
-  const kstToday = new Date(Date.now() + (9 * 60 * 60 * 1000)).toISOString().slice(0, 10);
-  const built = buildEqualWeightedMarketIndex(indexConfig, rows, { endDate: kstToday });
+  const built = buildEqualWeightedMarketIndex(indexConfig, rows);
   const audit = assertEqualWeightedMarketIndex(built);
   const componentStartDate = shiftDate(built.endDate, -(COMPONENT_HISTORY_DAYS - 1));
   return {
