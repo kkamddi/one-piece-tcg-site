@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { marketDateKeyFromTimestamp, marketTradeDateKey } from '../lib/market-trade-date.js';
+import {
+  marketDateKeyFromTimestamp,
+  marketDateTimeLabelFromTimestamp,
+  marketTradeDateKey
+} from '../lib/market-trade-date.js';
 
 test('keeps an explicit calendar date unchanged', () => {
   assert.equal(marketTradeDateKey('2026-07-17'), '2026-07-17');
@@ -15,4 +19,11 @@ test('groups an ISO trading timestamp by the KST and JST calendar date', () => {
 test('uses the same KST and JST boundary for numeric timestamps', () => {
   assert.equal(marketDateKeyFromTimestamp(Date.parse('2026-07-16T22:38:53Z')), '2026-07-17');
   assert.equal(marketTradeDateKey('not-a-date'), '');
+});
+
+test('formats recent trade timestamps in KST and JST', () => {
+  assert.equal(
+    marketDateTimeLabelFromTimestamp(Date.parse('2026-07-16T22:38:53Z')),
+    '07.17 07:38'
+  );
 });

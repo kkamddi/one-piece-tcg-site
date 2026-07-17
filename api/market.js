@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
+import { marketDateTimeLabelFromTimestamp } from '../lib/market-trade-date.js';
 import priceChartingMarketLinks from '../src/data/pricecharting-market-links.js';
 
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
@@ -1102,12 +1103,7 @@ function buildSeries(points = [], price = 0, source = '', options = {}) {
 }
 
 function formatSnapshotDate(timestamp) {
-  const date = new Date(timestamp);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
-  return `${month}.${day} ${hour}:${minute}`;
+  return marketDateTimeLabelFromTimestamp(timestamp);
 }
 
 function buildRecentSnapshots(points = [], price = 0, label = '', source = '') {
