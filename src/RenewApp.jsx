@@ -76,7 +76,7 @@ const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
 const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
-const MARKET_INDEX_PUBLIC_ENABLED = false;
+const MARKET_INDEX_PUBLIC_ENABLED = true;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
 
@@ -8732,7 +8732,7 @@ function isMarketIndexPath(path) {
 function RenewMarketIndex({ onOpenComponent } = {}) {
   const [payload, setPayload] = useState(null);
   const [indexType, setIndexType] = useState(() => {
-    if (typeof window === 'undefined') return 'collector';
+    if (typeof window === 'undefined') return 'manga';
     const path = normalizeSitePath(window.location.pathname);
     return getMarketIndexTypeFromPath(path);
   });

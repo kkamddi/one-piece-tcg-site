@@ -143,13 +143,6 @@ async function rebuildIndex(indexConfig) {
       const current = Number(builtRows.indexRows[index].index_value || 0);
       if (previous > 0 && current > 0) maxDailyChange = Math.max(maxDailyChange, Math.abs((current / previous) - 1) * 100);
     }
-    const suspiciousBaselines = dataComponents.filter((component) => {
-      const firstPrice = Number(component.firstObservedPrice || 0);
-      const basePrice = Number(component.basePrice || 0);
-      if (!(firstPrice > 0) || !(basePrice > 0)) return false;
-      const ratio = firstPrice / basePrice;
-      return ratio >= 1.6 || ratio <= 0.625;
-    });
     const currentRawValues = dataComponents
       .map((component) => 100 * (Number(component.series.at(-1)?.price || 0) / Number(component.basePrice || 0)))
       .filter((value) => Number.isFinite(value) && value > 0);
@@ -157,12 +150,28 @@ async function rebuildIndex(indexConfig) {
       ? currentRawValues.reduce((sum, value) => sum + value, 0) / currentRawValues.length
       : 0;
     const belowBaseCount = currentRawValues.filter((value) => value < 100).length;
-    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, raw component average ${currentRawAverage.toFixed(4)}, below base ${belowBaseCount}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}, excluded ${excludedComponents.length}, corrected initial outliers ${suspiciousBaselines.length}`);
-    for (const component of suspiciousBaselines) {
-      console.log(`${indexConfig.code}: baseline correction apparel ${component.apparelId}, first ${component.firstObservedPrice} on ${component.firstObservedDate}, baseline ${component.basePrice} on ${component.firstDate}`);
+    console.log(`${indexConfig.code}: base ${builtRows.effectiveBaseDate}, current ${last?.index_value || 0}, raw component average ${currentRawAverage.toFixed(4)}, below base ${belowBaseCount}, max daily ${maxDailyChange.toFixed(2)}%, components ${dataComponents.length}, excluded ${excludedComponents.length}`);
+    for (const component of dataComponents) {
+      const latest = component.series.at(-1) || {};
+      const individualIndex = component.basePrice > 0
+        ? Number((100 * Number(latest.price || 0) / component.basePrice).toFixed(2))
+        : 0;
+      const sourceInitialTradingDays = component.sourceSeries.slice(0, 5)
+        .map((point) => `${point.date}:${point.price}(${point.tradeCount})`)
+        .join(',');
+      const acceptedInitialTradingDays = component.rawSeries.slice(0, 5)
+        .map((point) => `${point.date}:${point.price}(${point.tradeCount})`)
+        .join(',');
+      console.log(`${indexConfig.code}: component ${component.code || component.apparelId} apparel ${component.apparelId}, source initial [${sourceInitialTradingDays}], accepted initial [${acceptedInitialTradingDays}], baseline ${component.firstDate}:${component.basePrice}, latest ${latest.date}:${latest.price}, individual ${individualIndex}, ignored ${component.ignoredObservationCount}`);
     }
     for (const component of excludedComponents) {
-      console.log(`${indexConfig.code}: excluded apparel ${component.apparelId}, first ${component.firstObservedDate || 'none'}, window end ${component.formationEndDate || 'none'}, trading days ${component.observationCount}/${component.requiredObservationCount}, trades ${component.tradeCount}/${component.requiredTradeCount}, reason ${component.reason}`);
+      const initialTradingDays = (component.initialTradingDays || [])
+        .map((point) => `${point.date}:${point.price}(${point.tradeCount})`)
+        .join(',');
+      const acceptedInitialTradingDays = (component.acceptedInitialTradingDays || [])
+        .map((point) => `${point.date}:${point.price}(${point.tradeCount})`)
+        .join(',');
+      console.log(`${indexConfig.code}: excluded apparel ${component.apparelId}, source initial [${initialTradingDays}], accepted initial [${acceptedInitialTradingDays}], trading days ${component.observationCount}/${component.requiredObservationCount}, trades ${component.tradeCount}/${component.requiredTradeCount}, ignored ${component.ignoredObservationCount}, reason ${component.reason}`);
     }
     return;
   }
@@ -170,7 +179,7 @@ async function rebuildIndex(indexConfig) {
   await queryD1(
     `insert or replace into market_indexes (code, name, base_date, base_value, description, updated_at)
      values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from a bounded 30-day formation baseline, composition-neutral SNKRDUNK component indexes v5`]
+    [indexConfig.code, indexConfig.name, builtRows.effectiveBaseDate, indexConfig.baseValue, `${indexConfig.name} from the equal-weight arithmetic mean of PSA10 component indexes v6`]
   );
   await queryD1('delete from market_index_components where index_code = ?', [indexConfig.code]);
   await insertRows('market_index_components', [

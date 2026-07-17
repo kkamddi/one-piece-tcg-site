@@ -2,7 +2,15 @@ import { appendFile } from 'node:fs/promises';
 import fs from 'node:fs';
 import marketCards from '../src/data/market-cards.js';
 import cardMarketLinks from '../src/data/card-market-links.js';
-import { buildFilteredDailyRows, medianNumber } from '../lib/market-outlier-filter.js';
+import {
+  auditFilteredDailyCoverage,
+  buildFilteredDailyRows,
+  medianNumber
+} from '../lib/market-outlier-filter.js';
+import {
+  buildInitialPriceFormationSeries,
+  filterUnsupportedObservedPricePoints
+} from '../lib/market-index-chain.js';
 import { marketDateKeyFromTimestamp, marketTradeDateKey } from '../lib/market-trade-date.js';
 
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
@@ -551,44 +559,39 @@ function buildUnfilteredDailyRows(dailyBuckets) {
 }
 
 function sourceFormationAudit(rows, condition = 'psa10') {
-  const observed = rows
+  const sourceObserved = rows
     .filter((row) => row.condition_key === condition)
-    .sort((a, b) => a.point_date.localeCompare(b.point_date));
-  if (!observed.length) return null;
+    .map((row) => ({
+      date: row.point_date,
+      price: Number(row.median_price_jpy || 0),
+      tradeCount: Number(row.trade_count || 0)
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (!sourceObserved.length) return null;
 
-  let formation = null;
-  for (const point of observed) {
-    const end = new Date(`${point.point_date}T00:00:00Z`);
-    end.setUTCDate(end.getUTCDate() + 29);
-    const endDate = end.toISOString().slice(0, 10);
-    const window = observed.filter((row) => row.point_date >= point.point_date && row.point_date <= endDate);
-    const tradeCount = window.reduce((sum, row) => sum + Number(row.trade_count || 0), 0);
-    if (window.length < 3 || tradeCount < 5) continue;
-    const prices = window.map((row) => Number(row.median_price_jpy || 0)).sort((a, b) => a - b);
-    const middle = Math.floor(prices.length / 2);
-    const baselinePrice = prices.length % 2
-      ? prices[middle]
-      : Math.round((prices[middle - 1] + prices[middle]) / 2);
-    formation = {
-      startDate: point.point_date,
-      endDate,
-      tradingDays: window.length,
-      tradeCount,
-      baselinePrice,
-    };
-    break;
-  }
-
+  const observed = filterUnsupportedObservedPricePoints(sourceObserved);
+  const baseline = buildInitialPriceFormationSeries(observed);
   const latest = observed.at(-1);
   return {
-    earliestDate: observed[0].point_date,
-    latestDate: latest.point_date,
+    sourceEarliestDate: sourceObserved[0].date,
+    sourceEarliestPrice: sourceObserved[0].price,
+    earliestDate: observed[0]?.date || '',
+    latestDate: latest?.date || '',
     tradingDays: observed.length,
-    tradeCount: observed.reduce((sum, row) => sum + Number(row.trade_count || 0), 0),
-    latestPrice: Number(latest.median_price_jpy || 0),
-    formation,
-    individualIndex: formation?.baselinePrice > 0
-      ? Number((100 * Number(latest.median_price_jpy || 0) / formation.baselinePrice).toFixed(2))
+    tradeCount: observed.reduce((sum, row) => sum + Number(row.tradeCount || 0), 0),
+    ignoredTradingDays: sourceObserved.length - observed.length,
+    initialTradingDays: observed.slice(0, 5),
+    latestPrice: Number(latest?.price || 0),
+    formation: baseline.series.length ? {
+      startDate: baseline.firstObservedDate,
+      endDate: baseline.baselineDate,
+      tradingDays: baseline.supportedObservationCount,
+      tradeCount: baseline.supportedTradeCount,
+      baselinePrice: baseline.baselinePrice
+    } : null,
+    exclusionReason: baseline.reason,
+    individualIndex: baseline.baselinePrice > 0 && latest?.price > 0
+      ? Number((100 * latest.price / baseline.baselinePrice).toFixed(2))
       : null,
   };
 }
@@ -744,6 +747,7 @@ async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, resul
   result.rawDailyRowsPrepared = rawDailyRows.length;
   result.dailyRowsPrepared = dailyRows.length;
   result.recentHistoryPrepared = recentHistory.length;
+  result.semanticAudit = auditFilteredDailyCoverage(rawDailyRows, dailyRows);
   result.rawSourceAudits = {
     a: sourceFormationAudit(rawDailyRows, 'a'),
     psa10: sourceFormationAudit(rawDailyRows, 'psa10'),
@@ -753,6 +757,13 @@ async function finalizeAggregateHistory(item, dailyBuckets, recentHistory, resul
     psa10: sourceFormationAudit(dailyRows, 'psa10'),
   };
   result.sourceAudit = result.sourceAudits.psa10;
+  if (!result.semanticAudit.valid) {
+    const reasons = result.semanticAudit.conditions
+      .filter((item) => !item.valid)
+      .map((item) => `${item.conditionKey}:${item.reasons.join('+')}`)
+      .join(',');
+    throw new Error(`Daily history semantic audit failed (${reasons})`);
+  }
   if (options.dryRun) {
     result.audit = await auditDailyRows(item, dailyRows, options);
     return;

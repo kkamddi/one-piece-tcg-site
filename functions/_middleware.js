@@ -18,11 +18,12 @@ const LEGACY_REDIRECTS = {
   '/faq/rarity': '/faq',
   '/faq/start': '/faq',
   '/faq/storage': '/faq',
-  '/prices/collector-index': '/prices/index',
+  '/prices/collector-index': '/prices/index/manga',
   '/prices/manga-index': '/prices/index/manga',
   '/prices/premium-art-index': '/prices/index/premium-art',
-  '/prices/sp-index': '/prices/index/heroines',
-  '/prices/index/sp': '/prices/index/heroines',
+  '/prices/sp-index': '/prices/index/manga',
+  '/prices/index/sp': '/prices/index/manga',
+  '/prices/index/heroines': '/prices/index/manga',
   '/prices/luffy-index': '/prices/index/luffy'
 };
 
@@ -101,7 +102,7 @@ const ROUTE_SEO = {
     keywords: '원피스카드 박스 시세, 원피스카드 박스 가격, 부스터 박스'
   },
   '/prices/index': {
-    title: 'OPTCG Collector Index | Card Pone',
+    title: 'OPTCG Market Index | Card Pone',
     description: 'Card Pone가 추적하는 원피스카드 대표 지수와 하위 섹터 지수를 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표'
   },
@@ -194,8 +195,8 @@ const SEO_FIXES = {
     schemaType: 'CollectionPage'
   },
   '/prices/index': {
-    title: 'OPTCG Collector Index - 원피스카드 가격 지수 | Card Pone',
-    description: 'Card Pone가 추적하는 원피스카드 대표 가격 지수와 Manga, Premium Art, Heroines, Luffy 하위 지수를 확인할 수 있습니다.',
+    title: 'OPTCG Market Index - 원피스카드 가격 지수 | Card Pone',
+    description: 'Card Pone가 추적하는 Manga, Premium Art, Luffy 원피스카드 가격 지수를 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 투자 지표, 망가카드 시세',
     schemaType: 'WebPage'
   },
@@ -306,7 +307,7 @@ const SEO_PRIMARY = {
   },
   '/prices': {
     title: '원피스카드 시세 - 카드 가격·박스 가격·인덱스 | 카드포네',
-    description: '원피스카드 싱글 카드 시세, 박스 가격, 최근 거래 기록, 가격 그래프와 OPTCG Collector Index를 확인할 수 있습니다.',
+    description: '원피스카드 싱글 카드 시세, 박스 가격, 최근 거래 기록, 가격 그래프와 OPTCG Market Index를 확인할 수 있습니다.',
     keywords: '원피스카드 시세, 원피스카드 가격, 원피스카드 박스 시세, 카드포네 시세, SNKRDUNK 원피스카드',
     schemaType: 'CollectionPage'
   },
@@ -323,8 +324,8 @@ const SEO_PRIMARY = {
     schemaType: 'CollectionPage'
   },
   '/prices/index': {
-    title: 'OPTCG Collector Index - 원피스카드 가격 지수 | 카드포네',
-    description: '대표 원피스카드 가격 흐름을 Collector Index와 Manga, Premium Art, Heroines, Luffy 하위 지수로 확인할 수 있습니다.',
+    title: 'OPTCG Market Index - 원피스카드 가격 지수 | 카드포네',
+    description: 'Manga, Premium Art, Luffy 카드의 가격 흐름을 동일 비중 섹터 지수로 확인할 수 있습니다.',
     keywords: 'OPTCG Index, 원피스카드 지수, 원피스카드 가격 지표, 카드포네 인덱스',
     schemaType: 'WebPage'
   },
@@ -374,7 +375,7 @@ const SERVER_PAGE_CONTENT = {
     heading: '원피스카드 도감과 시세를 한곳에서',
     paragraphs: [
       'Card Pone은 한글판과 일본판 원피스카드를 검색하고, 보유 카드와 위시리스트를 관리하며, 카드별 시세 흐름을 확인할 수 있는 수집 도구입니다.',
-      '카드 시세는 공개 시장 데이터를 정리해 조건별 최근 거래와 기간별 흐름으로 제공하며, Collector Index는 PSA10 거래 데이터가 있는 구성 종목의 일별 변화를 연결해 보여줍니다.'
+      '카드 시세는 공개 시장 데이터를 정리해 조건별 최근 거래와 기간별 흐름으로 제공하며, Market Index는 PSA10 거래 데이터가 있는 구성 종목의 개별 지수를 동일 비중 평균해 보여줍니다.'
     ],
     links: ['/cards', '/prices', '/guide', '/shops']
   },
@@ -387,10 +388,10 @@ const SERVER_PAGE_CONTENT = {
     links: ['/cards/jp', '/cards/kr', '/prices', '/guide/card-catalog']
   },
   '/prices': {
-    heading: '원피스카드 시세와 Collector Index',
+    heading: '원피스카드 시세와 Market Index',
     paragraphs: [
       '카드 일련번호나 이름으로 SNKRDUNK에 매핑된 상품을 찾고 Single과 PSA10의 최근 시세, 거래 기록, 7일·1개월·1년 가격 흐름을 확인할 수 있습니다.',
-      'Collector Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 비정상적인 묶음 거래와 일시적인 급등락을 완화한 뒤 종목별 수익률을 연결해 시장 흐름을 비교합니다.'
+      'Market Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 이상 거래를 분리한 뒤 카드별 지수를 동일 비중 평균해 Manga, Premium Art, Luffy 섹터 흐름을 비교합니다.'
     ],
     links: ['/prices/cards', '/prices/boxes', '/prices/index', '/guide/card-price']
   },
