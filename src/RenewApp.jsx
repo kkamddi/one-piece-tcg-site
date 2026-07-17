@@ -76,6 +76,7 @@ const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
 const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
+const MARKET_INDEX_PUBLIC_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
 
@@ -4658,7 +4659,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
               <strong>{psa10Count}</strong>
             </button>
           </div>
-          <RenewHomeMarketIndex onOpen={onOpenIndex} />
+          {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
         </article>
 
         <article className="renew-float-card renew-home-news">
@@ -9201,12 +9202,12 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const [homeTab, setHomeTab] = useState(() => {
     if (typeof window === 'undefined') return 'box';
     const path = normalizeSitePath(window.location.pathname);
-    if (isMarketIndexPath(path)) return 'index';
+    if (MARKET_INDEX_PUBLIC_ENABLED && isMarketIndexPath(path)) return 'index';
     if (path.startsWith('/prices/product/') || path.startsWith('/prices/card/')) return 'card';
     if (path.startsWith('/prices/box/')) return 'box';
     if (path === '/prices/cards') return 'card';
     if (path === '/prices/boxes') return 'box';
-    return new URLSearchParams(window.location.search).get('tab') === 'index' ? 'index' : 'box';
+    return MARKET_INDEX_PUBLIC_ENABLED && new URLSearchParams(window.location.search).get('tab') === 'index' ? 'index' : 'box';
   });
   const [candidates, setCandidates] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -9607,9 +9608,9 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
             <div className="renew-market-home-tabs">
               <button type="button" className={homeTab === 'box' ? 'is-active' : ''} onClick={() => setHomeTab('box')}>{t('marketHomeBoxTab')}</button>
               <button type="button" className={homeTab === 'card' ? 'is-active' : ''} onClick={() => setHomeTab('card')}>{t('marketHomeCardTab')}</button>
-              <button type="button" className={homeTab === 'index' ? 'is-active' : ''} onClick={() => setHomeTab('index')}>Index</button>
+              {MARKET_INDEX_PUBLIC_ENABLED ? <button type="button" className={homeTab === 'index' ? 'is-active' : ''} onClick={() => setHomeTab('index')}>Index</button> : null}
             </div>
-            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : <RenewMarketIndex onOpenComponent={openMarketIndexComponent} />}
+            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : MARKET_INDEX_PUBLIC_ENABLED ? <RenewMarketIndex onOpenComponent={openMarketIndexComponent} /> : <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} />}
           </>
         ) : null}
 
