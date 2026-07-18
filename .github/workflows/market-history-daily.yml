@@ -14,7 +14,7 @@ on:
       max_pages:
         description: Trading History pages per card
         required: false
-        default: "1"
+        default: "2"
       recent_days:
         description: Recent days retained and rebuilt during this run
         required: false
@@ -90,9 +90,10 @@ jobs:
           BACKFILL_RECENT_RAW_DAYS: ${{ github.event.inputs.recent_days || '2' }}
           BACKFILL_DAILY_DAYS: ${{ github.event.inputs.recent_days || '2' }}
           BACKFILL_REPLACE_DAILY_WINDOW: "1"
+          BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.per_page || '50' }}
-          TRADING_HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '1' }}
+          TRADING_HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '2' }}
           BACKFILL_CONDITIONS: ${{ github.event.inputs.conditions || 'a,psa10' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '750' }}
           BACKFILL_HISTORY_CHUNK_SIZE: "20"
