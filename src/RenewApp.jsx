@@ -747,6 +747,8 @@ const PARTNER_AD_ITEMS = [
     bodyEn: '2F, 40, Yeonnam-ro 3-gil, Mapo-gu, Seoul',
     metaKr: 'Mon-Sun 11:00~22:00',
     metaEn: 'Mon-Sun 11:00~22:00',
+    sido: '서울',
+    gungu: '마포구',
     imageUrl: '/partners/the-card-room.png',
     actions: [
       { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://map.naver.com/p/entry/place/2096216680' },
@@ -764,6 +766,8 @@ const PARTNER_AD_ITEMS = [
     bodyEn: 'B2 B212, 95 Hangang-daero, Yongsan',
     metaKr: 'Mon-Sun 14:00~21:00',
     metaEn: 'Mon-Sun 14:00~21:00',
+    sido: '서울',
+    gungu: '용산구',
     imageUrl: '/partners/card-sungji.png',
     actions: [
       { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://naver.me/xQe4VQum' },
@@ -787,6 +791,18 @@ const PARTNER_SHOP_NEWS = [
     priority: 1
   }
 ];
+
+function getPartnerShopRows(uiLang = 'KR') {
+  return PARTNER_AD_ITEMS.map((item) => ({
+    name: uiLang === 'EN' ? item.titleEn : item.titleKr,
+    address: uiLang === 'EN' ? item.bodyEn : item.bodyKr,
+    sido: item.sido,
+    gungu: item.gungu,
+    sourceType: 'partner',
+    sourceLabel: getLocaleText(uiLang, '카드숍', 'Card Shop', 'カードショップ'),
+    naverMapUrl: item.actions?.find((action) => /map\.naver\.com|naver\.me/i.test(action.href))?.href || ''
+  }));
+}
 
 function getPartnerShopByKey(key) {
   return PARTNER_AD_ITEMS.find((item) => item.key === key) || null;
@@ -2196,6 +2212,7 @@ const UI_TEXT = {
     allShops: '전체 매장',
     officialShop: '공인점포',
     searchShop: '취급점포',
+    partnerShop: '카드숍',
     allRegions: '전체 지역',
     allDistricts: '전체 시군구',
     shopSearchPlaceholder: '매장명 또는 주소 검색',
@@ -2310,6 +2327,7 @@ const UI_TEXT = {
     allShops: 'All Shops',
     officialShop: 'Certified',
     searchShop: 'Retailers',
+    partnerShop: 'Card Shops',
     allRegions: 'All Regions',
     allDistricts: 'All Districts',
     shopSearchPlaceholder: 'Search shop name or address',
@@ -2424,6 +2442,7 @@ const UI_TEXT = {
     allShops: '全店舗',
     officialShop: '公認店',
     searchShop: '取扱店',
+    partnerShop: 'カードショップ',
     allRegions: 'すべての地域',
     allDistricts: 'すべての市区町村',
     shopSearchPlaceholder: '店舗名または住所で検索',
@@ -10541,11 +10560,31 @@ function getShopMapLinks(shop) {
   const naverKeyword = encodeURIComponent(shop?.name || '');
   const keyword = encodeURIComponent([shop?.name, shop?.address].filter(Boolean).join(' '));
   return {
-    naver: `https://map.naver.com/p/search/${naverKeyword}`,
-    kakao: hasCoords
+    naver: shop?.naverMapUrl || `https://map.naver.com/p/search/${naverKeyword}`,
+    kakao: shop?.kakaoMapUrl || (hasCoords
       ? `https://map.kakao.com/link/map/${encodeURIComponent(shop?.name || '매장')},${lat},${lng}`
-      : `https://map.kakao.com/?q=${keyword}`
+      : `https://map.kakao.com/?q=${keyword}`)
   };
+}
+
+function filterPartnerShopRows(items, { sido, gungu, query }) {
+  const keyword = String(query || '').trim().toLowerCase();
+  return items.filter((shop) => {
+    const matchesSido = !sido || sido === '전체' || shop.sido === sido;
+    const matchesGungu = !gungu || gungu === '전체' || shop.gungu === gungu;
+    const matchesQuery = !keyword || [shop.name, shop.address, shop.sido, shop.gungu]
+      .some((value) => String(value || '').toLowerCase().includes(keyword));
+    return matchesSido && matchesGungu && matchesQuery;
+  });
+}
+
+function mergeShopRows(items) {
+  const unique = new Map();
+  items.forEach((shop) => {
+    const key = `${String(shop?.name || '').trim().toLowerCase()}|${String(shop?.address || '').trim().toLowerCase()}`;
+    if (!unique.has(key)) unique.set(key, shop);
+  });
+  return [...unique.values()];
 }
 
 function getDistanceKm(from, shop) {
@@ -10651,6 +10690,7 @@ function RenewShops({ uiLang }) {
   const [userPosition, setUserPosition] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
+  const partnerShopRows = useMemo(() => getPartnerShopRows(uiLang), [uiLang]);
 
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'shops') return;
@@ -10658,12 +10698,52 @@ function RenewShops({ uiLang }) {
   }, [type, sido, gungu, draftQuery, query]);
 
   useEffect(() => {
-    fetchShopRegions(type, sido).then(setRegions).catch(() => setRegions({ sidos: [], gungus: [] }));
-  }, [type, sido]);
+    let cancelled = false;
+    const partnerRows = type === '' || type === 'partner' ? partnerShopRows : [];
+    if (type === 'partner') {
+      const sidos = [...new Set(partnerRows.map((shop) => shop.sido).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+      const gungus = !sido || sido === '전체'
+        ? []
+        : [...new Set(partnerRows.filter((shop) => shop.sido === sido).map((shop) => shop.gungu).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+      setRegions({ sidos, gungus });
+      return undefined;
+    }
+    fetchShopRegions(type, sido)
+      .then((nextRegions) => {
+        if (cancelled) return;
+        const sidos = [...new Set([...(nextRegions?.sidos || []), ...partnerRows.map((shop) => shop.sido).filter(Boolean)])].sort((a, b) => a.localeCompare(b, 'ko'));
+        const partnerGungus = !sido || sido === '전체' ? [] : partnerRows.filter((shop) => shop.sido === sido).map((shop) => shop.gungu).filter(Boolean);
+        const gungus = [...new Set([...(nextRegions?.gungus || []), ...partnerGungus])].sort((a, b) => a.localeCompare(b, 'ko'));
+        setRegions({ sidos, gungus });
+      })
+      .catch(() => {
+        if (!cancelled) setRegions({ sidos: [], gungus: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [type, sido, partnerShopRows]);
 
   useEffect(() => {
-    fetchShops({ type, sido, gungu, q: query }).then((items) => setShops(Array.isArray(items) ? items : []));
-  }, [type, sido, gungu, query]);
+    let cancelled = false;
+    const partnerRows = type === '' || type === 'partner'
+      ? filterPartnerShopRows(partnerShopRows, { sido, gungu, query })
+      : [];
+    if (type === 'partner') {
+      setShops(partnerRows);
+      return undefined;
+    }
+    fetchShops({ type, sido, gungu, q: query })
+      .then((items) => {
+        if (!cancelled) setShops(mergeShopRows([...(Array.isArray(items) ? items : []), ...partnerRows]));
+      })
+      .catch(() => {
+        if (!cancelled) setShops(partnerRows);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [type, sido, gungu, query, partnerShopRows]);
 
   const displayedShops = useMemo(() => {
     if (!userPosition) return shops;
@@ -10715,10 +10795,11 @@ function RenewShops({ uiLang }) {
           <a href="/shops/partners" onClick={() => rememberCurrentAppView()}>{uiLang === 'EN' ? 'View' : '보기'}</a>
         </div>
         <div className="renew-shop-filters">
-          <select value={type} onChange={(event) => setType(event.target.value)}>
+          <select value={type} onChange={(event) => { setType(event.target.value); setSido('전체'); setGungu('전체'); }}>
             <option value="">{t('allShops')}</option>
             <option value="official">{t('officialShop')}</option>
             <option value="general">{t('searchShop')}</option>
+            <option value="partner">{t('partnerShop')}</option>
           </select>
           <select value={sido} onChange={(event) => { setSido(event.target.value); setGungu('전체'); }}>
             <option value="전체">{t('allRegions')}</option>
