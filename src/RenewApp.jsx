@@ -9712,7 +9712,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, onRequireLogin, uiLang }) {
+function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const savedViewState = getAppHistoryState().marketViewState || {};
   const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
@@ -9800,7 +9800,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     }
     resetMarketHomeFromLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialCode, initialApparelId]);
+  }, [initialCode, initialApparelId, routeRevision]);
 
   useEffect(() => {
     const handleMarketPopState = () => {
@@ -10025,7 +10025,10 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     setCode(nextCode);
     setMarketProductLocale(nextLocale);
     if (typeof window !== 'undefined') {
-      pushAppHistory(getMarketIndexComponentHref(item));
+      pushAppHistory(getMarketIndexComponentHref(item), {
+        marketReturnUrl: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+        marketReturnContext: 'index'
+      });
     }
     searchMarket(nextCode || String(nextApparelId), nextApparelId, nextLocale);
     window.setTimeout(() => {
@@ -10051,6 +10054,25 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
       }
       marketCandidateRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
+  }
+
+  function returnFromMarketDetail() {
+    if (candidates.length > 1) {
+      returnToMarketCandidates();
+      return;
+    }
+    const currentState = getAppHistoryState();
+    if (currentState.cardPoneInternal) {
+      window.history.back();
+      return;
+    }
+    const fallbackUrl = currentState.marketReturnUrl || getLocalizedPagePath('prices', uiLang);
+    replaceAppHistoryState({
+      cardPoneInternal: false,
+      marketReturnUrl: null,
+      marketReturnContext: null
+    }, fallbackUrl);
+    resetMarketHomeFromLocation();
   }
 
   async function mapCandidateToInitialCard(event, item) {
@@ -10216,11 +10238,11 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
         {selected ? (
           <div className="renew-market-detail" ref={marketDetailRef}>
-            {candidates.length > 1 ? (
-              <button type="button" className="renew-market-detail-back" onClick={returnToMarketCandidates}>
-                ← {t('reselectVariant')}
-              </button>
-            ) : null}
+            <button type="button" className="renew-market-detail-back" onClick={returnFromMarketDetail}>
+              ← {candidates.length > 1
+                ? t('reselectVariant')
+                : getLocaleText(uiLang, '이전 화면', 'Back', '前の画面')}
+            </button>
             <div className="renew-market-card">
               <img src={selected.previewImageUrl || '/card-placeholder.svg'} alt={selected.name} onError={placeholderImage} />
               <div>
@@ -10801,6 +10823,7 @@ export default function RenewApp() {
   const [deckComingSoonOpen, setDeckComingSoonOpen] = useState(false);
   const [newsComingSoonOpen, setNewsComingSoonOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [routeRevision, setRouteRevision] = useState(0);
   const internalNavigationRef = useRef(false);
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
@@ -10876,6 +10899,7 @@ export default function RenewApp() {
 
   useEffect(() => {
     const handlePopState = (event) => {
+      setRouteRevision((value) => value + 1);
       internalNavigationRef.current = Boolean(event.state?.cardPoneInternal);
       const routeLocale = getPathLocale(window.location.pathname);
       if (routeLocale) setUiLang(routeLocale);
@@ -11298,6 +11322,7 @@ export default function RenewApp() {
           initialCode={marketInitialCode}
           initialApparelId={marketInitialApparelId}
           initialCardId={marketInitialCardId}
+          routeRevision={routeRevision}
           onRequireLogin={() => handleAuthClick('login')}
           uiLang={uiLang}
         />
