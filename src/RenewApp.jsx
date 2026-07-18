@@ -2527,6 +2527,28 @@ function getLocalizedPagePath(page, uiLang = 'KR') {
   return localizeAppPath(PAGE_PATHS[page] || '/', uiLang);
 }
 
+function getAppHistoryState() {
+  return typeof window !== 'undefined' && window.history.state && typeof window.history.state === 'object'
+    ? window.history.state
+    : {};
+}
+
+function replaceAppHistoryState(patch = {}, url = window.location.href) {
+  if (typeof window === 'undefined') return;
+  window.history.replaceState({ ...getAppHistoryState(), ...patch }, '', url);
+}
+
+function rememberCurrentAppView(patch = {}) {
+  if (typeof window === 'undefined') return;
+  replaceAppHistoryState({ cardPoneScrollY: window.scrollY || 0, ...patch });
+}
+
+function pushAppHistory(url, state = {}) {
+  if (typeof window === 'undefined') return;
+  rememberCurrentAppView();
+  window.history.pushState({ cardPoneInternal: true, ...state }, '', url);
+}
+
 function getRouteSeoPage(pathname = '/') {
   const path = getAppPath(pathname);
   if (PATH_PAGES[path]) return PATH_PAGES[path];
@@ -5156,7 +5178,7 @@ function RenewPartnerAdSection({ uiLang }) {
                 </div>
               ) : null}
               <div className="renew-partner-ad-actions" style={{ '--partner-action-count': shopActions.length + 1 }}>
-                <a href={getPartnerShopUrl(item)}>
+                <a href={getPartnerShopUrl(item)} onClick={() => rememberCurrentAppView()}>
                   <MobileNavIcon type="details" />
                   <span>{isEn ? 'Details' : '상세'}</span>
                 </a>
@@ -5199,7 +5221,7 @@ function RenewPartnerShopSeoPage({ uiLang }) {
 
   const renderShopCard = (item) => (
     <article key={item.key} className="renew-partner-seo-card">
-      <a className="renew-partner-seo-card-link" href={getPartnerShopUrl(item)}>
+      <a className="renew-partner-seo-card-link" href={getPartnerShopUrl(item)} onClick={() => rememberCurrentAppView()}>
         {item.imageUrl ? <img src={item.imageUrl} alt={item.titleEn || item.titleKr} loading="lazy" /> : null}
         <div>
           <small>{isEn ? 'Partner card shop' : '제휴 카드샵'}</small>
@@ -5750,7 +5772,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
         {showOriginalTitle ? <small className="renew-calendar-event-original" lang="ja">{event.title}</small> : null}
         <small className="renew-calendar-event-date">{event.endDate ? `${event.date} - ${event.endDate}` : event.date} · {event.category}</small>
       </div>
-      {event.url ? <a href={event.url} target={event.url.startsWith('http') ? '_blank' : undefined} rel={event.url.startsWith('http') ? 'noreferrer' : undefined}>{actionLabel}</a> : null}
+      {event.url ? <a href={event.url} target={event.url.startsWith('http') ? '_blank' : undefined} rel={event.url.startsWith('http') ? 'noreferrer' : undefined} onClick={() => { if (!event.url.startsWith('http')) rememberCurrentAppView(); }}>{actionLabel}</a> : null}
     </article>
   );
 }
@@ -5760,11 +5782,17 @@ function RenewCalendar({ uiLang }) {
   const isJp = uiLang === 'JP';
   const dateLocale = isJp ? 'ja-JP' : isEn ? 'en-US' : 'ko-KR';
   const todayKey = getCalendarTodayKey();
-  const [monthKey, setMonthKey] = useState(todayKey.slice(0, 7));
-  const [selectedDate, setSelectedDate] = useState(todayKey);
-  const [localeFilter, setLocaleFilter] = useState('ALL');
-  const [kindFilter, setKindFilter] = useState('all');
+  const savedViewState = getAppHistoryState().calendarViewState || {};
+  const [monthKey, setMonthKey] = useState(() => /^\d{4}-\d{2}$/.test(savedViewState.monthKey || '') ? savedViewState.monthKey : todayKey.slice(0, 7));
+  const [selectedDate, setSelectedDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(savedViewState.selectedDate || '') ? savedViewState.selectedDate : todayKey);
+  const [localeFilter, setLocaleFilter] = useState(() => ['ALL', 'KR', 'JP'].includes(savedViewState.localeFilter) ? savedViewState.localeFilter : 'ALL');
+  const [kindFilter, setKindFilter] = useState(() => ['all', 'release', 'event', 'notice'].includes(savedViewState.kindFilter) ? savedViewState.kindFilter : 'all');
   const [boxes, setBoxes] = useState(boxMarketItems);
+
+  useEffect(() => {
+    if (getPageFromPath(window.location.pathname) !== 'calendar') return;
+    replaceAppHistoryState({ calendarViewState: { monthKey, selectedDate, localeFilter, kindFilter } });
+  }, [monthKey, selectedDate, localeFilter, kindFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -5912,7 +5940,7 @@ function RenewCalendar({ uiLang }) {
               {highlightedEvents.map((event) => {
                 const external = event.url?.startsWith('http');
                 return (
-                  <a key={`highlight-${event.id}`} href={event.url || '#'} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+                  <a key={`highlight-${event.id}`} href={event.url || '#'} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined} onClick={() => { if (!external) rememberCurrentAppView(); }}>
                     <div>
                       <time dateTime={event.date}>{event.date.slice(5).replace('-', '.')}</time>
                       <span>{event.locale} · {event.kind === 'release' ? (isJp ? '発売' : isEn ? 'Release' : '발매') : (isJp ? '公式情報' : isEn ? 'Official news' : '공식 소식')}</span>
@@ -6012,6 +6040,7 @@ function RenewCalendar({ uiLang }) {
 function RenewNews({ uiLang, onOpenCalendar }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
+  const savedViewState = getAppHistoryState().newsViewState || {};
   const initialParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const initialPath = typeof window !== 'undefined' ? getAppPath(window.location.pathname) : '/news';
   const isCardStorageGuide = initialPath === '/guide/card-storage';
@@ -6032,10 +6061,15 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             : '';
   const initialSection = initialRouteState.section || routeSection || initialParams.get('section') || 'all';
   const initialLocale = (initialParams.get('locale') || (isJp ? 'JP' : 'KR')).toUpperCase();
-  const [newsFilter, setNewsFilter] = useState(NEWS_FILTERS.some((item) => item.id === initialSection) ? initialSection : 'all');
-  const [noticeLocale, setNoticeLocale] = useState(initialLocale === 'JP' ? 'JP' : 'KR');
-  const [supplyFilter, setSupplyFilter] = useState('all');
-  const [guideQaMode, setGuideQaMode] = useState(initialRouteState.mode === 'qa' || initialPath === '/faq' || initialParams.get('mode') === 'qa' ? 'qa' : 'guide');
+  const [newsFilter, setNewsFilter] = useState(() => {
+    const candidate = savedViewState.newsFilter || initialSection;
+    return NEWS_FILTERS.some((item) => item.id === candidate) ? candidate : 'all';
+  });
+  const [noticeLocale, setNoticeLocale] = useState(() => ['KR', 'JP'].includes(savedViewState.noticeLocale) ? savedViewState.noticeLocale : (initialLocale === 'JP' ? 'JP' : 'KR'));
+  const [supplyFilter, setSupplyFilter] = useState(() => savedViewState.supplyFilter || 'all');
+  const [guideQaMode, setGuideQaMode] = useState(() => ['guide', 'qa'].includes(savedViewState.guideQaMode)
+    ? savedViewState.guideQaMode
+    : (initialRouteState.mode === 'qa' || initialPath === '/faq' || initialParams.get('mode') === 'qa' ? 'qa' : 'guide'));
   const [guideTarget, setGuideTarget] = useState(null);
   const officialTopics = OFFICIAL_TOPIC_ITEMS
     .filter((item) => (item.locale || '').toUpperCase() === noticeLocale)
@@ -6054,6 +6088,10 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   useEffect(() => {
     if (isJp) setNoticeLocale('JP');
   }, [isJp]);
+  useEffect(() => {
+    if (getPageFromPath(window.location.pathname) !== 'news') return;
+    replaceAppHistoryState({ newsViewState: { newsFilter, noticeLocale, supplyFilter, guideQaMode } });
+  }, [newsFilter, noticeLocale, supplyFilter, guideQaMode]);
   return (
     <main className="renew-main renew-news-main">
       <a className="renew-news-calendar-link" href={getLocalizedPagePath('calendar', uiLang)} onClick={(event) => { event.preventDefault(); onOpenCalendar?.(); }}>
@@ -6229,22 +6267,22 @@ function RenewNews({ uiLang, onOpenCalendar }) {
         </div>
         {guideQaMode === 'guide' ? (
           <>
-          <a className="renew-guide-feature-link" href="/guide/card-storage">
+          <a className="renew-guide-feature-link" href="/guide/card-storage" onClick={() => rememberCurrentAppView()}>
             <span>STORAGE GUIDE</span>
             <strong>원피스카드 보관 방법</strong>
             <small>슬리브, 탑로더, 카드세이버, 바인더 보관 기준을 확인합니다.</small>
           </a>
-          <a className="renew-guide-feature-link" href="/guide/shops">
+          <a className="renew-guide-feature-link" href="/guide/shops" onClick={() => rememberCurrentAppView()}>
             <span>SHOP GUIDE</span>
             <strong>원피스카드 사는 방법</strong>
             <small>공인점포, 취급점포, 지역별 검색과 내 주변 구매처 찾는 방법을 확인합니다.</small>
           </a>
-          <a className="renew-guide-feature-link" href="/guide/card-price">
+          <a className="renew-guide-feature-link" href="/guide/card-price" onClick={() => rememberCurrentAppView()}>
             <span>PRICE GUIDE</span>
             <strong>원피스카드 시세 보는 방법</strong>
             <small>카드 가격, 박스 가격, 최근 거래 기록과 기간별 그래프를 확인하는 방법을 정리했습니다.</small>
           </a>
-          <a className="renew-guide-feature-link" href="/guide/card-catalog">
+          <a className="renew-guide-feature-link" href="/guide/card-catalog" onClick={() => rememberCurrentAppView()}>
             <span>CATALOG GUIDE</span>
             <strong>원피스카드 도감 사용법</strong>
             <small>한글판, 일본판, OP/EB/ST/PR 시리즈와 일련번호 검색 방법을 확인합니다.</small>
@@ -6597,7 +6635,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (initialViewState?.locale || 'JP');
   const [locale, setLocale] = useState(initialLocale);
   const [selectedSeries, setSelectedSeries] = useState(() => hasInitialSearch ? getDefaultRenewSeriesId(initialLocale) : (initialViewState?.selectedSeries || getDefaultRenewSeriesId(initialLocale)));
-  const [openSection, setOpenSection] = useState('');
+  const [openSection, setOpenSection] = useState(() => hasInitialSearch ? '' : (initialViewState?.openSection || ''));
   const [searchKeyword, setSearchKeyword] = useState(hasInitialSearch ? initialSearch.q : (initialViewState?.searchKeyword || ''));
   const [activeRarity, setActiveRarity] = useState(hasInitialSearch ? 'ALL' : (initialViewState?.activeRarity || 'ALL'));
   const [collectionFilter, setCollectionFilter] = useState(hasInitialSearch ? 'all' : (initialViewState?.collectionFilter || 'all'));
@@ -6704,6 +6742,17 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [initialSearch?.id, initialSearch?.locale, initialSearch?.q]);
 
   useEffect(() => {
+    if (!initialViewState || hasInitialSearch) return;
+    if (initialViewState.locale) setLocale(initialViewState.locale);
+    if (initialViewState.selectedSeries) setSelectedSeries(initialViewState.selectedSeries);
+    setSearchKeyword(initialViewState.searchKeyword || '');
+    setActiveRarity(initialViewState.activeRarity || 'ALL');
+    setCollectionFilter(initialViewState.collectionFilter || 'all');
+    setCatalogSortMode(initialViewState.catalogSortMode || 'rarity');
+    setOpenSection(initialViewState.openSection || '');
+  }, [hasInitialSearch, initialViewState]);
+
+  useEffect(() => {
     setExpandedDeferredRarities(new Set());
   }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter]);
 
@@ -6729,9 +6778,10 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       searchKeyword,
       activeRarity,
       collectionFilter,
-      catalogSortMode
+      catalogSortMode,
+      openSection
     });
-  }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter, catalogSortMode, onViewStateChange]);
+  }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter, catalogSortMode, openSection, onViewStateChange]);
 
   useEffect(() => {
     let cancelled = false;
@@ -6900,7 +6950,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     if (typeof window !== 'undefined') {
       const nextPath = localizeAppPath(getSeriesRoutePath(series), uiLang);
       if (window.location.pathname !== nextPath) {
-        window.history.pushState(null, '', nextPath);
+        pushAppHistory(nextPath);
       }
     }
   };
@@ -9135,23 +9185,46 @@ function isMarketIndexPath(path) {
 }
 
 function RenewMarketIndex({ onOpenComponent } = {}) {
+  const savedViewState = typeof window !== 'undefined' && window.history.state?.marketIndexViewState
+    ? window.history.state.marketIndexViewState
+    : {};
+  const restoredScrollRef = useRef(false);
   const [payload, setPayload] = useState(null);
   const [indexType, setIndexType] = useState(() => {
+    if (MARKET_INDEX_OPTIONS.some((item) => item.key === savedViewState.indexType)) return savedViewState.indexType;
     if (typeof window === 'undefined') return 'manga';
     const path = getAppPath(window.location.pathname);
     return getMarketIndexTypeFromPath(path);
   });
-  const [range, setRange] = useState('1y');
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [componentPage, setComponentPage] = useState(1);
-  const [componentSort, setComponentSort] = useState('default');
+  const [range, setRange] = useState(() => ['1d', '7d', '1m', '6m', '1y'].includes(savedViewState.range) ? savedViewState.range : '1y');
+  const [detailsOpen, setDetailsOpen] = useState(() => Boolean(savedViewState.detailsOpen));
+  const [componentPage, setComponentPage] = useState(() => Math.max(1, Number(savedViewState.componentPage) || 1));
+  const [componentSort, setComponentSort] = useState(() => ['default', 'gainers', 'losers'].includes(savedViewState.componentSort) ? savedViewState.componentSort : 'default');
   const [loading, setLoading] = useState(false);
   const selectedIndex = MARKET_INDEX_OPTIONS.find((item) => item.key === indexType) || MARKET_INDEX_OPTIONS[0];
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const path = getAppPath(window.location.pathname);
+    const isIndexView = isMarketIndexPath(path) || new URLSearchParams(window.location.search).get('tab') === 'index';
+    if (!isIndexView) return;
+    const currentState = window.history.state || {};
+    window.history.replaceState({
+      ...currentState,
+      marketIndexViewState: {
+        ...(currentState.marketIndexViewState || {}),
+        indexType,
+        range,
+        detailsOpen,
+        componentPage,
+        componentSort
+      }
+    }, '', window.location.href);
+  }, [indexType, range, detailsOpen, componentPage, componentSort]);
+
+  useEffect(() => {
     let cancelled = false;
     setPayload(null);
-    setComponentPage(1);
     setLoading(true);
     fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${MARKET_INDEX_CONDITION}&range=${range}`, { cache: 'no-store' })
       .then((response) => (response.ok ? response.json() : null))
@@ -9168,6 +9241,19 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
       cancelled = true;
     };
   }, [indexType, range]);
+
+  useEffect(() => {
+    if (loading || !payload || restoredScrollRef.current || !Number.isFinite(Number(savedViewState.scrollY))) return undefined;
+    restoredScrollRef.current = true;
+    const scrollY = Math.max(0, Number(savedViewState.scrollY) || 0);
+    const restore = () => window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' });
+    const frameId = window.requestAnimationFrame(restore);
+    const timerId = window.setTimeout(restore, 220);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timerId);
+    };
+  }, [loading, payload, savedViewState.scrollY]);
 
   const components = Array.isArray(payload?.components) ? payload.components.filter((item) => item.hasData) : [];
   const sortedComponents = useMemo(() => {
@@ -9196,11 +9282,11 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <h2>{selectedIndex.title}</h2>
         </div>
         <div className="renew-chip-group">
-          <button type="button" className={range === '1d' ? 'is-active' : ''} onClick={() => setRange('1d')}>1D</button>
-          <button type="button" className={range === '7d' ? 'is-active' : ''} onClick={() => setRange('7d')}>7D</button>
-          <button type="button" className={range === '1m' ? 'is-active' : ''} onClick={() => setRange('1m')}>1M</button>
-          <button type="button" className={range === '6m' ? 'is-active' : ''} onClick={() => setRange('6m')}>6M</button>
-          <button type="button" className={range === '1y' ? 'is-active' : ''} onClick={() => setRange('1y')}>1Y</button>
+          <button type="button" className={range === '1d' ? 'is-active' : ''} onClick={() => { setRange('1d'); setComponentPage(1); }}>1D</button>
+          <button type="button" className={range === '7d' ? 'is-active' : ''} onClick={() => { setRange('7d'); setComponentPage(1); }}>7D</button>
+          <button type="button" className={range === '1m' ? 'is-active' : ''} onClick={() => { setRange('1m'); setComponentPage(1); }}>1M</button>
+          <button type="button" className={range === '6m' ? 'is-active' : ''} onClick={() => { setRange('6m'); setComponentPage(1); }}>6M</button>
+          <button type="button" className={range === '1y' ? 'is-active' : ''} onClick={() => { setRange('1y'); setComponentPage(1); }}>1Y</button>
         </div>
       </div>
       <div className="renew-index-sector-head">
@@ -9216,6 +9302,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
             onClick={() => {
               setIndexType(option.key);
               setDetailsOpen(false);
+              setComponentPage(1);
             }}
           >
             {option.label}
@@ -9290,10 +9377,19 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
                 onClick={(event) => {
                   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
                   event.preventDefault();
+                  const currentState = window.history.state || {};
+                  window.history.replaceState({
+                    ...currentState,
+                    marketIndexViewState: {
+                      ...(currentState.marketIndexViewState || {}),
+                      scrollY: window.scrollY
+                    }
+                  }, '', window.location.href);
                   if (onOpenComponent) {
                     onOpenComponent(item);
                     return;
                   }
+                  rememberCurrentAppView();
                   window.location.assign(getMarketIndexComponentHref(item));
                 }}
               >
@@ -9329,9 +9425,15 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
 
 function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
   const t = (key) => getUiText(uiLang, key);
-  const [sortMode, setSortMode] = useState('latest');
-  const [boxPage, setBoxPage] = useState(1);
+  const savedViewState = getAppHistoryState().boxMarketViewState || {};
+  const [sortMode, setSortMode] = useState(() => ['latest', 'high', 'low'].includes(savedViewState.sortMode) ? savedViewState.sortMode : 'latest');
+  const [boxPage, setBoxPage] = useState(() => Math.max(1, Number(savedViewState.boxPage) || 1));
   const [boxes, setBoxes] = useState(boxMarketItems);
+  const previousBoxViewRef = useRef({ sortMode, initialBoxCode });
+  useEffect(() => {
+    if (getPageFromPath(window.location.pathname) !== 'prices') return;
+    replaceAppHistoryState({ boxMarketViewState: { sortMode, boxPage } });
+  }, [sortMode, boxPage]);
   useEffect(() => {
     let cancelled = false;
     fetch('/api/box-market', { cache: 'no-store' })
@@ -9345,6 +9447,9 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
     };
   }, []);
   useEffect(() => {
+    const previous = previousBoxViewRef.current;
+    previousBoxViewRef.current = { sortMode, initialBoxCode };
+    if (previous.sortMode === sortMode && previous.initialBoxCode === initialBoxCode) return;
     setBoxPage(1);
   }, [sortMode, initialBoxCode]);
   const sortedBoxes = useMemo(() => {
@@ -9547,8 +9652,14 @@ async function getKoreanNameMarketCodes(query) {
 
 function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   const t = (key) => getUiText(uiLang, key);
-  const [sortMode, setSortMode] = useState('focus');
+  const savedViewState = getAppHistoryState().cardMarketViewState || {};
+  const [sortMode, setSortMode] = useState(() => ['focus', 'high'].includes(savedViewState.sortMode) ? savedViewState.sortMode : 'focus');
   const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    if (getPageFromPath(window.location.pathname) !== 'prices') return;
+    replaceAppHistoryState({ cardMarketViewState: { sortMode } });
+  }, [sortMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -9603,9 +9714,12 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
 
 function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, onRequireLogin, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
+  const savedViewState = getAppHistoryState().marketViewState || {};
+  const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
   const [code, setCode] = useState(initialCode || '');
   const [marketProductLocale, setMarketProductLocale] = useState('JP');
   const [homeTab, setHomeTab] = useState(() => {
+    if (savedHomeTab) return savedHomeTab;
     if (typeof window === 'undefined') return 'box';
     const path = getAppPath(window.location.pathname);
     if (MARKET_INDEX_PUBLIC_ENABLED && isMarketIndexPath(path)) return 'index';
@@ -9631,6 +9745,26 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const marketDetailRef = useRef(null);
   const marketCandidateRef = useRef(null);
   const marketCandidateScrollYRef = useRef(0);
+
+  useEffect(() => {
+    if (getPageFromPath(window.location.pathname) !== 'prices') return;
+    replaceAppHistoryState({ marketViewState: { homeTab, marketProductLocale } });
+  }, [homeTab, marketProductLocale]);
+
+  const resetMarketHomeFromLocation = useCallback(() => {
+    setCode('');
+    setCandidates([]);
+    setSelected(null);
+    setMarketDetail(null);
+    setMessage('');
+    setCandidatePanelCollapsed(false);
+    const path = getAppPath(window.location.pathname);
+    const params = new URLSearchParams(window.location.search);
+    if (MARKET_INDEX_PUBLIC_ENABLED && (isMarketIndexPath(path) || params.get('tab') === 'index')) setHomeTab('index');
+    else if (path.startsWith('/prices/card/') || path === '/prices/cards') setHomeTab('card');
+    else if (path === '/prices' && savedHomeTab) setHomeTab(savedHomeTab);
+    else setHomeTab('box');
+  }, [savedHomeTab]);
 
   useEffect(() => {
     if (initialCode) {
@@ -9662,9 +9796,22 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           searchMarket(item.code, initialApparelId, itemLocale);
         })
         .catch(() => {});
+      return;
     }
+    resetMarketHomeFromLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode, initialApparelId]);
+
+  useEffect(() => {
+    const handleMarketPopState = () => {
+      if (getPageFromPath(window.location.pathname) !== 'prices') return;
+      const routeState = getMarketRouteState(window.location.pathname, window.location.search);
+      if (routeState.code || routeState.apparelId) return;
+      resetMarketHomeFromLocation();
+    };
+    window.addEventListener('popstate', handleMarketPopState);
+    return () => window.removeEventListener('popstate', handleMarketPopState);
+  }, [resetMarketHomeFromLocation]);
 
   useEffect(() => {
     let cancelled = false;
@@ -9878,7 +10025,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     setCode(nextCode);
     setMarketProductLocale(nextLocale);
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', getMarketIndexComponentHref(item));
+      pushAppHistory(getMarketIndexComponentHref(item));
     }
     searchMarket(nextCode || String(nextApparelId), nextApparelId, nextLocale);
     window.setTimeout(() => {
@@ -10471,16 +10618,22 @@ function RenewJapaneseShops() {
 function RenewShops({ uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const initialShopRouteState = getShopRouteState();
-  const [type, setType] = useState(initialShopRouteState && initialShopRouteState.type ? initialShopRouteState.type : '');
-  const [sido, setSido] = useState(initialShopRouteState && initialShopRouteState.sido ? initialShopRouteState.sido : '전체');
-  const [gungu, setGungu] = useState('전체');
-  const [draftQuery, setDraftQuery] = useState('');
-  const [query, setQuery] = useState('');
+  const savedViewState = getAppHistoryState().shopsViewState || {};
+  const [type, setType] = useState(() => savedViewState.type ?? (initialShopRouteState?.type || ''));
+  const [sido, setSido] = useState(() => savedViewState.sido ?? (initialShopRouteState?.sido || '전체'));
+  const [gungu, setGungu] = useState(() => savedViewState.gungu || '전체');
+  const [draftQuery, setDraftQuery] = useState(() => savedViewState.draftQuery || '');
+  const [query, setQuery] = useState(() => savedViewState.query || '');
   const [regions, setRegions] = useState({ sidos: [], gungus: [] });
   const [shops, setShops] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
+
+  useEffect(() => {
+    if (getPageFromPath(window.location.pathname) !== 'shops') return;
+    replaceAppHistoryState({ shopsViewState: { type, sido, gungu, draftQuery, query } });
+  }, [type, sido, gungu, draftQuery, query]);
 
   useEffect(() => {
     fetchShopRegions(type, sido).then(setRegions).catch(() => setRegions({ sidos: [], gungus: [] }));
@@ -10537,7 +10690,7 @@ function RenewShops({ uiLang }) {
             <strong>{uiLang === 'EN' ? 'Partner card shops' : '제휴 카드샵'}</strong>
             <span>{uiLang === 'EN' ? 'Check partner stores and shop news.' : '제휴 카드샵 위치와 입고소식을 확인할 수 있습니다.'}</span>
           </div>
-          <a href="/shops/partners">{uiLang === 'EN' ? 'View' : '보기'}</a>
+          <a href="/shops/partners" onClick={() => rememberCurrentAppView()}>{uiLang === 'EN' ? 'View' : '보기'}</a>
         </div>
         <div className="renew-shop-filters">
           <select value={type} onChange={(event) => setType(event.target.value)}>
@@ -10627,7 +10780,16 @@ export default function RenewApp() {
   const [legalOpen, setLegalOpen] = useState(null);
   const [catalogInitialSearch, setCatalogInitialSearch] = useState(null);
   const [catalogViewState, setCatalogViewState] = useState(() => window.history.state?.catalogViewState || getCatalogRouteViewState());
-  const [catalogReturnScrollY, setCatalogReturnScrollY] = useState(null);
+  const [catalogReturnScrollY, setCatalogReturnScrollY] = useState(() => {
+    if (initialPage !== 'cards') return null;
+    const scrollY = Number(window.history.state?.cardPoneScrollY);
+    return Number.isFinite(scrollY) ? scrollY : null;
+  });
+  const [routeReturnScrollY, setRouteReturnScrollY] = useState(() => {
+    if (initialPage === 'cards') return null;
+    const scrollY = Number(window.history.state?.cardPoneScrollY);
+    return Number.isFinite(scrollY) ? scrollY : null;
+  });
   const [marketInitialCode, setMarketInitialCode] = useState('');
   const [marketInitialApparelId, setMarketInitialApparelId] = useState(null);
   const [marketInitialCardId, setMarketInitialCardId] = useState('');
@@ -10647,11 +10809,7 @@ export default function RenewApp() {
   const handleCatalogViewStateChange = useCallback((nextViewState) => {
     setCatalogViewState(nextViewState);
     if (getPageFromPath(window.location.pathname) !== 'cards') return;
-    window.history.replaceState(
-      { ...(window.history.state || {}), catalogViewState: nextViewState },
-      '',
-      window.location.href
-    );
+    replaceAppHistoryState({ catalogViewState: nextViewState });
   }, []);
   const refreshNotifications = useCallback(async () => {
     if (!authUser?.id) {
@@ -10668,7 +10826,7 @@ export default function RenewApp() {
 
   useEffect(() => {
     if (window.location.pathname === '/deck' || window.location.pathname === '/deck-simulator') {
-      window.history.replaceState(null, '', '/news');
+      replaceAppHistoryState({}, '/news');
     }
   }, []);
 
@@ -10718,6 +10876,7 @@ export default function RenewApp() {
 
   useEffect(() => {
     const handlePopState = (event) => {
+      internalNavigationRef.current = Boolean(event.state?.cardPoneInternal);
       const routeLocale = getPathLocale(window.location.pathname);
       if (routeLocale) setUiLang(routeLocale);
       else setUiLang((current) => current === 'JP' ? 'KR' : current);
@@ -10728,7 +10887,11 @@ export default function RenewApp() {
       }
       if (nextPage === 'cards') {
         setCatalogViewState(event.state?.catalogViewState || getCatalogRouteViewState(window.location.pathname));
+        setCatalogReturnScrollY(Number.isFinite(Number(event.state?.cardPoneScrollY)) ? Number(event.state.cardPoneScrollY) : null);
       }
+      setRouteReturnScrollY(nextPage === 'cards' || !Number.isFinite(Number(event.state?.cardPoneScrollY))
+        ? null
+        : Number(event.state.cardPoneScrollY));
       setActivePage(nextPage);
       if (nextPage === 'prices') {
         const routeState = getMarketRouteState(window.location.pathname, window.location.search);
@@ -10740,10 +10903,26 @@ export default function RenewApp() {
         const params = new URLSearchParams(window.location.search);
         setMarketFilterCardId(params.get('cardId') || '');
       }
+      if (!['/privacy', '/terms'].includes(getAppPath(window.location.pathname))) setLegalOpen(null);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    if (routeReturnScrollY == null) return undefined;
+    const targetY = Math.max(0, Number(routeReturnScrollY) || 0);
+    const restore = () => window.scrollTo({ top: targetY, left: 0, behavior: 'auto' });
+    const frameId = window.requestAnimationFrame(restore);
+    const timerId = window.setTimeout(() => {
+      restore();
+      setRouteReturnScrollY(null);
+    }, 220);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timerId);
+    };
+  }, [activePage, routeReturnScrollY]);
 
   useEffect(() => {
     const savedVisitorToken = window.localStorage.getItem(VISITOR_TOKEN_KEY);
@@ -10929,7 +11108,20 @@ export default function RenewApp() {
       }
     }
     const link = String(notification.link_url || '');
-    if (link.startsWith('/')) window.location.assign(link);
+    if (link.startsWith('/')) {
+      const target = new URL(link, window.location.origin);
+      const nextPage = getPageFromPath(target.pathname);
+      if (nextPage === 'prices') {
+        const routeState = getMarketRouteState(target.pathname, target.search);
+        setMarketInitialCode(routeState.code);
+        setMarketInitialApparelId(routeState.apparelId);
+        setMarketInitialCardId(routeState.cardId);
+      }
+      if (nextPage === 'marketplace') setMarketFilterCardId(target.searchParams.get('cardId') || '');
+      setActivePage(nextPage);
+      internalNavigationRef.current = true;
+      pushAppHistory(`${target.pathname}${target.search}`);
+    }
   }
 
   async function handleNotificationsReadAll() {
@@ -10948,8 +11140,7 @@ export default function RenewApp() {
     const nextUrl = `${nextPath}${window.location.search}`;
     setUiLang(language);
     if (window.location.pathname + window.location.search !== nextUrl) {
-      internalNavigationRef.current = true;
-      window.history.pushState(null, '', nextUrl);
+      replaceAppHistoryState({}, nextUrl);
     }
   }
 
@@ -10964,10 +11155,6 @@ export default function RenewApp() {
     const path = getLocalizedPagePath(page, uiLang);
     const query = options.query ? `?${options.query}` : '';
     const nextUrl = `${path}${query}`;
-    if (page === 'marketplace') {
-      window.location.assign(nextUrl);
-      return;
-    }
     if (page === 'home') {
       setCatalogInitialSearch(null);
       setCatalogViewState(null);
@@ -10983,21 +11170,22 @@ export default function RenewApp() {
     }
     if (window.location.pathname + window.location.search !== nextUrl) {
       internalNavigationRef.current = true;
-      window.history.pushState(null, '', nextUrl);
+      pushAppHistory(nextUrl);
     }
   }
 
   function openLegal(type) {
     setLegalOpen(type);
     internalNavigationRef.current = true;
-    window.history.pushState(null, '', localizeAppPath(`/${type}`, uiLang));
+    pushAppHistory(localizeAppPath(`/${type}`, uiLang));
   }
 
   function closeLegal() {
     setLegalOpen(null);
     const path = getAppPath(window.location.pathname);
     if (path === '/privacy' || path === '/terms') {
-      window.history.pushState(null, '', getLocalizedPagePath(activePage, uiLang));
+      if (window.history.state?.cardPoneInternal) window.history.back();
+      else replaceAppHistoryState({}, getLocalizedPagePath(activePage, uiLang));
     }
   }
 
@@ -11010,7 +11198,7 @@ export default function RenewApp() {
   function handleRouteBack() {
     if (!routeBackInfo) return;
     const sameOriginReferrer = document.referrer && document.referrer.startsWith(SITE_ORIGIN);
-    if (internalNavigationRef.current || sameOriginReferrer) {
+    if (internalNavigationRef.current || sameOriginReferrer || window.history.state?.cardPoneInternal) {
       const currentUrl = window.location.href;
       window.history.back();
       window.setTimeout(() => {
@@ -11189,13 +11377,13 @@ export default function RenewApp() {
         <p>{t('footerIntro')}</p>
         <p>{t('footerDisclaimer')}</p>
         <div className="renew-footer-links">
-          <a href={getLocalizedPagePath('about', uiLang)}>{t('about')}</a>
+          <a href={getLocalizedPagePath('about', uiLang)} onClick={(event) => { event.preventDefault(); navigatePage('about'); }}>{t('about')}</a>
           <span>·</span>
-          <a href={getLocalizedPagePath('dataPolicy', uiLang)}>{t('dataPolicy')}</a>
+          <a href={getLocalizedPagePath('dataPolicy', uiLang)} onClick={(event) => { event.preventDefault(); navigatePage('dataPolicy'); }}>{t('dataPolicy')}</a>
           <span>·</span>
-          <a href={getLocalizedPagePath('terms', uiLang)}>{t('terms')}</a>
+          <a href={getLocalizedPagePath('terms', uiLang)} onClick={(event) => { event.preventDefault(); navigatePage('terms'); }}>{t('terms')}</a>
           <span>·</span>
-          <a href={getLocalizedPagePath('privacy', uiLang)}>{t('privacy')}</a>
+          <a href={getLocalizedPagePath('privacy', uiLang)} onClick={(event) => { event.preventDefault(); navigatePage('privacy'); }}>{t('privacy')}</a>
         </div>
       </footer>
       {legalOpen ? <RenewLegalModal type={legalOpen} onClose={closeLegal} /> : null}
