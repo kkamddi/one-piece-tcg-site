@@ -749,6 +749,8 @@ const PARTNER_AD_ITEMS = [
     metaEn: 'Mon-Sun 11:00~22:00',
     sido: '서울',
     gungu: '마포구',
+    lat: 37.5606213,
+    lng: 126.9205737,
     imageUrl: '/partners/the-card-room.png',
     actions: [
       { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://map.naver.com/p/entry/place/2096216680' },
@@ -768,6 +770,8 @@ const PARTNER_AD_ITEMS = [
     metaEn: 'Mon-Sun 14:00~21:00',
     sido: '서울',
     gungu: '용산구',
+    lat: 37.5290927,
+    lng: 126.9668857,
     imageUrl: '/partners/card-sungji.png',
     actions: [
       { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://naver.me/xQe4VQum' },
@@ -798,6 +802,8 @@ function getPartnerShopRows(uiLang = 'KR') {
     address: uiLang === 'EN' ? item.bodyEn : item.bodyKr,
     sido: item.sido,
     gungu: item.gungu,
+    lat: item.lat,
+    lng: item.lng,
     sourceType: 'partner',
     sourceLabel: getLocaleText(uiLang, '카드숍', 'Card Shop', 'カードショップ'),
     naverMapUrl: item.actions?.find((action) => /map\.naver\.com|naver\.me/i.test(action.href))?.href || ''
