@@ -6748,7 +6748,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, []);
 
   useEffect(() => {
-    if (localeSeries.some((series) => series.id === selectedSeries)) return;
+    if (selectedSeries === ALL_SERIES_ID || localeSeries.some((series) => series.id === selectedSeries)) return;
     const nextSeries = getDefaultRenewSeriesId(locale);
     setSelectedSeries(nextSeries);
     setOpenSection('');
