@@ -23,6 +23,10 @@ on:
         description: Delay between SNKRDUNK requests
         required: false
         default: "750"
+      apparel_ids:
+        description: Optional comma-separated SNKRDUNK apparel IDs for a focused repair
+        required: false
+        default: ""
   schedule:
     # 22:30 KST. This avoids the existing market and index refresh windows.
     - cron: "30 13 * * *"
@@ -82,6 +86,7 @@ jobs:
           SNKRDUNK_COOKIE: ${{ secrets.SNKRDUNK_COOKIE }}
           SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
           SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
+          APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           BACKFILL_SCOPE: all-jp
           BACKFILL_MISSING_CONDITION: none
           BACKFILL_START_INDEX: ${{ matrix.shard_start }}
