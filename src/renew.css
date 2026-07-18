@@ -8969,23 +8969,6 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
-.renew-back-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  margin: 0 0 14px;
-  border: 1px solid rgba(23, 25, 28, 0.12);
-  border-radius: 999px;
-  padding: 0 16px;
-  color: inherit;
-  background: rgba(255, 255, 255, 0.72);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  cursor: pointer;
-}
-
 .renew-market-locale-badge {
   display: inline-flex;
   align-items: center;
@@ -9055,11 +9038,6 @@
 .renew-app.is-dark .renew-market-search-field input {
   border-color: transparent;
   background: transparent;
-}
-
-.renew-app.is-dark .renew-back-button {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .renew-app.is-dark .renew-market-snkr-link {

@@ -2148,7 +2148,6 @@ const UI_TEXT = {
     officialInfo: '공식 정보보기',
     openSnkrdunk: '스니덩크 바로가기',
     loginRequired: '로그인 후 이용해 주세요.',
-    backToCatalog: '← 도감으로 돌아가기',
     marketCodePlaceholder: '일련번호 검색 예: OP05-119',
     marketSearch: '시세 검색',
     marketLoading: '시세 후보를 찾는 중...',
@@ -2263,7 +2262,6 @@ const UI_TEXT = {
     officialInfo: 'Official Info',
     openSnkrdunk: 'Open SNKRDUNK',
     loginRequired: 'Please log in first.',
-    backToCatalog: '← Back to Cards',
     marketCodePlaceholder: 'Card code e.g. OP05-119',
     marketSearch: 'Search Price',
     marketLoading: 'Finding market candidates...',
@@ -2378,7 +2376,6 @@ const UI_TEXT = {
     officialInfo: '公式情報を見る',
     openSnkrdunk: 'SNKRDUNKを開く',
     loginRequired: 'ログイン後にご利用いただけます。',
-    backToCatalog: '← カード図鑑に戻る',
     marketCodePlaceholder: 'カード番号 例: OP05-119',
     marketSearch: '相場を検索',
     marketLoading: '相場候補を検索中...',
@@ -3044,16 +3041,22 @@ function getPageFromPath(pathname = '/') {
 function getRouteBackInfo(pathname = '/', search = '') {
   const path = getAppPath(pathname);
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
-  if (path.startsWith('/shops/partners/')) return { label: '제휴 카드샵으로 돌아가기', page: 'partnerShops' };
-  if (path === '/shops/partners') return { label: '구매처로 돌아가기', page: 'shops' };
+  if (path.startsWith('/shops/partners/')) return { page: 'partnerShops' };
+  if (path === '/shops/partners') return { page: 'shops' };
   if (path === '/' || (['/cards', '/prices', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
-  if (path.startsWith('/cards')) return { label: '도감으로 돌아가기', page: 'cards' };
-  if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { label: '시세로 돌아가기', page: 'prices' };
-  if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { label: '정보로 돌아가기', page: 'news' };
-  if (path.startsWith('/shops')) return { label: '구매처로 돌아가기', page: 'shops' };
-  if (path.startsWith('/market')) return { label: '거래로 돌아가기', page: 'marketplace' };
-  if (['/about', '/data-policy', '/terms', '/privacy'].includes(path)) return { label: '홈으로 돌아가기', page: 'home' };
+  if (path.startsWith('/cards')) return { page: 'cards' };
+  if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { page: 'prices' };
+  if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { page: 'news' };
+  if (path.startsWith('/shops')) return { page: 'shops' };
+  if (path.startsWith('/market')) return { page: 'marketplace' };
+  if (['/about', '/data-policy', '/terms', '/privacy'].includes(path)) return { page: 'home' };
   return null;
+}
+
+function getRouteBackLabel(uiLang = 'KR') {
+  if (uiLang === 'EN') return 'Back';
+  if (uiLang === 'JP') return '戻る';
+  return '뒤로가기';
 }
 
 function getCanonicalUrl(page) {
@@ -9598,7 +9601,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, onBackToCatalog, onRequireLogin, uiLang }) {
+function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, onRequireLogin, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const [code, setCode] = useState(initialCode || '');
   const [marketProductLocale, setMarketProductLocale] = useState('JP');
@@ -9983,11 +9986,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   return (
     <main className="renew-subpage">
       <section className="renew-panel renew-market">
-        {onBackToCatalog ? (
-          <button type="button" className="renew-back-button" onClick={onBackToCatalog}>
-            {t('backToCatalog')}
-          </button>
-        ) : null}
         <form className="renew-market-search" onSubmit={(event) => { event.preventDefault(); searchMarket(code); }}>
           <a className="renew-market-snkr-link" href={SNKRDUNK_MARKET_URL} target="_blank" rel="noreferrer" aria-label="SNKRDUNK 바로가기">
             <span>SNKR</span>
@@ -10628,9 +10626,8 @@ export default function RenewApp() {
   const [visitorToken, setVisitorToken] = useState('');
   const [legalOpen, setLegalOpen] = useState(null);
   const [catalogInitialSearch, setCatalogInitialSearch] = useState(null);
-  const [catalogViewState, setCatalogViewState] = useState(() => getCatalogRouteViewState());
+  const [catalogViewState, setCatalogViewState] = useState(() => window.history.state?.catalogViewState || getCatalogRouteViewState());
   const [catalogReturnScrollY, setCatalogReturnScrollY] = useState(null);
-  const [canReturnToCatalog, setCanReturnToCatalog] = useState(false);
   const [marketInitialCode, setMarketInitialCode] = useState('');
   const [marketInitialApparelId, setMarketInitialApparelId] = useState(null);
   const [marketInitialCardId, setMarketInitialCardId] = useState('');
@@ -10647,6 +10644,15 @@ export default function RenewApp() {
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const t = (key) => getUiText(uiLang, key);
+  const handleCatalogViewStateChange = useCallback((nextViewState) => {
+    setCatalogViewState(nextViewState);
+    if (getPageFromPath(window.location.pathname) !== 'cards') return;
+    window.history.replaceState(
+      { ...(window.history.state || {}), catalogViewState: nextViewState },
+      '',
+      window.location.href
+    );
+  }, []);
   const refreshNotifications = useCallback(async () => {
     if (!authUser?.id) {
       setNotifications([]);
@@ -10711,7 +10717,7 @@ export default function RenewApp() {
   }, []);
 
   useEffect(() => {
-    const handlePopState = () => {
+    const handlePopState = (event) => {
       const routeLocale = getPathLocale(window.location.pathname);
       if (routeLocale) setUiLang(routeLocale);
       else setUiLang((current) => current === 'JP' ? 'KR' : current);
@@ -10721,7 +10727,7 @@ export default function RenewApp() {
         setCatalogViewState(null);
       }
       if (nextPage === 'cards') {
-        setCatalogViewState(getCatalogRouteViewState(window.location.pathname));
+        setCatalogViewState(event.state?.catalogViewState || getCatalogRouteViewState(window.location.pathname));
       }
       setActivePage(nextPage);
       if (nextPage === 'prices') {
@@ -10974,7 +10980,6 @@ export default function RenewApp() {
       setMarketInitialCode('');
       setMarketInitialApparelId(null);
       setMarketInitialCardId('');
-      setCanReturnToCatalog(false);
     }
     if (window.location.pathname + window.location.search !== nextUrl) {
       internalNavigationRef.current = true;
@@ -11006,7 +11011,11 @@ export default function RenewApp() {
     if (!routeBackInfo) return;
     const sameOriginReferrer = document.referrer && document.referrer.startsWith(SITE_ORIGIN);
     if (internalNavigationRef.current || sameOriginReferrer) {
+      const currentUrl = window.location.href;
       window.history.back();
+      window.setTimeout(() => {
+        if (window.location.href === currentUrl) navigatePage(routeBackInfo.page);
+      }, 250);
       return;
     }
     navigatePage(routeBackInfo.page);
@@ -11029,7 +11038,7 @@ export default function RenewApp() {
         onNotificationSelect={handleNotificationSelect}
         onNotificationsReadAll={handleNotificationsReadAll}
       />
-      {routeBackInfo ? <RenewRouteBackButton label={routeBackInfo.label} onClick={handleRouteBack} /> : null}
+      {routeBackInfo ? <RenewRouteBackButton label={getRouteBackLabel(uiLang)} onClick={handleRouteBack} /> : null}
       {activePage === 'home' ? (
         <RenewHome
           authUser={authUser}
@@ -11054,7 +11063,6 @@ export default function RenewApp() {
             setMarketInitialCode('');
             setMarketInitialApparelId(null);
             setMarketInitialCardId('');
-            setCanReturnToCatalog(false);
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
           onOpenPrices={() => navigatePage('prices')}
@@ -11068,7 +11076,7 @@ export default function RenewApp() {
           initialViewState={catalogViewState}
           restoreScrollY={catalogReturnScrollY}
           onRestoreScrollDone={() => setCatalogReturnScrollY(null)}
-          onViewStateChange={setCatalogViewState}
+          onViewStateChange={handleCatalogViewStateChange}
           onOpenMarket={(marketTarget) => {
             const nextCode = typeof marketTarget === 'object' ? marketTarget?.code : marketTarget;
             const nextApparelId = typeof marketTarget === 'object' ? marketTarget?.apparelId : null;
@@ -11077,7 +11085,6 @@ export default function RenewApp() {
             setMarketInitialCode(nextCode || '');
             setMarketInitialApparelId(nextApparelId || null);
             setMarketInitialCardId(nextCardId || '');
-            setCanReturnToCatalog(true);
             const query = new URLSearchParams();
             if (nextCode) query.set('code', nextCode);
             if (nextApparelId) query.set('apparelId', String(nextApparelId));
@@ -11103,7 +11110,6 @@ export default function RenewApp() {
           initialCode={marketInitialCode}
           initialApparelId={marketInitialApparelId}
           initialCardId={marketInitialCardId}
-          onBackToCatalog={canReturnToCatalog ? () => navigatePage('cards') : null}
           onRequireLogin={() => handleAuthClick('login')}
           uiLang={uiLang}
         />
