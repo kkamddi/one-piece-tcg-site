@@ -2563,15 +2563,55 @@ function replaceAppHistoryState(patch = {}, url = window.location.href) {
   window.history.replaceState({ ...getAppHistoryState(), ...patch }, '', url);
 }
 
+function getCurrentAppScrollY() {
+  if (typeof window === 'undefined') return 0;
+  const lockedScrollY = Number(document.body?.dataset?.renewModalScrollY);
+  if (Number.isFinite(lockedScrollY)) return lockedScrollY;
+  return window.scrollY || document.documentElement?.scrollTop || 0;
+}
+
 function rememberCurrentAppView(patch = {}) {
   if (typeof window === 'undefined') return;
-  replaceAppHistoryState({ cardPoneScrollY: window.scrollY || 0, ...patch });
+  replaceAppHistoryState({ cardPoneScrollY: getCurrentAppScrollY(), ...patch });
 }
 
 function pushAppHistory(url, state = {}) {
   if (typeof window === 'undefined') return;
   rememberCurrentAppView();
   window.history.pushState({ cardPoneInternal: true, ...state }, '', url);
+}
+
+function restoreAppScrollPosition(targetY, { onDone, timeoutMs = 3000 } = {}) {
+  if (typeof window === 'undefined') return () => {};
+  const safeTargetY = Math.max(0, Number(targetY) || 0);
+  const startedAt = Date.now();
+  let frameId = 0;
+  let timerId = 0;
+  let stopped = false;
+
+  const finish = (notify = true) => {
+    if (stopped) return;
+    stopped = true;
+    window.cancelAnimationFrame(frameId);
+    window.clearTimeout(timerId);
+    if (notify) onDone?.();
+  };
+
+  const restore = () => {
+    if (stopped) return;
+    window.scrollTo({ top: safeTargetY, left: 0, behavior: 'auto' });
+    const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+    if (Math.abs(currentY - safeTargetY) <= 2 || Date.now() - startedAt >= timeoutMs) {
+      finish();
+      return;
+    }
+    timerId = window.setTimeout(() => {
+      frameId = window.requestAnimationFrame(restore);
+    }, 80);
+  };
+
+  frameId = window.requestAnimationFrame(restore);
+  return () => finish(false);
 }
 
 function getRouteSeoPage(pathname = '/') {
@@ -6784,17 +6824,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
 
   useEffect(() => {
     if (loading || restoreScrollY == null || typeof window === 'undefined') return undefined;
-    const targetY = Math.max(0, Number(restoreScrollY) || 0);
-    const restore = () => window.scrollTo({ top: targetY, left: 0, behavior: 'auto' });
-    const frameId = window.requestAnimationFrame(restore);
-    const timerId = window.setTimeout(() => {
-      restore();
-      onRestoreScrollDone?.();
-    }, 220);
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.clearTimeout(timerId);
-    };
+    return restoreAppScrollPosition(restoreScrollY, { onDone: onRestoreScrollDone });
   }, [loading, restoreScrollY, onRestoreScrollDone]);
 
   useEffect(() => {
@@ -9271,14 +9301,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
   useEffect(() => {
     if (loading || !payload || restoredScrollRef.current || !Number.isFinite(Number(savedViewState.scrollY))) return undefined;
     restoredScrollRef.current = true;
-    const scrollY = Math.max(0, Number(savedViewState.scrollY) || 0);
-    const restore = () => window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' });
-    const frameId = window.requestAnimationFrame(restore);
-    const timerId = window.setTimeout(restore, 220);
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.clearTimeout(timerId);
-    };
+    return restoreAppScrollPosition(savedViewState.scrollY);
   }, [loading, payload, savedViewState.scrollY]);
 
   const components = Array.isArray(payload?.components) ? payload.components.filter((item) => item.hasData) : [];
@@ -10994,6 +11017,15 @@ export default function RenewApp() {
   }, [uiLang]);
 
   useEffect(() => {
+    if (!('scrollRestoration' in window.history)) return undefined;
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useEffect(() => {
     if (activePage === 'prices') {
       const routeState = getMarketRouteState(window.location.pathname, window.location.search);
       setMarketInitialCode(routeState.code);
@@ -11040,17 +11072,7 @@ export default function RenewApp() {
 
   useEffect(() => {
     if (routeReturnScrollY == null) return undefined;
-    const targetY = Math.max(0, Number(routeReturnScrollY) || 0);
-    const restore = () => window.scrollTo({ top: targetY, left: 0, behavior: 'auto' });
-    const frameId = window.requestAnimationFrame(restore);
-    const timerId = window.setTimeout(() => {
-      restore();
-      setRouteReturnScrollY(null);
-    }, 220);
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      window.clearTimeout(timerId);
-    };
+    return restoreAppScrollPosition(routeReturnScrollY, { onDone: () => setRouteReturnScrollY(null) });
   }, [activePage, routeReturnScrollY]);
 
   useEffect(() => {
@@ -11398,7 +11420,7 @@ export default function RenewApp() {
             const nextCode = typeof marketTarget === 'object' ? marketTarget?.code : marketTarget;
             const nextApparelId = typeof marketTarget === 'object' ? marketTarget?.apparelId : null;
             const nextCardId = typeof marketTarget === 'object' ? marketTarget?.cardId : '';
-            setCatalogReturnScrollY(typeof window !== 'undefined' ? window.scrollY : null);
+            setCatalogReturnScrollY(typeof window !== 'undefined' ? getCurrentAppScrollY() : null);
             setMarketInitialCode(nextCode || '');
             setMarketInitialApparelId(nextApparelId || null);
             setMarketInitialCardId(nextCardId || '');
