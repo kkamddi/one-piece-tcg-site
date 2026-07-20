@@ -599,7 +599,11 @@ async function buildTargetItems(scope = 'approved', explicitApparelIds = []) {
 
   const jpMarketCards = allMarketCards.filter((item) => item?.locale === 'JP');
   const enMarketCards = allMarketCards.filter((item) => item?.locale === 'EN');
-  if (scope === 'all-jp') return jpMarketCards;
+  const scheduledMarketCards = uniqueByApparelId([
+    ...jpMarketCards,
+    ...enMarketCards.filter((item) => item?.collectDaily === true),
+  ]);
+  if (scope === 'all-jp') return scheduledMarketCards;
   if (scope === 'all-en') return enMarketCards;
   if (scope === 'all-market' || scope === 'all') return allMarketCards;
 

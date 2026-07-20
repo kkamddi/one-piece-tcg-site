@@ -58,6 +58,7 @@ async function fetchMarketProduct(apparelId) {
     apparelId: Number(product.id || apparelId),
     name: String(product.name || '').trim(),
     setName: parseSetName(product.name),
+    collectDaily: true,
     minPrice: 0,
     minPriceFormat: 'US $ -',
     listingCount: parseListingCount(product.listingCount),
