@@ -674,7 +674,21 @@ async function saveMarketStorageSnapshot(item, conditionPrices = [], { persistLi
           latest_captured_at = excluded.latest_captured_at,
           is_active = 1,
           raw_market_card_json = excluded.raw_market_card_json,
-          updated_at = excluded.updated_at`,
+          updated_at = excluded.updated_at
+        where date(market_products.latest_captured_at, '+9 hours')
+                is not date(excluded.latest_captured_at, '+9 hours')
+           or market_products.locale is not excluded.locale
+           or market_products.code is not excluded.code
+           or market_products.name is not excluded.name
+           or market_products.set_name is not excluded.set_name
+           or market_products.source_url is not excluded.source_url
+           or market_products.preview_image_url is not excluded.preview_image_url
+           or market_products.latest_a_price_jpy is not excluded.latest_a_price_jpy
+           or market_products.latest_psa10_price_jpy is not excluded.latest_psa10_price_jpy
+           or market_products.latest_min_price_amount is not excluded.latest_min_price_amount
+           or market_products.latest_min_price_currency is not excluded.latest_min_price_currency
+           or market_products.latest_listing_count is not excluded.latest_listing_count
+           or market_products.is_active is not 1`,
         [
           apparelId,
           item.locale || 'JP',

@@ -1,0 +1,123 @@
+name: D1 usage monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 09:45 KST. Alert only when the 30-day usage pace reaches 70%.
+    - cron: "45 0 * * *"
+
+concurrency:
+  group: d1-usage-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Measure D1 usage
+        id: usage
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "Cloudflare credentials are missing."
+            exit 1
+          fi
+
+          info=$(npx --yes wrangler@4.112.0 d1 info optcgkorea-public-shadow --json)
+          echo "$info"
+          node - "$GITHUB_OUTPUT" "$info" <<'NODE'
+          const fs = require('node:fs');
+          const [outputPath, raw] = process.argv.slice(2);
+          const info = JSON.parse(raw);
+          const rowsRead24h = Number(info.rows_read_24h || 0);
+          const rowsWritten24h = Number(info.rows_written_24h || 0);
+          const storageBytes = Number(info.database_size || 0);
+          const projectedRowsRead30d = rowsRead24h * 30;
+          const projectedRowsWritten30d = rowsWritten24h * 30;
+          const paidReadIncluded = 25_000_000_000;
+          const paidWriteIncluded = 50_000_000;
+          const paidStorageIncluded = 5 * 1024 * 1024 * 1024;
+          const readPercent = projectedRowsRead30d / paidReadIncluded * 100;
+          const writePercent = projectedRowsWritten30d / paidWriteIncluded * 100;
+          const storagePercent = storageBytes / paidStorageIncluded * 100;
+          const alert = Math.max(readPercent, writePercent, storagePercent) >= 70;
+          const values = {
+            alert: String(alert),
+            rows_read_24h: String(rowsRead24h),
+            rows_written_24h: String(rowsWritten24h),
+            storage_bytes: String(storageBytes),
+            read_percent: readPercent.toFixed(1),
+            write_percent: writePercent.toFixed(1),
+            storage_percent: storagePercent.toFixed(1)
+          };
+          fs.appendFileSync(outputPath, Object.entries(values).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
+          console.log(JSON.stringify({ ...values, projectedRowsRead30d, projectedRowsWritten30d }));
+          NODE
+
+      - name: Write usage summary
+        if: ${{ success() }}
+        env:
+          ROWS_READ_24H: ${{ steps.usage.outputs.rows_read_24h }}
+          ROWS_WRITTEN_24H: ${{ steps.usage.outputs.rows_written_24h }}
+          STORAGE_BYTES: ${{ steps.usage.outputs.storage_bytes }}
+          READ_PERCENT: ${{ steps.usage.outputs.read_percent }}
+          WRITE_PERCENT: ${{ steps.usage.outputs.write_percent }}
+          STORAGE_PERCENT: ${{ steps.usage.outputs.storage_percent }}
+        run: |
+          {
+            echo "### D1 usage"
+            echo "- Rows read (24h): ${ROWS_READ_24H}"
+            echo "- Rows written (24h): ${ROWS_WRITTEN_24H}"
+            echo "- Database bytes: ${STORAGE_BYTES}"
+            echo "- 30-day read pace: ${READ_PERCENT}%"
+            echo "- 30-day write pace: ${WRITE_PERCENT}%"
+            echo "- Storage usage: ${STORAGE_PERCENT}%"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Notify Telegram on high usage
+        if: ${{ steps.usage.outputs.alert == 'true' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          READ_PERCENT: ${{ steps.usage.outputs.read_percent }}
+          WRITE_PERCENT: ${{ steps.usage.outputs.write_percent }}
+          STORAGE_PERCENT: ${{ steps.usage.outputs.storage_percent }}
+          ROWS_READ_24H: ${{ steps.usage.outputs.rows_read_24h }}
+          ROWS_WRITTEN_24H: ${{ steps.usage.outputs.rows_written_24h }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notification."
+            exit 0
+          fi
+          message="Cloudflare D1 usage warning (30-day pace)
+          Reads: ${READ_PERCENT}% (${ROWS_READ_24H} rows / 24h)
+          Writes: ${WRITE_PERCENT}% (${ROWS_WRITTEN_24H} rows / 24h)
+          Storage: ${STORAGE_PERCENT}%
+          Run: ${RUN_URL}"
+          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}"
+
+      - name: Notify Telegram on monitor failure
+        if: ${{ failure() }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            exit 0
+          fi
+          message="Cloudflare D1 usage monitor failed.
+          Run: ${RUN_URL}"
+          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || true
