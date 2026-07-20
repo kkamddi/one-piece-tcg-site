@@ -276,6 +276,10 @@ async function buildTargets() {
   }
 
   const jpMarketCards = allMarketCards.filter((item) => item?.locale === 'JP');
+  const scheduledMarketCards = allMarketCards.filter((item) => (
+    item?.locale === 'JP' || item?.collectHistoryDaily === true
+  ));
+  if (scope === 'scheduled') return filterTargetsByMissingCondition(scheduledMarketCards);
   if (scope === 'all-jp') return filterTargetsByMissingCondition(jpMarketCards);
   if (scope === 'all-market' || scope === 'all') return filterTargetsByMissingCondition(allMarketCards);
 

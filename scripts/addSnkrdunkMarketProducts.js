@@ -51,6 +51,7 @@ async function fetchMarketProduct(apparelId) {
   if (!match) throw new Error(`SNKRDUNK ${apparelId} product data not found`);
   const product = JSON.parse(decodeHtml(match[1]));
   const localeMatch = String(product.name || '').match(/\[(EN|JP)\]/i);
+  const isOpenedCard = /:Opened\b/i.test(String(product.name || ''));
   const previewImageUrl = String(product.thumbnailUrl || '').replace(/\?size=[^&]+/, '?size=m');
   return {
     code: String(product.productNumber || '').trim(),
@@ -59,6 +60,7 @@ async function fetchMarketProduct(apparelId) {
     name: String(product.name || '').trim(),
     setName: parseSetName(product.name),
     collectDaily: true,
+    collectHistoryDaily: isOpenedCard,
     minPrice: 0,
     minPriceFormat: 'US $ -',
     listingCount: parseListingCount(product.listingCount),

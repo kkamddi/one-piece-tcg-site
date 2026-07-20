@@ -87,7 +87,7 @@ jobs:
           SNKRDUNK_AUTHORIZATION: ${{ secrets.SNKRDUNK_AUTHORIZATION }}
           SNKRDUNK_CSRF_TOKEN: ${{ secrets.SNKRDUNK_CSRF_TOKEN }}
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
-          BACKFILL_SCOPE: all-jp
+          BACKFILL_SCOPE: scheduled
           BACKFILL_MISSING_CONDITION: none
           BACKFILL_START_INDEX: ${{ matrix.shard_start }}
           BACKFILL_CARD_LIMIT: ${{ matrix.shard_limit }}
@@ -139,7 +139,7 @@ jobs:
             exit 0
           fi
           message="Daily market trading history ${COLLECT_RESULT}.
-          Scope: all JP cards / Single + PSA10 / recent page
+          Scope: all JP cards + curated EN cards / Single + PSA10 / recent page
           Run: ${RUN_URL}"
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
