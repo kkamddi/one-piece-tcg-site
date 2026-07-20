@@ -46,8 +46,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  discover:
+    name: Discover newly listed JP cards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      added: ${{ steps.discover.outputs.added }}
+      added_ids: ${{ steps.discover.outputs.added_ids }}
+    steps:
+      - id: discover
+        name: Discover and snapshot new card products
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+        run: |
+          if [ -z "$COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+          json=$(curl -fsS --retry 3 --retry-delay 15 --retry-max-time 120 --retry-all-errors --connect-timeout 20 --max-time 120 \
+            -H "Authorization: Bearer ${COLLECTOR_TOKEN}" "${COLLECTOR_URL}?action=discover")
+          echo "$json"
+          meta=$(node -e "
+            const p = JSON.parse(process.argv[1]);
+            if (!p.ok || !Number.isFinite(p.added)) process.exit(1);
+            process.stdout.write([p.added, (p.addedIds || []).join(',')].join('|'));
+          " "$json")
+          IFS='|' read -r added added_ids <<< "$meta"
+          echo "added=$added" >> "$GITHUB_OUTPUT"
+          echo "added_ids=$added_ids" >> "$GITHUB_OUTPUT"
+
   collect:
     name: Collect market prices (${{ matrix.shard_name }})
+    needs: discover
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -267,12 +298,38 @@ jobs:
           echo "$json"
           node -e "const p=JSON.parse(process.argv[1]); if (!p.ok) process.exit(1)" "$json"
 
+  notify-new-cards:
+    name: Notify newly discovered cards
+    needs: discover
+    if: ${{ needs.discover.result == 'success' && needs.discover.outputs.added != '0' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ADDED: ${{ needs.discover.outputs.added }}
+          ADDED_IDS: ${{ needs.discover.outputs.added_ids }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notification."
+            exit 0
+          fi
+          message="New SNKRDUNK JP cards added: ${ADDED}
+          Apparel IDs: ${ADDED_IDS}
+          Run: ${RUN_URL}"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+
   notify-failure:
     name: Notify Telegram on failure
     needs:
+      - discover
       - collect
       - evaluate-alerts
-    if: ${{ always() && (needs.collect.result == 'failure' || needs.evaluate-alerts.result == 'failure') }}
+    if: ${{ always() && (needs.discover.result == 'failure' || needs.collect.result == 'failure' || needs.evaluate-alerts.result == 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify Telegram

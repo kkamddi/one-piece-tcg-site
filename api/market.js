@@ -1225,6 +1225,54 @@ export async function collectMarketSnapshot(item, options = {}) {
   };
 }
 
+function parseStoredMarketItem(row) {
+  try {
+    const parsed = JSON.parse(String(row?.raw_market_card_json || '{}'));
+    const apparelId = Number(parsed?.apparelId || row?.apparel_id || 0);
+    if (!apparelId) return null;
+    return {
+      ...parsed,
+      source: parsed.source || row?.source || 'snkrdunk',
+      apparelId,
+      locale: parsed.locale || row?.locale || 'JP',
+      code: parsed.code || row?.code || '',
+      name: parsed.name || row?.name || '',
+      setName: parsed.setName || row?.set_name || '',
+      sourceUrl: parsed.sourceUrl || row?.source_url || '',
+      previewImageUrl: parsed.previewImageUrl || row?.preview_image_url || '',
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function findStoredMarketCandidates({ apparelId, code }) {
+  if (!shouldReadD1Market()) return [];
+  const normalizedCode = String(code || '').trim().toUpperCase().replace(/^OPC-/, '');
+  if (!apparelId && !normalizedCode) return [];
+  const where = ["source = 'snkrdunk'", 'is_active = 1'];
+  const params = [];
+  if (apparelId) {
+    where.push('apparel_id = ?');
+    params.push(Number(apparelId));
+  } else {
+    where.push("(upper(code) = ? OR upper(replace(code, 'OPC-', '')) = ? OR upper(name) LIKE ?)");
+    params.push(normalizedCode, normalizedCode, `%[${normalizedCode}]%`);
+  }
+  try {
+    const rows = await queryD1(`
+      SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
+      FROM market_products
+      WHERE ${where.join(' AND ')}
+      ORDER BY updated_at DESC
+      LIMIT 24
+    `, params);
+    return rows.map(parseStoredMarketItem).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
   const summaryMode = String(params.get('summary') || '').toLowerCase();
@@ -1318,14 +1366,17 @@ async function localFallback(params) {
   const apparelId = params.get('apparelId');
   const code = (params.get('code') || '').trim().toUpperCase();
   const normalizeMarketCode = (value) => String(value || '').trim().toUpperCase().replace(/^OPC-/, '');
-  const candidates = (Array.isArray(marketCards) ? marketCards : [])
+  const staticCandidates = (Array.isArray(marketCards) ? marketCards : [])
     .filter((item) => {
       if (apparelId) return String(item.apparelId) === String(apparelId);
       if (!code) return false;
       const itemCode = String(item.code || '').toUpperCase();
       const name = String(item.name || '').toUpperCase();
       return itemCode === code || normalizeMarketCode(itemCode) === code || name.includes(`[${code}]`);
-    })
+    });
+  const staticIds = new Set(staticCandidates.map((item) => String(item.apparelId)));
+  const storedCandidates = await findStoredMarketCandidates({ apparelId, code });
+  const candidates = [...staticCandidates, ...storedCandidates.filter((item) => !staticIds.has(String(item.apparelId)))]
     .sort((a, b) => {
       const jpDelta = (String(b.locale || '').toUpperCase() === 'JP') - (String(a.locale || '').toUpperCase() === 'JP');
       if (jpDelta) return jpDelta;

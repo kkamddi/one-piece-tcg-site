@@ -183,6 +183,43 @@ async function fetchApprovedOverrideIds() {
   }
 }
 
+function parseStoredMarketCard(row) {
+  try {
+    const parsed = JSON.parse(String(row?.raw_market_card_json || '{}'));
+    const apparelId = Number(parsed?.apparelId || row?.apparel_id || 0);
+    if (!apparelId) return null;
+    return {
+      ...parsed,
+      source: parsed.source || row?.source || 'snkrdunk',
+      apparelId,
+      locale: parsed.locale || row?.locale || 'JP',
+      code: parsed.code || row?.code || '',
+      name: parsed.name || row?.name || '',
+      setName: parsed.setName || row?.set_name || '',
+      sourceUrl: parsed.sourceUrl || row?.source_url || '',
+      previewImageUrl: parsed.previewImageUrl || row?.preview_image_url || '',
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchDiscoveredMarketCards() {
+  try {
+    const rows = await queryD1(`
+      SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
+      FROM market_products
+      WHERE source = 'snkrdunk'
+        AND is_active = 1
+        AND json_extract(raw_market_card_json, '$.catalogDiscovered') = 1
+    `);
+    return uniqueByApparelId(rows.map(parseStoredMarketCard).filter(Boolean));
+  } catch (error) {
+    console.warn(`discovered market catalog lookup skipped: ${error?.message || 'failed'}`);
+    return [];
+  }
+}
+
 function normalizeMissingCondition(value) {
   const condition = String(value || '').trim().toLowerCase();
   if (condition === 'a') return 'single';
@@ -222,8 +259,10 @@ async function filterTargetsByMissingCondition(targets) {
 async function buildTargets() {
   const explicitIds = parseIds(process.env.APPAREL_IDS || process.env.BACKFILL_APPAREL_IDS);
   const scope = String(process.env.BACKFILL_SCOPE || 'approved').trim().toLowerCase();
-  const allMarketCards = uniqueByApparelId((Array.isArray(marketCards) ? marketCards : [])
-    .filter((item) => item?.apparelId));
+  const allMarketCards = uniqueByApparelId([
+    ...(Array.isArray(marketCards) ? marketCards : []),
+    ...(await fetchDiscoveredMarketCards()),
+  ].filter((item) => item?.apparelId));
   const byApparelId = new Map(allMarketCards.map((item) => [Number(item.apparelId), item]));
 
   if (explicitIds.length) {

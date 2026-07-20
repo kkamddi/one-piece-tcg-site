@@ -12,6 +12,8 @@ const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const DEFAULT_SOLD_LISTING_PAGES = 1;
 const MAX_SOLD_LISTING_PAGES = 50;
 const DEFAULT_SOLD_LISTING_PER_PAGE = 50;
+const DISCOVERY_PAGE_SIZE = 100;
+const DISCOVERY_MAX_PAGES = 3;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
@@ -56,6 +58,113 @@ function uniqueByApparelId(items) {
     seen.add(apparelId);
     return true;
   });
+}
+
+function normalizeCatalogText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function parseCatalogSetName(name) {
+  const match = String(name || '').match(/\(([^()]+)\)\s*$/);
+  return match ? normalizeCatalogText(match[1]) : '';
+}
+
+function parseCatalogListingCount(value) {
+  const match = String(value ?? '').match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+function catalogCardCode(item) {
+  const titleMatch = String(item?.name || '').match(/\[([^\]]+)\]/);
+  const fromTitle = normalizeCatalogText(titleMatch?.[1]);
+  const fromProductNumber = normalizeCatalogText(item?.productNumber).replace(/^OPC-TCG-/i, '');
+  return fromTitle || fromProductNumber;
+}
+
+function isJapaneseCatalogProduct(item) {
+  return !/\[(EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/i.test(String(item?.name || ''));
+}
+
+function isDiscoverableCatalogCard(item) {
+  const apparelId = Number(item?.id || 0);
+  const code = catalogCardCode(item);
+  const name = normalizeCatalogText(item?.name);
+  if (!Number.isInteger(apparelId) || apparelId <= 0 || !code || !/[A-Z]/i.test(code) || !/\d/.test(code)) return false;
+  if (/\[(?:OP|EB|ST|PRB|P|DON|CS|OPC)-?\d/i.test(name)) return true;
+  return /^(?:OP|EB|ST|PRB|P|DON|CS|OPC)-?\d/i.test(code)
+    && !/\b(?:box|deck|collection|set|pack)\b/i.test(name);
+}
+
+function toDiscoveredMarketCard(item) {
+  const apparelId = Number(item.id);
+  return {
+    source: 'snkrdunk',
+    code: catalogCardCode(item),
+    locale: 'JP',
+    apparelId,
+    name: normalizeCatalogText(item.name),
+    setName: parseCatalogSetName(item.name),
+    minPrice: Number(item.minPrice || 0),
+    minPriceFormat: item.minPriceFormat || 'US $ -',
+    listingCount: parseCatalogListingCount(item.listingCount),
+    sourceUrl: `${SNKRDUNK_BASE}/en/trading-cards/${apparelId}?slide=right`,
+    previewImageUrl: item.thumbnailUrl || '',
+    catalogDiscovered: true,
+  };
+}
+
+function parseStoredMarketCard(row) {
+  try {
+    const parsed = JSON.parse(String(row?.raw_market_card_json || '{}'));
+    const apparelId = Number(parsed?.apparelId || row?.apparel_id || 0);
+    return apparelId > 0 ? {
+      ...parsed,
+      source: parsed.source || row?.source || 'snkrdunk',
+      apparelId,
+      locale: parsed.locale || row?.locale || 'JP',
+      code: parsed.code || row?.code || '',
+      name: parsed.name || row?.name || '',
+      setName: parsed.setName || row?.set_name || '',
+      sourceUrl: parsed.sourceUrl || row?.source_url || '',
+      previewImageUrl: parsed.previewImageUrl || row?.preview_image_url || '',
+    } : null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchDiscoveredMarketCards() {
+  try {
+    const rows = await queryD1(`
+      SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
+      FROM market_products
+      WHERE source = 'snkrdunk'
+        AND is_active = 1
+        AND json_extract(raw_market_card_json, '$.catalogDiscovered') = 1
+    `);
+    return uniqueByApparelId(rows.map(parseStoredMarketCard).filter(Boolean));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchLatestCatalogPage(page) {
+  const url = new URL(`${SNKRDUNK_BASE}/en/v1/trading-cards`);
+  url.searchParams.set('brandId', 'onepiece');
+  url.searchParams.set('categoryId', '25');
+  url.searchParams.set('page', String(page));
+  url.searchParams.set('perPage', String(DISCOVERY_PAGE_SIZE));
+  url.searchParams.set('order', 'release');
+  const response = await fetch(url, {
+    headers: {
+      accept: 'application/json',
+      'user-agent': 'Mozilla/5.0 OPTCGKorea/1.0',
+    },
+  });
+  const text = (await response.text()).replace(/^\uFEFF/, '');
+  if (!response.ok) throw new Error(`snkrdunk_catalog_${response.status}`);
+  const payload = JSON.parse(text);
+  return Array.isArray(payload?.tradingCards) ? payload.tradingCards : [];
 }
 
 function parseApparelIds(value) {
@@ -479,8 +588,10 @@ async function fetchApprovedOverrideIds() {
 }
 
 async function buildTargetItems(scope = 'approved', explicitApparelIds = []) {
-  const allMarketCards = uniqueByApparelId((Array.isArray(marketCards) ? marketCards : [])
-    .filter((item) => item?.apparelId));
+  const allMarketCards = uniqueByApparelId([
+    ...(Array.isArray(marketCards) ? marketCards : []),
+    ...(await fetchDiscoveredMarketCards()),
+  ].filter((item) => item?.apparelId));
   if (explicitApparelIds.length) {
     const requestedIds = new Set(explicitApparelIds);
     return allMarketCards.filter((item) => requestedIds.has(Number(item.apparelId)));
@@ -563,6 +674,37 @@ async function collectBatch(items, concurrency = DEFAULT_CONCURRENCY, options = 
   return result;
 }
 
+async function discoverNewMarketCards() {
+  const knownIds = new Set([
+    ...(Array.isArray(marketCards) ? marketCards : []),
+    ...(await fetchDiscoveredMarketCards()),
+  ].map((item) => Number(item?.apparelId || 0)).filter(Boolean));
+  const fetched = [];
+  for (let page = 1; page <= DISCOVERY_MAX_PAGES; page += 1) {
+    const items = await fetchLatestCatalogPage(page);
+    fetched.push(...items);
+    if (items.length < DISCOVERY_PAGE_SIZE) break;
+  }
+  const candidates = uniqueByApparelId(fetched
+    .filter(isJapaneseCatalogProduct)
+    .filter(isDiscoverableCatalogCard)
+    .map(toDiscoveredMarketCard));
+  const additions = candidates.filter((item) => !knownIds.has(Number(item.apparelId)));
+  const snapshot = additions.length
+    ? await collectBatch(additions, Math.min(DEFAULT_CONCURRENCY, 3), { persistListingSnapshot: true })
+    : { collected: 0, priced: 0, failed: 0, errors: [] };
+  if (snapshot.failed > 0) throw new Error(`catalog_snapshot_failed:${snapshot.failed}`);
+  return {
+    ok: true,
+    scanned: fetched.length,
+    candidates: candidates.length,
+    added: additions.length,
+    addedIds: additions.map((item) => Number(item.apparelId)),
+    addedCards: additions.map((item) => ({ apparelId: item.apparelId, code: item.code, name: item.name })),
+    snapshot,
+  };
+}
+
 export default async function handler(request, response) {
   if (!['GET', 'POST'].includes(request.method)) {
     return response.status(405).json({ error: 'method_not_allowed' });
@@ -582,6 +724,14 @@ export default async function handler(request, response) {
       return response.status(200).json(result);
     } catch (error) {
       return response.status(500).json({ error: error?.message || 'history_ingest_failed' });
+    }
+  }
+
+  if (mode === 'discover' || mode === 'catalog') {
+    try {
+      return response.status(200).json(await discoverNewMarketCards());
+    } catch (error) {
+      return response.status(500).json({ error: error?.message || 'catalog_discovery_failed' });
     }
   }
 

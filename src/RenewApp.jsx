@@ -3831,6 +3831,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
+  useBodyScrollLock(notificationMenuOpen && isLoggedIn);
   const unreadCount = notifications.filter((item) => !item.read_at).length;
   const handleNotificationClick = () => {
     setMobileLanguageOpen(false);
@@ -9897,10 +9898,26 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           ...resultSource,
           ...primaryItems.filter((item) => koreanNameCodes.has(normalizeCode(item.code)))
         ]);
+      let discoveredItems = [];
+      if (!expandedResult.length || (targetApparelId && !expandedResult.some((item) => String(item.apparelId) === String(targetApparelId)))) {
+        try {
+          const detail = await fetchMarketPrice({
+            code: rawQuery,
+            apparelId: targetApparelId || null,
+            summary: true
+          });
+          if (detail?.item?.apparelId) discoveredItems = [detail.item];
+        } catch {
+          // The D1 catalog fallback is optional; keep static search behavior on failure.
+        }
+      }
+      const combinedResult = uniqueMarketItems([...expandedResult, ...discoveredItems]);
+      const discoveredApparelIds = new Set(discoveredItems.map((item) => String(item.apparelId)));
       const shouldSortCandidatesByPrice = !targetApparelId && !exactCodeResult.length;
-      const result = expandedResult
+      const result = combinedResult
         .filter((item) => {
           if (targetApparelId && String(item.apparelId) === String(targetApparelId)) return true;
+          if (discoveredApparelIds.has(String(item.apparelId))) return true;
           if (exactCodeResult.length && normalizeCode(item.code) === normalized) return true;
           const price = Number(item.minPrice || 0);
           const listingCount = item.listingCount;

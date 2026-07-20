@@ -546,6 +546,8 @@
 .renew-notification-list {
   max-height: min(520px, 70vh);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .renew-notification-list > button {
