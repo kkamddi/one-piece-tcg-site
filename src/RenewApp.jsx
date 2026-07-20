@@ -9919,6 +9919,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           if (targetApparelId && String(item.apparelId) === String(targetApparelId)) return true;
           if (discoveredApparelIds.has(String(item.apparelId))) return true;
           if (exactCodeResult.length && normalizeCode(item.code) === normalized) return true;
+          if (normalizedText && getMarketSearchText(item).includes(normalizedText)) return true;
           const price = Number(item.minPrice || 0);
           const listingCount = item.listingCount;
           return price > 0 || listingCount == null || Number(listingCount) > 0;
