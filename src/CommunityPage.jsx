@@ -697,7 +697,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
               <small>{localeText(uiLang, 'JPG, PNG, WEBP · 최대 10MB', 'JPG, PNG, WEBP · up to 10 MB', 'JPG・PNG・WEBP · 最大10MB')}</small>
             </div>
             <label><span>{localeText(uiLang, '내용', 'Content', '本文')}</span><textarea value={content} onChange={(event) => setContent(event.target.value)} maxLength={2000} rows={8} required /></label>
-            <footer><button type="button" onClick={closeComposer}>{localeText(uiLang, '취소', 'Cancel', 'キャンセル')}</button><button type="submit" disabled={saving || !title.trim() || !content.trim()}>{saving ? localeText(uiLang, '등록 중', 'Publishing', '投稿中') : localeText(uiLang, '게시하기', 'Publish', '投稿する')}</button></footer>
+            <footer><button type="button" onClick={closeComposer}>{localeText(uiLang, '취소', 'Cancel', 'キャンセル')}</button><button type="submit" disabled={saving || !title.trim() || !content.trim()}>{saving ? localeText(uiLang, '저장 중', 'Saving', '保存中') : editingPost ? localeText(uiLang, '수정 완료', 'Save changes', '変更を保存') : localeText(uiLang, '게시하기', 'Publish', '投稿する')}</button></footer>
           </form>
         </div>
       ) : null}
