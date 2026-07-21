@@ -455,29 +455,28 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
       <section className="renew-panel renew-community-panel">
         <header className="renew-community-head">
           <h1>COMMUNITY</h1>
-          <button type="button" className="renew-community-write" onClick={openComposer}>＋ {localeText(uiLang, '글쓰기', 'New post', '投稿')}</button>
-        </header>
-
-        <section className={`renew-community-attendance${attendance?.checkedToday ? ' is-complete' : ''}`} aria-label={localeText(uiLang, '출석체크', 'Daily check-in', '出席チェック')}>
-          <div>
-            <span>DAILY CHECK-IN</span>
-            <strong>{authUser
-              ? attendance?.checkedToday
-                ? localeText(uiLang, '오늘 출석 완료', 'Checked in today', '本日の出席完了')
-                : localeText(uiLang, '오늘 출석하고 1P 받기', 'Check in and earn 1 point', '出席して1P獲得')
-              : localeText(uiLang, '로그인하고 매일 1P 받기', 'Sign in for daily points', 'ログインして毎日1P')}</strong>
-            {authUser && attendance ? (
-              <small>{localeText(uiLang, `연속 ${attendance.streak || 0}일 · ${Number(attendance.totalPoints || 0).toLocaleString('ko-KR')}P`, `${attendance.streak || 0}-day streak · ${Number(attendance.totalPoints || 0).toLocaleString('en-US')}P`, `${attendance.streak || 0}日連続 · ${Number(attendance.totalPoints || 0).toLocaleString('ja-JP')}P`)}</small>
-            ) : null}
+          <div className="renew-community-head-actions">
+            <button
+              type="button"
+              className={`renew-community-checkin${attendance?.checkedToday ? ' is-complete' : ''}`}
+              onClick={checkInToday}
+              disabled={attendanceLoading || Boolean(attendance?.checkedToday)}
+              title={authUser && attendance
+                ? localeText(uiLang, `연속 ${attendance.streak || 0}일 · ${Number(attendance.totalPoints || 0).toLocaleString('ko-KR')}P`, `${attendance.streak || 0}-day streak · ${Number(attendance.totalPoints || 0).toLocaleString('en-US')}P`, `${attendance.streak || 0}日連続 · ${Number(attendance.totalPoints || 0).toLocaleString('ja-JP')}P`)
+                : undefined}
+            >
+              <span>{attendanceLoading
+                ? localeText(uiLang, '확인 중', 'Checking', '確認中')
+                : attendance?.checkedToday
+                  ? localeText(uiLang, '출석완료', 'Checked in', '出席完了')
+                  : localeText(uiLang, '출석체크', 'Check in', '出席')}</span>
+              <small>{authUser && attendance
+                ? `${Number(attendance.totalPoints || 0).toLocaleString(uiLang === 'en' ? 'en-US' : uiLang === 'jp' ? 'ja-JP' : 'ko-KR')}P`
+                : '+1P'}</small>
+            </button>
+            <button type="button" className="renew-community-write" onClick={openComposer}>＋ {localeText(uiLang, '글쓰기', 'New post', '投稿')}</button>
           </div>
-          <button type="button" onClick={checkInToday} disabled={attendanceLoading || Boolean(attendance?.checkedToday)}>
-            {attendanceLoading
-              ? localeText(uiLang, '확인 중', 'Checking', '確認中')
-              : attendance?.checkedToday
-                ? localeText(uiLang, '완료', 'Done', '完了')
-                : localeText(uiLang, '출석', 'Check in', '出席')}
-          </button>
-        </section>
+        </header>
 
         <div className="renew-community-toolbar">
           <div className="renew-community-boards" role="tablist" aria-label={localeText(uiLang, '게시판 분류', 'Categories', 'カテゴリー')}>
