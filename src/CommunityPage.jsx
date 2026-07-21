@@ -433,7 +433,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
   };
 
   return (
-    <main className="renew-subpage renew-community-main">
+    <main className={`renew-subpage renew-community-main${composerOpen || imageConsentOpen ? ' is-community-modal-open' : ''}`}>
       <section className="renew-panel renew-community-panel">
         <header className="renew-community-head">
           <div className="renew-community-head-actions">

@@ -67,6 +67,10 @@
   z-index: 10000;
 }
 
+.renew-subpage.is-community-modal-open {
+  z-index: 1300;
+}
+
 .renew-nav {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
