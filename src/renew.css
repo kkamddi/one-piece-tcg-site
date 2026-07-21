@@ -7311,11 +7311,15 @@
   }
 
   .renew-community-head {
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 12px;
   }
 
   .renew-community-head h1 {
     font-size: 22px;
+    white-space: nowrap;
   }
 
   .renew-community-write,
@@ -7326,6 +7330,8 @@
   }
 
   .renew-community-head-actions {
+    width: 100%;
+    justify-content: flex-end;
     gap: 6px;
   }
 

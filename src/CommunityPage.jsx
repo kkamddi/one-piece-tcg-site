@@ -90,32 +90,6 @@ function getPopularScore(post, windowMs) {
     + freshness;
 }
 
-function getCommunityPreviewPosts() {
-  const now = Date.now();
-  return [
-    ['preview-1', 'question', '신규 프로모 카드 시세가 궁금합니다', 14, 9, 230, 1],
-    ['preview-2', 'free', '오늘 개봉한 박스 결과 공유합니다', 11, 6, 182, 3],
-    ['preview-3', 'free', 'PSA10 수집 기준을 어떻게 잡으시나요?', 8, 12, 154, 6],
-    ['preview-4', 'question', '입문용 스타트 덱 추천 부탁드립니다', 5, 4, 96, 30],
-    ['preview-5', 'free', '이번 주 카드샵 방문 후기', 3, 2, 61, 70]
-  ].map(([id, boardId, title, likes, commentCount, views, hours]) => ({
-    id,
-    boardId,
-    nickname: 'UI 미리보기',
-    title,
-    content: '커뮤니티 화면 검토를 위한 로컬 전용 샘플 게시글입니다.',
-    cardName: '',
-    imageUrl: '',
-    likes,
-    commentCount,
-    views,
-    createdAt: new Date(now - hours * 60 * 60 * 1000).toISOString(),
-    likedByMe: false,
-    canEdit: false,
-    preview: true
-  }));
-}
-
 function useCommunityModalScrollLock(active) {
   useEffect(() => {
     if (!active || typeof window === 'undefined' || typeof document === 'undefined') return undefined;
@@ -200,7 +174,8 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
     } catch (error) {
       const isLocalPreview = import.meta.env.DEV && ['127.0.0.1', 'localhost'].includes(window.location.hostname);
       if (isLocalPreview) {
-        setPosts(getCommunityPreviewPosts());
+        setPosts([]);
+        setLoadFailed(false);
       } else {
         setLoadFailed(true);
         setMessage(localeText(uiLang, '게시글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.', 'Could not load posts. Please try again.', '投稿を読み込めませんでした。'));
@@ -384,7 +359,6 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
   const openPost = async (post) => {
     setSelectedPost(post);
     setComments([]);
-    if (post.preview) return;
     setCommentsLoading(true);
     try {
       const [updatedPost, response] = await Promise.all([
@@ -489,7 +463,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
 
         {message && !loadFailed ? <p className="renew-community-message" role="status">{message}</p> : null}
 
-        {!selectedPost && !loading && !loadFailed ? (
+        {!selectedPost && !loading && !loadFailed && (popularPosts.daily.length || popularPosts.weekly.length) ? (
           <div className="renew-community-popular-grid">
             {[
               { id: 'daily', eyebrow: 'TODAY', title: localeText(uiLang, '인기글', 'Popular posts', '人気投稿') },
