@@ -4610,7 +4610,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
               <div className="renew-account-point-stats">
                 <div>
                   <span>{text('현재 등급', 'Member grade', '会員ランク')}</span>
-                  <strong>{username === 'admin' ? text('관리자', 'Admin', '管理者') : text('일반 회원', 'Member', '一般会員')}</strong>
+                  <strong>{authUser?.app_metadata?.role === 'admin' ? text('관리자', 'Admin', '管理者') : text('일반 회원', 'Member', '一般会員')}</strong>
                 </div>
                 <div>
                   <span>{text('누적 포인트', 'Total points', '累計ポイント')}</span>
