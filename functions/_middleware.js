@@ -50,9 +50,9 @@ const PAGE_SEO = {
     keywords: '원피스카드 거래, 원피스 카드 교환, 원피스카드 판매, 원피스카드 마켓'
   },
   '/community': {
-    title: '원피스카드 커뮤니티 - 질문·가입인사·이벤트 | Card Pone',
-    description: '원피스카드 질문과 자유 이야기, 가입인사를 나누고 출석 포인트와 회원 등급을 확인할 수 있습니다.',
-    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 가입인사, 원피스카드 이벤트, 카드 수집 커뮤니티',
+    title: '원피스카드 커뮤니티 - 질문·정보·자유 | Card Pone',
+    description: '원피스카드 질문과 정보, 자유 이야기와 가입인사를 나누고 출석 포인트와 회원 등급을 확인할 수 있습니다.',
+    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 정보, 원피스카드 가입인사, 카드 수집 커뮤니티',
     schemaType: 'CollectionPage'
   },
   '/news': {
@@ -109,8 +109,8 @@ const JAPANESE_SEO = {
   },
   '/community': {
     title: 'ワンピースカードゲーム コミュニティ | Card Pone',
-    description: 'ONE PIECE CARD GAMEの質問、自己紹介、コレクションの話を共有できるコミュニティです。',
-    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 自己紹介,ワンピカード コレクション',
+    description: 'ONE PIECE CARD GAMEの質問、情報、自己紹介、コレクションの話を共有できるコミュニティです。',
+    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 情報,ワンピカード 自己紹介,ワンピカード コレクション',
     schemaType: 'CollectionPage'
   },
   '/calendar': {
@@ -469,7 +469,7 @@ const SEO_PRIMARY = {
 const SITE_NAVIGATION_ITEMS = [
   { name: '도감', url: `${SITE_ORIGIN}/cards`, description: '한글판·일본판 원피스카드 도감 검색' },
   { name: '시세', url: `${SITE_ORIGIN}/prices`, description: '카드 시세, 박스 가격, 카드 인덱스' },
-  { name: '커뮤니티', url: `${SITE_ORIGIN}/community`, description: '질문, 가입인사와 카드 수집 이야기' },
+  { name: '커뮤니티', url: `${SITE_ORIGIN}/community`, description: '질문, 정보, 가입인사와 카드 수집 이야기' },
   { name: '일정', url: `${SITE_ORIGIN}/calendar`, description: '상품 발매일과 공식 이벤트 공지 캘린더' },
   { name: '정보', url: `${SITE_ORIGIN}/news`, description: '공식공지, 사전예약, 가이드와 Q&A' },
   { name: '구매처', url: `${SITE_ORIGIN}/shops`, description: '지역별 공인점포와 취급점포 검색' },
@@ -479,7 +479,7 @@ const SITE_NAVIGATION_ITEMS = [
 const JAPANESE_SITE_NAVIGATION_ITEMS = [
   { name: 'カード図鑑', url: `${SITE_ORIGIN}/jp/cards`, description: '日本版ONE PIECE CARD GAMEのカードをシリーズやカード番号から検索' },
   { name: '相場', url: `${SITE_ORIGIN}/jp/prices`, description: 'Single・PSA10の相場、ボックス価格、価格チャート' },
-  { name: 'コミュニティ', url: `${SITE_ORIGIN}/jp/community`, description: '質問、自己紹介、カード収集の話題' },
+  { name: 'コミュニティ', url: `${SITE_ORIGIN}/jp/community`, description: '質問、情報、自己紹介、カード収集の話題' },
   { name: 'スケジュール', url: `${SITE_ORIGIN}/jp/calendar`, description: '新商品、プロモカード、公式イベントの日程' },
   { name: '公式情報', url: `${SITE_ORIGIN}/jp/news`, description: '新商品と公式告知の最新情報' },
   { name: 'ショップ', url: `${SITE_ORIGIN}/jp/shops`, description: '公式ショップと公認店の検索' }
@@ -513,7 +513,7 @@ const SERVER_PAGE_CONTENT = {
   '/community': {
     heading: '원피스카드 커뮤니티',
     paragraphs: [
-      '질문, 자유 이야기와 가입인사를 통해 원피스카드 수집 경험을 회원들과 나눌 수 있습니다.',
+      '질문, 정보, 자유 이야기와 가입인사를 통해 원피스카드 수집 경험을 회원들과 나눌 수 있습니다.',
       '출석과 게시글 좋아요로 적립한 포인트는 회원 등급에 반영되며 이벤트 혜택은 확정된 내용만 별도 공지합니다.'
     ],
     links: ['/cards', '/prices', '/guide', '/news']
@@ -604,7 +604,7 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
   '/community': {
     heading: 'ワンピースカードゲーム コミュニティ',
     paragraphs: [
-      '質問、自己紹介、自由な話題を通して、ONE PIECE CARD GAMEの収集体験を共有できます。',
+      '質問、情報、自己紹介、自由な話題を通して、ONE PIECE CARD GAMEの収集体験を共有できます。',
       '出席と投稿へのいいねで獲得したポイントは会員ランクに反映され、イベント特典は確定後に別途案内します。'
     ],
     links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']

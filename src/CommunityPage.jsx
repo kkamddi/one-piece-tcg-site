@@ -18,10 +18,12 @@ const COMMUNITY_BOARDS = [
   { id: 'all', kr: '전체', en: 'All', jp: 'すべて' },
   { id: 'intro', kr: '가입인사', en: 'Introductions', jp: '自己紹介' },
   { id: 'question', kr: '질문', en: 'Questions', jp: '質問' },
+  { id: 'info', kr: '정보', en: 'Info', jp: '情報' },
   { id: 'free', kr: '자유', en: 'General', jp: 'フリー' },
   { id: 'event', kr: '이벤트', en: 'Events', jp: 'イベント' }
 ];
 const COMMUNITY_IMAGE_CONSENT_KEY = 'card-pone-community-image-consent-v1';
+const COMMUNITY_POSTS_PER_PAGE = 10;
 
 function localeText(uiLang, kr, en, jp) {
   if (uiLang === 'JP') return jp || en || kr;
@@ -152,6 +154,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   const [loadFailed, setLoadFailed] = useState(false);
   const [message, setMessage] = useState('');
   const [activeBoard, setActiveBoard] = useState('all');
+  const [listPage, setListPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
@@ -231,6 +234,11 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
 
   const visiblePosts = useMemo(() => categoryPosts.filter((post) => !(activeBoard === 'event' && post.pinned))
     .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt)), [categoryPosts]);
+  const totalPostPages = Math.max(1, Math.ceil(visiblePosts.length / COMMUNITY_POSTS_PER_PAGE));
+  const paginatedPosts = useMemo(() => {
+    const start = (listPage - 1) * COMMUNITY_POSTS_PER_PAGE;
+    return visiblePosts.slice(start, start + COMMUNITY_POSTS_PER_PAGE);
+  }, [listPage, visiblePosts]);
   const isEventBoard = activeBoard === 'event';
   const pinnedEventPosts = useMemo(() => posts
     .filter((post) => post.boardId === 'event' && post.pinned)
@@ -248,6 +256,14 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   const displayedPinnedEventPosts = hasStoredEventState ? pinnedEventPosts : [defaultEventNotice];
   const hasMyIntroPost = useMemo(() => posts.some((post) => post.boardId === 'intro' && post.ownedByMe), [posts]);
   const cannotWriteActiveBoard = (isEventBoard && !isAdmin) || (activeBoard === 'intro' && hasMyIntroPost);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [activeBoard]);
+
+  useEffect(() => {
+    setListPage((page) => Math.min(page, totalPostPages));
+  }, [totalPostPages]);
 
   const popularPosts = useMemo(() => {
     const now = Date.now();
@@ -277,7 +293,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
       return;
     }
     setEditingPost(null);
-    setComposerBoard(['intro', 'free', 'event'].includes(activeBoard) ? activeBoard : 'question');
+    setComposerBoard(['intro', 'question', 'info', 'free', 'event'].includes(activeBoard) ? activeBoard : 'question');
     setComposerOpen(true);
   };
 
@@ -650,32 +666,40 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
             <button type="button" onClick={loadPosts}>{localeText(uiLang, '다시 시도', 'Try again', '再試行')}</button>
           </div>
         ) : visiblePosts.length ? (
-          <div className="renew-community-list">
-            {visiblePosts.map((post) => {
-              const board = getBoard(post.boardId);
-              return (
-                <article key={post.id} className="renew-community-post">
-                  <button type="button" className="renew-community-post-main" onClick={() => openPost(post)}>
-                    <div className="renew-community-post-meta">
-                      <span>{localeText(uiLang, board.kr, board.en, board.jp)}</span>
-                      <b>{post.nickname}</b>
-                      <CommunityGradeBadge gradeKey={post.authorGrade} uiLang={uiLang} />
-                      <time>{formatCommunityDate(post.createdAt, uiLang)}</time>
+          <>
+            <div className="renew-community-list">
+              {paginatedPosts.map((post) => {
+                const board = getBoard(post.boardId);
+                return (
+                  <article key={post.id} className="renew-community-post">
+                    <button type="button" className="renew-community-post-main" onClick={() => openPost(post)}>
+                      <div className="renew-community-post-meta">
+                        <span>{localeText(uiLang, board.kr, board.en, board.jp)}</span>
+                        <b>{post.nickname}</b>
+                        <CommunityGradeBadge gradeKey={post.authorGrade} uiLang={uiLang} />
+                        <time>{formatCommunityDate(post.createdAt, uiLang)}</time>
+                      </div>
+                      <h2>
+                        {post.title}
+                        {Number(post.commentCount || 0) > 0 ? <small>({post.commentCount})</small> : null}
+                      </h2>
+                    </button>
+                    <div className="renew-community-post-stats">
+                      <button type="button" className={post.likedByMe ? 'is-active' : ''} onClick={() => toggleLike(post.id)}>♡ {post.likes || 0}</button>
+                      <span>{localeText(uiLang, '조회', 'Views', '閲覧')} {post.views || 0}</span>
                     </div>
-                    <h2>{post.title}</h2>
-                    <p>{post.content}</p>
-                    {post.cardName ? <strong className="renew-community-card-tag">CARD · {post.cardName}</strong> : null}
-                  </button>
-                  {post.imageUrl ? <button type="button" className="renew-community-post-image" onClick={() => openPost(post)} aria-label={post.title}><img src={post.imageUrl} alt="" loading="lazy" /></button> : null}
-                  <div className="renew-community-post-stats">
-                    <button type="button" className={post.likedByMe ? 'is-active' : ''} onClick={() => toggleLike(post.id)}>♡ {post.likes || 0}</button>
-                    <span>▢ {post.commentCount || 0}</span>
-                    <span>{localeText(uiLang, '조회', 'Views', '閲覧')} {post.views || 0}</span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+            {totalPostPages > 1 ? (
+              <nav className="renew-community-pagination" aria-label={localeText(uiLang, '게시글 페이지', 'Post pages', '投稿ページ')}>
+                <button type="button" onClick={() => setListPage((page) => Math.max(1, page - 1))} disabled={listPage === 1} aria-label={localeText(uiLang, '이전', 'Previous', '前へ')} title={localeText(uiLang, '이전', 'Previous', '前へ')}>‹</button>
+                <strong>{listPage} / {totalPostPages}</strong>
+                <button type="button" onClick={() => setListPage((page) => Math.min(totalPostPages, page + 1))} disabled={listPage === totalPostPages} aria-label={localeText(uiLang, '다음', 'Next', '次へ')} title={localeText(uiLang, '다음', 'Next', '次へ')}>›</button>
+              </nav>
+            ) : null}
+          </>
         ) : isEventBoard && displayedPinnedEventPosts.length ? null : (
           <div className="renew-community-empty">
             <strong>{localeText(uiLang, '아직 게시글이 없습니다.', 'No posts yet.', 'まだ投稿がありません。')}</strong>

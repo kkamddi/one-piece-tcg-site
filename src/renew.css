@@ -6691,7 +6691,7 @@
 
 .renew-community-boards {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -6829,16 +6829,17 @@
 
 .renew-community-list {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .renew-community-post {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px 18px;
+  align-items: center;
+  gap: 8px 16px;
   border: 1px solid rgba(23, 25, 28, 0.1);
-  border-radius: 12px;
-  padding: 18px 20px;
+  border-radius: 8px;
+  padding: 10px 14px;
   background: rgba(255, 255, 255, 0.72);
   transition: border-color 160ms ease, transform 160ms ease;
 }
@@ -6860,7 +6861,7 @@
 
 .renew-community-post-main {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .renew-community-post-meta {
@@ -6944,6 +6945,20 @@
   letter-spacing: 0;
 }
 
+.renew-community-post h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 16px;
+}
+
+.renew-community-post h2 small {
+  flex: 0 0 auto;
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .renew-community-post-main > p {
   display: -webkit-box;
   overflow: hidden;
@@ -6988,12 +7003,10 @@
 }
 
 .renew-community-post-stats {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 14px;
-  border-top: 1px solid rgba(23, 25, 28, 0.07);
-  padding-top: 10px;
+  justify-content: flex-end;
+  gap: 10px;
   color: #7b8493;
   font-size: 12px;
   font-weight: 800;
@@ -7012,6 +7025,39 @@
 .renew-community-post-stats button.is-active,
 .renew-community-detail-actions button.is-active {
   color: #c94d35;
+}
+
+.renew-community-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.renew-community-pagination button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(23, 25, 28, 0.13);
+  border-radius: 50%;
+  color: #17191c;
+  background: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.renew-community-pagination button:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.renew-community-pagination strong {
+  min-width: 52px;
+  text-align: center;
+  font-size: 14px;
 }
 
 .renew-community-empty {
@@ -7445,6 +7491,12 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.renew-app.is-dark .renew-community-pagination button {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .renew-app.is-dark .renew-community-post-meta b,
 .renew-app.is-dark .renew-community-empty strong {
   color: #f4f6f8;
@@ -7529,7 +7581,7 @@
 
 @media (max-width: 900px) {
   .renew-community-boards {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
@@ -7584,6 +7636,10 @@
     padding: 4px;
   }
 
+  .renew-community-boards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .renew-community-boards button {
     min-height: 36px;
     padding: 0 6px;
@@ -7612,9 +7668,10 @@
   }
 
   .renew-community-post {
-    gap: 10px 12px;
-    border-radius: 10px;
-    padding: 15px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    border-radius: 8px;
+    padding: 10px 12px;
   }
 
   .renew-community-post h2 {
@@ -7632,7 +7689,11 @@
   }
 
   .renew-community-post-meta time {
-    width: 100%;
+    width: auto;
+  }
+
+  .renew-community-post-stats {
+    justify-content: flex-start;
   }
 
   .renew-community-detail h2 {
