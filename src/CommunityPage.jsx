@@ -215,7 +215,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   }, [authUser?.id]);
 
   const categoryPosts = useMemo(() => posts.filter((post) => {
-      if (post.adminOnly || post.boardId === 'feedback') return false;
+      if (post.adminOnly || post.hidden || post.boardId === 'feedback') return false;
       return activeBoard === 'all' || getBoard(post.boardId).id === activeBoard;
     }), [posts, activeBoard]);
 
@@ -225,6 +225,17 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   const pinnedEventPosts = useMemo(() => posts
     .filter((post) => post.boardId === 'event' && post.pinned)
     .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt)), [posts]);
+  const hasStoredEventState = useMemo(() => posts.some((post) => post.boardId === 'event'), [posts]);
+  const defaultEventNotice = useMemo(() => ({
+    id: '',
+    boardId: 'event',
+    title: localeText(uiLang, '이벤트 게시판 안내', 'Events board notice', 'イベント掲示板のお知らせ'),
+    content: localeText(uiLang, '이벤트 게시판은 추후 공지 예정입니다. 출석과 활동으로 모은 포인트에는 추후 회원 혜택이 제공될 예정입니다.', 'Events will be announced here soon. Points earned through check-ins and activity will bring future member benefits.', 'イベントは今後こちらでお知らせします。出席・活動で貯めたポイントには、今後会員特典を予定しています。'),
+    pinned: true,
+    canEdit: isAdmin,
+    isFallback: true
+  }), [isAdmin, uiLang]);
+  const displayedPinnedEventPosts = hasStoredEventState ? pinnedEventPosts : [defaultEventNotice];
   const hasMyIntroPost = useMemo(() => posts.some((post) => post.boardId === 'intro' && post.ownedByMe), [posts]);
   const cannotWriteActiveBoard = (isEventBoard && !isAdmin) || (activeBoard === 'intro' && hasMyIntroPost);
 
@@ -385,14 +396,15 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
         cardName: cardName.trim(),
         imageUrl: uploadedImageUrl || editingPost?.imageUrl || '',
         content: safeContent,
-        pinned: editingPost?.pinned || (!editingPost && composerBoard === 'event')
+        pinned: editingPost?.isFallback || editingPost?.pinned || (!editingPost && composerBoard === 'event')
       };
-      const post = editingPost
-        ? await updateCommunityPost(editingPost.id, payload, viewerToken)
-        : await createCommunityPost(payload, viewerToken);
-      setPosts((items) => editingPost
-        ? items.map((item) => item.id === post.id ? post : item)
-        : [post, ...items]);
+      const isNewPost = !editingPost || editingPost.isFallback;
+      const post = isNewPost
+        ? await createCommunityPost(payload, viewerToken)
+        : await updateCommunityPost(editingPost.id, payload, viewerToken);
+      setPosts((items) => isNewPost
+        ? [post, ...items]
+        : items.map((item) => item.id === post.id ? post : item));
       setActiveBoard(composerBoard === 'event' ? 'event' : 'all');
       closeComposer(true);
     } catch (error) {
@@ -463,6 +475,16 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   const removePostById = async (post) => {
     if (!post?.canEdit || !window.confirm(localeText(uiLang, '게시글을 삭제할까요?', 'Delete this post?', 'この投稿を削除しますか？'))) return;
     try {
+      if (post.isFallback) {
+        const hiddenPost = await createCommunityPost({
+          boardId: 'event',
+          title: post.title,
+          content: post.content,
+          hidden: true
+        });
+        setPosts((items) => [hiddenPost, ...items]);
+        return;
+      }
       await deleteCommunityPost(post.id, viewerToken);
       setPosts((items) => items.filter((item) => item.id !== post.id));
       if (selectedPost?.id === post.id) setSelectedPost(null);
@@ -472,10 +494,14 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   };
 
   const togglePinnedPost = async (post) => {
-    if (!isAdmin || !post?.id) return;
+    if (!isAdmin || !post) return;
     try {
-      const updated = await updateCommunityPost(post.id, { pinned: !post.pinned });
-      setPosts((items) => items.map((item) => item.id === post.id ? updated : item));
+      const updated = post.isFallback
+        ? await createCommunityPost({ boardId: 'event', title: post.title, content: post.content, pinned: false })
+        : await updateCommunityPost(post.id, { pinned: !post.pinned });
+      setPosts((items) => post.isFallback
+        ? [updated, ...items]
+        : items.map((item) => item.id === post.id ? updated : item));
       if (selectedPost?.id === post.id) setSelectedPost(updated);
     } catch {
       setMessage(localeText(uiLang, '고정 상태를 변경하지 못했습니다.', 'Could not change the pinned state.', '固定状態を変更できませんでした。'));
@@ -521,8 +547,8 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
 
         {message && !loadFailed ? <p className="renew-community-message" role="status">{message}</p> : null}
 
-        {isEventBoard ? pinnedEventPosts.map((post) => (
-          <aside key={post.id} className="renew-community-event-notice" aria-label={post.title}>
+        {isEventBoard ? displayedPinnedEventPosts.map((post) => (
+          <aside key={post.id || 'default-event-notice'} className="renew-community-event-notice" aria-label={post.title}>
             <span className="renew-community-event-notice-icon" aria-hidden="true">📌</span>
             <div>
               <div className="renew-community-event-notice-meta"><span>NOTICE</span></div>
@@ -627,7 +653,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
               );
             })}
           </div>
-        ) : isEventBoard && pinnedEventPosts.length ? null : (
+        ) : isEventBoard && displayedPinnedEventPosts.length ? null : (
           <div className="renew-community-empty">
             <strong>{localeText(uiLang, '아직 게시글이 없습니다.', 'No posts yet.', 'まだ投稿がありません。')}</strong>
             <p>{isEventBoard

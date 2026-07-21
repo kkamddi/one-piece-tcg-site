@@ -163,13 +163,13 @@ export default async function handler(request, response) {
     }
 
     if (request.method === 'POST') {
-      const { boardId, title, cardName, imageUrl, content, pinned } = request.body ?? {};
+      const { boardId, title, cardName, imageUrl, content, pinned, hidden } = request.body ?? {};
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
       if (!boardId || !title || !content) return response.status(400).json({ error: 'invalid_request' });
       const isEventBoard = String(boardId).trim() === 'event';
       if (isEventBoard && !isAdminUser(user)) return response.status(403).json({ error: 'event_board_read_only' });
 
-      const resolvedCardName = isEventBoard ? (pinned ? '__pinned__' : '') : cardName;
+      const resolvedCardName = isEventBoard ? (hidden ? '__hidden__' : pinned ? '__pinned__' : '') : cardName;
       const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName: resolvedCardName, imageUrl, content }, user.id, user.id);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(201).json(post);
