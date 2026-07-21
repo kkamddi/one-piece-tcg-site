@@ -8013,7 +8013,7 @@
 
 .renew-auth-provider-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -8138,6 +8138,7 @@
 
 .renew-kakao,
 .renew-google,
+.renew-naver,
 .renew-submit {
   height: 52px;
   border: 0;
@@ -8158,6 +8159,11 @@
   color: #17191c;
 }
 
+.renew-naver {
+  background: #03c75a;
+  color: #fff;
+}
+
 .renew-app.is-dark .renew-google {
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.08);
@@ -8172,7 +8178,8 @@
 
 .renew-submit:disabled,
 .renew-kakao:disabled,
-.renew-google:disabled {
+.renew-google:disabled,
+.renew-naver:disabled {
   cursor: default;
   opacity: 0.48;
 }

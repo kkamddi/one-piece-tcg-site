@@ -4302,6 +4302,25 @@ function RenewAuthModal({ onClose, onSignedIn }) {
     }
   }
 
+  async function loginWithNaver() {
+    if (!supabase || !hasSupabaseAuthConfig) {
+      setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
+      return;
+    }
+    if (isSignup && !requiredAgreed) {
+      setMessage('필수 약관에 동의해 주세요.');
+      return;
+    }
+    if (isSignup) savePendingSocialConsent();
+    try {
+      const { error } = await signInWithSocialProvider('custom:naver');
+      if (error) throw error;
+    } catch (error) {
+      if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
+      setMessage(error.message);
+    }
+  }
+
   return (
     <>
       <div className="renew-modal-backdrop" onClick={onClose}>
@@ -4314,11 +4333,14 @@ function RenewAuthModal({ onClose, onSignedIn }) {
         </div>
         <form className="renew-login-form" onSubmit={submitLogin}>
           <div className="renew-auth-provider-grid">
-            <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig}>
-              카카오톡으로 계속하기
+            <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig} aria-label="카카오톡으로 계속하기">
+              카카오톡
             </button>
-            <button type="button" className="renew-google" onClick={loginWithGoogle} disabled={!hasSupabaseAuthConfig}>
-              Google로 계속하기
+            <button type="button" className="renew-google" onClick={loginWithGoogle} disabled={!hasSupabaseAuthConfig} aria-label="Google로 계속하기">
+              Google
+            </button>
+            <button type="button" className="renew-naver" onClick={loginWithNaver} disabled={!hasSupabaseAuthConfig} aria-label="네이버로 계속하기">
+              네이버
             </button>
           </div>
           {!isSignup ? <div className="renew-divider"><span>기존 계정 로그인</span></div> : null}
@@ -4334,7 +4356,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
           </label> : null}
           {isSignup ? (
             <>
-              <p className="renew-auth-social-guide">카카오톡 또는 Google 계정으로 간편하게 가입할 수 있습니다.</p>
+              <p className="renew-auth-social-guide">카카오톡, Google 또는 네이버 계정으로 간편하게 가입할 수 있습니다.</p>
               <div className="renew-auth-consent">
                 <label className="renew-auth-consent-all">
                   <input
@@ -4612,7 +4634,13 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     }
   }
 
-  const providerLabel = provider === 'kakao' ? '카카오' : provider === 'google' ? 'Google' : '일반 계정';
+  const providerLabel = provider === 'kakao'
+    ? '카카오'
+    : provider === 'google'
+      ? 'Google'
+      : ['custom:naver', 'naver'].includes(provider)
+        ? '네이버'
+        : '일반 계정';
   const memberGrade = getCommunityMemberGrade(pointOverview?.totalPoints, uiLang);
   const isAdmin = authUser?.app_metadata?.role === 'admin';
 
@@ -11122,7 +11150,7 @@ export default function RenewApp() {
   const needsSocialConsent = useMemo(() => {
     const provider = String(authUser?.app_metadata?.provider || '').toLowerCase();
     return Boolean(authUser?.id
-      && ['google', 'kakao'].includes(provider)
+      && ['google', 'kakao', 'custom:naver', 'naver'].includes(provider)
       && (!authUser.user_metadata?.terms_accepted_at || !authUser.user_metadata?.privacy_accepted_at));
   }, [authUser]);
   const t = (key) => getUiText(uiLang, key);
