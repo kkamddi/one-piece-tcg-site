@@ -15,6 +15,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
+import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
@@ -9703,15 +9704,8 @@ function getMarketFocusScore(item) {
   return listingScore + priceScore + latestScore + Math.min(Number(item.minPrice || 0), 999999) / 1000;
 }
 
-// SNKRDUNK ONE PIECE Cards > Most Popular, verified 2026-07-21.
-const SNKRDUNK_POPULAR_APPAREL_IDS = Object.freeze([
-  '854923', '819292', '167350', '854158', '323700',
-  '706813', '854167', '709870', '822584', '854159',
-  '108050', '835343', '311560', '752859', '132558',
-  '854160', '855339', '300067', '764629', '819289'
-]);
 const SNKRDUNK_POPULAR_RANK = new Map(
-  SNKRDUNK_POPULAR_APPAREL_IDS.map((apparelId, index) => [apparelId, index])
+  snkrdunkPopularApparelIds.map((apparelId, index) => [apparelId, index])
 );
 
 function compareMarketFocus(left, right) {

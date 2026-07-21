@@ -1,4 +1,4 @@
-name: SNKRDUNK box products sync
+name: SNKRDUNK catalog sync
 
 on:
   workflow_dispatch:
@@ -31,17 +31,20 @@ jobs:
       - name: Sync new Japanese box products
         run: node scripts/syncSnkrdunkBoxProducts.js --lookback-days "${{ inputs.lookback_days || '21' }}"
 
-      - name: Commit product updates
+      - name: Sync popular card ranking
+        run: node scripts/syncSnkrdunkPopularCards.js
+
+      - name: Commit catalog updates
         id: commit
         run: |
-          if git diff --quiet -- src/data/box-market-items.js; then
+          if git diff --quiet -- src/data/box-market-items.js src/data/snkrdunk-popular-cards.js; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/box-market-items.js
-          git commit -m "chore: sync SNKRDUNK box products"
+          git add src/data/box-market-items.js src/data/snkrdunk-popular-cards.js
+          git commit -m "chore: sync SNKRDUNK catalog"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
@@ -75,7 +78,7 @@ jobs:
           fi
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=SNKRDUNK box products synced and deployed."
+            --data-urlencode "text=SNKRDUNK catalog and popular cards synced and deployed."
 
       - name: Notify failed catalog update
         if: failure()
@@ -88,4 +91,4 @@ jobs:
           fi
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=SNKRDUNK box products sync failed. Check GitHub Actions."
+            --data-urlencode "text=SNKRDUNK catalog sync failed. Check GitHub Actions."
