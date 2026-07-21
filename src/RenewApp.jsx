@@ -2103,7 +2103,6 @@ const NAV_ITEMS = [
   { id: 'prices', labelKey: 'navPrices' },
   ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
   { id: 'community', labelKey: 'navCommunity' },
-  { id: 'calendar', labelKey: 'navCalendar' },
   { id: 'news', labelKey: 'navNews' },
   { id: 'shops', labelKey: 'navShops' }
 ];
