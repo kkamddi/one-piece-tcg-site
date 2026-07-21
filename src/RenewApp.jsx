@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
-import { deleteMyAccount, resolveLoginEmail } from './api/auth';
+import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
+import { fetchCommunityPointOverview } from './api/community';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
@@ -3824,7 +3825,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </a>
         <div className="renew-mobile-actions">
           <div className={`renew-mobile-language ${mobileLanguageOpen ? 'is-open' : ''}`}>
-            <button type="button" onClick={() => setMobileLanguageOpen((value) => !value)} aria-label="언어 변경" aria-expanded={mobileLanguageOpen}>
+            <button type="button" onClick={() => { setAccountMenuOpen(false); setNotificationMenuOpen(false); setMobileLanguageOpen((value) => !value); }} aria-label="언어 변경" aria-expanded={mobileLanguageOpen}>
               {uiLang}
             </button>
             {mobileLanguageOpen ? (
@@ -3896,12 +3897,30 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
               </div>
             ) : null}
           </div>
-          <div className="renew-ui-lang" aria-label="UI language">
-            {['KR', 'EN', 'JP'].map((lang) => (
-              <button key={lang} type="button" className={uiLang === lang ? 'is-active' : ''} onClick={() => onUiLangChange(lang)}>
-                {lang}
-              </button>
-            ))}
+          <div className={`renew-desktop-language ${mobileLanguageOpen ? 'is-open' : ''}`}>
+            <button
+              type="button"
+              className="renew-desktop-language-trigger"
+              onClick={() => {
+                setAccountMenuOpen(false);
+                setNotificationMenuOpen(false);
+                setMobileLanguageOpen((value) => !value);
+              }}
+              aria-label="UI language"
+              aria-expanded={mobileLanguageOpen}
+            >
+              <span>{uiLang}</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
+            {mobileLanguageOpen ? (
+              <div className="renew-desktop-language-menu" role="menu" aria-label="UI language">
+                {['KR', 'EN', 'JP'].map((lang) => (
+                  <button key={lang} type="button" className={uiLang === lang ? 'is-active' : ''} onClick={() => { setMobileLanguageOpen(false); onUiLangChange(lang); }} role="menuitem">
+                    {lang}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
           <div className={`renew-notification-shell ${notificationMenuOpen ? 'is-open' : ''}`}>
             <button type="button" className="renew-mode" onClick={handleNotificationClick} aria-label="알림">
@@ -4320,8 +4339,26 @@ function RenewSocialConsentModal({ authUser, onAccepted, onLogout }) {
   );
 }
 
-function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout, onUserUpdated }) {
+function getPointHistoryLabel(reason, uiLang) {
+  if (reason === 'daily_checkin') return getLocaleText(uiLang, '출석체크', 'Daily check-in', '出席チェック');
+  if (reason === 'post_like') return getLocaleText(uiLang, '게시글 좋아요', 'Post like received', '投稿へのいいね');
+  if (reason === 'admin_adjustment') return getLocaleText(uiLang, '운영자 조정', 'Admin adjustment', '管理者調整');
+  return getLocaleText(uiLang, '포인트 적립', 'Points', 'ポイント');
+}
+
+function formatPointHistoryDate(value, uiLang) {
+  if (!value) return '-';
+  return new Intl.DateTimeFormat(uiLang === 'JP' ? 'ja-JP' : uiLang === 'EN' ? 'en-US' : 'ko-KR', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(value));
+}
+
+function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', onClose, onLogout, onUserUpdated }) {
   useBodyScrollLock();
+  const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
   const email = authUser?.email || '';
   const username = authUser?.user_metadata?.username || email.split('@')[0] || '-';
   const provider = authUser?.app_metadata?.provider || 'email';
@@ -4336,6 +4373,27 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [pointOverview, setPointOverview] = useState(null);
+  const [pointLoading, setPointLoading] = useState(false);
+
+  useEffect(() => {
+    if (!unlocked) return undefined;
+    let cancelled = false;
+    setPointLoading(true);
+    fetchCommunityPointOverview()
+      .then((overview) => {
+        if (!cancelled) setPointOverview(overview || null);
+      })
+      .catch(() => {
+        if (!cancelled) setPointOverview(null);
+      })
+      .finally(() => {
+        if (!cancelled) setPointLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [unlocked]);
 
   async function unlockAccount(event) {
     event.preventDefault();
@@ -4355,18 +4413,28 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
   }
 
   async function saveNickname() {
-    if (!supabase || !nickname.trim()) return;
+    const nextNickname = nickname.trim();
+    const currentNickname = String(authUser?.user_metadata?.nickname || '').trim();
+    if (!supabase || !nextNickname) return;
+    if (nextNickname.length < 2 || nextNickname.length > 20) {
+      setMessage(text('닉네임은 2자 이상 20자 이하로 입력해 주세요.', 'Use 2 to 20 characters.', 'ニックネームは2〜20文字で入力してください。'));
+      return;
+    }
     setLoading(true);
     setMessage('');
     try {
+      if (nextNickname.toLowerCase() !== currentNickname.toLowerCase()) {
+        const availability = await checkAuthAvailability('nickname', nextNickname);
+        if (!availability?.available) throw new Error(text('이미 사용 중인 닉네임입니다.', 'This nickname is already in use.', 'このニックネームは使用されています。'));
+      }
       const { data, error } = await supabase.auth.updateUser({
-        data: { ...(authUser?.user_metadata || {}), nickname: nickname.trim() }
+        data: { ...(authUser?.user_metadata || {}), nickname: nextNickname }
       });
       if (error) throw error;
       onUserUpdated(data?.user || null);
-      setMessage('닉네임이 변경되었습니다.');
+      setMessage(text('닉네임이 변경되었습니다.', 'Nickname updated.', 'ニックネームを変更しました。'));
     } catch (error) {
-      setMessage(error?.message || '닉네임 변경에 실패했습니다.');
+      setMessage(error?.message || text('닉네임 변경에 실패했습니다.', 'Could not update nickname.', 'ニックネームを変更できませんでした。'));
     } finally {
       setLoading(false);
     }
@@ -4436,11 +4504,50 @@ function RenewAccountModal({ authUser, userState, displayName, onClose, onLogout
           </form>
         ) : (
           <>
+            <section className="renew-account-points" aria-label={text('내 포인트', 'My points', 'マイポイント')}>
+              <div className="renew-account-point-stats">
+                <div>
+                  <span>{text('현재 등급', 'Member grade', '会員ランク')}</span>
+                  <strong>{username === 'admin' ? text('관리자', 'Admin', '管理者') : text('일반 회원', 'Member', '一般会員')}</strong>
+                </div>
+                <div>
+                  <span>{text('누적 포인트', 'Total points', '累計ポイント')}</span>
+                  <strong>{pointLoading ? '-' : `${Number(pointOverview?.totalPoints || 0).toLocaleString(uiLang === 'EN' ? 'en-US' : uiLang === 'JP' ? 'ja-JP' : 'ko-KR')}P`}</strong>
+                </div>
+                <div>
+                  <span>{text('연속 출석일', 'Check-in streak', '連続出席')}</span>
+                  <strong>{pointLoading ? '-' : text(`${Number(pointOverview?.streak || 0)}일`, `${Number(pointOverview?.streak || 0)} days`, `${Number(pointOverview?.streak || 0)}日`)}</strong>
+                </div>
+              </div>
+              <div className="renew-account-point-history">
+                <header>
+                  <strong>{text('포인트 내역', 'Point history', 'ポイント履歴')}</strong>
+                  <small>{text('최근 30건', 'Latest 30', '最新30件')}</small>
+                </header>
+                {pointLoading ? <p>{text('포인트 내역을 불러오는 중입니다.', 'Loading point history.', 'ポイント履歴を読み込んでいます。')}</p> : null}
+                {!pointLoading && !pointOverview ? <p>{text('포인트 정보를 불러오지 못했습니다.', 'Could not load points.', 'ポイント情報を読み込めませんでした。')}</p> : null}
+                {!pointLoading && pointOverview && !pointOverview.history?.length ? <p>{text('아직 적립된 포인트가 없습니다.', 'No point activity yet.', 'ポイント履歴はまだありません。')}</p> : null}
+                {!pointLoading && pointOverview?.history?.length ? (
+                  <ul>
+                    {pointOverview.history.map((item) => (
+                      <li key={item.id}>
+                        <div>
+                          <strong>{getPointHistoryLabel(item.reason, uiLang)}</strong>
+                          <time>{formatPointHistoryDate(item.createdAt, uiLang)}</time>
+                        </div>
+                        <b className={item.amount < 0 ? 'is-negative' : ''}>{item.amount > 0 ? '+' : ''}{item.amount}P</b>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            </section>
             <div className="renew-account-summary">
               <div>
                 <span>닉네임</span>
                 <input value={nickname} onChange={(event) => setNickname(event.target.value)} />
                 <button type="button" onClick={saveNickname} disabled={loading || !nickname.trim()}>닉네임 변경</button>
+                <small>{text('Card Pone에서 표시할 닉네임입니다.', 'This name is shown on Card Pone.', 'Card Poneで表示するニックネームです。')}</small>
               </div>
               <div>
                 <span>아이디</span>
@@ -11153,6 +11260,7 @@ export default function RenewApp() {
           authUser={authUser}
           userState={userState}
           displayName={displayName}
+          uiLang={uiLang}
           onClose={() => setAccountOpen(false)}
           onLogout={handleLogout}
           onUserUpdated={(user) => {
