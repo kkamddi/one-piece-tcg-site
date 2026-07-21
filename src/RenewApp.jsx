@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
-import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail, signupWithProfile } from './api/auth';
+import { deleteMyAccount, resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
@@ -78,6 +78,7 @@ const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
 const MARKET_INDEX_PUBLIC_ENABLED = true;
+const PARTNER_NEWS_POPUP_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
 
@@ -3345,9 +3346,9 @@ function applyPageSeo(page, uiLang = 'KR') {
 const TERMS_SECTIONS = [
   ['제1조 목적', '본 약관은 Card Pone가 제공하는 카드 도감, 시세 확인, 컬렉션 관리 및 관련 서비스의 이용 조건과 절차를 정함을 목적으로 합니다.'],
   ['제2조 서비스의 성격', '본 사이트는 원피스 카드게임 유저를 위한 비공식 정보 제공 서비스입니다.\n본 사이트는 BANDAI, ONE PIECE CARD GAME 공식 유통사 및 관련 권리자와 제휴되어 있지 않습니다.'],
-  ['제3조 제공 서비스', '본 서비스는 웹사이트와 Android 앱에서 카드 정보, 카드 시세, 컬렉션 관리, 위시리스트, 시세 알림, 공지사항 등의 기능을 제공할 수 있습니다.'],
+  ['제3조 제공 서비스', '본 서비스는 웹사이트와 Android 앱에서 카드 정보, 카드 시세, 컬렉션 관리, 위시리스트, 시세 알림, 커뮤니티, 출석 및 포인트 등의 기능을 제공할 수 있습니다.'],
   ['제4조 시세 정보의 이용', '본 사이트에서 제공하는 시세 정보는 외부 거래 플랫폼, 공개 정보 또는 자체 수집 데이터를 기반으로 한 참고용 정보입니다.\n실제 거래 가격과 차이가 있을 수 있으며, 카드 구매·판매·투자 판단의 책임은 이용자 본인에게 있습니다.'],
-  ['제5조 회원 및 계정', '이용자는 이메일 또는 카카오 및 Google 로그인 등 소셜 로그인 기능을 통해 서비스를 이용할 수 있습니다.\n이용자는 본인의 계정 정보를 안전하게 관리해야 하며, 마이페이지의 계정 삭제 기능을 통해 언제든지 탈퇴할 수 있습니다.'],
+  ['제5조 회원 및 계정', '신규 회원가입은 카카오톡 또는 Google 소셜 로그인을 통해 제공됩니다. 기존 이메일 계정은 계속 로그인할 수 있습니다.\n이용자는 본인의 계정 정보를 안전하게 관리해야 하며, 마이페이지의 계정 삭제 기능을 통해 언제든지 탈퇴할 수 있습니다.'],
   ['제6조 금지행위', '이용자는 다음 행위를 해서는 안 됩니다.\n- 사이트의 정상적인 운영을 방해하는 행위\n- 허위 정보 입력 또는 타인의 계정 도용\n- 무단 크롤링, 자동화 프로그램을 이용한 과도한 접근\n- 저작권, 상표권 등 제3자의 권리를 침해하는 행위\n- 기타 법령 또는 공서양속에 반하는 행위'],
   ['제7조 광고 및 제휴', '본 사이트에는 Google AdSense 등 제3자 광고 서비스 또는 제휴 링크가 포함될 수 있습니다.\n광고 및 제휴 링크를 통해 발생하는 외부 사이트 이용에 대해서는 해당 외부 사이트의 정책이 적용됩니다.\n본 사이트는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.'],
   ['제8조 저작권 및 지식재산권', '본 사이트의 디자인, 데이터 구성, 자체 제작 콘텐츠의 권리는 운영자에게 있습니다.\nONE PIECE CARD GAME 및 관련 이미지, 명칭, 상표의 권리는 각 권리자에게 있습니다.'],
@@ -3357,15 +3358,15 @@ const TERMS_SECTIONS = [
 ];
 
 const PRIVACY_SECTIONS = [
-  ['1. 수집하는 개인정보 항목', '본 서비스는 기능 제공을 위해 다음 정보를 수집할 수 있습니다.\n- 계정 정보: 이메일, 아이디, 닉네임, 소셜 로그인 제공자의 계정 식별자 및 프로필 정보\n- 서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 시세 알림 조건\n- 알림 정보: Android 앱의 푸시 알림 기기 토큰 및 알림 수신 상태\n- 자동 수집 정보: 접속 IP, 브라우저·앱·기기 정보, 접속 기록, 쿠키\n- 문의 시 수집 정보: 이메일 주소, 문의 내용'],
-  ['2. 개인정보의 이용 목적', '수집한 개인정보는 다음 목적으로 이용됩니다.\n- 회원 식별 및 로그인 기능 제공\n- 컬렉션 관리, 위시리스트, 보유 카드 저장 기능 제공\n- 서비스 이용 기록 관리 및 부정 이용 방지\n- 문의 응대 및 공지사항 전달\n- 서비스 개선 및 통계 분석\n- 광고 표시 및 광고 성과 분석'],
-  ['3. 개인정보의 보유 및 이용 기간', '개인정보는 서비스 제공 목적이 달성될 때까지 보관합니다. 이용자는 웹과 앱의 마이페이지에서 계정을 직접 삭제할 수 있으며, 탈퇴 시 계정 정보, 컬렉션, 시세 알림과 푸시 토큰을 지체 없이 삭제합니다.\n다만 관련 법령에 따라 보관이 필요한 정보는 해당 기간 동안 분리 보관할 수 있습니다.'],
+  ['1. 수집하는 개인정보 항목', '본 서비스는 기능 제공을 위해 다음 정보를 수집할 수 있습니다.\n- 계정 정보: 이메일, 아이디, 닉네임, 소셜 로그인 제공자의 계정 식별자 및 프로필 정보\n- 서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 시세 알림 조건\n- 커뮤니티 정보: 게시글, 댓글, 업로드 이미지, 좋아요, 출석 및 포인트 내역\n- 알림 정보: Android 앱의 푸시 알림 기기 토큰 및 알림 수신 상태\n- 자동 수집 정보: 접속 IP, 브라우저·앱·기기 정보, 접속 기록, 쿠키\n- 문의 시 수집 정보: 이메일 주소, 문의 내용'],
+  ['2. 개인정보의 이용 목적', '수집한 개인정보는 다음 목적으로 이용됩니다.\n- 회원 식별 및 로그인 기능 제공\n- 컬렉션 관리, 위시리스트, 보유 카드 저장 기능 제공\n- 커뮤니티 운영, 출석 확인 및 포인트 중복 적립 방지\n- 서비스 이용 기록 관리 및 부정 이용 방지\n- 문의 응대 및 공지사항 전달\n- 서비스 개선 및 통계 분석\n- 광고 표시 및 광고 성과 분석'],
+  ['3. 개인정보의 보유 및 이용 기간', '개인정보는 서비스 제공 목적이 달성될 때까지 보관합니다. 이용자는 웹과 앱의 마이페이지에서 계정을 직접 삭제할 수 있으며, 탈퇴 시 계정 정보, 컬렉션, 커뮤니티 활동, 출석·포인트, 시세 알림과 푸시 토큰을 지체 없이 삭제합니다.\n다만 관련 법령에 따라 보관이 필요한 정보는 해당 기간 동안 분리 보관할 수 있습니다.'],
   ['4. 쿠키 및 광고 서비스 이용', '본 사이트는 서비스 이용 분석, 사용자 편의 제공 및 광고 표시를 위해 쿠키를 사용할 수 있습니다.\n또한 Google AdSense 등 제3자 광고 서비스를 이용할 수 있으며, 이 과정에서 광고 제공자가 쿠키를 사용하여 이용자의 관심사에 기반한 광고를 표시할 수 있습니다.\n이용자는 브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수 있습니다.\n단, 쿠키를 차단할 경우 일부 서비스 이용에 제한이 있을 수 있습니다.'],
   ['5. 개인정보의 제3자 제공', '본 사이트는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.\n다만 법령에 따른 요청이 있거나 이용자의 동의가 있는 경우에는 예외로 합니다.'],
   ['6. 개인정보 처리의 위탁', '본 서비스는 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.\n- Supabase: 회원 인증, 계정 및 컬렉션 데이터 저장\n- Kakao Login 및 Google Identity: 소셜 로그인 제공\n- Firebase Cloud Messaging: Android 푸시 알림 전송\n- Cloudflare: 웹·API 제공 및 보안\n- Google AdSense: 웹사이트 광고 제공\n사용하는 서비스가 변경될 경우 본 방침을 통해 안내합니다.'],
   ['7. 이용자의 권리', '이용자는 언제든지 본인의 개인정보를 조회·수정하거나 마이페이지에서 계정을 삭제할 수 있습니다. 별도 요청이 필요한 경우 아래 이메일로 접수할 수 있습니다.\n이메일: optkr26@gmail.com'],
   ['8. 개인정보 보호책임자', '개인정보 관련 문의는 아래 연락처로 문의할 수 있습니다.\n운영자: Card Pone\n이메일: optkr26@gmail.com'],
-  ['9. 개인정보처리방침 변경', '본 개인정보처리방침은 법령, 서비스 변경 사항에 따라 수정될 수 있으며, 변경 시 사이트 공지사항 또는 본 페이지를 통해 안내합니다.\n시행일: 2026년 7월 14일']
+  ['9. 개인정보처리방침 변경', '본 개인정보처리방침은 법령, 서비스 변경 사항에 따라 수정될 수 있으며, 변경 시 사이트 공지사항 또는 본 페이지를 통해 안내합니다.\n시행일: 2026년 7월 21일']
 ];
 
 const STATIC_INFO_PAGES = {
@@ -3478,6 +3479,7 @@ const STATIC_INFO_PAGES = {
         list: [
           '계정 정보: 이메일, 아이디, 닉네임, 카카오 또는 Google 계정 식별자와 프로필 정보',
           '서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 시세 알림 조건',
+          '커뮤니티 정보: 게시글, 댓글, 업로드 이미지, 좋아요, 출석 및 포인트 내역',
           '알림 정보: Android 앱의 푸시 기기 토큰과 알림 수신 상태',
           '자동 수집 정보: 접속 IP, 브라우저·앱·기기 정보, 접속 기록, 쿠키',
           '문의 시 수집 정보: 이메일 주소, 문의 내용'
@@ -3488,6 +3490,7 @@ const STATIC_INFO_PAGES = {
         list: [
           '회원 식별 및 로그인 기능 제공',
           '컬렉션 관리, 위시리스트, 보유 카드 저장 기능 제공',
+          '커뮤니티 운영, 출석 확인 및 포인트 중복 적립 방지',
           '서비스 이용 기록 관리 및 부정 이용 방지',
           '문의 응대 및 서비스 개선',
           '광고 표시 및 광고 성과 분석'
@@ -3505,7 +3508,7 @@ const STATIC_INFO_PAGES = {
         title: '계정 및 데이터 삭제',
         body: [
           '로그인 가능한 이용자는 웹과 Android 앱의 마이페이지에서 계정 삭제를 완료할 수 있습니다.',
-          '앱을 삭제했거나 로그인할 수 없는 경우 아래 이메일로 계정 이메일과 삭제 요청 사실을 보내 주세요. 본인 확인 후 계정, 컬렉션, 시세 알림과 푸시 토큰을 삭제합니다.'
+          '앱을 삭제했거나 로그인할 수 없는 경우 아래 이메일로 계정 이메일과 삭제 요청 사실을 보내 주세요. 본인 확인 후 계정, 컬렉션, 커뮤니티 활동, 출석·포인트, 시세 알림과 푸시 토큰을 삭제합니다.'
         ],
         actionUrl: 'mailto:optkr26@gmail.com?subject=Card%20Pone%20계정%20삭제%20요청',
         actionLabel: '계정 삭제 요청 이메일 보내기'
@@ -4171,13 +4174,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
   useBodyScrollLock();
   const [mode, setMode] = useState('login');
   const [identifier, setIdentifier] = useState('');
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [checkState, setCheckState] = useState({ username: null, nickname: null });
-  const [checkingField, setCheckingField] = useState('');
   const [agreements, setAgreements] = useState({ terms: false, privacy: false });
   const [legalType, setLegalType] = useState(null);
   const [message, setMessage] = useState('');
@@ -4203,37 +4200,13 @@ function RenewAuthModal({ onClose, onSignedIn }) {
   function changeMode(nextMode) {
     setMode(nextMode);
     setPassword('');
-    setPasswordConfirm('');
     setMessage('');
   }
 
   function getAuthErrorMessage(error) {
     const raw = String(error?.message || '').trim();
-    if (raw === 'email_taken') return '이미 사용 중인 이메일입니다.';
-    if (raw === 'username_taken') return '이미 사용 중인 아이디입니다.';
-    if (raw === 'nickname_taken') return '이미 사용 중인 닉네임입니다.';
     if (raw === 'consent_required') return '필수 약관에 동의해 주세요.';
     return raw || `${isSignup ? '회원가입' : '로그인'}에 실패했습니다.`;
-  }
-
-  async function checkDuplicate(type) {
-    const value = (type === 'username' ? username : nickname).trim();
-    const label = type === 'username' ? '아이디' : '닉네임';
-    if (!value) {
-      setMessage(`${label}를 먼저 입력해 주세요.`);
-      return;
-    }
-    setCheckingField(type);
-    setMessage('');
-    try {
-      const result = await checkAuthAvailability(type, value);
-      setCheckState((current) => ({ ...current, [type]: result.available }));
-      setMessage(result.available ? `사용 가능한 ${label}입니다.` : `이미 사용 중인 ${label}입니다.`);
-    } catch (error) {
-      setMessage(error?.message || '중복확인에 실패했습니다.');
-    } finally {
-      setCheckingField('');
-    }
   }
 
   async function submitLogin(event) {
@@ -4245,27 +4218,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
     setLoading(true);
     setMessage('');
     try {
-      if (isSignup) {
-        if (password.length < 8) throw new Error('비밀번호는 8자 이상 입력해 주세요.');
-        if (password !== passwordConfirm) throw new Error('비밀번호 확인이 일치하지 않습니다.');
-        if (checkState.username !== true) throw new Error('아이디 중복확인을 완료해 주세요.');
-        if (checkState.nickname !== true) throw new Error('닉네임 중복확인을 완료해 주세요.');
-        if (!requiredAgreed) throw new Error('필수 약관에 동의해 주세요.');
-        await signupWithProfile({
-          email: email.trim(),
-          password,
-          username: username.trim(),
-          nickname: nickname.trim(),
-          termsAccepted: true,
-          privacyAccepted: true,
-          consentVersion: AUTH_CONSENT_VERSION
-        });
-        const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) throw error;
-        onSignedIn(data?.user || null);
-        onClose();
-        return;
-      }
+      if (isSignup) throw new Error('신규 가입은 카카오톡 또는 Google을 이용해 주세요.');
       const lookup = await resolveLoginEmail(identifier.trim());
       const loginEmail = lookup?.email || identifier.trim();
       const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
@@ -4336,64 +4289,20 @@ function RenewAuthModal({ onClose, onSignedIn }) {
               Google로 계속하기
             </button>
           </div>
-          <div className="renew-divider"><span>또는</span></div>
-          {isSignup ? (
-            <>
-              <label>
-                <span>아이디</span>
-                <div className="renew-auth-inline-field">
-                  <input
-                    value={username}
-                    onChange={(event) => {
-                      setUsername(event.target.value);
-                      setCheckState((current) => ({ ...current, username: null }));
-                    }}
-                    autoComplete="username"
-                    placeholder="로그인에 사용할 아이디"
-                  />
-                  <button type="button" onClick={() => checkDuplicate('username')} disabled={checkingField === 'username'}>
-                    {checkingField === 'username' ? '확인 중' : '중복확인'}
-                  </button>
-                </div>
-              </label>
-              <label>
-                <span>닉네임</span>
-                <div className="renew-auth-inline-field">
-                  <input
-                    value={nickname}
-                    onChange={(event) => {
-                      setNickname(event.target.value);
-                      setCheckState((current) => ({ ...current, nickname: null }));
-                    }}
-                    autoComplete="nickname"
-                    placeholder="사이트에 표시될 이름"
-                  />
-                  <button type="button" onClick={() => checkDuplicate('nickname')} disabled={checkingField === 'nickname'}>
-                    {checkingField === 'nickname' ? '확인 중' : '중복확인'}
-                  </button>
-                </div>
-              </label>
-              <label className="renew-auth-field-wide">
-                <span>이메일</span>
-                <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="your@email.com" />
-              </label>
-            </>
-          ) : (
+          {!isSignup ? <div className="renew-divider"><span>기존 계정 로그인</span></div> : null}
+          {!isSignup ? (
             <label>
               <span>아이디 또는 이메일</span>
               <input value={identifier} onChange={(event) => setIdentifier(event.target.value)} autoComplete="username" />
             </label>
-          )}
-          <label>
+          ) : null}
+          {!isSignup ? <label>
             <span>비밀번호</span>
-            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete={isSignup ? 'new-password' : 'current-password'} />
-          </label>
+            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" />
+          </label> : null}
           {isSignup ? (
             <>
-              <label>
-                <span>비밀번호 확인</span>
-                <input value={passwordConfirm} onChange={(event) => setPasswordConfirm(event.target.value)} type="password" autoComplete="new-password" />
-              </label>
+              <p className="renew-auth-social-guide">카카오톡 또는 Google 계정으로 간편하게 가입할 수 있습니다.</p>
               <div className="renew-auth-consent">
                 <label className="renew-auth-consent-all">
                   <input
@@ -4415,15 +4324,13 @@ function RenewAuthModal({ onClose, onSignedIn }) {
             </>
           ) : null}
           {message ? <p className="renew-form-message" aria-live="polite">{message}</p> : null}
-          <button
+          {!isSignup ? <button
             type="submit"
             className="renew-submit"
-            disabled={loading || !password || (isSignup
-              ? !email.trim() || !username.trim() || !nickname.trim() || !passwordConfirm || !requiredAgreed
-              : !identifier.trim())}
+            disabled={loading || !password || !identifier.trim()}
           >
-            {loading ? '처리 중...' : isSignup ? '회원가입' : '로그인'}
-          </button>
+            {loading ? '처리 중...' : '로그인'}
+          </button> : null}
           <p className="renew-auth-mode-switch">
             {isSignup ? '이미 계정이 있으신가요?' : '계정이 없으신가요?'}
             <button type="button" onClick={() => changeMode(isSignup ? 'login' : 'signup')}>
@@ -4432,6 +4339,79 @@ function RenewAuthModal({ onClose, onSignedIn }) {
           </p>
           </form>
         </div>
+      </div>
+      {legalType ? (
+        <div className="renew-modal-backdrop renew-auth-legal-backdrop" onClick={() => setLegalType(null)}>
+          <RenewLegalDialog type={legalType} onClose={() => setLegalType(null)} />
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function RenewSocialConsentModal({ authUser, onAccepted, onLogout }) {
+  useBodyScrollLock();
+  const [agreements, setAgreements] = useState({ terms: false, privacy: false });
+  const [legalType, setLegalType] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const requiredAgreed = agreements.terms && agreements.privacy;
+
+  async function acceptConsent() {
+    if (!supabase || !authUser?.id || !requiredAgreed || loading) return;
+    setLoading(true);
+    setMessage('');
+    try {
+      const acceptedAt = new Date().toISOString();
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          ...(authUser.user_metadata || {}),
+          terms_accepted_at: acceptedAt,
+          terms_version: AUTH_CONSENT_VERSION,
+          privacy_accepted_at: acceptedAt,
+          privacy_version: AUTH_CONSENT_VERSION
+        }
+      });
+      if (error) throw error;
+      onAccepted(data?.user || authUser);
+    } catch (error) {
+      setMessage(error?.message || '약관 동의를 저장하지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="renew-modal-backdrop renew-social-consent-backdrop">
+        <section className="renew-auth-modal renew-social-consent-modal" role="dialog" aria-modal="true" aria-labelledby="social-consent-title">
+          <div className="renew-modal-head">
+            <div>
+              <span>SIGN UP</span>
+              <h2 id="social-consent-title">가입 약관 동의</h2>
+            </div>
+          </div>
+          <div className="renew-login-form">
+            <p className="renew-auth-social-guide">서비스 이용을 시작하려면 필수 약관에 동의해 주세요.</p>
+            <div className="renew-auth-consent">
+              <label className="renew-auth-consent-all">
+                <input type="checkbox" checked={requiredAgreed} onChange={(event) => setAgreements({ terms: event.target.checked, privacy: event.target.checked })} />
+                <strong>필수 약관 전체 동의</strong>
+              </label>
+              <label>
+                <input type="checkbox" checked={agreements.terms} onChange={(event) => setAgreements((current) => ({ ...current, terms: event.target.checked }))} />
+                <span>[필수] <button type="button" onClick={() => setLegalType('terms')}>이용약관</button> 동의</span>
+              </label>
+              <label>
+                <input type="checkbox" checked={agreements.privacy} onChange={(event) => setAgreements((current) => ({ ...current, privacy: event.target.checked }))} />
+                <span>[필수] <button type="button" onClick={() => setLegalType('privacy')}>개인정보처리방침</button> 동의</span>
+              </label>
+            </div>
+            {message ? <p className="renew-form-message" role="status">{message}</p> : null}
+            <button type="button" className="renew-submit" onClick={acceptConsent} disabled={!requiredAgreed || loading}>{loading ? '저장 중...' : '동의하고 시작하기'}</button>
+            <button type="button" className="renew-social-consent-logout" onClick={onLogout} disabled={loading}>다른 계정으로 로그인</button>
+          </div>
+        </section>
       </div>
       {legalType ? (
         <div className="renew-modal-backdrop renew-auth-legal-backdrop" onClick={() => setLegalType(null)}>
@@ -5035,7 +5015,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   }, [isJp]);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !latestPartnerNews || !renewalNoticeChecked || renewalNoticeOpen) return;
+    if (!PARTNER_NEWS_POPUP_ENABLED || typeof window === 'undefined' || !latestPartnerNews || !renewalNoticeChecked || renewalNoticeOpen) return;
     const storageKey = `card-pone-partner-news-${latestPartnerNews.id}`;
     if (window.localStorage.getItem(storageKey)) return;
     setPartnerNewsOpen(true);
@@ -5207,7 +5187,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       ) : null}
       {updatesOpen && !isJp ? <RenewUpdateModal onClose={() => setUpdatesOpen(false)} /> : null}
       {renewalNoticeOpen && !isJp ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
-      {partnerNewsOpen && latestPartnerNews ? (
+      {PARTNER_NEWS_POPUP_ENABLED && partnerNewsOpen && latestPartnerNews ? (
         <PartnerShopNewsModal news={latestPartnerNews} uiLang={uiLang} onClose={closePartnerNews} />
       ) : null}
       {progressOpen ? (
@@ -10978,6 +10958,12 @@ export default function RenewApp() {
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
+  const needsSocialConsent = useMemo(() => {
+    const provider = String(authUser?.app_metadata?.provider || '').toLowerCase();
+    return Boolean(authUser?.id
+      && ['google', 'kakao'].includes(provider)
+      && (!authUser.user_metadata?.terms_accepted_at || !authUser.user_metadata?.privacy_accepted_at));
+  }, [authUser]);
   const t = (key) => getUiText(uiLang, key);
   const handleCatalogViewStateChange = useCallback((nextViewState) => {
     setCatalogViewState(nextViewState);
@@ -11532,6 +11518,13 @@ export default function RenewApp() {
         </button>
       ) : null}
       {authOpen ? <RenewAuthModal onClose={() => setAuthOpen(false)} onSignedIn={setAuthUser} /> : null}
+      {needsSocialConsent ? (
+        <RenewSocialConsentModal
+          authUser={authUser}
+          onAccepted={setAuthUser}
+          onLogout={handleLogout}
+        />
+      ) : null}
       {accountOpen && authUser ? (
         <RenewAccountModal
           authUser={authUser}

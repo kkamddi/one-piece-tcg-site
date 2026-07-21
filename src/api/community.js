@@ -1,11 +1,20 @@
+import { supabase } from '../lib/supabase';
+
 const API_BASE = '/api/community';
 
+async function getAccessToken() {
+  if (!supabase) return '';
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? '';
+}
+
 async function requestJson(url, options = {}) {
+  const accessToken = options.auth ? await getAccessToken() : '';
   const response = await fetch(url, {
     cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
-      ...(options.token ? { 'x-community-token': options.token } : {}),
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(options.headers ?? {})
     },
     method: options.method ?? 'GET',
@@ -25,34 +34,50 @@ async function requestJson(url, options = {}) {
   return response.json();
 }
 
-export function fetchCommunityPosts(token) {
-  return requestJson(API_BASE, { token });
+export function fetchCommunityPosts() {
+  return requestJson(API_BASE, { auth: true });
 }
 
-export function createCommunityPost(payload, token) {
-  return requestJson(API_BASE, { method: 'POST', body: payload, token });
+export function createCommunityPost(payload) {
+  return requestJson(API_BASE, { auth: true, method: 'POST', body: payload });
 }
 
-export function updateCommunityPost(id, payload, token) {
-  return requestJson(`${API_BASE}/${encodeURIComponent(id)}`, { method: 'PATCH', body: payload, token });
+export function uploadCommunityImage(payload) {
+  return requestJson(`${API_BASE}?action=image`, {
+    auth: true,
+    method: 'POST',
+    body: payload
+  });
 }
 
-export function deleteCommunityPost(id, token) {
-  return requestJson(`${API_BASE}/${encodeURIComponent(id)}`, { method: 'DELETE', token });
+export function updateCommunityPost(id, payload) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}`, { auth: true, method: 'PATCH', body: payload });
 }
 
-export function incrementCommunityPostView(id, token) {
-  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=view`, { method: 'POST', token });
+export function deleteCommunityPost(id) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}`, { auth: true, method: 'DELETE' });
 }
 
-export function toggleCommunityPostLike(id, token) {
-  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=like`, { method: 'POST', token });
+export function incrementCommunityPostView(id) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=view`, { auth: true, method: 'POST' });
 }
 
-export function fetchCommunityComments(id, token) {
-  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=comments`, { token });
+export function toggleCommunityPostLike(id) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=like`, { auth: true, method: 'POST' });
 }
 
-export function addCommunityComment(id, payload, token) {
-  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=comment`, { method: 'POST', body: payload, token });
+export function fetchCommunityComments(id) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=comments`, { auth: true });
+}
+
+export function addCommunityComment(id, payload) {
+  return requestJson(`${API_BASE}/${encodeURIComponent(id)}?action=comment`, { auth: true, method: 'POST', body: payload });
+}
+
+export function fetchCommunityAttendance() {
+  return requestJson(`${API_BASE}?action=attendance`, { auth: true });
+}
+
+export function checkInCommunityAttendance() {
+  return requestJson(`${API_BASE}?action=attendance`, { auth: true, method: 'POST' });
 }

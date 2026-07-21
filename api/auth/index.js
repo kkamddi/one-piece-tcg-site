@@ -57,6 +57,7 @@ async function deleteAccountData(user) {
   await runCleanup(supabaseAdmin.from(PUSH_SUBSCRIPTIONS_TABLE).delete().eq('user_id', userId));
   await runCleanup(supabaseAdmin.from(COMMUNITY_TABLE).delete().eq('id', `state-${userId}`));
   await runCleanup(supabaseAdmin.from(COMMUNITY_TABLE).delete().eq('author_token', `user:${userId}`));
+  await runCleanup(supabaseAdmin.from(COMMUNITY_TABLE).delete().eq('author_token', userId));
 
   const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
   if (deleteError) throw deleteError;
@@ -94,44 +95,7 @@ export default async function handler(request, response) {
     }
 
     if (action === 'signup' && request.method === 'POST') {
-      const { email, password, username, nickname, termsAccepted, privacyAccepted, consentVersion } = request.body ?? {};
-      const safeEmail = String(email ?? '').trim().toLowerCase();
-      const safePassword = String(password ?? '');
-      const safeUsername = String(username ?? '').trim().toLowerCase();
-      const safeNickname = String(nickname ?? '').trim();
-      if (!safeEmail || !safePassword || !safeUsername || !safeNickname) {
-        return response.status(400).json({ error: 'invalid_request' });
-      }
-      if (termsAccepted !== true || privacyAccepted !== true) {
-        return response.status(400).json({ error: 'consent_required' });
-      }
-
-      const users = await listAllAuthUsers();
-      const emailTaken = users.some((user) => String(user.email ?? '').toLowerCase() === safeEmail);
-      const usernameTaken = users.some((user) => String(user.user_metadata?.username ?? '').toLowerCase() === safeUsername);
-      const nicknameTaken = users.some((user) => String(user.user_metadata?.nickname ?? '').toLowerCase() === safeNickname.toLowerCase());
-
-      if (emailTaken) return response.status(409).json({ error: 'email_taken' });
-      if (usernameTaken) return response.status(409).json({ error: 'username_taken' });
-      if (nicknameTaken) return response.status(409).json({ error: 'nickname_taken' });
-
-      const consentAcceptedAt = new Date().toISOString();
-      const safeConsentVersion = String(consentVersion || '2026-07-14').slice(0, 32);
-      const { data, error } = await supabaseAdmin.auth.admin.createUser({
-        email: safeEmail,
-        password: safePassword,
-        email_confirm: true,
-        user_metadata: {
-          username: safeUsername,
-          nickname: safeNickname,
-          terms_accepted_at: consentAcceptedAt,
-          terms_version: safeConsentVersion,
-          privacy_accepted_at: consentAcceptedAt,
-          privacy_version: safeConsentVersion
-        }
-      });
-      if (error) throw error;
-      return response.status(201).json({ ok: true, userId: data.user?.id ?? null });
+      return response.status(403).json({ error: 'social_signup_only' });
     }
 
     if (action === 'delete-account' && request.method === 'DELETE') {

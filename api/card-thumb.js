@@ -4,7 +4,8 @@ export default async function handler(request, response) {
   const key = String(request.query?.key || '').replace(/^\/+/, '');
   const isCardThumb = /^cards\/(KR|JP)\/[A-Za-z0-9_-]+\.webp$/.test(key);
   const isMarketImage = /^market\/listings\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(webp|jpg|jpeg|png)$/.test(key);
-  if (!key || key.includes('..') || (!isCardThumb && !isMarketImage)) {
+  const isCommunityImage = /^community\/posts\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(webp|jpg|jpeg|png)$/.test(key);
+  if (!key || key.includes('..') || (!isCardThumb && !isMarketImage && !isCommunityImage)) {
     response.status(400).json({ error: 'invalid_key' });
     return;
   }

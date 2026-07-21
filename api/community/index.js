@@ -3,24 +3,137 @@ import {
   getCommunityStorageMode,
   listCommunityPosts
 } from '../../lib/community-store.js';
+import { supabaseAdmin } from '../../lib/supabase-admin.js';
+
+function getAuthToken(request) {
+  const authHeader = String(request.headers.authorization ?? '');
+  return authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+}
+
+async function getAuthenticatedUser(request) {
+  const token = getAuthToken(request);
+  if (!token || !supabaseAdmin) return null;
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (error) return null;
+  return data?.user ?? null;
+}
+
+function getUserNickname(user) {
+  const metadata = user?.user_metadata || {};
+  return String(metadata.nickname || metadata.full_name || metadata.name || metadata.user_name || user?.email?.split('@')[0] || '회원').trim().slice(0, 40);
+}
+
+function decodeBase64(value) {
+  const base64 = String(value || '').replace(/^data:[^;]+;base64,/, '');
+  if (!base64) return null;
+  if (typeof atob === 'function') {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+    return bytes;
+  }
+  if (typeof Buffer !== 'undefined') return Uint8Array.from(Buffer.from(base64, 'base64'));
+  return null;
+}
+
+function getImageExtension(mimeType) {
+  if (mimeType === 'image/png') return 'png';
+  if (mimeType === 'image/jpeg') return 'jpg';
+  return 'webp';
+}
+
+async function uploadCommunityImage(request, response, user) {
+  if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
+
+  const bucket = process.env?.CARD_THUMBNAILS;
+  if (!bucket || typeof bucket.put !== 'function') {
+    return response.status(503).json({ error: 'image_bucket_unavailable' });
+  }
+
+  const mimeType = String(request.body?.mimeType || 'image/webp').trim();
+  if (!['image/webp', 'image/jpeg', 'image/png'].includes(mimeType)) {
+    return response.status(400).json({ error: 'invalid_image_type' });
+  }
+
+  const bytes = decodeBase64(request.body?.data);
+  if (!bytes?.byteLength) return response.status(400).json({ error: 'invalid_image' });
+  if (bytes.byteLength > 900 * 1024) return response.status(413).json({ error: 'image_too_large' });
+
+  const key = `community/posts/${user.id}/${Date.now()}-${crypto.randomUUID()}.${getImageExtension(mimeType)}`;
+  await bucket.put(key, bytes, { httpMetadata: { contentType: mimeType } });
+  return response.status(201).json({
+    key,
+    imageUrl: `/api/card-thumb?key=${encodeURIComponent(key)}`
+  });
+}
+
+function getKoreanDate() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function normalizePointStatus(row = {}) {
+  return {
+    checkedToday: Boolean(row.checked_today),
+    totalPoints: Number(row.total_points || 0),
+    streak: Number(row.streak || 0),
+    checkinDate: row.checkin_date || getKoreanDate(),
+    awarded: Boolean(row.awarded)
+  };
+}
+
+async function getAttendanceStatus(userId) {
+  const { data, error } = await supabaseAdmin.rpc('get_community_point_status', {
+    p_user_id: userId,
+    p_checkin_date: getKoreanDate()
+  });
+  if (error) throw error;
+  return normalizePointStatus(Array.isArray(data) ? data[0] : data);
+}
+
+async function recordAttendance(userId) {
+  const { data, error } = await supabaseAdmin.rpc('record_community_daily_checkin', {
+    p_user_id: userId,
+    p_checkin_date: getKoreanDate()
+  });
+  if (error) throw error;
+  return normalizePointStatus(Array.isArray(data) ? data[0] : data);
+}
 
 export default async function handler(request, response) {
-  const viewerToken = request.headers['x-community-token'] ?? '';
-
   try {
+    const user = await getAuthenticatedUser(request);
+    const viewerToken = user?.id || '';
+    const action = String(request.query?.action || '');
+
+    if (action === 'attendance') {
+      if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
+      if (request.method === 'GET') {
+        response.setHeader('Cache-Control', 'no-store, max-age=0');
+        return response.status(200).json(await getAttendanceStatus(user.id));
+      }
+      if (request.method === 'POST') {
+        response.setHeader('Cache-Control', 'no-store, max-age=0');
+        return response.status(200).json(await recordAttendance(user.id));
+      }
+      return response.status(405).json({ error: 'method_not_allowed' });
+    }
+
     if (request.method === 'GET') {
       const posts = await listCommunityPosts(viewerToken);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(200).json({ posts, storage: getCommunityStorageMode() });
     }
 
-    if (request.method === 'POST') {
-      const { boardId, nickname, title, cardName, imageUrl, content } = request.body ?? {};
-      if (!viewerToken || !boardId || !nickname || !title || !content) {
-        return response.status(400).json({ error: 'invalid_request' });
-      }
+    if (request.method === 'POST' && request.query?.action === 'image') {
+      return uploadCommunityImage(request, response, user);
+    }
 
-      const post = await createCommunityPost({ boardId, nickname, title, cardName, imageUrl, content }, viewerToken, viewerToken);
+    if (request.method === 'POST') {
+      const { boardId, title, cardName, imageUrl, content } = request.body ?? {};
+      if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
+      if (!boardId || !title || !content) return response.status(400).json({ error: 'invalid_request' });
+
+      const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName, imageUrl, content }, user.id, user.id);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(201).json(post);
     }
