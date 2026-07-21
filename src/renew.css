@@ -6470,6 +6470,67 @@
   cursor: pointer;
 }
 
+.renew-community-event-notice {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin: 18px 0;
+  padding: 18px 20px;
+  border: 1px solid #17191c;
+  border-radius: 8px;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-community-event-notice-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 22px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-community-event-notice > div {
+  display: grid;
+  gap: 7px;
+}
+
+.renew-community-event-notice-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.renew-community-event-notice-meta span {
+  color: #ffab98;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.renew-community-event-notice-meta b {
+  padding: 3px 7px;
+  border-radius: 4px;
+  color: #17191c;
+  font-size: 11px;
+  line-height: 1;
+  background: #fff;
+}
+
+.renew-community-event-notice strong {
+  font-size: 18px;
+}
+
+.renew-community-event-notice p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .renew-community-checkin {
   display: inline-flex;
   align-items: center;

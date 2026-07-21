@@ -162,6 +162,7 @@ export default async function handler(request, response) {
       const { boardId, title, cardName, imageUrl, content } = request.body ?? {};
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
       if (!boardId || !title || !content) return response.status(400).json({ error: 'invalid_request' });
+      if (String(boardId).trim() === 'event') return response.status(403).json({ error: 'event_board_read_only' });
 
       const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName, imageUrl, content }, user.id, user.id);
       response.setHeader('Cache-Control', 'no-store, max-age=0');

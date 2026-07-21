@@ -218,6 +218,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
 
   const visiblePosts = useMemo(() => [...categoryPosts]
     .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt)), [categoryPosts]);
+  const isEventBoard = activeBoard === 'event';
 
   const popularPosts = useMemo(() => {
     const now = Date.now();
@@ -232,6 +233,10 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
   }, [categoryPosts]);
 
   const openComposer = () => {
+    if (isEventBoard) {
+      setMessage(localeText(uiLang, '이벤트 게시판은 공지 전용입니다.', 'The events board is reserved for notices.', 'イベント掲示板はお知らせ専用です。'));
+      return;
+    }
     if (!authUser) {
       onRequireLogin?.();
       return;
@@ -328,6 +333,10 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
     const safeTitle = title.trim();
     const safeContent = content.trim();
     if (!safeTitle || !safeContent) return;
+    if (composerBoard === 'event') {
+      setMessage(localeText(uiLang, '이벤트 게시판은 공지 전용입니다.', 'The events board is reserved for notices.', 'イベント掲示板はお知らせ専用です。'));
+      return;
+    }
     setSaving(true);
     setMessage('');
     try {
@@ -446,7 +455,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
                 ? `${Number(attendance.totalPoints || 0).toLocaleString(uiLang === 'en' ? 'en-US' : uiLang === 'jp' ? 'ja-JP' : 'ko-KR')}P`
                 : '+1P'}</small>
             </button>
-            <button type="button" className="renew-community-write" onClick={openComposer}>＋ {localeText(uiLang, '글쓰기', 'New post', '投稿')}</button>
+            {!isEventBoard ? <button type="button" className="renew-community-write" onClick={openComposer}>＋ {localeText(uiLang, '글쓰기', 'New post', '投稿')}</button> : null}
           </div>
         </header>
 
@@ -461,6 +470,17 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
         </div>
 
         {message && !loadFailed ? <p className="renew-community-message" role="status">{message}</p> : null}
+
+        {isEventBoard ? (
+          <aside className="renew-community-event-notice" aria-label={localeText(uiLang, '이벤트 게시판 안내', 'Events board notice', 'イベント掲示板のお知らせ')}>
+            <span className="renew-community-event-notice-icon" aria-hidden="true">📡</span>
+            <div>
+              <div className="renew-community-event-notice-meta"><span>NOTICE</span><b>{localeText(uiLang, '상단 고정', 'Pinned', '固定')}</b></div>
+              <strong>{localeText(uiLang, '이벤트 게시판 안내', 'Events board notice', 'イベント掲示板のお知らせ')}</strong>
+              <p>{localeText(uiLang, '이벤트 게시판은 추후 공지 예정입니다. 출석과 활동으로 모은 포인트에는 추후 회원 혜택이 제공될 예정입니다.', 'Events will be announced here soon. Points earned through check-ins and activity will bring future member benefits.', 'イベントは今後こちらでお知らせします。出席・活動で貯めたポイントには、今後会員特典を予定しています。')}</p>
+            </div>
+          </aside>
+        ) : null}
 
         {!selectedPost && !loading && !loadFailed && (popularPosts.daily.length || popularPosts.weekly.length) ? (
           <div className="renew-community-popular-grid">
@@ -551,8 +571,10 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
         ) : (
           <div className="renew-community-empty">
             <strong>{localeText(uiLang, '아직 게시글이 없습니다.', 'No posts yet.', 'まだ投稿がありません。')}</strong>
-            <p>{localeText(uiLang, '첫 번째 카드 이야기를 남겨보세요.', 'Start the first card conversation.', '最初のカードトークを始めましょう。')}</p>
-            <button type="button" onClick={openComposer}>{localeText(uiLang, '글쓰기', 'New post', '投稿')}</button>
+            <p>{isEventBoard
+              ? localeText(uiLang, '새 이벤트 소식은 이곳에 안내됩니다.', 'New event announcements will appear here.', '新しいイベントのお知らせはここに掲載されます。')
+              : localeText(uiLang, '첫 번째 카드 이야기를 남겨보세요.', 'Start the first card conversation.', '最初のカードトークを始めましょう。')}</p>
+            {!isEventBoard ? <button type="button" onClick={openComposer}>{localeText(uiLang, '글쓰기', 'New post', '投稿')}</button> : null}
           </div>
         )}
       </section>
@@ -565,7 +587,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
               <button type="button" onClick={closeComposer} aria-label={localeText(uiLang, '닫기', 'Close', '閉じる')}>×</button>
             </header>
             <div className="renew-community-composer-boards">
-              {COMMUNITY_BOARDS.filter((board) => board.id !== 'all').map((board) => (
+              {COMMUNITY_BOARDS.filter((board) => board.id !== 'all' && board.id !== 'event').map((board) => (
                 <button key={board.id} type="button" className={composerBoard === board.id ? 'is-active' : ''} onClick={() => setComposerBoard(board.id)}>
                   {localeText(uiLang, board.kr, board.en, board.jp)}
                 </button>
