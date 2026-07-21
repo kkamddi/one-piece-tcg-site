@@ -81,3 +81,7 @@ export function fetchCommunityAttendance() {
 export function checkInCommunityAttendance() {
   return requestJson(`${API_BASE}?action=attendance`, { auth: true, method: 'POST' });
 }
+
+export function fetchCommunityPointOverview() {
+  return requestJson(`${API_BASE}?action=points`, { auth: true });
+}

@@ -333,38 +333,76 @@
   color: #cbd5e1;
 }
 
-.renew-ui-lang {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  height: 46px;
-  padding: 4px;
-  border: 1px solid rgba(23, 25, 28, 0.14);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.66);
+.renew-desktop-language {
+  position: relative;
 }
 
-.renew-ui-lang button {
-  min-width: 42px;
-  height: 36px;
-  border: 0;
+.renew-desktop-language-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 68px;
+  height: 46px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
   border-radius: 999px;
+  padding: 0 13px;
   color: inherit;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  background: rgba(255, 255, 255, 0.66);
+  font-size: 13px;
+  font-weight: 900;
   cursor: pointer;
 }
 
-.renew-ui-lang button.is-active {
-  background: #d44c36;
-  color: #fff;
+.renew-desktop-language-trigger span:last-child {
+  color: #6b7280;
+  font-size: 12px;
 }
 
-.renew-app.is-dark .renew-ui-lang {
+.renew-desktop-language-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 120;
+  display: grid;
+  gap: 3px;
+  min-width: 76px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 12px;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
+}
+
+.renew-desktop-language-menu button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  color: #17191c;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-desktop-language-menu button:hover {
+  background: rgba(23, 25, 28, 0.06);
+}
+
+.renew-desktop-language-menu button.is-active {
+  color: #fff;
+  background: #d44c36;
+}
+
+.renew-app.is-dark .renew-desktop-language-trigger,
+.renew-app.is-dark .renew-desktop-language-menu {
   border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
+  color: #f5f2ec;
+  background: rgba(23, 25, 31, 0.98);
+}
+
+.renew-app.is-dark .renew-desktop-language-menu button {
+  color: #f5f2ec;
 }
 
 .renew-account-pill {
@@ -3538,7 +3576,109 @@
 }
 
 .renew-account-modal {
-  width: min(480px, 100%);
+  width: min(560px, 100%);
+}
+
+.renew-account-points {
+  padding: 12px 20px 2px;
+}
+
+.renew-account-point-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  background: rgba(23, 25, 28, 0.035);
+}
+
+.renew-account-point-stats > div {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 14px;
+}
+
+.renew-account-point-stats > div + div {
+  border-left: 1px solid rgba(23, 25, 28, 0.09);
+}
+
+.renew-account-point-stats span,
+.renew-account-point-history small,
+.renew-account-point-history time {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-account-point-stats strong {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-account-point-history {
+  margin-top: 14px;
+}
+
+.renew-account-point-history > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 9px;
+}
+
+.renew-account-point-history > header strong {
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.renew-account-point-history > p {
+  margin: 0;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  padding: 14px 2px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.renew-account-point-history ul {
+  max-height: 184px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.renew-account-point-history li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid rgba(23, 25, 28, 0.08);
+  padding: 10px 2px;
+}
+
+.renew-account-point-history li > div {
+  display: grid;
+  gap: 2px;
+}
+
+.renew-account-point-history li strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.renew-account-point-history li b {
+  color: #c94d35;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.renew-account-point-history li b.is-negative {
+  color: #2563eb;
 }
 
 .renew-account-summary {
@@ -3747,6 +3887,24 @@
   border-color: rgba(255, 255, 255, 0.14);
   color: #f5f2ec;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-account-point-stats {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.renew-app.is-dark .renew-account-point-stats > div + div,
+.renew-app.is-dark .renew-account-point-history > p,
+.renew-app.is-dark .renew-account-point-history li {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.renew-app.is-dark .renew-account-point-stats span,
+.renew-app.is-dark .renew-account-point-history small,
+.renew-app.is-dark .renew-account-point-history time,
+.renew-app.is-dark .renew-account-point-history > p {
+  color: #c5ccd8;
 }
 
 .renew-app.is-dark .renew-account-actions .renew-account-delete-button {
@@ -14708,6 +14866,23 @@
   .renew-account-summary {
     grid-template-columns: 1fr;
     padding: 12px 18px 0;
+  }
+
+  .renew-account-points {
+    padding: 10px 18px 2px;
+  }
+
+  .renew-account-point-stats > div {
+    gap: 5px;
+    padding: 12px 8px;
+  }
+
+  .renew-account-point-stats span {
+    font-size: 10px;
+  }
+
+  .renew-account-point-stats strong {
+    font-size: 14px;
   }
 
   .renew-account-form {

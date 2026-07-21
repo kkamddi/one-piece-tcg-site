@@ -99,6 +99,29 @@ async function recordAttendance(userId) {
   return normalizePointStatus(Array.isArray(data) ? data[0] : data);
 }
 
+async function getPointOverview(userId) {
+  const [status, ledgerResult] = await Promise.all([
+    getAttendanceStatus(userId),
+    supabaseAdmin
+      .from('community_point_ledger')
+      .select('id,amount,reason,metadata,created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(30)
+  ]);
+  if (ledgerResult.error) throw ledgerResult.error;
+  return {
+    ...status,
+    history: (ledgerResult.data || []).map((row) => ({
+      id: row.id,
+      amount: Number(row.amount || 0),
+      reason: row.reason,
+      metadata: row.metadata || {},
+      createdAt: row.created_at
+    }))
+  };
+}
+
 export default async function handler(request, response) {
   try {
     const user = await getAuthenticatedUser(request);
@@ -116,6 +139,13 @@ export default async function handler(request, response) {
         return response.status(200).json(await recordAttendance(user.id));
       }
       return response.status(405).json({ error: 'method_not_allowed' });
+    }
+
+    if (action === 'points') {
+      if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
+      if (request.method !== 'GET') return response.status(405).json({ error: 'method_not_allowed' });
+      response.setHeader('Cache-Control', 'no-store, max-age=0');
+      return response.status(200).json(await getPointOverview(user.id));
     }
 
     if (request.method === 'GET') {
