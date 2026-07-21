@@ -26,6 +26,10 @@ function getUserNickname(user) {
   return String(metadata.nickname || metadata.full_name || metadata.name || metadata.user_name || user?.email?.split('@')[0] || '회원').trim().slice(0, 40);
 }
 
+function isAdminUser(user) {
+  return String(user?.user_metadata?.username || '').toLowerCase() === 'admin';
+}
+
 function isUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
 }
@@ -53,7 +57,13 @@ export default async function handler(request, response) {
 
     if (request.method === 'PATCH') {
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
-      const updated = await updateCommunityPost(id, request.body ?? {}, viewerToken, viewerToken);
+      const input = { ...(request.body ?? {}) };
+      if (Object.prototype.hasOwnProperty.call(input, 'pinned')) {
+        if (!isAdminUser(user)) return response.status(403).json({ error: 'forbidden' });
+        input.cardName = input.pinned ? '__pinned__' : '';
+        delete input.pinned;
+      }
+      const updated = await updateCommunityPost(id, input, viewerToken, viewerToken);
       if (!updated) return response.status(404).json({ error: 'not_found' });
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(200).json(updated);
@@ -61,7 +71,7 @@ export default async function handler(request, response) {
 
     if (request.method === 'DELETE') {
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
-      const deleted = await deleteCommunityPost(id, viewerToken);
+      const deleted = await deleteCommunityPost(id, viewerToken, viewerToken);
       if (!deleted) return response.status(404).json({ error: 'not_found' });
       return response.status(204).end();
     }

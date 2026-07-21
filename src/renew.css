@@ -359,8 +359,14 @@
 }
 
 .renew-desktop-language-trigger span:last-child {
+  display: grid;
+  width: 10px;
+  height: 10px;
+  place-items: center;
   color: #6b7280;
   font-size: 12px;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
 .renew-desktop-language-menu {
@@ -6481,10 +6487,10 @@
   align-items: start;
   margin: 18px 0;
   padding: 18px 20px;
-  border: 1px solid #17191c;
+  border: 1px solid rgba(212, 76, 54, 0.26);
   border-radius: 8px;
-  color: #fff;
-  background: #17191c;
+  color: #17191c;
+  background: #fff2eb;
 }
 
 .renew-community-event-notice-icon {
@@ -6492,10 +6498,10 @@
   width: 46px;
   height: 46px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(212, 76, 54, 0.24);
   border-radius: 8px;
   font-size: 22px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.74);
 }
 
 .renew-community-event-notice > div {
@@ -6510,18 +6516,9 @@
 }
 
 .renew-community-event-notice-meta span {
-  color: #ffab98;
+  color: #d44c36;
   font-size: 11px;
   font-weight: 900;
-}
-
-.renew-community-event-notice-meta b {
-  padding: 3px 7px;
-  border-radius: 4px;
-  color: #17191c;
-  font-size: 11px;
-  line-height: 1;
-  background: #fff;
 }
 
 .renew-community-event-notice strong {
@@ -6530,9 +6527,50 @@
 
 .renew-community-event-notice p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: #656a73;
   font-size: 14px;
   line-height: 1.55;
+}
+
+.renew-community-event-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.renew-community-event-notice-actions button {
+  min-height: 32px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 6px;
+  padding: 0 11px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.renew-community-event-notice-actions button.is-danger {
+  border-color: rgba(190, 45, 37, 0.24);
+  color: #b42318;
+}
+
+.renew-app.is-dark .renew-community-event-notice {
+  border-color: rgba(240, 122, 94, 0.3);
+  color: #f5f2ec;
+  background: rgba(212, 76, 54, 0.14);
+}
+
+.renew-app.is-dark .renew-community-event-notice-icon,
+.renew-app.is-dark .renew-community-event-notice-actions button {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f5f2ec;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-community-event-notice p {
+  color: #cbd5e1;
 }
 
 .renew-community-checkin {
@@ -6573,7 +6611,7 @@
 
 .renew-community-boards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -7358,7 +7396,7 @@
 
 @media (max-width: 900px) {
   .renew-community-boards {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 

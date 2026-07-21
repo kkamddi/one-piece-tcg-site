@@ -2320,7 +2320,7 @@ const UI_TEXT = {
     marketHomeCardTab: 'Cards',
     marketCardTitle: 'Card Prices',
     marketCardHelp: 'Featured SNKRDUNK card prices',
-    marketCardSortFocus: 'Featured',
+    marketCardSortFocus: 'Popular',
     marketCardSortHigh: 'High Price',
     marketCandidateSelect: 'Select',
     selectedVariant: 'Selected Version',
@@ -2436,7 +2436,7 @@ const UI_TEXT = {
     marketHomeCardTab: 'カード',
     marketCardTitle: 'カード相場',
     marketCardHelp: 'SNKRDUNK基準の注目カード相場',
-    marketCardSortFocus: '注目順',
+    marketCardSortFocus: '人気順',
     marketCardSortHigh: '価格が高い順',
     marketCandidateSelect: '選択',
     selectedVariant: '選択中のバージョン',
@@ -4012,7 +4012,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
               aria-expanded={mobileLanguageOpen}
             >
               <span>{uiLang}</span>
-              <span aria-hidden="true">⌄</span>
+              <span aria-hidden="true">▾</span>
             </button>
             {mobileLanguageOpen ? (
               <div className="renew-desktop-language-menu" role="menu" aria-label="UI language">
@@ -9703,6 +9703,28 @@ function getMarketFocusScore(item) {
   return listingScore + priceScore + latestScore + Math.min(Number(item.minPrice || 0), 999999) / 1000;
 }
 
+// SNKRDUNK ONE PIECE Cards > Most Popular, verified 2026-07-21.
+const SNKRDUNK_POPULAR_APPAREL_IDS = Object.freeze([
+  '854923', '819292', '167350', '854158', '323700',
+  '706813', '854167', '709870', '822584', '854159',
+  '108050', '835343', '311560', '752859', '132558',
+  '854160', '855339', '300067', '764629', '819289'
+]);
+const SNKRDUNK_POPULAR_RANK = new Map(
+  SNKRDUNK_POPULAR_APPAREL_IDS.map((apparelId, index) => [apparelId, index])
+);
+
+function compareMarketFocus(left, right) {
+  const leftRank = SNKRDUNK_POPULAR_RANK.get(String(left?.apparelId || ''));
+  const rightRank = SNKRDUNK_POPULAR_RANK.get(String(right?.apparelId || ''));
+  if (leftRank !== undefined || rightRank !== undefined) {
+    if (leftRank === undefined) return 1;
+    if (rightRank === undefined) return -1;
+    return leftRank - rightRank;
+  }
+  return getMarketFocusScore(right) - getMarketFocusScore(left);
+}
+
 function getMarketDisplayName(item) {
   const code = String(item?.code || '').trim();
   let name = String(item?.name || '').trim();
@@ -9835,10 +9857,10 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
 
   const visibleItems = useMemo(() => {
     const withPrice = items.filter((item) => Number(item.minPrice || 0) > 0);
-    const source = withPrice.length ? withPrice : items;
+    const source = sortMode === 'focus' ? items : (withPrice.length ? withPrice : items);
     const sorted = [...source].sort((a, b) => {
       if (sortMode === 'high') return (Number(b.minPrice) || 0) - (Number(a.minPrice) || 0);
-      return getMarketFocusScore(b) - getMarketFocusScore(a);
+      return compareMarketFocus(a, b);
     });
     return sorted.slice(0, 10);
   }, [items, sortMode]);
@@ -11596,6 +11618,7 @@ export default function RenewApp() {
         <CommunityPage
           authUser={authUser}
           displayName={displayName}
+          isAdmin={authUser?.user_metadata?.username === 'admin'}
           uiLang={uiLang}
           onRequireLogin={() => handleAuthClick('login')}
         />

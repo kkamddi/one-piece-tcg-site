@@ -23,6 +23,10 @@ function getUserNickname(user) {
   return String(metadata.nickname || metadata.full_name || metadata.name || metadata.user_name || user?.email?.split('@')[0] || '회원').trim().slice(0, 40);
 }
 
+function isAdminUser(user) {
+  return String(user?.user_metadata?.username || '').toLowerCase() === 'admin';
+}
+
 function decodeBase64(value) {
   const base64 = String(value || '').replace(/^data:[^;]+;base64,/, '');
   if (!base64) return null;
@@ -159,18 +163,24 @@ export default async function handler(request, response) {
     }
 
     if (request.method === 'POST') {
-      const { boardId, title, cardName, imageUrl, content } = request.body ?? {};
+      const { boardId, title, cardName, imageUrl, content, pinned } = request.body ?? {};
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
       if (!boardId || !title || !content) return response.status(400).json({ error: 'invalid_request' });
-      if (String(boardId).trim() === 'event') return response.status(403).json({ error: 'event_board_read_only' });
+      const isEventBoard = String(boardId).trim() === 'event';
+      if (isEventBoard && !isAdminUser(user)) return response.status(403).json({ error: 'event_board_read_only' });
 
-      const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName, imageUrl, content }, user.id, user.id);
+      const resolvedCardName = isEventBoard ? (pinned ? '__pinned__' : '') : cardName;
+      const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName: resolvedCardName, imageUrl, content }, user.id, user.id);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(201).json(post);
     }
 
     return response.status(405).json({ error: 'method_not_allowed' });
   } catch (error) {
-    return response.status(500).json({ error: error?.message || 'server_error' });
+    const errorCode = error?.message || 'server_error';
+    if (errorCode === 'intro_post_already_exists') {
+      return response.status(409).json({ error: errorCode });
+    }
+    return response.status(500).json({ error: errorCode });
   }
 }

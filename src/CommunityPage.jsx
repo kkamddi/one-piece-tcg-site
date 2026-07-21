@@ -9,11 +9,13 @@ import {
   fetchCommunityPosts,
   incrementCommunityPostView,
   toggleCommunityPostLike,
+  updateCommunityPost,
   uploadCommunityImage
 } from './api/community';
 
 const COMMUNITY_BOARDS = [
   { id: 'all', kr: '전체', en: 'All', jp: 'すべて' },
+  { id: 'intro', kr: '가입인사', en: 'Introductions', jp: '自己紹介' },
   { id: 'question', kr: '질문', en: 'Questions', jp: '質問' },
   { id: 'free', kr: '자유', en: 'General', jp: 'フリー' },
   { id: 'event', kr: '이벤트', en: 'Events', jp: 'イベント' }
@@ -133,7 +135,7 @@ function useCommunityModalScrollLock(active) {
   }, [active]);
 }
 
-export default function CommunityPage({ authUser, displayName, uiLang = 'KR', onRequireLogin }) {
+export default function CommunityPage({ authUser, displayName, isAdmin = false, uiLang = 'KR', onRequireLogin }) {
   const viewerToken = authUser?.id || '';
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -145,6 +147,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentContent, setCommentContent] = useState('');
   const [composerOpen, setComposerOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
   const [composerBoard, setComposerBoard] = useState('question');
   const [title, setTitle] = useState('');
   const [cardName, setCardName] = useState('');
@@ -216,13 +219,19 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
       return activeBoard === 'all' || getBoard(post.boardId).id === activeBoard;
     }), [posts, activeBoard]);
 
-  const visiblePosts = useMemo(() => [...categoryPosts]
+  const visiblePosts = useMemo(() => categoryPosts.filter((post) => !(activeBoard === 'event' && post.pinned))
     .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt)), [categoryPosts]);
   const isEventBoard = activeBoard === 'event';
+  const pinnedEventPosts = useMemo(() => posts
+    .filter((post) => post.boardId === 'event' && post.pinned)
+    .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt)), [posts]);
+  const hasMyIntroPost = useMemo(() => posts.some((post) => post.boardId === 'intro' && post.ownedByMe), [posts]);
+  const cannotWriteActiveBoard = (isEventBoard && !isAdmin) || (activeBoard === 'intro' && hasMyIntroPost);
 
   const popularPosts = useMemo(() => {
     const now = Date.now();
     const rankWithin = (windowMs) => categoryPosts
+      .filter((post) => post.boardId !== 'event')
       .filter((post) => now - new Date(post.createdAt).getTime() <= windowMs)
       .sort((left, right) => getPopularScore(right, windowMs) - getPopularScore(left, windowMs))
       .slice(0, 3);
@@ -233,14 +242,31 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
   }, [categoryPosts]);
 
   const openComposer = () => {
-    if (isEventBoard) {
+    if (isEventBoard && !isAdmin) {
       setMessage(localeText(uiLang, '이벤트 게시판은 공지 전용입니다.', 'The events board is reserved for notices.', 'イベント掲示板はお知らせ専用です。'));
+      return;
+    }
+    if (activeBoard === 'intro' && hasMyIntroPost) {
+      setMessage(localeText(uiLang, '가입인사는 계정당 한 번만 작성할 수 있습니다.', 'Each account can post one introduction.', '自己紹介は1アカウントにつき1件のみ投稿できます。'));
       return;
     }
     if (!authUser) {
       onRequireLogin?.();
       return;
     }
+    setEditingPost(null);
+    setComposerBoard(['intro', 'free', 'event'].includes(activeBoard) ? activeBoard : 'question');
+    setComposerOpen(true);
+  };
+
+  const openPostEditor = (post) => {
+    if (!post?.canEdit) return;
+    setEditingPost(post);
+    setComposerBoard(post.boardId || 'free');
+    setTitle(post.title || '');
+    setCardName(post.cardName || '');
+    setImagePreviewUrl(post.imageUrl || '');
+    setContent(post.content || '');
     setComposerOpen(true);
   };
 
@@ -318,6 +344,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
     if (saving && !force) return;
     setComposerOpen(false);
     setImageConsentOpen(false);
+    setEditingPost(null);
     setTitle('');
     setCardName('');
     clearSelectedImage();
@@ -333,8 +360,12 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
     const safeTitle = title.trim();
     const safeContent = content.trim();
     if (!safeTitle || !safeContent) return;
-    if (composerBoard === 'event') {
+    if (composerBoard === 'event' && !isAdmin) {
       setMessage(localeText(uiLang, '이벤트 게시판은 공지 전용입니다.', 'The events board is reserved for notices.', 'イベント掲示板はお知らせ専用です。'));
+      return;
+    }
+    if (composerBoard === 'intro' && hasMyIntroPost && editingPost?.boardId !== 'intro') {
+      setMessage(localeText(uiLang, '가입인사는 계정당 한 번만 작성할 수 있습니다.', 'Each account can post one introduction.', '自己紹介は1アカウントにつき1件のみ投稿できます。'));
       return;
     }
     setSaving(true);
@@ -347,19 +378,27 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
         uploadedImageUrl = uploaded?.imageUrl || '';
         if (!uploadedImageUrl) throw new Error('image_upload_failed');
       }
-      const post = await createCommunityPost({
+      const payload = {
         boardId: composerBoard,
         nickname: displayName,
         title: safeTitle,
         cardName: cardName.trim(),
-        imageUrl: uploadedImageUrl,
-        content: safeContent
-      }, viewerToken);
-      setPosts((items) => [post, ...items]);
-      setActiveBoard('all');
+        imageUrl: uploadedImageUrl || editingPost?.imageUrl || '',
+        content: safeContent,
+        pinned: editingPost?.pinned || (!editingPost && composerBoard === 'event')
+      };
+      const post = editingPost
+        ? await updateCommunityPost(editingPost.id, payload, viewerToken)
+        : await createCommunityPost(payload, viewerToken);
+      setPosts((items) => editingPost
+        ? items.map((item) => item.id === post.id ? post : item)
+        : [post, ...items]);
+      setActiveBoard(composerBoard === 'event' ? 'event' : 'all');
       closeComposer(true);
-    } catch {
-      setMessage(localeText(uiLang, '게시글을 등록하지 못했습니다.', 'Could not publish the post.', '投稿できませんでした。'));
+    } catch (error) {
+      setMessage(error?.message === 'intro_post_already_exists'
+        ? localeText(uiLang, '가입인사는 계정당 한 번만 작성할 수 있습니다.', 'Each account can post one introduction.', '自己紹介は1アカウントにつき1件のみ投稿できます。')
+        : localeText(uiLang, '게시글을 등록하지 못했습니다.', 'Could not publish the post.', '投稿できませんでした。'));
     } finally {
       setSaving(false);
     }
@@ -421,14 +460,25 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
     }
   };
 
-  const removePost = async () => {
-    if (!selectedPost?.canEdit || !window.confirm(localeText(uiLang, '게시글을 삭제할까요?', 'Delete this post?', 'この投稿を削除しますか？'))) return;
+  const removePostById = async (post) => {
+    if (!post?.canEdit || !window.confirm(localeText(uiLang, '게시글을 삭제할까요?', 'Delete this post?', 'この投稿を削除しますか？'))) return;
     try {
-      await deleteCommunityPost(selectedPost.id, viewerToken);
-      setPosts((items) => items.filter((item) => item.id !== selectedPost.id));
-      setSelectedPost(null);
+      await deleteCommunityPost(post.id, viewerToken);
+      setPosts((items) => items.filter((item) => item.id !== post.id));
+      if (selectedPost?.id === post.id) setSelectedPost(null);
     } catch {
       setMessage(localeText(uiLang, '게시글을 삭제하지 못했습니다.', 'Could not delete the post.', '投稿を削除できませんでした。'));
+    }
+  };
+
+  const togglePinnedPost = async (post) => {
+    if (!isAdmin || !post?.id) return;
+    try {
+      const updated = await updateCommunityPost(post.id, { pinned: !post.pinned });
+      setPosts((items) => items.map((item) => item.id === post.id ? updated : item));
+      if (selectedPost?.id === post.id) setSelectedPost(updated);
+    } catch {
+      setMessage(localeText(uiLang, '고정 상태를 변경하지 못했습니다.', 'Could not change the pinned state.', '固定状態を変更できませんでした。'));
     }
   };
 
@@ -455,7 +505,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
                 ? `${Number(attendance.totalPoints || 0).toLocaleString(uiLang === 'en' ? 'en-US' : uiLang === 'jp' ? 'ja-JP' : 'ko-KR')}P`
                 : '+1P'}</small>
             </button>
-            {!isEventBoard ? <button type="button" className="renew-community-write" onClick={openComposer}>＋ {localeText(uiLang, '글쓰기', 'New post', '投稿')}</button> : null}
+            {!cannotWriteActiveBoard ? <button type="button" className="renew-community-write" onClick={openComposer}>＋ {localeText(uiLang, '글쓰기', 'New post', '投稿')}</button> : null}
           </div>
         </header>
 
@@ -471,16 +521,23 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
 
         {message && !loadFailed ? <p className="renew-community-message" role="status">{message}</p> : null}
 
-        {isEventBoard ? (
-          <aside className="renew-community-event-notice" aria-label={localeText(uiLang, '이벤트 게시판 안내', 'Events board notice', 'イベント掲示板のお知らせ')}>
-            <span className="renew-community-event-notice-icon" aria-hidden="true">📡</span>
+        {isEventBoard ? pinnedEventPosts.map((post) => (
+          <aside key={post.id} className="renew-community-event-notice" aria-label={post.title}>
+            <span className="renew-community-event-notice-icon" aria-hidden="true">📌</span>
             <div>
-              <div className="renew-community-event-notice-meta"><span>NOTICE</span><b>{localeText(uiLang, '상단 고정', 'Pinned', '固定')}</b></div>
-              <strong>{localeText(uiLang, '이벤트 게시판 안내', 'Events board notice', 'イベント掲示板のお知らせ')}</strong>
-              <p>{localeText(uiLang, '이벤트 게시판은 추후 공지 예정입니다. 출석과 활동으로 모은 포인트에는 추후 회원 혜택이 제공될 예정입니다.', 'Events will be announced here soon. Points earned through check-ins and activity will bring future member benefits.', 'イベントは今後こちらでお知らせします。出席・活動で貯めたポイントには、今後会員特典を予定しています。')}</p>
+              <div className="renew-community-event-notice-meta"><span>NOTICE</span></div>
+              <strong>{post.title}</strong>
+              <p>{post.content}</p>
+              {isAdmin ? (
+                <div className="renew-community-event-notice-actions">
+                  <button type="button" onClick={() => openPostEditor(post)}>{localeText(uiLang, '수정', 'Edit', '編集')}</button>
+                  <button type="button" onClick={() => togglePinnedPost(post)}>{localeText(uiLang, '고정 해제', 'Unpin', '固定解除')}</button>
+                  <button type="button" className="is-danger" onClick={() => removePostById(post)}>{localeText(uiLang, '삭제', 'Delete', '削除')}</button>
+                </div>
+              ) : null}
             </div>
           </aside>
-        ) : null}
+        )) : null}
 
         {!selectedPost && !loading && !loadFailed && (popularPosts.daily.length || popularPosts.weekly.length) ? (
           <div className="renew-community-popular-grid">
@@ -518,7 +575,9 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
             <div className="renew-community-detail-actions">
               <button type="button" className={selectedPost.likedByMe ? 'is-active' : ''} onClick={() => toggleLike(selectedPost.id)}>♡ {localeText(uiLang, '좋아요', 'Like', 'いいね')} {selectedPost.likes || 0}</button>
               <span>{localeText(uiLang, '조회', 'Views', '閲覧')} {selectedPost.views || 0}</span>
-              {selectedPost.canEdit ? <button type="button" className="is-danger" onClick={removePost}>{localeText(uiLang, '삭제', 'Delete', '削除')}</button> : null}
+              {selectedPost.canEdit ? <button type="button" onClick={() => openPostEditor(selectedPost)}>{localeText(uiLang, '수정', 'Edit', '編集')}</button> : null}
+              {isAdmin && selectedPost.boardId === 'event' ? <button type="button" onClick={() => togglePinnedPost(selectedPost)}>{selectedPost.pinned ? localeText(uiLang, '고정 해제', 'Unpin', '固定解除') : localeText(uiLang, '상단 고정', 'Pin', '固定')}</button> : null}
+              {selectedPost.canEdit ? <button type="button" className="is-danger" onClick={() => removePostById(selectedPost)}>{localeText(uiLang, '삭제', 'Delete', '削除')}</button> : null}
             </div>
             <section className="renew-community-comments">
               <header><strong>{localeText(uiLang, '댓글', 'Comments', 'コメント')} {selectedPost.commentCount || comments.length}</strong></header>
@@ -568,13 +627,13 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
               );
             })}
           </div>
-        ) : (
+        ) : isEventBoard && pinnedEventPosts.length ? null : (
           <div className="renew-community-empty">
             <strong>{localeText(uiLang, '아직 게시글이 없습니다.', 'No posts yet.', 'まだ投稿がありません。')}</strong>
             <p>{isEventBoard
               ? localeText(uiLang, '새 이벤트 소식은 이곳에 안내됩니다.', 'New event announcements will appear here.', '新しいイベントのお知らせはここに掲載されます。')
               : localeText(uiLang, '첫 번째 카드 이야기를 남겨보세요.', 'Start the first card conversation.', '最初のカードトークを始めましょう。')}</p>
-            {!isEventBoard ? <button type="button" onClick={openComposer}>{localeText(uiLang, '글쓰기', 'New post', '投稿')}</button> : null}
+            {!cannotWriteActiveBoard ? <button type="button" onClick={openComposer}>{localeText(uiLang, '글쓰기', 'New post', '投稿')}</button> : null}
           </div>
         )}
       </section>
@@ -583,18 +642,20 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
         <div className="renew-modal-backdrop renew-community-composer-backdrop" onClick={closeComposer}>
           <form className="renew-info-modal renew-community-composer" onSubmit={submitPost} onClick={(event) => event.stopPropagation()}>
             <header>
-              <div><span>NEW POST</span><strong>{localeText(uiLang, '카드 이야기 작성', 'Create a post', '投稿を作成')}</strong></div>
+              <div><span>{editingPost ? 'EDIT POST' : 'NEW POST'}</span><strong>{editingPost ? localeText(uiLang, '게시글 수정', 'Edit post', '投稿を編集') : localeText(uiLang, '카드 이야기 작성', 'Create a post', '投稿を作成')}</strong></div>
               <button type="button" onClick={closeComposer} aria-label={localeText(uiLang, '닫기', 'Close', '閉じる')}>×</button>
             </header>
             <div className="renew-community-composer-boards">
-              {COMMUNITY_BOARDS.filter((board) => board.id !== 'all' && board.id !== 'event').map((board) => (
+              {COMMUNITY_BOARDS.filter((board) => editingPost
+                ? board.id === editingPost.boardId
+                : board.id !== 'all' && (board.id !== 'event' || isAdmin) && !(board.id === 'intro' && hasMyIntroPost)).map((board) => (
                 <button key={board.id} type="button" className={composerBoard === board.id ? 'is-active' : ''} onClick={() => setComposerBoard(board.id)}>
                   {localeText(uiLang, board.kr, board.en, board.jp)}
                 </button>
               ))}
             </div>
             <label><span>{localeText(uiLang, '제목', 'Title', 'タイトル')}</span><input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={80} required /></label>
-            <label><span>{localeText(uiLang, '관련 카드', 'Related card', '関連カード')} <small>{localeText(uiLang, '선택', 'Optional', '任意')}</small></span><input value={cardName} onChange={(event) => setCardName(event.target.value)} maxLength={80} placeholder="OP05-119" /></label>
+            {composerBoard !== 'event' ? <label><span>{localeText(uiLang, '관련 카드', 'Related card', '関連カード')} <small>{localeText(uiLang, '선택', 'Optional', '任意')}</small></span><input value={cardName} onChange={(event) => setCardName(event.target.value)} maxLength={80} placeholder="OP05-119" /></label> : null}
             <div className="renew-community-image-picker">
               <div>
                 <span>{localeText(uiLang, '이미지', 'Image', '画像')} <small>{localeText(uiLang, '선택', 'Optional', '任意')}</small></span>
