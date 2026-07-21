@@ -4459,6 +4459,31 @@ function formatPointHistoryDate(value, uiLang) {
   }).format(new Date(value));
 }
 
+const COMMUNITY_MEMBER_GRADES = [
+  { min: 0, kr: '견습 선원', en: 'Apprentice', jp: '見習い船員' },
+  { min: 10, kr: '선원', en: 'Crew', jp: '船員' },
+  { min: 30, kr: '초신성', en: 'Supernova', jp: '超新星' },
+  { min: 80, kr: '칠무해', en: 'Warlord', jp: '王下七武海' },
+  { min: 200, kr: '사황', en: 'Emperor', jp: '四皇' },
+  { min: 500, kr: '해적왕', en: 'Pirate King', jp: '海賊王' }
+];
+
+function getCommunityMemberGrade(points, uiLang) {
+  const totalPoints = Math.max(0, Number(points) || 0);
+  let gradeIndex = 0;
+  for (let index = 1; index < COMMUNITY_MEMBER_GRADES.length; index += 1) {
+    if (totalPoints < COMMUNITY_MEMBER_GRADES[index].min) break;
+    gradeIndex = index;
+  }
+  const current = COMMUNITY_MEMBER_GRADES[gradeIndex];
+  const next = COMMUNITY_MEMBER_GRADES[gradeIndex + 1] || null;
+  return {
+    label: getLocaleText(uiLang, current.kr, current.en, current.jp),
+    nextLabel: next ? getLocaleText(uiLang, next.kr, next.en, next.jp) : '',
+    remaining: next ? Math.max(0, next.min - totalPoints) : 0
+  };
+}
+
 function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', onClose, onLogout, onUserUpdated }) {
   useBodyScrollLock();
   const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
@@ -4470,6 +4495,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
   const [currentPassword, setCurrentPassword] = useState('');
   const [nickname, setNickname] = useState(displayName || '');
   const [message, setMessage] = useState('');
+  const [nicknameNotice, setNicknameNotice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -4498,6 +4524,12 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     };
   }, [unlocked]);
 
+  useEffect(() => {
+    if (!nicknameNotice) return undefined;
+    const timer = window.setTimeout(() => setNicknameNotice(null), 2600);
+    return () => window.clearTimeout(timer);
+  }, [nicknameNotice]);
+
   async function unlockAccount(event) {
     event.preventDefault();
     if (!supabase || !email || !currentPassword.trim()) return;
@@ -4520,11 +4552,11 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     const currentNickname = String(authUser?.user_metadata?.nickname || '').trim();
     if (!supabase || !nextNickname) return;
     if (nextNickname.length < 2 || nextNickname.length > 20) {
-      setMessage(text('닉네임은 2자 이상 20자 이하로 입력해 주세요.', 'Use 2 to 20 characters.', 'ニックネームは2〜20文字で入力してください。'));
+      setNicknameNotice({ type: 'error', message: text('닉네임은 2자 이상 20자 이하로 입력해 주세요.', 'Use 2 to 20 characters.', 'ニックネームは2〜20文字で入力してください。') });
       return;
     }
     setLoading(true);
-    setMessage('');
+    setNicknameNotice(null);
     try {
       if (nextNickname.toLowerCase() !== currentNickname.toLowerCase()) {
         const availability = await checkAuthAvailability('nickname', nextNickname);
@@ -4535,9 +4567,9 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
       });
       if (error) throw error;
       onUserUpdated(data?.user || null);
-      setMessage(text('닉네임이 변경되었습니다.', 'Nickname updated.', 'ニックネームを変更しました。'));
+      setNicknameNotice({ type: 'success', message: text('닉네임이 변경되었습니다.', 'Nickname updated.', 'ニックネームを変更しました。') });
     } catch (error) {
-      setMessage(error?.message || text('닉네임 변경에 실패했습니다.', 'Could not update nickname.', 'ニックネームを変更できませんでした。'));
+      setNicknameNotice({ type: 'error', message: error?.message || text('닉네임 변경에 실패했습니다.', 'Could not update nickname.', 'ニックネームを変更できませんでした。') });
     } finally {
       setLoading(false);
     }
@@ -4584,13 +4616,17 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
   }
 
   const providerLabel = provider === 'kakao' ? '카카오' : provider === 'google' ? 'Google' : '일반 계정';
+  const memberGrade = getCommunityMemberGrade(pointOverview?.totalPoints, uiLang);
+  const isAdmin = authUser?.app_metadata?.role === 'admin';
 
   return (
-    <div className="renew-modal-backdrop" onClick={onClose}>
-      <div className="renew-info-modal renew-account-modal" onClick={(event) => event.stopPropagation()}>
+    <>
+      <div className="renew-modal-backdrop" onClick={onClose}>
+        <div className="renew-info-modal renew-account-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
-          <div>
+          <div className="renew-account-title">
             <h2>마이페이지</h2>
+            {isAdmin ? <span>ADMIN</span> : null}
           </div>
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
@@ -4611,7 +4647,14 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
               <div className="renew-account-point-stats">
                 <div>
                   <span>{text('현재 등급', 'Member grade', '会員ランク')}</span>
-                  <strong>{authUser?.app_metadata?.role === 'admin' ? text('관리자', 'Admin', '管理者') : text('일반 회원', 'Member', '一般会員')}</strong>
+                  <strong>{pointLoading ? '-' : memberGrade.label}</strong>
+                  {!pointLoading ? (
+                    <small className="renew-account-grade-progress">
+                      {memberGrade.nextLabel
+                        ? text(`다음 ${memberGrade.nextLabel}까지 ${memberGrade.remaining}P`, `${memberGrade.remaining}P to ${memberGrade.nextLabel}`, `次の${memberGrade.nextLabel}まで${memberGrade.remaining}P`)
+                        : text('최고 등급', 'Highest grade', '最高ランク')}
+                    </small>
+                  ) : null}
                 </div>
                 <div>
                   <span>{text('누적 포인트', 'Total points', '累計ポイント')}</span>
@@ -4709,8 +4752,16 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
             </form>
           </div>
         ) : null}
+        </div>
       </div>
-    </div>
+      {nicknameNotice ? createPortal(
+        <div className={`renew-account-toast is-${nicknameNotice.type}`} role="status" aria-live="polite">
+          <span aria-hidden="true">{nicknameNotice.type === 'success' ? '✓' : '!'}</span>
+          <strong>{nicknameNotice.message}</strong>
+        </div>,
+        document.body
+      ) : null}
+    </>
   );
 }
 

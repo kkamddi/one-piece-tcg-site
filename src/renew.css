@@ -3589,6 +3589,65 @@
   width: min(560px, 100%);
 }
 
+.renew-account-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.renew-account-title > span {
+  border: 1px solid rgba(214, 74, 51, 0.24);
+  border-radius: 999px;
+  padding: 4px 7px;
+  color: #d64a33;
+  background: rgba(214, 74, 51, 0.08);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.renew-account-toast {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  width: min(420px, calc(100vw - 32px));
+  gap: 10px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 8px;
+  padding: 13px 15px;
+  color: #17191c;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: rgba(4, 23, 43, 0.2) 0 18px 48px -20px;
+  transform: translateX(-50%);
+}
+
+.renew-account-toast > span {
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #1f8a57;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.renew-account-toast.is-error > span {
+  background: #d64a33;
+}
+
+.renew-account-toast > strong {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
 .renew-account-points {
   padding: 12px 20px 2px;
 }
@@ -3624,6 +3683,15 @@
   overflow: hidden;
   font-size: 16px;
   font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-account-point-stats .renew-account-grade-progress {
+  overflow: hidden;
+  color: #d64a33;
+  font-size: 10px;
+  font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3902,6 +3970,18 @@
 .renew-app.is-dark .renew-account-point-stats {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
+}
+
+.renew-app.is-dark .renew-account-title > span {
+  border-color: rgba(255, 145, 122, 0.28);
+  color: #ff917a;
+  background: rgba(214, 74, 51, 0.14);
+}
+
+.renew-app.is-dark .renew-account-toast {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+  background: rgba(19, 23, 31, 0.98);
 }
 
 .renew-app.is-dark .renew-account-point-stats > div + div,
