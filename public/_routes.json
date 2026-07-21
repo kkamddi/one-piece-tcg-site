@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/assets/*",
+    "/partners/*",
+    "/uploads/*",
+    "/app-icon-*",
+    "/apple-touch-icon*",
+    "/card-placeholder.svg",
+    "/card-pone-*",
+    "/compass-bg.png",
+    "/custom-logo.png",
+    "/favicon*",
+    "/og-*",
+    "/onepiece-*",
+    "/optcg-*",
+    "/native-auth-start.html",
+    "/robots.txt",
+    "/rss.xml",
+    "/site.webmanifest",
+    "/sitemap*",
+    "/sw.js"
+  ]
+}
