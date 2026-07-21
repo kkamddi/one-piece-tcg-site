@@ -4506,7 +4506,7 @@ function getCommunityMemberGrade(points, uiLang) {
 function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', onClose, onLogout, onUserUpdated }) {
   useBodyScrollLock();
   const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
-  const email = authUser?.email || '';
+  const email = authUser?.user_metadata?.naver_email || authUser?.email || '';
   const username = authUser?.user_metadata?.username || email.split('@')[0] || '-';
   const provider = authUser?.app_metadata?.provider || 'email';
   const isSocialAccount = provider !== 'email';

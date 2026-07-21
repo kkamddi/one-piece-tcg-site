@@ -14,3 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <RootApp />
   </React.StrictMode>
 );
+
+window.requestAnimationFrame(() => {
+  document.documentElement.classList.remove('card-pone-js-booting');
+});

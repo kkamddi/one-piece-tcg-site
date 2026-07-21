@@ -45,8 +45,7 @@ export async function onRequestGet({ request }) {
   return jsonResponse({
     sub: id,
     id,
-    email,
-    email_verified: true,
+    naver_email: email,
     name,
     nickname,
     preferred_username: nickname,

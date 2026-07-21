@@ -31,9 +31,44 @@
     <link rel="shortcut icon" href="/card-pone-favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/card-pone-apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <script>
+      document.documentElement.classList.add('card-pone-js-booting');
+      window.setTimeout(() => {
+        document.documentElement.classList.remove('card-pone-js-booting');
+      }, 8000);
+    </script>
     <style id="card-pone-server-page-critical">
       html { background: #f7f7f5; }
       body { margin: 0; background: #f7f7f5; color: #17191d; }
+      html.card-pone-js-booting body { overflow: hidden; }
+      html.card-pone-js-booting body::before {
+        position: fixed;
+        inset: 0;
+        z-index: 99998;
+        display: grid;
+        place-items: center;
+        background: #f7f7f5;
+        color: #17191d;
+        font-family: Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 24px;
+        font-weight: 900;
+        content: "CARD Pone";
+      }
+      html.card-pone-js-booting body::after {
+        position: fixed;
+        top: calc(50% + 34px);
+        left: calc(50% - 10px);
+        z-index: 99999;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #d9dce1;
+        border-top-color: #d84a32;
+        border-radius: 50%;
+        content: "";
+        animation: card-pone-boot-spin .7s linear infinite;
+      }
+      html.card-pone-js-booting .server-page-content { visibility: hidden; }
+      @keyframes card-pone-boot-spin { to { transform: rotate(360deg); } }
       .server-page-content {
         box-sizing: border-box;
         width: min(100% - 32px, 1120px);
@@ -91,6 +126,7 @@
         text-decoration: none;
       }
       @media (max-width: 640px) {
+        html.card-pone-js-booting body::before { font-size: 21px; }
         .server-page-content { width: min(100% - 40px, 1120px); padding-top: 28px; }
         .server-page-content::before { margin-bottom: 52px; font-size: 21px; }
         .server-page-content h1 { font-size: 34px; }
