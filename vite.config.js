@@ -7,6 +7,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/card-pone-app-[hash].js',
+        chunkFileNames: 'assets/card-pone-chunk-[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           const sourceName = assetInfo.names?.[0] || assetInfo.name || '';
           if (sourceName.endsWith('.css')) return 'assets/card-pone-styles-[hash][extname]';
