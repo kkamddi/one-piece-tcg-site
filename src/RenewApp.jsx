@@ -17,6 +17,7 @@ import boxMarketItems from './data/box-market-items';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
+import CommunityPage from './CommunityPage';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
@@ -2101,6 +2102,7 @@ const NAV_ITEMS = [
   { id: 'cards', labelKey: 'navCards' },
   { id: 'prices', labelKey: 'navPrices' },
   ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
+  { id: 'community', labelKey: 'navCommunity' },
   { id: 'calendar', labelKey: 'navCalendar' },
   { id: 'news', labelKey: 'navNews' },
   { id: 'shops', labelKey: 'navShops' }
@@ -2111,6 +2113,7 @@ const UI_TEXT = {
     navCards: '도감',
     navPrices: '시세',
     navMarketplace: '거래',
+    navCommunity: '커뮤니티',
     navCalendar: '일정',
     navNews: '정보',
     navShops: '구매처',
@@ -2226,6 +2229,7 @@ const UI_TEXT = {
     navCards: 'Cards',
     navPrices: 'Prices',
     navMarketplace: 'Trade',
+    navCommunity: 'Community',
     navCalendar: 'Calendar',
     navNews: 'Info',
     navShops: 'Shops',
@@ -2341,6 +2345,7 @@ const UI_TEXT = {
     navCards: 'カード図鑑',
     navPrices: '相場',
     navMarketplace: '取引',
+    navCommunity: 'コミュニティ',
     navCalendar: 'カレンダー',
     navNews: '情報',
     navShops: 'ショップ',
@@ -2480,6 +2485,7 @@ const PAGE_PATHS = {
   cards: '/cards',
   prices: '/prices',
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
+  community: '/community',
   calendar: '/calendar',
   news: '/news',
   shops: '/shops',
@@ -2526,6 +2532,7 @@ function getRouteSeoPage(pathname = '/') {
   if (PATH_PAGES[path]) return PATH_PAGES[path];
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
+  if (path.startsWith('/community')) return 'community';
   if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
   if (path.startsWith('/shops/partners')) return 'partnerShops';
@@ -2641,6 +2648,13 @@ const PAGE_SEO = {
     description: 'Card Pone 거래 페이지는 유저 간 원피스 카드 판매, 교환, 구매 글을 카페 인증 기반으로 운영하기 위한 공간입니다.',
     keywords: '원피스카드 거래, 원피스 카드 교환, 원피스카드 판매, 원피스카드 마켓',
     body: '거래 페이지는 유저 간 카드 판매와 교환을 안전하게 운영하기 위해 카페 인증, 매물 사진, 판매자 정보, 문의 기능을 단계적으로 제공할 예정입니다.'
+  },
+  community: {
+    title: '원피스카드 커뮤니티 - 질문·개봉·시세 이야기 | Card Pone',
+    h1: '원피스카드 커뮤니티',
+    description: '원피스카드 질문, 개봉 결과, 시세와 수집 이야기를 카드 정보와 함께 나눌 수 있습니다.',
+    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 개봉, 원피스카드 수집, 원피스카드 시세 토론',
+    body: '카드 상세 정보와 연결해 질문, 개봉 결과, 시세와 수집 경험을 나누는 커뮤니티입니다.'
   },
   news: {
     title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | Card Pone',
@@ -2794,6 +2808,13 @@ const JP_PAGE_SEO = {
     description: 'SNKRDUNK基準でONE PIECE CARD GAMEのSingle・PSA10の価格、最近の取引記録、7日・1か月・1年チャートを確認できます。',
     keywords: 'ワンピースカードゲーム 相場,ワンピカード 相場,ワンピースカード 価格,SNKRDUNK,PSA10,Card Pone',
     body: 'カードごとの最近の取引価格、価格チャート、ボックス相場を確認できます。'
+  },
+  community: {
+    title: 'ワンピースカードゲーム コミュニティ | Card Pone',
+    h1: 'ワンピースカードゲーム コミュニティ',
+    description: 'ONE PIECE CARD GAMEの質問、開封結果、相場、コレクションの話を共有できます。',
+    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 開封,ワンピカード コレクション',
+    body: 'カード情報と一緒に質問、開封結果、相場、コレクションの話を共有するコミュニティです。'
   },
   calendar: {
     title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
@@ -3036,7 +3057,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
   if (path.startsWith('/shops/partners/')) return { label: '제휴 카드샵으로 돌아가기', page: 'partnerShops' };
   if (path === '/shops/partners') return { label: '구매처로 돌아가기', page: 'shops' };
-  if (path === '/' || (['/cards', '/prices', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
+  if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
   if (path.startsWith('/cards')) return { label: '도감으로 돌아가기', page: 'cards' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { label: '시세로 돌아가기', page: 'prices' };
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { label: '정보로 돌아가기', page: 'news' };
@@ -3399,6 +3420,7 @@ function MobileNavIcon({ type }) {
     cards: <><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1 1-1h5a3 3 0 0 1 3 3 3 3 0 0 1 3-3h5a1 1 0 0 1 1 1V5a1 1 0 0 0-1-1h-5a3 3 0 0 0-3 3 3 3 0 0 0-3-3H4a1 1 0 0 0-1 1z" /></>,
     prices: <><path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" /></>,
     marketplace: <><path d="M7 7h11l-3-3" /><path d="M18 7l-3 3" /><path d="M17 17H6l3 3" /><path d="M6 17l3-3" /></>,
+    community: <><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" /><path d="M8 9h8" /><path d="M8 13h5" /></>,
     calendar: <><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></>,
     details: <><path d="M2.1 12a10.2 10.2 0 0 1 19.8 0 10.2 10.2 0 0 1-19.8 0" /><circle cx="12" cy="12" r="3" /></>,
     store: <><path d="M6 2 3 6v2a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0V6l-3-4Z" /><path d="M5 11v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" /><path d="M9 22v-6h6v6" /></>,
@@ -3906,9 +3928,9 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        <a href={getLocalizedPagePath('calendar', uiLang)} className={activePage === 'calendar' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('calendar'); }} aria-label="캘린더">
-          <MobileNavIcon type="calendar" />
-          <span>{t('navCalendar')}</span>
+        <a href={getLocalizedPagePath('community', uiLang)} className={activePage === 'community' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('community'); }} aria-label="커뮤니티">
+          <MobileNavIcon type="community" />
+          <span>{t('navCommunity')}</span>
         </a>
         <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
@@ -11101,6 +11123,13 @@ export default function RenewApp() {
         ) : (
           <RenewMarketplaceHidden />
         )
+      ) : activePage === 'community' ? (
+        <CommunityPage
+          authUser={authUser}
+          displayName={displayName}
+          uiLang={uiLang}
+          onRequireLogin={() => handleAuthClick('login')}
+        />
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'news' ? (

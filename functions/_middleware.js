@@ -3,7 +3,6 @@ const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
 const LEGACY_REDIRECTS = {
   '/deck': '/news',
   '/deck-simulator': '/news',
-  '/community': '/',
   '/collection': '/',
   '/guide/buying': '/guide/shops',
   '/guide/catalog': '/guide/card-catalog',
@@ -46,6 +45,11 @@ const PAGE_SEO = {
     title: '원피스 카드 거래 - 유저 교환과 판매 게시판 | Card Pone',
     description: 'Card Pone 거래 페이지는 유저 간 원피스 카드 판매, 교환, 구매 글을 카페 인증 기반으로 운영하기 위한 공간입니다.',
     keywords: '원피스카드 거래, 원피스 카드 교환, 원피스카드 판매, 원피스카드 마켓'
+  },
+  '/community': {
+    title: '원피스카드 커뮤니티 - 질문·개봉·시세 이야기 | Card Pone',
+    description: '원피스카드 질문, 개봉 결과, 시세와 수집 이야기를 카드 정보와 함께 나눌 수 있습니다.',
+    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 개봉, 원피스카드 수집, 원피스카드 시세 토론'
   },
   '/news': {
     title: '원피스 카드 공지사항 및 업데이트 | Card Pone',
@@ -97,6 +101,12 @@ const JAPANESE_SEO = {
     title: 'ワンピースカードゲーム 相場・価格チャート | Card Pone',
     description: 'SNKRDUNK基準でONE PIECE CARD GAMEのSingle・PSA10の価格、最近の取引記録、7日・1か月・1年チャートを確認できます。',
     keywords: 'ワンピースカードゲーム 相場,ワンピカード 相場,ワンピースカード 価格,SNKRDUNK,PSA10,Card Pone',
+    schemaType: 'CollectionPage'
+  },
+  '/community': {
+    title: 'ワンピースカードゲーム コミュニティ | Card Pone',
+    description: 'ONE PIECE CARD GAMEの質問、開封結果、相場、コレクションの話を共有できます。',
+    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 開封,ワンピカード コレクション',
     schemaType: 'CollectionPage'
   },
   '/calendar': {
