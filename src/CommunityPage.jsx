@@ -427,7 +427,6 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
     <main className="renew-subpage renew-community-main">
       <section className="renew-panel renew-community-panel">
         <header className="renew-community-head">
-          <h1>COMMUNITY</h1>
           <div className="renew-community-head-actions">
             <button
               type="button"
