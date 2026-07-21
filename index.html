@@ -32,42 +32,91 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/card-pone-apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <script>
-      document.documentElement.classList.add('card-pone-js-booting');
-      window.setTimeout(() => {
-        document.documentElement.classList.remove('card-pone-js-booting');
-      }, 8000);
+      (() => {
+        const retryKey = 'card-pone:boot-retry';
+        document.documentElement.classList.add('card-pone-js-booting');
+        window.__CARD_PONE_BOOT_TIMER__ = window.setTimeout(() => {
+          const url = new URL(window.location.href);
+          let alreadyRetried = url.searchParams.has('_app_retry');
+          try {
+            if (!alreadyRetried) alreadyRetried = sessionStorage.getItem(retryKey) === '1';
+          } catch {
+            // Some privacy modes block session storage. The URL marker still prevents a reload loop.
+          }
+          if (!alreadyRetried) {
+            try {
+              sessionStorage.setItem(retryKey, '1');
+            } catch {
+              // Continue with the URL-based retry marker.
+            }
+            url.searchParams.set('_app_retry', Date.now().toString());
+            window.location.replace(url.toString());
+            return;
+          }
+          document.documentElement.classList.remove('card-pone-js-booting');
+          document.documentElement.classList.add('card-pone-js-boot-failed');
+        }, 10000);
+      })();
     </script>
     <style id="card-pone-server-page-critical">
       html { background: #f7f7f5; }
       body { margin: 0; background: #f7f7f5; color: #17191d; }
-      html.card-pone-js-booting body { overflow: hidden; }
-      html.card-pone-js-booting body::before {
+      html.card-pone-js-booting body,
+      html.card-pone-js-boot-failed body { overflow: hidden; }
+      #card-pone-boot-screen {
         position: fixed;
         inset: 0;
         z-index: 99998;
-        display: grid;
+        display: none;
         place-items: center;
         background: #f7f7f5;
         color: #17191d;
         font-family: Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: 24px;
-        font-weight: 900;
-        content: "CARD Pone";
       }
-      html.card-pone-js-booting body::after {
-        position: fixed;
-        top: calc(50% + 34px);
-        left: calc(50% - 10px);
-        z-index: 99999;
+      html.card-pone-js-booting #card-pone-boot-screen,
+      html.card-pone-js-boot-failed #card-pone-boot-screen { display: grid; }
+      .card-pone-boot-content {
+        display: grid;
+        justify-items: center;
+        gap: 16px;
+        padding: 24px;
+        text-align: center;
+      }
+      .card-pone-boot-content strong { font-size: 24px; font-weight: 900; }
+      .card-pone-boot-spinner {
         width: 18px;
         height: 18px;
         border: 2px solid #d9dce1;
         border-top-color: #d84a32;
         border-radius: 50%;
-        content: "";
         animation: card-pone-boot-spin .7s linear infinite;
       }
-      html.card-pone-js-booting .server-page-content { visibility: hidden; }
+      .card-pone-boot-error,
+      .card-pone-boot-retry { display: none; }
+      .card-pone-boot-error {
+        margin: 0;
+        color: #626975;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.6;
+      }
+      .card-pone-boot-retry {
+        min-height: 42px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 8px;
+        background: #17191d;
+        color: #fff;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      html.card-pone-js-boot-failed .card-pone-boot-spinner { display: none; }
+      html.card-pone-js-boot-failed .card-pone-boot-error,
+      html.card-pone-js-boot-failed .card-pone-boot-retry { display: block; }
+      html.card-pone-js-booting .server-page-content,
+      html.card-pone-js-boot-failed .server-page-content { visibility: hidden; }
       @keyframes card-pone-boot-spin { to { transform: rotate(360deg); } }
       .server-page-content {
         box-sizing: border-box;
@@ -126,7 +175,7 @@
         text-decoration: none;
       }
       @media (max-width: 640px) {
-        html.card-pone-js-booting body::before { font-size: 21px; }
+        .card-pone-boot-content strong { font-size: 21px; }
         .server-page-content { width: min(100% - 40px, 1120px); padding-top: 28px; }
         .server-page-content::before { margin-bottom: 52px; font-size: 21px; }
         .server-page-content h1 { font-size: 34px; }
@@ -184,6 +233,14 @@
     <title>카드포네 Card Pone - 원피스카드 도감, 시세, 구매처</title>
   </head>
   <body>
+    <div id="card-pone-boot-screen" role="status" aria-live="polite">
+      <div class="card-pone-boot-content">
+        <strong>CARD Pone</strong>
+        <span class="card-pone-boot-spinner" aria-hidden="true"></span>
+        <p class="card-pone-boot-error">사이트를 불러오지 못했습니다.<br />잠시 후 다시 시도해 주세요.</p>
+        <button class="card-pone-boot-retry" type="button" onclick="window.location.reload()">다시 시도</button>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
