@@ -6,6 +6,7 @@ import {
   toggleCommunityPostLike,
   updateCommunityPost
 } from '../../lib/community-store.js';
+import { resolveCommunityAuthorGrades } from '../../lib/community-grade-profile.js';
 import { supabaseAdmin } from '../../lib/supabase-admin.js';
 
 function getAuthToken(request) {
@@ -77,7 +78,7 @@ export default async function handler(request, response) {
     }
 
     if (request.method === 'GET' && action === 'comments') {
-      const comments = await listCommunityComments(id, viewerToken);
+      const comments = await listCommunityComments(id, viewerToken, { resolveAuthorGrades: resolveCommunityAuthorGrades });
       if (!comments) return response.status(404).json({ error: 'not_found' });
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(200).json({ comments });
@@ -109,8 +110,9 @@ export default async function handler(request, response) {
       if (!content) return response.status(400).json({ error: 'invalid_request' });
       const comment = await addCommunityComment(id, { nickname: getUserNickname(user), content }, user.id, user.id);
       if (!comment) return response.status(404).json({ error: 'not_found' });
+      const authorGrades = await resolveCommunityAuthorGrades([user.id]);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
-      return response.status(201).json(comment);
+      return response.status(201).json({ ...comment, authorGrade: authorGrades.get(user.id) || '' });
     }
 
     return response.status(405).json({ error: 'method_not_allowed' });

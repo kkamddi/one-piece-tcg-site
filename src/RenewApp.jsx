@@ -20,6 +20,7 @@ import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
 import CommunityPage from './CommunityPage';
+import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
@@ -72,7 +73,7 @@ const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
-const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-15-portfolio-return';
+const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-21-community';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
@@ -244,6 +245,17 @@ function useBodyScrollLock(active = true) {
 }
 
 const RENEW_HOME_UPDATES = [
+  {
+    id: '2026-07-21-community',
+    title: '[26.07.21] 업데이트 안내',
+    summary: '커뮤니티 오픈 안내',
+    details: [
+      '질문·자유·가입인사 게시판에서 회원들과 카드 이야기를 나눌 수 있습니다.',
+      '매일 출석과 게시글 좋아요를 통해 포인트를 모을 수 있습니다.',
+      '누적 포인트에 따라 회원 등급이 올라가며 작성자 이름 옆에 등급이 표시됩니다.',
+      '이벤트 게시판과 포인트별 회원 혜택은 준비 중이며 세부 내용은 추후 별도로 안내합니다.'
+    ]
+  },
   {
     id: '2026-07-15-portfolio-return',
     title: '[26.07.15] 업데이트 안내',
@@ -2745,11 +2757,11 @@ const PAGE_SEO = {
     body: '거래 페이지는 유저 간 카드 판매와 교환을 안전하게 운영하기 위해 카페 인증, 매물 사진, 판매자 정보, 문의 기능을 단계적으로 제공할 예정입니다.'
   },
   community: {
-    title: '원피스카드 커뮤니티 - 질문·개봉·시세 이야기 | Card Pone',
+    title: '원피스카드 커뮤니티 - 질문·가입인사·이벤트 | Card Pone',
     h1: '원피스카드 커뮤니티',
-    description: '원피스카드 질문, 개봉 결과, 시세와 수집 이야기를 카드 정보와 함께 나눌 수 있습니다.',
-    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 개봉, 원피스카드 수집, 원피스카드 시세 토론',
-    body: '카드 상세 정보와 연결해 질문, 개봉 결과, 시세와 수집 경험을 나누는 커뮤니티입니다.'
+    description: '원피스카드 질문과 자유 이야기, 가입인사를 나누고 출석 포인트와 회원 등급을 확인할 수 있습니다.',
+    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 가입인사, 원피스카드 이벤트, 카드 수집 커뮤니티',
+    body: '질문, 자유 이야기와 가입인사를 나누고 출석 포인트와 회원 등급을 확인하는 원피스카드 커뮤니티입니다.'
   },
   news: {
     title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | Card Pone',
@@ -2907,9 +2919,9 @@ const JP_PAGE_SEO = {
   community: {
     title: 'ワンピースカードゲーム コミュニティ | Card Pone',
     h1: 'ワンピースカードゲーム コミュニティ',
-    description: 'ONE PIECE CARD GAMEの質問、開封結果、相場、コレクションの話を共有できます。',
-    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 開封,ワンピカード コレクション',
-    body: 'カード情報と一緒に質問、開封結果、相場、コレクションの話を共有するコミュニティです。'
+    description: 'ONE PIECE CARD GAMEの質問、自己紹介、コレクションの話を共有できるコミュニティです。',
+    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 自己紹介,ワンピカード コレクション',
+    body: '質問、自己紹介、自由な話題を共有できるONE PIECE CARD GAMEコミュニティです。'
   },
   calendar: {
     title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
@@ -4459,28 +4471,13 @@ function formatPointHistoryDate(value, uiLang) {
   }).format(new Date(value));
 }
 
-const COMMUNITY_MEMBER_GRADES = [
-  { min: 0, kr: '견습 선원', en: 'Apprentice', jp: '見習い船員' },
-  { min: 10, kr: '선원', en: 'Crew', jp: '船員' },
-  { min: 30, kr: '초신성', en: 'Supernova', jp: '超新星' },
-  { min: 80, kr: '칠무해', en: 'Warlord', jp: '王下七武海' },
-  { min: 200, kr: '사황', en: 'Emperor', jp: '四皇' },
-  { min: 500, kr: '해적왕', en: 'Pirate King', jp: '海賊王' }
-];
-
 function getCommunityMemberGrade(points, uiLang) {
-  const totalPoints = Math.max(0, Number(points) || 0);
-  let gradeIndex = 0;
-  for (let index = 1; index < COMMUNITY_MEMBER_GRADES.length; index += 1) {
-    if (totalPoints < COMMUNITY_MEMBER_GRADES[index].min) break;
-    gradeIndex = index;
-  }
-  const current = COMMUNITY_MEMBER_GRADES[gradeIndex];
-  const next = COMMUNITY_MEMBER_GRADES[gradeIndex + 1] || null;
+  const current = getCommunityGrade(points);
+  const next = current.next;
   return {
     label: getLocaleText(uiLang, current.kr, current.en, current.jp),
     nextLabel: next ? getLocaleText(uiLang, next.kr, next.en, next.jp) : '',
-    remaining: next ? Math.max(0, next.min - totalPoints) : 0
+    remaining: current.remaining
   };
 }
 
@@ -10371,28 +10368,18 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
       setJsonLd('optcg-market-detail-jsonld', null);
       return;
     }
-    const offerPrice = Math.round((selectedLatest.price / MARKET_USD_TO_JPY) * 100) / 100;
     setJsonLd('optcg-market-detail-jsonld', {
       '@context': 'https://schema.org',
-      '@type': 'Product',
+      '@type': 'Dataset',
       name: getMarketShortName(selected),
-      sku: selected.code,
-      image: selected.previewImageUrl,
       description: selected.setName || selected.name,
-      brand: {
-        '@type': 'Brand',
-        name: 'ONE PIECE Card Game'
-      },
       url: `${SITE_ORIGIN}/prices?code=${encodeURIComponent(selected.code)}&apparelId=${encodeURIComponent(selected.apparelId || '')}`,
-      offers: {
-        '@type': 'AggregateOffer',
-        lowPrice: offerPrice,
-        highPrice: offerPrice,
-        priceCurrency: 'USD',
-        offerCount: 1
-      }
+      creator: { '@type': 'Organization', name: 'Card Pone' },
+      measurementTechnique: 'Condition-specific market transaction history aggregation',
+      variableMeasured: `${normalizedCondition === 'psa10' ? 'PSA10' : 'Single'} market price`,
+      isAccessibleForFree: true
     });
-  }, [selected, selectedLatest]);
+  }, [normalizedCondition, selected, selectedLatest]);
 
   return (
     <main className="renew-subpage">

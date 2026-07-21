@@ -3,6 +3,7 @@ import {
   getCommunityStorageMode,
   listCommunityPosts
 } from '../../lib/community-store.js';
+import { resolveCommunityAuthorGrades } from '../../lib/community-grade-profile.js';
 import { supabaseAdmin } from '../../lib/supabase-admin.js';
 
 function getAuthToken(request) {
@@ -153,7 +154,7 @@ export default async function handler(request, response) {
     }
 
     if (request.method === 'GET') {
-      const posts = await listCommunityPosts(viewerToken);
+      const posts = await listCommunityPosts(viewerToken, { resolveAuthorGrades: resolveCommunityAuthorGrades });
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(200).json({ posts, storage: getCommunityStorageMode() });
     }
@@ -171,8 +172,9 @@ export default async function handler(request, response) {
 
       const resolvedCardName = isEventBoard ? (hidden ? '__hidden__' : pinned ? '__pinned__' : '') : cardName;
       const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName: resolvedCardName, imageUrl, content }, user.id, user.id);
+      const authorGrades = await resolveCommunityAuthorGrades([user.id]);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
-      return response.status(201).json(post);
+      return response.status(201).json({ ...post, authorGrade: authorGrades.get(user.id) || '' });
     }
 
     return response.status(405).json({ error: 'method_not_allowed' });

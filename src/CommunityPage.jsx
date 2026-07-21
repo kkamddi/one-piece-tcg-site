@@ -12,6 +12,7 @@ import {
   updateCommunityPost,
   uploadCommunityImage
 } from './api/community';
+import { getCommunityGradeLabel } from '../lib/community-grades.js';
 
 const COMMUNITY_BOARDS = [
   { id: 'all', kr: '전체', en: 'All', jp: 'すべて' },
@@ -31,6 +32,15 @@ function localeText(uiLang, kr, en, jp) {
 function getBoard(boardId) {
   return COMMUNITY_BOARDS.find((board) => board.id === boardId)
     || COMMUNITY_BOARDS.find((board) => board.id === 'free');
+}
+
+function CommunityGradeBadge({ gradeKey, uiLang }) {
+  if (!gradeKey) return null;
+  return (
+    <span className={`renew-community-grade is-${gradeKey}`}>
+      {getCommunityGradeLabel(gradeKey, uiLang)}
+    </span>
+  );
 }
 
 function formatCommunityDate(value, uiLang) {
@@ -402,9 +412,10 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
       const post = isNewPost
         ? await createCommunityPost(payload, viewerToken)
         : await updateCommunityPost(editingPost.id, payload, viewerToken);
+      const nextPost = { ...post, authorGrade: post.authorGrade || editingPost?.authorGrade || '' };
       setPosts((items) => isNewPost
-        ? [post, ...items]
-        : items.map((item) => item.id === post.id ? post : item));
+        ? [nextPost, ...items]
+        : items.map((item) => item.id === nextPost.id ? nextPost : item));
       setActiveBoard(composerBoard === 'event' ? 'event' : 'all');
       closeComposer(true);
     } catch (error) {
@@ -425,8 +436,9 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
         incrementCommunityPostView(post.id, viewerToken),
         fetchCommunityComments(post.id, viewerToken)
       ]);
-      setSelectedPost(updatedPost || post);
-      setPosts((items) => items.map((item) => item.id === post.id ? (updatedPost || item) : item));
+      const nextPost = updatedPost ? { ...updatedPost, authorGrade: updatedPost.authorGrade || post.authorGrade || '' } : post;
+      setSelectedPost(nextPost);
+      setPosts((items) => items.map((item) => item.id === post.id ? nextPost : item));
       setComments(Array.isArray(response?.comments) ? response.comments : []);
     } catch {
       setMessage(localeText(uiLang, '게시글 내용을 불러오지 못했습니다.', 'Could not load the post.', '投稿を読み込めませんでした。'));
@@ -442,8 +454,12 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
     }
     try {
       const updated = await toggleCommunityPostLike(postId, viewerToken);
-      setPosts((items) => items.map((item) => item.id === postId ? updated : item));
-      if (selectedPost?.id === postId) setSelectedPost(updated);
+      setPosts((items) => items.map((item) => item.id === postId
+        ? { ...updated, authorGrade: updated.authorGrade || item.authorGrade || '' }
+        : item));
+      if (selectedPost?.id === postId) {
+        setSelectedPost((item) => ({ ...updated, authorGrade: updated.authorGrade || item?.authorGrade || '' }));
+      }
     } catch {
       setMessage(localeText(uiLang, '좋아요를 반영하지 못했습니다.', 'Could not update the like.', 'いいねを更新できませんでした。'));
     }
@@ -591,6 +607,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
               <div className="renew-community-post-meta">
                 <span>{localeText(uiLang, getBoard(selectedPost.boardId).kr, getBoard(selectedPost.boardId).en, getBoard(selectedPost.boardId).jp)}</span>
                 <b>{selectedPost.nickname}</b>
+                <CommunityGradeBadge gradeKey={selectedPost.authorGrade} uiLang={uiLang} />
                 <time>{formatCommunityDate(selectedPost.createdAt, uiLang)}</time>
               </div>
               <h2>{selectedPost.title}</h2>
@@ -609,7 +626,11 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
               <header><strong>{localeText(uiLang, '댓글', 'Comments', 'コメント')} {selectedPost.commentCount || comments.length}</strong></header>
               {comments.map((comment) => (
                 <article key={comment.id}>
-                  <div><b>{comment.nickname}</b><time>{formatCommunityDate(comment.createdAt, uiLang)}</time></div>
+                  <div>
+                    <b>{comment.nickname}</b>
+                    <CommunityGradeBadge gradeKey={comment.authorGrade} uiLang={uiLang} />
+                    <time>{formatCommunityDate(comment.createdAt, uiLang)}</time>
+                  </div>
                   <p>{comment.content}</p>
                 </article>
               ))}
@@ -637,6 +658,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
                     <div className="renew-community-post-meta">
                       <span>{localeText(uiLang, board.kr, board.en, board.jp)}</span>
                       <b>{post.nickname}</b>
+                      <CommunityGradeBadge gradeKey={post.authorGrade} uiLang={uiLang} />
                       <time>{formatCommunityDate(post.createdAt, uiLang)}</time>
                     </div>
                     <h2>{post.title}</h2>

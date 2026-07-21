@@ -6872,7 +6872,7 @@
   font-weight: 700;
 }
 
-.renew-community-post-meta span {
+.renew-community-post-meta > span:not(.renew-community-grade) {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -6885,6 +6885,55 @@
 
 .renew-community-post-meta b {
   color: #363d48;
+}
+
+.renew-community-grade {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.renew-community-grade.is-apprentice {
+  border-color: #d7dce3;
+  color: #596273;
+  background: #f2f4f7;
+}
+
+.renew-community-grade.is-crew {
+  border-color: #b9decf;
+  color: #176a50;
+  background: #eaf7f1;
+}
+
+.renew-community-grade.is-supernova {
+  border-color: #bfd3fa;
+  color: #245fc4;
+  background: #edf4ff;
+}
+
+.renew-community-grade.is-warlord {
+  border-color: #d7c3f4;
+  color: #7040a5;
+  background: #f5effd;
+}
+
+.renew-community-grade.is-emperor {
+  border-color: #f0c0b7;
+  color: #b63d2b;
+  background: #fff0ec;
+}
+
+.renew-community-grade.is-pirate-king {
+  border-color: #dfc36f;
+  color: #725000;
+  background: #fff7d6;
 }
 
 .renew-community-post h2,
@@ -7399,6 +7448,10 @@
 .renew-app.is-dark .renew-community-post-meta b,
 .renew-app.is-dark .renew-community-empty strong {
   color: #f4f6f8;
+}
+
+.renew-app.is-dark .renew-community-grade {
+  filter: saturate(0.9) brightness(0.92);
 }
 
 .renew-app.is-dark .renew-community-boards button,

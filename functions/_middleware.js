@@ -50,9 +50,10 @@ const PAGE_SEO = {
     keywords: '원피스카드 거래, 원피스 카드 교환, 원피스카드 판매, 원피스카드 마켓'
   },
   '/community': {
-    title: '원피스카드 커뮤니티 - 질문·개봉·시세 이야기 | Card Pone',
-    description: '원피스카드 질문, 개봉 결과, 시세와 수집 이야기를 카드 정보와 함께 나눌 수 있습니다.',
-    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 개봉, 원피스카드 수집, 원피스카드 시세 토론'
+    title: '원피스카드 커뮤니티 - 질문·가입인사·이벤트 | Card Pone',
+    description: '원피스카드 질문과 자유 이야기, 가입인사를 나누고 출석 포인트와 회원 등급을 확인할 수 있습니다.',
+    keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 가입인사, 원피스카드 이벤트, 카드 수집 커뮤니티',
+    schemaType: 'CollectionPage'
   },
   '/news': {
     title: '원피스 카드 공지사항 및 업데이트 | Card Pone',
@@ -108,8 +109,8 @@ const JAPANESE_SEO = {
   },
   '/community': {
     title: 'ワンピースカードゲーム コミュニティ | Card Pone',
-    description: 'ONE PIECE CARD GAMEの質問、開封結果、相場、コレクションの話を共有できます。',
-    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 開封,ワンピカード コレクション',
+    description: 'ONE PIECE CARD GAMEの質問、自己紹介、コレクションの話を共有できるコミュニティです。',
+    keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 自己紹介,ワンピカード コレクション',
     schemaType: 'CollectionPage'
   },
   '/calendar': {
@@ -160,7 +161,7 @@ function getJapaneseSeo(pathname) {
       title: `SNKRDUNK 商品 #${id} 相場 | Card Pone`,
       description: `SNKRDUNK商品 #${id} のONE PIECE CARD GAME価格チャートと最近の取引記録を確認できます。`,
       keywords: `SNKRDUNK ${id},ワンピースカードゲーム 相場,ワンピカード 価格`,
-      schemaType: 'Product'
+      schemaType: 'WebPage'
     };
   }
   if (basePath.startsWith('/prices/card/')) {
@@ -169,7 +170,7 @@ function getJapaneseSeo(pathname) {
       title: `${code} ワンピースカードゲーム 相場 | Card Pone`,
       description: `${code}のONE PIECE CARD GAME相場候補と価格を確認できます。`,
       keywords: `${code},ワンピースカードゲーム 相場,ワンピカード 価格`,
-      schemaType: 'Product'
+      schemaType: 'WebPage'
     };
   }
   if (basePath.startsWith('/prices/box/')) {
@@ -178,7 +179,7 @@ function getJapaneseSeo(pathname) {
       title: `${code} ボックス相場 | Card Pone`,
       description: `ONE PIECE CARD GAME ${code}のボックス価格とSNKRDUNK商品情報を確認できます。`,
       keywords: `${code},ワンピースカードゲーム ボックス 相場,ワンピカード ボックス`,
-      schemaType: 'Product'
+      schemaType: 'WebPage'
     };
   }
   return JAPANESE_SEO['/'];
@@ -468,6 +469,7 @@ const SEO_PRIMARY = {
 const SITE_NAVIGATION_ITEMS = [
   { name: '도감', url: `${SITE_ORIGIN}/cards`, description: '한글판·일본판 원피스카드 도감 검색' },
   { name: '시세', url: `${SITE_ORIGIN}/prices`, description: '카드 시세, 박스 가격, 카드 인덱스' },
+  { name: '커뮤니티', url: `${SITE_ORIGIN}/community`, description: '질문, 가입인사와 카드 수집 이야기' },
   { name: '일정', url: `${SITE_ORIGIN}/calendar`, description: '상품 발매일과 공식 이벤트 공지 캘린더' },
   { name: '정보', url: `${SITE_ORIGIN}/news`, description: '공식공지, 사전예약, 가이드와 Q&A' },
   { name: '구매처', url: `${SITE_ORIGIN}/shops`, description: '지역별 공인점포와 취급점포 검색' },
@@ -477,6 +479,7 @@ const SITE_NAVIGATION_ITEMS = [
 const JAPANESE_SITE_NAVIGATION_ITEMS = [
   { name: 'カード図鑑', url: `${SITE_ORIGIN}/jp/cards`, description: '日本版ONE PIECE CARD GAMEのカードをシリーズやカード番号から検索' },
   { name: '相場', url: `${SITE_ORIGIN}/jp/prices`, description: 'Single・PSA10の相場、ボックス価格、価格チャート' },
+  { name: 'コミュニティ', url: `${SITE_ORIGIN}/jp/community`, description: '質問、自己紹介、カード収集の話題' },
   { name: 'スケジュール', url: `${SITE_ORIGIN}/jp/calendar`, description: '新商品、プロモカード、公式イベントの日程' },
   { name: '公式情報', url: `${SITE_ORIGIN}/jp/news`, description: '新商品と公式告知の最新情報' },
   { name: 'ショップ', url: `${SITE_ORIGIN}/jp/shops`, description: '公式ショップと公認店の検索' }
@@ -506,6 +509,14 @@ const SERVER_PAGE_CONTENT = {
       'Market Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 이상 거래를 분리한 뒤 카드별 지수를 동일 비중 평균해 Manga, Luffy 섹터 흐름을 비교합니다.'
     ],
     links: ['/prices/cards', '/prices/boxes', '/prices/index', '/guide/card-price']
+  },
+  '/community': {
+    heading: '원피스카드 커뮤니티',
+    paragraphs: [
+      '질문, 자유 이야기와 가입인사를 통해 원피스카드 수집 경험을 회원들과 나눌 수 있습니다.',
+      '출석과 게시글 좋아요로 적립한 포인트는 회원 등급에 반영되며 이벤트 혜택은 확정된 내용만 별도 공지합니다.'
+    ],
+    links: ['/cards', '/prices', '/guide', '/news']
   },
   '/news': {
     heading: '원피스카드 정보',
@@ -546,6 +557,22 @@ const SERVER_PAGE_CONTENT = {
       '시세는 실제 거래 시점과 카드 상태에 따라 달라질 수 있으므로 단일 가격보다 최근 거래와 기간별 흐름을 함께 확인해야 합니다.'
     ],
     links: ['/guide', '/cards', '/prices', '/shops']
+  },
+  '/about': {
+    heading: 'Card Pone 서비스 소개',
+    paragraphs: [
+      'Card Pone은 원피스카드 도감, 시세, 포트폴리오, 일정과 커뮤니티를 제공하는 비공식 팬 서비스입니다.',
+      '공식 판매처나 권리자가 아니며 카드 정보와 시장 데이터는 수집과 비교를 돕는 참고 자료로 제공합니다.'
+    ],
+    links: ['/data-policy', '/terms', '/privacy', '/cards']
+  },
+  '/data-policy': {
+    heading: '카드 및 시세 데이터 운영 정책',
+    paragraphs: [
+      '카드 정보는 공식 공개 자료를 기준으로 정리하고 시세는 연결된 공개 시장의 거래 데이터를 조건별로 구분해 표시합니다.',
+      '데이터 수집 시점, 카드 상태, 환율과 거래량에 따라 실제 거래 가격과 차이가 날 수 있으며 오류 제보는 운영자가 확인 후 반영합니다.'
+    ],
+    links: ['/prices', '/guide/card-price', '/about', '/privacy']
   }
 };
 
@@ -573,6 +600,14 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
       '価格情報は参考情報です。取引時の状態、複数枚販売、為替の変動によって実際の売買価格と異なる場合があります。'
     ],
     links: ['/jp/cards', '/jp/calendar', '/jp/news', '/jp']
+  },
+  '/community': {
+    heading: 'ワンピースカードゲーム コミュニティ',
+    paragraphs: [
+      '質問、自己紹介、自由な話題を通して、ONE PIECE CARD GAMEの収集体験を共有できます。',
+      '出席と投稿へのいいねで獲得したポイントは会員ランクに反映され、イベント特典は確定後に別途案内します。'
+    ],
+    links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']
   },
   '/calendar': {
     heading: 'ワンピースカードゲーム 発売日とイベントカレンダー',
@@ -608,7 +643,7 @@ function createServerPageContent(pathname, seo) {
   const content = contentMap[contentKey] || {
     heading: seo.title.split('|')[0].trim(),
     paragraphs: [seo.description],
-    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/calendar', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/guide', '/shops']
+    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/community', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/community', '/guide', '/shops']
   };
   const links = content.links
     .map((path) => {
