@@ -252,7 +252,8 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   const popularPosts = useMemo(() => {
     const now = Date.now();
     const rankWithin = (windowMs) => categoryPosts
-      .filter((post) => post.boardId !== 'event')
+      .filter((post) => post.boardId !== 'event' && post.boardId !== 'intro')
+      .filter((post) => Number(post.likes || 0) >= 1)
       .filter((post) => now - new Date(post.createdAt).getTime() <= windowMs)
       .sort((left, right) => getPopularScore(right, windowMs) - getPopularScore(left, windowMs))
       .slice(0, 3);
@@ -581,7 +582,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
           </aside>
         )) : null}
 
-        {!selectedPost && !loading && !loadFailed && (popularPosts.daily.length || popularPosts.weekly.length) ? (
+        {!selectedPost && !loading && !loadFailed ? (
           <div className="renew-community-popular-grid">
             {[
               { id: 'daily', eyebrow: 'TODAY', title: localeText(uiLang, '인기글', 'Popular posts', '人気投稿') },
