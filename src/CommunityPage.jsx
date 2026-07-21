@@ -15,10 +15,8 @@ import {
 const COMMUNITY_BOARDS = [
   { id: 'all', kr: '전체', en: 'All', jp: 'すべて' },
   { id: 'question', kr: '질문', en: 'Questions', jp: '質問' },
-  { id: 'showoff', kr: '개봉·자랑', en: 'Pulls', jp: '開封・自慢' },
-  { id: 'market-talk', kr: '시세·수집', en: 'Market & collection', jp: '相場・コレクション' },
-  { id: 'beginner', kr: '입문', en: 'Beginner', jp: '初心者' },
-  { id: 'free', kr: '자유', en: 'General', jp: 'フリー' }
+  { id: 'free', kr: '자유', en: 'General', jp: 'フリー' },
+  { id: 'event', kr: '이벤트', en: 'Events', jp: 'イベント' }
 ];
 const COMMUNITY_IMAGE_CONSENT_KEY = 'card-pone-community-image-consent-v1';
 
@@ -29,7 +27,8 @@ function localeText(uiLang, kr, en, jp) {
 }
 
 function getBoard(boardId) {
-  return COMMUNITY_BOARDS.find((board) => board.id === boardId) || COMMUNITY_BOARDS.at(-1);
+  return COMMUNITY_BOARDS.find((board) => board.id === boardId)
+    || COMMUNITY_BOARDS.find((board) => board.id === 'free');
 }
 
 function formatCommunityDate(value, uiLang) {
@@ -95,9 +94,9 @@ function getCommunityPreviewPosts() {
   const now = Date.now();
   return [
     ['preview-1', 'question', '신규 프로모 카드 시세가 궁금합니다', 14, 9, 230, 1],
-    ['preview-2', 'showoff', '오늘 개봉한 박스 결과 공유합니다', 11, 6, 182, 3],
-    ['preview-3', 'market-talk', 'PSA10 수집 기준을 어떻게 잡으시나요?', 8, 12, 154, 6],
-    ['preview-4', 'beginner', '입문용 스타트 덱 추천 부탁드립니다', 5, 4, 96, 30],
+    ['preview-2', 'free', '오늘 개봉한 박스 결과 공유합니다', 11, 6, 182, 3],
+    ['preview-3', 'free', 'PSA10 수집 기준을 어떻게 잡으시나요?', 8, 12, 154, 6],
+    ['preview-4', 'question', '입문용 스타트 덱 추천 부탁드립니다', 5, 4, 96, 30],
     ['preview-5', 'free', '이번 주 카드샵 방문 후기', 3, 2, 61, 70]
   ].map(([id, boardId, title, likes, commentCount, views, hours]) => ({
     id,
@@ -239,7 +238,7 @@ export default function CommunityPage({ authUser, displayName, uiLang = 'KR', on
 
   const categoryPosts = useMemo(() => posts.filter((post) => {
       if (post.adminOnly || post.boardId === 'feedback') return false;
-      return activeBoard === 'all' || (post.boardId || 'free') === activeBoard;
+      return activeBoard === 'all' || getBoard(post.boardId).id === activeBoard;
     }), [posts, activeBoard]);
 
   const visiblePosts = useMemo(() => [...categoryPosts]
