@@ -177,12 +177,13 @@ export default async function handler(request, response) {
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
       if (!boardId || !title || !content) return response.status(400).json({ error: 'invalid_request' });
       const isEventBoard = String(boardId).trim() === 'event';
+      const isIntroBoard = String(boardId).trim() === 'intro';
       if (isEventBoard && !isAdminUser(user)) return response.status(403).json({ error: 'event_board_read_only' });
 
       const resolvedCardName = isEventBoard ? (hidden ? '__hidden__' : pinned ? '__pinned__' : '') : cardName;
       const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName: resolvedCardName, imageUrl, imageUrls, content }, user.id, user.id);
       let pointsAwarded = false;
-      if (!isEventBoard) {
+      if (!isEventBoard && !isIntroBoard) {
         try {
           pointsAwarded = await awardPostCreatedPoint(user.id, post.id);
         } catch (error) {
