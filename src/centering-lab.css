@@ -8,7 +8,8 @@
   z-index: 100000;
 }
 
-.centering-lab.is-corner-open {
+.centering-lab.is-corner-open,
+.centering-lab.is-boundary-open {
   z-index: 100000;
 }
 
@@ -578,7 +579,8 @@
   min-width: 180px;
 }
 
-.centering-corner-panel {
+.centering-corner-panel,
+.centering-boundary-panel {
   overflow: hidden;
   border: 1px solid rgba(23, 25, 28, 0.11);
   border-radius: 8px;
@@ -586,7 +588,8 @@
   box-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
 }
 
-.centering-lab.is-corner-open .centering-corner-panel {
+.centering-lab.is-corner-open .centering-corner-panel,
+.centering-lab.is-boundary-open .centering-boundary-panel {
   position: fixed;
   z-index: 100000;
   inset: 0;
@@ -671,23 +674,85 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   transform: translate(-50%, -50%);
-  border: 3px solid #fff;
-  border-radius: 50%;
+  border: 0;
   padding: 0;
-  color: #fff;
-  background: #d84f38;
-  box-shadow: 0 4px 14px rgba(0,0,0,.34);
-  font-size: 11px;
-  font-weight: 950;
+  background: transparent;
   cursor: grab;
   touch-action: none;
 }
 
+.centering-corner-handle span {
+  position: relative;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d84f38;
+  box-shadow: 0 2px 8px rgba(0,0,0,.48);
+}
+
+.centering-corner-handle span::before,
+.centering-corner-handle span::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.centering-corner-handle span::before { width: 18px; height: 1px; }
+.centering-corner-handle span::after { width: 1px; height: 18px; }
+
 .centering-corner-handle:active {
   cursor: grabbing;
+}
+
+.centering-corner-magnifier {
+  position: absolute;
+  z-index: 5;
+  top: 14px;
+  right: 14px;
+  width: 104px;
+  height: 104px;
+  overflow: hidden;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-size: 420% 420%;
+  box-shadow: 0 8px 24px rgba(0,0,0,.38);
+  pointer-events: none;
+}
+
+.centering-corner-magnifier span::before,
+.centering-corner-magnifier span::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #ffef65;
+  transform: translate(-50%, -50%);
+}
+
+.centering-corner-magnifier span::before { width: 34px; height: 1px; }
+.centering-corner-magnifier span::after { width: 1px; height: 34px; }
+
+.centering-outline-status {
+  width: min(100%, 560px);
+  margin: -4px 0 0;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.centering-outline-status.is-invalid {
+  color: #c43f2e;
 }
 
 .centering-corner-actions,
@@ -709,6 +774,80 @@
   font-size: 13px;
   font-weight: 900;
   cursor: pointer;
+}
+
+.centering-corner-actions .centering-primary-button:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.centering-boundary-layout {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+}
+
+.centering-boundary-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: min(100%, 470px);
+}
+
+.centering-boundary-confirm-actions > button {
+  min-height: 48px;
+  border: 1px solid rgba(23,25,28,.16);
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #17191c;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.centering-boundary-confirm-actions > .centering-primary-button {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.centering-boundary-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: min(100%, 470px);
+  border: 1px solid rgba(23,25,28,.11);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.centering-boundary-mode span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.centering-boundary-mode button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 1px solid rgba(23,25,28,.16);
+  border-radius: 7px;
+  padding: 0 12px;
+  color: #17191c;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.centering-boundary-mode button[aria-pressed='true'] {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
 }
 
 .centering-result-panel {
@@ -887,11 +1026,14 @@
 .centering-boundary-handle {
   position: absolute;
   z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
   transform: translate(-50%, -50%);
-  border: 2px solid #fff;
+  border: 0;
   padding: 0;
-  background: #cf4b35;
-  box-shadow: 0 3px 10px rgba(0,0,0,.34);
+  background: transparent;
   cursor: grab;
   touch-action: none;
 }
@@ -901,42 +1043,57 @@
 }
 
 .centering-boundary-handle.is-corner {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
 }
 
 .centering-boundary-handle.is-corner::after {
   content: '';
   position: absolute;
-  inset: 7px;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
   border-radius: 50%;
-  background: #fff;
+  background: #cf4b35;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
 }
 
 .centering-boundary-handle.is-edge {
-  border-radius: 999px;
-  background: #17191c;
+  border-radius: 0;
+  background: transparent;
 }
 
 .centering-boundary-handle.is-top,
 .centering-boundary-handle.is-bottom {
-  width: 38px;
-  height: 20px;
+  width: 44px;
+  height: 44px;
 }
 
 .centering-boundary-handle.is-left,
 .centering-boundary-handle.is-right {
-  width: 20px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
 }
 
 .centering-boundary-handle.is-edge::after {
   content: '';
-  position: absolute;
-  inset: 5px;
+  display: block;
+  width: 22px;
+  height: 8px;
   border-radius: 99px;
-  border: 1px dashed rgba(255,255,255,.78);
+  border: 2px solid #fff;
+  background: #17191c;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.centering-boundary-handle.is-left::after,
+.centering-boundary-handle.is-right::after {
+  width: 8px;
+  height: 22px;
 }
 
 .centering-boundary-editor-badge {
@@ -1180,6 +1337,7 @@
 .renew-app.is-dark .centering-analysis-panel,
 .renew-app.is-dark .centering-error-panel,
 .renew-app.is-dark .centering-corner-panel,
+.renew-app.is-dark .centering-boundary-panel,
 .renew-app.is-dark .centering-result-panel {
   border-color: rgba(255,255,255,.12);
   background: #15191f;
@@ -1213,6 +1371,46 @@
 }
 
 .renew-app.is-dark .centering-boundary-toolbar button.is-primary {
+  border-color: #f5f2ec;
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .centering-outline-status {
+  color: #aeb7c5;
+}
+
+.renew-app.is-dark .centering-outline-status.is-invalid {
+  color: #ff8b75;
+}
+
+.renew-app.is-dark .centering-boundary-confirm-actions > button {
+  border-color: rgba(255,255,255,.16);
+  color: #f5f2ec;
+  background: #1d222a;
+}
+
+.renew-app.is-dark .centering-boundary-mode {
+  border-color: rgba(255,255,255,.12);
+}
+
+.renew-app.is-dark .centering-boundary-mode span {
+  color: #aeb7c5;
+}
+
+.renew-app.is-dark .centering-boundary-mode button {
+  border-color: rgba(255,255,255,.16);
+  color: #f5f2ec;
+  background: #1d222a;
+}
+
+.renew-app.is-dark .centering-boundary-mode button[aria-pressed='true'] {
+  border-color: #f5f2ec;
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .centering-boundary-confirm-actions > .centering-primary-button {
   border-color: #f5f2ec;
   color: #17191c;
   background: #f5f2ec;
@@ -1376,6 +1574,11 @@
     padding: 16px;
   }
 
+  .centering-boundary-layout {
+    gap: 14px;
+    padding: 16px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+
   .centering-corner-frame {
     width: 100%;
     height: auto;
@@ -1388,6 +1591,25 @@
 
   .centering-corner-actions > button {
     flex: 1 1 0;
+  }
+
+  .centering-boundary-confirm-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(84vw, 390px);
+  }
+
+  .centering-boundary-mode {
+    align-items: stretch;
+    width: min(84vw, 390px);
+  }
+
+  .centering-boundary-mode button {
+    min-width: 104px;
+  }
+
+  .centering-boundary-confirm-actions > .centering-primary-button {
+    grid-column: 1 / -1;
   }
 
   .centering-result-grid {

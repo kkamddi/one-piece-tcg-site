@@ -87,6 +87,8 @@ const CAMERA_FLOW_COPY = {
     cornerRetake: '다시 촬영',
     cornerLabel: '카드 모서리',
     readjust: '카드 외곽 다시 맞추기',
+    outlineReady: '네 점이 카드의 실제 바깥 모서리에 맞는지 마지막으로 확인해 주세요.',
+    outlineInvalid: '외곽점의 순서나 간격이 올바르지 않습니다. 네 점을 다시 맞춰 주세요.',
     analysisError: '이미지를 분석하지 못했습니다. 카드를 다시 촬영해 주세요.'
   },
   EN: {
@@ -110,6 +112,8 @@ const CAMERA_FLOW_COPY = {
     cornerRetake: 'Retake',
     cornerLabel: 'Card corner',
     readjust: 'Adjust card outline',
+    outlineReady: 'Check once more that all four points match the physical outer corners.',
+    outlineInvalid: 'The outline order or spacing is invalid. Reposition all four points.',
     analysisError: 'The image could not be analyzed. Please retake the card.'
   },
   JP: {
@@ -133,6 +137,8 @@ const CAMERA_FLOW_COPY = {
     cornerRetake: '撮り直す',
     cornerLabel: 'カードの角',
     readjust: 'カード外枠を再調整',
+    outlineReady: '4点がカード外側の実際の角に合っているか、もう一度確認してください。',
+    outlineInvalid: '外枠点の順序または間隔が正しくありません。4点を再調整してください。',
     analysisError: '画像を分析できませんでした。カードを撮り直してください。'
   }
 };
@@ -140,28 +146,40 @@ const CAMERA_FLOW_COPY = {
 const BOUNDARY_EDITOR_COPY = {
   KR: {
     title: '2단계 · 인쇄 경계 조정',
-    help: '모서리점은 기울기를 조정하고, 변 중앙 손잡이는 선 전체를 이동합니다.',
-    edit: '경계 조정',
+    help: '보정된 카드 안쪽의 실제 인쇄 테두리에 좌·우·상·하 네 선을 맞춰 주세요.',
+    edit: '인쇄 경계 다시 맞추기',
     reset: '자동 위치',
-    done: '조정 완료',
+    done: '경계 확정 후 결과 보기',
+    back: '카드 외곽으로 돌아가기',
+    advanced: '기울기 조정',
+    simple: '네 선 조정',
+    advancedHelp: '인쇄 테두리 자체가 비스듬할 때만 네 모서리 조정을 사용하세요.',
     corner: '인쇄 경계 모서리',
     edge: '인쇄 경계선'
   },
   EN: {
     title: 'Step 2 · Adjust print boundary',
-    help: 'Drag corners to change the angle or edge handles to move an entire side.',
-    edit: 'Adjust boundary',
+    help: 'Align the four lines with the actual inner print border on the corrected card.',
+    edit: 'Adjust print boundary',
     reset: 'Auto position',
-    done: 'Done',
+    done: 'Confirm and view result',
+    back: 'Back to card outline',
+    advanced: 'Adjust tilt',
+    simple: 'Four-line mode',
+    advancedHelp: 'Use four-corner adjustment only when the printed border itself is tilted.',
     corner: 'Print boundary corner',
     edge: 'Print boundary edge'
   },
   JP: {
     title: 'ステップ2 · 印刷境界を調整',
-    help: '角で傾きを調整し、辺中央のハンドルで線全体を移動します。',
-    edit: '境界を調整',
+    help: '補正されたカード内側の実際の印刷境界に、上下左右の4本の線を合わせてください。',
+    edit: '印刷境界を再調整',
     reset: '自動位置',
-    done: '調整完了',
+    done: '境界を確定して結果を見る',
+    back: 'カード外枠に戻る',
+    advanced: '傾きを調整',
+    simple: '4本線調整',
+    advancedHelp: '印刷境界自体が傾いている場合のみ、四隅調整を使用してください。',
     corner: '印刷境界の角',
     edge: '印刷境界線'
   }
@@ -528,6 +546,34 @@ function denormalizeCornerPoints(points, width, height) {
   }]));
 }
 
+function getOutlineValidation(points, width, height) {
+  const actual = denormalizeCornerPoints(points, width, height);
+  const ordered = [actual.tl, actual.tr, actual.br, actual.bl];
+  const crossProducts = ordered.map((point, index) => {
+    const next = ordered[(index + 1) % ordered.length];
+    const after = ordered[(index + 2) % ordered.length];
+    return (next.x - point.x) * (after.y - next.y) - (next.y - point.y) * (after.x - next.x);
+  });
+  const sameDirection = crossProducts.every((value) => value > 0) || crossProducts.every((value) => value < 0);
+  const top = pointDistance(actual.tl, actual.tr);
+  const right = pointDistance(actual.tr, actual.br);
+  const bottom = pointDistance(actual.bl, actual.br);
+  const left = pointDistance(actual.tl, actual.bl);
+  const areaRatio = polygonArea(actual) / Math.max(width * height, 1);
+  const averageRatio = ((top + bottom) / 2) / Math.max((left + right) / 2, 1);
+  const horizontalPerspective = Math.max(top, bottom) / Math.max(Math.min(top, bottom), 1);
+  const verticalPerspective = Math.max(left, right) / Math.max(Math.min(left, right), 1);
+  const minimumEdge = Math.min(top, right, bottom, left);
+  const valid = sameDirection
+    && areaRatio >= 0.045
+    && minimumEdge >= Math.min(width, height) * 0.12
+    && averageRatio >= 0.42
+    && averageRatio <= 1.08
+    && horizontalPerspective <= 2.2
+    && verticalPerspective <= 2.2;
+  return { valid, areaRatio, horizontalPerspective, verticalPerspective };
+}
+
 function solveLinearSystem(matrix, values) {
   const size = values.length;
   const rows = matrix.map((row, index) => [...row, values[index]]);
@@ -755,7 +801,7 @@ function shiftFrameEdge(frame, edge, deltaX, deltaY) {
   return next;
 }
 
-function BoundaryEditor({ frame, labels, onChange }) {
+function BoundaryEditor({ frame, labels, onChange, advanced = false }) {
   const editorRef = useRef(null);
   const dragRef = useRef(null);
 
@@ -801,7 +847,7 @@ function BoundaryEditor({ frame, labels, onChange }) {
         <polygon points={getFramePoints(frame)} />
         <path d="M50 0V100M0 50H100" />
       </svg>
-      {Object.entries(frame).map(([key, point]) => (
+      {advanced ? Object.entries(frame).map(([key, point]) => (
         <button
           type="button"
           className="centering-boundary-handle is-corner"
@@ -813,7 +859,7 @@ function BoundaryEditor({ frame, labels, onChange }) {
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
         />
-      ))}
+      )) : null}
       {['top', 'right', 'bottom', 'left'].map((edge) => {
         const position = getEdgePosition(frame, edge);
         return (
@@ -830,7 +876,7 @@ function BoundaryEditor({ frame, labels, onChange }) {
           />
         );
       })}
-      <span className="centering-boundary-editor-badge">MANUAL</span>
+      <span className="centering-boundary-editor-badge">PRINT BORDER</span>
     </div>
   );
 }
@@ -880,11 +926,11 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const [cornerPoints, setCornerPoints] = useState({
     tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
   });
-  const [cornerConfidence, setCornerConfidence] = useState(0);
+  const [activeCorner, setActiveCorner] = useState('');
   const [boundaries, setBoundaries] = useState(initialBoundaries);
   const [boundaryFrame, setBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
   const [automaticBoundaryFrame, setAutomaticBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
-  const [isBoundaryEditing, setIsBoundaryEditing] = useState(false);
+  const [isAdvancedBoundary, setIsAdvancedBoundary] = useState(false);
   const [confidence, setConfidence] = useState(demoResult ? 0.88 : 0);
   const videoRef = useRef(null);
   const viewportRef = useRef(null);
@@ -899,6 +945,10 @@ export default function CenteringLab({ uiLang = 'KR' }) {
 
   const report = useMemo(() => getCenteringReport(boundaries), [boundaries]);
   const confidencePercent = Math.round(confidence * 100);
+  const outlineValidation = useMemo(() => {
+    const source = rawCanvasRef.current;
+    return getOutlineValidation(cornerPoints, source?.width || 100, source?.height || 100);
+  }, [cornerPoints, rawImageUrl]);
 
   useEffect(() => {
     if (!demoResult && !demoCorners) return;
@@ -939,7 +989,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       setRawImageUrl(canvas.toDataURL('image/jpeg', 0.9));
       setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
       setCornerPoints(demoPoints);
-      setCornerConfidence(demoDetection.confidence);
     } else {
       setImageUrl(canvas.toDataURL('image/jpeg', 0.9));
     }
@@ -960,7 +1009,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   useEffect(() => () => stopCamera(), []);
 
   useEffect(() => {
-    if (phase !== 'camera' && phase !== 'corners') return undefined;
+    if (phase !== 'camera' && phase !== 'corners' && phase !== 'boundary') return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -976,7 +1025,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     const detection = detectCardCorners(canvas);
     const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
     setCornerPoints(normalizedPoints);
-    setCornerConfidence(detection.confidence);
     await sleep(260);
     setPhase('corners');
   }
@@ -1113,9 +1161,14 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     else startCamera();
   }
 
-  async function applyCornerAnalysis(points = cornerPoints, detectionConfidence = cornerConfidence) {
+  async function applyCornerAnalysis(points = cornerPoints) {
     const source = rawCanvasRef.current;
     if (!source) return;
+    const validation = getOutlineValidation(points, source.width, source.height);
+    if (!validation.valid) {
+      setPhase('corners');
+      return;
+    }
     try {
       setPhase('analyzing');
       await sleep(60);
@@ -1127,10 +1180,11 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       setBoundaries(analysis.boundaries);
       setBoundaryFrame(nextBoundaryFrame);
       setAutomaticBoundaryFrame(nextBoundaryFrame);
-      setIsBoundaryEditing(false);
-      setConfidence(clamp(analysis.confidence * 0.65 + detectionConfidence * 0.35, 0, 1));
-      await sleep(360);
-      setPhase('result');
+      setIsAdvancedBoundary(false);
+      const perspectiveScore = 1 - clamp((Math.max(validation.horizontalPerspective, validation.verticalPerspective) - 1) / 1.2, 0, 1);
+      setConfidence(clamp(0.55 + analysis.confidence * 0.25 + perspectiveScore * 0.2, 0, 1));
+      await sleep(240);
+      setPhase('boundary');
     } catch {
       setError(flow.analysisError);
       setPhase('error');
@@ -1156,6 +1210,11 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   function resetBoundaryFrame() {
     const nextFrame = Object.fromEntries(Object.entries(automaticBoundaryFrame).map(([key, point]) => [key, { ...point }]));
     updateBoundaryFrame(nextFrame);
+    setIsAdvancedBoundary(false);
+  }
+
+  function confirmBoundaryFrame() {
+    setPhase('result');
   }
 
   const referenceLabel = report.band === 'OUTSIDE'
@@ -1163,7 +1222,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     : `${report.band} ${uiLang === 'JP' ? '表面参考範囲' : uiLang === 'EN' ? 'front reference' : '앞면 참고 범위'}`;
 
   return (
-    <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}${phase === 'corners' ? ' is-corner-open' : ''}`}>
+    <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}${phase === 'corners' ? ' is-corner-open' : ''}${phase === 'boundary' ? ' is-boundary-open' : ''}`}>
       <section className="centering-lab-head">
         <div>
           <span>{text.eyebrow}</span>
@@ -1263,17 +1322,61 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                   aria-label={`${flow.cornerLabel} ${index + 1}`}
                   onPointerDown={(event) => {
                     event.currentTarget.setPointerCapture(event.pointerId);
+                    setActiveCorner(key);
                     updateCornerFromPointer(key, event);
                   }}
                   onPointerMove={(event) => {
                     if (event.currentTarget.hasPointerCapture(event.pointerId)) updateCornerFromPointer(key, event);
                   }}
-                ><span>{index + 1}</span></button>
+                  onPointerUp={(event) => {
+                    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+                    setActiveCorner('');
+                  }}
+                  onPointerCancel={() => setActiveCorner('')}
+                ><span aria-hidden="true" /></button>
               ))}
+              {activeCorner && rawImageUrl ? (
+                <div
+                  className="centering-corner-magnifier"
+                  style={{
+                    backgroundImage: `url(${rawImageUrl})`,
+                    backgroundPosition: `${cornerPoints[activeCorner].x}% ${cornerPoints[activeCorner].y}%`
+                  }}
+                  aria-hidden="true"
+                ><span /></div>
+              ) : null}
             </div>
+            <p className={`centering-outline-status${outlineValidation.valid ? ' is-ready' : ' is-invalid'}`}>
+              {outlineValidation.valid ? flow.outlineReady : flow.outlineInvalid}
+            </p>
             <div className="centering-corner-actions">
               <button type="button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : flow.cornerRetake}</button>
-              <button type="button" className="centering-primary-button" onClick={() => applyCornerAnalysis(cornerPoints, Math.max(cornerConfidence, 0.72))}>{flow.cornerApply}</button>
+              <button type="button" className="centering-primary-button" disabled={!outlineValidation.valid} onClick={() => applyCornerAnalysis(cornerPoints)}>{flow.cornerApply}</button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {phase === 'boundary' ? (
+        <section className="centering-boundary-panel">
+          <header className="centering-corner-head">
+            <div><span>STEP 2 / 2 · PRINT BORDER</span><h2>{editorText.title}</h2><p>{editorText.help}</p></div>
+          </header>
+          <div className="centering-boundary-layout">
+            <div className="centering-result-image">
+              {imageUrl ? <img src={imageUrl} alt="" /> : <div className="centering-result-image-loading" aria-hidden="true" />}
+              <BoundaryEditor frame={boundaryFrame} labels={editorText} onChange={updateBoundaryFrame} advanced={isAdvancedBoundary} />
+            </div>
+            <div className="centering-boundary-mode">
+              <span>{editorText.advancedHelp}</span>
+              <button type="button" aria-pressed={isAdvancedBoundary} onClick={() => setIsAdvancedBoundary((current) => !current)}>
+                {isAdvancedBoundary ? editorText.simple : editorText.advanced}
+              </button>
+            </div>
+            <div className="centering-boundary-confirm-actions">
+              <button type="button" onClick={() => setPhase('corners')}>{editorText.back}</button>
+              <button type="button" onClick={resetBoundaryFrame}>{editorText.reset}</button>
+              <button type="button" className="centering-primary-button" onClick={confirmBoundaryFrame}>{editorText.done}</button>
             </div>
           </div>
         </section>
@@ -1292,18 +1395,11 @@ export default function CenteringLab({ uiLang = 'KR' }) {
             <div className="centering-result-image-shell">
               <div className="centering-result-image">
                 {imageUrl ? <img src={imageUrl} alt="" /> : <div className="centering-result-image-loading" aria-hidden="true" />}
-                {isBoundaryEditing
-                  ? <BoundaryEditor frame={boundaryFrame} labels={editorText} onChange={updateBoundaryFrame} />
-                  : <ResultOverlay boundaries={boundaries} frame={boundaryFrame} report={report} />}
+                <ResultOverlay boundaries={boundaries} frame={boundaryFrame} report={report} />
               </div>
-              <div className={`centering-boundary-toolbar${isBoundaryEditing ? ' is-editing' : ''}`}>
+              <div className="centering-boundary-toolbar">
                 <div><b>{editorText.title}</b><span>{editorText.help}</span></div>
-                {isBoundaryEditing ? (
-                  <div>
-                    <button type="button" onClick={resetBoundaryFrame}>{editorText.reset}</button>
-                    <button type="button" className="is-primary" onClick={() => setIsBoundaryEditing(false)}>{editorText.done}</button>
-                  </div>
-                ) : <button type="button" className="is-primary" onClick={() => setIsBoundaryEditing(true)}>{editorText.edit}</button>}
+                <button type="button" className="is-primary" onClick={() => setPhase('boundary')}>{editorText.edit}</button>
               </div>
               <small>{confidence < 0.35 ? text.lowConfidence : text.highConfidence}</small>
             </div>
