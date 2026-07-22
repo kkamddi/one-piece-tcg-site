@@ -5,23 +5,23 @@ const CARD_WIDTH_MM = 63;
 const CARD_HEIGHT_MM = 88;
 const CAPTURE_WIDTH = 630;
 const CAPTURE_HEIGHT = 880;
-const AUTO_CAPTURE_HOLD_MS = 750;
+const CAPTURE_SOURCE_WIDTH = 960;
 
 const COPY = {
   KR: {
     eyebrow: 'CARD LAB',
     title: '센터링 측정기',
-    intro: '카드를 가이드에 맞춰 촬영하면 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석합니다.',
+    intro: '카드 전체를 촬영하면 원근을 자동 보정하고 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석합니다.',
     start: '카메라로 측정하기',
     privacy: '촬영 이미지는 서버에 저장하거나 전송하지 않습니다.',
     guideTitle: '측정 전 확인',
-    guideItems: ['슬리브와 탑로더를 제거해 주세요.', '반사가 적은 어두운 단색 바닥에 카드를 놓아 주세요.', '휴대폰과 카드가 평행하도록 위에서 촬영해 주세요.'],
+    guideItems: ['슬리브와 탑로더를 제거해 주세요.', '반사가 적은 어두운 단색 바닥에 카드를 놓아 주세요.', '카드 전체가 보이도록 위에서 촬영해 주세요. 기울기는 촬영 후 보정합니다.'],
     cameraTitle: '카드를 선 안에 맞춰주세요',
     cameraBody: '네 모서리가 흰색 가이드와 일치하면 잠시 고정해 주세요.',
     manualCapture: '지금 촬영',
     cancel: '취소',
     analyzing: '센터링 분석 중',
-    analyzingBody: '촬영 영역을 정리하고 인쇄 경계를 확인하고 있습니다.',
+    analyzingBody: '카드 모서리와 원근을 보정한 뒤 인쇄 경계를 확인하고 있습니다.',
     resultEyebrow: 'CENTERING REPORT',
     resultTitle: '센터링 진단서',
     score: '센터링 점수',
@@ -58,10 +58,73 @@ const COPY = {
     localOnly: '기기 내 분석'
   },
   EN: {
-    eyebrow: 'CARD LAB', title: 'Centering Check', intro: 'Align the card with the guide to analyze front left/right and top/bottom print ratios on your device.', start: 'Start camera check', privacy: 'Images stay on this device and are never uploaded.', guideTitle: 'Before measuring', guideItems: ['Remove sleeves and top loaders.', 'Use a dark, plain surface with minimal glare.', 'Keep the phone parallel to the card.'], cameraTitle: 'Align the card inside the guide', cameraBody: 'Hold still when all four corners match the white guide.', manualCapture: 'Capture now', cancel: 'Cancel', analyzing: 'Analyzing centering', analyzingBody: 'Preparing the captured frame and locating print boundaries.', resultEyebrow: 'CENTERING REPORT', resultTitle: 'Centering report', score: 'Centering score', horizontal: 'Left / right', vertical: 'Top / bottom', confidence: 'Confidence', retake: 'Retake', adjust: 'Adjust print boundaries', adjustHelp: 'Move the lines if automatic boundaries do not match the printed area.', left: 'Left', right: 'Right', top: 'Top', bottom: 'Bottom', reference: 'Centering reference', notice: 'This is a centering-only estimate. It does not evaluate surface, corners, printing defects, or grader discretion and does not guarantee a PSA grade.', official: 'View PSA centering standards', permissionDenied: 'Camera access is blocked. Allow camera access in site settings and try again.', cameraUnavailable: 'No camera is available on this device.', cameraError: 'The camera could not start. Check whether another app is using it.', retry: 'Try again', qualityAlign: 'Frame', qualityLight: 'Light', qualityStill: 'Still', ready: 'Good', wait: 'Checking', alignCard: 'Match the card corners', tooDark: 'Add more light', tooBright: 'Reduce glare', holdStill: 'Hold the phone still', focus: 'Focusing', autoReady: 'Hold still for automatic capture', lowConfidence: 'Automatic boundary detection is uncertain. Check the print boundary lines.', highConfidence: 'Print boundaries were detected consistently.', localOnly: 'On-device analysis'
+    eyebrow: 'CARD LAB', title: 'Centering Check', intro: 'Capture the full card to correct perspective and analyze front left/right and top/bottom print ratios on your device.', start: 'Start camera check', privacy: 'Images stay on this device and are never uploaded.', guideTitle: 'Before measuring', guideItems: ['Remove sleeves and top loaders.', 'Use a dark, plain surface with minimal glare.', 'Keep the whole card visible. Perspective is corrected after capture.'], cameraTitle: 'Align the card inside the guide', cameraBody: 'Hold still when all four corners match the white guide.', manualCapture: 'Capture now', cancel: 'Cancel', analyzing: 'Analyzing centering', analyzingBody: 'Correcting card corners and perspective, then locating print boundaries.', resultEyebrow: 'CENTERING REPORT', resultTitle: 'Centering report', score: 'Centering score', horizontal: 'Left / right', vertical: 'Top / bottom', confidence: 'Confidence', retake: 'Retake', adjust: 'Adjust print boundaries', adjustHelp: 'Move the lines if automatic boundaries do not match the printed area.', left: 'Left', right: 'Right', top: 'Top', bottom: 'Bottom', reference: 'Centering reference', notice: 'This is a centering-only estimate. It does not evaluate surface, corners, printing defects, or grader discretion and does not guarantee a PSA grade.', official: 'View PSA centering standards', permissionDenied: 'Camera access is blocked. Allow camera access in site settings and try again.', cameraUnavailable: 'No camera is available on this device.', cameraError: 'The camera could not start. Check whether another app is using it.', retry: 'Try again', qualityAlign: 'Frame', qualityLight: 'Light', qualityStill: 'Still', ready: 'Good', wait: 'Checking', alignCard: 'Match the card corners', tooDark: 'Add more light', tooBright: 'Reduce glare', holdStill: 'Hold the phone still', focus: 'Focusing', autoReady: 'Hold still for automatic capture', lowConfidence: 'Automatic boundary detection is uncertain. Check the print boundary lines.', highConfidence: 'Print boundaries were detected consistently.', localOnly: 'On-device analysis'
   },
   JP: {
-    eyebrow: 'CARD LAB', title: 'センタリング測定', intro: 'カードをガイドに合わせて撮影し、表面の左右・上下の印刷比率を端末内で分析します。', start: 'カメラで測定する', privacy: '撮影画像はサーバーへ保存・送信しません。', guideTitle: '測定前の確認', guideItems: ['スリーブとローダーを外してください。', '反射の少ない暗い単色の台に置いてください。', 'スマートフォンとカードを平行にしてください。'], cameraTitle: 'カードを枠内に合わせてください', cameraBody: '四隅を白いガイドに合わせ、そのまま固定してください。', manualCapture: '今すぐ撮影', cancel: 'キャンセル', analyzing: 'センタリング分析中', analyzingBody: '撮影範囲を整え、印刷境界を確認しています。', resultEyebrow: 'CENTERING REPORT', resultTitle: 'センタリング診断', score: 'センタリングスコア', horizontal: '左右比率', vertical: '上下比率', confidence: '測定信頼度', retake: '撮り直す', adjust: '印刷境界を調整', adjustHelp: '自動境界線が印刷領域と異なる場合はスライダーで調整してください。', left: '左', right: '右', top: '上', bottom: '下', reference: 'センタリング参考範囲', notice: 'センタリングのみの参考値です。表面、角、印刷状態、鑑定士の判断は含まず、PSAグレードを保証しません。', official: 'PSA公式基準を見る', permissionDenied: 'カメラ権限がブロックされています。サイト設定でカメラを許可してから再試行してください。', cameraUnavailable: '利用可能なカメラが見つかりません。', cameraError: 'カメラを開始できませんでした。他のアプリが使用していないか確認してください。', retry: '再試行', qualityAlign: '構図', qualityLight: '明るさ', qualityStill: '固定', ready: '良好', wait: '確認中', alignCard: 'カードの四隅を合わせてください', tooDark: 'もう少し明るくしてください', tooBright: '反射を減らしてください', holdStill: '端末を固定してください', focus: 'ピントを合わせています', autoReady: 'そのまま固定すると自動撮影します', lowConfidence: '自動境界認識が不確実です。印刷境界線を確認してください。', highConfidence: '印刷境界を安定して認識しました。', localOnly: '端末内分析'
+    eyebrow: 'CARD LAB', title: 'センタリング測定', intro: 'カード全体を撮影すると遠近を自動補正し、表面の左右・上下の印刷比率を端末内で分析します。', start: 'カメラで測定する', privacy: '撮影画像はサーバーへ保存・送信しません。', guideTitle: '測定前の確認', guideItems: ['スリーブとローダーを外してください。', '反射の少ない暗い単色の台に置いてください。', 'カード全体が見えるように撮影してください。傾きは撮影後に補正します。'], cameraTitle: 'カードを枠内に合わせてください', cameraBody: '四隅を白いガイドに合わせ、そのまま固定してください。', manualCapture: '今すぐ撮影', cancel: 'キャンセル', analyzing: 'センタリング分析中', analyzingBody: 'カードの四隅と遠近を補正してから印刷境界を確認しています。', resultEyebrow: 'CENTERING REPORT', resultTitle: 'センタリング診断', score: 'センタリングスコア', horizontal: '左右比率', vertical: '上下比率', confidence: '測定信頼度', retake: '撮り直す', adjust: '印刷境界を調整', adjustHelp: '自動境界線が印刷領域と異なる場合はスライダーで調整してください。', left: '左', right: '右', top: '上', bottom: '下', reference: 'センタリング参考範囲', notice: 'センタリングのみの参考値です。表面、角、印刷状態、鑑定士の判断は含まず、PSAグレードを保証しません。', official: 'PSA公式基準を見る', permissionDenied: 'カメラ権限がブロックされています。サイト設定でカメラを許可してから再試行してください。', cameraUnavailable: '利用可能なカメラが見つかりません。', cameraError: 'カメラを開始できませんでした。他のアプリが使用していないか確認してください。', retry: '再試行', qualityAlign: '構図', qualityLight: '明るさ', qualityStill: '固定', ready: '良好', wait: '確認中', alignCard: 'カードの四隅を合わせてください', tooDark: 'もう少し明るくしてください', tooBright: '反射を減らしてください', holdStill: '端末を固定してください', focus: 'ピントを合わせています', autoReady: 'そのまま固定すると自動撮影します', lowConfidence: '自動境界認識が不確実です。印刷境界線を確認してください。', highConfidence: '印刷境界を安定して認識しました。', localOnly: '端末内分析'
+  }
+};
+
+const CAMERA_FLOW_COPY = {
+  KR: {
+    title: '카드 전체가 보이게 촬영하세요',
+    body: '네 모서리를 정확히 맞출 필요 없이 카드가 촬영 영역 안에 모두 들어오면 됩니다.',
+    centerLabel: '중앙',
+    hint: '카드 전체가 보이면 촬영 버튼을 눌러 주세요.',
+    findCard: '카드를 화면 중앙에 놓아 주세요.',
+    moveCenter: '카드를 중앙 표시 쪽으로 옮겨 주세요.',
+    moveCloser: '카드를 조금 더 가까이 보여 주세요.',
+    detected: '카드가 인식되었습니다. 촬영 버튼을 눌러 주세요.',
+    dark: '조금 더 밝은 곳에서 촬영해 주세요.',
+    glare: '빛 반사를 줄인 뒤 촬영해 주세요.',
+    burst: '가장 선명한 장면을 고르고 있습니다.',
+    cornerTitle: '카드 모서리를 확인해 주세요',
+    cornerBody: '자동 인식이 불확실합니다. 네 점을 카드의 실제 모서리로 옮긴 뒤 분석해 주세요.',
+    cornerApply: '이 위치로 분석',
+    cornerRetake: '다시 촬영',
+    cornerLabel: '카드 모서리',
+    readjust: '모서리 다시 조정',
+    analysisError: '이미지를 분석하지 못했습니다. 카드를 다시 촬영해 주세요.'
+  },
+  EN: {
+    title: 'Keep the entire card in view',
+    body: 'The corners do not need to match exactly. Make sure the whole card stays inside the capture area.',
+    centerLabel: 'CENTER',
+    hint: 'Press the shutter when the whole card is visible.',
+    findCard: 'Place the card near the center of the screen.',
+    moveCenter: 'Move the card toward the center marker.',
+    moveCloser: 'Move the card slightly closer.',
+    detected: 'Card detected. Press the shutter.',
+    dark: 'Move to a brighter area.',
+    glare: 'Reduce glare before capturing.',
+    burst: 'Selecting the sharpest frame.',
+    cornerTitle: 'Check the card corners',
+    cornerBody: 'Automatic detection is uncertain. Move the four points onto the physical card corners.',
+    cornerApply: 'Analyze these corners',
+    cornerRetake: 'Retake',
+    cornerLabel: 'Card corner',
+    readjust: 'Adjust corners',
+    analysisError: 'The image could not be analyzed. Please retake the card.'
+  },
+  JP: {
+    title: 'カード全体が入るように撮影してください',
+    body: '四隅を正確に合わせる必要はありません。カード全体を撮影範囲内に入れてください。',
+    centerLabel: '中央',
+    hint: 'カード全体が見えたら撮影ボタンを押してください。',
+    findCard: 'カードを画面中央に置いてください。',
+    moveCenter: 'カードを中央マークへ移動してください。',
+    moveCloser: 'カードをもう少し近づけてください。',
+    detected: 'カードを認識しました。撮影ボタンを押してください。',
+    dark: 'もう少し明るい場所で撮影してください。',
+    glare: '光の反射を減らしてから撮影してください。',
+    burst: '最も鮮明なフレームを選択しています。',
+    cornerTitle: 'カードの四隅を確認してください',
+    cornerBody: '自動認識が不確実です。4つの点をカードの実際の角へ移動してください。',
+    cornerApply: 'この位置で分析',
+    cornerRetake: '撮り直す',
+    cornerLabel: 'カードの角',
+    readjust: '四隅を再調整',
+    analysisError: '画像を分析できませんでした。カードを撮り直してください。'
   }
 };
 
@@ -174,6 +237,258 @@ function measureFrame(canvas, guideRect, previousLuma) {
   };
 }
 
+function sleep(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+function captureViewportFrame(video, viewport) {
+  const viewportBox = viewport.getBoundingClientRect();
+  const canvas = document.createElement('canvas');
+  canvas.width = CAPTURE_SOURCE_WIDTH;
+  canvas.height = Math.max(640, Math.round(CAPTURE_SOURCE_WIDTH * viewportBox.height / Math.max(viewportBox.width, 1)));
+  drawVideoCover(video, canvas);
+  return canvas;
+}
+
+function getFrameQuality(canvas) {
+  const sample = document.createElement('canvas');
+  sample.width = 180;
+  sample.height = Math.max(180, Math.round(180 * canvas.height / canvas.width));
+  const context = sample.getContext('2d', { willReadFrequently: true });
+  context.drawImage(canvas, 0, 0, sample.width, sample.height);
+  const image = context.getImageData(0, 0, sample.width, sample.height);
+  const luma = getLumaData(image);
+  let brightness = 0;
+  let glare = 0;
+  let sharpness = 0;
+  let count = 0;
+  for (let y = 2; y < sample.height - 2; y += 2) {
+    for (let x = 2; x < sample.width - 2; x += 2) {
+      const index = y * sample.width + x;
+      const value = luma[index];
+      brightness += value;
+      glare += value > 246 ? 1 : 0;
+      sharpness += Math.abs(value - luma[index - 2]) + Math.abs(value - luma[index - sample.width * 2]);
+      count += 1;
+    }
+  }
+  brightness /= Math.max(count, 1);
+  glare /= Math.max(count, 1);
+  sharpness /= Math.max(count, 1);
+  const exposurePenalty = Math.abs(brightness - 135) * 0.08 + glare * 80;
+  return sharpness - exposurePenalty;
+}
+
+function getDefaultCornerPoints(width, height) {
+  const targetRatio = CARD_WIDTH_MM / CARD_HEIGHT_MM;
+  let cardHeight = height * 0.78;
+  let cardWidth = cardHeight * targetRatio;
+  if (cardWidth > width * 0.78) {
+    cardWidth = width * 0.78;
+    cardHeight = cardWidth / targetRatio;
+  }
+  const left = (width - cardWidth) / 2;
+  const top = (height - cardHeight) / 2;
+  return {
+    tl: { x: left, y: top },
+    tr: { x: left + cardWidth, y: top },
+    br: { x: left + cardWidth, y: top + cardHeight },
+    bl: { x: left, y: top + cardHeight }
+  };
+}
+
+function polygonArea(points) {
+  const ordered = [points.tl, points.tr, points.br, points.bl];
+  let area = 0;
+  for (let index = 0; index < ordered.length; index += 1) {
+    const current = ordered[index];
+    const next = ordered[(index + 1) % ordered.length];
+    area += current.x * next.y - next.x * current.y;
+  }
+  return Math.abs(area) / 2;
+}
+
+function pointDistance(first, second) {
+  return Math.hypot(first.x - second.x, first.y - second.y);
+}
+
+function detectCardCorners(canvas) {
+  const sample = document.createElement('canvas');
+  sample.width = Math.min(280, canvas.width);
+  sample.height = Math.round(sample.width * canvas.height / canvas.width);
+  const context = sample.getContext('2d', { willReadFrequently: true });
+  context.drawImage(canvas, 0, 0, sample.width, sample.height);
+  const image = context.getImageData(0, 0, sample.width, sample.height);
+  const pixels = image.data;
+  const borderSize = Math.max(4, Math.round(Math.min(sample.width, sample.height) * 0.055));
+  const borderR = [];
+  const borderG = [];
+  const borderB = [];
+  const borderLuma = [];
+  for (let y = 0; y < sample.height; y += 2) {
+    for (let x = 0; x < sample.width; x += 2) {
+      if (x >= borderSize && x < sample.width - borderSize && y >= borderSize && y < sample.height - borderSize) continue;
+      const offset = (y * sample.width + x) * 4;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      borderR.push(red);
+      borderG.push(green);
+      borderB.push(blue);
+      borderLuma.push(red * 0.299 + green * 0.587 + blue * 0.114);
+    }
+  }
+  const background = { r: median(borderR), g: median(borderG), b: median(borderB), luma: median(borderLuma) };
+  const deviations = borderLuma.map((value) => Math.abs(value - background.luma));
+  const colorThreshold = clamp(25 + median(deviations) * 2.8, 25, 58);
+  let mask = new Uint8Array(sample.width * sample.height);
+  for (let y = 2; y < sample.height - 2; y += 1) {
+    for (let x = 2; x < sample.width - 2; x += 1) {
+      const index = y * sample.width + x;
+      const offset = index * 4;
+      const red = pixels[offset];
+      const green = pixels[offset + 1];
+      const blue = pixels[offset + 2];
+      const luma = red * 0.299 + green * 0.587 + blue * 0.114;
+      const distance = Math.hypot(red - background.r, green - background.g, blue - background.b);
+      const centerWeight = 1 - Math.min(1, Math.hypot((x / sample.width) - 0.5, (y / sample.height) - 0.5));
+      if ((distance > colorThreshold && Math.abs(luma - background.luma) > 7) || (luma > background.luma + 22 - centerWeight * 5)) mask[index] = 1;
+    }
+  }
+  for (let pass = 0; pass < 2; pass += 1) {
+    const expanded = mask.slice();
+    for (let y = 1; y < sample.height - 1; y += 1) {
+      for (let x = 1; x < sample.width - 1; x += 1) {
+        const index = y * sample.width + x;
+        if (mask[index]) continue;
+        if (mask[index - 1] || mask[index + 1] || mask[index - sample.width] || mask[index + sample.width]) expanded[index] = 1;
+      }
+    }
+    mask = expanded;
+  }
+  const visited = new Uint8Array(mask.length);
+  let best = null;
+  const queue = new Int32Array(mask.length);
+  for (let start = 0; start < mask.length; start += 1) {
+    if (!mask[start] || visited[start]) continue;
+    let head = 0;
+    let tail = 0;
+    queue[tail++] = start;
+    visited[start] = 1;
+    let count = 0;
+    let minX = sample.width;
+    let maxX = 0;
+    let minY = sample.height;
+    let maxY = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let tl = { x: sample.width, y: sample.height, value: Number.POSITIVE_INFINITY };
+    let tr = { x: 0, y: sample.height, value: Number.NEGATIVE_INFINITY };
+    let br = { x: 0, y: 0, value: Number.NEGATIVE_INFINITY };
+    let bl = { x: sample.width, y: 0, value: Number.POSITIVE_INFINITY };
+    while (head < tail) {
+      const index = queue[head++];
+      const x = index % sample.width;
+      const y = Math.floor(index / sample.width);
+      count += 1;
+      sumX += x;
+      sumY += y;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+      if (x + y < tl.value) tl = { x, y, value: x + y };
+      if (x - y > tr.value) tr = { x, y, value: x - y };
+      if (x + y > br.value) br = { x, y, value: x + y };
+      if (x - y < bl.value) bl = { x, y, value: x - y };
+      const neighbors = [index - 1, index + 1, index - sample.width, index + sample.width];
+      for (const neighbor of neighbors) {
+        if (neighbor < 0 || neighbor >= mask.length || visited[neighbor] || !mask[neighbor]) continue;
+        const neighborX = neighbor % sample.width;
+        if (Math.abs(neighborX - x) > 1) continue;
+        visited[neighbor] = 1;
+        queue[tail++] = neighbor;
+      }
+    }
+    if (count < 100) continue;
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const centerDistance = Math.hypot(sumX / count / sample.width - 0.5, sumY / count / sample.height - 0.5);
+    const score = count * clamp(1.25 - centerDistance, 0.45, 1.25) * clamp(width / Math.max(height, 1), 0.4, 1.4);
+    if (!best || score > best.score) best = { score, count, width, height, tl, tr, br, bl, centerDistance };
+  }
+  if (!best) return { points: getDefaultCornerPoints(canvas.width, canvas.height), confidence: 0, areaRatio: 0, centerDistance: 1 };
+  const scaleX = canvas.width / sample.width;
+  const scaleY = canvas.height / sample.height;
+  const points = {
+    tl: { x: best.tl.x * scaleX, y: best.tl.y * scaleY },
+    tr: { x: best.tr.x * scaleX, y: best.tr.y * scaleY },
+    br: { x: best.br.x * scaleX, y: best.br.y * scaleY },
+    bl: { x: best.bl.x * scaleX, y: best.bl.y * scaleY }
+  };
+  const averageWidth = (pointDistance(points.tl, points.tr) + pointDistance(points.bl, points.br)) / 2;
+  const averageHeight = (pointDistance(points.tl, points.bl) + pointDistance(points.tr, points.br)) / 2;
+  const detectedRatio = averageWidth / Math.max(averageHeight, 1);
+  const targetRatio = CARD_WIDTH_MM / CARD_HEIGHT_MM;
+  const ratioScore = clamp(1 - Math.abs(Math.log(detectedRatio / targetRatio)) / 0.65, 0, 1);
+  const areaRatio = polygonArea(points) / (canvas.width * canvas.height);
+  const areaScore = clamp((areaRatio - 0.04) / 0.26, 0, 1);
+  const sizeScore = clamp(Math.min(best.width / sample.width, best.height / sample.height) / 0.34, 0, 1);
+  const centerScore = clamp(1 - best.centerDistance / 0.52, 0, 1);
+  const confidence = ratioScore * 0.34 + areaScore * 0.3 + sizeScore * 0.2 + centerScore * 0.16;
+  return { points, confidence, areaRatio, centerDistance: best.centerDistance };
+}
+
+function normalizeCornerPoints(points, width, height) {
+  return Object.fromEntries(Object.entries(points).map(([key, point]) => [key, {
+    x: clamp(point.x / width * 100, 1, 99),
+    y: clamp(point.y / height * 100, 1, 99)
+  }]));
+}
+
+function denormalizeCornerPoints(points, width, height) {
+  return Object.fromEntries(Object.entries(points).map(([key, point]) => [key, {
+    x: clamp(point.x / 100 * width, 0, width - 1),
+    y: clamp(point.y / 100 * height, 0, height - 1)
+  }]));
+}
+
+function warpCardCanvas(source, points) {
+  const output = document.createElement('canvas');
+  output.width = CAPTURE_WIDTH;
+  output.height = CAPTURE_HEIGHT;
+  const sourceContext = source.getContext('2d', { willReadFrequently: true });
+  const sourceImage = sourceContext.getImageData(0, 0, source.width, source.height);
+  const targetContext = output.getContext('2d');
+  const targetImage = targetContext.createImageData(output.width, output.height);
+  const sourcePixels = sourceImage.data;
+  const targetPixels = targetImage.data;
+  const { tl, tr, br, bl } = points;
+  for (let y = 0; y < output.height; y += 1) {
+    const v = y / (output.height - 1);
+    for (let x = 0; x < output.width; x += 1) {
+      const u = x / (output.width - 1);
+      const sourceX = (1 - u) * (1 - v) * tl.x + u * (1 - v) * tr.x + u * v * br.x + (1 - u) * v * bl.x;
+      const sourceY = (1 - u) * (1 - v) * tl.y + u * (1 - v) * tr.y + u * v * br.y + (1 - u) * v * bl.y;
+      const x0 = clamp(Math.floor(sourceX), 0, source.width - 1);
+      const y0 = clamp(Math.floor(sourceY), 0, source.height - 1);
+      const x1 = Math.min(x0 + 1, source.width - 1);
+      const y1 = Math.min(y0 + 1, source.height - 1);
+      const fx = sourceX - x0;
+      const fy = sourceY - y0;
+      const targetOffset = (y * output.width + x) * 4;
+      const offsets = [(y0 * source.width + x0) * 4, (y0 * source.width + x1) * 4, (y1 * source.width + x0) * 4, (y1 * source.width + x1) * 4];
+      for (let channel = 0; channel < 4; channel += 1) {
+        const topValue = sourcePixels[offsets[0] + channel] * (1 - fx) + sourcePixels[offsets[1] + channel] * fx;
+        const bottomValue = sourcePixels[offsets[2] + channel] * (1 - fx) + sourcePixels[offsets[3] + channel] * fx;
+        targetPixels[targetOffset + channel] = topValue * (1 - fy) + bottomValue * fy;
+      }
+    }
+  }
+  targetContext.putImageData(targetImage, 0, 0);
+  return output;
+}
+
 function detectBoundary(luma, width, height, axis, startRatio, endRatio) {
   const size = axis === 'x' ? width : height;
   const crossSize = axis === 'x' ? height : width;
@@ -275,24 +590,30 @@ function ResultOverlay({ boundaries }) {
 
 export default function CenteringLab({ uiLang = 'KR' }) {
   const text = COPY[uiLang] || COPY.KR;
+  const flow = CAMERA_FLOW_COPY[uiLang] || CAMERA_FLOW_COPY.KR;
   const demoMode = import.meta.env.DEV && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('centeringDemo') : '';
   const demoResult = demoMode === 'result';
   const demoCamera = demoMode === 'camera';
-  const [phase, setPhase] = useState(demoResult ? 'result' : demoCamera ? 'camera' : 'intro');
+  const demoCorners = demoMode === 'corners';
+  const [phase, setPhase] = useState(demoResult ? 'result' : demoCamera ? 'camera' : demoCorners ? 'corners' : 'intro');
   const [error, setError] = useState('');
-  const [quality, setQuality] = useState({ align: false, light: false, still: false, message: text.alignCard });
-  const [autoProgress, setAutoProgress] = useState(0);
+  const [qualityMessage, setQualityMessage] = useState(flow.hint);
   const [imageUrl, setImageUrl] = useState('');
+  const [rawImageUrl, setRawImageUrl] = useState('');
+  const [rawAspectRatio, setRawAspectRatio] = useState('3 / 4');
+  const [cornerPoints, setCornerPoints] = useState({
+    tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
+  });
+  const [cornerConfidence, setCornerConfidence] = useState(0);
   const [boundaries, setBoundaries] = useState(demoResult ? { left: 6.2, right: 5.5, top: 5.8, bottom: 6.1 } : { left: 6, right: 6, top: 6, bottom: 6 });
   const [confidence, setConfidence] = useState(demoResult ? 0.88 : 0);
   const videoRef = useRef(null);
   const viewportRef = useRef(null);
-  const guideRef = useRef(null);
   const streamRef = useRef(null);
   const monitorCanvasRef = useRef(null);
-  const previousLumaRef = useRef(null);
+  const rawCanvasRef = useRef(null);
+  const cornerFrameRef = useRef(null);
   const animationRef = useRef(0);
-  const autoProgressRef = useRef(0);
   const lastMeasuredRef = useRef(0);
   const captureLockedRef = useRef(false);
 
@@ -300,46 +621,66 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const confidencePercent = Math.round(confidence * 100);
 
   useEffect(() => {
-    if (!demoResult) return;
+    if (!demoResult && !demoCorners) return;
     const canvas = document.createElement('canvas');
-    canvas.width = CAPTURE_WIDTH;
-    canvas.height = CAPTURE_HEIGHT;
+    canvas.width = demoCorners ? 720 : CAPTURE_WIDTH;
+    canvas.height = demoCorners ? 1040 : CAPTURE_HEIGHT;
     const context = canvas.getContext('2d');
-    const gradient = context.createLinearGradient(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
+    const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, '#d55a3e');
     gradient.addColorStop(0.55, '#eee7dc');
     gradient.addColorStop(1, '#2b3442');
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT);
+    context.fillStyle = demoCorners ? '#26282c' : gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    if (demoCorners) {
+      context.save();
+      context.beginPath();
+      context.moveTo(118, 94);
+      context.lineTo(620, 126);
+      context.lineTo(588, 930);
+      context.lineTo(92, 900);
+      context.closePath();
+      context.clip();
+      context.fillStyle = gradient;
+      context.fillRect(70, 70, 570, 890);
+      context.restore();
+    }
     context.strokeStyle = 'rgba(255,255,255,.86)';
     context.lineWidth = 8;
-    context.strokeRect(38, 52, 557, 775);
+    if (!demoCorners) context.strokeRect(38, 52, 557, 775);
     context.fillStyle = 'rgba(0,0,0,.68)';
-    context.font = 'bold 42px sans-serif';
+    context.font = `bold ${demoCorners ? 38 : 42}px sans-serif`;
     context.textAlign = 'center';
-    context.fillText('CENTERING PREVIEW', CAPTURE_WIDTH / 2, CAPTURE_HEIGHT / 2);
-    setImageUrl(canvas.toDataURL('image/jpeg', 0.9));
-  }, [demoResult]);
+    context.fillText('CENTERING PREVIEW', canvas.width / 2, canvas.height / 2);
+    if (demoCorners) {
+      const demoDetection = detectCardCorners(canvas);
+      const demoPoints = normalizeCornerPoints(demoDetection.points, canvas.width, canvas.height);
+      rawCanvasRef.current = canvas;
+      setRawImageUrl(canvas.toDataURL('image/jpeg', 0.9));
+      setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
+      setCornerPoints(demoPoints);
+      setCornerConfidence(demoDetection.confidence);
+    } else {
+      setImageUrl(canvas.toDataURL('image/jpeg', 0.9));
+    }
+  }, [demoCorners, demoResult]);
 
   useEffect(() => {
     if (!demoCamera) return;
-    setQuality({ align: true, light: true, still: false, message: text.holdStill });
-    setAutoProgress(0.58);
-  }, [demoCamera, text.holdStill]);
+    setQualityMessage(flow.hint);
+  }, [demoCamera, flow.hint]);
 
   function stopCamera() {
     window.cancelAnimationFrame(animationRef.current);
     animationRef.current = 0;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
-    previousLumaRef.current = null;
-    autoProgressRef.current = 0;
   }
 
   useEffect(() => () => stopCamera(), []);
 
   useEffect(() => {
-    if (phase !== 'camera') return undefined;
+    if (phase !== 'camera' && phase !== 'corners') return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -351,85 +692,80 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     if (captureLockedRef.current) return;
     const video = videoRef.current;
     const viewport = viewportRef.current;
-    const guide = guideRef.current;
-    if (!video?.videoWidth || !viewport || !guide) return;
+    if (!video?.videoWidth || !viewport) return;
     captureLockedRef.current = true;
-    const viewportBox = viewport.getBoundingClientRect();
-    const guideBox = guide.getBoundingClientRect();
-    const canvas = document.createElement('canvas');
-    canvas.width = CAPTURE_WIDTH;
-    canvas.height = CAPTURE_HEIGHT;
-    drawVideoCover(video, canvas, {
-      viewportWidth: viewportBox.width,
-      viewportHeight: viewportBox.height,
-      x: guideBox.left - viewportBox.left,
-      y: guideBox.top - viewportBox.top,
-      width: guideBox.width,
-      height: guideBox.height
-    });
-    stopCamera();
-    setPhase('analyzing');
-    setAutoProgress(1);
-    const url = canvas.toDataURL('image/jpeg', 0.92);
-    window.setTimeout(() => {
-      const analysis = analyzeCapturedCanvas(canvas);
-      setImageUrl(url);
-      setBoundaries(analysis.boundaries);
-      setConfidence(analysis.confidence);
-      setPhase('result');
+    try {
+      setQualityMessage(flow.burst);
+      const frames = [];
+      for (let index = 0; index < 4; index += 1) {
+        frames.push(captureViewportFrame(video, viewport));
+        if (index < 3) await sleep(85);
+      }
+      const canvas = frames.reduce((best, frame) => getFrameQuality(frame) > getFrameQuality(best) ? frame : best, frames[0]);
+      stopCamera();
+      setPhase('analyzing');
+      rawCanvasRef.current = canvas;
+      setRawImageUrl(canvas.toDataURL('image/jpeg', 0.91));
+      setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
+      const detection = detectCardCorners(canvas);
+      const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
+      setCornerPoints(normalizedPoints);
+      setCornerConfidence(detection.confidence);
+      await sleep(520);
+      if (detection.confidence >= 0.62) await applyCornerAnalysis(normalizedPoints, detection.confidence);
+      else setPhase('corners');
+    } catch {
+      stopCamera();
+      setError(flow.analysisError);
+      setPhase('error');
+    } finally {
       captureLockedRef.current = false;
-    }, 850);
+    }
   }
 
   function monitorCamera(timestamp) {
     animationRef.current = window.requestAnimationFrame(monitorCamera);
-    if (timestamp - lastMeasuredRef.current < 150) return;
+    if (timestamp - lastMeasuredRef.current < 220) return;
     lastMeasuredRef.current = timestamp;
     const video = videoRef.current;
     const viewport = viewportRef.current;
-    const guide = guideRef.current;
-    if (!video?.videoWidth || !viewport || !guide || captureLockedRef.current) return;
+    if (!video?.videoWidth || !viewport || captureLockedRef.current) return;
     const viewportBox = viewport.getBoundingClientRect();
-    const guideBox = guide.getBoundingClientRect();
     if (!viewportBox.width || !viewportBox.height) return;
     const canvas = monitorCanvasRef.current || document.createElement('canvas');
     monitorCanvasRef.current = canvas;
     canvas.width = 220;
     canvas.height = Math.max(180, Math.round(220 * viewportBox.height / viewportBox.width));
     drawVideoCover(video, canvas);
-    const guideRect = {
-      x: (guideBox.left - viewportBox.left) / viewportBox.width,
-      y: (guideBox.top - viewportBox.top) / viewportBox.height,
-      width: guideBox.width / viewportBox.width,
-      height: guideBox.height / viewportBox.height
-    };
-    const metrics = measureFrame(canvas, guideRect, previousLumaRef.current);
-    previousLumaRef.current = metrics.luma;
-    const align = metrics.edge >= 1.8;
-    const light = metrics.brightness >= 48 && metrics.brightness <= 222 && metrics.glare <= 0.17;
-    const focused = metrics.sharpness >= 5.5;
-    const still = metrics.motion <= 12;
-    let message = text.autoReady;
-    if (!align) message = text.alignCard;
-    else if (metrics.brightness < 48) message = text.tooDark;
-    else if (metrics.brightness > 222 || metrics.glare > 0.17) message = text.tooBright;
-    else if (!focused) message = text.focus;
-    else if (!still) message = text.holdStill;
-    const good = align && light && focused && still;
-    const progressStep = 150 / AUTO_CAPTURE_HOLD_MS;
-    const penalty = !align || !light ? progressStep * 1.25 : !focused ? progressStep * 0.45 : progressStep * 0.18;
-    autoProgressRef.current = clamp(autoProgressRef.current + (good ? progressStep : -penalty), 0, 1);
-    setAutoProgress(autoProgressRef.current);
-    if (autoProgressRef.current >= 1) captureCard();
-    setQuality({ align, light, still: still && focused, message });
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    const luma = getLumaData(image);
+    let brightness = 0;
+    let glare = 0;
+    for (let index = 0; index < luma.length; index += 4) {
+      brightness += luma[index];
+      if (luma[index] > 246) glare += 1;
+    }
+    const count = Math.ceil(luma.length / 4);
+    brightness /= Math.max(count, 1);
+    glare /= Math.max(count, 1);
+    const detection = detectCardCorners(canvas);
+    let message = flow.detected;
+    if (brightness < 42) message = flow.dark;
+    else if (brightness > 226 || glare > 0.16) message = flow.glare;
+    else if (detection.confidence < 0.24) message = flow.findCard;
+    else if (detection.centerDistance > 0.19) message = flow.moveCenter;
+    else if (detection.areaRatio < 0.055) message = flow.moveCloser;
+    setQualityMessage(message);
   }
 
   async function startCamera() {
     stopCamera();
     setError('');
     setImageUrl('');
-    setAutoProgress(0);
-    autoProgressRef.current = 0;
+    setRawImageUrl('');
+    rawCanvasRef.current = null;
+    setQualityMessage(flow.hint);
     setPhase('camera');
     captureLockedRef.current = false;
     try {
@@ -465,8 +801,38 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   function cancelCamera() {
     stopCamera();
     setPhase('intro');
-    setAutoProgress(0);
     captureLockedRef.current = false;
+  }
+
+  async function applyCornerAnalysis(points = cornerPoints, detectionConfidence = cornerConfidence) {
+    const source = rawCanvasRef.current;
+    if (!source) return;
+    try {
+      setPhase('analyzing');
+      await sleep(60);
+      const denormalized = denormalizeCornerPoints(points, source.width, source.height);
+      const corrected = warpCardCanvas(source, denormalized);
+      const analysis = analyzeCapturedCanvas(corrected);
+      setImageUrl(corrected.toDataURL('image/jpeg', 0.92));
+      setBoundaries(analysis.boundaries);
+      setConfidence(clamp(analysis.confidence * 0.65 + detectionConfidence * 0.35, 0, 1));
+      await sleep(360);
+      setPhase('result');
+    } catch {
+      setError(flow.analysisError);
+      setPhase('error');
+    }
+  }
+
+  function updateCornerFromPointer(key, event) {
+    const frame = cornerFrameRef.current;
+    if (!frame) return;
+    const rect = frame.getBoundingClientRect();
+    const next = {
+      x: clamp((event.clientX - rect.left) / Math.max(rect.width, 1) * 100, 1, 99),
+      y: clamp((event.clientY - rect.top) / Math.max(rect.height, 1) * 100, 1, 99)
+    };
+    setCornerPoints((current) => ({ ...current, [key]: next }));
   }
 
   function updateBoundary(key, value) {
@@ -479,7 +845,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     : `${report.band} ${uiLang === 'JP' ? '表面参考範囲' : uiLang === 'EN' ? 'front reference' : '앞면 참고 범위'}`;
 
   return (
-    <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}`}>
+    <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}${phase === 'corners' ? ' is-corner-open' : ''}`}>
       <section className="centering-lab-head">
         <div>
           <span>{text.eyebrow}</span>
@@ -507,24 +873,19 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       {phase === 'camera' ? (
         <section className="centering-camera-panel">
           <div className="centering-camera-copy">
-            <div><span>LIVE CHECK</span><h2>{text.cameraTitle}</h2><p>{text.cameraBody}</p></div>
+            <div><span>LIVE CHECK</span><h2>{flow.title}</h2><p>{flow.body}</p></div>
             <button type="button" onClick={cancelCamera}>{text.cancel}</button>
           </div>
           <div className="centering-camera-stage" ref={viewportRef}>
             <video ref={videoRef} autoPlay muted playsInline />
             <div className="centering-camera-shade" />
-            <div className="centering-card-guide" ref={guideRef}><CenteringGuide /></div>
+            <div className="centering-center-target" aria-hidden="true">
+              <span />
+              <b>{flow.centerLabel}</b>
+            </div>
           </div>
           <div className="centering-camera-controls">
-            <div className="centering-camera-status">
-              <div className="centering-quality-list">
-                <span className={quality.align ? 'is-good' : ''}>{text.qualityAlign}<b>{quality.align ? text.ready : text.wait}</b></span>
-                <span className={quality.light ? 'is-good' : ''}>{text.qualityLight}<b>{quality.light ? text.ready : text.wait}</b></span>
-                <span className={quality.still ? 'is-good' : ''}>{text.qualityStill}<b>{quality.still ? text.ready : text.wait}</b></span>
-              </div>
-              <strong>{quality.message}</strong>
-              <div className="centering-auto-progress"><span style={{ width: `${autoProgress * 100}%` }} /></div>
-            </div>
+            <div className="centering-camera-status"><strong>{qualityMessage}</strong></div>
             <button type="button" className="centering-shutter" onClick={captureCard} aria-label={text.manualCapture}><span /></button>
           </div>
         </section>
@@ -547,11 +908,54 @@ export default function CenteringLab({ uiLang = 'KR' }) {
         </section>
       ) : null}
 
+      {phase === 'corners' ? (
+        <section className="centering-corner-panel">
+          <header className="centering-corner-head">
+            <div><span>CORNER CHECK</span><h2>{flow.cornerTitle}</h2><p>{flow.cornerBody}</p></div>
+          </header>
+          <div className="centering-corner-layout">
+            <div
+              className="centering-corner-frame"
+              ref={cornerFrameRef}
+              style={{ aspectRatio: rawAspectRatio }}
+            >
+              {rawImageUrl ? <img src={rawImageUrl} alt="" /> : null}
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <polygon points={`${cornerPoints.tl.x},${cornerPoints.tl.y} ${cornerPoints.tr.x},${cornerPoints.tr.y} ${cornerPoints.br.x},${cornerPoints.br.y} ${cornerPoints.bl.x},${cornerPoints.bl.y}`} />
+              </svg>
+              {Object.entries(cornerPoints).map(([key, point], index) => (
+                <button
+                  type="button"
+                  className="centering-corner-handle"
+                  key={key}
+                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                  aria-label={`${flow.cornerLabel} ${index + 1}`}
+                  onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    updateCornerFromPointer(key, event);
+                  }}
+                  onPointerMove={(event) => {
+                    if (event.currentTarget.hasPointerCapture(event.pointerId)) updateCornerFromPointer(key, event);
+                  }}
+                ><span>{index + 1}</span></button>
+              ))}
+            </div>
+            <div className="centering-corner-actions">
+              <button type="button" onClick={startCamera}>{flow.cornerRetake}</button>
+              <button type="button" className="centering-primary-button" onClick={() => applyCornerAnalysis(cornerPoints, Math.max(cornerConfidence, 0.72))}>{flow.cornerApply}</button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {phase === 'result' ? (
         <section className="centering-result-panel">
           <header className="centering-result-head">
             <div><span>{text.resultEyebrow}</span><h2>{text.resultTitle}</h2></div>
-            <button type="button" onClick={startCamera}>{text.retake}</button>
+            <div className="centering-result-actions">
+              {rawImageUrl ? <button type="button" onClick={() => setPhase('corners')}>{flow.readjust}</button> : null}
+              <button type="button" onClick={startCamera}>{text.retake}</button>
+            </div>
           </header>
           <div className="centering-result-grid">
             <div className="centering-result-image-shell">

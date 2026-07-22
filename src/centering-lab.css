@@ -8,6 +8,10 @@
   z-index: 100000;
 }
 
+.centering-lab.is-corner-open {
+  z-index: 100000;
+}
+
 .centering-lab-head {
   display: flex;
   align-items: end;
@@ -256,7 +260,7 @@
 }
 
 .centering-camera-copy > button,
-.centering-result-head > button {
+.centering-result-actions button {
   flex: 0 0 auto;
   min-height: 40px;
   border: 1px solid rgba(23, 25, 28, 0.16);
@@ -295,36 +299,83 @@
   pointer-events: none;
 }
 
-.centering-card-guide {
-  position: relative;
+.centering-center-target {
+  position: absolute;
   z-index: 2;
-  width: min(calc(100% - 28px), 380px);
-  aspect-ratio: 63 / 88;
-  filter: drop-shadow(0 0 8px rgba(0,0,0,.38));
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255,255,255,.82);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,.42));
+  pointer-events: none;
+}
+
+.centering-center-target::before,
+.centering-center-target::after {
+  content: '';
+  position: absolute;
+  border-radius: 99px;
+  background: rgba(255,255,255,.82);
+}
+
+.centering-center-target::before { width: 82px; height: 1px; }
+.centering-center-target::after { width: 1px; height: 82px; }
+
+.centering-center-target > span {
+  position: relative;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d84f38;
+}
+
+.centering-center-target > b {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: #fff;
+  background: rgba(0,0,0,.56);
+  font-size: 9px;
+  white-space: nowrap;
 }
 
 .centering-camera-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
+  justify-items: center;
+  gap: 8px;
   padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
   background: #0d0f12;
 }
 
 .centering-camera-status {
-  display: grid;
-  gap: 7px;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  min-height: 34px;
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 8px;
-  padding: 9px 11px;
+  padding: 7px 11px;
   color: #fff;
   background: #171a1f;
 }
 
 .centering-camera-status > strong {
   font-size: 12px;
+  line-height: 1.45;
   text-align: center;
 }
 
@@ -374,10 +425,11 @@
 }
 
 .centering-shutter {
+  grid-column: 2;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   border: 2px solid rgba(255,255,255,.92);
   border-radius: 50%;
   background: rgba(0,0,0,.36);
@@ -385,8 +437,8 @@
 }
 
 .centering-shutter span {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #fff;
 }
@@ -454,6 +506,139 @@
 
 .centering-error-panel .centering-primary-button {
   min-width: 180px;
+}
+
+.centering-corner-panel {
+  overflow: hidden;
+  border: 1px solid rgba(23, 25, 28, 0.11);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
+}
+
+.centering-lab.is-corner-open .centering-corner-panel {
+  position: fixed;
+  z-index: 100000;
+  inset: 0;
+  overflow-y: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+.centering-corner-head {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(23,25,28,.1);
+}
+
+.centering-corner-head > div {
+  display: grid;
+  gap: 5px;
+}
+
+.centering-corner-head span {
+  color: #d14d36;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.centering-corner-head h2 {
+  font-size: 24px;
+}
+
+.centering-corner-head p {
+  max-width: 680px;
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.centering-corner-layout {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+}
+
+.centering-corner-frame {
+  position: relative;
+  width: auto;
+  height: min(calc(100vh - 260px), 680px);
+  max-width: min(100%, 560px);
+  overflow: hidden;
+  border: 1px solid rgba(23,25,28,.16);
+  border-radius: 8px;
+  background: #17191c;
+  touch-action: none;
+}
+
+.centering-corner-frame > img,
+.centering-corner-frame > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.centering-corner-frame > img {
+  display: block;
+  object-fit: fill;
+}
+
+.centering-corner-frame > svg {
+  pointer-events: none;
+}
+
+.centering-corner-frame polygon {
+  fill: rgba(230,96,70,.13);
+  stroke: #ffef65;
+  stroke-width: .6;
+  vector-effect: non-scaling-stroke;
+}
+
+.centering-corner-handle {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  padding: 0;
+  color: #fff;
+  background: #d84f38;
+  box-shadow: 0 4px 14px rgba(0,0,0,.34);
+  font-size: 11px;
+  font-weight: 950;
+  cursor: grab;
+  touch-action: none;
+}
+
+.centering-corner-handle:active {
+  cursor: grabbing;
+}
+
+.centering-corner-actions,
+.centering-result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.centering-corner-actions > button:first-child {
+  min-height: 52px;
+  border: 1px solid rgba(23,25,28,.16);
+  border-radius: 8px;
+  padding: 0 20px;
+  color: #17191c;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .centering-result-panel {
@@ -704,6 +889,7 @@
 
 .renew-app.is-dark .centering-lab-head p,
 .renew-app.is-dark .centering-camera-copy p,
+.renew-app.is-dark .centering-corner-head p,
 .renew-app.is-dark .centering-intro-copy li,
 .renew-app.is-dark .centering-result-image-shell small,
 .renew-app.is-dark .centering-direction-note p,
@@ -716,6 +902,7 @@
 .renew-app.is-dark .centering-camera-panel,
 .renew-app.is-dark .centering-analysis-panel,
 .renew-app.is-dark .centering-error-panel,
+.renew-app.is-dark .centering-corner-panel,
 .renew-app.is-dark .centering-result-panel {
   border-color: rgba(255,255,255,.12);
   background: #15191f;
@@ -731,6 +918,7 @@
 }
 
 .renew-app.is-dark .centering-metrics > div + div,
+.renew-app.is-dark .centering-corner-head,
 .renew-app.is-dark .centering-result-head,
 .renew-app.is-dark .centering-adjustments {
   border-color: rgba(255,255,255,.12);
@@ -738,8 +926,14 @@
 
 .renew-app.is-dark .centering-official-link,
 .renew-app.is-dark .centering-camera-copy > button,
-.renew-app.is-dark .centering-result-head > button {
+.renew-app.is-dark .centering-result-actions button,
+.renew-app.is-dark .centering-corner-actions > button:first-child {
   color: #f5f2ec;
+}
+
+.renew-app.is-dark .centering-corner-actions > button:first-child {
+  border-color: rgba(255,255,255,.16);
+  background: #15191f;
 }
 
 @media (max-width: 760px) {
@@ -818,9 +1012,13 @@
     min-height: 0;
   }
 
-  .centering-card-guide {
-    width: min(calc(100% - 24px), 360px);
+  .centering-center-target {
+    width: 48px;
+    height: 48px;
   }
+
+  .centering-center-target::before { width: 70px; }
+  .centering-center-target::after { height: 70px; }
 
   .centering-camera-controls {
     gap: 9px;
@@ -828,19 +1026,50 @@
   }
 
   .centering-shutter {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
   }
 
   .centering-shutter span {
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
   }
 
   .centering-analysis-panel,
   .centering-error-panel {
     min-height: 460px;
     padding: 24px;
+  }
+
+  .centering-corner-head {
+    padding: 18px 16px 15px;
+  }
+
+  .centering-corner-head h2 {
+    font-size: 20px;
+  }
+
+  .centering-corner-head p {
+    font-size: 11px;
+  }
+
+  .centering-corner-layout {
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .centering-corner-frame {
+    width: auto;
+    height: min(calc(100vh - 244px), 580px);
+    max-width: 100%;
+  }
+
+  .centering-corner-actions {
+    width: 100%;
+  }
+
+  .centering-corner-actions > button {
+    flex: 1 1 0;
   }
 
   .centering-result-grid {
