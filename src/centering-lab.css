@@ -588,16 +588,6 @@
   box-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
 }
 
-.centering-lab.is-corner-open .centering-corner-panel,
-.centering-lab.is-boundary-open .centering-boundary-panel {
-  position: fixed;
-  z-index: 100000;
-  inset: 0;
-  overflow-y: auto;
-  border: 0;
-  border-radius: 0;
-}
-
 .centering-corner-head {
   padding: 22px 24px 18px;
   border-bottom: 1px solid rgba(23,25,28,.1);
@@ -628,9 +618,47 @@
 
 .centering-corner-layout {
   display: grid;
-  justify-items: center;
-  gap: 18px;
+  grid-template-columns: minmax(0, 560px) minmax(260px, 330px);
+  align-items: start;
+  justify-content: center;
+  gap: 28px;
   padding: 24px;
+}
+
+.centering-editor-visual {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.centering-editor-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  min-height: 30px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.centering-editor-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.centering-editor-legend i {
+  display: block;
+  width: 24px;
+  height: 0;
+  border-top: 2px solid #d84f38;
+}
+
+.centering-editor-legend .is-inner i {
+  border-top: 1px dashed rgba(23, 25, 28, .58);
 }
 
 .centering-corner-frame {
@@ -663,10 +691,19 @@
 }
 
 .centering-corner-frame polygon {
-  fill: rgba(230,96,70,.13);
-  stroke: #ffef65;
-  stroke-width: .6;
+  fill: none;
   vector-effect: non-scaling-stroke;
+}
+
+.centering-corner-frame polygon.is-outer {
+  stroke: #d84f38;
+  stroke-width: .75;
+}
+
+.centering-corner-frame polygon.is-inner {
+  stroke: rgba(255,255,255,.82);
+  stroke-width: .45;
+  stroke-dasharray: 1.4 1.4;
 }
 
 .centering-corner-handle {
@@ -742,13 +779,13 @@
 .centering-corner-magnifier span::after { width: 1px; height: 34px; }
 
 .centering-outline-status {
-  width: min(100%, 560px);
-  margin: -4px 0 0;
+  width: 100%;
+  margin: 0;
   color: #667085;
   font-size: 11px;
   font-weight: 750;
   line-height: 1.5;
-  text-align: center;
+  text-align: left;
 }
 
 .centering-outline-status.is-invalid {
@@ -762,6 +799,34 @@
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.centering-step-controls {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+  min-height: 100%;
+  border-left: 1px solid rgba(23,25,28,.1);
+  padding: 40px 0 0 28px;
+}
+
+.centering-step-tip {
+  margin: 0;
+  color: #343941;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.centering-step-controls .centering-corner-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
+.centering-step-controls .centering-corner-actions > button {
+  width: 100%;
 }
 
 .centering-corner-actions > button:first-child {
@@ -783,16 +848,22 @@
 
 .centering-boundary-layout {
   display: grid;
-  justify-items: center;
-  gap: 18px;
+  grid-template-columns: minmax(0, 470px) minmax(260px, 330px);
+  align-items: start;
+  justify-content: center;
+  gap: 28px;
   padding: 24px;
 }
 
-.centering-boundary-confirm-actions {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+.centering-boundary-layout .centering-editor-visual {
   width: min(100%, 470px);
+}
+
+.centering-boundary-confirm-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
 }
 
 .centering-boundary-confirm-actions > button {
@@ -808,6 +879,7 @@
 }
 
 .centering-boundary-confirm-actions > .centering-primary-button {
+  grid-column: 1 / -1;
   border-color: #17191c;
   color: #fff;
   background: #17191c;
@@ -818,7 +890,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  width: min(100%, 470px);
+  width: 100%;
   border: 1px solid rgba(23,25,28,.11);
   border-radius: 8px;
   padding: 10px 12px;
@@ -1008,11 +1080,22 @@
 }
 
 .centering-boundary-editor polygon {
-  fill: rgba(230,96,70,.08);
-  stroke: #ffb13b;
-  stroke-width: .75;
+  fill: rgba(255,255,255,.035);
+  stroke: rgba(255,255,255,.9);
+  stroke-width: .65;
+  stroke-dasharray: 1.4 1.4;
   vector-effect: non-scaling-stroke;
   filter: drop-shadow(0 0 1px rgba(0,0,0,.72));
+}
+
+.centering-physical-edge {
+  position: absolute;
+  z-index: 5;
+  inset: 1.1%;
+  border: 2px solid #d84f38;
+  border-radius: 3.5%;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.35);
+  pointer-events: none;
 }
 
 .centering-boundary-editor path {
@@ -1097,17 +1180,7 @@
 }
 
 .centering-boundary-editor-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  border: 1px solid rgba(255,255,255,.36);
-  border-radius: 999px;
-  padding: 5px 8px;
-  color: #fff;
-  background: rgba(23,25,28,.72);
-  font-size: 9px;
-  font-weight: 950;
-  pointer-events: none;
+  display: none;
 }
 
 .centering-boundary-toolbar {
@@ -1380,6 +1453,19 @@
   color: #aeb7c5;
 }
 
+.renew-app.is-dark .centering-editor-legend,
+.renew-app.is-dark .centering-step-tip {
+  color: #d3d8e0;
+}
+
+.renew-app.is-dark .centering-editor-legend .is-inner i {
+  border-color: rgba(255,255,255,.72);
+}
+
+.renew-app.is-dark .centering-step-controls {
+  border-color: rgba(255,255,255,.12);
+}
+
 .renew-app.is-dark .centering-outline-status.is-invalid {
   color: #ff8b75;
 }
@@ -1570,13 +1656,28 @@
   }
 
   .centering-corner-layout {
+    grid-template-columns: 1fr;
     gap: 14px;
     padding: 16px;
   }
 
   .centering-boundary-layout {
+    grid-template-columns: 1fr;
     gap: 14px;
     padding: 16px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .centering-editor-legend {
+    gap: 12px;
+    font-size: 10px;
+  }
+
+  .centering-step-controls {
+    gap: 12px;
+    min-height: 0;
+    border-top: 1px solid rgba(23,25,28,.1);
+    border-left: 0;
+    padding: 14px 0 0;
   }
 
   .centering-corner-frame {
@@ -1596,12 +1697,12 @@
   .centering-boundary-confirm-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: min(84vw, 390px);
+    width: 100%;
   }
 
   .centering-boundary-mode {
     align-items: stretch;
-    width: min(84vw, 390px);
+    width: 100%;
   }
 
   .centering-boundary-mode button {

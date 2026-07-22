@@ -3946,7 +3946,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
+function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
@@ -4029,7 +4029,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </a>
 
         <nav className="renew-tabs" aria-label="주요 메뉴">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter((item) => item.id !== 'lab' || isAdmin).map((item) => (
             <a
               key={item.id}
               href={getLocalizedPagePath(item.id, uiLang)}
@@ -6331,7 +6331,7 @@ function RenewCalendar({ uiLang }) {
   );
 }
 
-function RenewNews({ uiLang, onOpenCalendar, onOpenLab }) {
+function RenewNews({ uiLang, onOpenCalendar, onOpenLab, isAdmin = false }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
   const savedViewState = getAppHistoryState().newsViewState || {};
@@ -6396,14 +6396,16 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab }) {
         </div>
         <b aria-hidden="true">›</b>
       </a>
-      <a className="renew-news-calendar-link renew-news-lab-link" href={getLocalizedPagePath('lab', uiLang)} onClick={(event) => { event.preventDefault(); onOpenLab?.(); }}>
-        <span>CARD LAB</span>
-        <div>
-          <strong>{uiLang === 'JP' ? 'センタリング測定' : uiLang === 'EN' ? 'Centering Check' : '센터링 측정기'}</strong>
-          <small>{uiLang === 'JP' ? 'カメラでカード表面の左右・上下比率を確認できます。' : uiLang === 'EN' ? 'Check front centering ratios with your camera.' : '카메라로 카드 앞면의 좌우·상하 비율을 확인하세요.'}</small>
-        </div>
-        <b aria-hidden="true">›</b>
-      </a>
+      {isAdmin ? (
+        <a className="renew-news-calendar-link renew-news-lab-link" href={getLocalizedPagePath('lab', uiLang)} onClick={(event) => { event.preventDefault(); onOpenLab?.(); }}>
+          <span>CARD LAB</span>
+          <div>
+            <strong>{uiLang === 'JP' ? 'センタリング測定' : uiLang === 'EN' ? 'Centering Check' : '센터링 측정기'}</strong>
+            <small>{uiLang === 'JP' ? 'カメラでカード表面の左右・上下比率を確認できます。' : uiLang === 'EN' ? 'Check front centering ratios with your camera.' : '카메라로 카드 앞면의 좌우·상하 비율을 확인하세요.'}</small>
+          </div>
+          <b aria-hidden="true">›</b>
+        </a>
+      ) : null}
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.map((item) => (
           <button
@@ -7616,6 +7618,32 @@ function RenewMarketplaceHidden() {
         <div className="renew-empty">
           <strong>제휴 채널 준비 중</strong>
           <p>기존 유저 거래 매물은 잠시 숨김 처리했습니다. 제휴 채널로 전환 후 다시 안내하겠습니다.</p>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function RenewAdminLabGate({ authResolved, isLoggedIn, uiLang, onLogin, onBack }) {
+  const title = getLocaleText(uiLang, '관리자 전용 기능', 'Admin-only feature', '管理者専用機能');
+  const message = !authResolved
+    ? getLocaleText(uiLang, '계정 권한을 확인하고 있습니다.', 'Checking account permissions.', 'アカウント権限を確認しています。')
+    : isLoggedIn
+      ? getLocaleText(uiLang, '센터링 측정기는 현재 관리자 계정에서만 사용할 수 있습니다.', 'The centering tool is currently available only to administrators.', 'センタリング測定は現在、管理者アカウントのみ利用できます。')
+      : getLocaleText(uiLang, '관리자 계정으로 로그인해야 센터링 측정기를 사용할 수 있습니다.', 'Sign in with an administrator account to use the centering tool.', '管理者アカウントでログインするとセンタリング測定を利用できます。');
+  return (
+    <main className="renew-subpage">
+      <section className="renew-panel">
+        <div className="renew-empty">
+          <strong>{title}</strong>
+          <p>{message}</p>
+          {authResolved ? (
+            <button type="button" className="renew-pill is-filled" onClick={isLoggedIn ? onBack : onLogin}>
+              {isLoggedIn
+                ? getLocaleText(uiLang, '정보로 돌아가기', 'Back to Info', '情報へ戻る')
+                : getLocaleText(uiLang, '관리자 로그인', 'Admin sign in', '管理者ログイン')}
+            </button>
+          ) : null}
         </div>
       </section>
     </main>
@@ -11141,6 +11169,7 @@ export default function RenewApp() {
     return ['EN', 'JP'].includes(savedLocale) ? savedLocale : 'KR';
   });
   const [authUser, setAuthUser] = useState(null);
+  const [authResolved, setAuthResolved] = useState(!supabase);
   const [notifications, setNotifications] = useState([]);
   const [authOpen, setAuthOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -11179,6 +11208,10 @@ export default function RenewApp() {
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
+  const isAdminUser = useMemo(() => (
+    authUser?.app_metadata?.role === 'admin'
+    || authUser?.user_metadata?.username === 'admin'
+  ), [authUser]);
   const needsSocialConsent = useMemo(() => {
     const provider = String(authUser?.app_metadata?.provider || '').toLowerCase();
     return Boolean(authUser?.id
@@ -11357,13 +11390,24 @@ export default function RenewApp() {
   }, [visitorToken]);
 
   useEffect(() => {
-    if (!supabase) return undefined;
+    if (!supabase) {
+      setAuthResolved(true);
+      return undefined;
+    }
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (mounted) setAuthUser(data.session?.user || null);
-    });
+    supabase.auth.getSession()
+      .then(({ data }) => {
+        if (mounted) setAuthUser(data.session?.user || null);
+      })
+      .catch(() => {
+        if (mounted) setAuthUser(null);
+      })
+      .finally(() => {
+        if (mounted) setAuthResolved(true);
+      });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user || null);
+      setAuthResolved(true);
     });
     return () => {
       mounted = false;
@@ -11598,6 +11642,7 @@ export default function RenewApp() {
         isDark={isDark}
         onToggleTheme={() => setIsDark((value) => !value)}
         isLoggedIn={Boolean(authUser)}
+        isAdmin={isAdminUser}
         displayName={displayName}
         onAuthClick={handleAuthClick}
         uiLang={uiLang}
@@ -11717,9 +11762,24 @@ export default function RenewApp() {
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
-        <CenteringLab uiLang={uiLang} />
+        authResolved && isAdminUser ? (
+          <CenteringLab uiLang={uiLang} />
+        ) : (
+          <RenewAdminLabGate
+            authResolved={authResolved}
+            isLoggedIn={Boolean(authUser)}
+            uiLang={uiLang}
+            onLogin={() => handleAuthClick('login')}
+            onBack={() => navigatePage('news')}
+          />
+        )
       ) : activePage === 'news' ? (
-        <RenewNews uiLang={uiLang} onOpenCalendar={() => navigatePage('calendar')} onOpenLab={() => navigatePage('lab')} />
+        <RenewNews
+          uiLang={uiLang}
+          isAdmin={isAdminUser}
+          onOpenCalendar={() => navigatePage('calendar')}
+          onOpenLab={() => navigatePage('lab')}
+        />
       ) : activePage === 'partnerShops' ? (
         isJapaneseUi(uiLang) ? <RenewJapaneseShops /> : <RenewPartnerShopSeoPage uiLang={uiLang} />
       ) : activePage === 'shops' ? (

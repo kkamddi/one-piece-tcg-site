@@ -86,6 +86,9 @@ const CAMERA_FLOW_COPY = {
     cornerApply: '카드 외곽 확정',
     cornerRetake: '다시 촬영',
     cornerLabel: '카드 모서리',
+    outerLegend: '실제 카드 외곽',
+    innerLegend: '인쇄 경계 (다음 단계)',
+    outerTip: '주황색 네 점을 카드의 둥근 모서리가 끝나는 실제 바깥쪽에 맞춰 주세요.',
     readjust: '카드 외곽 다시 맞추기',
     outlineReady: '네 점이 카드의 실제 바깥 모서리에 맞는지 마지막으로 확인해 주세요.',
     outlineInvalid: '외곽점의 순서나 간격이 올바르지 않습니다. 네 점을 다시 맞춰 주세요.',
@@ -111,6 +114,9 @@ const CAMERA_FLOW_COPY = {
     cornerApply: 'Confirm card outline',
     cornerRetake: 'Retake',
     cornerLabel: 'Card corner',
+    outerLegend: 'Physical card edge',
+    innerLegend: 'Print border (next step)',
+    outerTip: 'Place the four orange points on the physical ends of the rounded card corners.',
     readjust: 'Adjust card outline',
     outlineReady: 'Check once more that all four points match the physical outer corners.',
     outlineInvalid: 'The outline order or spacing is invalid. Reposition all four points.',
@@ -136,6 +142,9 @@ const CAMERA_FLOW_COPY = {
     cornerApply: 'カード外枠を確定',
     cornerRetake: '撮り直す',
     cornerLabel: 'カードの角',
+    outerLegend: 'カード実物の外枠',
+    innerLegend: '印刷境界（次のステップ）',
+    outerTip: 'オレンジ色の4点を、丸い角が終わるカード実物の外側に合わせてください。',
     readjust: 'カード外枠を再調整',
     outlineReady: '4点がカード外側の実際の角に合っているか、もう一度確認してください。',
     outlineInvalid: '外枠点の順序または間隔が正しくありません。4点を再調整してください。',
@@ -154,6 +163,8 @@ const BOUNDARY_EDITOR_COPY = {
     advanced: '기울기 조정',
     simple: '네 선 조정',
     advancedHelp: '인쇄 테두리 자체가 비스듬할 때만 네 모서리 조정을 사용하세요.',
+    outerLegend: '보정된 카드 외곽',
+    innerLegend: '측정할 인쇄 경계',
     corner: '인쇄 경계 모서리',
     edge: '인쇄 경계선'
   },
@@ -167,6 +178,8 @@ const BOUNDARY_EDITOR_COPY = {
     advanced: 'Adjust tilt',
     simple: 'Four-line mode',
     advancedHelp: 'Use four-corner adjustment only when the printed border itself is tilted.',
+    outerLegend: 'Corrected card edge',
+    innerLegend: 'Measured print border',
     corner: 'Print boundary corner',
     edge: 'Print boundary edge'
   },
@@ -180,6 +193,8 @@ const BOUNDARY_EDITOR_COPY = {
     advanced: '傾きを調整',
     simple: '4本線調整',
     advancedHelp: '印刷境界自体が傾いている場合のみ、四隅調整を使用してください。',
+    outerLegend: '補正されたカード外枠',
+    innerLegend: '測定する印刷境界',
     corner: '印刷境界の角',
     edge: '印刷境界線'
   }
@@ -374,10 +389,10 @@ function getFrameQuality(canvas) {
 
 function getDefaultCornerPoints(width, height) {
   const targetRatio = CARD_WIDTH_MM / CARD_HEIGHT_MM;
-  let cardHeight = height * 0.78;
+  let cardHeight = height * 0.6;
   let cardWidth = cardHeight * targetRatio;
-  if (cardWidth > width * 0.78) {
-    cardWidth = width * 0.78;
+  if (cardWidth > width * 0.64) {
+    cardWidth = width * 0.64;
     cardHeight = cardWidth / targetRatio;
   }
   const left = (width - cardWidth) / 2;
@@ -403,6 +418,112 @@ function polygonArea(points) {
 
 function pointDistance(first, second) {
   return Math.hypot(first.x - second.x, first.y - second.y);
+}
+
+function getInsetOutline(points, amount = 0.075) {
+  const center = Object.values(points).reduce((result, point) => ({
+    x: result.x + point.x / 4,
+    y: result.y + point.y / 4
+  }), { x: 0, y: 0 });
+  return Object.fromEntries(Object.entries(points).map(([key, point]) => [key, {
+    x: point.x + (center.x - point.x) * amount,
+    y: point.y + (center.y - point.y) * amount
+  }]));
+}
+
+function getLineContrast(pixels, width, height, axis, position, start, end) {
+  const values = [];
+  const offset = 2;
+  const safePosition = clamp(Math.round(position), offset, (axis === 'horizontal' ? height : width) - offset - 1);
+  for (let cursor = Math.round(start); cursor <= Math.round(end); cursor += 2) {
+    const x1 = axis === 'horizontal' ? clamp(cursor, 0, width - 1) : safePosition - offset;
+    const y1 = axis === 'horizontal' ? safePosition - offset : clamp(cursor, 0, height - 1);
+    const x2 = axis === 'horizontal' ? clamp(cursor, 0, width - 1) : safePosition + offset;
+    const y2 = axis === 'horizontal' ? safePosition + offset : clamp(cursor, 0, height - 1);
+    const first = (Math.round(y1) * width + Math.round(x1)) * 4;
+    const second = (Math.round(y2) * width + Math.round(x2)) * 4;
+    values.push(Math.hypot(
+      pixels[first] - pixels[second],
+      pixels[first + 1] - pixels[second + 1],
+      pixels[first + 2] - pixels[second + 2]
+    ));
+  }
+  return median(values);
+}
+
+function findStrongestEdge(pixels, width, height, axis, from, to, lineStart, lineEnd) {
+  let bestPosition = from;
+  let bestScore = -1;
+  for (let position = Math.round(from); position <= Math.round(to); position += 1) {
+    const score = getLineContrast(pixels, width, height, axis, position, lineStart, lineEnd);
+    if (score > bestScore) {
+      bestScore = score;
+      bestPosition = position;
+    }
+  }
+  return { position: bestPosition, score: bestScore };
+}
+
+function detectCenteredCardBounds(pixels, width, height) {
+  const top = findStrongestEdge(pixels, width, height, 'horizontal', height * 0.1, height * 0.46, width * 0.28, width * 0.72);
+  const bottom = findStrongestEdge(pixels, width, height, 'horizontal', height * 0.54, height * 0.94, width * 0.28, width * 0.72);
+  const left = findStrongestEdge(pixels, width, height, 'vertical', width * 0.08, width * 0.46, height * 0.3, height * 0.76);
+  const right = findStrongestEdge(pixels, width, height, 'vertical', width * 0.54, width * 0.92, height * 0.3, height * 0.76);
+  const detectedWidth = right.position - left.position;
+  const detectedHeight = bottom.position - top.position;
+  const ratio = detectedWidth / Math.max(detectedHeight, 1);
+  const areaRatio = detectedWidth * detectedHeight / Math.max(width * height, 1);
+  const valid = detectedWidth >= width * 0.22
+    && detectedWidth <= width * 0.72
+    && detectedHeight >= height * 0.34
+    && detectedHeight <= height * 0.86
+    && ratio >= 0.5
+    && ratio <= 0.9
+    && areaRatio >= 0.08
+    && Math.min(top.score, bottom.score, left.score, right.score) >= 11;
+  if (!valid) return null;
+  return {
+    points: {
+      tl: { x: left.position, y: top.position },
+      tr: { x: right.position, y: top.position },
+      br: { x: right.position, y: bottom.position },
+      bl: { x: left.position, y: bottom.position }
+    },
+    areaRatio,
+    edgeScore: Math.min(top.score, bottom.score, left.score, right.score)
+  };
+}
+
+function refineCardBounds(pixels, width, height, bounds) {
+  const roughWidth = Math.max(bounds.maxX - bounds.minX, 1);
+  const roughHeight = Math.max(bounds.maxY - bounds.minY, 1);
+  const searchLeft = clamp(bounds.minX - roughWidth * 0.14, 3, width - 4);
+  const searchRight = clamp(bounds.maxX + roughWidth * 0.14, 3, width - 4);
+  const searchTop = clamp(bounds.minY - roughHeight * 0.14, 3, height - 4);
+  const searchBottom = clamp(bounds.maxY + roughHeight * 0.14, 3, height - 4);
+  const horizontalStart = searchLeft + (searchRight - searchLeft) * 0.22;
+  const horizontalEnd = searchRight - (searchRight - searchLeft) * 0.22;
+  const verticalStart = searchTop + (searchBottom - searchTop) * 0.22;
+  const verticalEnd = searchBottom - (searchBottom - searchTop) * 0.22;
+  const top = findStrongestEdge(pixels, width, height, 'horizontal', searchTop, bounds.minY + roughHeight * 0.3, horizontalStart, horizontalEnd);
+  const bottom = findStrongestEdge(pixels, width, height, 'horizontal', bounds.maxY - roughHeight * 0.3, searchBottom, horizontalStart, horizontalEnd);
+  const left = findStrongestEdge(pixels, width, height, 'vertical', searchLeft, bounds.minX + roughWidth * 0.3, verticalStart, verticalEnd);
+  const right = findStrongestEdge(pixels, width, height, 'vertical', bounds.maxX - roughWidth * 0.3, searchRight, verticalStart, verticalEnd);
+  const refinedWidth = right.position - left.position;
+  const refinedHeight = bottom.position - top.position;
+  const ratio = refinedWidth / Math.max(refinedHeight, 1);
+  const valid = refinedWidth >= width * 0.12
+    && refinedHeight >= height * 0.12
+    && ratio >= 0.48
+    && ratio <= 0.94
+    && Math.min(top.score, bottom.score, left.score, right.score) >= 9;
+  if (!valid) return null;
+  return {
+    tl: { x: left.position, y: top.position },
+    tr: { x: right.position, y: top.position },
+    br: { x: right.position, y: bottom.position },
+    bl: { x: left.position, y: bottom.position }
+  };
 }
 
 function detectCardCorners(canvas) {
@@ -507,18 +628,47 @@ function detectCardCorners(canvas) {
     const width = maxX - minX;
     const height = maxY - minY;
     const centerDistance = Math.hypot(sumX / count / sample.width - 0.5, sumY / count / sample.height - 0.5);
-    const score = count * clamp(1.25 - centerDistance, 0.45, 1.25) * clamp(width / Math.max(height, 1), 0.4, 1.4);
-    if (!best || score > best.score) best = { score, count, width, height, tl, tr, br, bl, centerDistance };
+    const boxArea = Math.max((width + 1) * (height + 1), 1);
+    const fillRatio = count / boxArea;
+    const boxRatio = width / Math.max(height, 1);
+    const targetRatio = CARD_WIDTH_MM / CARD_HEIGHT_MM;
+    const ratioScore = clamp(1 - Math.abs(Math.log(boxRatio / targetRatio)) / 0.48, 0, 1);
+    const boxAreaRatio = boxArea / (sample.width * sample.height);
+    if (fillRatio < 0.12 || ratioScore < 0.12 || boxAreaRatio < 0.025 || boxAreaRatio > 0.78) continue;
+    const score = Math.sqrt(boxArea)
+      * Math.pow(fillRatio, 1.35)
+      * Math.pow(ratioScore, 2.6)
+      * clamp(1.2 - centerDistance, 0.35, 1.2);
+    if (!best || score > best.score) best = {
+      score, count, width, height, tl, tr, br, bl, centerDistance, minX, maxX, minY, maxY, fillRatio
+    };
   }
-  if (!best) return { points: getDefaultCornerPoints(canvas.width, canvas.height), confidence: 0, areaRatio: 0, centerDistance: 1 };
+  if (!best) {
+    const centered = detectCenteredCardBounds(pixels, sample.width, sample.height);
+    if (!centered) return { points: getDefaultCornerPoints(canvas.width, canvas.height), confidence: 0, areaRatio: 0, centerDistance: 1 };
+    const scaleX = canvas.width / sample.width;
+    const scaleY = canvas.height / sample.height;
+    const points = Object.fromEntries(Object.entries(centered.points).map(([key, point]) => [key, {
+      x: point.x * scaleX,
+      y: point.y * scaleY
+    }]));
+    return { points, confidence: clamp(centered.edgeScore / 90, 0.18, 0.58), areaRatio: centered.areaRatio, centerDistance: 0 };
+  }
   const scaleX = canvas.width / sample.width;
   const scaleY = canvas.height / sample.height;
-  const points = {
-    tl: { x: best.tl.x * scaleX, y: best.tl.y * scaleY },
-    tr: { x: best.tr.x * scaleX, y: best.tr.y * scaleY },
-    br: { x: best.br.x * scaleX, y: best.br.y * scaleY },
-    bl: { x: best.bl.x * scaleX, y: best.bl.y * scaleY }
-  };
+  const roughPoints = { tl: best.tl, tr: best.tr, br: best.br, bl: best.bl };
+  const maximumSlope = Math.max(
+    Math.abs(best.tl.y - best.tr.y) / Math.max(best.width, 1),
+    Math.abs(best.bl.y - best.br.y) / Math.max(best.width, 1),
+    Math.abs(best.tl.x - best.bl.x) / Math.max(best.height, 1),
+    Math.abs(best.tr.x - best.br.x) / Math.max(best.height, 1)
+  );
+  const refinedPoints = maximumSlope < 0.14 ? refineCardBounds(pixels, sample.width, sample.height, best) : null;
+  const selectedPoints = refinedPoints || roughPoints;
+  const points = Object.fromEntries(Object.entries(selectedPoints).map(([key, point]) => [key, {
+    x: point.x * scaleX,
+    y: point.y * scaleY
+  }]));
   const averageWidth = (pointDistance(points.tl, points.tr) + pointDistance(points.bl, points.br)) / 2;
   const averageHeight = (pointDistance(points.tl, points.bl) + pointDistance(points.tr, points.br)) / 2;
   const detectedRatio = averageWidth / Math.max(averageHeight, 1);
@@ -528,7 +678,7 @@ function detectCardCorners(canvas) {
   const areaScore = clamp((areaRatio - 0.04) / 0.26, 0, 1);
   const sizeScore = clamp(Math.min(best.width / sample.width, best.height / sample.height) / 0.34, 0, 1);
   const centerScore = clamp(1 - best.centerDistance / 0.52, 0, 1);
-  const confidence = ratioScore * 0.34 + areaScore * 0.3 + sizeScore * 0.2 + centerScore * 0.16;
+  const confidence = ratioScore * 0.3 + areaScore * 0.24 + sizeScore * 0.16 + centerScore * 0.14 + clamp(best.fillRatio, 0, 1) * 0.16;
   return { points, confidence, areaRatio, centerDistance: best.centerDistance };
 }
 
@@ -949,6 +1099,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     const source = rawCanvasRef.current;
     return getOutlineValidation(cornerPoints, source?.width || 100, source?.height || 100);
   }, [cornerPoints, rawImageUrl]);
+  const innerGuidePoints = useMemo(() => getInsetOutline(cornerPoints), [cornerPoints]);
 
   useEffect(() => {
     if (!demoResult && !demoCorners) return;
@@ -1009,7 +1160,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   useEffect(() => () => stopCamera(), []);
 
   useEffect(() => {
-    if (phase !== 'camera' && phase !== 'corners' && phase !== 'boundary') return undefined;
+    if (phase !== 'camera') return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -1304,55 +1455,65 @@ export default function CenteringLab({ uiLang = 'KR' }) {
             <div><span>STEP 1 / 2 · CARD OUTLINE</span><h2>{flow.cornerTitle}</h2><p>{flow.cornerBody}</p></div>
           </header>
           <div className="centering-corner-layout">
-            <div
-              className="centering-corner-frame"
-              ref={cornerFrameRef}
-              style={{ aspectRatio: rawAspectRatio }}
-            >
-              {rawImageUrl ? <img src={rawImageUrl} alt="" /> : null}
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <polygon points={`${cornerPoints.tl.x},${cornerPoints.tl.y} ${cornerPoints.tr.x},${cornerPoints.tr.y} ${cornerPoints.br.x},${cornerPoints.br.y} ${cornerPoints.bl.x},${cornerPoints.bl.y}`} />
-              </svg>
-              {Object.entries(cornerPoints).map(([key, point], index) => (
-                <button
-                  type="button"
-                  className="centering-corner-handle"
-                  key={key}
-                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                  aria-label={`${flow.cornerLabel} ${index + 1}`}
-                  onPointerDown={(event) => {
-                    event.currentTarget.setPointerCapture(event.pointerId);
-                    setActiveCorner(key);
-                    updateCornerFromPointer(key, event);
-                  }}
-                  onPointerMove={(event) => {
-                    if (event.currentTarget.hasPointerCapture(event.pointerId)) updateCornerFromPointer(key, event);
-                  }}
-                  onPointerUp={(event) => {
-                    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-                    setActiveCorner('');
-                  }}
-                  onPointerCancel={() => setActiveCorner('')}
-                ><span aria-hidden="true" /></button>
-              ))}
-              {activeCorner && rawImageUrl ? (
-                <div
-                  className="centering-corner-magnifier"
-                  style={{
-                    backgroundImage: `url(${rawImageUrl})`,
-                    backgroundPosition: `${cornerPoints[activeCorner].x}% ${cornerPoints[activeCorner].y}%`
-                  }}
-                  aria-hidden="true"
-                ><span /></div>
-              ) : null}
+            <div className="centering-editor-visual">
+              <div className="centering-editor-legend" aria-hidden="true">
+                <span className="is-outer"><i />{flow.outerLegend}</span>
+                <span className="is-inner"><i />{flow.innerLegend}</span>
+              </div>
+              <div
+                className="centering-corner-frame"
+                ref={cornerFrameRef}
+                style={{ aspectRatio: rawAspectRatio }}
+              >
+                {rawImageUrl ? <img src={rawImageUrl} alt="" /> : null}
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                  <polygon className="is-outer" points={`${cornerPoints.tl.x},${cornerPoints.tl.y} ${cornerPoints.tr.x},${cornerPoints.tr.y} ${cornerPoints.br.x},${cornerPoints.br.y} ${cornerPoints.bl.x},${cornerPoints.bl.y}`} />
+                  <polygon className="is-inner" points={`${innerGuidePoints.tl.x},${innerGuidePoints.tl.y} ${innerGuidePoints.tr.x},${innerGuidePoints.tr.y} ${innerGuidePoints.br.x},${innerGuidePoints.br.y} ${innerGuidePoints.bl.x},${innerGuidePoints.bl.y}`} />
+                </svg>
+                {Object.entries(cornerPoints).map(([key, point], index) => (
+                  <button
+                    type="button"
+                    className="centering-corner-handle"
+                    key={key}
+                    style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                    aria-label={`${flow.cornerLabel} ${index + 1}`}
+                    onPointerDown={(event) => {
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                      setActiveCorner(key);
+                      updateCornerFromPointer(key, event);
+                    }}
+                    onPointerMove={(event) => {
+                      if (event.currentTarget.hasPointerCapture(event.pointerId)) updateCornerFromPointer(key, event);
+                    }}
+                    onPointerUp={(event) => {
+                      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+                      setActiveCorner('');
+                    }}
+                    onPointerCancel={() => setActiveCorner('')}
+                  ><span aria-hidden="true" /></button>
+                ))}
+                {activeCorner && rawImageUrl ? (
+                  <div
+                    className="centering-corner-magnifier"
+                    style={{
+                      backgroundImage: `url(${rawImageUrl})`,
+                      backgroundPosition: `${cornerPoints[activeCorner].x}% ${cornerPoints[activeCorner].y}%`
+                    }}
+                    aria-hidden="true"
+                  ><span /></div>
+                ) : null}
+              </div>
             </div>
-            <p className={`centering-outline-status${outlineValidation.valid ? ' is-ready' : ' is-invalid'}`}>
-              {outlineValidation.valid ? flow.outlineReady : flow.outlineInvalid}
-            </p>
-            <div className="centering-corner-actions">
-              <button type="button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : flow.cornerRetake}</button>
-              <button type="button" className="centering-primary-button" disabled={!outlineValidation.valid} onClick={() => applyCornerAnalysis(cornerPoints)}>{flow.cornerApply}</button>
-            </div>
+            <aside className="centering-step-controls">
+              <p className="centering-step-tip">{flow.outerTip}</p>
+              <p className={`centering-outline-status${outlineValidation.valid ? ' is-ready' : ' is-invalid'}`}>
+                {outlineValidation.valid ? flow.outlineReady : flow.outlineInvalid}
+              </p>
+              <div className="centering-corner-actions">
+                <button type="button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : flow.cornerRetake}</button>
+                <button type="button" className="centering-primary-button" disabled={!outlineValidation.valid} onClick={() => applyCornerAnalysis(cornerPoints)}>{flow.cornerApply}</button>
+              </div>
+            </aside>
           </div>
         </section>
       ) : null}
@@ -1363,21 +1524,30 @@ export default function CenteringLab({ uiLang = 'KR' }) {
             <div><span>STEP 2 / 2 · PRINT BORDER</span><h2>{editorText.title}</h2><p>{editorText.help}</p></div>
           </header>
           <div className="centering-boundary-layout">
-            <div className="centering-result-image">
-              {imageUrl ? <img src={imageUrl} alt="" /> : <div className="centering-result-image-loading" aria-hidden="true" />}
-              <BoundaryEditor frame={boundaryFrame} labels={editorText} onChange={updateBoundaryFrame} advanced={isAdvancedBoundary} />
+            <div className="centering-editor-visual">
+              <div className="centering-editor-legend" aria-hidden="true">
+                <span className="is-outer"><i />{editorText.outerLegend}</span>
+                <span className="is-inner"><i />{editorText.innerLegend}</span>
+              </div>
+              <div className="centering-result-image">
+                {imageUrl ? <img src={imageUrl} alt="" /> : <div className="centering-result-image-loading" aria-hidden="true" />}
+                <span className="centering-physical-edge" aria-hidden="true" />
+                <BoundaryEditor frame={boundaryFrame} labels={editorText} onChange={updateBoundaryFrame} advanced={isAdvancedBoundary} />
+              </div>
             </div>
-            <div className="centering-boundary-mode">
-              <span>{editorText.advancedHelp}</span>
-              <button type="button" aria-pressed={isAdvancedBoundary} onClick={() => setIsAdvancedBoundary((current) => !current)}>
-                {isAdvancedBoundary ? editorText.simple : editorText.advanced}
-              </button>
-            </div>
-            <div className="centering-boundary-confirm-actions">
-              <button type="button" onClick={() => setPhase('corners')}>{editorText.back}</button>
-              <button type="button" onClick={resetBoundaryFrame}>{editorText.reset}</button>
-              <button type="button" className="centering-primary-button" onClick={confirmBoundaryFrame}>{editorText.done}</button>
-            </div>
+            <aside className="centering-step-controls">
+              <div className="centering-boundary-mode">
+                <span>{editorText.advancedHelp}</span>
+                <button type="button" aria-pressed={isAdvancedBoundary} onClick={() => setIsAdvancedBoundary((current) => !current)}>
+                  {isAdvancedBoundary ? editorText.simple : editorText.advanced}
+                </button>
+              </div>
+              <div className="centering-boundary-confirm-actions">
+                <button type="button" onClick={() => setPhase('corners')}>{editorText.back}</button>
+                <button type="button" onClick={resetBoundaryFrame}>{editorText.reset}</button>
+                <button type="button" className="centering-primary-button" onClick={confirmBoundaryFrame}>{editorText.done}</button>
+              </div>
+            </aside>
           </div>
         </section>
       ) : null}
