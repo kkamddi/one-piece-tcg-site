@@ -75,6 +75,9 @@ const CAMERA_FLOW_COPY = {
     moveCenter: '카드를 중앙 표시 쪽으로 옮겨 주세요.',
     moveCloser: '카드를 조금 더 가까이 보여 주세요.',
     detected: '카드가 인식되었습니다. 촬영 버튼을 눌러 주세요.',
+    upload: '사진 업로드',
+    chooseAnother: '다른 사진 선택',
+    invalidImage: '사진 파일을 불러오지 못했습니다. JPG, PNG 또는 WebP 파일을 선택해 주세요.',
     dark: '조금 더 밝은 곳에서 촬영해 주세요.',
     glare: '빛 반사를 줄인 뒤 촬영해 주세요.',
     burst: '가장 선명한 장면을 고르고 있습니다.',
@@ -95,6 +98,9 @@ const CAMERA_FLOW_COPY = {
     moveCenter: 'Move the card toward the center marker.',
     moveCloser: 'Move the card slightly closer.',
     detected: 'Card detected. Press the shutter.',
+    upload: 'Upload photo',
+    chooseAnother: 'Choose another photo',
+    invalidImage: 'The photo could not be loaded. Choose a JPG, PNG, or WebP file.',
     dark: 'Move to a brighter area.',
     glare: 'Reduce glare before capturing.',
     burst: 'Selecting the sharpest frame.',
@@ -115,6 +121,9 @@ const CAMERA_FLOW_COPY = {
     moveCenter: 'カードを中央マークへ移動してください。',
     moveCloser: 'カードをもう少し近づけてください。',
     detected: 'カードを認識しました。撮影ボタンを押してください。',
+    upload: '写真をアップロード',
+    chooseAnother: '別の写真を選択',
+    invalidImage: '写真を読み込めませんでした。JPG、PNG、WebPファイルを選択してください。',
     dark: 'もう少し明るい場所で撮影してください。',
     glare: '光の反射を減らしてから撮影してください。',
     burst: '最も鮮明なフレームを選択しています。',
@@ -125,6 +134,36 @@ const CAMERA_FLOW_COPY = {
     cornerLabel: 'カードの角',
     readjust: '四隅を再調整',
     analysisError: '画像を分析できませんでした。カードを撮り直してください。'
+  }
+};
+
+const BOUNDARY_EDITOR_COPY = {
+  KR: {
+    title: '인쇄 경계 직접 조정',
+    help: '모서리점은 기울기를 조정하고, 변 중앙 손잡이는 선 전체를 이동합니다.',
+    edit: '경계 조정',
+    reset: '자동 위치',
+    done: '조정 완료',
+    corner: '인쇄 경계 모서리',
+    edge: '인쇄 경계선'
+  },
+  EN: {
+    title: 'Adjust print boundary',
+    help: 'Drag corners to change the angle or edge handles to move an entire side.',
+    edit: 'Adjust boundary',
+    reset: 'Auto position',
+    done: 'Done',
+    corner: 'Print boundary corner',
+    edge: 'Print boundary edge'
+  },
+  JP: {
+    title: '印刷境界を直接調整',
+    help: '角で傾きを調整し、辺中央のハンドルで線全体を移動します。',
+    edit: '境界を調整',
+    reset: '自動位置',
+    done: '調整完了',
+    corner: '印刷境界の角',
+    edge: '印刷境界線'
   }
 };
 
@@ -248,6 +287,42 @@ function captureViewportFrame(video, viewport) {
   canvas.height = Math.max(640, Math.round(CAPTURE_SOURCE_WIDTH * viewportBox.height / Math.max(viewportBox.width, 1)));
   drawVideoCover(video, canvas);
   return canvas;
+}
+
+async function imageFileToCanvas(file) {
+  if (!file || !file.type.startsWith('image/')) throw new Error('invalid-image');
+  let source;
+  let objectUrl = '';
+  try {
+    if (typeof createImageBitmap === 'function') {
+      try {
+        source = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      } catch {
+        source = await createImageBitmap(file);
+      }
+    } else {
+      objectUrl = URL.createObjectURL(file);
+      source = await new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = objectUrl;
+      });
+    }
+    const sourceWidth = source.width || source.naturalWidth;
+    const sourceHeight = source.height || source.naturalHeight;
+    if (!sourceWidth || !sourceHeight || Math.min(sourceWidth, sourceHeight) < 180) throw new Error('invalid-image');
+    const scale = Math.min(1, 1800 / Math.max(sourceWidth, sourceHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+    canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    source?.close?.();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+  }
 }
 
 function getFrameQuality(canvas) {
@@ -453,6 +528,47 @@ function denormalizeCornerPoints(points, width, height) {
   }]));
 }
 
+function solveLinearSystem(matrix, values) {
+  const size = values.length;
+  const rows = matrix.map((row, index) => [...row, values[index]]);
+  for (let column = 0; column < size; column += 1) {
+    let pivot = column;
+    for (let row = column + 1; row < size; row += 1) {
+      if (Math.abs(rows[row][column]) > Math.abs(rows[pivot][column])) pivot = row;
+    }
+    if (Math.abs(rows[pivot][column]) < 1e-10) throw new Error('invalid-corners');
+    [rows[column], rows[pivot]] = [rows[pivot], rows[column]];
+    const divisor = rows[column][column];
+    for (let index = column; index <= size; index += 1) rows[column][index] /= divisor;
+    for (let row = 0; row < size; row += 1) {
+      if (row === column) continue;
+      const factor = rows[row][column];
+      for (let index = column; index <= size; index += 1) rows[row][index] -= factor * rows[column][index];
+    }
+  }
+  return rows.map((row) => row[size]);
+}
+
+function getPerspectiveTransform(points, width, height) {
+  const sourcePoints = [points.tl, points.tr, points.br, points.bl];
+  const targetPoints = [
+    { x: 0, y: 0 },
+    { x: width - 1, y: 0 },
+    { x: width - 1, y: height - 1 },
+    { x: 0, y: height - 1 }
+  ];
+  const matrix = [];
+  const values = [];
+  targetPoints.forEach((target, index) => {
+    const source = sourcePoints[index];
+    matrix.push([target.x, target.y, 1, 0, 0, 0, -source.x * target.x, -source.x * target.y]);
+    values.push(source.x);
+    matrix.push([0, 0, 0, target.x, target.y, 1, -source.y * target.x, -source.y * target.y]);
+    values.push(source.y);
+  });
+  return solveLinearSystem(matrix, values);
+}
+
 function warpCardCanvas(source, points) {
   const output = document.createElement('canvas');
   output.width = CAPTURE_WIDTH;
@@ -463,13 +579,12 @@ function warpCardCanvas(source, points) {
   const targetImage = targetContext.createImageData(output.width, output.height);
   const sourcePixels = sourceImage.data;
   const targetPixels = targetImage.data;
-  const { tl, tr, br, bl } = points;
+  const transform = getPerspectiveTransform(points, output.width, output.height);
   for (let y = 0; y < output.height; y += 1) {
-    const v = y / (output.height - 1);
     for (let x = 0; x < output.width; x += 1) {
-      const u = x / (output.width - 1);
-      const sourceX = (1 - u) * (1 - v) * tl.x + u * (1 - v) * tr.x + u * v * br.x + (1 - u) * v * bl.x;
-      const sourceY = (1 - u) * (1 - v) * tl.y + u * (1 - v) * tr.y + u * v * br.y + (1 - u) * v * bl.y;
+      const denominator = transform[6] * x + transform[7] * y + 1;
+      const sourceX = (transform[0] * x + transform[1] * y + transform[2]) / denominator;
+      const sourceY = (transform[3] * x + transform[4] * y + transform[5]) / denominator;
       const x0 = clamp(Math.floor(sourceX), 0, source.width - 1);
       const y0 = clamp(Math.floor(sourceY), 0, source.height - 1);
       const x1 = Math.min(x0 + 1, source.width - 1);
@@ -562,24 +677,182 @@ function CenteringGuide() {
       <rect x="5.7" y="8" width="51.6" height="72" rx="1" className="is-inner is-dashed" />
       <path d="M31.5 0.5v87M0.5 44h62" className="is-axis" />
       <circle cx="31.5" cy="44" r="1.8" className="is-center" />
-      <text x="31.5" y="3.4" textAnchor="middle">63 × 88 mm</text>
+      <text x="31.5" y="3.4" textAnchor="middle">63 x 88 mm</text>
       <text x="31.5" y="85.8" textAnchor="middle">CARD PONE CENTER</text>
     </svg>
   );
 }
 
-function ResultOverlay({ boundaries }) {
-  const style = {
-    left: `${boundaries.left}%`,
-    right: `${boundaries.right}%`,
-    top: `${boundaries.top}%`,
-    bottom: `${boundaries.bottom}%`
+function boundariesToFrame(boundaries) {
+  return {
+    tl: { x: boundaries.left, y: boundaries.top },
+    tr: { x: 100 - boundaries.right, y: boundaries.top },
+    br: { x: 100 - boundaries.right, y: 100 - boundaries.bottom },
+    bl: { x: boundaries.left, y: 100 - boundaries.bottom }
   };
+}
+
+function frameToBoundaries(frame) {
+  return {
+    left: Number(clamp((frame.tl.x + frame.bl.x) / 2, 0.5, 35).toFixed(1)),
+    right: Number(clamp(100 - (frame.tr.x + frame.br.x) / 2, 0.5, 35).toFixed(1)),
+    top: Number(clamp((frame.tl.y + frame.tr.y) / 2, 0.5, 35).toFixed(1)),
+    bottom: Number(clamp(100 - (frame.bl.y + frame.br.y) / 2, 0.5, 35).toFixed(1))
+  };
+}
+
+function getFramePoints(frame) {
+  return `${frame.tl.x},${frame.tl.y} ${frame.tr.x},${frame.tr.y} ${frame.br.x},${frame.br.y} ${frame.bl.x},${frame.bl.y}`;
+}
+
+function getEdgePosition(frame, edge) {
+  const edgePoints = {
+    top: [frame.tl, frame.tr],
+    right: [frame.tr, frame.br],
+    bottom: [frame.bl, frame.br],
+    left: [frame.tl, frame.bl]
+  }[edge];
+  return {
+    x: (edgePoints[0].x + edgePoints[1].x) / 2,
+    y: (edgePoints[0].y + edgePoints[1].y) / 2
+  };
+}
+
+function constrainFrameCorner(frame, key, point) {
+  const gap = 2;
+  const limits = {
+    tl: { minX: 1, maxX: frame.tr.x - gap, minY: 1, maxY: frame.bl.y - gap },
+    tr: { minX: frame.tl.x + gap, maxX: 99, minY: 1, maxY: frame.br.y - gap },
+    br: { minX: frame.bl.x + gap, maxX: 99, minY: frame.tr.y + gap, maxY: 99 },
+    bl: { minX: 1, maxX: frame.br.x - gap, minY: frame.tl.y + gap, maxY: 99 }
+  }[key];
+  return {
+    x: clamp(point.x, limits.minX, limits.maxX),
+    y: clamp(point.y, limits.minY, limits.maxY)
+  };
+}
+
+function shiftFrameEdge(frame, edge, deltaX, deltaY) {
+  const next = Object.fromEntries(Object.entries(frame).map(([key, point]) => [key, { ...point }]));
+  const gap = 2;
+  if (edge === 'left') {
+    const delta = clamp(deltaX, 1 - Math.min(frame.tl.x, frame.bl.x), Math.min(frame.tr.x - frame.tl.x, frame.br.x - frame.bl.x) - gap);
+    next.tl.x += delta;
+    next.bl.x += delta;
+  } else if (edge === 'right') {
+    const delta = clamp(deltaX, gap - Math.min(frame.tr.x - frame.tl.x, frame.br.x - frame.bl.x), 99 - Math.max(frame.tr.x, frame.br.x));
+    next.tr.x += delta;
+    next.br.x += delta;
+  } else if (edge === 'top') {
+    const delta = clamp(deltaY, 1 - Math.min(frame.tl.y, frame.tr.y), Math.min(frame.bl.y - frame.tl.y, frame.br.y - frame.tr.y) - gap);
+    next.tl.y += delta;
+    next.tr.y += delta;
+  } else if (edge === 'bottom') {
+    const delta = clamp(deltaY, gap - Math.min(frame.bl.y - frame.tl.y, frame.br.y - frame.tr.y), 99 - Math.max(frame.bl.y, frame.br.y));
+    next.bl.y += delta;
+    next.br.y += delta;
+  }
+  return next;
+}
+
+function BoundaryEditor({ frame, labels, onChange }) {
+  const editorRef = useRef(null);
+  const dragRef = useRef(null);
+
+  const getPointerPosition = (event) => {
+    const rect = editorRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    return {
+      x: clamp((event.clientX - rect.left) / Math.max(rect.width, 1) * 100, 0, 100),
+      y: clamp((event.clientY - rect.top) / Math.max(rect.height, 1) * 100, 0, 100)
+    };
+  };
+
+  const startDrag = (type, key, event) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      type,
+      key,
+      start: getPointerPosition(event),
+      frame: Object.fromEntries(Object.entries(frame).map(([name, point]) => [name, { ...point }]))
+    };
+  };
+
+  const moveDrag = (event) => {
+    const drag = dragRef.current;
+    if (!drag || !event.currentTarget.hasPointerCapture(event.pointerId)) return;
+    const pointer = getPointerPosition(event);
+    if (drag.type === 'corner') {
+      onChange({ ...drag.frame, [drag.key]: constrainFrameCorner(drag.frame, drag.key, pointer) });
+      return;
+    }
+    onChange(shiftFrameEdge(drag.frame, drag.key, pointer.x - drag.start.x, pointer.y - drag.start.y));
+  };
+
+  const stopDrag = (event) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    dragRef.current = null;
+  };
+
+  return (
+    <div className="centering-boundary-editor" ref={editorRef}>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <polygon points={getFramePoints(frame)} />
+        <path d="M50 0V100M0 50H100" />
+      </svg>
+      {Object.entries(frame).map(([key, point]) => (
+        <button
+          type="button"
+          className="centering-boundary-handle is-corner"
+          key={key}
+          style={{ left: `${point.x}%`, top: `${point.y}%` }}
+          aria-label={`${labels.corner} ${key}`}
+          onPointerDown={(event) => startDrag('corner', key, event)}
+          onPointerMove={moveDrag}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+        />
+      ))}
+      {['top', 'right', 'bottom', 'left'].map((edge) => {
+        const position = getEdgePosition(frame, edge);
+        return (
+          <button
+            type="button"
+            className={`centering-boundary-handle is-edge is-${edge}`}
+            key={edge}
+            style={{ left: `${position.x}%`, top: `${position.y}%` }}
+            aria-label={`${labels.edge} ${edge}`}
+            onPointerDown={(event) => startDrag('edge', edge, event)}
+            onPointerMove={moveDrag}
+            onPointerUp={stopDrag}
+            onPointerCancel={stopDrag}
+          />
+        );
+      })}
+      <span className="centering-boundary-editor-badge">MANUAL</span>
+    </div>
+  );
+}
+
+function ResultOverlay({ boundaries, frame, report }) {
+  const tightHorizontal = report.left <= report.right ? 'left' : 'right';
+  const tightVertical = report.top <= report.bottom ? 'top' : 'bottom';
   return (
     <div className="centering-result-overlay" aria-hidden="true">
-      <div className="centering-result-boundary" style={style} />
+      <span className={`centering-result-margin is-left${tightHorizontal === 'left' ? ' is-tight' : ''}`} style={{ width: `${boundaries.left}%` }} />
+      <span className={`centering-result-margin is-right${tightHorizontal === 'right' ? ' is-tight' : ''}`} style={{ width: `${boundaries.right}%` }} />
+      <span className={`centering-result-margin is-top${tightVertical === 'top' ? ' is-tight' : ''}`} style={{ height: `${boundaries.top}%` }} />
+      <span className={`centering-result-margin is-bottom${tightVertical === 'bottom' ? ' is-tight' : ''}`} style={{ height: `${boundaries.bottom}%` }} />
+      <svg className="centering-result-boundary" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon points={getFramePoints(frame)} />
+      </svg>
       <span className="centering-result-axis is-vertical" />
       <span className="centering-result-axis is-horizontal" />
+      <b className={`centering-result-ratio is-left${tightHorizontal === 'left' ? ' is-tight' : ''}`}>L {report.left.toFixed(1)}</b>
+      <b className={`centering-result-ratio is-right${tightHorizontal === 'right' ? ' is-tight' : ''}`}>R {report.right.toFixed(1)}</b>
+      <b className={`centering-result-ratio is-top${tightVertical === 'top' ? ' is-tight' : ''}`}>T {report.top.toFixed(1)}</b>
+      <b className={`centering-result-ratio is-bottom${tightVertical === 'bottom' ? ' is-tight' : ''}`}>B {report.bottom.toFixed(1)}</b>
       <span className="centering-result-corner is-tl" />
       <span className="centering-result-corner is-tr" />
       <span className="centering-result-corner is-bl" />
@@ -591,13 +864,16 @@ function ResultOverlay({ boundaries }) {
 export default function CenteringLab({ uiLang = 'KR' }) {
   const text = COPY[uiLang] || COPY.KR;
   const flow = CAMERA_FLOW_COPY[uiLang] || CAMERA_FLOW_COPY.KR;
+  const editorText = BOUNDARY_EDITOR_COPY[uiLang] || BOUNDARY_EDITOR_COPY.KR;
   const demoMode = import.meta.env.DEV && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('centeringDemo') : '';
   const demoResult = demoMode === 'result';
   const demoCamera = demoMode === 'camera';
   const demoCorners = demoMode === 'corners';
+  const initialBoundaries = demoResult ? { left: 6.2, right: 5.5, top: 5.8, bottom: 6.1 } : { left: 6, right: 6, top: 6, bottom: 6 };
   const [phase, setPhase] = useState(demoResult ? 'result' : demoCamera ? 'camera' : demoCorners ? 'corners' : 'intro');
   const [error, setError] = useState('');
   const [qualityMessage, setQualityMessage] = useState(flow.hint);
+  const [sourceMode, setSourceMode] = useState('camera');
   const [imageUrl, setImageUrl] = useState('');
   const [rawImageUrl, setRawImageUrl] = useState('');
   const [rawAspectRatio, setRawAspectRatio] = useState('3 / 4');
@@ -605,10 +881,14 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
   });
   const [cornerConfidence, setCornerConfidence] = useState(0);
-  const [boundaries, setBoundaries] = useState(demoResult ? { left: 6.2, right: 5.5, top: 5.8, bottom: 6.1 } : { left: 6, right: 6, top: 6, bottom: 6 });
+  const [boundaries, setBoundaries] = useState(initialBoundaries);
+  const [boundaryFrame, setBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
+  const [automaticBoundaryFrame, setAutomaticBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
+  const [isBoundaryEditing, setIsBoundaryEditing] = useState(false);
   const [confidence, setConfidence] = useState(demoResult ? 0.88 : 0);
   const videoRef = useRef(null);
   const viewportRef = useRef(null);
+  const uploadInputRef = useRef(null);
   const streamRef = useRef(null);
   const monitorCanvasRef = useRef(null);
   const rawCanvasRef = useRef(null);
@@ -688,6 +968,20 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     };
   }, [phase]);
 
+  async function prepareSourceCanvas(canvas) {
+    setPhase('analyzing');
+    rawCanvasRef.current = canvas;
+    setRawImageUrl(canvas.toDataURL('image/jpeg', 0.91));
+    setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
+    const detection = detectCardCorners(canvas);
+    const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
+    setCornerPoints(normalizedPoints);
+    setCornerConfidence(detection.confidence);
+    await sleep(520);
+    if (detection.confidence >= 0.62) await applyCornerAnalysis(normalizedPoints, detection.confidence);
+    else setPhase('corners');
+  }
+
   async function captureCard() {
     if (captureLockedRef.current) return;
     const video = videoRef.current;
@@ -703,17 +997,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       }
       const canvas = frames.reduce((best, frame) => getFrameQuality(frame) > getFrameQuality(best) ? frame : best, frames[0]);
       stopCamera();
-      setPhase('analyzing');
-      rawCanvasRef.current = canvas;
-      setRawImageUrl(canvas.toDataURL('image/jpeg', 0.91));
-      setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
-      const detection = detectCardCorners(canvas);
-      const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
-      setCornerPoints(normalizedPoints);
-      setCornerConfidence(detection.confidence);
-      await sleep(520);
-      if (detection.confidence >= 0.62) await applyCornerAnalysis(normalizedPoints, detection.confidence);
-      else setPhase('corners');
+      await prepareSourceCanvas(canvas);
     } catch {
       stopCamera();
       setError(flow.analysisError);
@@ -765,6 +1049,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     setImageUrl('');
     setRawImageUrl('');
     rawCanvasRef.current = null;
+    setSourceMode('camera');
     setQualityMessage(flow.hint);
     setPhase('camera');
     captureLockedRef.current = false;
@@ -804,6 +1089,31 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     captureLockedRef.current = false;
   }
 
+  async function handleImageUpload(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    stopCamera();
+    setError('');
+    setImageUrl('');
+    setRawImageUrl('');
+    rawCanvasRef.current = null;
+    setSourceMode('upload');
+    setPhase('analyzing');
+    try {
+      const canvas = await imageFileToCanvas(file);
+      await prepareSourceCanvas(canvas);
+    } catch {
+      setError(flow.invalidImage);
+      setPhase('error');
+    }
+  }
+
+  function retryCurrentSource() {
+    if (sourceMode === 'upload') uploadInputRef.current?.click();
+    else startCamera();
+  }
+
   async function applyCornerAnalysis(points = cornerPoints, detectionConfidence = cornerConfidence) {
     const source = rawCanvasRef.current;
     if (!source) return;
@@ -813,8 +1123,12 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       const denormalized = denormalizeCornerPoints(points, source.width, source.height);
       const corrected = warpCardCanvas(source, denormalized);
       const analysis = analyzeCapturedCanvas(corrected);
+      const nextBoundaryFrame = boundariesToFrame(analysis.boundaries);
       setImageUrl(corrected.toDataURL('image/jpeg', 0.92));
       setBoundaries(analysis.boundaries);
+      setBoundaryFrame(nextBoundaryFrame);
+      setAutomaticBoundaryFrame(nextBoundaryFrame);
+      setIsBoundaryEditing(false);
       setConfidence(clamp(analysis.confidence * 0.65 + detectionConfidence * 0.35, 0, 1));
       await sleep(360);
       setPhase('result');
@@ -835,9 +1149,14 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     setCornerPoints((current) => ({ ...current, [key]: next }));
   }
 
-  function updateBoundary(key, value) {
-    setBoundaries((current) => ({ ...current, [key]: Number(value) }));
-    setConfidence((current) => Math.max(current, 0.7));
+  function updateBoundaryFrame(nextFrame) {
+    setBoundaryFrame(nextFrame);
+    setBoundaries(frameToBoundaries(nextFrame));
+  }
+
+  function resetBoundaryFrame() {
+    const nextFrame = Object.fromEntries(Object.entries(automaticBoundaryFrame).map(([key, point]) => [key, { ...point }]));
+    updateBoundaryFrame(nextFrame);
   }
 
   const referenceLabel = report.band === 'OUTSIDE'
@@ -854,6 +1173,13 @@ export default function CenteringLab({ uiLang = 'KR' }) {
         </div>
         <strong>{CARD_WIDTH_MM} × {CARD_HEIGHT_MM} mm</strong>
       </section>
+      <input
+        ref={uploadInputRef}
+        className="centering-upload-input"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleImageUpload}
+      />
 
       {phase === 'intro' ? (
         <section className="centering-intro-panel">
@@ -864,7 +1190,10 @@ export default function CenteringLab({ uiLang = 'KR' }) {
           <div className="centering-intro-copy">
             <h2>{text.guideTitle}</h2>
             <ol>{text.guideItems.map((item, index) => <li key={item}><b>{index + 1}</b><span>{item}</span></li>)}</ol>
-            <button type="button" className="centering-primary-button" onClick={startCamera}>{text.start}</button>
+            <div className="centering-intro-actions">
+              <button type="button" className="centering-primary-button" onClick={startCamera}>{text.start}</button>
+              <button type="button" className="centering-upload-button" onClick={() => uploadInputRef.current?.click()}><span aria-hidden="true">↑</span>{flow.upload}</button>
+            </div>
             <small>{text.privacy}</small>
           </div>
         </section>
@@ -879,6 +1208,9 @@ export default function CenteringLab({ uiLang = 'KR' }) {
           <div className="centering-camera-stage" ref={viewportRef}>
             <video ref={videoRef} autoPlay muted playsInline />
             <div className="centering-camera-shade" />
+            <div className="centering-camera-guide" aria-hidden="true">
+              <CenteringGuide />
+            </div>
             <div className="centering-center-target" aria-hidden="true">
               <span />
               <b>{flow.centerLabel}</b>
@@ -904,7 +1236,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
           <span>!</span>
           <h2>{text.title}</h2>
           <p>{error}</p>
-          <button type="button" className="centering-primary-button" onClick={startCamera}>{text.retry}</button>
+          <button type="button" className="centering-primary-button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : text.retry}</button>
         </section>
       ) : null}
 
@@ -941,7 +1273,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
               ))}
             </div>
             <div className="centering-corner-actions">
-              <button type="button" onClick={startCamera}>{flow.cornerRetake}</button>
+              <button type="button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : flow.cornerRetake}</button>
               <button type="button" className="centering-primary-button" onClick={() => applyCornerAnalysis(cornerPoints, Math.max(cornerConfidence, 0.72))}>{flow.cornerApply}</button>
             </div>
           </div>
@@ -954,14 +1286,25 @@ export default function CenteringLab({ uiLang = 'KR' }) {
             <div><span>{text.resultEyebrow}</span><h2>{text.resultTitle}</h2></div>
             <div className="centering-result-actions">
               {rawImageUrl ? <button type="button" onClick={() => setPhase('corners')}>{flow.readjust}</button> : null}
-              <button type="button" onClick={startCamera}>{text.retake}</button>
+              <button type="button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : text.retake}</button>
             </div>
           </header>
           <div className="centering-result-grid">
             <div className="centering-result-image-shell">
               <div className="centering-result-image">
                 {imageUrl ? <img src={imageUrl} alt="" /> : <div className="centering-result-image-loading" aria-hidden="true" />}
-                <ResultOverlay boundaries={boundaries} />
+                {isBoundaryEditing
+                  ? <BoundaryEditor frame={boundaryFrame} labels={editorText} onChange={updateBoundaryFrame} />
+                  : <ResultOverlay boundaries={boundaries} frame={boundaryFrame} report={report} />}
+              </div>
+              <div className={`centering-boundary-toolbar${isBoundaryEditing ? ' is-editing' : ''}`}>
+                <div><b>{editorText.title}</b><span>{editorText.help}</span></div>
+                {isBoundaryEditing ? (
+                  <div>
+                    <button type="button" onClick={resetBoundaryFrame}>{editorText.reset}</button>
+                    <button type="button" className="is-primary" onClick={() => setIsBoundaryEditing(false)}>{editorText.done}</button>
+                  </div>
+                ) : <button type="button" className="is-primary" onClick={() => setIsBoundaryEditing(true)}>{editorText.edit}</button>}
               </div>
               <small>{confidence < 0.35 ? text.lowConfidence : text.highConfidence}</small>
             </div>
@@ -989,15 +1332,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                     ? (uiLang === 'JP' ? '印刷領域が下側に寄っています。' : uiLang === 'EN' ? 'The printed area shifts downward.' : '인쇄 영역이 아래쪽으로 치우쳐 있습니다.')
                     : (uiLang === 'JP' ? '印刷領域が上側に寄っています。' : uiLang === 'EN' ? 'The printed area shifts upward.' : '인쇄 영역이 위쪽으로 치우쳐 있습니다.')}</p>
               </div>
-              <details className="centering-adjustments" open={confidence < 0.35}>
-                <summary>{text.adjust}</summary>
-                <p>{text.adjustHelp}</p>
-                <div className="centering-adjustment-grid">
-                  {['left', 'right', 'top', 'bottom'].map((key) => (
-                    <label key={key}><span>{text[key]} <b>{boundaries[key].toFixed(1)}%</b></span><input type="range" min="1.5" max="24" step="0.1" value={boundaries[key]} onChange={(event) => updateBoundary(key, event.target.value)} /></label>
-                  ))}
-                </div>
-              </details>
               <p className="centering-disclaimer">{text.notice}</p>
               <a className="centering-official-link" href="https://www.psacard.com/gradingstandards" target="_blank" rel="noreferrer">{text.official} ↗</a>
             </div>
