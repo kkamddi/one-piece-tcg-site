@@ -5,7 +5,7 @@ const CARD_WIDTH_MM = 63;
 const CARD_HEIGHT_MM = 88;
 const CAPTURE_WIDTH = 630;
 const CAPTURE_HEIGHT = 880;
-const AUTO_CAPTURE_HOLD_MS = 1100;
+const AUTO_CAPTURE_HOLD_MS = 750;
 
 const COPY = {
   KR: {
@@ -240,15 +240,15 @@ function getCenteringReport(boundaries) {
 
 function CenteringGuide() {
   return (
-    <svg className="centering-guide-svg" viewBox="0 0 100 140" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="1" y="1" width="98" height="138" rx="3" />
-      <path d="M1 18V1h17M82 1h17v17M99 122v17H82M18 139H1v-17" className="is-corner" />
-      <rect x="5" y="7" width="90" height="126" rx="2" className="is-inner" />
-      <rect x="9" y="13" width="82" height="114" rx="1" className="is-inner is-dashed" />
-      <path d="M50 1v138M1 70h98" className="is-axis" />
-      <circle cx="50" cy="70" r="3" className="is-center" />
-      <text x="50" y="6" textAnchor="middle">63 × 88</text>
-      <text x="50" y="136" textAnchor="middle">CARD PONE CENTER</text>
+    <svg className="centering-guide-svg" viewBox="0 0 63 88" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <rect x="0.5" y="0.5" width="62" height="87" rx="2" />
+      <path d="M0.5 11V0.5H11M52 0.5h10.5V11M62.5 77v10.5H52M11 87.5H0.5V77" className="is-corner" />
+      <rect x="3.2" y="4.5" width="56.6" height="79" rx="1.4" className="is-inner" />
+      <rect x="5.7" y="8" width="51.6" height="72" rx="1" className="is-inner is-dashed" />
+      <path d="M31.5 0.5v87M0.5 44h62" className="is-axis" />
+      <circle cx="31.5" cy="44" r="1.8" className="is-center" />
+      <text x="31.5" y="3.4" textAnchor="middle">63 × 88 mm</text>
+      <text x="31.5" y="85.8" textAnchor="middle">CARD PONE CENTER</text>
     </svg>
   );
 }
@@ -275,8 +275,10 @@ function ResultOverlay({ boundaries }) {
 
 export default function CenteringLab({ uiLang = 'KR' }) {
   const text = COPY[uiLang] || COPY.KR;
-  const demoResult = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('centeringDemo') === 'result';
-  const [phase, setPhase] = useState(demoResult ? 'result' : 'intro');
+  const demoMode = import.meta.env.DEV && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('centeringDemo') : '';
+  const demoResult = demoMode === 'result';
+  const demoCamera = demoMode === 'camera';
+  const [phase, setPhase] = useState(demoResult ? 'result' : demoCamera ? 'camera' : 'intro');
   const [error, setError] = useState('');
   const [quality, setQuality] = useState({ align: false, light: false, still: false, message: text.alignCard });
   const [autoProgress, setAutoProgress] = useState(0);
@@ -290,7 +292,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const monitorCanvasRef = useRef(null);
   const previousLumaRef = useRef(null);
   const animationRef = useRef(0);
-  const stableSinceRef = useRef(0);
+  const autoProgressRef = useRef(0);
   const lastMeasuredRef = useRef(0);
   const captureLockedRef = useRef(false);
 
@@ -319,16 +321,31 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     setImageUrl(canvas.toDataURL('image/jpeg', 0.9));
   }, [demoResult]);
 
+  useEffect(() => {
+    if (!demoCamera) return;
+    setQuality({ align: true, light: true, still: false, message: text.holdStill });
+    setAutoProgress(0.58);
+  }, [demoCamera, text.holdStill]);
+
   function stopCamera() {
     window.cancelAnimationFrame(animationRef.current);
     animationRef.current = 0;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     previousLumaRef.current = null;
-    stableSinceRef.current = 0;
+    autoProgressRef.current = 0;
   }
 
   useEffect(() => () => stopCamera(), []);
+
+  useEffect(() => {
+    if (phase !== 'camera') return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [phase]);
 
   async function captureCard() {
     if (captureLockedRef.current) return;
@@ -388,10 +405,10 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     };
     const metrics = measureFrame(canvas, guideRect, previousLumaRef.current);
     previousLumaRef.current = metrics.luma;
-    const align = metrics.edge >= 2.2;
+    const align = metrics.edge >= 1.8;
     const light = metrics.brightness >= 48 && metrics.brightness <= 222 && metrics.glare <= 0.17;
-    const focused = metrics.sharpness >= 7;
-    const still = metrics.motion <= 6;
+    const focused = metrics.sharpness >= 5.5;
+    const still = metrics.motion <= 12;
     let message = text.autoReady;
     if (!align) message = text.alignCard;
     else if (metrics.brightness < 48) message = text.tooDark;
@@ -399,15 +416,11 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     else if (!focused) message = text.focus;
     else if (!still) message = text.holdStill;
     const good = align && light && focused && still;
-    if (good) {
-      if (!stableSinceRef.current) stableSinceRef.current = timestamp;
-      const progress = clamp((timestamp - stableSinceRef.current) / AUTO_CAPTURE_HOLD_MS, 0, 1);
-      setAutoProgress(progress);
-      if (progress >= 1) captureCard();
-    } else {
-      stableSinceRef.current = 0;
-      setAutoProgress(0);
-    }
+    const progressStep = 150 / AUTO_CAPTURE_HOLD_MS;
+    const penalty = !align || !light ? progressStep * 1.25 : !focused ? progressStep * 0.45 : progressStep * 0.18;
+    autoProgressRef.current = clamp(autoProgressRef.current + (good ? progressStep : -penalty), 0, 1);
+    setAutoProgress(autoProgressRef.current);
+    if (autoProgressRef.current >= 1) captureCard();
     setQuality({ align, light, still: still && focused, message });
   }
 
@@ -416,6 +429,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     setError('');
     setImageUrl('');
     setAutoProgress(0);
+    autoProgressRef.current = 0;
     setPhase('camera');
     captureLockedRef.current = false;
     try {
@@ -465,7 +479,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     : `${report.band} ${uiLang === 'JP' ? '表面参考範囲' : uiLang === 'EN' ? 'front reference' : '앞면 참고 범위'}`;
 
   return (
-    <main className="renew-subpage centering-lab">
+    <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}`}>
       <section className="centering-lab-head">
         <div>
           <span>{text.eyebrow}</span>
@@ -500,6 +514,8 @@ export default function CenteringLab({ uiLang = 'KR' }) {
             <video ref={videoRef} autoPlay muted playsInline />
             <div className="centering-camera-shade" />
             <div className="centering-card-guide" ref={guideRef}><CenteringGuide /></div>
+          </div>
+          <div className="centering-camera-controls">
             <div className="centering-camera-status">
               <div className="centering-quality-list">
                 <span className={quality.align ? 'is-good' : ''}>{text.qualityAlign}<b>{quality.align ? text.ready : text.wait}</b></span>
