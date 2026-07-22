@@ -27,7 +27,7 @@ const rateLimitBuckets = new Map();
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  'Permissions-Policy': 'camera=(self), microphone=(), geolocation=(), payment=()',
   'X-Frame-Options': 'SAMEORIGIN'
 };
 

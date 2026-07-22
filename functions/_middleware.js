@@ -55,6 +55,12 @@ const PAGE_SEO = {
     keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 정보, 원피스카드 가입인사, 카드 수집 커뮤니티',
     schemaType: 'CollectionPage'
   },
+  '/lab/centering': {
+    title: '원피스카드 센터링 측정기 | Card Pone',
+    description: '카메라 촬영으로 원피스카드 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석하고 센터링 참고 구간을 확인할 수 있습니다.',
+    keywords: '원피스카드 센터링, 카드 센터링 측정기, PSA 센터링, 원피스카드 감정',
+    schemaType: 'WebApplication'
+  },
   '/news': {
     title: '원피스 카드 공지사항 및 업데이트 | Card Pone',
     description: 'Card Pone의 카드 데이터 업데이트, 시세 기능 개선, 원피스 카드게임 관련 공지사항을 확인할 수 있습니다.',
@@ -112,6 +118,12 @@ const JAPANESE_SEO = {
     description: 'ONE PIECE CARD GAMEの質問、情報、自己紹介、コレクションの話を共有できるコミュニティです。',
     keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 情報,ワンピカード 自己紹介,ワンピカード コレクション',
     schemaType: 'CollectionPage'
+  },
+  '/lab/centering': {
+    title: 'ワンピースカード センタリング測定 | Card Pone',
+    description: 'カメラ撮影でカード表面の左右・上下の印刷比率を端末内で分析し、センタリングの参考範囲を確認できます。',
+    keywords: 'ワンピースカード センタリング,カード センタリング測定,PSA センタリング',
+    schemaType: 'WebApplication'
   },
   '/calendar': {
     title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
@@ -518,6 +530,14 @@ const SERVER_PAGE_CONTENT = {
     ],
     links: ['/cards', '/prices', '/guide', '/news']
   },
+  '/lab/centering': {
+    heading: '원피스카드 센터링 측정기',
+    paragraphs: [
+      '카드를 촬영 가이드에 맞추면 앞면의 좌우와 상하 인쇄 비율을 기기 안에서 분석하고 측정 신뢰도를 함께 표시합니다.',
+      '센터링만 확인하는 참고 도구이며 표면, 모서리, 인쇄 결함과 감정사의 판단은 포함하지 않습니다.'
+    ],
+    links: ['/cards', '/prices', '/guide/card-price', '/data-policy']
+  },
   '/news': {
     heading: '원피스카드 정보',
     paragraphs: [
@@ -606,6 +626,14 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
     paragraphs: [
       '質問、情報、自己紹介、自由な話題を通して、ONE PIECE CARD GAMEの収集体験を共有できます。',
       '出席と投稿へのいいねで獲得したポイントは会員ランクに反映され、イベント特典は確定後に別途案内します。'
+    ],
+    links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']
+  },
+  '/lab/centering': {
+    heading: 'ワンピースカード センタリング測定',
+    paragraphs: [
+      '撮影ガイドにカードを合わせ、表面の左右と上下の印刷比率を端末内で分析し、測定信頼度を表示します。',
+      'センタリングのみの参考ツールであり、表面、角、印刷欠陥、鑑定士の判断は含みません。'
     ],
     links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']
   },
