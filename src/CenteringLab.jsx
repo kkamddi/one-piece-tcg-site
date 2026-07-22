@@ -81,12 +81,12 @@ const CAMERA_FLOW_COPY = {
     dark: '조금 더 밝은 곳에서 촬영해 주세요.',
     glare: '빛 반사를 줄인 뒤 촬영해 주세요.',
     burst: '가장 선명한 장면을 고르고 있습니다.',
-    cornerTitle: '카드 모서리를 확인해 주세요',
-    cornerBody: '자동 인식이 불확실합니다. 네 점을 카드의 실제 모서리로 옮긴 뒤 분석해 주세요.',
-    cornerApply: '이 위치로 분석',
+    cornerTitle: '1단계 · 카드 외곽 맞추기',
+    cornerBody: '사진은 아직 회전하거나 잘리지 않았습니다. 네 점을 카드의 실제 바깥 모서리에 맞춘 뒤 외곽을 확정해 주세요.',
+    cornerApply: '카드 외곽 확정',
     cornerRetake: '다시 촬영',
     cornerLabel: '카드 모서리',
-    readjust: '모서리 다시 조정',
+    readjust: '카드 외곽 다시 맞추기',
     analysisError: '이미지를 분석하지 못했습니다. 카드를 다시 촬영해 주세요.'
   },
   EN: {
@@ -104,12 +104,12 @@ const CAMERA_FLOW_COPY = {
     dark: 'Move to a brighter area.',
     glare: 'Reduce glare before capturing.',
     burst: 'Selecting the sharpest frame.',
-    cornerTitle: 'Check the card corners',
-    cornerBody: 'Automatic detection is uncertain. Move the four points onto the physical card corners.',
-    cornerApply: 'Analyze these corners',
+    cornerTitle: 'Step 1 · Set card outline',
+    cornerBody: 'The photo has not been rotated or cropped. Move all four points onto the physical outer corners, then confirm the outline.',
+    cornerApply: 'Confirm card outline',
     cornerRetake: 'Retake',
     cornerLabel: 'Card corner',
-    readjust: 'Adjust corners',
+    readjust: 'Adjust card outline',
     analysisError: 'The image could not be analyzed. Please retake the card.'
   },
   JP: {
@@ -127,19 +127,19 @@ const CAMERA_FLOW_COPY = {
     dark: 'もう少し明るい場所で撮影してください。',
     glare: '光の反射を減らしてから撮影してください。',
     burst: '最も鮮明なフレームを選択しています。',
-    cornerTitle: 'カードの四隅を確認してください',
-    cornerBody: '自動認識が不確実です。4つの点をカードの実際の角へ移動してください。',
-    cornerApply: 'この位置で分析',
+    cornerTitle: 'ステップ1 · カード外枠を合わせる',
+    cornerBody: '写真はまだ回転・切り抜きされていません。4点をカード外側の実際の角に合わせ、外枠を確定してください。',
+    cornerApply: 'カード外枠を確定',
     cornerRetake: '撮り直す',
     cornerLabel: 'カードの角',
-    readjust: '四隅を再調整',
+    readjust: 'カード外枠を再調整',
     analysisError: '画像を分析できませんでした。カードを撮り直してください。'
   }
 };
 
 const BOUNDARY_EDITOR_COPY = {
   KR: {
-    title: '인쇄 경계 직접 조정',
+    title: '2단계 · 인쇄 경계 조정',
     help: '모서리점은 기울기를 조정하고, 변 중앙 손잡이는 선 전체를 이동합니다.',
     edit: '경계 조정',
     reset: '자동 위치',
@@ -148,7 +148,7 @@ const BOUNDARY_EDITOR_COPY = {
     edge: '인쇄 경계선'
   },
   EN: {
-    title: 'Adjust print boundary',
+    title: 'Step 2 · Adjust print boundary',
     help: 'Drag corners to change the angle or edge handles to move an entire side.',
     edit: 'Adjust boundary',
     reset: 'Auto position',
@@ -157,7 +157,7 @@ const BOUNDARY_EDITOR_COPY = {
     edge: 'Print boundary edge'
   },
   JP: {
-    title: '印刷境界を直接調整',
+    title: 'ステップ2 · 印刷境界を調整',
     help: '角で傾きを調整し、辺中央のハンドルで線全体を移動します。',
     edit: '境界を調整',
     reset: '自動位置',
@@ -977,9 +977,8 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
     setCornerPoints(normalizedPoints);
     setCornerConfidence(detection.confidence);
-    await sleep(520);
-    if (detection.confidence >= 0.62) await applyCornerAnalysis(normalizedPoints, detection.confidence);
-    else setPhase('corners');
+    await sleep(260);
+    setPhase('corners');
   }
 
   async function captureCard() {
@@ -1243,7 +1242,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       {phase === 'corners' ? (
         <section className="centering-corner-panel">
           <header className="centering-corner-head">
-            <div><span>CORNER CHECK</span><h2>{flow.cornerTitle}</h2><p>{flow.cornerBody}</p></div>
+            <div><span>STEP 1 / 2 · CARD OUTLINE</span><h2>{flow.cornerTitle}</h2><p>{flow.cornerBody}</p></div>
           </header>
           <div className="centering-corner-layout">
             <div

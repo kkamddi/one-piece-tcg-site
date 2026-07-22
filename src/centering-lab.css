@@ -632,9 +632,9 @@
 
 .centering-corner-frame {
   position: relative;
-  width: auto;
-  height: min(calc(100vh - 260px), 680px);
-  max-width: min(100%, 560px);
+  width: min(100%, 560px);
+  height: auto;
+  max-width: 560px;
   overflow: hidden;
   border: 1px solid rgba(23,25,28,.16);
   border-radius: 8px;
@@ -1377,8 +1377,8 @@
   }
 
   .centering-corner-frame {
-    width: auto;
-    height: min(calc(100vh - 244px), 580px);
+    width: 100%;
+    height: auto;
     max-width: 100%;
   }
 
