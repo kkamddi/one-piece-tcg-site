@@ -10392,24 +10392,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const showMarketHome = !code.trim() && !selected && !candidates.length;
   const canMapInitialCard = authUser?.user_metadata?.username === 'admin' && Boolean(initialCardId);
 
-  useEffect(() => {
-    if (!selected || !selectedLatest?.price) {
-      setJsonLd('optcg-market-detail-jsonld', null);
-      return;
-    }
-    setJsonLd('optcg-market-detail-jsonld', {
-      '@context': 'https://schema.org',
-      '@type': 'Dataset',
-      name: getMarketShortName(selected),
-      description: selected.setName || selected.name,
-      url: `${SITE_ORIGIN}/prices?code=${encodeURIComponent(selected.code)}&apparelId=${encodeURIComponent(selected.apparelId || '')}`,
-      creator: { '@type': 'Organization', name: 'Card Pone' },
-      measurementTechnique: 'Condition-specific market transaction history aggregation',
-      variableMeasured: `${normalizedCondition === 'psa10' ? 'PSA10' : 'Single'} market price`,
-      isAccessibleForFree: true
-    });
-  }, [normalizedCondition, selected, selectedLatest]);
-
   return (
     <main className="renew-subpage">
       <section className="renew-panel renew-market">

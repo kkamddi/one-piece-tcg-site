@@ -853,11 +853,6 @@ function createJsonLd(pathname, seo) {
     pageNode.category = 'Trading Card';
   }
 
-  if (schemaType === 'Dataset') {
-    pageNode.creator = { '@type': 'Organization', name: 'Card Pone' };
-    pageNode.measurementTechnique = 'Market price index based on collected public market data';
-  }
-
   if (schemaType === 'FAQPage') {
     pageNode.mainEntity = [
       {

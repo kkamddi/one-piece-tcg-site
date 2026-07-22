@@ -1,5 +1,13 @@
 # Codex 기본 작업 지침
 
+## Production deployment rules
+
+- Production is deployed only from the latest synchronized `main` commit.
+- Never run a direct Cloudflare Pages production deployment from a feature or recovery branch.
+- Merge current feature changes and automated data updates into `main` before deploying.
+- Use `.github/workflows/deploy-production.yml` for every production deployment.
+- A data-sync workflow may update `main`, but it must delegate deployment to the production workflow.
+
 - 크레딧 사용량을 최소화해서 작업한다.
 - 전체 코드베이스를 스캔하지 않는다. 사용자가 명시적으로 요청한 경우에만 전체 탐색한다.
 - 작업 전 관련 파일 후보를 먼저 좁히고, 가능한 최소 파일만 확인한다.
