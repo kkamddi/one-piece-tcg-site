@@ -24,6 +24,7 @@ const COMMUNITY_BOARDS = [
 ];
 const COMMUNITY_IMAGE_CONSENT_KEY = 'card-pone-community-image-consent-v1';
 const COMMUNITY_POSTS_PER_PAGE = 10;
+const COMMUNITY_MAX_IMAGES = 5;
 
 function localeText(uiLang, kr, en, jp) {
   if (uiLang === 'JP') return jp || en || kr;
@@ -54,6 +55,12 @@ function formatCommunityDate(value, uiLang) {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date);
+}
+
+function getPostImageUrls(post) {
+  const urls = Array.isArray(post?.imageUrls) ? post.imageUrls : [post?.imageUrl];
+  return [...new Set(urls.map((url) => String(url || '').trim()).filter(Boolean))]
+    .slice(0, COMMUNITY_MAX_IMAGES);
 }
 
 function readFileAsDataUrl(file) {
@@ -164,21 +171,27 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
   const [composerBoard, setComposerBoard] = useState('question');
   const [title, setTitle] = useState('');
   const [cardName, setCardName] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [selectedImages, setSelectedImages] = useState([]);
   const [imageConsentOpen, setImageConsentOpen] = useState(false);
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [attendance, setAttendance] = useState(null);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const imageInputRef = useRef(null);
+  const selectedImagesRef = useRef([]);
 
   useCommunityModalScrollLock(composerOpen);
   useCommunityModalScrollLock(imageConsentOpen);
 
+  useEffect(() => {
+    selectedImagesRef.current = selectedImages;
+  }, [selectedImages]);
+
   useEffect(() => () => {
-    if (imagePreviewUrl.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl);
-  }, [imagePreviewUrl]);
+    selectedImagesRef.current.forEach((image) => {
+      if (image.previewUrl.startsWith('blob:')) URL.revokeObjectURL(image.previewUrl);
+    });
+  }, []);
 
   const loadPosts = async () => {
     setLoading(true);
@@ -303,7 +316,12 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
     setComposerBoard(post.boardId || 'free');
     setTitle(post.title || '');
     setCardName(post.cardName || '');
-    setImagePreviewUrl(post.imageUrl || '');
+    setSelectedImages(getPostImageUrls(post).map((url) => ({
+      id: url,
+      file: null,
+      previewUrl: url,
+      uploadedUrl: url
+    })));
     setContent(post.content || '');
     setComposerOpen(true);
   };
@@ -329,28 +347,53 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
     }
   };
 
-  const clearSelectedImage = () => {
-    setImageFile(null);
-    setImagePreviewUrl('');
+  const clearSelectedImages = () => {
+    selectedImagesRef.current.forEach((image) => {
+      if (image.previewUrl.startsWith('blob:')) URL.revokeObjectURL(image.previewUrl);
+    });
+    setSelectedImages([]);
     if (imageInputRef.current) imageInputRef.current.value = '';
   };
 
+  const removeSelectedImage = (imageId) => {
+    setSelectedImages((images) => images.filter((image) => {
+      if (image.id !== imageId) return true;
+      if (image.previewUrl.startsWith('blob:')) URL.revokeObjectURL(image.previewUrl);
+      return false;
+    }));
+  };
+
   const handleImageChange = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    if (files.some((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))) {
       setMessage(localeText(uiLang, 'JPG, PNG, WEBP 이미지만 올릴 수 있습니다.', 'Only JPG, PNG, and WEBP images are supported.', 'JPG・PNG・WEBP画像のみアップロードできます。'));
       event.target.value = '';
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage(localeText(uiLang, '이미지는 10MB 이하만 선택할 수 있습니다.', 'Choose an image smaller than 10 MB.', '10MB以下の画像を選択してください。'));
+    if (files.some((file) => file.size > 10 * 1024 * 1024)) {
+      setMessage(localeText(uiLang, '각 이미지는 10MB 이하만 선택할 수 있습니다.', 'Each image must be smaller than 10 MB.', '各画像は10MB以下にしてください。'));
       event.target.value = '';
       return;
     }
+    const remainingCount = COMMUNITY_MAX_IMAGES - selectedImages.length;
+    if (remainingCount <= 0) {
+      setMessage(localeText(uiLang, '사진은 최대 5장까지 올릴 수 있습니다.', 'You can upload up to 5 images.', '画像は最大5枚までアップロードできます。'));
+      event.target.value = '';
+      return;
+    }
+    const acceptedFiles = files.slice(0, remainingCount);
     setMessage('');
-    setImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
+    setSelectedImages((images) => [...images, ...acceptedFiles.map((file) => ({
+      id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+      uploadedUrl: ''
+    }))]);
+    if (files.length > remainingCount) {
+      setMessage(localeText(uiLang, '사진은 최대 5장까지 추가되었습니다.', 'Only the first 5 images were added.', '画像は最大5枚まで追加されました。'));
+    }
+    event.target.value = '';
   };
 
   const openDeviceImagePicker = () => {
@@ -385,7 +428,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
     setEditingPost(null);
     setTitle('');
     setCardName('');
-    clearSelectedImage();
+    clearSelectedImages();
     setContent('');
   };
 
@@ -409,19 +452,20 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
     setSaving(true);
     setMessage('');
     try {
-      let uploadedImageUrl = '';
-      if (imageFile) {
-        const compressedImage = await compressCommunityImage(imageFile);
+      const uploadedImageUrls = await Promise.all(selectedImages.map(async (image) => {
+        if (image.uploadedUrl) return image.uploadedUrl;
+        const compressedImage = await compressCommunityImage(image.file);
         const uploaded = await uploadCommunityImage(compressedImage);
-        uploadedImageUrl = uploaded?.imageUrl || '';
-        if (!uploadedImageUrl) throw new Error('image_upload_failed');
-      }
+        if (!uploaded?.imageUrl) throw new Error('image_upload_failed');
+        return uploaded.imageUrl;
+      }));
       const payload = {
         boardId: composerBoard,
         nickname: displayName,
         title: safeTitle,
         cardName: cardName.trim(),
-        imageUrl: uploadedImageUrl || editingPost?.imageUrl || '',
+        imageUrl: uploadedImageUrls[0] || '',
+        imageUrls: uploadedImageUrls,
         content: safeContent,
         pinned: editingPost?.isFallback || editingPost?.pinned || (!editingPost && composerBoard === 'event')
       };
@@ -630,7 +674,13 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
               <h2>{selectedPost.title}</h2>
               {selectedPost.cardName ? <strong className="renew-community-card-tag">CARD · {selectedPost.cardName}</strong> : null}
             </header>
-            {selectedPost.imageUrl ? <img className="renew-community-detail-image" src={selectedPost.imageUrl} alt="" loading="lazy" /> : null}
+            {getPostImageUrls(selectedPost).length ? (
+              <div className={`renew-community-detail-images is-count-${Math.min(getPostImageUrls(selectedPost).length, 3)}`}>
+                {getPostImageUrls(selectedPost).map((imageUrl, index) => (
+                  <img key={imageUrl} src={imageUrl} alt={localeText(uiLang, `게시글 이미지 ${index + 1}`, `Post image ${index + 1}`, `投稿画像 ${index + 1}`)} loading="lazy" />
+                ))}
+              </div>
+            ) : null}
             <p className="renew-community-detail-content">{selectedPost.content}</p>
             <div className="renew-community-detail-actions">
               <button type="button" className={selectedPost.likedByMe ? 'is-active' : ''} onClick={() => toggleLike(selectedPost.id)}>♡ {localeText(uiLang, '좋아요', 'Like', 'いいね')} {selectedPost.likes || 0}</button>
@@ -732,16 +782,20 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
             <div className="renew-community-image-picker">
               <div>
                 <span>{localeText(uiLang, '이미지', 'Image', '画像')} <small>{localeText(uiLang, '선택', 'Optional', '任意')}</small></span>
-                <button type="button" onClick={requestImagePicker}>{imageFile ? localeText(uiLang, '다른 사진 선택', 'Choose another', '別の写真を選択') : localeText(uiLang, '기기에서 사진 선택', 'Choose from device', '端末から選択')}</button>
+                <button type="button" onClick={requestImagePicker} disabled={selectedImages.length >= COMMUNITY_MAX_IMAGES}>{selectedImages.length ? localeText(uiLang, '사진 추가', 'Add images', '画像を追加') : localeText(uiLang, '기기에서 사진 선택', 'Choose from device', '端末から選択')}</button>
               </div>
-              <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} hidden />
-              {imagePreviewUrl ? (
-                <div className="renew-community-image-preview">
-                  <img src={imagePreviewUrl} alt={localeText(uiLang, '선택한 이미지 미리보기', 'Selected image preview', '選択した画像のプレビュー')} />
-                  <button type="button" onClick={clearSelectedImage} aria-label={localeText(uiLang, '이미지 삭제', 'Remove image', '画像を削除')}>×</button>
+              <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleImageChange} hidden />
+              {selectedImages.length ? (
+                <div className="renew-community-image-previews">
+                  {selectedImages.map((image, index) => (
+                    <div key={image.id} className="renew-community-image-preview">
+                      <img src={image.previewUrl} alt={localeText(uiLang, `선택한 이미지 ${index + 1}`, `Selected image ${index + 1}`, `選択した画像 ${index + 1}`)} />
+                      <button type="button" onClick={() => removeSelectedImage(image.id)} aria-label={localeText(uiLang, `이미지 ${index + 1} 삭제`, `Remove image ${index + 1}`, `画像 ${index + 1} を削除`)}>×</button>
+                    </div>
+                  ))}
                 </div>
               ) : null}
-              <small>{localeText(uiLang, 'JPG, PNG, WEBP · 최대 10MB', 'JPG, PNG, WEBP · up to 10 MB', 'JPG・PNG・WEBP · 最大10MB')}</small>
+              <small>{localeText(uiLang, `JPG, PNG, WEBP · 최대 5장 · 각 10MB (${selectedImages.length}/5)`, `JPG, PNG, WEBP · up to 5 images · 10 MB each (${selectedImages.length}/5)`, `JPG・PNG・WEBP · 最大5枚 · 各10MB (${selectedImages.length}/5)`)}</small>
             </div>
             <label><span>{localeText(uiLang, '내용', 'Content', '本文')}</span><textarea value={content} onChange={(event) => setContent(event.target.value)} maxLength={2000} rows={8} required /></label>
             <footer><button type="button" onClick={closeComposer}>{localeText(uiLang, '취소', 'Cancel', 'キャンセル')}</button><button type="submit" disabled={saving || !title.trim() || !content.trim()}>{saving ? localeText(uiLang, '저장 중', 'Saving', '保存中') : editingPost ? localeText(uiLang, '수정 완료', 'Save changes', '変更を保存') : localeText(uiLang, '게시하기', 'Publish', '投稿する')}</button></footer>
@@ -756,7 +810,7 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
               <div><span>PHOTO ACCESS</span><strong id="community-image-consent-title">{localeText(uiLang, '사진 선택 안내', 'Photo access', '写真選択のご案内')}</strong></div>
               <button type="button" onClick={() => setImageConsentOpen(false)} aria-label={localeText(uiLang, '닫기', 'Close', '閉じる')}>×</button>
             </header>
-            <p>{localeText(uiLang, 'Card Pone은 사용자가 직접 선택한 사진 1장만 게시글 업로드에 사용합니다. 계속을 누르면 기기의 사진 선택창이 열립니다.', 'Card Pone only uses the single photo you choose for this post. Continue to open your device photo picker.', 'Card Poneは、この投稿のために選択した写真1枚のみを使用します。続行すると端末の写真選択画面が開きます。')}</p>
+            <p>{localeText(uiLang, 'Card Pone은 사용자가 직접 선택한 사진만 게시글 업로드에 사용합니다. 한 게시글에 최대 5장까지 선택할 수 있습니다.', 'Card Pone only uses the photos you choose for this post. You can select up to 5 images.', 'Card Poneは、この投稿のために選択した写真のみを使用します。最大5枚まで選択できます。')}</p>
             <footer>
               <button type="button" onClick={() => setImageConsentOpen(false)}>{localeText(uiLang, '취소', 'Cancel', 'キャンセル')}</button>
               <button type="button" onClick={confirmImageConsent}>{localeText(uiLang, '허용하고 계속', 'Allow and continue', '許可して続行')}</button>
