@@ -479,6 +479,9 @@ export default function CommunityPage({ authUser, displayName, isAdmin = false, 
         : items.map((item) => item.id === nextPost.id ? nextPost : item));
       setActiveBoard(composerBoard === 'event' ? 'event' : 'all');
       closeComposer(true);
+      if (isNewPost && post.pointsAwarded) {
+        setMessage(localeText(uiLang, '게시글이 등록되어 1P가 적립됐습니다.', 'Post published. You earned 1 point.', '投稿が公開され、1P獲得しました。'));
+      }
     } catch (error) {
       setMessage(error?.message === 'intro_post_already_exists'
         ? localeText(uiLang, '가입인사는 계정당 한 번만 작성할 수 있습니다.', 'Each account can post one introduction.', '自己紹介は1アカウントにつき1件のみ投稿できます。')

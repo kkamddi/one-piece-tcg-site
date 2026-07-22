@@ -251,7 +251,7 @@ const RENEW_HOME_UPDATES = [
     summary: '커뮤니티 오픈 안내',
     details: [
       '질문·정보·자유·가입인사 게시판에서 회원들과 카드 이야기를 나눌 수 있습니다.',
-      '매일 출석과 게시글 좋아요를 통해 포인트를 모을 수 있습니다.',
+      '매일 출석, 게시글 작성과 게시글 좋아요를 통해 포인트를 모을 수 있습니다.',
       '누적 포인트에 따라 회원 등급이 올라가며 작성자 이름 옆에 등급이 표시됩니다.',
       '이벤트 게시판과 포인트별 회원 혜택은 준비 중이며 세부 내용은 추후 별도로 안내합니다.'
     ]
@@ -4478,6 +4478,7 @@ function RenewSocialConsentModal({ authUser, onAccepted, onLogout }) {
 
 function getPointHistoryLabel(reason, uiLang) {
   if (reason === 'daily_checkin') return getLocaleText(uiLang, '출석체크', 'Daily check-in', '出席チェック');
+  if (reason === 'post_created') return getLocaleText(uiLang, '게시글 작성', 'Post published', '投稿作成');
   if (reason === 'post_like') return getLocaleText(uiLang, '게시글 좋아요', 'Post like received', '投稿へのいいね');
   if (reason === 'admin_adjustment') return getLocaleText(uiLang, '운영자 조정', 'Admin adjustment', '管理者調整');
   return getLocaleText(uiLang, '포인트 적립', 'Points', 'ポイント');
