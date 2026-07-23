@@ -2544,7 +2544,8 @@ const PAGE_PATHS = {
   cards: '/cards',
   prices: '/prices',
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
-  lab: '/lab/centering',
+  lab: '/lab',
+  centering: '/lab/centering',
   calendar: '/calendar',
   news: '/news',
   shops: '/shops',
@@ -3029,7 +3030,8 @@ function getJapaneseRouteSeo(pathname, page) {
 function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
-  if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, page);
+  const seoPage = page === 'centering' ? 'lab' : page;
+  if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, seoPage);
   const seoAliases = {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
@@ -3364,7 +3366,8 @@ function setHreflangLinks() {
 }
 
 function applyPageSeo(page, uiLang = 'KR') {
-  const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[page] || PAGE_SEO.home;
+  const seoPage = page === 'centering' ? 'lab' : page;
+  const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[seoPage] || PAGE_SEO.home;
   const url = getCanonicalUrl(page);
   const isJapanese = uiLang === 'JP' || (typeof window !== 'undefined' && getPathLocale(window.location.pathname) === 'JP');
   document.title = seo.title;
@@ -3946,6 +3949,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
 
 function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
+  const isLabActive = activePage === 'lab' || activePage === 'centering';
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
@@ -4031,7 +4035,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             <a
               key={item.id}
               href={getLocalizedPagePath(item.id, uiLang)}
-              className={`renew-tab ${activePage === item.id ? 'is-active' : ''}`}
+              className={`renew-tab ${(item.id === 'lab' ? isLabActive : activePage === item.id) ? 'is-active' : ''}`}
               onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
             >
               {t(item.labelKey)}
@@ -4103,7 +4107,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        <a href={getLocalizedPagePath('lab', uiLang)} className={activePage === 'lab' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('lab'); }} aria-label="실험실">
+        <a href={getLocalizedPagePath('lab', uiLang)} className={isLabActive ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('lab'); }} aria-label="실험실">
           <MobileNavIcon type="lab" />
           <span>{t('navLab')}</span>
         </a>
@@ -7668,6 +7672,64 @@ function RenewMarketplaceHidden() {
           <strong>제휴 채널 준비 중</strong>
           <p>기존 유저 거래 매물은 잠시 숨김 처리했습니다. 제휴 채널로 전환 후 다시 안내하겠습니다.</p>
         </div>
+      </section>
+    </main>
+  );
+}
+
+function RenewLabHome({ uiLang, onOpenCentering }) {
+  const tools = [
+    {
+      id: 'centering',
+      icon: 'lab',
+      status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
+      title: getLocaleText(uiLang, '센터링 측정기', 'Centering Check', 'センタリング測定'),
+      description: getLocaleText(uiLang, '카드 인쇄 영역의 좌우·상하 비율을 확인합니다.', 'Check the left/right and top/bottom print balance.', 'カード印刷領域の左右・上下バランスを確認します。'),
+      onClick: onOpenCentering
+    },
+    {
+      id: 'simulator',
+      icon: 'supplies',
+      status: getLocaleText(uiLang, '준비 중', 'Coming soon', '準備中'),
+      title: getLocaleText(uiLang, '카드깡 시뮬레이터', 'Pack Simulator', 'パックシミュレーター'),
+      description: getLocaleText(uiLang, '카드 팩을 가상으로 개봉하는 도구입니다.', 'Open card packs virtually.', 'カードパックをバーチャルで開封します。')
+    },
+    {
+      id: 'deck-builder',
+      icon: 'cards',
+      status: getLocaleText(uiLang, '준비 중', 'Coming soon', '準備中'),
+      title: getLocaleText(uiLang, '덱 빌더', 'Deck Builder', 'デッキビルダー'),
+      description: getLocaleText(uiLang, '카드를 조합해 덱을 구성하는 도구입니다.', 'Build a deck from your card choices.', 'カードを組み合わせてデッキを組むツールです。')
+    }
+  ];
+
+  return (
+    <main className="renew-subpage renew-lab-page">
+      <section className="renew-lab-intro">
+        <span>LAB</span>
+        <h1>{getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}</h1>
+      </section>
+      <section className="renew-lab-grid" aria-label={getLocaleText(uiLang, '실험실 도구', 'Lab tools', 'ラボツール')}>
+        {tools.map((tool) => tool.onClick ? (
+          <button key={tool.id} type="button" className="renew-lab-tool is-available" onClick={tool.onClick}>
+            <span className="renew-lab-tool-icon"><MobileNavIcon type={tool.icon} /></span>
+            <span className="renew-lab-tool-copy">
+              <small>{tool.status}</small>
+              <strong>{tool.title}</strong>
+              <span>{tool.description}</span>
+            </span>
+            <span className="renew-lab-tool-arrow" aria-hidden="true">→</span>
+          </button>
+        ) : (
+          <article key={tool.id} className="renew-lab-tool is-coming" aria-label={`${tool.title} ${tool.status}`}>
+            <span className="renew-lab-tool-icon"><MobileNavIcon type={tool.icon} /></span>
+            <span className="renew-lab-tool-copy">
+              <small>{tool.status}</small>
+              <strong>{tool.title}</strong>
+              <span>{tool.description}</span>
+            </span>
+          </article>
+        ))}
       </section>
     </main>
   );
@@ -11255,7 +11317,7 @@ export default function RenewApp() {
   const [routeRevision, setRouteRevision] = useState(0);
   const internalNavigationRef = useRef(false);
 
-  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === activePage)?.labelKey), [activePage, uiLang]);
+  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (activePage === 'centering' ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const isAdminUser = useMemo(() => (
     authUser?.app_metadata?.role === 'admin'
@@ -11806,6 +11868,8 @@ export default function RenewApp() {
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
+        <RenewLabHome uiLang={uiLang} onOpenCentering={() => navigatePage('centering')} />
+      ) : activePage === 'centering' ? (
         authResolved && isAdminUser ? (
           <CenteringLab uiLang={uiLang} />
         ) : (
@@ -11814,7 +11878,7 @@ export default function RenewApp() {
             isLoggedIn={Boolean(authUser)}
             uiLang={uiLang}
             onLogin={() => handleAuthClick('login')}
-            onBack={() => navigatePage('news')}
+            onBack={() => navigatePage('lab')}
           />
         )
       ) : activePage === 'news' ? (
