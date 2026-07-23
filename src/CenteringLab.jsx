@@ -431,6 +431,32 @@ function getInsetOutline(points, amount = 0.075) {
   }]));
 }
 
+function getCornerViewport(points, padding = 0.16) {
+  const values = Object.values(points || {});
+  if (values.length !== 4) return { left: 0, top: 0, width: 100, height: 100 };
+  const minX = Math.min(...values.map((point) => point.x));
+  const maxX = Math.max(...values.map((point) => point.x));
+  const minY = Math.min(...values.map((point) => point.y));
+  const maxY = Math.max(...values.map((point) => point.y));
+  const cardWidth = Math.max(maxX - minX, 1);
+  const cardHeight = Math.max(maxY - minY, 1);
+  const width = Math.min(100, cardWidth * (1 + padding * 2));
+  const height = Math.min(100, cardHeight * (1 + padding * 2));
+  return {
+    left: Number(clamp(minX - (width - cardWidth) / 2, 0, 100 - width).toFixed(2)),
+    top: Number(clamp(minY - (height - cardHeight) / 2, 0, 100 - height).toFixed(2)),
+    width: Number(width.toFixed(2)),
+    height: Number(height.toFixed(2))
+  };
+}
+
+function projectPointToViewport(point, viewport) {
+  return {
+    x: (point.x - viewport.left) / viewport.width * 100,
+    y: (point.y - viewport.top) / viewport.height * 100
+  };
+}
+
 function getLineContrast(pixels, width, height, axis, position, start, end) {
   const values = [];
   const offset = 2;
@@ -829,13 +855,8 @@ function detectBoundary(luma, width, height, axis, startRatio, endRatio) {
 
 const RECOMMENDED_PRINT_BOUNDARIES = Object.freeze({ left: 4.5, right: 4.5, top: 4.5, bottom: 4.5 });
 
-function getRecommendedPrintBoundaries(detected) {
-  const minimum = 3.6;
-  const maximum = 12;
-  return Object.fromEntries(Object.entries(RECOMMENDED_PRINT_BOUNDARIES).map(([key, fallback]) => {
-    const value = Number(detected?.[key]);
-    return [key, Number.isFinite(value) ? Number(clamp(value, minimum, maximum).toFixed(1)) : fallback];
-  }));
+function getRecommendedPrintBoundaries() {
+  return { ...RECOMMENDED_PRINT_BOUNDARIES };
 }
 
 function analyzeCapturedCanvas(canvas) {
@@ -850,17 +871,10 @@ function analyzeCapturedCanvas(canvas) {
   const right = detectBoundary(luma, sample.width, sample.height, 'x', 0.78, 0.975);
   const top = detectBoundary(luma, sample.width, sample.height, 'y', 0.025, 0.22);
   const bottom = detectBoundary(luma, sample.width, sample.height, 'y', 0.78, 0.975);
-  const detectedBoundaries = {
-    left: Number((left.position / sample.width * 100).toFixed(1)),
-    right: Number(((sample.width - right.position) / sample.width * 100).toFixed(1)),
-    top: Number((top.position / sample.height * 100).toFixed(1)),
-    bottom: Number(((sample.height - bottom.position) / sample.height * 100).toFixed(1))
-  };
-  const boundaries = getRecommendedPrintBoundaries(detectedBoundaries);
-  const wasConstrained = Object.keys(boundaries).some((key) => boundaries[key] !== detectedBoundaries[key]);
+  const boundaries = getRecommendedPrintBoundaries();
   return {
     boundaries,
-    confidence: (left.confidence + right.confidence + top.confidence + bottom.confidence) / 4 * (wasConstrained ? 0.55 : 1)
+    confidence: (left.confidence + right.confidence + top.confidence + bottom.confidence) / 4
   };
 }
 
@@ -1089,6 +1103,9 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const [cornerPoints, setCornerPoints] = useState({
     tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
   });
+  const [cornerViewport, setCornerViewport] = useState(() => getCornerViewport({
+    tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
+  }));
   const [activeCorner, setActiveCorner] = useState('');
   const [boundaries, setBoundaries] = useState(initialBoundaries);
   const [boundaryFrame, setBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
@@ -1113,6 +1130,22 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     return getOutlineValidation(cornerPoints, source?.width || 100, source?.height || 100);
   }, [cornerPoints, rawImageUrl]);
   const innerGuidePoints = useMemo(() => getInsetOutline(cornerPoints), [cornerPoints]);
+  const displayedCornerPoints = useMemo(() => Object.fromEntries(
+    Object.entries(cornerPoints).map(([key, point]) => [key, projectPointToViewport(point, cornerViewport)])
+  ), [cornerPoints, cornerViewport]);
+  const displayedInnerGuidePoints = useMemo(() => Object.fromEntries(
+    Object.entries(innerGuidePoints).map(([key, point]) => [key, projectPointToViewport(point, cornerViewport)])
+  ), [innerGuidePoints, cornerViewport]);
+  const cornerFrameAspectRatio = useMemo(() => {
+    const [width = 3, height = 4] = rawAspectRatio.split('/').map((value) => Number(value.trim()) || 1);
+    return `${width * cornerViewport.width} / ${height * cornerViewport.height}`;
+  }, [cornerViewport, rawAspectRatio]);
+  const cornerImageStyle = useMemo(() => ({
+    width: `${10000 / cornerViewport.width}%`,
+    height: `${10000 / cornerViewport.height}%`,
+    left: `${-cornerViewport.left / cornerViewport.width * 100}%`,
+    top: `${-cornerViewport.top / cornerViewport.height * 100}%`
+  }), [cornerViewport]);
 
   useEffect(() => {
     if (!demoResult && !demoCorners) return;
@@ -1153,6 +1186,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       setRawImageUrl(canvas.toDataURL('image/jpeg', 0.9));
       setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
       setCornerPoints(demoPoints);
+      setCornerViewport(getCornerViewport(demoPoints));
     } else {
       setImageUrl(canvas.toDataURL('image/jpeg', 0.9));
     }
@@ -1189,6 +1223,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     const detection = detectCardCorners(canvas);
     const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
     setCornerPoints(normalizedPoints);
+    setCornerViewport(getCornerViewport(normalizedPoints));
     await sleep(260);
     setPhase('corners');
   }
@@ -1360,10 +1395,15 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     if (!frame) return;
     const rect = frame.getBoundingClientRect();
     const next = {
-      x: clamp((event.clientX - rect.left) / Math.max(rect.width, 1) * 100, 1, 99),
-      y: clamp((event.clientY - rect.top) / Math.max(rect.height, 1) * 100, 1, 99)
+      x: clamp(cornerViewport.left + (event.clientX - rect.left) / Math.max(rect.width, 1) * cornerViewport.width, 1, 99),
+      y: clamp(cornerViewport.top + (event.clientY - rect.top) / Math.max(rect.height, 1) * cornerViewport.height, 1, 99)
     };
     setCornerPoints((current) => ({ ...current, [key]: next }));
+  }
+
+  function returnToCornerAdjustment() {
+    setCornerViewport(getCornerViewport(cornerPoints));
+    setPhase('corners');
   }
 
   function updateBoundaryFrame(nextFrame) {
@@ -1476,19 +1516,19 @@ export default function CenteringLab({ uiLang = 'KR' }) {
               <div
                 className="centering-corner-frame"
                 ref={cornerFrameRef}
-                style={{ aspectRatio: rawAspectRatio }}
+                style={{ aspectRatio: cornerFrameAspectRatio }}
               >
-                {rawImageUrl ? <img src={rawImageUrl} alt="" /> : null}
+                {rawImageUrl ? <img className="centering-corner-source" src={rawImageUrl} style={cornerImageStyle} alt="" /> : null}
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                  <polygon className="is-outer" points={`${cornerPoints.tl.x},${cornerPoints.tl.y} ${cornerPoints.tr.x},${cornerPoints.tr.y} ${cornerPoints.br.x},${cornerPoints.br.y} ${cornerPoints.bl.x},${cornerPoints.bl.y}`} />
-                  <polygon className="is-inner" points={`${innerGuidePoints.tl.x},${innerGuidePoints.tl.y} ${innerGuidePoints.tr.x},${innerGuidePoints.tr.y} ${innerGuidePoints.br.x},${innerGuidePoints.br.y} ${innerGuidePoints.bl.x},${innerGuidePoints.bl.y}`} />
+                  <polygon className="is-outer" points={`${displayedCornerPoints.tl.x},${displayedCornerPoints.tl.y} ${displayedCornerPoints.tr.x},${displayedCornerPoints.tr.y} ${displayedCornerPoints.br.x},${displayedCornerPoints.br.y} ${displayedCornerPoints.bl.x},${displayedCornerPoints.bl.y}`} />
+                  <polygon className="is-inner" points={`${displayedInnerGuidePoints.tl.x},${displayedInnerGuidePoints.tl.y} ${displayedInnerGuidePoints.tr.x},${displayedInnerGuidePoints.tr.y} ${displayedInnerGuidePoints.br.x},${displayedInnerGuidePoints.br.y} ${displayedInnerGuidePoints.bl.x},${displayedInnerGuidePoints.bl.y}`} />
                 </svg>
                 {Object.entries(cornerPoints).map(([key, point], index) => (
                   <button
                     type="button"
                     className="centering-corner-handle"
                     key={key}
-                    style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                    style={{ left: `${displayedCornerPoints[key].x}%`, top: `${displayedCornerPoints[key].y}%` }}
                     aria-label={`${flow.cornerLabel} ${index + 1}`}
                     onPointerDown={(event) => {
                       event.currentTarget.setPointerCapture(event.pointerId);
@@ -1556,7 +1596,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                 </button>
               </div>
               <div className="centering-boundary-confirm-actions">
-                <button type="button" onClick={() => setPhase('corners')}>{editorText.back}</button>
+                <button type="button" onClick={returnToCornerAdjustment}>{editorText.back}</button>
                 <button type="button" onClick={resetBoundaryFrame}>{editorText.reset}</button>
                 <button type="button" className="centering-primary-button" onClick={confirmBoundaryFrame}>{editorText.done}</button>
               </div>
@@ -1570,7 +1610,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
           <header className="centering-result-head">
             <div><span>{text.resultEyebrow}</span><h2>{text.resultTitle}</h2></div>
             <div className="centering-result-actions">
-              {rawImageUrl ? <button type="button" onClick={() => setPhase('corners')}>{flow.readjust}</button> : null}
+              {rawImageUrl ? <button type="button" onClick={returnToCornerAdjustment}>{flow.readjust}</button> : null}
               <button type="button" onClick={retryCurrentSource}>{sourceMode === 'upload' ? flow.chooseAnother : text.retake}</button>
             </div>
           </header>

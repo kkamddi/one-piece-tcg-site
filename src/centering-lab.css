@@ -686,6 +686,11 @@
   object-fit: fill;
 }
 
+.centering-corner-frame > img.centering-corner-source {
+  inset: auto;
+  max-width: none;
+}
+
 .centering-corner-frame > svg {
   pointer-events: none;
 }
