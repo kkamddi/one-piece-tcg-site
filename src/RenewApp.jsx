@@ -85,6 +85,19 @@ const MARKET_INDEX_PUBLIC_ENABLED = true;
 const PARTNER_NEWS_POPUP_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
+const PACK_SIMULATOR_DEFAULT_RULE = Object.freeze({
+  cardsPerPack: 6,
+  packsPerBox: 24,
+  boxesPerCarton: 12,
+  cartonHits: [
+    { group: 'SP', count: 1 },
+    { group: 'PARALLEL', count: 8 },
+    { group: 'SEC', count: 4 },
+    { group: 'L', count: 12 },
+    { group: 'SR', count: 48 }
+  ]
+});
+const PACK_SIMULATOR_RULES_BY_SERIES = Object.freeze({});
 
 function getBoxReleaseSortValue(item) {
   const rawDate = item?.releaseDate || item?.release_date || item?.releasedAt || item?.released_at;
@@ -2536,6 +2549,7 @@ const PAGE_PATHS = {
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
   lab: '/lab',
   centering: '/lab/centering',
+  packSimulator: '/lab/pack-simulator',
   profitCalculator: '/tools/profit-calculator',
   profitGuide: '/guides/profit-calculator',
   calendar: '/calendar',
@@ -3052,7 +3066,7 @@ function getJapaneseRouteSeo(pathname, page) {
 function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
-  const seoPage = page === 'centering' ? 'lab' : page;
+  const seoPage = ['centering', 'packSimulator'].includes(page) ? 'lab' : page;
   if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, seoPage);
   const seoAliases = {
     '/prices/collector-index': '/prices/index',
@@ -3411,7 +3425,7 @@ function setHreflangLinks() {
 }
 
 function applyPageSeo(page, uiLang = 'KR') {
-  const seoPage = page === 'centering' ? 'lab' : page;
+  const seoPage = ['centering', 'packSimulator'].includes(page) ? 'lab' : page;
   const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[seoPage] || PAGE_SEO.home;
   const url = getCanonicalUrl(page);
   const isJapanese = uiLang === 'JP' || (typeof window !== 'undefined' && getPathLocale(window.location.pathname) === 'JP');
@@ -3994,7 +4008,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
 
 function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
-  const isLabActive = activePage === 'lab' || activePage === 'centering';
+  const isLabActive = ['lab', 'centering', 'packSimulator'].includes(activePage);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
@@ -7317,11 +7331,16 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       .then((detail) => {
         if (!detail) return;
         setSelectedCard((current) => (
-          current?.id === cardId ? { ...current, ...detail } : current
+          !current || current.id === cardId ? { ...(current || {}), ...detail } : current
         ));
       })
       .catch(() => {});
   }
+
+  useEffect(() => {
+    const routeCardId = new URLSearchParams(window.location.search).get('cardId');
+    if (routeCardId) openCard(routeCardId);
+  }, [viewStateRevision]);
 
   useEffect(() => {
     if (!selectedCard) {
@@ -7737,7 +7756,504 @@ function RenewMarketplaceHidden() {
   );
 }
 
-function RenewLabHome({ uiLang, onOpenCentering }) {
+function shuffleSimulatorItems(items) {
+  const next = [...items];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(Math.random() * (index + 1));
+    [next[index], next[target]] = [next[target], next[index]];
+  }
+  return next;
+}
+
+function getSimulatorPoolKey(card) {
+  const rarity = getRarityBucket(card?.rarity);
+  if (rarity === 'SP') return 'SP';
+  const variantSource = `${card?.id || ''} ${card?.variantKey || ''} ${card?.imageUrl || ''}`;
+  if (/_p\d+\b/i.test(variantSource)) return 'PARALLEL';
+  return rarity || 'C';
+}
+
+function getSimulatorRarityScore(card) {
+  return {
+    SP: 7,
+    PARALLEL: 6,
+    SEC: 5,
+    L: 4,
+    SR: 3,
+    R: 2,
+    UC: 1,
+    C: 0,
+    P: 0
+  }[getSimulatorPoolKey(card)] ?? 0;
+}
+
+function pickSimulatorCard(poolMap, keys, usedIds = new Set()) {
+  const candidates = keys.flatMap((key) => poolMap.get(key) || []);
+  if (!candidates.length) return null;
+  const unused = candidates.filter((card) => !usedIds.has(card.id));
+  const source = unused.length ? unused : candidates;
+  return source[Math.floor(Math.random() * source.length)] || null;
+}
+
+function createSimulatorCarton(cards, seriesId) {
+  const seriesRule = PACK_SIMULATOR_RULES_BY_SERIES[seriesId] || {};
+  const rule = {
+    ...PACK_SIMULATOR_DEFAULT_RULE,
+    ...seriesRule,
+    cartonHits: seriesRule.cartonHits || PACK_SIMULATOR_DEFAULT_RULE.cartonHits
+  };
+  const usableCards = cards.filter((card) => card?.id && card?.imageUrl);
+  const poolMap = new Map();
+  usableCards.forEach((card) => {
+    const key = getSimulatorPoolKey(card);
+    poolMap.set(key, [...(poolMap.get(key) || []), card]);
+  });
+  const fallbackKeys = ['C', 'UC', 'R', 'SR', 'L', 'SEC', 'PARALLEL', 'SP'];
+  const draw = (keys, usedIds) => pickSimulatorCard(poolMap, keys, usedIds)
+    || pickSimulatorCard(poolMap, fallbackKeys, usedIds);
+  const createBasePack = () => {
+    const pack = [];
+    const usedIds = new Set();
+    [
+      ['C'],
+      ['C', 'UC'],
+      ['C', 'UC'],
+      ['UC', 'C'],
+      ['R', 'UC', 'C'],
+      ['R', 'UC', 'C']
+    ].slice(0, rule.cardsPerPack).forEach((keys) => {
+      const card = draw(keys, usedIds);
+      if (!card) return;
+      pack.push(card);
+      usedIds.add(card.id);
+    });
+    while (pack.length < rule.cardsPerPack && usableCards.length) {
+      const card = draw(fallbackKeys, usedIds);
+      if (!card) break;
+      pack.push(card);
+      usedIds.add(card.id);
+    }
+    return pack;
+  };
+  const boxes = Array.from({ length: rule.boxesPerCarton }, () => ({
+    packs: Array.from({ length: rule.packsPerBox }, createBasePack)
+  }));
+  const hitSlots = shuffleSimulatorItems(boxes.flatMap((box, boxIndex) => (
+    box.packs.map((pack, packIndex) => ({ boxIndex, packIndex }))
+  )));
+  let slotIndex = 0;
+  rule.cartonHits.forEach(({ group, count }) => {
+    if (!(poolMap.get(group) || []).length) return;
+    for (let index = 0; index < count && slotIndex < hitSlots.length; index += 1) {
+      const slot = hitSlots[slotIndex];
+      slotIndex += 1;
+      const pack = boxes[slot.boxIndex].packs[slot.packIndex];
+      const card = pickSimulatorCard(poolMap, [group], new Set(pack.map((item) => item.id)));
+      if (!card) continue;
+      pack[Math.max(0, pack.length - 1)] = card;
+    }
+  });
+  return { boxes, rule };
+}
+
+function createPackSimulatorResult(unit, cards, seriesId) {
+  const carton = createSimulatorCarton(cards, seriesId);
+  if (unit === 'carton') {
+    return {
+      unit,
+      boxes: carton.boxes,
+      rule: carton.rule
+    };
+  }
+  const box = carton.boxes[Math.floor(Math.random() * carton.boxes.length)] || carton.boxes[0];
+  if (unit === 'box') {
+    return {
+      unit,
+      boxes: box ? [box] : [],
+      rule: carton.rule
+    };
+  }
+  const pack = box?.packs[Math.floor(Math.random() * box.packs.length)] || box?.packs[0] || [];
+  return {
+    unit: 'pack',
+    boxes: [{ packs: [pack] }],
+    rule: carton.rule
+  };
+}
+
+function groupSimulatorCards(cards, priceByCardId) {
+  const grouped = new Map();
+  cards.forEach((card) => {
+    if (!card?.id) return;
+    const current = grouped.get(card.id) || {
+      card,
+      quantity: 0,
+      priceUsd: Number(priceByCardId.get(card.id)?.priceUsd || 0)
+    };
+    current.quantity += 1;
+    grouped.set(card.id, current);
+  });
+  return [...grouped.values()].sort((a, b) => (
+    getSimulatorRarityScore(b.card) - getSimulatorRarityScore(a.card)
+    || b.priceUsd - a.priceUsd
+    || String(a.card.cardNo || '').localeCompare(String(b.card.cardNo || ''), 'en', { numeric: true })
+  ));
+}
+
+function formatSimulatorPrice(priceUsd, uiLang) {
+  if (!Number(priceUsd || 0)) return getLocaleText(uiLang, '가격 정보 없음', 'No price data', '価格情報なし');
+  if (isJapaneseUi(uiLang)) return formatYen(Number(priceUsd) * MARKET_USD_TO_JPY);
+  if (uiLang === 'EN') return formatUsd(priceUsd);
+  return formatCatalogWonFromUsd(priceUsd);
+}
+
+function RenewPackSimulator({ uiLang, onOpenCard }) {
+  const [locale, setLocale] = useState('JP');
+  const [selectedSeriesId, setSelectedSeriesId] = useState('');
+  const [unit, setUnit] = useState('pack');
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [result, setResult] = useState(null);
+  const [progressIndex, setProgressIndex] = useState(0);
+  const [revealedCount, setRevealedCount] = useState(1);
+  const [fastOpened, setFastOpened] = useState(false);
+  const [priceByCardId, setPriceByCardId] = useState(() => new Map());
+  const [boxImageByCode, setBoxImageByCode] = useState(() => new Map(
+    boxMarketItems
+      .filter((item) => item.code && item.previewImageUrl)
+      .map((item) => [item.code, item.previewImageUrl])
+  ));
+  const openingTimerRef = useRef(null);
+  const simulatorSeries = useMemo(() => sortDescByCode(seriesData.filter((series) => {
+    const baseId = getBaseSeriesId(series);
+    return (series.locale || 'KR') === locale
+      && /^(OP|EB|PRB)\d+$/.test(baseId)
+      && /BOOSTER/.test(String(series.kindEn || ''))
+      && Number(seriesCardCounts?.[series.id] || 1) > 0;
+  })), [locale]);
+  const selectedSeries = useMemo(() => (
+    simulatorSeries.find((series) => series.id === selectedSeriesId) || simulatorSeries[0] || null
+  ), [selectedSeriesId, simulatorSeries]);
+  const productImageUrl = getSeriesBoxPreviewUrl(selectedSeries, boxImageByCode);
+
+  useEffect(() => {
+    const nextSeriesId = simulatorSeries[0]?.id || '';
+    if (!simulatorSeries.some((series) => series.id === selectedSeriesId)) setSelectedSeriesId(nextSeriesId);
+  }, [selectedSeriesId, simulatorSeries]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedSeries?.id) {
+      setCards([]);
+      return undefined;
+    }
+    setLoading(true);
+    fetchCards({ locale, series: selectedSeries.id })
+      .then((items) => {
+        if (!cancelled) setCards(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCards([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, selectedSeries?.id]);
+
+  useEffect(() => {
+    setResult(null);
+    setOpening(false);
+    setProgressIndex(0);
+    setRevealedCount(1);
+    setFastOpened(false);
+  }, [locale, selectedSeriesId, unit]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/box-market', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (cancelled || !Array.isArray(payload?.items)) return;
+        setBoxImageByCode((current) => {
+          const next = new Map(current);
+          payload.items.forEach((item) => {
+            if (item?.code && item?.previewImageUrl) next.set(item.code, item.previewImageUrl);
+          });
+          return next;
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      loadCardMarketLinks(),
+      import('./data/market-cards.js'),
+      fetch('/api/market?summary=latest', { cache: 'no-store' })
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null)
+    ])
+      .then(([links, marketModule, marketSummary]) => {
+        if (cancelled) return;
+        const marketItems = Array.isArray(marketModule.default) ? marketModule.default : [];
+        const itemByApparelId = new Map(marketItems.map((item) => [String(item.apparelId), item]));
+        const latestByApparelId = new Map(
+          (Array.isArray(marketSummary?.items) ? marketSummary.items : [])
+            .filter((item) => item?.apparelId)
+            .map((item) => [String(item.apparelId), item])
+        );
+        const next = new Map();
+        links.forEach((link) => {
+          if (link?.status !== 'approved' || !link.cardId || !link.apparelId) return;
+          const item = itemByApparelId.get(String(link.apparelId));
+          const latest = latestByApparelId.get(String(link.apparelId));
+          const priceUsd = Number(latest?.aPriceUsd || item?.minPrice || 0);
+          if (item && priceUsd > 0) next.set(link.cardId, { priceUsd, apparelId: item.apparelId });
+        });
+        setPriceByCardId(next);
+      })
+      .catch(() => {
+        if (!cancelled) setPriceByCardId(new Map());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => () => {
+    if (openingTimerRef.current) window.clearTimeout(openingTimerRef.current);
+  }, []);
+
+  function startOpening() {
+    if (!selectedSeries?.id || !cards.length || loading || opening) return;
+    if (openingTimerRef.current) window.clearTimeout(openingTimerRef.current);
+    setOpening(true);
+    setResult(null);
+    setProgressIndex(0);
+    setRevealedCount(1);
+    setFastOpened(false);
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    openingTimerRef.current = window.setTimeout(() => {
+      setResult(createPackSimulatorResult(unit, cards, selectedSeries.id));
+      setOpening(false);
+      openingTimerRef.current = null;
+    }, reducedMotion ? 120 : 900);
+  }
+
+  const unitLabel = {
+    pack: getLocaleText(uiLang, '1팩', '1 Pack', '1パック'),
+    box: getLocaleText(uiLang, '1박스', '1 Box', '1ボックス'),
+    carton: getLocaleText(uiLang, '1카톤', '1 Carton', '1カートン')
+  }[unit];
+  const currentPack = result?.unit === 'pack'
+    ? result.boxes[0]?.packs[0] || []
+    : result?.unit === 'box'
+      ? result.boxes[0]?.packs[progressIndex] || []
+      : [];
+  const currentBoxCards = result?.unit === 'carton'
+    ? result.boxes[progressIndex]?.packs.flat() || []
+    : [];
+  const currentBoxHits = useMemo(() => {
+    const hits = currentBoxCards
+      .filter((card) => getSimulatorRarityScore(card) >= 3)
+      .sort((a, b) => getSimulatorRarityScore(b) - getSimulatorRarityScore(a));
+    return hits.length ? hits : [...currentBoxCards].sort((a, b) => getSimulatorRarityScore(b) - getSimulatorRarityScore(a)).slice(0, 8);
+  }, [currentBoxCards]);
+  const isComplete = Boolean(result) && (
+    result.unit === 'pack'
+      ? revealedCount >= currentPack.length
+      : result.unit === 'box'
+        ? fastOpened || progressIndex >= (result.boxes[0]?.packs.length || 1) - 1
+        : fastOpened || progressIndex >= result.boxes.length - 1
+  );
+  const visibleCards = useMemo(() => {
+    if (!result) return [];
+    if (result.unit === 'pack') return currentPack.slice(0, revealedCount);
+    if (result.unit === 'box') {
+      return (fastOpened ? result.boxes[0]?.packs : result.boxes[0]?.packs.slice(0, progressIndex + 1))?.flat() || [];
+    }
+    return (fastOpened ? result.boxes : result.boxes.slice(0, progressIndex + 1)).flatMap((box) => box.packs.flat());
+  }, [currentPack, fastOpened, progressIndex, result, revealedCount]);
+  const groupedCards = useMemo(() => groupSimulatorCards(visibleCards, priceByCardId), [priceByCardId, visibleCards]);
+  const totalPriceUsd = useMemo(() => groupedCards.reduce((total, item) => (
+    total + (item.priceUsd * item.quantity)
+  ), 0), [groupedCards]);
+  const displayCards = result?.unit === 'carton' ? currentBoxHits : currentPack;
+
+  return (
+    <main className="renew-subpage renew-pack-simulator-page">
+      <header className="renew-pack-simulator-header">
+        <span>PACK SIMULATOR</span>
+        <h1>{getLocaleText(uiLang, '가상 카드깡', 'Virtual Pack Opening', 'パック開封シミュレーター')}</h1>
+        <small>{getLocaleText(uiLang, '임시 봉입 규칙', 'Temporary pull rates', '仮封入率')}</small>
+      </header>
+
+      <section className="renew-pack-simulator-setup" aria-label={getLocaleText(uiLang, '개봉 설정', 'Opening settings', '開封設定')}>
+        <div className="renew-pack-locale-control" role="group" aria-label={getLocaleText(uiLang, '카드 언어', 'Card language', 'カード言語')}>
+          {['JP', 'KR'].map((value) => (
+            <button key={value} type="button" className={locale === value ? 'is-active' : ''} onClick={() => setLocale(value)}>
+              {value}
+            </button>
+          ))}
+        </div>
+        <label className="renew-pack-series-select">
+          <span>{getLocaleText(uiLang, '카드 시리즈', 'Card series', 'カードシリーズ')}</span>
+          <select value={selectedSeries?.id || ''} onChange={(event) => setSelectedSeriesId(event.target.value)}>
+            {simulatorSeries.map((series) => (
+              <option key={series.id} value={series.id}>
+                {getBaseSeriesId(series)} · {series.koName || series.enName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="renew-pack-unit-control" role="group" aria-label={getLocaleText(uiLang, '개봉 단위', 'Opening unit', '開封単位')}>
+          {[
+            ['pack', getLocaleText(uiLang, '1팩', '1 Pack', '1パック')],
+            ['box', getLocaleText(uiLang, '1박스', '1 Box', '1ボックス')],
+            ['carton', getLocaleText(uiLang, '1카톤', '1 Carton', '1カートン')]
+          ].map(([value, label]) => (
+            <button key={value} type="button" className={unit === value ? 'is-active' : ''} onClick={() => setUnit(value)}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className={`renew-pack-opening-stage ${opening ? 'is-opening' : ''} ${result ? 'has-result' : ''}`}>
+        {!result ? (
+          <>
+            <div className="renew-pack-product-visual" aria-hidden="true">
+              {productImageUrl ? (
+                <img src={productImageUrl} alt="" onError={placeholderImage} />
+              ) : (
+                <span>{getBaseSeriesId(selectedSeries)}</span>
+              )}
+              <i>{unitLabel}</i>
+            </div>
+            <div className="renew-pack-opening-copy">
+              <strong>{opening
+                ? getLocaleText(uiLang, '개봉 중...', 'Opening...', '開封中...')
+                : selectedSeries
+                  ? `${getBaseSeriesId(selectedSeries)} · ${unitLabel}`
+                  : getLocaleText(uiLang, '시리즈를 선택해 주세요.', 'Select a series.', 'シリーズを選択してください。')}</strong>
+              <button type="button" onClick={startOpening} disabled={loading || opening || !cards.length}>
+                {loading
+                  ? getLocaleText(uiLang, '카드 불러오는 중', 'Loading cards', 'カード読込中')
+                  : getLocaleText(uiLang, '개봉하기', 'Open', '開封する')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="renew-pack-result-heading">
+              <div>
+                <span>{getBaseSeriesId(selectedSeries)}</span>
+                <h2>{result.unit === 'pack'
+                  ? getLocaleText(uiLang, '카드를 한 장씩 확인해 보세요.', 'Reveal each card.', 'カードを1枚ずつ確認')
+                  : result.unit === 'box'
+                    ? `${getLocaleText(uiLang, '팩 개봉', 'Pack', 'パック')} ${progressIndex + 1} / ${result.boxes[0]?.packs.length || 0}`
+                    : `${getLocaleText(uiLang, '박스 결과', 'Box', 'ボックス')} ${progressIndex + 1} / ${result.boxes.length}`}</h2>
+              </div>
+              <button type="button" onClick={startOpening}>{getLocaleText(uiLang, '다시 개봉', 'Open again', 'もう一度')}</button>
+            </div>
+            <div className={`renew-pack-reveal-grid is-${result.unit}`}>
+              {displayCards.map((card, index) => {
+                const hidden = result.unit === 'pack' && index >= revealedCount;
+                const price = priceByCardId.get(card.id)?.priceUsd || 0;
+                return (
+                  <article key={`${card.id}-${index}`} className={`renew-pack-reveal-card ${hidden ? 'is-hidden' : ''} ${getSimulatorRarityScore(card) >= 5 ? 'is-premium' : ''}`}>
+                    {hidden ? (
+                      <button type="button" className="renew-pack-card-back" onClick={() => setRevealedCount((value) => Math.min(currentPack.length, Math.max(value, index + 1)))}>
+                        <span>CARD Pone</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button type="button" className="renew-pack-card-image" onClick={() => onOpenCard?.(card)}>
+                          <img src={getCardThumbnailSrc(card)} data-fallback-src={getCardImageSrc(card)} alt={card.name || card.cardNo} onError={fallbackToOriginalCardImage} />
+                        </button>
+                        <div>
+                          <span>{getSimulatorPoolKey(card)}</span>
+                          <strong>{card.cardNo}</strong>
+                          <p>{card.name}</p>
+                          <small>{formatSimulatorPrice(price, uiLang)}</small>
+                        </div>
+                      </>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+            <div className="renew-pack-progress-actions">
+              {result.unit === 'pack' && !isComplete ? (
+                <button type="button" onClick={() => setRevealedCount((value) => Math.min(currentPack.length, value + 1))}>
+                  {getLocaleText(uiLang, '다음 카드', 'Next card', '次のカード')}
+                </button>
+              ) : null}
+              {result.unit === 'box' && !isComplete ? (
+                <>
+                  <button type="button" onClick={() => setProgressIndex((value) => Math.min((result.boxes[0]?.packs.length || 1) - 1, value + 1))}>
+                    {getLocaleText(uiLang, '다음 팩', 'Next pack', '次のパック')}
+                  </button>
+                  <button type="button" className="is-secondary" onClick={() => setFastOpened(true)}>
+                    {getLocaleText(uiLang, '전체 빠른 개봉', 'Open all', 'まとめて開封')}
+                  </button>
+                </>
+              ) : null}
+              {result.unit === 'carton' && !isComplete ? (
+                <>
+                  <button type="button" onClick={() => setProgressIndex((value) => Math.min(result.boxes.length - 1, value + 1))}>
+                    {getLocaleText(uiLang, '다음 박스', 'Next box', '次のボックス')}
+                  </button>
+                  <button type="button" className="is-secondary" onClick={() => setFastOpened(true)}>
+                    {getLocaleText(uiLang, '전체 빠른 개봉', 'Open all', 'まとめて開封')}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </>
+        )}
+      </section>
+
+      {result ? (
+        <section className="renew-pack-summary">
+          <header>
+            <div>
+              <span>{isComplete ? getLocaleText(uiLang, '전체 결과', 'Full result', '全体結果') : getLocaleText(uiLang, '현재까지', 'Revealed', '現在まで')}</span>
+              <strong>{visibleCards.length.toLocaleString('ko-KR')}{getLocaleText(uiLang, '장', ' cards', '枚')}</strong>
+            </div>
+            <div>
+              <span>{getLocaleText(uiLang, '확인된 시세 합계', 'Known price total', '価格合計')}</span>
+              <strong>{formatSimulatorPrice(totalPriceUsd, uiLang)}</strong>
+            </div>
+          </header>
+          <div className="renew-pack-summary-list">
+            {groupedCards.map(({ card, quantity, priceUsd }) => (
+              <button key={card.id} type="button" onClick={() => onOpenCard?.(card)}>
+                <img src={getCardThumbnailSrc(card)} data-fallback-src={getCardImageSrc(card)} alt="" onError={fallbackToOriginalCardImage} />
+                <span>
+                  <small>{getSimulatorPoolKey(card)} · {card.cardNo}</small>
+                  <strong>{card.name}</strong>
+                  <em>{formatSimulatorPrice(priceUsd, uiLang)}</em>
+                </span>
+                <b>×{quantity}</b>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </main>
+  );
+}
+
+function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator }) {
   const tools = [
     {
       id: 'centering',
@@ -7750,9 +8266,10 @@ function RenewLabHome({ uiLang, onOpenCentering }) {
     {
       id: 'simulator',
       icon: 'supplies',
-      status: getLocaleText(uiLang, '준비 중', 'Coming soon', '準備中'),
+      status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
       title: getLocaleText(uiLang, '카드깡 시뮬레이터', 'Pack Simulator', 'パックシミュレーター'),
-      description: getLocaleText(uiLang, '카드 팩을 가상으로 개봉하는 도구입니다.', 'Open card packs virtually.', 'カードパックをバーチャルで開封します。')
+      description: getLocaleText(uiLang, '카드 팩을 가상으로 개봉하는 도구입니다.', 'Open card packs virtually.', 'カードパックをバーチャルで開封します。'),
+      onClick: onOpenSimulator
     },
     {
       id: 'deck-builder',
@@ -11377,7 +11894,7 @@ export default function RenewApp() {
   const [routeRevision, setRouteRevision] = useState(0);
   const internalNavigationRef = useRef(false);
 
-  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (activePage === 'centering' ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
+  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'packSimulator'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const isAdminUser = useMemo(() => (
     authUser?.app_metadata?.role === 'admin'
@@ -11934,7 +12451,20 @@ export default function RenewApp() {
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
-        <RenewLabHome uiLang={uiLang} onOpenCentering={() => navigatePage('centering')} />
+        <RenewLabHome
+          uiLang={uiLang}
+          onOpenCentering={() => navigatePage('centering')}
+          onOpenSimulator={() => navigatePage('packSimulator')}
+        />
+      ) : activePage === 'packSimulator' ? (
+        <RenewPackSimulator
+          uiLang={uiLang}
+          onOpenCard={(card) => {
+            const query = new URLSearchParams();
+            if (card?.id) query.set('cardId', card.id);
+            navigatePage('cards', { query: query.toString() });
+          }}
+        />
       ) : activePage === 'centering' ? (
         authResolved && isAdminUser ? (
           <CenteringLab uiLang={uiLang} />
