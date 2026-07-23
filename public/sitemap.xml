@@ -612,4 +612,16 @@
     <changefreq>monthly</changefreq>
     <priority>0.76</priority>
   </url>
+  <url>
+    <loc>https://www.optcgkorea.com/tools/portfolio-calculator</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/guides/portfolio-calculator</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

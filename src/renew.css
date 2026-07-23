@@ -1315,7 +1315,7 @@
   width: min(74vw, 920px);
   aspect-ratio: 1;
   pointer-events: none;
-  background: url('/compass-bg.png') center / contain no-repeat;
+  background: url('/compass-bg.webp') center / contain no-repeat;
   opacity: 0.13;
   transform: translate(-50%, -50%);
 }
@@ -2583,6 +2583,7 @@
 
 .renew-catalog-main {
   min-width: 0;
+  min-height: 760px;
   border-radius: 28px;
   padding: 18px;
 }
@@ -17118,20 +17119,327 @@ button.renew-lab-tool.is-available:hover {
   line-height: 1.7;
 }
 
+.renew-portfolio-calculator-shell {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr);
+  gap: 18px;
+  padding: 20px;
+}
+
+.renew-portfolio-calculator-search,
+.renew-portfolio-calculator-workspace {
+  min-width: 0;
+}
+
+.renew-portfolio-calculator-search form {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-portfolio-calculator-search form > label {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-portfolio-calculator-search form > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.renew-portfolio-calculator-search input,
+.renew-portfolio-calculator-search button,
+.renew-portfolio-calculator-actions button {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 11px;
+  padding: 0 13px;
+  color: #17191c;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.renew-portfolio-calculator-search input {
+  width: 100%;
+}
+
+.renew-portfolio-calculator-search form button,
+.renew-portfolio-calculator-actions button.is-primary {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+  cursor: pointer;
+}
+
+.renew-portfolio-calculator-results {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.renew-portfolio-calculator-results button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 10px;
+  padding: 8px;
+  color: #17191c;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-portfolio-calculator-results button.is-active {
+  border-color: #c94d35;
+  background: #fff5ef;
+}
+
+.renew-portfolio-calculator-results img {
+  width: 44px;
+  aspect-ratio: 5 / 7;
+  border-radius: 5px;
+  object-fit: contain;
+}
+
+.renew-portfolio-calculator-results span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.renew-portfolio-calculator-results strong,
+.renew-portfolio-calculator-results small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-portfolio-calculator-results b {
+  color: #c94d35;
+  font-size: 11px;
+}
+
+.renew-portfolio-calculator-results strong {
+  font-size: 13px;
+}
+
+.renew-portfolio-calculator-results small,
+.renew-portfolio-calculator-empty {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.renew-portfolio-calculator-workspace {
+  display: grid;
+  align-content: start;
+  gap: 13px;
+  border-left: 1px solid rgba(23, 25, 28, 0.1);
+  padding-left: 18px;
+}
+
+.renew-portfolio-calculator-card {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+}
+
+.renew-portfolio-calculator-card img {
+  width: 66px;
+  aspect-ratio: 5 / 7;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.renew-portfolio-calculator-card > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.renew-portfolio-calculator-card b {
+  color: #c94d35;
+  font-size: 11px;
+}
+
+.renew-portfolio-calculator-card strong {
+  overflow: hidden;
+  color: #17191c;
+  font-size: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-portfolio-calculator-card span,
+.renew-portfolio-calculator-card small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.renew-portfolio-calculator-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  border-radius: 11px;
+  padding: 4px;
+  background: #f1f1f2;
+}
+
+.renew-portfolio-calculator-tabs button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  color: #6b7280;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-portfolio-calculator-tabs button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-profit-field select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 12px;
+  padding: 0 13px;
+  color: #17191c;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  outline: 0;
+}
+
+.renew-portfolio-calculator-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.renew-portfolio-calculator-estimate {
+  display: grid;
+  align-content: center;
+  grid-column: span 2;
+  gap: 4px;
+  min-height: 74px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.renew-portfolio-calculator-estimate span,
+.renew-portfolio-calculator-estimate small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.renew-portfolio-calculator-estimate strong {
+  color: #17191c;
+  font-size: 14px;
+}
+
+.renew-portfolio-calculator-preview {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.renew-portfolio-calculator-preview article {
+  min-height: 88px;
+  padding: 12px;
+}
+
+.renew-portfolio-calculator-preview strong {
+  font-size: 15px;
+}
+
+.renew-portfolio-calculator-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.renew-portfolio-calculator-actions button {
+  cursor: pointer;
+}
+
+.renew-portfolio-calculator-actions button:disabled,
+.renew-portfolio-calculator-search button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.renew-portfolio-calculator-placeholder {
+  display: grid;
+  width: 100%;
+  min-height: 300px;
+  padding: 24px;
+  place-items: center;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.renew-portfolio-message {
+  margin: 0;
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.renew-portfolio-calculator-shell > .renew-profit-privacy-note {
+  grid-column: 1 / -1;
+}
+
 .renew-app.is-dark .renew-profit-head h1,
 .renew-app.is-dark .renew-profit-guide-card h2,
 .renew-app.is-dark .renew-profit-faq-panel h2,
 .renew-app.is-dark .renew-profit-result-grid strong,
-.renew-app.is-dark .renew-profit-faq-panel summary {
+.renew-app.is-dark .renew-profit-faq-panel summary,
+.renew-app.is-dark .renew-portfolio-calculator-card strong,
+.renew-app.is-dark .renew-portfolio-calculator-estimate strong {
   color: #f8fafc;
 }
 
 .renew-app.is-dark .renew-profit-guide-button,
 .renew-app.is-dark .renew-profit-reset-button,
-.renew-app.is-dark .renew-profit-field input {
+.renew-app.is-dark .renew-profit-field input,
+.renew-app.is-dark .renew-profit-field select,
+.renew-app.is-dark .renew-portfolio-calculator-search input,
+.renew-app.is-dark .renew-portfolio-calculator-actions button,
+.renew-app.is-dark .renew-portfolio-calculator-results button {
   border-color: rgba(255, 255, 255, 0.14);
   color: #f8fafc;
   background: #20242a;
+}
+
+.renew-app.is-dark .renew-portfolio-calculator-workspace {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-portfolio-calculator-tabs {
+  background: #262a30;
+}
+
+.renew-app.is-dark .renew-portfolio-calculator-search form button,
+.renew-app.is-dark .renew-portfolio-calculator-actions button.is-primary,
+.renew-app.is-dark .renew-portfolio-calculator-tabs button.is-active {
+  color: #17191c;
+  background: #f8fafc;
 }
 
 .renew-app.is-dark .renew-profit-currency-row > div {
@@ -17149,6 +17457,10 @@ button.renew-lab-tool.is-available:hover {
 }
 
 @media (max-width: 840px) {
+  .renew-catalog-main {
+    min-height: 70svh;
+  }
+
   .renew-profit-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -17176,6 +17488,21 @@ button.renew-lab-tool.is-available:hover {
   .renew-profit-guide-card {
     min-height: 0;
   }
+
+  .renew-portfolio-calculator-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-portfolio-calculator-workspace {
+    border-top: 1px solid rgba(23, 25, 28, 0.1);
+    border-left: 0;
+    padding-top: 18px;
+    padding-left: 0;
+  }
+
+  .renew-portfolio-calculator-preview article:last-child {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 560px) {
@@ -17199,6 +17526,23 @@ button.renew-lab-tool.is-available:hover {
 
   .renew-profit-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .renew-portfolio-calculator-shell {
+    padding: 14px;
+  }
+
+  .renew-portfolio-calculator-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-portfolio-calculator-estimate {
+    grid-column: auto;
+  }
+
+  .renew-portfolio-calculator-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .renew-profit-panel {

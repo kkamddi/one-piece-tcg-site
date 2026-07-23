@@ -100,6 +100,24 @@
     <priority>0.82</priority>
   </url>
   <url>
+    <loc>https://www.optcgkorea.com/jp/tools/portfolio-calculator</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/tools/portfolio-calculator" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/tools/portfolio-calculator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/tools/portfolio-calculator" />
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/guides/portfolio-calculator</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/portfolio-calculator" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/portfolio-calculator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/portfolio-calculator" />
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
     <loc>https://www.optcgkorea.com/jp/calendar</loc>
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/calendar" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/calendar" />

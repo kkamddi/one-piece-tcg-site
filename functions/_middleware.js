@@ -56,9 +56,9 @@ const PAGE_SEO = {
     schemaType: 'CollectionPage'
   },
   '/lab': {
-    title: '원피스카드 실험실 - 센터링 측정·카드깡 시뮬레이터 | Card Pone',
-    description: '원피스카드 센터링 측정기와 카드깡 시뮬레이터 등 수집에 필요한 공개 도구를 이용할 수 있습니다.',
-    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드깡 시뮬레이터',
+    title: '원피스카드 실험실 - 센터링·카드깡·포트폴리오 계산 | Card Pone',
+    description: '원피스카드 센터링 측정기, 카드깡 시뮬레이터와 포트폴리오 수익률 계산기를 이용할 수 있습니다.',
+    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드 수익률 계산기',
     schemaType: 'CollectionPage'
   },
   '/lab/centering': {
@@ -83,6 +83,18 @@ const PAGE_SEO = {
     title: '원피스카드 카드깡 시뮬레이터 사용 가이드 | Card Pone',
     description: '가상 카드깡의 시리즈와 개봉 단위 선택, 팩·박스·카톤 결과와 확률의 의미를 안내합니다.',
     keywords: '원피스카드 카드깡 시뮬레이터 사용법, 원피스카드 봉입률, 가상 카드 개봉',
+    schemaType: 'FAQPage'
+  },
+  '/tools/portfolio-calculator': {
+    title: '원피스카드 포트폴리오 수익률 계산기 | Card Pone',
+    description: '원피스카드를 검색하고 매입가 또는 매입일 시세를 입력해 현재 평가금액, 평가손익과 수익률을 계산하세요.',
+    keywords: '원피스카드 포트폴리오, 카드 수익률 계산기, 원피스카드 평가손익, 카드 매입가 계산',
+    schemaType: 'WebApplication'
+  },
+  '/guides/portfolio-calculator': {
+    title: '포트폴리오 수익률 계산기 사용 가이드 | Card Pone',
+    description: '카드 검색, 매입가 직접 입력, 매입일 시세 추정과 포트폴리오 저장 방법을 안내합니다.',
+    keywords: '카드 포트폴리오 사용법, 카드 수익률 계산 방법, 원피스카드 매입가, 카드 평가손익',
     schemaType: 'FAQPage'
   },
   '/news': {
@@ -144,9 +156,9 @@ const JAPANESE_SEO = {
     schemaType: 'CollectionPage'
   },
   '/lab': {
-    title: 'ワンピースカード ラボ - センタリング・開封シミュレーター | Card Pone',
-    description: 'センタリング測定とパック開封シミュレーターなど、カード収集に役立つ公開ツールを利用できます。',
-    keywords: 'ワンピースカード ラボ,カード センタリング,パック開封 シミュレーター',
+    title: 'ワンピースカード ラボ - センタリング・開封・収益率計算 | Card Pone',
+    description: 'センタリング測定、パック開封シミュレーター、ポートフォリオ収益率計算を利用できます。',
+    keywords: 'ワンピースカード ラボ,カード センタリング,パック開封 シミュレーター,カード 収益率 計算',
     schemaType: 'CollectionPage'
   },
   '/lab/centering': {
@@ -183,6 +195,18 @@ const JAPANESE_SEO = {
     title: 'カード損益計算機の使い方 | Card Pone',
     description: 'カード取引の損益計算、手数料・送料の反映、損益分岐販売価格の確認方法を解説します。',
     keywords: 'カード 損益計算 方法,カード 利益率 計算,損益分岐価格,トレーディングカード ガイド',
+    schemaType: 'FAQPage'
+  },
+  '/tools/portfolio-calculator': {
+    title: 'ワンピースカード ポートフォリオ収益率計算 | Card Pone',
+    description: 'カードを検索し、購入価格または購入日の参考価格から現在評価額、評価損益、収益率を計算できます。',
+    keywords: 'ワンピースカード ポートフォリオ,カード 収益率 計算,カード 評価損益,カード 購入価格',
+    schemaType: 'WebApplication'
+  },
+  '/guides/portfolio-calculator': {
+    title: 'ポートフォリオ収益率計算ガイド | Card Pone',
+    description: 'カード検索、購入価格の入力、購入日の参考価格推定、ポートフォリオ保存方法を案内します。',
+    keywords: 'カード ポートフォリオ 使い方,カード 収益率 計算方法,ワンピースカード 購入価格',
     schemaType: 'FAQPage'
   },
   '/calendar': {
@@ -531,9 +555,9 @@ const SEO_PRIMARY = {
     schemaType: 'Article'
   },
   '/lab': {
-    title: '원피스카드 실험실 - 센터링 측정·카드깡 시뮬레이터 | 카드포네',
-    description: '원피스카드 센터링 측정기와 카드깡 시뮬레이터 등 수집에 필요한 공개 도구를 이용할 수 있습니다.',
-    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드깡 시뮬레이터',
+    title: '원피스카드 실험실 - 센터링·카드깡·포트폴리오 계산 | 카드포네',
+    description: '원피스카드 센터링 측정기, 카드깡 시뮬레이터와 포트폴리오 수익률 계산기를 이용할 수 있습니다.',
+    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드 수익률 계산기',
     schemaType: 'CollectionPage'
   },
   '/lab/centering': {
@@ -570,6 +594,18 @@ const SEO_PRIMARY = {
     title: '카드 손익 계산기 사용 가이드 | 카드포네',
     description: '카드 거래 손익 계산 기준, 수수료와 배송비 반영 방법, 손익분기 판매가 확인 방법을 안내합니다.',
     keywords: '카드 손익 계산 방법, 카드 수익률 계산, 카드 손익분기 판매가, 원피스카드 거래 가이드',
+    schemaType: 'FAQPage'
+  },
+  '/tools/portfolio-calculator': {
+    title: '원피스카드 포트폴리오 수익률 계산기 | 카드포네',
+    description: '원피스카드를 검색하고 매입가 또는 매입일 시세를 입력해 현재 평가금액, 평가손익과 수익률을 계산하세요.',
+    keywords: '원피스카드 포트폴리오, 카드 수익률 계산기, 원피스카드 평가손익, 카드 매입가 계산',
+    schemaType: 'WebApplication'
+  },
+  '/guides/portfolio-calculator': {
+    title: '포트폴리오 수익률 계산기 사용 가이드 | 카드포네',
+    description: '카드 검색, 매입가 직접 입력, 매입일 시세 추정과 포트폴리오 저장 방법을 안내합니다.',
+    keywords: '카드 포트폴리오 사용법, 카드 수익률 계산 방법, 원피스카드 매입가, 카드 평가손익',
     schemaType: 'FAQPage'
   },
   '/faq': {
@@ -633,10 +669,10 @@ const SERVER_PAGE_CONTENT = {
   '/lab': {
     heading: '원피스카드 실험실',
     paragraphs: [
-      '센터링 측정기와 카드깡 시뮬레이터처럼 카드 수집 과정에서 직접 사용할 수 있는 공개 도구를 모았습니다.',
+      '센터링 측정기, 카드깡 시뮬레이터와 포트폴리오 수익률 계산기처럼 카드 수집 과정에서 직접 사용할 수 있는 공개 도구를 모았습니다.',
       '각 도구는 별도 페이지에서 실행되며 사용 기준과 결과 해석 방법은 연결된 공개 가이드에서 확인할 수 있습니다.'
     ],
-    links: ['/lab/centering', '/lab/pack-simulator', '/guides/centering', '/guides/pack-simulator']
+    links: ['/lab/centering', '/lab/pack-simulator', '/tools/portfolio-calculator', '/guides/portfolio-calculator']
   },
   '/lab/centering': {
     heading: '원피스카드 센터링 측정기',
@@ -685,6 +721,22 @@ const SERVER_PAGE_CONTENT = {
       '손익분기 판매가는 수수료와 배송비까지 반영했을 때 손익이 0원이 되는 카드 1장당 판매 가격입니다. 실제 거래 결과는 거래처 정책과 배송 조건에 따라 달라질 수 있습니다.'
     ],
     links: ['/tools/profit-calculator', '/prices', '/guide/card-price', '/faq']
+  },
+  '/tools/portfolio-calculator': {
+    heading: '원피스카드 포트폴리오 수익률 계산기',
+    paragraphs: [
+      '카드를 검색하고 매입가와 수량을 입력하면 현재 참고 시세와 비교한 평가금액, 평가손익과 수익률을 계산할 수 있습니다.',
+      '로그인하지 않아도 계산할 수 있으며, 로그인 사용자는 계산한 매입 정보를 기존 포트폴리오에 저장할 수 있습니다.'
+    ],
+    links: ['/guides/portfolio-calculator', '/lab', '/prices', '/cards']
+  },
+  '/guides/portfolio-calculator': {
+    heading: '포트폴리오 수익률 계산 가이드',
+    paragraphs: [
+      '카드를 선택한 뒤 매입가를 직접 입력하거나 매입일 이전의 유효한 참고 시세를 이용해 매입 단가를 추정할 수 있습니다.',
+      '평가손익은 현재 참고 시세와 매입 원가의 차이이며 실제 판매 수수료, 배송비와 환율 변동은 포함하지 않습니다.'
+    ],
+    links: ['/tools/portfolio-calculator', '/lab', '/prices', '/data-policy']
   },
   '/news': {
     heading: '원피스카드 정보',
@@ -780,10 +832,10 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
   '/lab': {
     heading: 'ワンピースカード ラボ',
     paragraphs: [
-      'センタリング測定と開封シミュレーターなど、カード収集に直接使える公開ツールをまとめています。',
+      'センタリング測定、開封シミュレーター、ポートフォリオ収益率計算など、カード収集に直接使える公開ツールをまとめています。',
       '各ツールは独立したページで利用でき、測定基準と結果の見方は公開ガイドで確認できます。'
     ],
-    links: ['/jp/lab/centering', '/jp/lab/pack-simulator', '/jp/guides/centering', '/jp/guides/pack-simulator']
+    links: ['/jp/lab/centering', '/jp/lab/pack-simulator', '/jp/tools/portfolio-calculator', '/jp/guides/portfolio-calculator']
   },
   '/lab/centering': {
     heading: 'ワンピースカード センタリング測定',
@@ -832,6 +884,22 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
       '損益分岐販売価格は、手数料と送料を反映したうえで損益が0円になるカード1枚あたりの販売価格です。実際の取引結果は、販売先の規約や配送条件によって変わることがあります。'
     ],
     links: ['/jp/tools/profit-calculator', '/jp/prices', '/jp/news', '/jp']
+  },
+  '/tools/portfolio-calculator': {
+    heading: 'ワンピースカード ポートフォリオ収益率計算',
+    paragraphs: [
+      'カードを検索して購入価格と数量を入力すると、現在の参考価格と比較した評価額、評価損益、収益率を計算できます。',
+      'ログインせずに計算でき、ログイン後は購入情報を既存のポートフォリオへ保存できます。'
+    ],
+    links: ['/jp/guides/portfolio-calculator', '/jp/lab', '/jp/prices', '/jp/cards']
+  },
+  '/guides/portfolio-calculator': {
+    heading: 'ポートフォリオ収益率計算ガイド',
+    paragraphs: [
+      'カードを選び、購入価格を直接入力するか、購入日以前の有効な参考価格から購入単価を推定できます。',
+      '評価損益は現在の参考価格と購入原価の差であり、販売手数料、送料、為替変動は含みません。'
+    ],
+    links: ['/jp/tools/portfolio-calculator', '/jp/lab', '/jp/prices', '/jp']
   },
   '/calendar': {
     heading: 'ワンピースカードゲーム 発売日とイベントカレンダー',
@@ -1150,6 +1218,41 @@ function createJsonLd(pathname, seo) {
         '@type': 'Question',
         name: '손익분기 판매가는 무엇인가요?',
         acceptedAnswer: { '@type': 'Answer', text: '수수료와 배송비까지 반영했을 때 손익이 0원이 되는 카드 1장당 판매 가격입니다.' }
+      }
+    ];
+  } else if (normalized === '/guides/portfolio-calculator' || normalized === '/jp/guides/portfolio-calculator') {
+    const isJapanesePortfolioGuide = normalized.startsWith('/jp/');
+    pageNode.mainEntity = isJapanesePortfolioGuide ? [
+      {
+        '@type': 'Question',
+        name: '表示価格は実際の売却価格を保証しますか？',
+        acceptedAnswer: { '@type': 'Answer', text: 'いいえ。カードの状態や取引時期によって異なる参考値です。' }
+      },
+      {
+        '@type': 'Question',
+        name: 'ログインなしで計算できますか？',
+        acceptedAnswer: { '@type': 'Answer', text: 'はい。計算は公開機能で、ポートフォリオへの保存時のみログインが必要です。' }
+      },
+      {
+        '@type': 'Question',
+        name: '日付の推定値はどのように選びますか？',
+        acceptedAnswer: { '@type': 'Answer', text: '選択日を含む過去7日以内で最も近い有効な相場を使用します。' }
+      }
+    ] : [
+      {
+        '@type': 'Question',
+        name: '표시 가격이 실제 판매 보장 가격인가요?',
+        acceptedAnswer: { '@type': 'Answer', text: '아닙니다. 최근 거래와 현재 시세를 정리한 참고값이며 카드 상태와 거래 시점에 따라 달라질 수 있습니다.' }
+      },
+      {
+        '@type': 'Question',
+        name: '로그인하지 않아도 계산할 수 있나요?',
+        acceptedAnswer: { '@type': 'Answer', text: '네. 검색과 계산은 공개 기능입니다. 계산 결과를 포트폴리오에 저장할 때만 로그인이 필요합니다.' }
+      },
+      {
+        '@type': 'Question',
+        name: '날짜 추정값은 어떻게 고르나요?',
+        acceptedAnswer: { '@type': 'Answer', text: '선택한 날짜를 포함해 이전 7일 안에서 가장 가까운 유효 시세 기록을 사용합니다.' }
       }
     ];
   } else if (schemaType === 'FAQPage') {

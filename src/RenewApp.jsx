@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail } from './api/auth';
@@ -20,6 +20,7 @@ import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
 import CenteringLab from './CenteringLab';
+import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuide } from './PortfolioCalculator';
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
 import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
@@ -2295,6 +2296,34 @@ function mergePsa10MarketDetail(detail, psaDetail) {
   };
 }
 
+async function searchPortfolioCalculatorCards(query) {
+  const cards = await searchCards(query, 'JP');
+  return (Array.isArray(cards) ? cards : []).map((card) => ({
+    ...card,
+    thumbnailUrl: getCardThumbnailSrc(card)
+  }));
+}
+
+async function loadPortfolioCalculatorQuote(card) {
+  const link = await findApprovedCardMarketLink(card);
+  if (!link?.apparelId) return null;
+  const detail = await fetchMarketPrice({
+    code: card.marketCode || card.cardNo,
+    apparelId: link.apparelId
+  });
+  const psaDetail = await fetchPsa10MarketPrice(card.id).catch(() => null);
+  const merged = mergePsa10MarketDetail(detail, psaDetail);
+  return {
+    apparelId: Number(link.apparelId),
+    detail: merged,
+    prices: {
+      a: Number(getMarketConditionBucket(merged?.latestByCondition, 'a')?.price || 0),
+      psa10: Number(getMarketConditionBucket(merged?.latestByCondition, 'psa10')?.price || 0)
+    },
+    sourceUrl: detail?.sourceUrl || ''
+  };
+}
+
 function getMarketSaleSourceLabel(sale, fallback = '') {
   const sourceText = String(`${sale?.platform || ''} ${sale?.source || ''} ${sale?.sourceUrl || ''}`).toLowerCase();
   if (sourceText.includes('snkrdunk')) return 'SNKR';
@@ -2700,6 +2729,8 @@ const PAGE_PATHS = {
   packSimulatorGuide: '/guides/pack-simulator',
   profitCalculator: '/tools/profit-calculator',
   profitGuide: '/guides/profit-calculator',
+  portfolioCalculator: '/tools/portfolio-calculator',
+  portfolioCalculatorGuide: '/guides/portfolio-calculator',
   calendar: '/calendar',
   news: '/news',
   shops: '/shops',
@@ -2811,6 +2842,8 @@ function getRouteSeoPage(pathname = '/') {
   if (path.startsWith('/community')) return 'lab';
   if (path === '/tools/profit-calculator') return 'profitCalculator';
   if (path === '/guides/profit-calculator') return 'profitGuide';
+  if (path === '/tools/portfolio-calculator') return 'portfolioCalculator';
+  if (path === '/guides/portfolio-calculator') return 'portfolioCalculatorGuide';
   if (path.startsWith('/lab')) return 'lab';
   if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
@@ -2936,11 +2969,11 @@ const PAGE_SEO = {
     body: '질문, 정보, 자유 이야기와 가입인사를 나누고 출석 포인트와 회원 등급을 확인하는 원피스카드 커뮤니티입니다.'
   },
   lab: {
-    title: '원피스카드 실험실 - 센터링 측정·카드깡 시뮬레이터 | Card Pone',
+    title: '원피스카드 실험실 - 센터링·카드깡·포트폴리오 계산 | Card Pone',
     h1: '원피스카드 실험실',
-    description: '원피스카드 센터링 측정기와 카드깡 시뮬레이터 등 수집에 필요한 공개 도구를 이용할 수 있습니다.',
-    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드깡 시뮬레이터',
-    body: '센터링 측정기와 카드깡 시뮬레이터를 한곳에서 선택해 이용할 수 있는 공개 도구 모음입니다.'
+    description: '원피스카드 센터링 측정기, 카드깡 시뮬레이터와 포트폴리오 수익률 계산기를 이용할 수 있습니다.',
+    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드 수익률 계산기',
+    body: '센터링 측정기, 카드깡 시뮬레이터와 포트폴리오 수익률 계산기를 한곳에서 선택하는 공개 도구 모음입니다.'
   },
   centering: {
     title: '원피스카드 센터링 측정기 | Card Pone',
@@ -2983,6 +3016,20 @@ const PAGE_SEO = {
     description: '카드 거래 손익 계산 기준, 수수료와 배송비 반영 방법, 손익분기 판매가 확인 방법을 안내합니다.',
     keywords: '카드 손익 계산 방법, 카드 수익률 계산, 카드 손익분기 판매가, 원피스카드 거래 가이드',
     body: '카드 매입가와 판매가, 수수료, 배송비를 기준으로 손익과 수익률을 확인하는 방법을 정리한 공개 가이드입니다.'
+  },
+  portfolioCalculator: {
+    title: '원피스카드 포트폴리오 수익률 계산기 | Card Pone',
+    h1: '포트폴리오 수익률 계산기',
+    description: '원피스카드를 검색하고 매입가 또는 매입일 시세를 입력해 현재 평가금액, 평가손익과 수익률을 계산하세요.',
+    keywords: '원피스카드 포트폴리오, 카드 수익률 계산기, 원피스카드 평가손익, 카드 매입가 계산',
+    body: '카드별 매입가와 수량을 현재 참고 시세와 비교해 평가금액, 평가손익, 수익률을 확인하는 공개 도구입니다.'
+  },
+  portfolioCalculatorGuide: {
+    title: '포트폴리오 수익률 계산기 사용 가이드 | Card Pone',
+    h1: '포트폴리오 수익률 계산 가이드',
+    description: '카드 검색, 매입가 직접 입력, 매입일 시세 추정과 포트폴리오 저장 방법을 안내합니다.',
+    keywords: '카드 포트폴리오 사용법, 카드 수익률 계산 방법, 원피스카드 매입가, 카드 평가손익',
+    body: '카드별 매입 정보와 현재 참고 시세를 이용해 평가손익을 계산하고 로그인 후 포트폴리오에 저장하는 방법을 안내합니다.'
   },
   news: {
     title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | Card Pone',
@@ -3145,11 +3192,11 @@ const JP_PAGE_SEO = {
     body: '質問、情報、自己紹介、自由な話題を共有できるONE PIECE CARD GAMEコミュニティです。'
   },
   lab: {
-    title: 'ワンピースカード ラボ - センタリング・開封シミュレーター | Card Pone',
+    title: 'ワンピースカード ラボ - センタリング・開封・収益率計算 | Card Pone',
     h1: 'ワンピースカード ラボ',
-    description: 'センタリング測定とパック開封シミュレーターなど、カード収集に役立つ公開ツールを利用できます。',
-    keywords: 'ワンピースカード ラボ,カード センタリング,パック開封 シミュレーター',
-    body: 'センタリング測定とパック開封シミュレーターを選んで利用できる公開ツール集です。'
+    description: 'センタリング測定、パック開封シミュレーター、ポートフォリオ収益率計算を利用できます。',
+    keywords: 'ワンピースカード ラボ,カード センタリング,パック開封 シミュレーター,カード 収益率 計算',
+    body: 'センタリング測定、パック開封シミュレーター、ポートフォリオ収益率計算を選べる公開ツール集です。'
   },
   centering: {
     title: 'ワンピースカード センタリング測定 | Card Pone',
@@ -3192,6 +3239,20 @@ const JP_PAGE_SEO = {
     description: 'カード取引の損益計算、手数料・送料の反映、損益分岐販売価格の確認方法を解説します。',
     keywords: 'カード 損益計算 方法,カード 利益率 計算,損益分岐価格,トレーディングカード ガイド',
     body: 'カードの仕入れ値と販売価格、手数料、送料をもとに損益と収益率を確認する方法をまとめた公開ガイドです。'
+  },
+  portfolioCalculator: {
+    title: 'ワンピースカード ポートフォリオ収益率計算 | Card Pone',
+    h1: 'ポートフォリオ収益率計算',
+    description: 'カードを検索し、購入価格または購入日の参考価格から現在評価額、評価損益、収益率を計算できます。',
+    keywords: 'ワンピースカード ポートフォリオ,カード 収益率 計算,カード 評価損益,カード 購入価格',
+    body: 'カードごとの購入価格と数量を現在の参考価格と比較し、評価額、評価損益、収益率を確認する公開ツールです。'
+  },
+  portfolioCalculatorGuide: {
+    title: 'ポートフォリオ収益率計算ガイド | Card Pone',
+    h1: 'ポートフォリオ収益率計算ガイド',
+    description: 'カード検索、購入価格の入力、購入日の参考価格推定、ポートフォリオ保存方法を案内します。',
+    keywords: 'カード ポートフォリオ 使い方,カード 収益率 計算方法,ワンピースカード 購入価格',
+    body: '購入情報と現在の参考価格から評価損益を計算し、ログイン後にポートフォリオへ保存する方法を案内します。'
   },
   calendar: {
     title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
@@ -3441,6 +3502,8 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path.startsWith('/community')) return { page: 'community' };
   if (path === '/tools/profit-calculator') return { page: 'home' };
   if (path === '/guides/profit-calculator') return { page: 'profitCalculator' };
+  if (path === '/tools/portfolio-calculator') return { page: 'lab' };
+  if (path === '/guides/portfolio-calculator') return { page: 'portfolioCalculator' };
   if (path === '/guides/centering') return { page: 'centering' };
   if (path === '/guides/pack-simulator') return { page: 'packSimulator' };
   if (path.startsWith('/lab')) return { page: 'lab' };
@@ -3585,7 +3648,7 @@ function getPageJsonLd(page, seo, uiLang = 'KR') {
       mainEntityOfPage: url
     });
   }
-  if (['profitCalculator', 'centering', 'packSimulator'].includes(page)) {
+  if (['profitCalculator', 'portfolioCalculator', 'centering', 'packSimulator'].includes(page)) {
     graph.push({
       '@type': 'WebApplication',
       name: seo.h1,
@@ -3600,6 +3663,16 @@ function getPageJsonLd(page, seo, uiLang = 'KR') {
     graph.push({
       '@type': 'FAQPage',
       mainEntity: getProfitCalculatorFaq(uiLang).map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer }
+      }))
+    });
+  }
+  if (page === 'portfolioCalculatorGuide') {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: getPortfolioCalculatorFaq(uiLang).map((item) => ({
         '@type': 'Question',
         name: item.question,
         acceptedAnswer: { '@type': 'Answer', text: item.answer }
@@ -4222,7 +4295,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
 
 function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
-  const isLabActive = ['lab', 'centering', 'packSimulator'].includes(activePage);
+  const isLabActive = ['lab', 'centering', 'packSimulator', 'portfolioCalculator', 'portfolioCalculatorGuide'].includes(activePage);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
@@ -7269,6 +7342,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   const [selectedSeries, setSelectedSeries] = useState(() => hasInitialSearch ? getDefaultRenewSeriesId(initialLocale) : (initialViewState?.selectedSeries || getDefaultRenewSeriesId(initialLocale)));
   const [openSection, setOpenSection] = useState(() => hasInitialSearch ? '' : (initialViewState?.openSection || ''));
   const [searchKeyword, setSearchKeyword] = useState(hasInitialSearch ? initialSearch.q : (initialViewState?.searchKeyword || ''));
+  const [debouncedSearchKeyword, setDebouncedSearchKeyword] = useState(searchKeyword);
   const [activeRarity, setActiveRarity] = useState(hasInitialSearch ? 'ALL' : (initialViewState?.activeRarity || 'ALL'));
   const [collectionFilter, setCollectionFilter] = useState(hasInitialSearch ? 'all' : (initialViewState?.collectionFilter || 'all'));
   const [catalogSortMode, setCatalogSortMode] = useState(hasInitialSearch ? 'rarity' : (initialViewState?.catalogSortMode || 'rarity'));
@@ -7285,6 +7359,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   ));
   const rarityPanelRef = useRef(null);
   const appliedViewStateRevisionRef = useRef(viewStateRevision);
+  const [catalogPending, startCatalogTransition] = useTransition();
 
   const localeSeries = useMemo(() => seriesData.filter((series) => (series.locale ?? 'KR') === locale), [locale]);
   const sections = useMemo(() => buildRenewSeriesSections(localeSeries), [localeSeries]);
@@ -7392,6 +7467,11 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter]);
 
   useEffect(() => {
+    const timerId = window.setTimeout(() => setDebouncedSearchKeyword(searchKeyword), 180);
+    return () => window.clearTimeout(timerId);
+  }, [searchKeyword]);
+
+  useEffect(() => {
     if (loading || restoreScrollY == null || typeof window === 'undefined') return undefined;
     return restoreAppScrollPosition(restoreScrollY, { onDone: onRestoreScrollDone });
   }, [loading, restoreScrollY, onRestoreScrollDone]);
@@ -7433,7 +7513,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     async function loadCards() {
       setLoading(true);
       try {
-        const keyword = searchKeyword.trim();
+        const keyword = debouncedSearchKeyword.trim();
         const collectionIds = collectionFilter === 'owned'
           ? (Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds : [])
           : collectionFilter === 'wish'
@@ -7446,7 +7526,11 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
             : collectionIds.length
               ? await fetchCards({ locale })
               : [];
-        if (!cancelled) setCards(Array.isArray(result) ? result : []);
+        if (!cancelled) {
+          startCatalogTransition(() => {
+            setCards(Array.isArray(result) ? result : []);
+          });
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -7455,7 +7539,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     return () => {
       cancelled = true;
     };
-  }, [locale, selectedSeries, searchKeyword, collectionFilter, userState]);
+  }, [locale, selectedSeries, debouncedSearchKeyword, collectionFilter, userState]);
 
   const getCatalogPriceRank = useCallback((card) => {
     const price = catalogMarketPriceByCardId.get(card.id);
@@ -7673,7 +7757,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
         </div>
       </aside>
 
-      <section className="renew-catalog-main">
+      <section className="renew-catalog-main" aria-busy={loading || catalogPending}>
         <div className="renew-catalog-toolbar">
           <input value={searchKeyword} onChange={(event) => setSearchKeyword(event.target.value)} placeholder={t('searchPlaceholder')} />
           <div className="renew-mobile-rarity-filter" ref={rarityPanelRef}>
@@ -8801,7 +8885,7 @@ function RenewLabToolGuide({ type, uiLang, onOpenTool }) {
   );
 }
 
-function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator }) {
+function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfolioCalculator }) {
   const tools = [
     {
       id: 'centering',
@@ -8818,6 +8902,14 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator }) {
       title: getLocaleText(uiLang, '카드깡 시뮬레이터', 'Pack Simulator', 'パックシミュレーター'),
       description: getLocaleText(uiLang, '카드 팩을 가상으로 개봉하는 도구입니다.', 'Open card packs virtually.', 'カードパックをバーチャルで開封します。'),
       onClick: onOpenSimulator
+    },
+    {
+      id: 'portfolio-calculator',
+      icon: 'prices',
+      status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
+      title: getLocaleText(uiLang, '포트폴리오 수익률 계산기', 'Portfolio Return Calculator', 'ポートフォリオ収益率計算'),
+      description: getLocaleText(uiLang, '매입 정보와 현재 참고 시세로 평가손익을 계산합니다.', 'Compare purchase details with the current reference price.', '購入情報と現在の参考価格から評価損益を計算します。'),
+      onClick: onOpenPortfolioCalculator
     },
     {
       id: 'deck-builder',
@@ -12415,7 +12507,7 @@ export default function RenewApp() {
   const [routeRevision, setRouteRevision] = useState(0);
   const internalNavigationRef = useRef(false);
 
-  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'packSimulator'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
+  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'packSimulator', 'portfolioCalculator', 'portfolioCalculatorGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const isAdminUser = useMemo(() => (
     authUser?.app_metadata?.role === 'admin'
@@ -12968,6 +13060,48 @@ export default function RenewApp() {
         <ProfitCalculator uiLang={uiLang} onOpenGuide={() => navigatePage('profitGuide')} />
       ) : activePage === 'profitGuide' ? (
         <ProfitCalculatorGuide uiLang={uiLang} onOpenCalculator={() => navigatePage('profitCalculator')} />
+      ) : activePage === 'portfolioCalculator' ? (
+        <PortfolioCalculator
+          uiLang={uiLang}
+          authUser={authUser}
+          onOpenGuide={() => navigatePage('portfolioCalculatorGuide')}
+          onRequireLogin={() => handleAuthClick('login')}
+          onSearchCards={searchPortfolioCalculatorCards}
+          onLoadQuote={loadPortfolioCalculatorQuote}
+          onEstimatePrice={findPortfolioEstimatePoint}
+          onSave={async ({ card, quote, grade, lot }) => {
+            const imageUrl = card.imageUrl || card.image_url || card.image || card.thumbnailUrl || '';
+            const payload = await savePortfolioPurchase({
+              holding: {
+                code: card.marketCode || card.cardNo,
+                apparelId: quote.apparelId,
+                cardId: card.id,
+                name: card.name,
+                setName: card.seriesName || '',
+                imageUrl,
+                previewImageUrl: imageUrl,
+                sourceUrl: quote.sourceUrl || '',
+                grade: normalizeMarketConditionKey(grade)
+              },
+              purchase: lot
+            });
+            setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
+          }}
+          onOpenDetail={(card, quote) => {
+            const code = card.marketCode || card.cardNo;
+            setMarketInitialCode(code);
+            setMarketInitialApparelId(quote?.apparelId || null);
+            setMarketInitialCardId(card.id || '');
+            const query = new URLSearchParams();
+            if (code) query.set('code', code);
+            if (quote?.apparelId) query.set('apparelId', String(quote.apparelId));
+            if (card.id) query.set('cardId', card.id);
+            navigatePage('prices', { query: query.toString() });
+          }}
+          rates={{ krwPerJpy: MARKET_USD_TO_KRW / MARKET_USD_TO_JPY, jpyPerUsd: MARKET_USD_TO_JPY }}
+        />
+      ) : activePage === 'portfolioCalculatorGuide' ? (
+        <PortfolioCalculatorGuide uiLang={uiLang} onOpenCalculator={() => navigatePage('portfolioCalculator')} />
       ) : activePage === 'centeringGuide' ? (
         <RenewLabToolGuide type="centering" uiLang={uiLang} onOpenTool={() => navigatePage('centering')} />
       ) : activePage === 'packSimulatorGuide' ? (
@@ -12979,6 +13113,7 @@ export default function RenewApp() {
           uiLang={uiLang}
           onOpenCentering={() => navigatePage('centering')}
           onOpenSimulator={() => navigatePage('packSimulator')}
+          onOpenPortfolioCalculator={() => navigatePage('portfolioCalculator')}
         />
       ) : activePage === 'packSimulator' ? (
         <RenewPackSimulator
