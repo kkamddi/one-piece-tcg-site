@@ -7034,7 +7034,7 @@ function RenewLegalModal({ type, onClose }) {
   );
 }
 
-function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, onRequireLogin, marketListings = [], uiLang }) {
+function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, viewStateRevision = 0, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, onRequireLogin, marketListings = [], uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const hasInitialSearch = Boolean(initialSearch?.q);
   const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (initialViewState?.locale || 'JP');
@@ -7057,6 +7057,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       .map((item) => [item.code, item.previewImageUrl])
   ));
   const rarityPanelRef = useRef(null);
+  const appliedViewStateRevisionRef = useRef(viewStateRevision);
 
   const localeSeries = useMemo(() => seriesData.filter((series) => (series.locale ?? 'KR') === locale), [locale]);
   const sections = useMemo(() => buildRenewSeriesSections(localeSeries), [localeSeries]);
@@ -7147,6 +7148,8 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
   }, [initialSearch?.id, initialSearch?.locale, initialSearch?.q]);
 
   useEffect(() => {
+    if (appliedViewStateRevisionRef.current === viewStateRevision) return;
+    appliedViewStateRevisionRef.current = viewStateRevision;
     if (!initialViewState || hasInitialSearch) return;
     if (initialViewState.locale) setLocale(initialViewState.locale);
     if (initialViewState.selectedSeries) setSelectedSeries(initialViewState.selectedSeries);
@@ -7155,7 +7158,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     setCollectionFilter(initialViewState.collectionFilter || 'all');
     setCatalogSortMode(initialViewState.catalogSortMode || 'rarity');
     setOpenSection(initialViewState.openSection || '');
-  }, [hasInitialSearch, initialViewState]);
+  }, [hasInitialSearch, initialViewState, viewStateRevision]);
 
   useEffect(() => {
     setExpandedDeferredRarities(new Set());
@@ -7350,14 +7353,23 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     }
   };
 
+  const changeCatalogLocale = (nextLocale) => {
+    if (locale === nextLocale) return;
+    setLocale(nextLocale);
+    setSelectedSeries(getDefaultRenewSeriesId(nextLocale));
+    setOpenSection('');
+    setActiveRarity('ALL');
+    setRarityPanelOpen(false);
+  };
+
   return (
     <main className="renew-catalog">
       <aside className="renew-catalog-side">
         <div className="renew-catalog-headline">
           <span>{t('category')}</span>
           <div className="renew-catalog-locale">
-            <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => setLocale('KR')}>{t('searchKr')}</button>
-            <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => setLocale('JP')}>{t('searchJp')}</button>
+            <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => changeCatalogLocale('KR')}>{t('searchKr')}</button>
+            <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => changeCatalogLocale('JP')}>{t('searchJp')}</button>
           </div>
         </div>
         <div className="renew-mobile-category-panel">
@@ -11850,6 +11862,7 @@ export default function RenewApp() {
           setUserState={setUserState}
           initialSearch={catalogInitialSearch}
           initialViewState={catalogViewState}
+          viewStateRevision={routeRevision}
           restoreScrollY={catalogReturnScrollY}
           onRestoreScrollDone={() => setCatalogReturnScrollY(null)}
           onViewStateChange={handleCatalogViewStateChange}
