@@ -427,7 +427,7 @@ function writeMarketInterestIds(userId, ids) {
   window.localStorage.setItem(getMarketInterestStorageKey(userId), JSON.stringify([...ids]));
 }
 const OFFICIAL_TOPIC_ITEMS = Array.isArray(topicsData)
-  ? topicsData.filter((item) => !item.calendarOnly || item.calendarKind === 'release')
+  ? topicsData.filter((item) => !item.calendarOnly)
   : [];
 const TOPIC_SOURCE_LABEL = {
   KR_OFFICIAL: '한국 공식',
