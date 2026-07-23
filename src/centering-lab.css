@@ -661,6 +661,57 @@
   border-top: 1px dashed rgba(23, 25, 28, .58);
 }
 
+.centering-corner-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 560px);
+  gap: 12px;
+}
+
+.centering-corner-toolbar .centering-editor-legend {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.centering-corner-zoom {
+  display: inline-grid;
+  grid-template-columns: 30px 48px 30px;
+  align-items: center;
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid rgba(23, 25, 28, .14);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.centering-corner-zoom button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  color: #17191c;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.centering-corner-zoom button:disabled {
+  opacity: .3;
+  cursor: default;
+}
+
+.centering-corner-zoom output {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  border-inline: 1px solid rgba(23, 25, 28, .1);
+  color: #343941;
+  font-size: 11px;
+  font-weight: 850;
+}
+
 .centering-corner-frame {
   position: relative;
   width: min(100%, 560px);
@@ -1676,6 +1727,27 @@
   .centering-editor-legend {
     gap: 12px;
     font-size: 10px;
+  }
+
+  .centering-corner-toolbar {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .centering-corner-toolbar .centering-editor-legend {
+    flex-wrap: wrap;
+    column-gap: 10px;
+    row-gap: 4px;
+  }
+
+  .centering-corner-zoom {
+    grid-template-columns: 28px 43px 28px;
+    height: 30px;
+  }
+
+  .centering-corner-zoom button {
+    width: 28px;
+    height: 28px;
   }
 
   .centering-step-controls {

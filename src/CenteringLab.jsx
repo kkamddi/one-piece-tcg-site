@@ -6,6 +6,7 @@ const CARD_HEIGHT_MM = 88;
 const CAPTURE_WIDTH = 630;
 const CAPTURE_HEIGHT = 880;
 const CAPTURE_SOURCE_WIDTH = 960;
+const CORNER_ZOOM_PADDINGS = [0.16, 0.1, 0.055, 0.02];
 
 const COPY = {
   KR: {
@@ -86,6 +87,9 @@ const CAMERA_FLOW_COPY = {
     cornerApply: '카드 외곽 확정',
     cornerRetake: '다시 촬영',
     cornerLabel: '카드 모서리',
+    zoomOut: '축소',
+    zoomIn: '확대',
+    zoomLabel: '외곽 조정 확대 배율',
     outerLegend: '실제 카드 외곽',
     innerLegend: '인쇄 경계 (다음 단계)',
     outerTip: '주황색 네 점을 카드의 둥근 모서리가 끝나는 실제 바깥쪽에 맞춰 주세요.',
@@ -114,6 +118,9 @@ const CAMERA_FLOW_COPY = {
     cornerApply: 'Confirm card outline',
     cornerRetake: 'Retake',
     cornerLabel: 'Card corner',
+    zoomOut: 'Zoom out',
+    zoomIn: 'Zoom in',
+    zoomLabel: 'Outline adjustment zoom level',
     outerLegend: 'Physical card edge',
     innerLegend: 'Print border (next step)',
     outerTip: 'Place the four orange points on the physical ends of the rounded card corners.',
@@ -142,6 +149,9 @@ const CAMERA_FLOW_COPY = {
     cornerApply: 'カード外枠を確定',
     cornerRetake: '撮り直す',
     cornerLabel: 'カードの角',
+    zoomOut: '縮小',
+    zoomIn: '拡大',
+    zoomLabel: '外枠調整の拡大率',
     outerLegend: 'カード実物の外枠',
     innerLegend: '印刷境界（次のステップ）',
     outerTip: 'オレンジ色の4点を、丸い角が終わるカード実物の外側に合わせてください。',
@@ -448,6 +458,11 @@ function getCornerViewport(points, padding = 0.16) {
     width: Number(width.toFixed(2)),
     height: Number(height.toFixed(2))
   };
+}
+
+function getCornerViewportForZoom(points, zoomLevel = 0) {
+  const safeLevel = Math.round(clamp(zoomLevel, 0, CORNER_ZOOM_PADDINGS.length - 1));
+  return getCornerViewport(points, CORNER_ZOOM_PADDINGS[safeLevel]);
 }
 
 function projectPointToViewport(point, viewport) {
@@ -1103,9 +1118,10 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const [cornerPoints, setCornerPoints] = useState({
     tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
   });
-  const [cornerViewport, setCornerViewport] = useState(() => getCornerViewport({
+  const [cornerViewport, setCornerViewport] = useState(() => getCornerViewportForZoom({
     tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
   }));
+  const [cornerZoom, setCornerZoom] = useState(0);
   const [activeCorner, setActiveCorner] = useState('');
   const [boundaries, setBoundaries] = useState(initialBoundaries);
   const [boundaryFrame, setBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
@@ -1146,6 +1162,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     left: `${-cornerViewport.left / cornerViewport.width * 100}%`,
     top: `${-cornerViewport.top / cornerViewport.height * 100}%`
   }), [cornerViewport]);
+  const cornerZoomLabel = `${Number((1 + cornerZoom * 0.25).toFixed(2))}x`;
 
   useEffect(() => {
     if (!demoResult && !demoCorners) return;
@@ -1186,7 +1203,8 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       setRawImageUrl(canvas.toDataURL('image/jpeg', 0.9));
       setRawAspectRatio(`${canvas.width} / ${canvas.height}`);
       setCornerPoints(demoPoints);
-      setCornerViewport(getCornerViewport(demoPoints));
+      setCornerZoom(0);
+      setCornerViewport(getCornerViewportForZoom(demoPoints));
     } else {
       setImageUrl(canvas.toDataURL('image/jpeg', 0.9));
     }
@@ -1223,7 +1241,8 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     const detection = detectCardCorners(canvas);
     const normalizedPoints = normalizeCornerPoints(detection.points, canvas.width, canvas.height);
     setCornerPoints(normalizedPoints);
-    setCornerViewport(getCornerViewport(normalizedPoints));
+    setCornerZoom(0);
+    setCornerViewport(getCornerViewportForZoom(normalizedPoints));
     await sleep(260);
     setPhase('corners');
   }
@@ -1402,8 +1421,15 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   }
 
   function returnToCornerAdjustment() {
-    setCornerViewport(getCornerViewport(cornerPoints));
+    setCornerViewport(getCornerViewportForZoom(cornerPoints, cornerZoom));
     setPhase('corners');
+  }
+
+  function changeCornerZoom(delta) {
+    const next = Math.round(clamp(cornerZoom + delta, 0, CORNER_ZOOM_PADDINGS.length - 1));
+    if (next === cornerZoom) return;
+    setCornerZoom(next);
+    setCornerViewport(getCornerViewportForZoom(cornerPoints, next));
   }
 
   function updateBoundaryFrame(nextFrame) {
@@ -1509,9 +1535,16 @@ export default function CenteringLab({ uiLang = 'KR' }) {
           </header>
           <div className="centering-corner-layout">
             <div className="centering-editor-visual">
-              <div className="centering-editor-legend" aria-hidden="true">
-                <span className="is-outer"><i />{flow.outerLegend}</span>
-                <span className="is-inner"><i />{flow.innerLegend}</span>
+              <div className="centering-corner-toolbar">
+                <div className="centering-editor-legend" aria-hidden="true">
+                  <span className="is-outer"><i />{flow.outerLegend}</span>
+                  <span className="is-inner"><i />{flow.innerLegend}</span>
+                </div>
+                <div className="centering-corner-zoom" aria-label={flow.zoomLabel}>
+                  <button type="button" onClick={() => changeCornerZoom(-1)} disabled={cornerZoom === 0} title={flow.zoomOut} aria-label={flow.zoomOut}>-</button>
+                  <output aria-live="polite">{cornerZoomLabel}</output>
+                  <button type="button" onClick={() => changeCornerZoom(1)} disabled={cornerZoom === CORNER_ZOOM_PADDINGS.length - 1} title={flow.zoomIn} aria-label={flow.zoomIn}>+</button>
+                </div>
               </div>
               <div
                 className="centering-corner-frame"
