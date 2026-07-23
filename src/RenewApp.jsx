@@ -4107,7 +4107,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="lab" />
           <span>{t('navLab')}</span>
         </a>
-        <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' || activePage === 'lab' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
+        <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
         </a>
@@ -6390,7 +6390,7 @@ function RenewCalendar({ uiLang }) {
   );
 }
 
-function RenewNews({ uiLang, onOpenCalendar, onOpenLab, isAdmin = false }) {
+function RenewNews({ uiLang, onOpenCalendar }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
   const savedViewState = getAppHistoryState().newsViewState || {};
@@ -6455,16 +6455,6 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, isAdmin = false }) {
         </div>
         <b aria-hidden="true">›</b>
       </a>
-      {isAdmin ? (
-        <a className="renew-news-calendar-link renew-news-lab-link" href={getLocalizedPagePath('lab', uiLang)} onClick={(event) => { event.preventDefault(); onOpenLab?.(); }}>
-          <span>CARD LAB</span>
-          <div>
-            <strong>{uiLang === 'JP' ? 'センタリング測定' : uiLang === 'EN' ? 'Centering Check' : '센터링 측정기'}</strong>
-            <small>{uiLang === 'JP' ? 'カメラでカード表面の左右・上下比率を確認できます。' : uiLang === 'EN' ? 'Check front centering ratios with your camera.' : '카메라로 카드 앞면의 좌우·상하 비율을 확인하세요.'}</small>
-          </div>
-          <b aria-hidden="true">›</b>
-        </a>
-      ) : null}
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.map((item) => (
           <button
@@ -11830,9 +11820,7 @@ export default function RenewApp() {
       ) : activePage === 'news' ? (
         <RenewNews
           uiLang={uiLang}
-          isAdmin={isAdminUser}
           onOpenCalendar={() => navigatePage('calendar')}
-          onOpenLab={() => navigatePage('lab')}
         />
       ) : activePage === 'partnerShops' ? (
         isJapaneseUi(uiLang) ? <RenewJapaneseShops /> : <RenewPartnerShopSeoPage uiLang={uiLang} />
