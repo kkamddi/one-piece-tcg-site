@@ -4563,7 +4563,6 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [pointOverview, setPointOverview] = useState(null);
   const [pointLoading, setPointLoading] = useState(false);
-  const [checkInLoading, setCheckInLoading] = useState(false);
 
   useEffect(() => {
     if (!unlocked) return undefined;
@@ -4589,29 +4588,6 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     const timer = window.setTimeout(() => setNicknameNotice(null), 2600);
     return () => window.clearTimeout(timer);
   }, [nicknameNotice]);
-
-  async function checkIn() {
-    if (checkInLoading || pointOverview?.checkedToday) return;
-    setCheckInLoading(true);
-    try {
-      const status = await checkInCommunityAttendance();
-      try {
-        setPointOverview(await fetchCommunityPointOverview());
-      } catch {
-        setPointOverview((current) => ({ ...(current || {}), ...status }));
-      }
-      setNicknameNotice({
-        type: 'success',
-        message: status?.awarded
-          ? text('출석체크가 완료되었습니다. +1P가 적립되었습니다.', 'Check-in complete. +1P awarded.', '出席チェックが完了しました。+1Pを獲得しました。')
-          : text('오늘은 이미 출석체크를 완료했습니다.', 'You have already checked in today.', '本日はすでに出席チェック済みです。')
-      });
-    } catch (error) {
-      setNicknameNotice({ type: 'error', message: error?.message || text('출석을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'Could not complete check-in. Please try again.', '出席チェックを処理できませんでした。しばらくしてから再試行してください。') });
-    } finally {
-      setCheckInLoading(false);
-    }
-  }
 
   async function unlockAccount(event) {
     event.preventDefault();
@@ -4753,15 +4729,6 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
                   <span>{text('연속 출석일', 'Check-in streak', '連続出席')}</span>
                   <strong>{pointLoading ? '-' : text(`${Number(pointOverview?.streak || 0)}일`, `${Number(pointOverview?.streak || 0)} days`, `${Number(pointOverview?.streak || 0)}日`)}</strong>
                 </div>
-              </div>
-              <div className="renew-account-checkin">
-                <div>
-                  <strong>{text('오늘의 출석', 'Today\'s check-in', '今日の出席')}</strong>
-                  <span>{pointOverview?.checkedToday ? text('출석 완료', 'Complete', '出席済み') : text('매일 1회 +1P', '+1P once a day', '1日1回 +1P')}</span>
-                </div>
-                <button type="button" onClick={checkIn} disabled={pointLoading || checkInLoading || pointOverview?.checkedToday}>
-                  {checkInLoading ? text('처리 중', 'Checking in', '処理中') : pointOverview?.checkedToday ? text('출석 완료', 'Checked in', '出席完了') : text('출석체크', 'Check in', '出席チェック')}
-                </button>
               </div>
               <div className="renew-account-point-history">
                 <header>
@@ -5127,6 +5094,9 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const [progressOpen, setProgressOpen] = useState(false);
   const [progressLocale, setProgressLocale] = useState('KR');
   const [progressData, setProgressData] = useState({ KR: { owned: 0, total: 0, percent: 0, series: [] }, JP: { owned: 0, total: 0, percent: 0, series: [] } });
+  const [attendance, setAttendance] = useState(null);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceNotice, setAttendanceNotice] = useState('');
   const ownedCount = Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds.length : 0;
   const valuationEntries = (Array.isArray(portfolioHoldings) ? portfolioHoldings : []).map((item) => [item.id, item]);
   const totalJpy = marketTotalJpy ?? 0;
@@ -5258,6 +5228,45 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const latestPartnerNews = useMemo(() => isJp ? null : getActivePartnerShopNews()[0] || null, [isJp]);
 
   useEffect(() => {
+    if (!authUser?.id) {
+      setAttendance(null);
+      return undefined;
+    }
+    let cancelled = false;
+    fetchCommunityPointOverview()
+      .then((overview) => {
+        if (!cancelled) setAttendance(overview || null);
+      })
+      .catch(() => {
+        if (!cancelled) setAttendance(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id]);
+
+  async function checkInFromHome() {
+    if (attendanceLoading || attendance?.checkedToday) return;
+    setAttendanceLoading(true);
+    setAttendanceNotice('');
+    try {
+      const status = await checkInCommunityAttendance();
+      try {
+        setAttendance(await fetchCommunityPointOverview());
+      } catch {
+        setAttendance((current) => ({ ...(current || {}), ...status }));
+      }
+      setAttendanceNotice(status?.awarded
+        ? getLocaleText(uiLang, '+1P 적립 완료', '+1P awarded', '+1P獲得完了')
+        : getLocaleText(uiLang, '오늘 출석 완료', 'Checked in today', '本日は出席済み'));
+    } catch {
+      setAttendanceNotice(getLocaleText(uiLang, '출석 처리 실패', 'Check-in failed', '出席に失敗しました'));
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     if (isJp) {
       setRenewalNoticeOpen(false);
@@ -5379,6 +5388,25 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
               <strong>{psa10Count}</strong>
             </button>
           </div>
+          {authUser ? (
+            <div className="renew-home-attendance">
+              <div>
+                <span>{getLocaleText(uiLang, '오늘의 출석', 'Today\'s check-in', '今日の出席')}</span>
+                <strong>{attendance?.checkedToday
+                  ? getLocaleText(uiLang, '출석 완료', 'Complete', '出席済み')
+                  : getLocaleText(uiLang, '매일 1회 +1P', '+1P once a day', '1日1回 +1P')}</strong>
+                <small>{getLocaleText(uiLang, `연속 ${Number(attendance?.streak || 0)}일 · ${Number(attendance?.totalPoints || 0).toLocaleString('ko-KR')}P`, `${Number(attendance?.streak || 0)}-day streak · ${Number(attendance?.totalPoints || 0)}P`, `${Number(attendance?.streak || 0)}日連続 · ${Number(attendance?.totalPoints || 0)}P`)}</small>
+              </div>
+              <button type="button" onClick={checkInFromHome} disabled={attendanceLoading || attendance?.checkedToday}>
+                {attendanceLoading
+                  ? getLocaleText(uiLang, '처리 중', 'Checking in', '処理中')
+                  : attendance?.checkedToday
+                    ? getLocaleText(uiLang, '완료', 'Done', '完了')
+                    : getLocaleText(uiLang, '출석체크', 'Check in', '出席')}
+              </button>
+              {attendanceNotice ? <em>{attendanceNotice}</em> : null}
+            </div>
+          ) : null}
           {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
         </article>
 
