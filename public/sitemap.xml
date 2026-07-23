@@ -571,10 +571,34 @@
     <priority>0.86</priority>
   </url>
   <url>
+    <loc>https://www.optcgkorea.com/lab</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.84</priority>
+  </url>
+  <url>
     <loc>https://www.optcgkorea.com/lab/centering</loc>
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/lab/pack-simulator</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/guides/centering</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.76</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/guides/pack-simulator</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.76</priority>
   </url>
   <url>
     <loc>https://www.optcgkorea.com/tools/profit-calculator</loc>

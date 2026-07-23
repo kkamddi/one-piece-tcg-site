@@ -55,11 +55,35 @@ const PAGE_SEO = {
     keywords: '원피스카드 커뮤니티, 원피스카드 질문, 원피스카드 정보, 원피스카드 가입인사, 카드 수집 커뮤니티',
     schemaType: 'CollectionPage'
   },
+  '/lab': {
+    title: '원피스카드 실험실 - 센터링 측정·카드깡 시뮬레이터 | Card Pone',
+    description: '원피스카드 센터링 측정기와 카드깡 시뮬레이터 등 수집에 필요한 공개 도구를 이용할 수 있습니다.',
+    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드깡 시뮬레이터',
+    schemaType: 'CollectionPage'
+  },
   '/lab/centering': {
     title: '원피스카드 센터링 측정기 | Card Pone',
-    description: '카메라 촬영으로 원피스카드 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석하고 센터링 참고 구간을 확인할 수 있습니다.',
+    description: '카메라 촬영이나 사진으로 원피스카드 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석하고 센터링 참고 구간을 확인할 수 있습니다.',
     keywords: '원피스카드 센터링, 카드 센터링 측정기, PSA 센터링, 원피스카드 감정',
     schemaType: 'WebApplication'
+  },
+  '/lab/pack-simulator': {
+    title: '원피스카드 카드깡 시뮬레이터 | Card Pone',
+    description: '원피스카드 시리즈와 1팩·1박스·1카톤을 선택해 가상 개봉 결과와 획득 카드의 참고 시세를 확인할 수 있습니다.',
+    keywords: '원피스카드 카드깡, 원피스카드 시뮬레이터, 원피스카드 팩 개봉, 원피스카드 박스 개봉',
+    schemaType: 'WebApplication'
+  },
+  '/guides/centering': {
+    title: '원피스카드 센터링 측정기 사용 가이드 | Card Pone',
+    description: '원피스카드 촬영 준비, 카드 외곽과 내부 인쇄 경계 조정, 센터링 결과 해석 방법을 안내합니다.',
+    keywords: '원피스카드 센터링 측정 방법, 카드 센터링 비율, 센터링 측정 가이드',
+    schemaType: 'FAQPage'
+  },
+  '/guides/pack-simulator': {
+    title: '원피스카드 카드깡 시뮬레이터 사용 가이드 | Card Pone',
+    description: '가상 카드깡의 시리즈와 개봉 단위 선택, 팩·박스·카톤 결과와 확률의 의미를 안내합니다.',
+    keywords: '원피스카드 카드깡 시뮬레이터 사용법, 원피스카드 봉입률, 가상 카드 개봉',
+    schemaType: 'FAQPage'
   },
   '/news': {
     title: '원피스 카드 공지사항 및 업데이트 | Card Pone',
@@ -119,11 +143,35 @@ const JAPANESE_SEO = {
     keywords: 'ワンピースカードゲーム コミュニティ,ワンピカード 質問,ワンピカード 情報,ワンピカード 自己紹介,ワンピカード コレクション',
     schemaType: 'CollectionPage'
   },
+  '/lab': {
+    title: 'ワンピースカード ラボ - センタリング・開封シミュレーター | Card Pone',
+    description: 'センタリング測定とパック開封シミュレーターなど、カード収集に役立つ公開ツールを利用できます。',
+    keywords: 'ワンピースカード ラボ,カード センタリング,パック開封 シミュレーター',
+    schemaType: 'CollectionPage'
+  },
   '/lab/centering': {
     title: 'ワンピースカード センタリング測定 | Card Pone',
-    description: 'カメラ撮影でカード表面の左右・上下の印刷比率を端末内で分析し、センタリングの参考範囲を確認できます。',
+    description: '撮影したカードの外枠と印刷境界を調整し、表面の左右・上下のセンタリング比率を端末内で確認できます。',
     keywords: 'ワンピースカード センタリング,カード センタリング測定,PSA センタリング',
     schemaType: 'WebApplication'
+  },
+  '/lab/pack-simulator': {
+    title: 'ワンピースカード 開封シミュレーター | Card Pone',
+    description: 'シリーズと1パック・1ボックス・1カートンを選び、仮想開封結果とカードの参考価格を確認できます。',
+    keywords: 'ワンピースカード 開封シミュレーター,ワンピカード パック開封,ボックス開封',
+    schemaType: 'WebApplication'
+  },
+  '/guides/centering': {
+    title: 'ワンピースカード センタリング測定ガイド | Card Pone',
+    description: '撮影準備、カード外枠と印刷境界の調整、センタリング結果の見方を案内します。',
+    keywords: 'カード センタリング 測定方法,センタリング 比率,ワンピースカード ガイド',
+    schemaType: 'FAQPage'
+  },
+  '/guides/pack-simulator': {
+    title: 'ワンピースカード 開封シミュレーターガイド | Card Pone',
+    description: 'シリーズと開封単位の選択、パック・ボックス・カートンの結果と確率の見方を案内します。',
+    keywords: 'ワンピースカード 開封シミュレーター 使い方,封入率,仮想開封',
+    schemaType: 'FAQPage'
   },
   '/tools/profit-calculator': {
     title: 'カード損益計算機 | Card Pone',
@@ -482,6 +530,36 @@ const SEO_PRIMARY = {
     keywords: '원피스카드 가이드, 원피스카드 입문, 원피스카드 수집, 원피스카드 보관 방법',
     schemaType: 'Article'
   },
+  '/lab': {
+    title: '원피스카드 실험실 - 센터링 측정·카드깡 시뮬레이터 | 카드포네',
+    description: '원피스카드 센터링 측정기와 카드깡 시뮬레이터 등 수집에 필요한 공개 도구를 이용할 수 있습니다.',
+    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드깡 시뮬레이터',
+    schemaType: 'CollectionPage'
+  },
+  '/lab/centering': {
+    title: '원피스카드 센터링 측정기 | 카드포네',
+    description: '카드 외곽과 내부 인쇄 경계를 조정해 원피스카드 앞면의 좌우·상하 센터링 비율을 기기 안에서 확인할 수 있습니다.',
+    keywords: '원피스카드 센터링, 카드 센터링 측정기, PSA 센터링, 원피스카드 감정',
+    schemaType: 'WebApplication'
+  },
+  '/lab/pack-simulator': {
+    title: '원피스카드 카드깡 시뮬레이터 | 카드포네',
+    description: '원피스카드 시리즈와 1팩·1박스·1카톤을 선택해 가상 개봉 결과와 획득 카드의 참고 시세를 확인할 수 있습니다.',
+    keywords: '원피스카드 카드깡, 원피스카드 시뮬레이터, 원피스카드 팩 개봉, 원피스카드 박스 개봉',
+    schemaType: 'WebApplication'
+  },
+  '/guides/centering': {
+    title: '원피스카드 센터링 측정기 사용 가이드 | 카드포네',
+    description: '원피스카드 촬영 준비, 카드 외곽과 내부 인쇄 경계 조정, 센터링 결과 해석 방법을 안내합니다.',
+    keywords: '원피스카드 센터링 측정 방법, 카드 센터링 비율, 센터링 측정 가이드',
+    schemaType: 'FAQPage'
+  },
+  '/guides/pack-simulator': {
+    title: '원피스카드 카드깡 시뮬레이터 사용 가이드 | 카드포네',
+    description: '가상 카드깡의 시리즈와 개봉 단위 선택, 팩·박스·카톤 결과와 확률의 의미를 안내합니다.',
+    keywords: '원피스카드 카드깡 시뮬레이터 사용법, 원피스카드 봉입률, 가상 카드 개봉',
+    schemaType: 'FAQPage'
+  },
   '/tools/profit-calculator': {
     title: '카드 손익 계산기 | 카드포네',
     description: '카드 매입가, 판매 예정가, 수수료와 배송비를 입력해 예상 손익, 수익률, 손익분기 판매가를 계산하세요.',
@@ -505,9 +583,8 @@ const SEO_PRIMARY = {
 const SITE_NAVIGATION_ITEMS = [
   { name: '도감', url: `${SITE_ORIGIN}/cards`, description: '한글판·일본판 원피스카드 도감 검색' },
   { name: '시세', url: `${SITE_ORIGIN}/prices`, description: '카드 시세, 박스 가격, 카드 인덱스' },
-  { name: '커뮤니티', url: `${SITE_ORIGIN}/community`, description: '질문, 정보, 가입인사와 카드 수집 이야기' },
-  { name: '일정', url: `${SITE_ORIGIN}/calendar`, description: '상품 발매일과 공식 이벤트 공지 캘린더' },
   { name: '정보', url: `${SITE_ORIGIN}/news`, description: '공식공지, 사전예약, 가이드와 Q&A' },
+  { name: '실험실', url: `${SITE_ORIGIN}/lab`, description: '센터링 측정기와 카드깡 시뮬레이터' },
   { name: '구매처', url: `${SITE_ORIGIN}/shops`, description: '지역별 공인점포와 취급점포 검색' },
   { name: '가이드/Q&A', url: `${SITE_ORIGIN}/guide`, description: '원피스카드 입문 및 수집 가이드' }
 ];
@@ -515,9 +592,8 @@ const SITE_NAVIGATION_ITEMS = [
 const JAPANESE_SITE_NAVIGATION_ITEMS = [
   { name: 'カード図鑑', url: `${SITE_ORIGIN}/jp/cards`, description: '日本版ONE PIECE CARD GAMEのカードをシリーズやカード番号から検索' },
   { name: '相場', url: `${SITE_ORIGIN}/jp/prices`, description: 'Single・PSA10の相場、ボックス価格、価格チャート' },
-  { name: 'コミュニティ', url: `${SITE_ORIGIN}/jp/community`, description: '質問、情報、自己紹介、カード収集の話題' },
-  { name: 'スケジュール', url: `${SITE_ORIGIN}/jp/calendar`, description: '新商品、プロモカード、公式イベントの日程' },
   { name: '公式情報', url: `${SITE_ORIGIN}/jp/news`, description: '新商品と公式告知の最新情報' },
+  { name: 'ラボ', url: `${SITE_ORIGIN}/jp/lab`, description: 'センタリング測定と開封シミュレーター' },
   { name: 'ショップ', url: `${SITE_ORIGIN}/jp/shops`, description: '公式ショップと公認店の検索' }
 ];
 
@@ -554,13 +630,45 @@ const SERVER_PAGE_CONTENT = {
     ],
     links: ['/cards', '/prices', '/guide', '/news']
   },
+  '/lab': {
+    heading: '원피스카드 실험실',
+    paragraphs: [
+      '센터링 측정기와 카드깡 시뮬레이터처럼 카드 수집 과정에서 직접 사용할 수 있는 공개 도구를 모았습니다.',
+      '각 도구는 별도 페이지에서 실행되며 사용 기준과 결과 해석 방법은 연결된 공개 가이드에서 확인할 수 있습니다.'
+    ],
+    links: ['/lab/centering', '/lab/pack-simulator', '/guides/centering', '/guides/pack-simulator']
+  },
   '/lab/centering': {
     heading: '원피스카드 센터링 측정기',
     paragraphs: [
       '카드를 촬영 가이드에 맞추면 앞면의 좌우와 상하 인쇄 비율을 기기 안에서 분석하고 측정 신뢰도를 함께 표시합니다.',
       '센터링만 확인하는 참고 도구이며 표면, 모서리, 인쇄 결함과 감정사의 판단은 포함하지 않습니다.'
     ],
-    links: ['/cards', '/prices', '/guide/card-price', '/data-policy']
+    links: ['/guides/centering', '/lab', '/cards', '/data-policy']
+  },
+  '/lab/pack-simulator': {
+    heading: '원피스카드 카드깡 시뮬레이터',
+    paragraphs: [
+      '원피스카드 시리즈와 1팩, 1박스, 1카톤 중 개봉 단위를 선택해 가상 개봉 결과를 확인할 수 있습니다.',
+      '도감에 연결된 카드 이미지와 번호, 등급, 확인 가능한 참고 시세를 보여주며 실제 상품의 봉입 결과를 보장하지 않습니다.'
+    ],
+    links: ['/guides/pack-simulator', '/lab', '/cards', '/prices']
+  },
+  '/guides/centering': {
+    heading: '센터링 측정기 사용 가이드',
+    paragraphs: [
+      '슬리브와 탑로더를 제거하고 카드 네 모서리가 모두 보이도록 촬영한 뒤, 실제 카드 외곽과 내부 인쇄 경계를 순서대로 맞춥니다.',
+      '결과는 앞면 센터링 비율만 다루는 참고값이며 표면, 모서리, 엣지, 인쇄 결함을 포함한 최종 감정 등급이 아닙니다.'
+    ],
+    links: ['/lab/centering', '/lab', '/data-policy', '/cards']
+  },
+  '/guides/pack-simulator': {
+    heading: '카드깡 시뮬레이터 사용 가이드',
+    paragraphs: [
+      '카드 언어와 부스터 시리즈, 팩·박스·카톤 개봉 단위를 선택하면 설정된 카톤 봉입 규칙을 바탕으로 가상 결과를 생성합니다.',
+      '개봉 결과와 가격은 참고용이며 실제 상품의 구성이나 구매 결과를 예측하거나 보장하지 않습니다.'
+    ],
+    links: ['/lab/pack-simulator', '/lab', '/cards', '/prices']
   },
   '/tools/profit-calculator': {
     heading: '카드 손익 계산기',
@@ -669,13 +777,45 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
     ],
     links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']
   },
+  '/lab': {
+    heading: 'ワンピースカード ラボ',
+    paragraphs: [
+      'センタリング測定と開封シミュレーターなど、カード収集に直接使える公開ツールをまとめています。',
+      '各ツールは独立したページで利用でき、測定基準と結果の見方は公開ガイドで確認できます。'
+    ],
+    links: ['/jp/lab/centering', '/jp/lab/pack-simulator', '/jp/guides/centering', '/jp/guides/pack-simulator']
+  },
   '/lab/centering': {
     heading: 'ワンピースカード センタリング測定',
     paragraphs: [
       '撮影ガイドにカードを合わせ、表面の左右と上下の印刷比率を端末内で分析し、測定信頼度を表示します。',
       'センタリングのみの参考ツールであり、表面、角、印刷欠陥、鑑定士の判断は含みません。'
     ],
-    links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']
+    links: ['/jp/guides/centering', '/jp/lab', '/jp/cards', '/jp']
+  },
+  '/lab/pack-simulator': {
+    heading: 'ワンピースカード 開封シミュレーター',
+    paragraphs: [
+      'シリーズと1パック、1ボックス、1カートンを選び、仮想開封結果を確認できます。',
+      'カード図鑑の画像、番号、レアリティ、確認できる参考価格を表示しますが、実際の商品の封入結果を保証しません。'
+    ],
+    links: ['/jp/guides/pack-simulator', '/jp/lab', '/jp/cards', '/jp/prices']
+  },
+  '/guides/centering': {
+    heading: 'センタリング測定ガイド',
+    paragraphs: [
+      'スリーブとローダーを外し、カードの四隅がすべて見えるように撮影してから、実際の外枠と印刷境界を順番に合わせます。',
+      '結果は表面センタリングのみの参考値で、表面、角、エッジ、印刷欠陥を含む最終鑑定グレードではありません。'
+    ],
+    links: ['/jp/lab/centering', '/jp/lab', '/jp/cards', '/jp']
+  },
+  '/guides/pack-simulator': {
+    heading: '開封シミュレーターガイド',
+    paragraphs: [
+      'カード言語、ブースターシリーズ、パック・ボックス・カートンの開封単位を選ぶと、設定されたカートン封入ルールから仮想結果を生成します。',
+      '開封結果と価格は参考情報であり、実際の商品の内容や購入結果を予測・保証するものではありません。'
+    ],
+    links: ['/jp/lab/pack-simulator', '/jp/lab', '/jp/cards', '/jp/prices']
   },
   '/tools/profit-calculator': {
     heading: 'カード損益計算機',
@@ -937,7 +1077,57 @@ function createJsonLd(pathname, seo) {
     pageNode.category = 'Trading Card';
   }
 
-  if (normalized === '/guides/profit-calculator' || normalized === '/jp/guides/profit-calculator') {
+  if (normalized === '/guides/centering' || normalized === '/jp/guides/centering') {
+    const isJapaneseCenteringGuide = normalized.startsWith('/jp/');
+    pageNode.mainEntity = isJapaneseCenteringGuide ? [
+      {
+        '@type': 'Question',
+        name: '写真が少し傾いていても測定できますか？',
+        acceptedAnswer: { '@type': 'Answer', text: '四隅がすべて見え、外枠を正確に指定できれば補正後に測定できます。強い傾きは信頼度を下げます。' }
+      },
+      {
+        '@type': 'Question',
+        name: '結果は鑑定の最終グレードですか？',
+        acceptedAnswer: { '@type': 'Answer', text: 'いいえ。センタリングのみの参考値で、表面、角、エッジ、印刷状態は含みません。' }
+      }
+    ] : [
+      {
+        '@type': 'Question',
+        name: '사진이 조금 기울어져도 측정할 수 있나요?',
+        acceptedAnswer: { '@type': 'Answer', text: '네 모서리가 모두 보이고 카드 외곽을 정확히 맞출 수 있으면 원근 보정 후 측정할 수 있습니다. 기울기가 과도하면 신뢰도가 낮아질 수 있습니다.' }
+      },
+      {
+        '@type': 'Question',
+        name: '표시된 점수가 실제 감정 등급인가요?',
+        acceptedAnswer: { '@type': 'Answer', text: '아닙니다. 센터링만 평가한 참고값이며 표면, 모서리, 엣지, 인쇄 상태를 포함한 최종 감정 등급이 아닙니다.' }
+      }
+    ];
+  } else if (normalized === '/guides/pack-simulator' || normalized === '/jp/guides/pack-simulator') {
+    const isJapaneseSimulatorGuide = normalized.startsWith('/jp/');
+    pageNode.mainEntity = isJapaneseSimulatorGuide ? [
+      {
+        '@type': 'Question',
+        name: '実際の商品の封入結果を保証しますか？',
+        acceptedAnswer: { '@type': 'Answer', text: 'いいえ。設定された封入ルールによる仮想開封であり、実際の商品の内容を保証しません。' }
+      },
+      {
+        '@type': 'Question',
+        name: '同じシリーズを再度開封すると同じ結果ですか？',
+        acceptedAnswer: { '@type': 'Answer', text: 'いいえ。開封ごとに新しい仮想カートンとランダム選択を使用します。' }
+      }
+    ] : [
+      {
+        '@type': 'Question',
+        name: '실제 상품의 봉입 결과를 보장하나요?',
+        acceptedAnswer: { '@type': 'Answer', text: '아닙니다. 제공된 봉입 규칙을 바탕으로 만든 가상 개봉이며 실제 상품의 구성과 결과를 보장하지 않습니다.' }
+      },
+      {
+        '@type': 'Question',
+        name: '같은 시리즈를 다시 열면 결과가 같나요?',
+        acceptedAnswer: { '@type': 'Answer', text: '아닙니다. 개봉할 때마다 새로운 가상 카톤과 무작위 선택을 사용하므로 결과가 달라집니다.' }
+      }
+    ];
+  } else if (normalized === '/guides/profit-calculator' || normalized === '/jp/guides/profit-calculator') {
     const isJapaneseProfitGuide = normalized.startsWith('/jp/');
     pageNode.mainEntity = isJapaneseProfitGuide ? [
       {

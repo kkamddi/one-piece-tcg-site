@@ -5,7 +5,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -14,7 +14,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/cards" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/cards" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/cards" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -23,7 +23,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -32,7 +32,16 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/community" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/community" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/community" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/lab</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/lab" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/lab" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/lab" />
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -41,7 +50,34 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/lab/centering" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/lab/centering" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/lab/centering" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/lab/pack-simulator</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/lab/pack-simulator" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/lab/pack-simulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/lab/pack-simulator" />
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/guides/centering</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/centering" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/centering" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/centering" />
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/guides/pack-simulator</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/pack-simulator" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/pack-simulator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/pack-simulator" />
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -51,8 +87,8 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/tools/profit-calculator" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/tools/profit-calculator" />
     <lastmod>2026-07-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.78</priority>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
   </url>
   <url>
     <loc>https://www.optcgkorea.com/jp/guides/profit-calculator</loc>
@@ -60,15 +96,15 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/profit-calculator" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/profit-calculator" />
     <lastmod>2026-07-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.76</priority>
+    <changefreq>daily</changefreq>
+    <priority>0.82</priority>
   </url>
   <url>
     <loc>https://www.optcgkorea.com/jp/calendar</loc>
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/calendar" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/calendar" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/calendar" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -77,7 +113,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/news" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/news" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/news" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -86,7 +122,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/shops" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/shops" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/shops" />
-    <lastmod>2026-07-22</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.82</priority>
   </url>
@@ -9437,7 +9473,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/EB-02" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/EB-02" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/EB-02" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9446,7 +9482,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/EB-03" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/EB-03" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/EB-03" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9455,7 +9491,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/EB-03-SP" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/EB-03-SP" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/EB-03-SP" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9464,7 +9500,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/EB-04" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/EB-04" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/EB-04" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9473,7 +9509,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OJP-3" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OJP-3" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OJP-3" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9482,7 +9518,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-01" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-01" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-01" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9491,7 +9527,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-02" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-02" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-02" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9500,7 +9536,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-03" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-03" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-03" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9509,7 +9545,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-04" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-04" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-04" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9518,7 +9554,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-05" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-05" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-05" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9527,7 +9563,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-06" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-06" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-06" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9536,7 +9572,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-07" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-07" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-07" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9545,7 +9581,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-08" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-08" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-08" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9554,7 +9590,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-09" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-09" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-09" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9563,7 +9599,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-10" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-10" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-10" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9572,7 +9608,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-11" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-11" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-11" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9581,7 +9617,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-12" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-12" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-12" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9590,7 +9626,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-13" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-13" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-13" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9599,7 +9635,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-14" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-14" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-14" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9608,7 +9644,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-15" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-15" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-15" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9617,7 +9653,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OP-16" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OP-16" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OP-16" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9626,7 +9662,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-001" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-001" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-001" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9635,7 +9671,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-018" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-018" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-018" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9644,7 +9680,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-033" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-033" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-033" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9653,7 +9689,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-035" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-035" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-035" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9662,7 +9698,16 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-046" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-046" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-046" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.66</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/prices/box/OPC-TCG-OP-17</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-OP-17" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-OP-17" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-OP-17" />
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9671,7 +9716,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-R1-PP" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-R1-PP" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-R1-PP" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9680,7 +9725,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-ST-31" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-31" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-31" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9689,7 +9734,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-ST-32" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-32" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-32" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9698,7 +9743,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-ST-33" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-33" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-33" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9707,7 +9752,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-ST-34" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-34" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-34" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9716,7 +9761,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-ST-35" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-35" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-35" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9725,7 +9770,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPC-TCG-ST-36" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-36" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPC-TCG-ST-36" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9734,7 +9779,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPDAY-2024" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPDAY-2024" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPDAY-2024" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9743,7 +9788,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/OPDAY-2025" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/OPDAY-2025" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/OPDAY-2025" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9752,7 +9797,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/P-2022" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/P-2022" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/P-2022" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9761,7 +9806,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/PCC-1" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/PCC-1" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/PCC-1" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9770,7 +9815,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/PCC-6A-1" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/PCC-6A-1" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/PCC-6A-1" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9779,7 +9824,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/PCC-BS4" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/PCC-BS4" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/PCC-BS4" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9788,7 +9833,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/PCC-KUMAMOTO" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/PCC-KUMAMOTO" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/PCC-KUMAMOTO" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9797,7 +9842,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/PRB-01" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/PRB-01" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/PRB-01" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9806,7 +9851,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/PRB-02" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/PRB-02" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/PRB-02" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>
@@ -9815,7 +9860,7 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/prices/box/TPP-NFE" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/prices/box/TPP-NFE" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/prices/box/TPP-NFE" />
-    <lastmod>2026-07-21</lastmod>
+    <lastmod>2026-07-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.66</priority>
   </url>

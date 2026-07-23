@@ -2696,6 +2696,8 @@ const PAGE_PATHS = {
   lab: '/lab',
   centering: '/lab/centering',
   packSimulator: '/lab/pack-simulator',
+  centeringGuide: '/guides/centering',
+  packSimulatorGuide: '/guides/pack-simulator',
   profitCalculator: '/tools/profit-calculator',
   profitGuide: '/guides/profit-calculator',
   calendar: '/calendar',
@@ -2934,11 +2936,39 @@ const PAGE_SEO = {
     body: '질문, 정보, 자유 이야기와 가입인사를 나누고 출석 포인트와 회원 등급을 확인하는 원피스카드 커뮤니티입니다.'
   },
   lab: {
+    title: '원피스카드 실험실 - 센터링 측정·카드깡 시뮬레이터 | Card Pone',
+    h1: '원피스카드 실험실',
+    description: '원피스카드 센터링 측정기와 카드깡 시뮬레이터 등 수집에 필요한 공개 도구를 이용할 수 있습니다.',
+    keywords: '원피스카드 실험실, 원피스카드 센터링, 원피스카드 카드깡, 카드깡 시뮬레이터',
+    body: '센터링 측정기와 카드깡 시뮬레이터를 한곳에서 선택해 이용할 수 있는 공개 도구 모음입니다.'
+  },
+  centering: {
     title: '원피스카드 센터링 측정기 | Card Pone',
     h1: '원피스카드 센터링 측정기',
-    description: '카메라 촬영으로 원피스카드 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석하고 센터링 참고 구간을 확인할 수 있습니다.',
+    description: '카메라 촬영이나 사진으로 원피스카드 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석하고 센터링 참고 구간을 확인할 수 있습니다.',
     keywords: '원피스카드 센터링, 카드 센터링 측정기, PSA 센터링, 원피스카드 감정',
-    body: '카드를 촬영 가이드에 맞추면 좌우와 상하 인쇄 경계를 분석하고 센터링 비율과 측정 신뢰도를 보여주는 도구입니다.'
+    body: '카드 외곽과 내부 인쇄 경계를 맞춰 좌우와 상하 센터링 비율을 확인하는 공개 도구입니다.'
+  },
+  packSimulator: {
+    title: '원피스카드 카드깡 시뮬레이터 | Card Pone',
+    h1: '원피스카드 카드깡 시뮬레이터',
+    description: '원피스카드 시리즈와 1팩·1박스·1카톤을 선택해 가상 개봉 결과와 획득 카드의 참고 시세를 확인할 수 있습니다.',
+    keywords: '원피스카드 카드깡, 원피스카드 시뮬레이터, 원피스카드 팩 개봉, 원피스카드 박스 개봉',
+    body: '도감 카드와 봉입 규칙을 이용해 팩, 박스, 카톤을 가상 개봉하고 결과 카드를 확인하는 공개 도구입니다.'
+  },
+  centeringGuide: {
+    title: '원피스카드 센터링 측정기 사용 가이드 | Card Pone',
+    h1: '센터링 측정기 사용 가이드',
+    description: '원피스카드 촬영 준비, 카드 외곽과 내부 인쇄 경계 조정, 센터링 결과 해석 방법을 안내합니다.',
+    keywords: '원피스카드 센터링 측정 방법, 카드 센터링 비율, 센터링 측정 가이드',
+    body: '카드 촬영부터 외곽과 내부 인쇄 경계 조정, 센터링 비율 확인까지의 과정을 안내합니다.'
+  },
+  packSimulatorGuide: {
+    title: '원피스카드 카드깡 시뮬레이터 사용 가이드 | Card Pone',
+    h1: '카드깡 시뮬레이터 사용 가이드',
+    description: '가상 카드깡의 시리즈와 개봉 단위 선택, 팩·박스·카톤 결과와 확률의 의미를 안내합니다.',
+    keywords: '원피스카드 카드깡 시뮬레이터 사용법, 원피스카드 봉입률, 가상 카드 개봉',
+    body: '시리즈와 개봉 단위를 선택하고 가상 개봉 결과와 참고 시세를 확인하는 방법을 안내합니다.'
   },
   profitCalculator: {
     title: '카드 손익 계산기 | Card Pone',
@@ -3115,11 +3145,39 @@ const JP_PAGE_SEO = {
     body: '質問、情報、自己紹介、自由な話題を共有できるONE PIECE CARD GAMEコミュニティです。'
   },
   lab: {
+    title: 'ワンピースカード ラボ - センタリング・開封シミュレーター | Card Pone',
+    h1: 'ワンピースカード ラボ',
+    description: 'センタリング測定とパック開封シミュレーターなど、カード収集に役立つ公開ツールを利用できます。',
+    keywords: 'ワンピースカード ラボ,カード センタリング,パック開封 シミュレーター',
+    body: 'センタリング測定とパック開封シミュレーターを選んで利用できる公開ツール集です。'
+  },
+  centering: {
     title: 'ワンピースカード センタリング測定 | Card Pone',
     h1: 'ワンピースカード センタリング測定',
-    description: 'カメラ撮影でカード表面の左右・上下の印刷比率を端末内で分析し、センタリングの参考範囲を確認できます。',
+    description: '撮影したカードの外枠と印刷境界を調整し、表面の左右・上下のセンタリング比率を端末内で確認できます。',
     keywords: 'ワンピースカード センタリング,カード センタリング測定,PSA センタリング',
-    body: '撮影ガイドにカードを合わせ、左右と上下のセンタリング比率と測定信頼度を確認できます。'
+    body: 'カードの外枠と印刷境界から左右・上下のセンタリング比率を確認する公開ツールです。'
+  },
+  packSimulator: {
+    title: 'ワンピースカード 開封シミュレーター | Card Pone',
+    h1: 'ワンピースカード 開封シミュレーター',
+    description: 'シリーズと1パック・1ボックス・1カートンを選び、仮想開封結果とカードの参考価格を確認できます。',
+    keywords: 'ワンピースカード 開封シミュレーター,ワンピカード パック開封,ボックス開封',
+    body: 'カード図鑑と封入ルールを使ってパック、ボックス、カートンを仮想開封する公開ツールです。'
+  },
+  centeringGuide: {
+    title: 'ワンピースカード センタリング測定ガイド | Card Pone',
+    h1: 'センタリング測定ガイド',
+    description: '撮影準備、カード外枠と印刷境界の調整、センタリング結果の見方を案内します。',
+    keywords: 'カード センタリング 測定方法,センタリング 比率,ワンピースカード ガイド',
+    body: '撮影から外枠と印刷境界の調整、センタリング比率の確認までを案内します。'
+  },
+  packSimulatorGuide: {
+    title: 'ワンピースカード 開封シミュレーターガイド | Card Pone',
+    h1: '開封シミュレーターガイド',
+    description: 'シリーズと開封単位の選択、パック・ボックス・カートンの結果と確率の見方を案内します。',
+    keywords: 'ワンピースカード 開封シミュレーター 使い方,封入率,仮想開封',
+    body: 'シリーズと開封単位を選び、仮想開封結果と参考価格を確認する方法を案内します。'
   },
   profitCalculator: {
     title: 'カード損益計算機 | Card Pone',
@@ -3212,8 +3270,7 @@ function getJapaneseRouteSeo(pathname, page) {
 function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
-  const seoPage = ['centering', 'packSimulator'].includes(page) ? 'lab' : page;
-  if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, seoPage);
+  if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, page);
   const seoAliases = {
     '/prices/collector-index': '/prices/index',
     '/prices/manga-index': '/prices/index/manga',
@@ -3384,6 +3441,8 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path.startsWith('/community')) return { page: 'community' };
   if (path === '/tools/profit-calculator') return { page: 'home' };
   if (path === '/guides/profit-calculator') return { page: 'profitCalculator' };
+  if (path === '/guides/centering') return { page: 'centering' };
+  if (path === '/guides/pack-simulator') return { page: 'packSimulator' };
   if (path.startsWith('/lab')) return { page: 'lab' };
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { page: 'news' };
   if (path.startsWith('/shops')) return { page: 'shops' };
@@ -3526,10 +3585,10 @@ function getPageJsonLd(page, seo, uiLang = 'KR') {
       mainEntityOfPage: url
     });
   }
-  if (page === 'profitCalculator') {
+  if (['profitCalculator', 'centering', 'packSimulator'].includes(page)) {
     graph.push({
       '@type': 'WebApplication',
-      name: 'Card Pone 카드 손익 계산기',
+      name: seo.h1,
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'Web',
       isAccessibleForFree: true,
@@ -3541,6 +3600,16 @@ function getPageJsonLd(page, seo, uiLang = 'KR') {
     graph.push({
       '@type': 'FAQPage',
       mainEntity: getProfitCalculatorFaq(uiLang).map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer }
+      }))
+    });
+  }
+  if (['centeringGuide', 'packSimulatorGuide'].includes(page)) {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: getLabToolGuideContent(page === 'centeringGuide' ? 'centering' : 'packSimulator', uiLang).faq.map((item) => ({
         '@type': 'Question',
         name: item.question,
         acceptedAnswer: { '@type': 'Answer', text: item.answer }
@@ -3571,8 +3640,7 @@ function setHreflangLinks() {
 }
 
 function applyPageSeo(page, uiLang = 'KR') {
-  const seoPage = ['centering', 'packSimulator'].includes(page) ? 'lab' : page;
-  const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[seoPage] || PAGE_SEO.home;
+  const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[page] || PAGE_SEO.home;
   const url = getCanonicalUrl(page);
   const isJapanese = uiLang === 'JP' || (typeof window !== 'undefined' && getPathLocale(window.location.pathname) === 'JP');
   document.title = seo.title;
@@ -8178,7 +8246,7 @@ function formatSimulatorPrice(priceUsd, uiLang) {
   return formatCatalogWonFromUsd(priceUsd);
 }
 
-function RenewPackSimulator({ uiLang, onOpenCard }) {
+function RenewPackSimulator({ uiLang, onOpenCard, onOpenGuide }) {
   const [locale, setLocale] = useState('JP');
   const [selectedSeriesId, setSelectedSeriesId] = useState('');
   const [unit, setUnit] = useState('pack');
@@ -8421,8 +8489,11 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
 
   return (
     <main className="renew-subpage renew-pack-simulator-page">
-      <header className="renew-pack-simulator-header">
-        <span>PACK SIMULATOR</span>
+      <header className="renew-pack-simulator-header renew-profit-head">
+        <div><span>PACK SIMULATOR</span></div>
+        <button type="button" className="renew-profit-primary-button" onClick={onOpenGuide}>
+          {getLocaleText(uiLang, '사용 가이드', 'User guide', '利用ガイド')}
+        </button>
       </header>
 
       <section className="renew-pack-simulator-setup" aria-label={getLocaleText(uiLang, '개봉 설정', 'Opening settings', '開封設定')}>
@@ -8578,6 +8649,154 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
           </div>
         </section>
       ) : null}
+    </main>
+  );
+}
+
+function getLabToolGuideContent(type, uiLang = 'KR') {
+  const locale = uiLang === 'JP' ? 'JP' : uiLang === 'EN' ? 'EN' : 'KR';
+  const copy = {
+    centering: {
+      KR: {
+        eyebrow: 'CENTERING GUIDE',
+        title: '센터링 측정기 사용 가이드',
+        tool: '측정기로 돌아가기',
+        sections: [
+          ['1. 촬영 준비', '슬리브와 탑로더를 제거하고 반사가 적은 단색 바닥에 카드 전체가 보이도록 촬영합니다. 네 모서리가 사진 안에 있어야 원근 보정이 가능합니다.'],
+          ['2. 카드 외곽 조정', '네 모서리 점을 카드의 실제 바깥 모서리에 맞춥니다. 사진이 기울었거나 사다리꼴이어도 외곽을 정확히 지정하면 정면 형태로 보정됩니다.'],
+          ['3. 내부 테두리 조정', '보정된 카드에서 실제 인쇄 경계의 좌우·상하 선을 맞춥니다. 카드 그림이나 문자 위치가 아니라 인쇄 테두리를 기준으로 조정합니다.'],
+          ['4. 결과 확인', '좌우와 상하 비율, 참고 구간, 측정 신뢰도를 함께 확인합니다. 결과는 센터링만 다루며 모서리·표면·인쇄 결함은 평가하지 않습니다.']
+        ],
+        faq: [
+          { question: '사진이 조금 기울어져도 측정할 수 있나요?', answer: '네 모서리가 모두 보이고 카드 외곽을 정확히 맞출 수 있으면 원근 보정 후 측정할 수 있습니다. 기울기가 과도하거나 일부 모서리가 가려지면 신뢰도가 낮아질 수 있습니다.' },
+          { question: '표시된 점수가 실제 감정 등급인가요?', answer: '아닙니다. 센터링 비율을 감정사 기준과 비교한 참고값이며 표면, 모서리, 엣지, 인쇄 상태를 포함한 최종 감정 등급이 아닙니다.' },
+          { question: '촬영한 사진이 서버에 저장되나요?', answer: '아닙니다. 센터링 분석은 현재 기기 안에서 처리하며 촬영하거나 선택한 이미지를 서버에 저장하지 않습니다.' }
+        ],
+        note: '조명 반사와 내부 인쇄 경계의 위치에 따라 결과가 달라질 수 있으므로 최종 감정 판단이 아닌 비교용 참고값으로 이용하세요.'
+      },
+      EN: {
+        eyebrow: 'CENTERING GUIDE',
+        title: 'Centering Check Guide',
+        tool: 'Back to checker',
+        sections: [
+          ['1. Prepare the card', 'Remove sleeves and holders, use a low-glare plain background, and keep all four card corners visible.'],
+          ['2. Set the card outline', 'Place the four points on the actual outer corners. The tool corrects perspective after the outline is confirmed.'],
+          ['3. Set the print border', 'Align the left, right, top, and bottom lines with the printed inner border rather than artwork or text.'],
+          ['4. Read the result', 'Review horizontal and vertical ratios with the confidence indicator. Surface, corner, edge, and print defects are not graded.']
+        ],
+        faq: [
+          { question: 'Can I use a tilted photo?', answer: 'Yes, if all four corners are visible and the outer outline can be placed accurately. Extreme perspective may lower reliability.' },
+          { question: 'Is the result a final grading score?', answer: 'No. It is a centering-only reference and does not include surface, corners, edges, or print quality.' },
+          { question: 'Is my image uploaded?', answer: 'No. The image is processed on the current device and is not stored on the server.' }
+        ],
+        note: 'Use the result as a centering reference. Reflections and uncertain print borders can affect the measurement.'
+      },
+      JP: {
+        eyebrow: 'CENTERING GUIDE',
+        title: 'センタリング測定ガイド',
+        tool: '測定に戻る',
+        sections: [
+          ['1. 撮影準備', 'スリーブとローダーを外し、反射の少ない単色の背景でカードの四隅がすべて見えるように撮影します。'],
+          ['2. カード外枠の調整', '4つの点を実際のカード外側の角に合わせます。確定後に傾きと台形歪みを補正します。'],
+          ['3. 印刷境界の調整', '絵柄や文字ではなく、実際の印刷境界に左右・上下の線を合わせます。'],
+          ['4. 結果の確認', '左右・上下の比率と測定信頼度を確認します。表面、角、エッジ、印刷欠陥は評価しません。']
+        ],
+        faq: [
+          { question: '写真が少し傾いていても測定できますか？', answer: '四隅がすべて見え、外枠を正確に指定できれば補正後に測定できます。強い傾きは信頼度を下げます。' },
+          { question: '結果は鑑定の最終グレードですか？', answer: 'いいえ。センタリングのみの参考値で、表面、角、エッジ、印刷状態は含みません。' },
+          { question: '画像はサーバーに保存されますか？', answer: 'いいえ。画像は現在の端末内で処理され、サーバーには保存されません。' }
+        ],
+        note: '反射や印刷境界の判定によって結果が変わるため、最終鑑定ではなく比較用の参考値として利用してください。'
+      }
+    },
+    packSimulator: {
+      KR: {
+        eyebrow: 'PACK SIMULATOR GUIDE',
+        title: '카드깡 시뮬레이터 사용 가이드',
+        tool: '시뮬레이터로 돌아가기',
+        sections: [
+          ['1. 시리즈 선택', '개봉할 카드 언어와 부스터 시리즈를 선택합니다. 결과 카드는 현재 Card Pone 도감에 연결된 해당 시리즈 카드로 구성됩니다.'],
+          ['2. 개봉 단위 선택', '1팩은 한 팩 결과, 1박스는 팩 단위 진행, 1카톤은 박스별 주요 결과를 순서대로 보여줍니다. 빠른 개봉으로 남은 결과를 한 번에 확인할 수 있습니다.'],
+          ['3. 확률 구조', '박스와 팩은 내부에서 가상 카톤을 먼저 구성한 뒤 그 안의 박스와 팩을 무작위로 선택합니다. 반복 횟수가 많아질수록 설정된 카톤 봉입 규칙의 기댓값에 가까워지는 구조입니다.'],
+          ['4. 결과와 시세', '획득 카드의 이미지, 번호, 등급과 확인 가능한 참고 시세를 보여주며 도감 상세로 이동할 수 있습니다. 시세가 연결되지 않은 카드는 가격 합계에서 제외됩니다.']
+        ],
+        faq: [
+          { question: '실제 상품의 봉입 결과를 보장하나요?', answer: '아닙니다. 제공된 봉입 규칙을 바탕으로 만든 가상 개봉이며 실제 상품의 구성과 결과를 보장하지 않습니다.' },
+          { question: '같은 시리즈를 다시 열면 결과가 같나요?', answer: '아닙니다. 개봉할 때마다 새로운 가상 카톤과 무작위 선택을 사용하므로 결과가 달라집니다.' },
+          { question: '결과 가격은 실제 판매가인가요?', answer: 'Card Pone에 연결된 최근 참고 시세입니다. 카드 상태, 거래 시점과 판매처에 따라 실제 가격은 달라질 수 있습니다.' }
+        ],
+        note: '가상 개봉은 구매 결과를 예측하거나 보장하지 않습니다. 봉입 규칙은 확인된 자료에 따라 시리즈별로 조정될 수 있습니다.'
+      },
+      EN: {
+        eyebrow: 'PACK SIMULATOR GUIDE',
+        title: 'Pack Simulator Guide',
+        tool: 'Back to simulator',
+        sections: [
+          ['1. Select a series', 'Choose the card language and booster series. Results use cards linked to that series in the Card Pone catalog.'],
+          ['2. Select an opening unit', 'Open one pack, step through a box pack by pack, or review a carton by box. Skip controls reveal the remaining result.'],
+          ['3. Probability model', 'The simulator creates a virtual carton first, then randomly selects a box and pack. Repeated openings approach the configured carton expectations.'],
+          ['4. Results and prices', 'Review card images, numbers, rarities, and available reference prices. Cards without a linked price are excluded from the total.']
+        ],
+        faq: [
+          { question: 'Does this guarantee real product pulls?', answer: 'No. It is a virtual opening based on configured rules and cannot guarantee the contents of a real product.' },
+          { question: 'Will repeated openings give the same result?', answer: 'No. Each opening creates a new virtual carton and random selection.' },
+          { question: 'Are result prices actual sale prices?', answer: 'They are recent reference prices linked in Card Pone and may differ by condition, date, and marketplace.' }
+        ],
+        note: 'The simulator does not predict or guarantee purchase results. Series rules may be updated when better information becomes available.'
+      },
+      JP: {
+        eyebrow: 'PACK SIMULATOR GUIDE',
+        title: '開封シミュレーターガイド',
+        tool: 'シミュレーターに戻る',
+        sections: [
+          ['1. シリーズ選択', 'カード言語とブースターシリーズを選択します。結果はCard Poneの図鑑に接続されたカードで構成されます。'],
+          ['2. 開封単位選択', '1パック、パック単位で進む1ボックス、ボックス別に確認する1カートンから選択できます。'],
+          ['3. 確率モデル', '内部で仮想カートンを作成し、その中からボックスとパックをランダムに選びます。試行回数が増えると設定された封入ルールの期待値に近づきます。'],
+          ['4. 結果と価格', 'カード画像、番号、レアリティ、確認できる参考価格を表示します。価格未接続のカードは合計から除外されます。']
+        ],
+        faq: [
+          { question: '実際の商品の封入結果を保証しますか？', answer: 'いいえ。設定された封入ルールによる仮想開封であり、実際の商品の内容を保証しません。' },
+          { question: '同じシリーズを再度開封すると同じ結果ですか？', answer: 'いいえ。開封ごとに新しい仮想カートンとランダム選択を使用します。' },
+          { question: '表示価格は実売価格ですか？', answer: 'Card Poneに接続された最近の参考価格で、状態、時期、販売先によって異なる場合があります。' }
+        ],
+        note: '仮想開封は購入結果を予測・保証するものではありません。封入ルールは確認資料に応じて更新される場合があります。'
+      }
+    }
+  };
+  return copy[type]?.[locale] || copy[type]?.KR;
+}
+
+function RenewLabToolGuide({ type, uiLang, onOpenTool }) {
+  const copy = getLabToolGuideContent(type, uiLang);
+  return (
+    <main className="renew-subpage renew-profit-guide-page">
+      <header className="renew-profit-head">
+        <div>
+          <span>{copy.eyebrow}</span>
+          <h1>{copy.title}</h1>
+        </div>
+        <button type="button" className="renew-profit-primary-button" onClick={onOpenTool}>{copy.tool}</button>
+      </header>
+      <section className="renew-profit-guide-grid">
+        {copy.sections.map(([title, body]) => (
+          <article key={title} className="renew-panel renew-profit-guide-card">
+            <h2>{title}</h2>
+            <p>{body}</p>
+          </article>
+        ))}
+      </section>
+      <section className="renew-panel renew-profit-faq-panel">
+        <h2>FAQ</h2>
+        <div>
+          {copy.faq.map((item) => (
+            <details key={item.question}>
+              <summary>{item.question}</summary>
+              <p>{item.answer}</p>
+            </details>
+          ))}
+        </div>
+        <p className="renew-profit-guide-note">{copy.note}</p>
+      </section>
     </main>
   );
 }
@@ -12749,6 +12968,10 @@ export default function RenewApp() {
         <ProfitCalculator uiLang={uiLang} onOpenGuide={() => navigatePage('profitGuide')} />
       ) : activePage === 'profitGuide' ? (
         <ProfitCalculatorGuide uiLang={uiLang} onOpenCalculator={() => navigatePage('profitCalculator')} />
+      ) : activePage === 'centeringGuide' ? (
+        <RenewLabToolGuide type="centering" uiLang={uiLang} onOpenTool={() => navigatePage('centering')} />
+      ) : activePage === 'packSimulatorGuide' ? (
+        <RenewLabToolGuide type="packSimulator" uiLang={uiLang} onOpenTool={() => navigatePage('packSimulator')} />
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
@@ -12765,9 +12988,10 @@ export default function RenewApp() {
             if (card?.id) query.set('cardId', card.id);
             navigatePage('cards', { query: query.toString() });
           }}
+          onOpenGuide={() => navigatePage('packSimulatorGuide')}
         />
       ) : activePage === 'centering' ? (
-        <CenteringLab uiLang={uiLang} />
+        <CenteringLab uiLang={uiLang} onOpenGuide={() => navigatePage('centeringGuide')} />
       ) : activePage === 'news' ? (
         <RenewNews
           uiLang={uiLang}

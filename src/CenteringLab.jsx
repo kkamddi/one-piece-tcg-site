@@ -1175,7 +1175,7 @@ function ResultOverlay({ boundaries, frame, report }) {
   );
 }
 
-export default function CenteringLab({ uiLang = 'KR' }) {
+export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
   const text = COPY[uiLang] || COPY.KR;
   const flow = CAMERA_FLOW_COPY[uiLang] || CAMERA_FLOW_COPY.KR;
   const editorText = BOUNDARY_EDITOR_COPY[uiLang] || BOUNDARY_EDITOR_COPY.KR;
@@ -1601,10 +1601,13 @@ export default function CenteringLab({ uiLang = 'KR' }) {
 
   return (
     <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}${phase === 'corners' ? ' is-corner-open' : ''}${phase === 'boundary' ? ' is-boundary-open' : ''}`}>
-      <section className="centering-lab-head">
+      <section className="centering-lab-head renew-profit-head">
         <div>
           <span>{text.eyebrow}</span>
         </div>
+        <button type="button" className="renew-profit-primary-button" onClick={onOpenGuide}>
+          {uiLang === 'JP' ? '利用ガイド' : uiLang === 'EN' ? 'User guide' : '사용 가이드'}
+        </button>
       </section>
       <input
         ref={uploadInputRef}
