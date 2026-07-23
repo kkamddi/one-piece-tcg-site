@@ -76,7 +76,7 @@ const CAMERA_FLOW_COPY = {
     moveCenter: '카드를 중앙 표시 쪽으로 옮겨 주세요.',
     moveCloser: '카드를 조금 더 가까이 보여 주세요.',
     detected: '카드가 인식되었습니다. 촬영 버튼을 눌러 주세요.',
-    upload: '사진 업로드',
+    upload: '갤러리에서 선택',
     chooseAnother: '다른 사진 선택',
     invalidImage: '사진 파일을 불러오지 못했습니다. JPG, PNG 또는 WebP 파일을 선택해 주세요.',
     dark: '조금 더 밝은 곳에서 촬영해 주세요.',
@@ -107,7 +107,7 @@ const CAMERA_FLOW_COPY = {
     moveCenter: 'Move the card toward the center marker.',
     moveCloser: 'Move the card slightly closer.',
     detected: 'Card detected. Press the shutter.',
-    upload: 'Upload photo',
+    upload: 'Choose from library',
     chooseAnother: 'Choose another photo',
     invalidImage: 'The photo could not be loaded. Choose a JPG, PNG, or WebP file.',
     dark: 'Move to a brighter area.',
@@ -138,7 +138,7 @@ const CAMERA_FLOW_COPY = {
     moveCenter: 'カードを中央マークへ移動してください。',
     moveCloser: 'カードをもう少し近づけてください。',
     detected: 'カードを認識しました。撮影ボタンを押してください。',
-    upload: '写真をアップロード',
+    upload: 'ライブラリから選択',
     chooseAnother: '別の写真を選択',
     invalidImage: '写真を読み込めませんでした。JPG、PNG、WebPファイルを選択してください。',
     dark: 'もう少し明るい場所で撮影してください。',
@@ -1531,7 +1531,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
         ref={uploadInputRef}
         className="centering-upload-input"
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         onChange={handleImageUpload}
       />
 
