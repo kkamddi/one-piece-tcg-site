@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: production-deploy
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -47,6 +47,17 @@ jobs:
 
       - name: Build production site
         run: npm run build
+
+      - name: Re-verify synchronized main before deploy
+        shell: bash
+        run: |
+          git fetch --no-tags origin main
+          local_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git rev-parse origin/main)"
+          if [ "$local_sha" != "$remote_sha" ]; then
+            echo "Refusing deployment: built commit $local_sha is not origin/main $remote_sha."
+            exit 1
+          fi
 
       - name: Deploy synchronized main to Cloudflare Pages
         env:
