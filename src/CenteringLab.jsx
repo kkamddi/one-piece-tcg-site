@@ -1525,10 +1525,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       <section className="centering-lab-head">
         <div>
           <span>{text.eyebrow}</span>
-          <h1>{text.title}</h1>
-          <p>{text.intro}</p>
         </div>
-        <strong>{CARD_WIDTH_MM} × {CARD_HEIGHT_MM} mm</strong>
       </section>
       <input
         ref={uploadInputRef}
@@ -1548,8 +1545,14 @@ export default function CenteringLab({ uiLang = 'KR' }) {
             <h2>{text.guideTitle}</h2>
             <ol>{text.guideItems.map((item, index) => <li key={item}><b>{index + 1}</b><span>{item}</span></li>)}</ol>
             <div className="centering-intro-actions">
-              <button type="button" className="centering-primary-button" onClick={startCamera}>{text.start}</button>
-              <button type="button" className="centering-upload-button" onClick={() => uploadInputRef.current?.click()}><span aria-hidden="true">↑</span>{flow.upload}</button>
+              <button type="button" className="centering-start-option is-camera" onClick={startCamera}>
+                <span className="centering-start-option-icon is-camera" aria-hidden="true" />
+                <span className="centering-start-option-copy"><small>CAMERA</small><strong>{text.start}</strong></span>
+              </button>
+              <button type="button" className="centering-start-option is-upload" onClick={() => uploadInputRef.current?.click()}>
+                <span className="centering-start-option-icon is-upload" aria-hidden="true" />
+                <span className="centering-start-option-copy"><small>UPLOAD</small><strong>{flow.upload}</strong></span>
+              </button>
             </div>
             <small>{text.privacy}</small>
           </div>

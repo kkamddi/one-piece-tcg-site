@@ -217,31 +217,101 @@
   width: 100%;
 }
 
-.centering-upload-button {
-  display: flex;
+.centering-start-option {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 52px;
-  border: 1px solid rgba(23,25,28,.2);
+  gap: 12px;
+  min-height: 108px;
+  border: 1px solid rgba(23,25,28,.14);
   border-radius: 8px;
-  padding: 0 20px;
+  padding: 16px;
   color: #17191c;
   background: #fff;
-  font-size: 14px;
-  font-weight: 950;
+  text-align: left;
   cursor: pointer;
 }
 
-.centering-upload-button > span {
+.centering-start-option.is-camera {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.centering-start-option-icon {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 23px;
-  height: 23px;
-  border: 1px solid rgba(23,25,28,.18);
+  width: 30px;
+  height: 24px;
+  border: 2px solid currentColor;
+  border-radius: 5px;
+}
+
+.centering-start-option-icon.is-camera::before {
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
   border-radius: 50%;
-  font-size: 14px;
-  line-height: 1;
+  content: '';
+}
+
+.centering-start-option-icon.is-camera::after {
+  position: absolute;
+  top: -6px;
+  left: 7px;
+  width: 10px;
+  height: 5px;
+  border-radius: 2px 2px 0 0;
+  background: currentColor;
+  content: '';
+}
+
+.centering-start-option-icon.is-upload {
+  border-radius: 50%;
+}
+
+.centering-start-option-icon.is-upload::before {
+  position: absolute;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  content: '';
+  transform: rotate(45deg);
+}
+
+.centering-start-option-icon.is-upload::after {
+  position: absolute;
+  top: 6px;
+  width: 2px;
+  height: 11px;
+  background: currentColor;
+  content: '';
+}
+
+.centering-start-option-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.centering-start-option-copy small {
+  color: #cf4b35;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.centering-start-option.is-camera .centering-start-option-copy small {
+  color: #ff9c88;
+}
+
+.centering-start-option-copy strong {
+  color: inherit;
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1.25;
 }
 
 .centering-intro-copy small {
@@ -1551,14 +1621,20 @@
   color: #f5f2ec;
 }
 
-.renew-app.is-dark .centering-upload-button {
+.renew-app.is-dark .centering-start-option.is-upload {
   border-color: rgba(255,255,255,.16);
   color: #f5f2ec;
   background: #1d222a;
 }
 
-.renew-app.is-dark .centering-upload-button > span {
-  border-color: rgba(255,255,255,.18);
+.renew-app.is-dark .centering-start-option.is-camera {
+  border-color: #f5f2ec;
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .centering-start-option.is-camera .centering-start-option-copy small {
+  color: #cf4b35;
 }
 
 .renew-app.is-dark .centering-corner-actions > button:first-child {
@@ -1624,9 +1700,27 @@
     gap: 8px;
   }
 
-  .centering-intro-actions button {
-    padding: 0 12px;
-    font-size: 12px;
+  .centering-start-option {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 92px;
+    padding: 12px;
+  }
+
+  .centering-start-option-icon {
+    width: 26px;
+    height: 21px;
+  }
+
+  .centering-start-option-icon.is-camera::after {
+    top: -5px;
+    left: 6px;
+    width: 9px;
+    height: 4px;
+  }
+
+  .centering-start-option-copy strong {
+    font-size: 13px;
   }
 
   .centering-camera-copy,
