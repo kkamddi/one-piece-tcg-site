@@ -2308,8 +2308,8 @@ const NAV_ITEMS = [
   { id: 'cards', labelKey: 'navCards' },
   { id: 'prices', labelKey: 'navPrices' },
   ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
-  { id: 'lab', labelKey: 'navLab' },
   { id: 'news', labelKey: 'navNews' },
+  { id: 'lab', labelKey: 'navLab' },
   { id: 'shops', labelKey: 'navShops' }
 ];
 const VISIBLE_RENEW_HOME_UPDATES = RENEW_HOME_UPDATES.filter((item) => MARKETPLACE_ENABLED || item.id !== '2026-06-19-marketplace');
@@ -8640,32 +8640,6 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator }) {
   );
 }
 
-function RenewAdminLabGate({ authResolved, isLoggedIn, uiLang, onLogin, onBack }) {
-  const title = getLocaleText(uiLang, '관리자 전용 기능', 'Admin-only feature', '管理者専用機能');
-  const message = !authResolved
-    ? getLocaleText(uiLang, '계정 권한을 확인하고 있습니다.', 'Checking account permissions.', 'アカウント権限を確認しています。')
-    : isLoggedIn
-      ? getLocaleText(uiLang, '실험실 도구는 현재 관리자 계정에서만 사용할 수 있습니다.', 'Lab tools are currently available only to administrators.', 'ラボツールは現在、管理者アカウントのみ利用できます。')
-      : getLocaleText(uiLang, '관리자 계정으로 로그인해야 실험실 도구를 사용할 수 있습니다.', 'Sign in with an administrator account to use Lab tools.', '管理者アカウントでログインするとラボツールを利用できます。');
-  return (
-    <main className="renew-subpage">
-      <section className="renew-panel">
-        <div className="renew-empty">
-          <strong>{title}</strong>
-          <p>{message}</p>
-          {authResolved ? (
-            <button type="button" className="renew-pill is-filled" onClick={isLoggedIn ? onBack : onLogin}>
-              {isLoggedIn
-                ? getLocaleText(uiLang, '홈으로 돌아가기', 'Back to Home', 'ホームへ戻る')
-                : getLocaleText(uiLang, '관리자 로그인', 'Admin sign in', '管理者ログイン')}
-            </button>
-          ) : null}
-        </div>
-      </section>
-    </main>
-  );
-}
-
 const MARKETPLACE_SAMPLE_LISTINGS = [
   {
     id: 'sample-yamato',
@@ -12778,52 +12752,22 @@ export default function RenewApp() {
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
-        authResolved && isAdminUser ? (
-          <RenewLabHome
-            uiLang={uiLang}
-            onOpenCentering={() => navigatePage('centering')}
-            onOpenSimulator={() => navigatePage('packSimulator')}
-          />
-        ) : (
-          <RenewAdminLabGate
-            authResolved={authResolved}
-            isLoggedIn={Boolean(authUser)}
-            uiLang={uiLang}
-            onLogin={() => handleAuthClick('login')}
-            onBack={() => navigatePage('home')}
-          />
-        )
+        <RenewLabHome
+          uiLang={uiLang}
+          onOpenCentering={() => navigatePage('centering')}
+          onOpenSimulator={() => navigatePage('packSimulator')}
+        />
       ) : activePage === 'packSimulator' ? (
-        authResolved && isAdminUser ? (
-          <RenewPackSimulator
-            uiLang={uiLang}
-            onOpenCard={(card) => {
-              const query = new URLSearchParams();
-              if (card?.id) query.set('cardId', card.id);
-              navigatePage('cards', { query: query.toString() });
-            }}
-          />
-        ) : (
-          <RenewAdminLabGate
-            authResolved={authResolved}
-            isLoggedIn={Boolean(authUser)}
-            uiLang={uiLang}
-            onLogin={() => handleAuthClick('login')}
-            onBack={() => navigatePage('home')}
-          />
-        )
+        <RenewPackSimulator
+          uiLang={uiLang}
+          onOpenCard={(card) => {
+            const query = new URLSearchParams();
+            if (card?.id) query.set('cardId', card.id);
+            navigatePage('cards', { query: query.toString() });
+          }}
+        />
       ) : activePage === 'centering' ? (
-        authResolved && isAdminUser ? (
-          <CenteringLab uiLang={uiLang} />
-        ) : (
-          <RenewAdminLabGate
-            authResolved={authResolved}
-            isLoggedIn={Boolean(authUser)}
-            uiLang={uiLang}
-            onLogin={() => handleAuthClick('login')}
-            onBack={() => navigatePage('home')}
-          />
-        )
+        <CenteringLab uiLang={uiLang} />
       ) : activePage === 'news' ? (
         <RenewNews
           uiLang={uiLang}

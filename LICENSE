@@ -1,26 +1,54 @@
-MIT License
+CARD PONE PROPRIETARY LICENSE
 
-Copyright (c) 2026 OPTCG Korea
+Copyright (c) 2026 OPTCG Korea. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Scope
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This license applies to the original source code, project files, documentation,
+and other materials in this repository that are owned by OPTCG Korea
+(collectively, the "Software").
 
-This license applies only to the original source code and project files in this
-repository. It does not grant rights to ONE PIECE CARD GAME names, card images,
-card text, logos, characters, trademarks, or other third-party intellectual
-property, which remain the property of their respective rights holders.
+2. Restrictions
+
+Except with prior written permission from OPTCG Korea, no person or entity may:
+
+- copy, reproduce, modify, adapt, translate, or create derivative works of the
+  Software;
+- distribute, publish, sublicense, sell, rent, lease, or otherwise transfer the
+  Software;
+- deploy, host, operate, or make the Software available as a website,
+  application, service, or commercial product;
+- use the Software or any substantial portion of it in another project,
+  product, or service; or
+- remove or alter any copyright, ownership, or license notice.
+
+Access to a public repository grants only the rights required to view and fork
+the repository through GitHub's normal functionality. It does not grant any
+additional right to use, modify, distribute, deploy, or commercialize the
+Software.
+
+3. Third-Party Materials
+
+This license does not claim ownership of ONE PIECE CARD GAME names, card
+images, card text, logos, characters, trademarks, or other third-party
+intellectual property. Those materials remain the property of their respective
+rights holders and are subject to their own terms.
+
+Open-source libraries and other third-party dependencies included in or used by
+the project remain governed by their respective licenses.
+
+4. Historical Versions
+
+Copies of historical versions that were previously distributed under the MIT
+License remain governed by the license terms that applied to those copies. This
+proprietary license applies to this version and later versions of the Software.
+
+5. No Warranty
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. OPTCG KOREA SHALL NOT BE
+LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR
+ITS USE.
+
+For permission requests, contact: optkr26@gmail.com
