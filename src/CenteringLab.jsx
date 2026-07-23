@@ -30,7 +30,7 @@ const COPY = {
     vertical: '상하 비율',
     confidence: '측정 신뢰도',
     retake: '다시 촬영',
-    adjust: '인쇄 경계 조정',
+    adjust: '내부 테두리 조정',
     adjustHelp: '자동 경계선이 인쇄 영역과 다르면 슬라이더로 선을 맞춰 주세요.',
     left: '왼쪽',
     right: '오른쪽',
@@ -164,34 +164,34 @@ const CAMERA_FLOW_COPY = {
 
 const BOUNDARY_EDITOR_COPY = {
   KR: {
-    title: '2단계 · 인쇄 경계 조정',
-    help: '보정된 카드 안쪽의 실제 인쇄 테두리에 좌·우·상·하 네 선을 맞춰 주세요.',
-    edit: '인쇄 경계 다시 맞추기',
+    title: '2단계 · 내부 테두리 조정',
+    help: '보정된 카드 안쪽의 실제 내부 테두리에 좌·우·상·하 네 선을 맞춰 주세요.',
+    edit: '내부 테두리 다시 맞추기',
     reset: '권장 위치',
     done: '경계 확정 후 결과 보기',
     back: '카드 외곽으로 돌아가기',
     advanced: '기울기 조정',
     simple: '네 선 조정',
-    advancedHelp: '인쇄 테두리 자체가 비스듬할 때만 네 모서리 조정을 사용하세요.',
+    advancedHelp: '내부 테두리 자체가 비스듬할 때만 네 모서리 조정을 사용하세요.',
     outerLegend: '보정된 카드 외곽',
-    innerLegend: '측정할 인쇄 경계',
-    corner: '인쇄 경계 모서리',
-    edge: '인쇄 경계선'
+    innerLegend: '측정할 내부 테두리',
+    corner: '내부 테두리 모서리',
+    edge: '내부 테두리 선'
   },
   EN: {
-    title: 'Step 2 · Adjust print boundary',
-    help: 'Align the four lines with the actual inner print border on the corrected card.',
-    edit: 'Adjust print boundary',
+    title: 'Step 2 · Adjust inner border',
+    help: 'Align the four lines with the actual inner border on the corrected card.',
+    edit: 'Adjust inner border',
     reset: 'Recommended position',
     done: 'Confirm and view result',
     back: 'Back to card outline',
     advanced: 'Adjust tilt',
     simple: 'Four-line mode',
-    advancedHelp: 'Use four-corner adjustment only when the printed border itself is tilted.',
+    advancedHelp: 'Use four-corner adjustment only when the inner border itself is tilted.',
     outerLegend: 'Corrected card edge',
-    innerLegend: 'Measured print border',
-    corner: 'Print boundary corner',
-    edge: 'Print boundary edge'
+    innerLegend: 'Measured inner border',
+    corner: 'Inner border corner',
+    edge: 'Inner border edge'
   },
   JP: {
     title: 'ステップ2 · 印刷境界を調整',
@@ -207,6 +207,42 @@ const BOUNDARY_EDITOR_COPY = {
     innerLegend: '測定する印刷境界',
     corner: '印刷境界の角',
     edge: '印刷境界線'
+  }
+};
+
+const GRADING_REFERENCE_COPY = {
+  KR: {
+    title: '등급사별 전면 센터링 참고',
+    note: '전면 센터링만 비교한 예상값입니다. 표면·엣지·모서리·뒷면은 반영하지 않습니다.',
+    psaPass: 'PSA 10 기준 충족',
+    psaOutside: 'PSA 10 기준 초과',
+    cgcPristine: 'Pristine 10 기준',
+    cgcGem: 'Gem Mint 10 기준',
+    cgcOutside: 'Gem Mint 10 기준 초과',
+    brg: '공개 비율 기준 미확인',
+    ccg: '센터링 참고 범위'
+  },
+  EN: {
+    title: 'Front centering by grader',
+    note: 'Front centering only. Surface, edges, corners, and the back are not evaluated.',
+    psaPass: 'PSA 10 front reference',
+    psaOutside: 'Outside PSA 10 reference',
+    cgcPristine: 'Pristine 10 reference',
+    cgcGem: 'Gem Mint 10 reference',
+    cgcOutside: 'Outside Gem Mint 10 reference',
+    brg: 'No public ratio table',
+    ccg: 'Centering reference range'
+  },
+  JP: {
+    title: '鑑定会社別・表面センタリング参考',
+    note: '表面のセンタリングのみの参考値です。表面状態、エッジ、角、裏面は評価しません。',
+    psaPass: 'PSA 10 表面基準内',
+    psaOutside: 'PSA 10 表面基準外',
+    cgcPristine: 'Pristine 10 基準内',
+    cgcGem: 'Gem Mint 10 基準内',
+    cgcOutside: 'Gem Mint 10 基準外',
+    brg: '公開比率基準なし',
+    ccg: 'センタリング参考範囲'
   }
 };
 
@@ -910,6 +946,42 @@ function getCenteringReport(boundaries) {
   return { left, right, top, bottom, score, band };
 }
 
+function getBgsCenteringGrade(horizontalWorst, verticalWorst) {
+  if (horizontalWorst <= 50 && verticalWorst <= 50) return '10';
+  if ((horizontalWorst <= 50 && verticalWorst <= 55) || (verticalWorst <= 50 && horizontalWorst <= 55)) return '9.5';
+  if (horizontalWorst <= 55 && verticalWorst <= 55) return '9';
+  if (horizontalWorst <= 60 && verticalWorst <= 60) return '8';
+  if (horizontalWorst <= 65 && verticalWorst <= 65) return '7';
+  if (horizontalWorst <= 70 && verticalWorst <= 70) return '6';
+  if (horizontalWorst <= 75 && verticalWorst <= 75) return '5';
+  if (horizontalWorst <= 80 && verticalWorst <= 80) return '4';
+  if (horizontalWorst <= 85 && verticalWorst <= 85) return '3';
+  if (horizontalWorst <= 90 && verticalWorst <= 90) return '2';
+  return '1';
+}
+
+function getCcgCenteringRange(worst) {
+  if (worst <= 50) return '10';
+  if (worst <= 55) return '10–9.5';
+  if (worst <= 60) return '9.5–9';
+  if (worst <= 65) return '9–8.5';
+  if (worst <= 70) return '8.5–8';
+  if (worst <= 75) return '7';
+  return '<7';
+}
+
+function getGraderCenteringReferences(report) {
+  const horizontalWorst = Math.max(report.left, report.right);
+  const verticalWorst = Math.max(report.top, report.bottom);
+  const worst = Math.max(horizontalWorst, verticalWorst);
+  return {
+    psa10: worst <= 55,
+    bgs: getBgsCenteringGrade(horizontalWorst, verticalWorst),
+    cgc: worst <= 50 ? 'pristine' : worst <= 55 ? 'gem' : 'outside',
+    ccg: getCcgCenteringRange(worst)
+  };
+}
+
 function CenteringGuide() {
   return (
     <svg className="centering-guide-svg" viewBox="0 0 63 88" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -1107,6 +1179,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const text = COPY[uiLang] || COPY.KR;
   const flow = CAMERA_FLOW_COPY[uiLang] || CAMERA_FLOW_COPY.KR;
   const editorText = BOUNDARY_EDITOR_COPY[uiLang] || BOUNDARY_EDITOR_COPY.KR;
+  const gradingText = GRADING_REFERENCE_COPY[uiLang] || GRADING_REFERENCE_COPY.KR;
   const demoMode = import.meta.env.DEV && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('centeringDemo') : '';
   const demoResult = demoMode === 'result';
   const demoCamera = demoMode === 'camera';
@@ -1145,6 +1218,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const panRef = useRef({ pointerId: null, startX: 0, startY: 0, viewport: null });
 
   const report = useMemo(() => getCenteringReport(boundaries), [boundaries]);
+  const graderReferences = useMemo(() => getGraderCenteringReferences(report), [report]);
   const confidencePercent = Math.round(confidence * 100);
   const outlineValidation = useMemo(() => {
     const source = rawCanvasRef.current;
@@ -1167,15 +1241,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     left: `${-cornerViewport.left / cornerViewport.width * 100}%`,
     top: `${-cornerViewport.top / cornerViewport.height * 100}%`
   }), [cornerViewport]);
-  const cornerZoomLabel = useMemo(() => {
-    const baseViewport = getCornerViewportForZoom(cornerPoints, 0);
-    const zoom = Math.max(
-      baseViewport.width / Math.max(cornerViewport.width, 1),
-      baseViewport.height / Math.max(cornerViewport.height, 1)
-    );
-    return `${Number(zoom.toFixed(2))}x`;
-  }, [cornerPoints, cornerViewport]);
-
   useEffect(() => {
     if (!demoResult && !demoCorners) return;
     const canvas = document.createElement('canvas');
@@ -1447,8 +1512,15 @@ export default function CenteringLab({ uiLang = 'KR' }) {
 
   function setCornerZoomLevel(nextZoom) {
     const next = clamp(nextZoom, 0, CORNER_ZOOM_PADDINGS.length - 1);
+    const nextViewport = getCornerViewportForZoom(cornerPoints, next);
+    const centerX = cornerViewport.left + cornerViewport.width / 2;
+    const centerY = cornerViewport.top + cornerViewport.height / 2;
     setCornerZoom(next);
-    setCornerViewport(getCornerViewportForZoom(cornerPoints, next));
+    setCornerViewport({
+      ...nextViewport,
+      left: clamp(centerX - nextViewport.width / 2, 0, 100 - nextViewport.width),
+      top: clamp(centerY - nextViewport.height / 2, 0, 100 - nextViewport.height)
+    });
   }
 
   function handleCornerFramePointerDown(event) {
@@ -1621,7 +1693,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                 </div>
                 <div className="centering-corner-zoom" aria-label={flow.zoomLabel}>
                   <button type="button" className="is-zoom-out" onClick={() => changeCornerZoom(-1)} disabled={cornerZoom === 0} title={flow.zoomOut} aria-label={flow.zoomOut}><span aria-hidden="true" /></button>
-                  <output aria-live="polite">{cornerZoomLabel}</output>
                   <button type="button" className="is-zoom-in" onClick={() => changeCornerZoom(1)} disabled={cornerZoom === CORNER_ZOOM_PADDINGS.length - 1} title={flow.zoomIn} aria-label={flow.zoomIn}><span aria-hidden="true" /></button>
                 </div>
               </div>
@@ -1677,7 +1748,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
       {phase === 'boundary' ? (
         <section className="centering-boundary-panel">
           <header className="centering-corner-head">
-            <div><span>STEP 2 / 2 · PRINT BORDER</span><h2>{editorText.title}</h2><p>{editorText.help}</p></div>
+            <div><span>STEP 2 / 2 · INNER BORDER</span><h2>{editorText.title}</h2><p>{editorText.help}</p></div>
           </header>
           <div className="centering-boundary-layout">
             <div className="centering-editor-visual">
@@ -1740,6 +1811,36 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                 <div><span>{text.vertical}</span><strong>{report.top.toFixed(1)} <i>/</i> {report.bottom.toFixed(1)}</strong></div>
                 <div><span>{text.confidence}</span><strong>{confidencePercent}%</strong></div>
               </div>
+              <section className="centering-grading-reference">
+                <header><b>{gradingText.title}</b><span>{gradingText.note}</span></header>
+                <div className="centering-grading-reference-grid">
+                  <div className={graderReferences.psa10 ? 'is-pass' : ''}>
+                    <a href="https://www.psacard.com/gradingstandards" target="_blank" rel="noreferrer">PSA</a>
+                    <strong>{graderReferences.psa10 ? '10' : '—'}</strong>
+                    <small>{graderReferences.psa10 ? gradingText.psaPass : gradingText.psaOutside}</small>
+                  </div>
+                  <div>
+                    <a href="https://www.beckett.com/grading/scale" target="_blank" rel="noreferrer">BGS</a>
+                    <strong>{graderReferences.bgs}</strong>
+                    <small>Centering subgrade</small>
+                  </div>
+                  <div className={graderReferences.cgc !== 'outside' ? 'is-pass' : ''}>
+                    <a href="https://www.cgccards.com/card-grading/grading-scale/" target="_blank" rel="noreferrer">CGC</a>
+                    <strong>{graderReferences.cgc === 'pristine' || graderReferences.cgc === 'gem' ? '10' : '—'}</strong>
+                    <small>{graderReferences.cgc === 'pristine' ? gradingText.cgcPristine : graderReferences.cgc === 'gem' ? gradingText.cgcGem : gradingText.cgcOutside}</small>
+                  </div>
+                  <div>
+                    <a href="https://break.co.kr/" target="_blank" rel="noreferrer">BRG</a>
+                    <strong>—</strong>
+                    <small>{gradingText.brg}</small>
+                  </div>
+                  <div>
+                    <a href="https://ccgcard.kr/HowWeGrade" target="_blank" rel="noreferrer">CCG</a>
+                    <strong>{graderReferences.ccg}</strong>
+                    <small>{gradingText.ccg}</small>
+                  </div>
+                </div>
+              </section>
               <div className="centering-direction-note">
                 <b>{text.reference}</b>
                 <p>{Math.abs(report.left - 50) < 0.6

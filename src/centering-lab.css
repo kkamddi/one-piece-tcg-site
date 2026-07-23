@@ -740,8 +740,7 @@
 }
 
 .centering-corner-zoom {
-  display: inline-grid;
-  grid-template-columns: 30px 48px 30px;
+  display: inline-flex;
   align-items: center;
   height: 32px;
   overflow: hidden;
@@ -761,6 +760,10 @@
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
+}
+
+.centering-corner-zoom button + button {
+  border-left: 1px solid rgba(23, 25, 28, .1);
 }
 
 .centering-corner-zoom button span,
@@ -784,16 +787,6 @@
 .centering-corner-zoom button:disabled {
   opacity: .3;
   cursor: default;
-}
-
-.centering-corner-zoom output {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  border-inline: 1px solid rgba(23, 25, 28, .1);
-  color: #343941;
-  font-size: 11px;
-  font-weight: 850;
 }
 
 .centering-corner-frame {
@@ -1425,6 +1418,84 @@
   font-style: normal;
 }
 
+.centering-grading-reference {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(23,25,28,.11);
+  border-radius: 8px;
+  padding: 15px;
+  background: #fff;
+}
+
+.centering-grading-reference header {
+  display: grid;
+  gap: 3px;
+}
+
+.centering-grading-reference header b {
+  font-size: 13px;
+}
+
+.centering-grading-reference header span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.centering-grading-reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.centering-grading-reference-grid > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 96px;
+  border: 1px solid rgba(23,25,28,.1);
+  border-radius: 6px;
+  padding: 10px;
+  background: #f7f7f6;
+}
+
+.centering-grading-reference-grid > div.is-pass {
+  border-color: rgba(29, 126, 81, .25);
+  background: #eff9f3;
+}
+
+.centering-grading-reference-grid span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.centering-grading-reference-grid a {
+  width: fit-content;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.centering-grading-reference-grid a:hover {
+  color: #e66046;
+  text-decoration: underline;
+}
+
+.centering-grading-reference-grid strong {
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.centering-grading-reference-grid small {
+  color: #667085;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
 .centering-direction-note {
   border-left: 3px solid #e66046;
   padding: 4px 0 4px 15px;
@@ -1535,6 +1606,28 @@
 .renew-app.is-dark .centering-metrics {
   border-color: rgba(255,255,255,.12);
   background: #1d222a;
+}
+
+.renew-app.is-dark .centering-grading-reference {
+  border-color: rgba(255,255,255,.12);
+  background: #1d222a;
+}
+
+.renew-app.is-dark .centering-grading-reference header span,
+.renew-app.is-dark .centering-grading-reference-grid span,
+.renew-app.is-dark .centering-grading-reference-grid a,
+.renew-app.is-dark .centering-grading-reference-grid small {
+  color: #aeb7c5;
+}
+
+.renew-app.is-dark .centering-grading-reference-grid > div {
+  border-color: rgba(255,255,255,.1);
+  background: #171b21;
+}
+
+.renew-app.is-dark .centering-grading-reference-grid > div.is-pass {
+  border-color: rgba(116, 218, 164, .24);
+  background: #173629;
 }
 
 .renew-app.is-dark .centering-metrics > div + div,
@@ -1820,7 +1913,6 @@
   }
 
   .centering-corner-zoom {
-    grid-template-columns: 28px 43px 28px;
     height: 30px;
   }
 
