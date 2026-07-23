@@ -3378,7 +3378,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
   if (path.startsWith('/shops/partners/')) return { page: 'partnerShops' };
   if (path === '/shops/partners') return { page: 'shops' };
-  if (path === '/' || (['/cards', '/prices', '/community', '/lab/centering', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
+  if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
   if (path.startsWith('/cards')) return { page: 'cards' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { page: 'prices' };
   if (path.startsWith('/community')) return { page: 'community' };
@@ -8189,6 +8189,7 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
   const [progressIndex, setProgressIndex] = useState(0);
   const [revealedCount, setRevealedCount] = useState(1);
   const [fastOpened, setFastOpened] = useState(false);
+  const [autoOpening, setAutoOpening] = useState(false);
   const [priceByCardId, setPriceByCardId] = useState(() => new Map());
   const [boxImageByCode, setBoxImageByCode] = useState(() => new Map(
     boxMarketItems
@@ -8196,6 +8197,7 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
       .map((item) => [item.code, item.previewImageUrl])
   ));
   const openingTimerRef = useRef(null);
+  const sequenceTimerRef = useRef(null);
   const simulatorSeries = useMemo(() => sortDescByCode(seriesData.filter((series) => {
     const baseId = getBaseSeriesId(series);
     return (series.locale || 'KR') === locale
@@ -8241,6 +8243,7 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
     setProgressIndex(0);
     setRevealedCount(1);
     setFastOpened(false);
+    setAutoOpening(false);
   }, [locale, selectedSeriesId, unit]);
 
   useEffect(() => {
@@ -8301,7 +8304,33 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
 
   useEffect(() => () => {
     if (openingTimerRef.current) window.clearTimeout(openingTimerRef.current);
+    if (sequenceTimerRef.current) window.clearTimeout(sequenceTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!result || result.unit === 'pack' || fastOpened || !autoOpening) return undefined;
+    const finalIndex = result.unit === 'box'
+      ? Math.max(0, (result.boxes[0]?.packs.length || 1) - 1)
+      : Math.max(0, result.boxes.length - 1);
+    if (progressIndex >= finalIndex) {
+      setAutoOpening(false);
+      return undefined;
+    }
+    const isSpecialStep = result.unit === 'box'
+      ? result.specialEvent?.packIndex === progressIndex
+      : result.specialEvent?.boxIndex === progressIndex;
+    const delay = result.unit === 'box'
+      ? (isSpecialStep ? 1250 : 480)
+      : (isSpecialStep ? 1600 : 900);
+    sequenceTimerRef.current = window.setTimeout(() => {
+      setProgressIndex((value) => Math.min(finalIndex, value + 1));
+      sequenceTimerRef.current = null;
+    }, delay);
+    return () => {
+      if (sequenceTimerRef.current) window.clearTimeout(sequenceTimerRef.current);
+      sequenceTimerRef.current = null;
+    };
+  }, [autoOpening, fastOpened, progressIndex, result]);
 
   function startOpening() {
     if (!selectedSeries?.id || !cards.length || loading || opening) return;
@@ -8311,9 +8340,14 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
     setProgressIndex(0);
     setRevealedCount(1);
     setFastOpened(false);
+    setAutoOpening(false);
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     openingTimerRef.current = window.setTimeout(() => {
-      setResult(createPackSimulatorResult(unit, cards, selectedSeries.id));
+      const nextResult = createPackSimulatorResult(unit, cards, selectedSeries.id);
+      const packLength = nextResult.boxes[0]?.packs[0]?.length || 0;
+      setResult(nextResult);
+      setRevealedCount(nextResult.unit === 'pack' ? packLength : 1);
+      setAutoOpening(nextResult.unit !== 'pack' && !reducedMotion);
       setOpening(false);
       openingTimerRef.current = null;
     }, reducedMotion ? 120 : 900);
@@ -8345,6 +8379,11 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
         ? fastOpened || progressIndex >= (result.boxes[0]?.packs.length || 1) - 1
         : fastOpened || progressIndex >= result.boxes.length - 1
   );
+  const visibleSpecialEvent = result?.specialEvent && (
+    result.unit === 'pack'
+      || (result.unit === 'box' && progressIndex >= result.specialEvent.packIndex)
+      || (result.unit === 'carton' && progressIndex >= result.specialEvent.boxIndex)
+  ) ? result.specialEvent : null;
   const visibleCards = useMemo(() => {
     if (!result) return [];
     if (result.unit === 'pack') return currentPack.slice(0, revealedCount);
@@ -8359,12 +8398,31 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
   ), 0), [groupedCards]);
   const displayCards = result?.unit === 'carton' ? currentBoxHits : currentPack;
 
+  function showNextResult() {
+    if (!result || result.unit === 'pack') return;
+    setAutoOpening(false);
+    setProgressIndex((value) => (
+      result.unit === 'box'
+        ? Math.min((result.boxes[0]?.packs.length || 1) - 1, value + 1)
+        : Math.min(result.boxes.length - 1, value + 1)
+    ));
+  }
+
+  function revealAllResults() {
+    if (!result || result.unit === 'pack') return;
+    setAutoOpening(false);
+    setFastOpened(true);
+    setProgressIndex(
+      result.unit === 'box'
+        ? Math.max(0, (result.boxes[0]?.packs.length || 1) - 1)
+        : Math.max(0, result.boxes.length - 1)
+    );
+  }
+
   return (
     <main className="renew-subpage renew-pack-simulator-page">
       <header className="renew-pack-simulator-header">
         <span>PACK SIMULATOR</span>
-        <h1>{getLocaleText(uiLang, '가상 카드깡', 'Virtual Pack Opening', 'パック開封シミュレーター')}</h1>
-        <small>{getLocaleText(uiLang, '임시 봉입 규칙', 'Temporary pull rates', '仮封入率')}</small>
       </header>
 
       <section className="renew-pack-simulator-setup" aria-label={getLocaleText(uiLang, '개봉 설정', 'Opening settings', '開封設定')}>
@@ -8428,12 +8486,12 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
               <div>
                 <span>{getBaseSeriesId(selectedSeries)}</span>
                 <h2>{result.unit === 'pack'
-                  ? getLocaleText(uiLang, '카드를 한 장씩 확인해 보세요.', 'Reveal each card.', 'カードを1枚ずつ確認')
+                  ? getLocaleText(uiLang, '팩 개봉 결과', 'Pack result', 'パック結果')
                   : result.unit === 'box'
                     ? `${getLocaleText(uiLang, '팩 개봉', 'Pack', 'パック')} ${progressIndex + 1} / ${result.boxes[0]?.packs.length || 0}`
                     : `${getLocaleText(uiLang, '박스 결과', 'Box', 'ボックス')} ${progressIndex + 1} / ${result.boxes.length}`}</h2>
-                {result.specialEvent ? (
-                  <mark className="renew-pack-special-event">{result.specialEvent.label}</mark>
+                {visibleSpecialEvent ? (
+                  <mark className="renew-pack-special-event">{visibleSpecialEvent.label}</mark>
                 ) : null}
               </div>
               <button type="button" onClick={startOpening}>{getLocaleText(uiLang, '다시 개봉', 'Open again', 'もう一度')}</button>
@@ -8443,7 +8501,7 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
                 const hidden = result.unit === 'pack' && index >= revealedCount;
                 const price = priceByCardId.get(card.id)?.priceUsd || 0;
                 return (
-                  <article key={`${card.id}-${index}`} className={`renew-pack-reveal-card ${hidden ? 'is-hidden' : ''} ${getSimulatorRarityScore(card) >= 5 ? 'is-premium' : ''}`}>
+                  <article key={`${result.unit}-${progressIndex}-${card.id}-${index}`} className={`renew-pack-reveal-card ${hidden ? 'is-hidden' : ''} ${getSimulatorRarityScore(card) >= 5 ? 'is-premium' : ''}`}>
                     {hidden ? (
                       <button type="button" className="renew-pack-card-back" onClick={() => setRevealedCount((value) => Math.min(currentPack.length, Math.max(value, index + 1)))}>
                         <span>CARD Pone</span>
@@ -8471,28 +8529,20 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
               })}
             </div>
             <div className="renew-pack-progress-actions">
-              {result.unit === 'pack' && !isComplete ? (
-                <button type="button" onClick={() => setRevealedCount((value) => Math.min(currentPack.length, value + 1))}>
-                  {getLocaleText(uiLang, '다음 카드', 'Next card', '次のカード')}
-                </button>
-              ) : null}
-              {result.unit === 'box' && !isComplete ? (
+              {result.unit !== 'pack' && !isComplete ? (
                 <>
-                  <button type="button" onClick={() => setProgressIndex((value) => Math.min((result.boxes[0]?.packs.length || 1) - 1, value + 1))}>
-                    {getLocaleText(uiLang, '다음 팩', 'Next pack', '次のパック')}
+                  <button type="button" onClick={() => setAutoOpening((value) => !value)}>
+                    {autoOpening
+                      ? getLocaleText(uiLang, '일시 정지', 'Pause', '一時停止')
+                      : getLocaleText(uiLang, '자동 개봉', 'Auto open', '自動開封')}
                   </button>
-                  <button type="button" className="is-secondary" onClick={() => setFastOpened(true)}>
-                    {getLocaleText(uiLang, '전체 빠른 개봉', 'Open all', 'まとめて開封')}
+                  <button type="button" className="is-secondary" onClick={showNextResult}>
+                    {result.unit === 'box'
+                      ? getLocaleText(uiLang, '다음 팩', 'Next pack', '次のパック')
+                      : getLocaleText(uiLang, '다음 박스', 'Next box', '次のボックス')}
                   </button>
-                </>
-              ) : null}
-              {result.unit === 'carton' && !isComplete ? (
-                <>
-                  <button type="button" onClick={() => setProgressIndex((value) => Math.min(result.boxes.length - 1, value + 1))}>
-                    {getLocaleText(uiLang, '다음 박스', 'Next box', '次のボックス')}
-                  </button>
-                  <button type="button" className="is-secondary" onClick={() => setFastOpened(true)}>
-                    {getLocaleText(uiLang, '전체 빠른 개봉', 'Open all', 'まとめて開封')}
+                  <button type="button" className="is-secondary" onClick={revealAllResults}>
+                    {getLocaleText(uiLang, '전체 건너뛰기', 'Skip all', 'すべてスキップ')}
                   </button>
                 </>
               ) : null}
@@ -8563,7 +8613,6 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator }) {
     <main className="renew-subpage renew-lab-page">
       <section className="renew-lab-intro">
         <span>LAB</span>
-        <h1>{getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}</h1>
       </section>
       <section className="renew-lab-grid" aria-label={getLocaleText(uiLang, '실험실 도구', 'Lab tools', 'ラボツール')}>
         {tools.map((tool) => tool.onClick ? (
