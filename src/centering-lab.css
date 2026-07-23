@@ -1687,6 +1687,30 @@
     max-width: 100%;
   }
 
+  .centering-corner-handle,
+  .centering-boundary-handle.is-corner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .centering-corner-handle span {
+    width: 9px;
+    height: 9px;
+  }
+
+  .centering-corner-handle span::before {
+    width: 14px;
+  }
+
+  .centering-corner-handle span::after {
+    height: 14px;
+  }
+
+  .centering-boundary-handle.is-corner::after {
+    width: 8px;
+    height: 8px;
+  }
+
   .centering-corner-actions {
     width: 100%;
   }
