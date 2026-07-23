@@ -1126,7 +1126,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     tl: { x: 14, y: 10 }, tr: { x: 86, y: 10 }, br: { x: 86, y: 90 }, bl: { x: 14, y: 90 }
   }));
   const [cornerZoom, setCornerZoom] = useState(0);
-  const [activeCorner, setActiveCorner] = useState('');
   const [boundaries, setBoundaries] = useState(initialBoundaries);
   const [boundaryFrame, setBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
   const [automaticBoundaryFrame, setAutomaticBoundaryFrame] = useState(() => boundariesToFrame(initialBoundaries));
@@ -1639,7 +1638,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                     aria-label={`${flow.cornerLabel} ${index + 1}`}
                     onPointerDown={(event) => {
                       event.currentTarget.setPointerCapture(event.pointerId);
-                      setActiveCorner(key);
                       updateCornerFromPointer(key, event);
                     }}
                     onPointerMove={(event) => {
@@ -1647,21 +1645,9 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                     }}
                     onPointerUp={(event) => {
                       if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-                      setActiveCorner('');
                     }}
-                    onPointerCancel={() => setActiveCorner('')}
                   ><span aria-hidden="true" /></button>
                 ))}
-                {activeCorner && rawImageUrl ? (
-                  <div
-                    className="centering-corner-magnifier"
-                    style={{
-                      backgroundImage: `url(${rawImageUrl})`,
-                      backgroundPosition: `${cornerPoints[activeCorner].x}% ${cornerPoints[activeCorner].y}%`
-                    }}
-                    aria-hidden="true"
-                  ><span /></div>
-                ) : null}
               </div>
             </div>
             <aside className="centering-step-controls">
