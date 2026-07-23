@@ -6,7 +6,7 @@ const CARD_HEIGHT_MM = 88;
 const CAPTURE_WIDTH = 630;
 const CAPTURE_HEIGHT = 880;
 const CAPTURE_SOURCE_WIDTH = 960;
-const CORNER_ZOOM_PADDINGS = [0.16, 0.1, 0.055, 0.02];
+const CORNER_ZOOM_PADDINGS = [0.16, 0.1, 0.055, 0.02, -0.08, -0.18, -0.28, -0.34];
 
 const COPY = {
   KR: {
@@ -1167,7 +1167,14 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     left: `${-cornerViewport.left / cornerViewport.width * 100}%`,
     top: `${-cornerViewport.top / cornerViewport.height * 100}%`
   }), [cornerViewport]);
-  const cornerZoomLabel = `${Number((1 + cornerZoom * 0.25).toFixed(2))}x`;
+  const cornerZoomLabel = useMemo(() => {
+    const baseViewport = getCornerViewportForZoom(cornerPoints, 0);
+    const zoom = Math.max(
+      baseViewport.width / Math.max(cornerViewport.width, 1),
+      baseViewport.height / Math.max(cornerViewport.height, 1)
+    );
+    return `${Number(zoom.toFixed(2))}x`;
+  }, [cornerPoints, cornerViewport]);
 
   useEffect(() => {
     if (!demoResult && !demoCorners) return;
