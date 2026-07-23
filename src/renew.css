@@ -6621,6 +6621,27 @@
   cursor: pointer;
 }
 
+.renew-value-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.renew-value-head-actions button {
+  border: 0;
+  padding: 4px 0;
+  color: #6b7280;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.renew-value-head-actions button:first-child {
+  color: #c94d35;
+}
+
 .renew-community-event-notice {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
@@ -16125,5 +16146,390 @@ button.renew-lab-tool.is-available:hover {
     width: 100%;
     min-width: 0;
     max-width: 100%;
+  }
+}
+
+.renew-profit-page,
+.renew-profit-guide-page {
+  display: grid;
+  gap: 18px;
+}
+
+.renew-profit-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.renew-profit-head > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
+.renew-profit-head span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.renew-profit-head h1 {
+  margin: 0;
+  color: #17191c;
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.renew-profit-head > div:last-child {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.renew-profit-guide-button,
+.renew-profit-reset-button,
+.renew-profit-primary-button {
+  min-height: 40px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 12px;
+  padding: 0 14px;
+  color: #17191c;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-profit-primary-button {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-profit-reset-button {
+  color: #6b7280;
+}
+
+.renew-profit-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.renew-profit-currency-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.renew-profit-currency-row > span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.renew-profit-currency-row > div {
+  display: inline-flex;
+  gap: 4px;
+  border-radius: 12px;
+  padding: 4px;
+  background: #f1f1f2;
+}
+
+.renew-profit-currency-row button {
+  min-width: 50px;
+  min-height: 32px;
+  border: 0;
+  border-radius: 9px;
+  padding: 0 10px;
+  color: #6b7280;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-profit-currency-row button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-profit-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.renew-profit-field {
+  display: grid;
+  gap: 7px;
+}
+
+.renew-profit-field > span {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.renew-profit-field > div {
+  position: relative;
+}
+
+.renew-profit-field input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(23, 25, 28, 0.14);
+  border-radius: 12px;
+  padding: 0 38px 0 13px;
+  color: #17191c;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  outline: 0;
+}
+
+.renew-profit-field input:focus {
+  border-color: #c94d35;
+  box-shadow: 0 0 0 3px rgba(201, 77, 53, 0.12);
+}
+
+.renew-profit-field b {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.renew-profit-result-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: 1px solid rgba(23, 25, 28, 0.1);
+  border-bottom: 1px solid rgba(23, 25, 28, 0.1);
+}
+
+.renew-profit-result-grid article {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  min-height: 104px;
+  gap: 6px;
+  padding: 16px;
+}
+
+.renew-profit-result-grid article + article {
+  border-left: 1px solid rgba(23, 25, 28, 0.1);
+}
+
+.renew-profit-result-grid span {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.renew-profit-result-grid strong {
+  overflow: hidden;
+  color: #17191c;
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-profit-result-grid small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-profit-result-grid .is-profit strong,
+.renew-profit-result-grid .is-profit small {
+  color: #c94d35;
+}
+
+.renew-profit-result-grid .is-loss strong,
+.renew-profit-result-grid .is-loss small {
+  color: #2563eb;
+}
+
+.renew-profit-highlight {
+  background: #fff4ee;
+}
+
+.renew-profit-privacy-note,
+.renew-profit-guide-note {
+  margin: 0;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.renew-profit-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.renew-profit-guide-card {
+  min-height: 174px;
+  padding: 22px;
+}
+
+.renew-profit-guide-card h2,
+.renew-profit-faq-panel h2 {
+  margin: 0;
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.renew-profit-guide-card p {
+  margin: 14px 0 0;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+.renew-profit-faq-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.renew-profit-faq-panel > div {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-profit-faq-panel details {
+  border-top: 1px solid rgba(23, 25, 28, 0.1);
+  padding-top: 14px;
+}
+
+.renew-profit-faq-panel summary {
+  color: #17191c;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-profit-faq-panel details p {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.renew-app.is-dark .renew-profit-head h1,
+.renew-app.is-dark .renew-profit-guide-card h2,
+.renew-app.is-dark .renew-profit-faq-panel h2,
+.renew-app.is-dark .renew-profit-result-grid strong,
+.renew-app.is-dark .renew-profit-faq-panel summary {
+  color: #f8fafc;
+}
+
+.renew-app.is-dark .renew-profit-guide-button,
+.renew-app.is-dark .renew-profit-reset-button,
+.renew-app.is-dark .renew-profit-field input {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+  background: #20242a;
+}
+
+.renew-app.is-dark .renew-profit-currency-row > div {
+  background: #262a30;
+}
+
+.renew-app.is-dark .renew-profit-highlight {
+  background: rgba(201, 77, 53, 0.14);
+}
+
+.renew-app.is-dark .renew-profit-result-grid,
+.renew-app.is-dark .renew-profit-result-grid article + article,
+.renew-app.is-dark .renew-profit-faq-panel details {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 840px) {
+  .renew-profit-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .renew-profit-result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .renew-profit-result-grid article:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .renew-profit-result-grid article:nth-child(n + 3) {
+    border-top: 1px solid rgba(23, 25, 28, 0.1);
+  }
+
+  .renew-profit-result-grid article:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .renew-profit-guide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-profit-guide-card {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .renew-profit-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .renew-profit-head > div:last-child,
+  .renew-profit-primary-button {
+    width: 100%;
+  }
+
+  .renew-profit-head > div:last-child button {
+    flex: 1;
+  }
+
+  .renew-profit-head h1 {
+    font-size: 24px;
+  }
+
+  .renew-profit-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-profit-panel {
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .renew-profit-result-grid article {
+    min-height: 92px;
+    padding: 14px;
+  }
+
+  .renew-profit-result-grid strong {
+    font-size: 15px;
+  }
+
+  .renew-value-head-actions {
+    gap: 8px;
+  }
+
+  .renew-value-head-actions button {
+    font-size: 11px;
   }
 }

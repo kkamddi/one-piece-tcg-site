@@ -46,6 +46,24 @@
     <priority>0.82</priority>
   </url>
   <url>
+    <loc>https://www.optcgkorea.com/jp/tools/profit-calculator</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/tools/profit-calculator" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/tools/profit-calculator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/tools/profit-calculator" />
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+  <url>
+    <loc>https://www.optcgkorea.com/jp/guides/profit-calculator</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/profit-calculator" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/profit-calculator" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/profit-calculator" />
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.76</priority>
+  </url>
+  <url>
     <loc>https://www.optcgkorea.com/jp/calendar</loc>
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/calendar" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/calendar" />

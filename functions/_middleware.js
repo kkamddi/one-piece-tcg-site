@@ -125,6 +125,18 @@ const JAPANESE_SEO = {
     keywords: 'ワンピースカード センタリング,カード センタリング測定,PSA センタリング',
     schemaType: 'WebApplication'
   },
+  '/tools/profit-calculator': {
+    title: 'カード損益計算機 | Card Pone',
+    description: 'カードの仕入れ値、販売予定価格、手数料、送料から、予想損益、収益率、損益分岐販売価格を計算できます。',
+    keywords: 'カード 損益計算,カード 利益計算,トレーディングカード 手数料,損益分岐価格',
+    schemaType: 'WebApplication'
+  },
+  '/guides/profit-calculator': {
+    title: 'カード損益計算機の使い方 | Card Pone',
+    description: 'カード取引の損益計算、手数料・送料の反映、損益分岐販売価格の確認方法を解説します。',
+    keywords: 'カード 損益計算 方法,カード 利益率 計算,損益分岐価格,トレーディングカード ガイド',
+    schemaType: 'FAQPage'
+  },
   '/calendar': {
     title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
     description: 'ONE PIECE CARD GAMEの新商品、パック、ボックス、プロモカードの発売日と公式イベント情報を月別に確認できます。',
@@ -470,6 +482,18 @@ const SEO_PRIMARY = {
     keywords: '원피스카드 가이드, 원피스카드 입문, 원피스카드 수집, 원피스카드 보관 방법',
     schemaType: 'Article'
   },
+  '/tools/profit-calculator': {
+    title: '카드 손익 계산기 | 카드포네',
+    description: '카드 매입가, 판매 예정가, 수수료와 배송비를 입력해 예상 손익, 수익률, 손익분기 판매가를 계산하세요.',
+    keywords: '원피스카드 손익 계산기, 카드 수익률 계산기, 카드 판매 수수료, 카드 손익분기 가격',
+    schemaType: 'WebApplication'
+  },
+  '/guides/profit-calculator': {
+    title: '카드 손익 계산기 사용 가이드 | 카드포네',
+    description: '카드 거래 손익 계산 기준, 수수료와 배송비 반영 방법, 손익분기 판매가 확인 방법을 안내합니다.',
+    keywords: '카드 손익 계산 방법, 카드 수익률 계산, 카드 손익분기 판매가, 원피스카드 거래 가이드',
+    schemaType: 'FAQPage'
+  },
   '/faq': {
     title: '원피스카드 Q&A | 카드포네',
     description: '원피스카드 언어판, 봉입률, 박스 구매, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
@@ -537,6 +561,22 @@ const SERVER_PAGE_CONTENT = {
       '센터링만 확인하는 참고 도구이며 표면, 모서리, 인쇄 결함과 감정사의 판단은 포함하지 않습니다.'
     ],
     links: ['/cards', '/prices', '/guide/card-price', '/data-policy']
+  },
+  '/tools/profit-calculator': {
+    heading: '카드 손익 계산기',
+    paragraphs: [
+      '매입 단가와 판매 예정 단가, 수수료, 배송비를 입력하면 카드 거래의 예상 손익과 수익률, 손익분기 판매가를 계산할 수 있습니다.',
+      '입력한 값은 현재 브라우저에서만 계산하며 저장되지 않습니다. 실제 거래 전에는 이용처의 수수료와 배송 조건을 다시 확인하세요.'
+    ],
+    links: ['/guides/profit-calculator', '/prices', '/cards', '/guide/card-price']
+  },
+  '/guides/profit-calculator': {
+    heading: '카드 손익 계산 가이드',
+    paragraphs: [
+      '예상 정산금은 판매 예정가와 수량에서 판매 수수료와 판매 배송비를 뺀 금액입니다. 예상 손익은 예상 정산금에서 매입 금액과 매입 부대비용을 뺀 값입니다.',
+      '손익분기 판매가는 수수료와 배송비까지 반영했을 때 손익이 0원이 되는 카드 1장당 판매 가격입니다. 실제 거래 결과는 거래처 정책과 배송 조건에 따라 달라질 수 있습니다.'
+    ],
+    links: ['/tools/profit-calculator', '/prices', '/guide/card-price', '/faq']
   },
   '/news': {
     heading: '원피스카드 정보',
@@ -636,6 +676,22 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
       'センタリングのみの参考ツールであり、表面、角、印刷欠陥、鑑定士の判断は含みません。'
     ],
     links: ['/jp/cards', '/jp/prices', '/jp/news', '/jp']
+  },
+  '/tools/profit-calculator': {
+    heading: 'カード損益計算機',
+    paragraphs: [
+      '仕入れ値、販売予定価格、手数料、送料を入力すると、カード取引の予想損益、収益率、損益分岐販売価格を計算できます。',
+      '入力値は現在のブラウザ内でのみ計算され、保存されません。実際の取引前には販売先の手数料と配送条件を確認してください。'
+    ],
+    links: ['/jp/guides/profit-calculator', '/jp/prices', '/jp/cards', '/jp']
+  },
+  '/guides/profit-calculator': {
+    heading: 'カード損益計算機の使い方',
+    paragraphs: [
+      '予想受取額は、販売予定価格と数量から販売手数料と送料を差し引いた金額です。予想損益は、予想受取額から仕入れ金額と付帯費用を差し引いて求めます。',
+      '損益分岐販売価格は、手数料と送料を反映したうえで損益が0円になるカード1枚あたりの販売価格です。実際の取引結果は、販売先の規約や配送条件によって変わることがあります。'
+    ],
+    links: ['/jp/tools/profit-calculator', '/jp/prices', '/jp/news', '/jp']
   },
   '/calendar': {
     heading: 'ワンピースカードゲーム 発売日とイベントカレンダー',
@@ -881,7 +937,32 @@ function createJsonLd(pathname, seo) {
     pageNode.category = 'Trading Card';
   }
 
-  if (schemaType === 'FAQPage') {
+  if (normalized === '/guides/profit-calculator' || normalized === '/jp/guides/profit-calculator') {
+    const isJapaneseProfitGuide = normalized.startsWith('/jp/');
+    pageNode.mainEntity = isJapaneseProfitGuide ? [
+      {
+        '@type': 'Question',
+        name: '損益はどのように計算されますか？',
+        acceptedAnswer: { '@type': 'Answer', text: '予想受取額から仕入れ金額と付帯費用を差し引いて計算します。予想受取額には販売手数料と送料を反映します。' }
+      },
+      {
+        '@type': 'Question',
+        name: '損益分岐販売価格とは何ですか？',
+        acceptedAnswer: { '@type': 'Answer', text: '手数料と送料を反映したうえで、損益が0円になるカード1枚あたりの販売価格です。' }
+      }
+    ] : [
+      {
+        '@type': 'Question',
+        name: '손익은 어떻게 계산하나요?',
+        acceptedAnswer: { '@type': 'Answer', text: '예상 정산금에서 매입 금액과 매입 부대비용을 뺀 값으로 계산합니다. 예상 정산금에는 판매 수수료와 배송비를 반영합니다.' }
+      },
+      {
+        '@type': 'Question',
+        name: '손익분기 판매가는 무엇인가요?',
+        acceptedAnswer: { '@type': 'Answer', text: '수수료와 배송비까지 반영했을 때 손익이 0원이 되는 카드 1장당 판매 가격입니다.' }
+      }
+    ];
+  } else if (schemaType === 'FAQPage') {
     pageNode.mainEntity = [
       {
         '@type': 'Question',

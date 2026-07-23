@@ -20,6 +20,7 @@ import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
 import CenteringLab from './CenteringLab';
+import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
 import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
@@ -2535,6 +2536,8 @@ const PAGE_PATHS = {
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
   lab: '/lab',
   centering: '/lab/centering',
+  profitCalculator: '/tools/profit-calculator',
+  profitGuide: '/guides/profit-calculator',
   calendar: '/calendar',
   news: '/news',
   shops: '/shops',
@@ -2644,6 +2647,8 @@ function getRouteSeoPage(pathname = '/') {
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
   if (path.startsWith('/community')) return 'lab';
+  if (path === '/tools/profit-calculator') return 'profitCalculator';
+  if (path === '/guides/profit-calculator') return 'profitGuide';
   if (path.startsWith('/lab')) return 'lab';
   if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
@@ -2774,6 +2779,20 @@ const PAGE_SEO = {
     description: '카메라 촬영으로 원피스카드 앞면의 좌우·상하 인쇄 비율을 기기 안에서 분석하고 센터링 참고 구간을 확인할 수 있습니다.',
     keywords: '원피스카드 센터링, 카드 센터링 측정기, PSA 센터링, 원피스카드 감정',
     body: '카드를 촬영 가이드에 맞추면 좌우와 상하 인쇄 경계를 분석하고 센터링 비율과 측정 신뢰도를 보여주는 도구입니다.'
+  },
+  profitCalculator: {
+    title: '카드 손익 계산기 | Card Pone',
+    h1: '카드 손익 계산기',
+    description: '카드 매입가, 판매 예정가, 수수료와 배송비를 입력해 예상 손익, 수익률, 손익분기 판매가를 계산하세요.',
+    keywords: '원피스카드 손익 계산기, 카드 수익률 계산기, 카드 판매 수수료, 카드 손익분기 가격',
+    body: '매입 단가와 판매 예정 단가, 수수료, 배송비를 바탕으로 카드 거래의 예상 손익과 손익분기 판매가를 계산하는 공개 도구입니다.'
+  },
+  profitGuide: {
+    title: '카드 손익 계산기 사용 가이드 | Card Pone',
+    h1: '카드 손익 계산 가이드',
+    description: '카드 거래 손익 계산 기준, 수수료와 배송비 반영 방법, 손익분기 판매가 확인 방법을 안내합니다.',
+    keywords: '카드 손익 계산 방법, 카드 수익률 계산, 카드 손익분기 판매가, 원피스카드 거래 가이드',
+    body: '카드 매입가와 판매가, 수수료, 배송비를 기준으로 손익과 수익률을 확인하는 방법을 정리한 공개 가이드입니다.'
   },
   news: {
     title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | Card Pone',
@@ -2941,6 +2960,20 @@ const JP_PAGE_SEO = {
     description: 'カメラ撮影でカード表面の左右・上下の印刷比率を端末内で分析し、センタリングの参考範囲を確認できます。',
     keywords: 'ワンピースカード センタリング,カード センタリング測定,PSA センタリング',
     body: '撮影ガイドにカードを合わせ、左右と上下のセンタリング比率と測定信頼度を確認できます。'
+  },
+  profitCalculator: {
+    title: 'カード損益計算機 | Card Pone',
+    h1: 'カード損益計算機',
+    description: 'カードの仕入れ値、販売予定価格、手数料、送料から、予想損益、収益率、損益分岐販売価格を計算できます。',
+    keywords: 'カード 損益計算,カード 利益計算,トレーディングカード 手数料,損益分岐価格',
+    body: '仕入れ値、販売予定価格、手数料、送料をもとに、カード取引の予想損益と損益分岐販売価格を計算する公開ツールです。'
+  },
+  profitGuide: {
+    title: 'カード損益計算機の使い方 | Card Pone',
+    h1: 'カード損益計算機の使い方',
+    description: 'カード取引の損益計算、手数料・送料の反映、損益分岐販売価格の確認方法を解説します。',
+    keywords: 'カード 損益計算 方法,カード 利益率 計算,損益分岐価格,トレーディングカード ガイド',
+    body: 'カードの仕入れ値と販売価格、手数料、送料をもとに損益と収益率を確認する方法をまとめた公開ガイドです。'
   },
   calendar: {
     title: 'ワンピースカードゲーム 発売日・イベントカレンダー | Card Pone',
@@ -3189,6 +3222,8 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path.startsWith('/cards')) return { page: 'cards' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { page: 'prices' };
   if (path.startsWith('/community')) return { page: 'community' };
+  if (path === '/tools/profit-calculator') return { page: 'home' };
+  if (path === '/guides/profit-calculator') return { page: 'profitCalculator' };
   if (path.startsWith('/lab')) return { page: 'lab' };
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { page: 'news' };
   if (path.startsWith('/shops')) return { page: 'shops' };
@@ -3329,6 +3364,27 @@ function getPageJsonLd(page, seo, uiLang = 'KR') {
       author: { '@type': 'Organization', name: 'Card Pone' },
       publisher: { '@id': `${SITE_ORIGIN}/#organization` },
       mainEntityOfPage: url
+    });
+  }
+  if (page === 'profitCalculator') {
+    graph.push({
+      '@type': 'WebApplication',
+      name: 'Card Pone 카드 손익 계산기',
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Web',
+      isAccessibleForFree: true,
+      url,
+      description: seo.description
+    });
+  }
+  if (page === 'profitGuide') {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: getProfitCalculatorFaq(uiLang).map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer }
+      }))
     });
   }
   return { '@context': 'https://schema.org', '@graph': graph };
@@ -5074,7 +5130,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, onOpenProfitCalculator, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
@@ -5344,7 +5400,10 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
         <article className="renew-float-card renew-value">
           <div className="renew-value-head">
             <div className="renew-card-title">Portfolio</div>
-            {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{getLocaleText(uiLang, '전체 보기', 'View all', 'すべて見る')}</button> : null}
+            <div className="renew-value-head-actions">
+              <button type="button" onClick={onOpenProfitCalculator}>{getLocaleText(uiLang, '손익 계산', 'Profit calculator', '損益計算')}</button>
+              {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{getLocaleText(uiLang, '전체 보기', 'View all', 'すべて見る')}</button> : null}
+            </div>
           </div>
           <div className="renew-value-total">
             {portfolioTotalParts.map((part, index) => (
@@ -11782,6 +11841,7 @@ export default function RenewApp() {
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
           onOpenPrices={() => navigatePage('prices')}
+          onOpenProfitCalculator={() => navigatePage('profitCalculator')}
         />
       ) : activePage === 'cards' ? (
         <RenewCatalog
@@ -11854,6 +11914,10 @@ export default function RenewApp() {
         ) : (
           <RenewMarketplaceHidden />
         )
+      ) : activePage === 'profitCalculator' ? (
+        <ProfitCalculator uiLang={uiLang} onOpenGuide={() => navigatePage('profitGuide')} />
+      ) : activePage === 'profitGuide' ? (
+        <ProfitCalculatorGuide uiLang={uiLang} onOpenCalculator={() => navigatePage('profitCalculator')} />
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (

@@ -1,5 +1,12 @@
 # Codex 기본 작업 지침
 
+## Feature information architecture rules
+
+- Keep feature screens focused on the primary task. Do not add long explanatory subtitles or dense help copy below a new tool just to describe the feature.
+- Put feature instructions, calculation standards, caveats, and FAQs in a separately navigable public guide page or guide modal that follows the existing Card Pone UI.
+- A public tool page may link to its guide with a concise `사용 가이드` action. The guide must contain real user-visible content; never add crawler-only, reviewer-only, or hidden SEO text.
+- Public guides must use accurate page titles, descriptions, canonical URLs, and structured data that exactly match visible content.
+
 ## Production deployment rules
 
 - Production is deployed only from the latest synchronized `main` commit.

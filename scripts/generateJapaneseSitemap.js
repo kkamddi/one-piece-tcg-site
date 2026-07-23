@@ -63,7 +63,7 @@ const seriesLastmod = getLastModified([sourcePaths.series]);
 const cardLastmod = getLastModified([sourcePaths.cards]);
 const boxLastmod = getLastModified([sourcePaths.boxes]);
 
-const basePaths = ['/jp', '/jp/cards', '/jp/prices', '/jp/community', '/jp/lab/centering', '/jp/calendar', '/jp/news', '/jp/shops'];
+const basePaths = ['/jp', '/jp/cards', '/jp/prices', '/jp/community', '/jp/lab/centering', '/jp/tools/profit-calculator', '/jp/guides/profit-calculator', '/jp/calendar', '/jp/news', '/jp/shops'];
 const seriesPaths = [...new Set(
   seriesData
     .filter((series) => series.locale === 'JP')
