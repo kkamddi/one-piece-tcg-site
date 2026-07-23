@@ -31,22 +31,6 @@ function isAdminUser(user) {
   return String(user?.user_metadata?.username || '').toLowerCase() === 'admin';
 }
 
-function isUuid(value) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
-}
-
-async function awardLikePoint(postId, likerUserId, event) {
-  const recipientUserId = event?.authorToken || '';
-  if (!event?.liked || !isUuid(recipientUserId) || recipientUserId === likerUserId) return false;
-  const { data, error } = await supabaseAdmin.rpc('award_community_post_like_point', {
-    p_recipient_user_id: recipientUserId,
-    p_liker_user_id: likerUserId,
-    p_post_id: String(postId)
-  });
-  if (error) throw error;
-  return Boolean(data);
-}
-
 export default async function handler(request, response) {
   const { id, action } = request.query ?? {};
 
@@ -95,11 +79,6 @@ export default async function handler(request, response) {
       if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
       const result = await toggleCommunityPostLike(id, user.id, { includeEvent: true });
       if (!result?.post) return response.status(404).json({ error: 'not_found' });
-      try {
-        await awardLikePoint(id, user.id, result.event);
-      } catch (error) {
-        console.error('community_like_point_failed', error?.message || error);
-      }
       response.setHeader('Cache-Control', 'no-store, max-age=0');
       return response.status(200).json(result.post);
     }

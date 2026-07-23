@@ -3696,6 +3696,51 @@
   white-space: nowrap;
 }
 
+.renew-account-checkin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  border: 1px solid rgba(214, 74, 51, 0.22);
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: rgba(214, 74, 51, 0.055);
+}
+
+.renew-account-checkin > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.renew-account-checkin strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.renew-account-checkin span {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-account-checkin button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 7px;
+  padding: 9px 12px;
+  background: #17191c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-account-checkin button:disabled {
+  cursor: default;
+  opacity: 0.46;
+}
+
 .renew-account-point-history {
   margin-top: 14px;
 }

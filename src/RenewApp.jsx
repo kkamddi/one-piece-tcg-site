@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
-import { fetchCommunityPointOverview } from './api/community';
+import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
@@ -4563,6 +4563,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [pointOverview, setPointOverview] = useState(null);
   const [pointLoading, setPointLoading] = useState(false);
+  const [checkInLoading, setCheckInLoading] = useState(false);
 
   useEffect(() => {
     if (!unlocked) return undefined;
@@ -4588,6 +4589,29 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     const timer = window.setTimeout(() => setNicknameNotice(null), 2600);
     return () => window.clearTimeout(timer);
   }, [nicknameNotice]);
+
+  async function checkIn() {
+    if (checkInLoading || pointOverview?.checkedToday) return;
+    setCheckInLoading(true);
+    try {
+      const status = await checkInCommunityAttendance();
+      try {
+        setPointOverview(await fetchCommunityPointOverview());
+      } catch {
+        setPointOverview((current) => ({ ...(current || {}), ...status }));
+      }
+      setNicknameNotice({
+        type: 'success',
+        message: status?.awarded
+          ? text('출석체크가 완료되었습니다. +1P가 적립되었습니다.', 'Check-in complete. +1P awarded.', '出席チェックが完了しました。+1Pを獲得しました。')
+          : text('오늘은 이미 출석체크를 완료했습니다.', 'You have already checked in today.', '本日はすでに出席チェック済みです。')
+      });
+    } catch (error) {
+      setNicknameNotice({ type: 'error', message: error?.message || text('출석을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'Could not complete check-in. Please try again.', '出席チェックを処理できませんでした。しばらくしてから再試行してください。') });
+    } finally {
+      setCheckInLoading(false);
+    }
+  }
 
   async function unlockAccount(event) {
     event.preventDefault();
@@ -4729,6 +4753,15 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
                   <span>{text('연속 출석일', 'Check-in streak', '連続出席')}</span>
                   <strong>{pointLoading ? '-' : text(`${Number(pointOverview?.streak || 0)}일`, `${Number(pointOverview?.streak || 0)} days`, `${Number(pointOverview?.streak || 0)}日`)}</strong>
                 </div>
+              </div>
+              <div className="renew-account-checkin">
+                <div>
+                  <strong>{text('오늘의 출석', 'Today\'s check-in', '今日の出席')}</strong>
+                  <span>{pointOverview?.checkedToday ? text('출석 완료', 'Complete', '出席済み') : text('매일 1회 +1P', '+1P once a day', '1日1回 +1P')}</span>
+                </div>
+                <button type="button" onClick={checkIn} disabled={pointLoading || checkInLoading || pointOverview?.checkedToday}>
+                  {checkInLoading ? text('처리 중', 'Checking in', '処理中') : pointOverview?.checkedToday ? text('출석 완료', 'Checked in', '出席完了') : text('출석체크', 'Check in', '出席チェック')}
+                </button>
               </div>
               <div className="renew-account-point-history">
                 <header>

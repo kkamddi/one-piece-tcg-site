@@ -104,15 +104,6 @@ async function recordAttendance(userId) {
   return normalizePointStatus(Array.isArray(data) ? data[0] : data);
 }
 
-async function awardPostCreatedPoint(userId, postId) {
-  const { data, error } = await supabaseAdmin.rpc('award_community_post_created_point', {
-    p_user_id: userId,
-    p_post_id: String(postId)
-  });
-  if (error) throw error;
-  return Boolean(data);
-}
-
 async function getPointOverview(userId) {
   const [status, ledgerResult] = await Promise.all([
     getAttendanceStatus(userId),
@@ -182,17 +173,9 @@ export default async function handler(request, response) {
 
       const resolvedCardName = isEventBoard ? (hidden ? '__hidden__' : pinned ? '__pinned__' : '') : cardName;
       const post = await createCommunityPost({ boardId, nickname: getUserNickname(user), title, cardName: resolvedCardName, imageUrl, imageUrls, content }, user.id, user.id);
-      let pointsAwarded = false;
-      if (!isEventBoard && !isIntroBoard) {
-        try {
-          pointsAwarded = await awardPostCreatedPoint(user.id, post.id);
-        } catch (error) {
-          console.error('community_post_point_failed', error?.message || error);
-        }
-      }
       const authorGrades = await resolveCommunityAuthorGrades([user.id]);
       response.setHeader('Cache-Control', 'no-store, max-age=0');
-      return response.status(201).json({ ...post, authorGrade: authorGrades.get(user.id) || '', pointsAwarded });
+      return response.status(201).json({ ...post, authorGrade: authorGrades.get(user.id) || '', pointsAwarded: false });
     }
 
     return response.status(405).json({ error: 'method_not_allowed' });
