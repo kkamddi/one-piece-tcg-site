@@ -19,7 +19,6 @@ import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
-import CommunityPage from './CommunityPage';
 import CenteringLab from './CenteringLab';
 import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
@@ -2160,7 +2159,6 @@ const NAV_ITEMS = [
   { id: 'cards', labelKey: 'navCards' },
   { id: 'prices', labelKey: 'navPrices' },
   ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
-  { id: 'community', labelKey: 'navCommunity' },
   { id: 'lab', labelKey: 'navLab' },
   { id: 'news', labelKey: 'navNews' },
   { id: 'shops', labelKey: 'navShops' }
@@ -2546,7 +2544,6 @@ const PAGE_PATHS = {
   cards: '/cards',
   prices: '/prices',
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
-  community: '/community',
   lab: '/lab/centering',
   calendar: '/calendar',
   news: '/news',
@@ -2656,7 +2653,7 @@ function getRouteSeoPage(pathname = '/') {
   if (PATH_PAGES[path]) return PATH_PAGES[path];
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
-  if (path.startsWith('/community')) return 'community';
+  if (path.startsWith('/community')) return 'lab';
   if (path.startsWith('/lab')) return 'lab';
   if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
@@ -3579,6 +3576,7 @@ function MobileNavIcon({ type }) {
     prices: <><path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" /></>,
     marketplace: <><path d="M7 7h11l-3-3" /><path d="M18 7l-3 3" /><path d="M17 17H6l3 3" /><path d="M6 17l3-3" /></>,
     community: <><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" /><path d="M8 9h8" /><path d="M8 13h5" /></>,
+    lab: <><path d="M9 3h6" /><path d="M10 3v6.2L5.6 17A3 3 0 0 0 8.2 21h7.6a3 3 0 0 0 2.6-4L14 9.2V3" /><path d="M8.5 15h7" /></>,
     calendar: <><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></>,
     details: <><path d="M2.1 12a10.2 10.2 0 0 1 19.8 0 10.2 10.2 0 0 1-19.8 0" /><circle cx="12" cy="12" r="3" /></>,
     store: <><path d="M6 2 3 6v2a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0V6l-3-4Z" /><path d="M5 11v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" /><path d="M9 22v-6h6v6" /></>,
@@ -4029,7 +4027,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </a>
 
         <nav className="renew-tabs" aria-label="주요 메뉴">
-          {NAV_ITEMS.filter((item) => item.id !== 'lab' || isAdmin).map((item) => (
+          {NAV_ITEMS.map((item) => (
             <a
               key={item.id}
               href={getLocalizedPagePath(item.id, uiLang)}
@@ -4105,9 +4103,9 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        <a href={getLocalizedPagePath('community', uiLang)} className={activePage === 'community' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('community'); }} aria-label="커뮤니티">
-          <MobileNavIcon type="community" />
-          <span>{t('navCommunity')}</span>
+        <a href={getLocalizedPagePath('lab', uiLang)} className={activePage === 'lab' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('lab'); }} aria-label="실험실">
+          <MobileNavIcon type="lab" />
+          <span>{t('navLab')}</span>
         </a>
         <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' || activePage === 'lab' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
@@ -11569,6 +11567,9 @@ export default function RenewApp() {
   }
 
   function navigatePage(page, options = {}) {
+    if (page === 'community') {
+      page = 'lab';
+    }
     if (page === 'marketplace' && !MARKETPLACE_TAB_VISIBLE) {
       page = 'home';
     }
@@ -11751,14 +11752,6 @@ export default function RenewApp() {
         ) : (
           <RenewMarketplaceHidden />
         )
-      ) : activePage === 'community' ? (
-        <CommunityPage
-          authUser={authUser}
-          displayName={displayName}
-          isAdmin={authUser?.user_metadata?.username === 'admin'}
-          uiLang={uiLang}
-          onRequireLogin={() => handleAuthClick('login')}
-        />
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
