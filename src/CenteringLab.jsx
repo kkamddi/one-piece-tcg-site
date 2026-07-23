@@ -157,7 +157,7 @@ const BOUNDARY_EDITOR_COPY = {
     title: '2단계 · 인쇄 경계 조정',
     help: '보정된 카드 안쪽의 실제 인쇄 테두리에 좌·우·상·하 네 선을 맞춰 주세요.',
     edit: '인쇄 경계 다시 맞추기',
-    reset: '자동 위치',
+    reset: '권장 위치',
     done: '경계 확정 후 결과 보기',
     back: '카드 외곽으로 돌아가기',
     advanced: '기울기 조정',
@@ -172,7 +172,7 @@ const BOUNDARY_EDITOR_COPY = {
     title: 'Step 2 · Adjust print boundary',
     help: 'Align the four lines with the actual inner print border on the corrected card.',
     edit: 'Adjust print boundary',
-    reset: 'Auto position',
+    reset: 'Recommended position',
     done: 'Confirm and view result',
     back: 'Back to card outline',
     advanced: 'Adjust tilt',
@@ -187,7 +187,7 @@ const BOUNDARY_EDITOR_COPY = {
     title: 'ステップ2 · 印刷境界を調整',
     help: '補正されたカード内側の実際の印刷境界に、上下左右の4本の線を合わせてください。',
     edit: '印刷境界を再調整',
-    reset: '自動位置',
+    reset: '推奨位置',
     done: '境界を確定して結果を見る',
     back: 'カード外枠に戻る',
     advanced: '傾きを調整',
@@ -827,6 +827,17 @@ function detectBoundary(luma, width, height, axis, startRatio, endRatio) {
   };
 }
 
+const RECOMMENDED_PRINT_BOUNDARIES = Object.freeze({ left: 4.5, right: 4.5, top: 4.5, bottom: 4.5 });
+
+function getRecommendedPrintBoundaries(detected) {
+  const minimum = 3.6;
+  const maximum = 12;
+  return Object.fromEntries(Object.entries(RECOMMENDED_PRINT_BOUNDARIES).map(([key, fallback]) => {
+    const value = Number(detected?.[key]);
+    return [key, Number.isFinite(value) ? Number(clamp(value, minimum, maximum).toFixed(1)) : fallback];
+  }));
+}
+
 function analyzeCapturedCanvas(canvas) {
   const sample = document.createElement('canvas');
   sample.width = 315;
@@ -839,15 +850,17 @@ function analyzeCapturedCanvas(canvas) {
   const right = detectBoundary(luma, sample.width, sample.height, 'x', 0.78, 0.975);
   const top = detectBoundary(luma, sample.width, sample.height, 'y', 0.025, 0.22);
   const bottom = detectBoundary(luma, sample.width, sample.height, 'y', 0.78, 0.975);
-  const boundaries = {
+  const detectedBoundaries = {
     left: Number((left.position / sample.width * 100).toFixed(1)),
     right: Number(((sample.width - right.position) / sample.width * 100).toFixed(1)),
     top: Number((top.position / sample.height * 100).toFixed(1)),
     bottom: Number(((sample.height - bottom.position) / sample.height * 100).toFixed(1))
   };
+  const boundaries = getRecommendedPrintBoundaries(detectedBoundaries);
+  const wasConstrained = Object.keys(boundaries).some((key) => boundaries[key] !== detectedBoundaries[key]);
   return {
     boundaries,
-    confidence: (left.confidence + right.confidence + top.confidence + bottom.confidence) / 4
+    confidence: (left.confidence + right.confidence + top.confidence + bottom.confidence) / 4 * (wasConstrained ? 0.55 : 1)
   };
 }
 

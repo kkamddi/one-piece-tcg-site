@@ -1081,19 +1081,20 @@
 
 .centering-boundary-editor polygon {
   fill: rgba(255,255,255,.035);
-  stroke: rgba(255,255,255,.9);
-  stroke-width: .65;
-  stroke-dasharray: 1.4 1.4;
+  stroke: rgba(255,255,255,.98);
+  stroke-width: .9;
+  stroke-dasharray: 1.1 1.1;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 1px rgba(0,0,0,.72));
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.9));
 }
 
 .centering-physical-edge {
   position: absolute;
   z-index: 5;
-  inset: 1.1%;
+  inset: 0;
+  box-sizing: border-box;
   border: 2px solid #d84f38;
-  border-radius: 3.5%;
+  border-radius: 8px;
   box-shadow: 0 0 0 1px rgba(255,255,255,.35);
   pointer-events: none;
 }
@@ -1111,8 +1112,8 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   transform: translate(-50%, -50%);
   border: 0;
   padding: 0;
@@ -1126,8 +1127,8 @@
 }
 
 .centering-boundary-handle.is-corner {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   border-radius: 0;
 }
 
@@ -1152,21 +1153,21 @@
 
 .centering-boundary-handle.is-top,
 .centering-boundary-handle.is-bottom {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
 }
 
 .centering-boundary-handle.is-left,
 .centering-boundary-handle.is-right {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
 }
 
 .centering-boundary-handle.is-edge::after {
   content: '';
   display: block;
-  width: 22px;
-  height: 8px;
+  width: 18px;
+  height: 7px;
   border-radius: 99px;
   border: 2px solid #fff;
   background: #17191c;
@@ -1175,8 +1176,8 @@
 
 .centering-boundary-handle.is-left::after,
 .centering-boundary-handle.is-right::after {
-  width: 8px;
-  height: 22px;
+  width: 7px;
+  height: 18px;
 }
 
 .centering-boundary-editor-badge {
