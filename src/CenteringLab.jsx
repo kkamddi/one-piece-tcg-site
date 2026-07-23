@@ -461,8 +461,12 @@ function getCornerViewport(points, padding = 0.16) {
 }
 
 function getCornerViewportForZoom(points, zoomLevel = 0) {
-  const safeLevel = Math.round(clamp(zoomLevel, 0, CORNER_ZOOM_PADDINGS.length - 1));
-  return getCornerViewport(points, CORNER_ZOOM_PADDINGS[safeLevel]);
+  const safeLevel = clamp(Number(zoomLevel) || 0, 0, CORNER_ZOOM_PADDINGS.length - 1);
+  const lower = Math.floor(safeLevel);
+  const upper = Math.ceil(safeLevel);
+  const progress = safeLevel - lower;
+  const padding = CORNER_ZOOM_PADDINGS[lower] + (CORNER_ZOOM_PADDINGS[upper] - CORNER_ZOOM_PADDINGS[lower]) * progress;
+  return getCornerViewport(points, padding);
 }
 
 function projectPointToViewport(point, viewport) {
@@ -1138,6 +1142,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const animationRef = useRef(0);
   const lastMeasuredRef = useRef(0);
   const captureLockedRef = useRef(false);
+  const pinchRef = useRef({ points: new Map(), startDistance: 0, startZoom: 0 });
 
   const report = useMemo(() => getCenteringReport(boundaries), [boundaries]);
   const confidencePercent = Math.round(confidence * 100);
@@ -1223,6 +1228,12 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   }
 
   useEffect(() => () => stopCamera(), []);
+
+  useEffect(() => {
+    const isWorkflowOpen = ['camera', 'corners', 'boundary', 'result'].includes(phase);
+    document.body.classList.toggle('centering-workflow-open', isWorkflowOpen);
+    return () => document.body.classList.remove('centering-workflow-open');
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== 'camera') return undefined;
@@ -1410,6 +1421,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   }
 
   function updateCornerFromPointer(key, event) {
+    if (pinchRef.current.points.size >= 2) return;
     const frame = cornerFrameRef.current;
     if (!frame) return;
     const rect = frame.getBoundingClientRect();
@@ -1426,10 +1438,45 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   }
 
   function changeCornerZoom(delta) {
-    const next = Math.round(clamp(cornerZoom + delta, 0, CORNER_ZOOM_PADDINGS.length - 1));
-    if (next === cornerZoom) return;
+    const next = delta > 0
+      ? Math.min(Math.floor(cornerZoom + 1), CORNER_ZOOM_PADDINGS.length - 1)
+      : Math.max(Math.ceil(cornerZoom - 1), 0);
+    setCornerZoomLevel(next);
+  }
+
+  function setCornerZoomLevel(nextZoom) {
+    const next = clamp(nextZoom, 0, CORNER_ZOOM_PADDINGS.length - 1);
     setCornerZoom(next);
     setCornerViewport(getCornerViewportForZoom(cornerPoints, next));
+  }
+
+  function handleCornerFramePointerDown(event) {
+    if (event.pointerType !== 'touch') return;
+    const points = pinchRef.current.points;
+    points.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (points.size !== 2) return;
+    const [first, second] = [...points.values()];
+    pinchRef.current.startDistance = Math.hypot(first.x - second.x, first.y - second.y);
+    pinchRef.current.startZoom = cornerZoom;
+  }
+
+  function handleCornerFramePointerMove(event) {
+    if (event.pointerType !== 'touch') return;
+    const points = pinchRef.current.points;
+    if (!points.has(event.pointerId)) return;
+    points.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (points.size < 2 || !pinchRef.current.startDistance) return;
+    const [first, second] = [...points.values()];
+    const distance = Math.hypot(first.x - second.x, first.y - second.y);
+    const zoomDelta = (distance / pinchRef.current.startDistance - 1) * 3.2;
+    event.preventDefault();
+    setCornerZoomLevel(pinchRef.current.startZoom + zoomDelta);
+  }
+
+  function handleCornerFramePointerEnd(event) {
+    if (event.pointerType !== 'touch') return;
+    pinchRef.current.points.delete(event.pointerId);
+    if (pinchRef.current.points.size < 2) pinchRef.current.startDistance = 0;
   }
 
   function updateBoundaryFrame(nextFrame) {
@@ -1541,15 +1588,19 @@ export default function CenteringLab({ uiLang = 'KR' }) {
                   <span className="is-inner"><i />{flow.innerLegend}</span>
                 </div>
                 <div className="centering-corner-zoom" aria-label={flow.zoomLabel}>
-                  <button type="button" onClick={() => changeCornerZoom(-1)} disabled={cornerZoom === 0} title={flow.zoomOut} aria-label={flow.zoomOut}>-</button>
+                  <button type="button" className="is-zoom-out" onClick={() => changeCornerZoom(-1)} disabled={cornerZoom === 0} title={flow.zoomOut} aria-label={flow.zoomOut}><span aria-hidden="true" /></button>
                   <output aria-live="polite">{cornerZoomLabel}</output>
-                  <button type="button" onClick={() => changeCornerZoom(1)} disabled={cornerZoom === CORNER_ZOOM_PADDINGS.length - 1} title={flow.zoomIn} aria-label={flow.zoomIn}>+</button>
+                  <button type="button" className="is-zoom-in" onClick={() => changeCornerZoom(1)} disabled={cornerZoom === CORNER_ZOOM_PADDINGS.length - 1} title={flow.zoomIn} aria-label={flow.zoomIn}><span aria-hidden="true" /></button>
                 </div>
               </div>
               <div
                 className="centering-corner-frame"
                 ref={cornerFrameRef}
                 style={{ aspectRatio: cornerFrameAspectRatio }}
+                onPointerDownCapture={handleCornerFramePointerDown}
+                onPointerMoveCapture={handleCornerFramePointerMove}
+                onPointerUpCapture={handleCornerFramePointerEnd}
+                onPointerCancelCapture={handleCornerFramePointerEnd}
               >
                 {rawImageUrl ? <img className="centering-corner-source" src={rawImageUrl} style={cornerImageStyle} alt="" /> : null}
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">

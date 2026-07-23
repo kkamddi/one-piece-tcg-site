@@ -686,6 +686,7 @@
 }
 
 .centering-corner-zoom button {
+  position: relative;
   width: 30px;
   height: 30px;
   border: 0;
@@ -695,6 +696,24 @@
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
+}
+
+.centering-corner-zoom button span,
+.centering-corner-zoom button span::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: 13px;
+  height: 2px;
+  border-radius: 99px;
+  background: currentColor;
+  content: '';
+  transform: translate(-50%, -50%);
+}
+
+.centering-corner-zoom button.is-zoom-in span::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .centering-corner-zoom button:disabled {
@@ -710,6 +729,12 @@
   color: #343941;
   font-size: 11px;
   font-weight: 850;
+}
+
+@media (max-width: 760px) {
+  body.centering-workflow-open .renew-bottom-nav {
+    display: none;
+  }
 }
 
 .centering-corner-frame {
