@@ -5144,7 +5144,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, onOpenProfitCalculator, uiLang }) {
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
@@ -5415,7 +5415,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           <div className="renew-value-head">
             <div className="renew-card-title">Portfolio</div>
             <div className="renew-value-head-actions">
-              <button type="button" onClick={onOpenProfitCalculator}>{getLocaleText(uiLang, '손익 계산', 'Profit calculator', '損益計算')}</button>
               {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{getLocaleText(uiLang, '전체 보기', 'View all', 'すべて見る')}</button> : null}
             </div>
           </div>
@@ -8317,8 +8316,8 @@ function RenewAdminLabGate({ authResolved, isLoggedIn, uiLang, onLogin, onBack }
   const message = !authResolved
     ? getLocaleText(uiLang, '계정 권한을 확인하고 있습니다.', 'Checking account permissions.', 'アカウント権限を確認しています。')
     : isLoggedIn
-      ? getLocaleText(uiLang, '센터링 측정기는 현재 관리자 계정에서만 사용할 수 있습니다.', 'The centering tool is currently available only to administrators.', 'センタリング測定は現在、管理者アカウントのみ利用できます。')
-      : getLocaleText(uiLang, '관리자 계정으로 로그인해야 센터링 측정기를 사용할 수 있습니다.', 'Sign in with an administrator account to use the centering tool.', '管理者アカウントでログインするとセンタリング測定を利用できます。');
+      ? getLocaleText(uiLang, '실험실 도구는 현재 관리자 계정에서만 사용할 수 있습니다.', 'Lab tools are currently available only to administrators.', 'ラボツールは現在、管理者アカウントのみ利用できます。')
+      : getLocaleText(uiLang, '관리자 계정으로 로그인해야 실험실 도구를 사용할 수 있습니다.', 'Sign in with an administrator account to use Lab tools.', '管理者アカウントでログインするとラボツールを利用できます。');
   return (
     <main className="renew-subpage">
       <section className="renew-panel">
@@ -8328,7 +8327,7 @@ function RenewAdminLabGate({ authResolved, isLoggedIn, uiLang, onLogin, onBack }
           {authResolved ? (
             <button type="button" className="renew-pill is-filled" onClick={isLoggedIn ? onBack : onLogin}>
               {isLoggedIn
-                ? getLocaleText(uiLang, '정보로 돌아가기', 'Back to Info', '情報へ戻る')
+                ? getLocaleText(uiLang, '홈으로 돌아가기', 'Back to Home', 'ホームへ戻る')
                 : getLocaleText(uiLang, '관리자 로그인', 'Admin sign in', '管理者ログイン')}
             </button>
           ) : null}
@@ -12370,7 +12369,6 @@ export default function RenewApp() {
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
           onOpenPrices={() => navigatePage('prices')}
-          onOpenProfitCalculator={() => navigatePage('profitCalculator')}
         />
       ) : activePage === 'cards' ? (
         <RenewCatalog
@@ -12451,20 +12449,40 @@ export default function RenewApp() {
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
-        <RenewLabHome
-          uiLang={uiLang}
-          onOpenCentering={() => navigatePage('centering')}
-          onOpenSimulator={() => navigatePage('packSimulator')}
-        />
+        authResolved && isAdminUser ? (
+          <RenewLabHome
+            uiLang={uiLang}
+            onOpenCentering={() => navigatePage('centering')}
+            onOpenSimulator={() => navigatePage('packSimulator')}
+          />
+        ) : (
+          <RenewAdminLabGate
+            authResolved={authResolved}
+            isLoggedIn={Boolean(authUser)}
+            uiLang={uiLang}
+            onLogin={() => handleAuthClick('login')}
+            onBack={() => navigatePage('home')}
+          />
+        )
       ) : activePage === 'packSimulator' ? (
-        <RenewPackSimulator
-          uiLang={uiLang}
-          onOpenCard={(card) => {
-            const query = new URLSearchParams();
-            if (card?.id) query.set('cardId', card.id);
-            navigatePage('cards', { query: query.toString() });
-          }}
-        />
+        authResolved && isAdminUser ? (
+          <RenewPackSimulator
+            uiLang={uiLang}
+            onOpenCard={(card) => {
+              const query = new URLSearchParams();
+              if (card?.id) query.set('cardId', card.id);
+              navigatePage('cards', { query: query.toString() });
+            }}
+          />
+        ) : (
+          <RenewAdminLabGate
+            authResolved={authResolved}
+            isLoggedIn={Boolean(authUser)}
+            uiLang={uiLang}
+            onLogin={() => handleAuthClick('login')}
+            onBack={() => navigatePage('home')}
+          />
+        )
       ) : activePage === 'centering' ? (
         authResolved && isAdminUser ? (
           <CenteringLab uiLang={uiLang} />
@@ -12474,7 +12492,7 @@ export default function RenewApp() {
             isLoggedIn={Boolean(authUser)}
             uiLang={uiLang}
             onLogin={() => handleAuthClick('login')}
-            onBack={() => navigatePage('lab')}
+            onBack={() => navigatePage('home')}
           />
         )
       ) : activePage === 'news' ? (
