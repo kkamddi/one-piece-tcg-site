@@ -89,15 +89,160 @@ const PACK_SIMULATOR_DEFAULT_RULE = Object.freeze({
   cardsPerPack: 6,
   packsPerBox: 24,
   boxesPerCarton: 12,
-  cartonHits: [
+  cartonBoxHits: [
     { group: 'SP', count: 1 },
-    { group: 'PARALLEL', count: 8 },
+    { group: 'LEADER_PARALLEL', count: 2 },
     { group: 'SEC', count: 4 },
-    { group: 'L', count: 12 },
-    { group: 'SR', count: 48 }
-  ]
+    { group: 'PARALLEL', count: 5 }
+  ],
+  boxBaseHits: [
+    { group: 'L', count: 1 },
+    { group: 'SR', count: 4 }
+  ],
+  mangaRate: 0.001,
+  godPackRate: 0.001
 });
-const PACK_SIMULATOR_RULES_BY_SERIES = Object.freeze({});
+const PACK_SIMULATOR_RULES_BY_SERIES = Object.freeze({
+  'JP-PRB01': { cardsPerPack: 10, packsPerBox: 10 },
+  'JP-PRB02': { cardsPerPack: 10, packsPerBox: 10 }
+});
+const PACK_SIMULATOR_PRB01_GOD_MANGA_CARD_IDS = Object.freeze([
+  'JP::OP01-120_r1',
+  'JP::OP02-013_r1',
+  'JP::OP03-122_r1',
+  'JP::OP04-083_r1',
+  'JP::OP05-069_r1',
+  'JP::OP05-074_r1',
+  'JP::OP05-119_r1',
+  'JP::OP06-118_r1',
+  'JP::P-053_r1'
+]);
+const PACK_SIMULATOR_MANGA_CARD_IDS_BY_SERIES = Object.freeze({
+  'JP-OP01': ['JP::OP01-120_p2'],
+  'JP-OP02': ['JP::OP02-013_p2'],
+  'JP-OP03': ['JP::OP03-122_p2'],
+  'JP-OP04': ['JP::OP04-083_p2'],
+  'JP-OP05': ['JP::OP05-069_p2', 'JP::OP05-074_p2', 'JP::OP05-119_p2'],
+  'JP-OP06': ['JP::OP06-118_p2'],
+  'JP-EB01': ['JP::EB01-006_p2'],
+  'JP-OP07': ['JP::OP07-051_p2'],
+  'JP-OP08': ['JP::OP08-118_p2'],
+  'JP-OP09': ['JP::OP09-004_p2', 'JP::OP09-051_p2', 'JP::OP09-093_p2', 'JP::OP09-118_p2', 'JP::OP09-119_p2'],
+  'JP-OP10': ['JP::OP10-119_p2'],
+  'JP-EB02': ['JP::EB02-061_p2'],
+  'JP-OP11': ['JP::OP11-118_p2'],
+  'JP-OP12': ['JP::OP12-118_p2'],
+  'JP-OP13': [
+    'JP::OP13-118_p2',
+    'JP::OP13-118_p3',
+    'JP::OP13-119_p2',
+    'JP::OP13-119_p3',
+    'JP::OP13-120_p2',
+    'JP::OP13-120_p3'
+  ],
+  'JP-OP14': ['JP::OP14-119_p2'],
+  'JP-EB03': ['JP::EB03-061_p2'],
+  'JP-OP15': ['JP::OP15-118_p2'],
+  'JP-OP16': ['JP::OP16-063_p2', 'JP::OP16-065_p2', 'JP::OP16-073_p2'],
+  'JP-PRB01': ['JP::P-053_r1'],
+  'JP-PRB02': ['JP::OP06-119_r1']
+});
+const PACK_SIMULATOR_MANGA_CARD_IDS = new Set([
+  ...Object.values(PACK_SIMULATOR_MANGA_CARD_IDS_BY_SERIES).flat(),
+  ...PACK_SIMULATOR_PRB01_GOD_MANGA_CARD_IDS
+]);
+const PACK_SIMULATOR_VIRTUAL_CARDS_BY_SERIES = Object.freeze({
+  'JP-PRB01': [
+    {
+      id: 'SIM::JP-PRB01-GOLD-DON-ACE',
+      locale: 'JP',
+      cardNo: 'DON!!',
+      name: 'ゴールド ドン!!カード',
+      rarity: 'GOLD DON',
+      category: 'DON',
+      imageUrl: 'https://www.onepiece-cardgame.com/images/products/boosters/prb01/PRB01_DON_SP_Ace.png',
+      isSimulatorOnly: true
+    },
+    {
+      id: 'SIM::JP-PRB01-GOLD-DON-LUFFY',
+      locale: 'JP',
+      cardNo: 'DON!!',
+      name: 'ゴールド ドン!!カード',
+      rarity: 'GOLD DON',
+      category: 'DON',
+      imageUrl: 'https://www.onepiece-cardgame.com/images/products/boosters/prb01/PRB01_DON_SP_luffy.png',
+      isSimulatorOnly: true
+    },
+    {
+      id: 'SIM::JP-PRB01-GOLD-DON-SABO',
+      locale: 'JP',
+      cardNo: 'DON!!',
+      name: 'ゴールド ドン!!カード',
+      rarity: 'GOLD DON',
+      category: 'DON',
+      imageUrl: 'https://www.onepiece-cardgame.com/images/products/boosters/prb01/PRB01_DON_SP_sabo.png',
+      isSimulatorOnly: true
+    }
+  ],
+  'JP-PRB02': Array.from({ length: 30 }, (_, index) => ({
+    id: `SIM::JP-PRB02-GOLD-DON-${String(index + 1).padStart(2, '0')}`,
+    locale: 'JP',
+    cardNo: 'DON!!',
+    name: 'ゴールド ドン!!カード',
+    rarity: 'GOLD DON',
+    category: 'DON',
+    imageUrl: 'https://www.onepiece-cardgame.com/renewal/images/products/boosters/prb02/don_sp.webp',
+    isSimulatorOnly: true
+  }))
+});
+const PACK_SIMULATOR_GOD_PACKS_BY_SERIES = Object.freeze({
+  'JP-PRB01': {
+    label: 'MANGA GOD PACK',
+    cardIds: PACK_SIMULATOR_PRB01_GOD_MANGA_CARD_IDS,
+    appendGroups: ['GOLD_DON'],
+    appendCount: 1
+  },
+  'JP-PRB02': {
+    variants: [
+      {
+        label: 'GOLD DON!! GOD PACK',
+        groups: ['GOLD_DON'],
+        count: 10
+      },
+      {
+        label: 'PARALLEL GOD PACK',
+        groups: ['SP', 'LEADER_PARALLEL', 'PARALLEL'],
+        count: 10
+      }
+    ]
+  },
+  'JP-EB03': {
+    label: 'HEROINES SP GOD PACK',
+    cardIds: [
+      'JP::EB03-003_p2',
+      'JP::EB03-018_p2',
+      'JP::EB03-024_p2',
+      'JP::EB03-026_p2',
+      'JP::EB03-031_p2',
+      'JP::EB03-042_p2',
+      'JP::EB03-045_p2',
+      'JP::EB03-053_p2',
+      'JP::EB03-055_p2'
+    ],
+    count: 6
+  },
+  'JP-OP13': {
+    label: 'DEMON GOD PACK',
+    cardIds: [
+      'JP::OP13-079_p1',
+      'JP::OP13-080_p2',
+      'JP::OP13-083_p2',
+      'JP::OP13-084_p2',
+      'JP::OP13-089_p2',
+      'JP::OP13-091_p2'
+    ]
+  }
+});
 
 function getBoxReleaseSortValue(item) {
   const rawDate = item?.releaseDate || item?.release_date || item?.releasedAt || item?.released_at;
@@ -1539,6 +1684,7 @@ function getCardThumbnailKey(card) {
 }
 
 function getCardThumbnailSrc(card) {
+  if (card?.isSimulatorOnly) return getCardImageSrc(card);
   const key = getCardThumbnailKey(card);
   if (CARD_THUMBNAIL_BASE_URL === '/api/card-thumb' && key) {
     return resolveApiUrl(`/api/card-thumb?key=${encodeURIComponent(key)}`);
@@ -7765,16 +7911,25 @@ function shuffleSimulatorItems(items) {
 }
 
 function getSimulatorPoolKey(card) {
+  if (card?.isSimulatorOnly && card?.category === 'DON') return 'GOLD_DON';
+  if (PACK_SIMULATOR_MANGA_CARD_IDS.has(card?.id)) return 'MANGA';
+  const raritySource = String(card?.rarity || '').trim().toUpperCase();
   const rarity = getRarityBucket(card?.rarity);
-  if (rarity === 'SP') return 'SP';
+  if (rarity === 'SP' || raritySource.startsWith('SP')) return 'SP';
   const variantSource = `${card?.id || ''} ${card?.variantKey || ''} ${card?.imageUrl || ''}`;
+  if (/_p\d+\b/i.test(variantSource) && String(card?.category || '').toUpperCase() === 'LEADER') {
+    return 'LEADER_PARALLEL';
+  }
   if (/_p\d+\b/i.test(variantSource)) return 'PARALLEL';
   return rarity || 'C';
 }
 
 function getSimulatorRarityScore(card) {
   return {
-    SP: 7,
+    MANGA: 9,
+    GOLD_DON: 9,
+    SP: 8,
+    LEADER_PARALLEL: 7,
     PARALLEL: 6,
     SEC: 5,
     L: 4,
@@ -7794,20 +7949,79 @@ function pickSimulatorCard(poolMap, keys, usedIds = new Set()) {
   return source[Math.floor(Math.random() * source.length)] || null;
 }
 
+function getSimulatorGroupDrawKeys(group) {
+  return {
+    SP: ['SP', 'PARALLEL'],
+    LEADER_PARALLEL: ['LEADER_PARALLEL', 'PARALLEL'],
+    SEC: ['SEC', 'PARALLEL'],
+    PARALLEL: ['PARALLEL', 'SR'],
+    L: ['L'],
+    SR: ['SR']
+  }[group] || [group];
+}
+
+function pickSimulatorGroupCard(poolMap, group, usedIds) {
+  for (const key of getSimulatorGroupDrawKeys(group)) {
+    const card = pickSimulatorCard(poolMap, [key], usedIds);
+    if (card) return card;
+  }
+  return null;
+}
+
+function replaceSimulatorPackHit(box, packIndex, card) {
+  const pack = box?.packs?.[packIndex];
+  if (!pack?.length || !card) return false;
+  pack[Math.max(0, pack.length - 1)] = card;
+  return true;
+}
+
+function resolveSimulatorGodPack(cardsById, poolMap, config) {
+  if (!config) return null;
+  const variants = config.variants?.length ? config.variants : [config];
+  const selected = variants[Math.floor(Math.random() * variants.length)];
+  const cards = selected.cardIds?.length
+    ? selected.cardIds.map((cardId) => cardsById.get(cardId)).filter(Boolean)
+    : [];
+  if (selected.cardIds?.length && cards.length !== selected.cardIds.length) return null;
+  const selectedCards = selected.cardIds?.length && selected.count
+    ? shuffleSimulatorItems(cards).slice(0, selected.count)
+    : cards;
+  if (selected.cardIds?.length && selected.count && selectedCards.length !== selected.count) return null;
+
+  const groupCards = (selected.groups || []).flatMap((group) => poolMap.get(group) || []);
+  const selectedGroupCards = selected.groups?.length && selected.count
+    ? shuffleSimulatorItems(groupCards).slice(0, selected.count)
+    : groupCards;
+  if (selected.groups?.length && selected.count && selectedGroupCards.length !== selected.count) return null;
+
+  const appendCards = shuffleSimulatorItems(
+    (selected.appendGroups || []).flatMap((group) => poolMap.get(group) || [])
+  ).slice(0, selected.appendCount || 0);
+  if (selected.appendCount && appendCards.length !== selected.appendCount) return null;
+
+  return {
+    label: selected.label,
+    cards: [...selectedCards, ...selectedGroupCards, ...appendCards]
+  };
+}
+
 function createSimulatorCarton(cards, seriesId) {
   const seriesRule = PACK_SIMULATOR_RULES_BY_SERIES[seriesId] || {};
   const rule = {
     ...PACK_SIMULATOR_DEFAULT_RULE,
     ...seriesRule,
-    cartonHits: seriesRule.cartonHits || PACK_SIMULATOR_DEFAULT_RULE.cartonHits
+    cartonBoxHits: seriesRule.cartonBoxHits || PACK_SIMULATOR_DEFAULT_RULE.cartonBoxHits,
+    boxBaseHits: seriesRule.boxBaseHits || PACK_SIMULATOR_DEFAULT_RULE.boxBaseHits
   };
-  const usableCards = cards.filter((card) => card?.id && card?.imageUrl);
+  const virtualCards = PACK_SIMULATOR_VIRTUAL_CARDS_BY_SERIES[seriesId] || [];
+  const usableCards = [...cards, ...virtualCards].filter((card) => card?.id && card?.imageUrl);
+  const cardsById = new Map(usableCards.map((card) => [card.id, card]));
   const poolMap = new Map();
   usableCards.forEach((card) => {
     const key = getSimulatorPoolKey(card);
     poolMap.set(key, [...(poolMap.get(key) || []), card]);
   });
-  const fallbackKeys = ['C', 'UC', 'R', 'SR', 'L', 'SEC', 'PARALLEL', 'SP'];
+  const fallbackKeys = ['C', 'UC', 'R', 'SR', 'L', 'SEC'];
   const draw = (keys, usedIds) => pickSimulatorCard(poolMap, keys, usedIds)
     || pickSimulatorCard(poolMap, fallbackKeys, usedIds);
   const createBasePack = () => {
@@ -7837,22 +8051,73 @@ function createSimulatorCarton(cards, seriesId) {
   const boxes = Array.from({ length: rule.boxesPerCarton }, () => ({
     packs: Array.from({ length: rule.packsPerBox }, createBasePack)
   }));
-  const hitSlots = shuffleSimulatorItems(boxes.flatMap((box, boxIndex) => (
-    box.packs.map((pack, packIndex) => ({ boxIndex, packIndex }))
-  )));
-  let slotIndex = 0;
-  rule.cartonHits.forEach(({ group, count }) => {
-    if (!(poolMap.get(group) || []).length) return;
-    for (let index = 0; index < count && slotIndex < hitSlots.length; index += 1) {
-      const slot = hitSlots[slotIndex];
-      slotIndex += 1;
-      const pack = boxes[slot.boxIndex].packs[slot.packIndex];
-      const card = pickSimulatorCard(poolMap, [group], new Set(pack.map((item) => item.id)));
-      if (!card) continue;
-      pack[Math.max(0, pack.length - 1)] = card;
-    }
+
+  const boxHitGroups = shuffleSimulatorItems(rule.cartonBoxHits.flatMap(({ group, count }) => (
+    Array.from({ length: count }, () => group)
+  ))).slice(0, boxes.length);
+  boxes.forEach((box, boxIndex) => {
+    const packIndexes = shuffleSimulatorItems(Array.from({ length: box.packs.length }, (_, index) => index));
+    const mainGroup = boxHitGroups[boxIndex] || 'PARALLEL';
+    const mainPackIndex = packIndexes.shift() ?? 0;
+    const mainPack = box.packs[mainPackIndex] || [];
+    const mainCard = pickSimulatorGroupCard(poolMap, mainGroup, new Set(mainPack.map((item) => item.id)));
+    replaceSimulatorPackHit(box, mainPackIndex, mainCard);
+    box.mainHit = { group: mainGroup, packIndex: mainPackIndex, cardId: mainCard?.id || '' };
+
+    rule.boxBaseHits.forEach(({ group, count }) => {
+      for (let index = 0; index < count; index += 1) {
+        const packIndex = packIndexes.shift();
+        if (packIndex === undefined) return;
+        const pack = box.packs[packIndex] || [];
+        const card = pickSimulatorGroupCard(poolMap, group, new Set(pack.map((item) => item.id)));
+        replaceSimulatorPackHit(box, packIndex, card);
+      }
+    });
   });
-  return { boxes, rule };
+
+  const mangaCards = (PACK_SIMULATOR_MANGA_CARD_IDS_BY_SERIES[seriesId] || [])
+    .map((cardId) => cardsById.get(cardId))
+    .filter(Boolean);
+  const godPack = resolveSimulatorGodPack(cardsById, poolMap, PACK_SIMULATOR_GOD_PACKS_BY_SERIES[seriesId]);
+  const rareRoll = Math.random();
+  let rareCursor = 0;
+  let specialEvent = null;
+
+  if (mangaCards.length) {
+    rareCursor += rule.mangaRate;
+    if (rareRoll < rareCursor) {
+      const parallelBoxIndexes = boxes
+        .map((box, boxIndex) => (box.mainHit?.group === 'PARALLEL' ? boxIndex : -1))
+        .filter((boxIndex) => boxIndex >= 0);
+      const boxIndex = parallelBoxIndexes[Math.floor(Math.random() * parallelBoxIndexes.length)]
+        ?? Math.floor(Math.random() * boxes.length);
+      const packIndex = boxes[boxIndex]?.mainHit?.packIndex ?? 0;
+      const card = mangaCards[Math.floor(Math.random() * mangaCards.length)];
+      if (replaceSimulatorPackHit(boxes[boxIndex], packIndex, card)) {
+        boxes[boxIndex].mainHit = { group: 'MANGA', packIndex, cardId: card.id };
+        specialEvent = { type: 'manga', label: 'MANGA RARE', boxIndex, packIndex };
+      }
+    }
+  }
+
+  if (!specialEvent && godPack?.cards.length) {
+    rareCursor += rule.godPackRate;
+    if (rareRoll < rareCursor) {
+      const boxIndex = Math.floor(Math.random() * boxes.length);
+      const packIndexes = Array.from({ length: boxes[boxIndex]?.packs.length || 0 }, (_, index) => index)
+        .filter((packIndex) => packIndex !== boxes[boxIndex]?.mainHit?.packIndex);
+      const packIndex = packIndexes[Math.floor(Math.random() * packIndexes.length)] ?? 0;
+      boxes[boxIndex].packs[packIndex] = godPack.cards;
+      specialEvent = {
+        type: 'god-pack',
+        label: godPack.label,
+        boxIndex,
+        packIndex
+      };
+    }
+  }
+
+  return { boxes, rule, specialEvent };
 }
 
 function createPackSimulatorResult(unit, cards, seriesId) {
@@ -7861,22 +8126,29 @@ function createPackSimulatorResult(unit, cards, seriesId) {
     return {
       unit,
       boxes: carton.boxes,
-      rule: carton.rule
+      rule: carton.rule,
+      specialEvent: carton.specialEvent
     };
   }
-  const box = carton.boxes[Math.floor(Math.random() * carton.boxes.length)] || carton.boxes[0];
+  const boxIndex = Math.floor(Math.random() * carton.boxes.length);
+  const box = carton.boxes[boxIndex] || carton.boxes[0];
   if (unit === 'box') {
     return {
       unit,
       boxes: box ? [box] : [],
-      rule: carton.rule
+      rule: carton.rule,
+      specialEvent: carton.specialEvent?.boxIndex === boxIndex ? carton.specialEvent : null
     };
   }
-  const pack = box?.packs[Math.floor(Math.random() * box.packs.length)] || box?.packs[0] || [];
+  const packIndex = Math.floor(Math.random() * (box?.packs.length || 1));
+  const pack = box?.packs[packIndex] || box?.packs[0] || [];
   return {
     unit: 'pack',
     boxes: [{ packs: [pack] }],
-    rule: carton.rule
+    rule: carton.rule,
+    specialEvent: carton.specialEvent?.boxIndex === boxIndex && carton.specialEvent?.packIndex === packIndex
+      ? carton.specialEvent
+      : null
   };
 }
 
@@ -8160,6 +8432,9 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
                   : result.unit === 'box'
                     ? `${getLocaleText(uiLang, '팩 개봉', 'Pack', 'パック')} ${progressIndex + 1} / ${result.boxes[0]?.packs.length || 0}`
                     : `${getLocaleText(uiLang, '박스 결과', 'Box', 'ボックス')} ${progressIndex + 1} / ${result.boxes.length}`}</h2>
+                {result.specialEvent ? (
+                  <mark className="renew-pack-special-event">{result.specialEvent.label}</mark>
+                ) : null}
               </div>
               <button type="button" onClick={startOpening}>{getLocaleText(uiLang, '다시 개봉', 'Open again', 'もう一度')}</button>
             </div>
@@ -8175,7 +8450,12 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
                       </button>
                     ) : (
                       <>
-                        <button type="button" className="renew-pack-card-image" onClick={() => onOpenCard?.(card)}>
+                        <button
+                          type="button"
+                          className="renew-pack-card-image"
+                          disabled={card.isSimulatorOnly}
+                          onClick={() => onOpenCard?.(card)}
+                        >
                           <img src={getCardThumbnailSrc(card)} data-fallback-src={getCardImageSrc(card)} alt={card.name || card.cardNo} onError={fallbackToOriginalCardImage} />
                         </button>
                         <div>
@@ -8235,7 +8515,7 @@ function RenewPackSimulator({ uiLang, onOpenCard }) {
           </header>
           <div className="renew-pack-summary-list">
             {groupedCards.map(({ card, quantity, priceUsd }) => (
-              <button key={card.id} type="button" onClick={() => onOpenCard?.(card)}>
+              <button key={card.id} type="button" disabled={card.isSimulatorOnly} onClick={() => onOpenCard?.(card)}>
                 <img src={getCardThumbnailSrc(card)} data-fallback-src={getCardImageSrc(card)} alt="" onError={fallbackToOriginalCardImage} />
                 <span>
                   <small>{getSimulatorPoolKey(card)} · {card.cardNo}</small>

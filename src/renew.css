@@ -8798,6 +8798,21 @@ button.renew-lab-tool.is-available:hover {
   letter-spacing: 0;
 }
 
+.renew-pack-special-event {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  margin-top: 10px;
+  border: 1px solid rgba(201, 77, 53, 0.35);
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: #9d2f1f;
+  background: #fff0e8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
 .renew-pack-result-heading > button {
   flex: 0 0 auto;
   min-height: 40px;
@@ -8873,6 +8888,11 @@ button.renew-lab-tool.is-available:hover {
 .renew-pack-card-image {
   aspect-ratio: 0.716;
   background: #f2f2f2;
+}
+
+.renew-pack-card-image:disabled,
+.renew-pack-summary-list button:disabled {
+  cursor: default;
 }
 
 .renew-pack-card-image img {
@@ -9032,6 +9052,12 @@ button.renew-lab-tool.is-available:hover {
 .renew-app.is-dark .renew-pack-summary-list button {
   border-color: rgba(255, 255, 255, 0.14);
   background: #13171f;
+}
+
+.renew-app.is-dark .renew-pack-special-event {
+  border-color: rgba(255, 144, 117, 0.42);
+  color: #ffb6a3;
+  background: rgba(201, 77, 53, 0.16);
 }
 
 .renew-app.is-dark .renew-pack-opening-stage:not(.has-result) {
