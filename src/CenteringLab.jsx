@@ -92,7 +92,7 @@ const CAMERA_FLOW_COPY = {
     zoomLabel: '외곽 조정 확대 배율',
     outerLegend: '실제 카드 외곽',
     innerLegend: '인쇄 경계 (다음 단계)',
-    outerTip: '주황색 네 점을 카드의 둥근 모서리가 끝나는 실제 바깥쪽에 맞춰 주세요.',
+    outerTip: '사진 빈 영역을 한 손가락으로 밀어 위치를 옮기고, 두 손가락으로 확대한 뒤 주황색 네 점을 실제 모서리에 맞춰 주세요.',
     readjust: '카드 외곽 다시 맞추기',
     outlineReady: '네 점이 카드의 실제 바깥 모서리에 맞는지 마지막으로 확인해 주세요.',
     outlineInvalid: '외곽점의 순서나 간격이 올바르지 않습니다. 네 점을 다시 맞춰 주세요.',
@@ -123,7 +123,7 @@ const CAMERA_FLOW_COPY = {
     zoomLabel: 'Outline adjustment zoom level',
     outerLegend: 'Physical card edge',
     innerLegend: 'Print border (next step)',
-    outerTip: 'Place the four orange points on the physical ends of the rounded card corners.',
+    outerTip: 'Drag the empty photo area with one finger to pan, pinch to zoom, then place the four orange points on the physical card corners.',
     readjust: 'Adjust card outline',
     outlineReady: 'Check once more that all four points match the physical outer corners.',
     outlineInvalid: 'The outline order or spacing is invalid. Reposition all four points.',
@@ -154,7 +154,7 @@ const CAMERA_FLOW_COPY = {
     zoomLabel: '外枠調整の拡大率',
     outerLegend: 'カード実物の外枠',
     innerLegend: '印刷境界（次のステップ）',
-    outerTip: 'オレンジ色の4点を、丸い角が終わるカード実物の外側に合わせてください。',
+    outerTip: '写真の余白を1本指で動かして位置を調整し、2本指で拡大してから、オレンジの4点をカード実物の角に合わせてください。',
     readjust: 'カード外枠を再調整',
     outlineReady: '4点がカード外側の実際の角に合っているか、もう一度確認してください。',
     outlineInvalid: '外枠点の順序または間隔が正しくありません。4点を再調整してください。',
@@ -1143,6 +1143,7 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   const lastMeasuredRef = useRef(0);
   const captureLockedRef = useRef(false);
   const pinchRef = useRef({ points: new Map(), startDistance: 0, startZoom: 0 });
+  const panRef = useRef({ pointerId: null, startX: 0, startY: 0, viewport: null });
 
   const report = useMemo(() => getCenteringReport(boundaries), [boundaries]);
   const confidencePercent = Math.round(confidence * 100);
@@ -1228,12 +1229,6 @@ export default function CenteringLab({ uiLang = 'KR' }) {
   }
 
   useEffect(() => () => stopCamera(), []);
-
-  useEffect(() => {
-    const isWorkflowOpen = ['camera', 'corners', 'boundary', 'result'].includes(phase);
-    document.body.classList.toggle('centering-workflow-open', isWorkflowOpen);
-    return () => document.body.classList.remove('centering-workflow-open');
-  }, [phase]);
 
   useEffect(() => {
     if (phase !== 'camera') return undefined;
@@ -1454,7 +1449,18 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     if (event.pointerType !== 'touch') return;
     const points = pinchRef.current.points;
     points.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (points.size === 1 && !event.target.closest?.('.centering-corner-handle')) {
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      panRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        viewport: { ...cornerViewport }
+      };
+      return;
+    }
     if (points.size !== 2) return;
+    panRef.current.pointerId = null;
     const [first, second] = [...points.values()];
     pinchRef.current.startDistance = Math.hypot(first.x - second.x, first.y - second.y);
     pinchRef.current.startZoom = cornerZoom;
@@ -1465,7 +1471,22 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     const points = pinchRef.current.points;
     if (!points.has(event.pointerId)) return;
     points.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (points.size < 2 || !pinchRef.current.startDistance) return;
+    if (points.size < 2) {
+      const pan = panRef.current;
+      if (pan.pointerId !== event.pointerId || !pan.viewport) return;
+      const frame = cornerFrameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      const next = {
+        ...pan.viewport,
+        left: clamp(pan.viewport.left - (event.clientX - pan.startX) / Math.max(rect.width, 1) * pan.viewport.width, 0, 100 - pan.viewport.width),
+        top: clamp(pan.viewport.top - (event.clientY - pan.startY) / Math.max(rect.height, 1) * pan.viewport.height, 0, 100 - pan.viewport.height)
+      };
+      event.preventDefault();
+      setCornerViewport(next);
+      return;
+    }
+    if (!pinchRef.current.startDistance) return;
     const [first, second] = [...points.values()];
     const distance = Math.hypot(first.x - second.x, first.y - second.y);
     const zoomDelta = (distance / pinchRef.current.startDistance - 1) * 3.2;
@@ -1477,6 +1498,8 @@ export default function CenteringLab({ uiLang = 'KR' }) {
     if (event.pointerType !== 'touch') return;
     pinchRef.current.points.delete(event.pointerId);
     if (pinchRef.current.points.size < 2) pinchRef.current.startDistance = 0;
+    if (panRef.current.pointerId === event.pointerId) panRef.current.pointerId = null;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
   function updateBoundaryFrame(nextFrame) {

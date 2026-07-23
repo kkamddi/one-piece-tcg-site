@@ -731,12 +731,6 @@
   font-weight: 850;
 }
 
-@media (max-width: 760px) {
-  body.centering-workflow-open .renew-bottom-nav {
-    display: none;
-  }
-}
-
 .centering-corner-frame {
   position: relative;
   width: min(100%, 560px);
@@ -1609,7 +1603,7 @@
 @media (max-width: 760px) {
   .centering-lab {
     gap: 14px;
-    padding: 18px 14px 112px;
+    padding: 18px 14px calc(136px + env(safe-area-inset-bottom));
   }
 
   .centering-lab-head {
