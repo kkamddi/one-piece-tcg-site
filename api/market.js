@@ -13,7 +13,7 @@ const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts
 const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
 const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_LIMIT = 180;
-const LISTING_SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const LISTING_SNAPSHOT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const MARKET_DATA_SOURCE = String(process.env.MARKET_DATA_SOURCE || '').trim().toLowerCase();
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -617,7 +617,11 @@ async function saveListingFloorSnapshots(item, conditionPrices = [], capturedAt 
           price_amount_jpy = excluded.price_amount_jpy,
           min_price_usd = excluded.min_price_usd,
           listing_count = excluded.listing_count,
-          updated_at = excluded.updated_at`,
+          updated_at = excluded.updated_at
+        where market_listing_floor_snapshots.locale is not excluded.locale
+           or market_listing_floor_snapshots.code is not excluded.code
+           or market_listing_floor_snapshots.price_amount_jpy is not excluded.price_amount_jpy
+           or market_listing_floor_snapshots.min_price_usd is not excluded.min_price_usd`,
         [
           apparelId,
           item.locale || 'JP',

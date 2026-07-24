@@ -665,6 +665,13 @@ async function upsertDailyRows(rows) {
       trade_count = excluded.trade_count,
       source_count = excluded.source_count,
       updated_at = excluded.updated_at
+    where market_chart_daily_points.locale is not excluded.locale
+       or market_chart_daily_points.code is not excluded.code
+       or market_chart_daily_points.median_price_jpy is not excluded.median_price_jpy
+       or market_chart_daily_points.min_price_jpy is not excluded.min_price_jpy
+       or market_chart_daily_points.max_price_jpy is not excluded.max_price_jpy
+       or market_chart_daily_points.trade_count is not excluded.trade_count
+       or market_chart_daily_points.source_count is not excluded.source_count
   `);
 }
 

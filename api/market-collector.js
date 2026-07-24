@@ -445,6 +445,13 @@ async function upsertDailyPoint({ source, apparelId, locale, code, condition, da
       trade_count = excluded.trade_count,
       source_count = excluded.source_count,
       updated_at = excluded.updated_at
+    WHERE market_chart_daily_points.locale IS NOT excluded.locale
+       OR market_chart_daily_points.code IS NOT excluded.code
+       OR market_chart_daily_points.median_price_jpy IS NOT excluded.median_price_jpy
+       OR market_chart_daily_points.min_price_jpy IS NOT excluded.min_price_jpy
+       OR market_chart_daily_points.max_price_jpy IS NOT excluded.max_price_jpy
+       OR market_chart_daily_points.trade_count IS NOT excluded.trade_count
+       OR market_chart_daily_points.source_count IS NOT excluded.source_count
   `, [
     source,
     apparelId,
