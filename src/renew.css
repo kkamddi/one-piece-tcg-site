@@ -1438,6 +1438,11 @@
   box-shadow: rgba(4, 23, 43, 0.04) 0 12px 26px -20px;
 }
 
+.renew-partner-ad.is-in-shops {
+  width: 100%;
+  margin: 20px 0 0;
+}
+
 .renew-partner-ad-head span {
   color: #c94d35;
   font-size: 11px;
@@ -13078,6 +13083,10 @@ button.renew-lab-tool.is-available:hover {
   gap: 10px;
 }
 
+.renew-shop-filters.is-partner {
+  grid-template-columns: minmax(220px, 320px);
+}
+
 .renew-shop-search {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 92px;
@@ -14452,6 +14461,10 @@ button.renew-lab-tool.is-available:hover {
   .renew-shop-filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .renew-shop-filters.is-partner {
+    grid-template-columns: 1fr;
   }
 
   .renew-shop-filters select {

@@ -2858,6 +2858,7 @@ function restoreAppScrollPosition(targetY, { onDone, timeoutMs = 3000 } = {}) {
 
 function getRouteSeoPage(pathname = '/') {
   const path = getAppPath(pathname);
+  if (path === '/shops/partners') return 'shops';
   if (PATH_PAGES[path]) return PATH_PAGES[path];
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
@@ -2869,7 +2870,7 @@ function getRouteSeoPage(pathname = '/') {
   if (path.startsWith('/lab')) return 'lab';
   if (path.startsWith('/calendar')) return 'calendar';
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return 'news';
-  if (path.startsWith('/shops/partners')) return 'partnerShops';
+  if (path.startsWith('/shops/partners/')) return 'partnerShops';
   if (path.startsWith('/shops')) return 'shops';
   if (path.startsWith('/market')) return 'marketplace';
   return 'home';
@@ -2930,6 +2931,7 @@ function getNewsRouteState(pathname = typeof window !== 'undefined' ? window.loc
 function getShopRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   const path = getAppPath(pathname);
   if (path === '/shops/official') return { type: 'official' };
+  if (path === '/shops/partners') return { type: 'partner' };
   if (!path.startsWith('/shops/')) return null;
   const slug = decodeURIComponent(path.slice('/shops/'.length)).toLowerCase();
   const regions = {
@@ -5799,7 +5801,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           </button>
         </article>
       </section>
-      {!isJp ? <RenewPartnerAdSection uiLang={uiLang} /> : null}
       {adminStats ? (
         <section className="renew-admin-stats" aria-label="관리자 통계">
           {[
@@ -5862,7 +5863,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   );
 }
 
-function RenewPartnerAdSection({ uiLang }) {
+function RenewPartnerAdSection({ uiLang, placement = 'home' }) {
   const isEn = uiLang === 'EN';
   const getActionPresentation = (action) => {
     const actionKey = `${action?.labelEn || ''} ${action?.href || ''}`.toLowerCase();
@@ -5872,7 +5873,7 @@ function RenewPartnerAdSection({ uiLang }) {
     return { icon: 'external', label: isEn ? action.labelEn : action.labelKr };
   };
   return (
-    <section className="renew-partner-ad" aria-label={isEn ? 'Partner card shop news' : '제휴 카드샵 소식'}>
+    <section className={`renew-partner-ad${placement === 'shops' ? ' is-in-shops' : ''}`} aria-label={isEn ? 'Partner card shop news' : '제휴 카드샵 소식'}>
       <div className="renew-partner-ad-head">
         <span>{isEn ? 'Partner Shops' : '제휴 카드샵'}</span>
         <a className="renew-partner-ad-contact" href="mailto:optkr26@gmail.com?subject=Card%20Pone%20card%20shop%20partnership">
@@ -12423,71 +12424,73 @@ function RenewShops({ uiLang }) {
   return (
     <main className="renew-subpage">
       <section className="renew-panel renew-shops">
-        <div className="renew-shop-partner-link">
-          <div>
-            <small>{uiLang === 'EN' ? 'PARTNER SHOPS' : 'PARTNER SHOPS'}</small>
-            <strong>{uiLang === 'EN' ? 'Partner card shops' : '제휴 카드샵'}</strong>
-            <span>{uiLang === 'EN' ? 'Check partner stores and shop news.' : '제휴 카드샵 위치와 입고소식을 확인할 수 있습니다.'}</span>
-          </div>
-          <a href="/shops/partners" onClick={() => rememberCurrentAppView()}>{uiLang === 'EN' ? 'View' : '보기'}</a>
-        </div>
-        <div className="renew-shop-filters">
+        <div className={`renew-shop-filters${type === 'partner' ? ' is-partner' : ''}`}>
           <select value={type} onChange={(event) => { setType(event.target.value); setSido('전체'); setGungu('전체'); }}>
             <option value="">{t('allShops')}</option>
             <option value="official">{t('officialShop')}</option>
             <option value="general">{t('searchShop')}</option>
             <option value="partner">{t('partnerShop')}</option>
           </select>
-          <select value={sido} onChange={(event) => { setSido(event.target.value); setGungu('전체'); }}>
-            <option value="전체">{t('allRegions')}</option>
-            {regions.sidos?.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
-          <select value={gungu} onChange={(event) => setGungu(event.target.value)}>
-            <option value="전체">{t('allDistricts')}</option>
-            {regions.gungus?.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
-          <form className="renew-shop-search" onSubmit={(event) => { event.preventDefault(); setQuery(draftQuery.trim()); }}>
-            <input value={draftQuery} onChange={(event) => setDraftQuery(event.target.value)} placeholder={t('shopSearchPlaceholder')} />
-            <button type="submit">검색</button>
-          </form>
+          {type !== 'partner' ? (
+            <>
+              <select value={sido} onChange={(event) => { setSido(event.target.value); setGungu('전체'); }}>
+                <option value="전체">{t('allRegions')}</option>
+                {regions.sidos?.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+              <select value={gungu} onChange={(event) => setGungu(event.target.value)}>
+                <option value="전체">{t('allDistricts')}</option>
+                {regions.gungus?.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+              <form className="renew-shop-search" onSubmit={(event) => { event.preventDefault(); setQuery(draftQuery.trim()); }}>
+                <input value={draftQuery} onChange={(event) => setDraftQuery(event.target.value)} placeholder={t('shopSearchPlaceholder')} />
+                <button type="submit">검색</button>
+              </form>
+            </>
+          ) : null}
         </div>
-        <div className="renew-shop-sortbar">
-          <button
-            type="button"
-            className={userPosition ? 'is-active' : ''}
-            onClick={handleNearbySort}
-            disabled={locationLoading}
-            aria-pressed={Boolean(userPosition)}
-          >
-            {locationLoading
-              ? (uiLang === 'EN' ? 'Locating...' : '위치 확인 중...')
-              : userPosition
-                ? (uiLang === 'EN' ? 'Nearby first ON' : '내 주변순 적용 중')
-                : (uiLang === 'EN' ? 'Sort by distance' : '내 주변순')}
-          </button>
-          {locationError ? <small role="status">{locationError}</small> : null}
-        </div>
-        <div className="renew-shop-grid">
-          {displayedShops.map((shop) => {
-            const links = getShopMapLinks(shop);
-            return (
-              <article key={`${shop.name}-${shop.address}`}>
-                <b>{shop.name}</b>
-                <p>{shop.address}</p>
-                <small>{shop.sido} {shop.gungu} · {shop.sourceLabel || shop.sourceType}</small>
-                {userPosition && Number.isFinite(shop.distanceKm) ? (
-                  <strong className="renew-shop-distance">
-                    {uiLang === 'EN' ? 'About ' : '현재 위치에서 약 '}{formatShopDistance(shop.distanceKm)}
-                  </strong>
-                ) : null}
-                <div className="renew-shop-map-links">
-                  <a href={links.naver} target="_blank" rel="noreferrer">{t('naverMap')}</a>
-                  <a href={links.kakao} target="_blank" rel="noreferrer">{t('kakaoMap')}</a>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        {type === 'partner' ? (
+          <RenewPartnerAdSection uiLang={uiLang} placement="shops" />
+        ) : (
+          <>
+            <div className="renew-shop-sortbar">
+              <button
+                type="button"
+                className={userPosition ? 'is-active' : ''}
+                onClick={handleNearbySort}
+                disabled={locationLoading}
+                aria-pressed={Boolean(userPosition)}
+              >
+                {locationLoading
+                  ? (uiLang === 'EN' ? 'Locating...' : '위치 확인 중...')
+                  : userPosition
+                    ? (uiLang === 'EN' ? 'Nearby first ON' : '내 주변순 적용 중')
+                    : (uiLang === 'EN' ? 'Sort by distance' : '내 주변순')}
+              </button>
+              {locationError ? <small role="status">{locationError}</small> : null}
+            </div>
+            <div className="renew-shop-grid">
+              {displayedShops.map((shop) => {
+                const links = getShopMapLinks(shop);
+                return (
+                  <article key={`${shop.name}-${shop.address}`}>
+                    <b>{shop.name}</b>
+                    <p>{shop.address}</p>
+                    <small>{shop.sido} {shop.gungu} · {shop.sourceLabel || shop.sourceType}</small>
+                    {userPosition && Number.isFinite(shop.distanceKm) ? (
+                      <strong className="renew-shop-distance">
+                        {uiLang === 'EN' ? 'About ' : '현재 위치에서 약 '}{formatShopDistance(shop.distanceKm)}
+                      </strong>
+                    ) : null}
+                    <div className="renew-shop-map-links">
+                      <a href={links.naver} target="_blank" rel="noreferrer">{t('naverMap')}</a>
+                      <a href={links.kakao} target="_blank" rel="noreferrer">{t('kakaoMap')}</a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
+        )}
       </section>
     </main>
   );
