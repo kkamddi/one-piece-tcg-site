@@ -121,9 +121,9 @@
   color: inherit;
   background: transparent;
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: -0.025em;
-  text-shadow: 0.28px 0 currentColor;
+  text-shadow: none;
   cursor: pointer;
   text-decoration: none;
 }
@@ -8412,6 +8412,8 @@
 
 .renew-lab-page {
   display: grid;
+  box-sizing: border-box;
+  max-width: 100%;
   gap: 22px;
 }
 
@@ -8437,19 +8439,19 @@
 
 .renew-lab-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .renew-lab-tool {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
-  min-height: 176px;
+  gap: 14px;
+  min-height: 138px;
   border: 1px solid rgba(23, 25, 28, 0.12);
   border-radius: 8px;
-  padding: 20px;
+  padding: 18px 20px;
   color: #17191c;
   background: #fff;
   text-align: left;
@@ -8462,6 +8464,11 @@ button.renew-lab-tool {
 button.renew-lab-tool.is-available:hover {
   border-color: rgba(201, 77, 53, 0.52);
   box-shadow: 0 10px 24px -20px rgba(23, 25, 28, 0.5);
+}
+
+button.renew-lab-tool.is-available:focus-visible {
+  outline: 2px solid #c94d35;
+  outline-offset: 3px;
 }
 
 .renew-lab-tool.is-coming {
@@ -8545,11 +8552,32 @@ button.renew-lab-tool.is-available:hover {
 
 @media (max-width: 900px) {
   .renew-lab-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .renew-lab-tool {
-    min-height: 132px;
+    min-height: 126px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .renew-lab-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .renew-lab-tool {
+    gap: 12px;
+    min-height: 108px;
+    padding: 14px;
+  }
+
+  .renew-lab-tool-copy > span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 

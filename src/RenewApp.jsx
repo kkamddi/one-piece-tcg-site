@@ -8942,7 +8942,6 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
           <button key={tool.id} type="button" className="renew-lab-tool is-available" onClick={tool.onClick}>
             <span className="renew-lab-tool-icon"><MobileNavIcon type={tool.icon} /></span>
             <span className="renew-lab-tool-copy">
-              <small>{tool.status}</small>
               <strong>{tool.title}</strong>
               <span>{tool.description}</span>
             </span>
