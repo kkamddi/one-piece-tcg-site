@@ -12,9 +12,42 @@ const countsPath = path.join(rootDir, 'src/data/series-card-counts.json');
 
 const OFFICIAL_BASE = 'https://onepiece-cardgame.kr';
 const CARD_LIST_URL = `${OFFICIAL_BASE}/cardlist.do`;
-const SERIES_ID = 'KR-OP13';
-const BASE_SERIES_ID = 'OP13';
-const USER_AGENT = 'one-piece-tcg-site-op13-sync/1.0 (+internal tooling)';
+const targets = {
+  OP13: {
+    seriesId: 'KR-OP13',
+    baseSeriesId: 'OP13',
+    optionCode: 'OPK-13',
+    koName: '계승되는 의지',
+    enName: 'CARRYING ON HIS WILL',
+    kindKo: '부스터 팩',
+    kindEn: 'BOOSTER PACK',
+    officialSeriesKeyword: 'OP-13',
+    description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈',
+    insertAfter: 'KR-OP12',
+    minimumCardCount: 100
+  },
+  EB03: {
+    seriesId: 'KR-EB03',
+    baseSeriesId: 'EB03',
+    optionCode: 'EBK-03',
+    koName: '엑스트라 부스터 팩 ONE PIECE Heroines Edition',
+    enName: 'ONE PIECE Heroines Edition',
+    kindKo: '엑스트라 부스터',
+    kindEn: 'EXTRA BOOSTER',
+    officialSeriesKeyword: 'EB-03',
+    description: '공식 한글 카드 리스트 기준 엑스트라 부스터 카드',
+    insertAfter: 'KR-EB02',
+    minimumCardCount: 80
+  }
+};
+const targetKey = String(process.argv[2] || 'OP13').trim().toUpperCase();
+const target = targets[targetKey];
+if (!target) {
+  throw new Error(`Unsupported KR series target: ${targetKey}`);
+}
+const SERIES_ID = target.seriesId;
+const BASE_SERIES_ID = target.baseSeriesId;
+const USER_AGENT = `one-piece-tcg-site-${targetKey.toLowerCase()}-sync/1.0 (+internal tooling)`;
 const REQUEST_DELAY_MS = 800;
 
 const colorMap = {
@@ -46,13 +79,13 @@ const attributeMap = {
 
 const seriesMeta = {
   id: SERIES_ID,
-  koName: '계승되는 의지',
-  enName: 'CARRYING ON HIS WILL',
-  kindKo: '부스터 팩',
-  kindEn: 'BOOSTER PACK',
+  koName: target.koName,
+  enName: target.enName,
+  kindKo: target.kindKo,
+  kindEn: target.kindEn,
   queryLabel: '',
-  officialSeriesKeyword: 'OP-13',
-  description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈',
+  officialSeriesKeyword: target.officialSeriesKeyword,
+  description: target.description,
   locale: 'KR',
   baseSeriesId: BASE_SERIES_ID
 };
@@ -110,12 +143,12 @@ function getLastPageIndex(html) {
   return Math.max(...matches.filter((value) => Number.isFinite(value)));
 }
 
-function findOp13QueryLabel(html) {
+function findTargetQueryLabel(html) {
   const options = [...html.matchAll(/<option value="([^"]*)"[^>]*>([^<]*)/g)]
     .map((match) => ({ value: decodeHtml(match[1]).trim(), label: decodeHtml(match[2]).trim() }));
-  const option = options.find((item) => item.value.includes('OPK-13') || item.label.includes('OPK-13'));
+  const option = options.find((item) => item.value.includes(target.optionCode) || item.label.includes(target.optionCode));
   if (!option?.value) {
-    throw new Error('KR OP13 option was not found on official card list.');
+    throw new Error(`KR ${targetKey} option was not found on official card list.`);
   }
   return option.value;
 }
@@ -205,7 +238,7 @@ async function fetchOp13Cards(queryLabel, seriesLookup) {
 
 function insertSeries(seriesList, nextSeries) {
   const filtered = seriesList.filter((item) => item.id !== nextSeries.id);
-  const insertAfter = filtered.findIndex((item) => item.id === 'KR-OP12');
+  const insertAfter = filtered.findIndex((item) => item.id === target.insertAfter);
   if (insertAfter >= 0) {
     filtered.splice(insertAfter + 1, 0, nextSeries);
     return filtered;
@@ -234,23 +267,23 @@ async function main() {
   ]);
 
   const indexHtml = await fetchOfficialText(CARD_LIST_URL);
-  const queryLabel = findOp13QueryLabel(indexHtml);
-  const op13Series = { ...seriesMeta, queryLabel };
-  const seriesLookup = new Map([...seriesList, op13Series].map((item) => [item.id, item]));
-  const op13Cards = await fetchOp13Cards(queryLabel, seriesLookup);
+  const queryLabel = findTargetQueryLabel(indexHtml);
+  const targetSeries = { ...seriesMeta, queryLabel };
+  const seriesLookup = new Map([...seriesList, targetSeries].map((item) => [item.id, item]));
+  const targetCards = await fetchOp13Cards(queryLabel, seriesLookup);
 
-  if (op13Cards.length < 100) {
-    throw new Error(`KR OP13 card count looks too low: ${op13Cards.length}`);
+  if (targetCards.length < target.minimumCardCount) {
+    throw new Error(`KR ${targetKey} card count looks too low: ${targetCards.length}`);
   }
 
-  const nextSeries = insertSeries(seriesList, op13Series);
+  const nextSeries = insertSeries(seriesList, targetSeries);
   const nextCards = [
     ...cardsList.filter((card) => !(card.locale === 'KR' && card.series === SERIES_ID)),
-    ...sortCards(op13Cards)
+    ...sortCards(targetCards)
   ];
   const krSeriesCounts = {
     ...(counts.KR?.series || {}),
-    [SERIES_ID]: op13Cards.length
+    [SERIES_ID]: targetCards.length
   };
   const { officialSeriesCounts, ...countsWithoutLegacyRoot } = counts;
   const nextCounts = {
@@ -266,11 +299,11 @@ async function main() {
   await writeFile(cardsPath, `${JSON.stringify(nextCards, null, 2)}\n`, 'utf8');
   await writeFile(countsPath, `${JSON.stringify(nextCounts, null, 2)}\n`, 'utf8');
 
-  console.log(`[op13] queryLabel: ${queryLabel}`);
-  console.log(`[op13] wrote ${op13Cards.length} KR OP13 cards`);
+  console.log(`[${targetKey.toLowerCase()}] queryLabel: ${queryLabel}`);
+  console.log(`[${targetKey.toLowerCase()}] wrote ${targetCards.length} KR ${targetKey} cards`);
 }
 
 main().catch((error) => {
-  console.error('[op13] fatal:', error);
+  console.error(`[${targetKey.toLowerCase()}] fatal:`, error);
   process.exitCode = 1;
 });

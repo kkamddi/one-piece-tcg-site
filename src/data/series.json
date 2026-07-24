@@ -180,6 +180,18 @@
     "baseSeriesId": "EB02"
   },
   {
+    "id": "KR-EB03",
+    "koName": "엑스트라 부스터 팩 ONE PIECE Heroines Edition",
+    "enName": "ONE PIECE Heroines Edition",
+    "kindKo": "엑스트라 부스터",
+    "kindEn": "EXTRA BOOSTER",
+    "queryLabel": "[EBK-03] 엑스트라 부스터 팩 ONE PIECE Heroines Edition",
+    "officialSeriesKeyword": "EB-03",
+    "description": "공식 한글 카드 리스트 기준 엑스트라 부스터 카드",
+    "locale": "KR",
+    "baseSeriesId": "EB03"
+  },
+  {
     "id": "KR-ST01",
     "koName": "밀짚모자 일당",
     "enName": "Straw Hat Crew",

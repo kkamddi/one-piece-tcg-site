@@ -12,6 +12,7 @@ const getArg = (name, fallback = '') => {
 };
 
 const LOCALES = new Set((getArg('--locales', 'KR,JP') || 'KR,JP').split(',').map((item) => item.trim()).filter(Boolean));
+const SERIES = new Set((getArg('--series', '') || '').split(',').map((item) => item.trim()).filter(Boolean));
 const LIMIT = Number(getArg('--limit', '0')) || 0;
 const OUT_DIR = getArg('--out', 'data/card-thumbnails');
 const BUCKET = getArg('--bucket', 'optcg-card-thumbnails');
@@ -76,7 +77,7 @@ function uploadToR2(filePath, key) {
 }
 
 const targets = cards
-  .filter((card) => LOCALES.has(card.locale) && card.imageUrl)
+  .filter((card) => LOCALES.has(card.locale) && (!SERIES.size || SERIES.has(card.series)) && card.imageUrl)
   .slice(0, LIMIT || undefined);
 
 const manifest = [];
