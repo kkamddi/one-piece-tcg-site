@@ -28,15 +28,6 @@
     <priority>0.82</priority>
   </url>
   <url>
-    <loc>https://www.optcgkorea.com/jp/community</loc>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/community" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/community" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/community" />
-    <lastmod>2026-07-24</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.82</priority>
-  </url>
-  <url>
     <loc>https://www.optcgkorea.com/jp/lab</loc>
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/lab" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/lab" />

@@ -67,7 +67,6 @@ const basePaths = [
   '/jp',
   '/jp/cards',
   '/jp/prices',
-  '/jp/community',
   '/jp/lab',
   '/jp/lab/centering',
   '/jp/lab/pack-simulator',

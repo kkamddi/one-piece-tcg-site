@@ -3,7 +3,7 @@ name: D1 usage monitor
 on:
   workflow_dispatch:
   schedule:
-    # Daily at 09:45 KST. Alert only when the 30-day usage pace reaches 70%.
+    # Daily at 09:45 KST. Alert when the Cloudflare Free daily quota reaches 70%.
     - cron: "45 0 * * *"
 
 concurrency:
@@ -39,14 +39,12 @@ jobs:
           const rowsRead24h = Number(info.rows_read_24h || 0);
           const rowsWritten24h = Number(info.rows_written_24h || 0);
           const storageBytes = Number(info.database_size || 0);
-          const projectedRowsRead30d = rowsRead24h * 30;
-          const projectedRowsWritten30d = rowsWritten24h * 30;
-          const paidReadIncluded = 25_000_000_000;
-          const paidWriteIncluded = 50_000_000;
-          const paidStorageIncluded = 5 * 1024 * 1024 * 1024;
-          const readPercent = projectedRowsRead30d / paidReadIncluded * 100;
-          const writePercent = projectedRowsWritten30d / paidWriteIncluded * 100;
-          const storagePercent = storageBytes / paidStorageIncluded * 100;
+          const freeDailyReadLimit = 5_000_000;
+          const freeDailyWriteLimit = 100_000;
+          const freeStorageLimit = 5 * 1024 * 1024 * 1024;
+          const readPercent = rowsRead24h / freeDailyReadLimit * 100;
+          const writePercent = rowsWritten24h / freeDailyWriteLimit * 100;
+          const storagePercent = storageBytes / freeStorageLimit * 100;
           const alert = Math.max(readPercent, writePercent, storagePercent) >= 70;
           const values = {
             alert: String(alert),
@@ -58,7 +56,13 @@ jobs:
             storage_percent: storagePercent.toFixed(1)
           };
           fs.appendFileSync(outputPath, Object.entries(values).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
-          console.log(JSON.stringify({ ...values, projectedRowsRead30d, projectedRowsWritten30d }));
+          console.log(JSON.stringify({
+            plan: 'cloudflare-free',
+            ...values,
+            freeDailyReadLimit,
+            freeDailyWriteLimit,
+            freeStorageLimit
+          }));
           NODE
 
       - name: Write usage summary
@@ -76,8 +80,8 @@ jobs:
             echo "- Rows read (24h): ${ROWS_READ_24H}"
             echo "- Rows written (24h): ${ROWS_WRITTEN_24H}"
             echo "- Database bytes: ${STORAGE_BYTES}"
-            echo "- 30-day read pace: ${READ_PERCENT}%"
-            echo "- 30-day write pace: ${WRITE_PERCENT}%"
+            echo "- Free daily read usage: ${READ_PERCENT}%"
+            echo "- Free daily write usage: ${WRITE_PERCENT}%"
             echo "- Storage usage: ${STORAGE_PERCENT}%"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -97,7 +101,7 @@ jobs:
             echo "Telegram secrets are not configured; skipping notification."
             exit 0
           fi
-          message="Cloudflare D1 usage warning (30-day pace)
+          message="Cloudflare D1 Free usage warning
           Reads: ${READ_PERCENT}% (${ROWS_READ_24H} rows / 24h)
           Writes: ${WRITE_PERCENT}% (${ROWS_WRITTEN_24H} rows / 24h)
           Storage: ${STORAGE_PERCENT}%

@@ -4569,8 +4569,29 @@ function RenewOfficialLinks({ uiLang }) {
   );
 }
 
-function RenewSeoSummary({ page, titleAs = 'h1', placement = 'page' }) {
-  const seo = PAGE_SEO[page] || PAGE_SEO.home;
+const PAGE_SEO_JA = {
+  cards: {
+    h1: 'ワンピースカード図鑑',
+    body: '日本版と韓国版のカードをシリーズ別に確認し、カード名やカード番号から検索できます。'
+  },
+  prices: {
+    h1: 'ワンピースカード相場',
+    body: 'カード別の取引価格、ボックス価格、最近の取引履歴と期間別チャートを確認できます。'
+  },
+  news: {
+    h1: 'ワンピースカード情報',
+    body: '公式発表をもとに、新商品、プロモーション、イベントの日程と最新情報を確認できます。'
+  },
+  shops: {
+    h1: 'カードショップ・取扱店',
+    body: 'ONE PIECE CARD GAMEの取扱店とカードショップを地域別に検索できます。'
+  }
+};
+
+function RenewSeoSummary({ page, titleAs = 'h1', placement = 'page', uiLang = 'KR' }) {
+  const seo = isJapaneseUi(uiLang)
+    ? (PAGE_SEO_JA[page] || PAGE_SEO[page] || PAGE_SEO.home)
+    : (PAGE_SEO[page] || PAGE_SEO.home);
   const Heading = titleAs;
   return (
     <section className={`renew-seo-summary renew-seo-summary-${page} renew-seo-summary-${placement}`} aria-label={`${seo.h1} 설명`}>
@@ -7010,7 +7031,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
       {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
       {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
 
-      <RenewSeoSummary page="news" titleAs="h1" placement="footer" />
+      <RenewSeoSummary page="news" titleAs="h1" placement="footer" uiLang={uiLang} />
       {guideTarget ? (
         <RenewNewsGuideModal
           guideId={guideTarget}
@@ -7905,7 +7926,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
         );}) : null}
       </section>
 
-      <RenewSeoSummary page="cards" titleAs="h1" placement="footer" />
+      <RenewSeoSummary page="cards" titleAs="h1" placement="footer" uiLang={uiLang} />
       {selectedCard ? (
         <RenewCardModal
           card={selectedCard}
@@ -11984,7 +12005,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           uiLang={uiLang}
         />
       ) : null}
-      <RenewSeoSummary page="prices" titleAs="h1" placement="footer" />
+      <RenewSeoSummary page="prices" titleAs="h1" placement="footer" uiLang={uiLang} />
     </main>
   );
 }
@@ -12045,7 +12066,6 @@ function RenewDeck({ authUser, userState, setUserState, uiLang }) {
           ))}
         </div>
       </section>
-      <RenewSeoSummary page="shops" titleAs="h1" placement="footer" />
     </main>
   );
 }
@@ -12456,6 +12476,7 @@ function RenewShops({ uiLang }) {
           })}
         </div>
       </section>
+      <RenewSeoSummary page="shops" titleAs="h1" placement="footer" uiLang={uiLang} />
     </main>
   );
 }

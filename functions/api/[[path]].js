@@ -212,6 +212,22 @@ function routeApi(pathParts) {
   return null;
 }
 
+function getPublicCacheTtl(request, route, url) {
+  if (request.method !== 'GET' || request.headers.has('authorization')) return 0;
+  if (route.key === 'market') {
+    const summary = String(url.searchParams.get('summary') || '').toLowerCase();
+    if (summary === 'portfolio') return 0;
+    return summary === 'latest' ? 900 : 300;
+  }
+  if (route.key === 'marketIndex') return 3600;
+  if (route.key === 'boxMarket') return 900;
+  if (route.key === 'psa10Market') return 600;
+  if (['cardsIndex', 'cardsSearch', 'cardsId'].includes(route.key)) return 300;
+  if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 3600;
+  if (['cardImage', 'cardThumb'].includes(route.key)) return 86400;
+  return 0;
+}
+
 async function loadHandler(key) {
   if (key === 'auth') return (await import('../../api/auth/index.js')).default;
   if (key === 'admin') return (await import('../../api/admin/index.js')).default;
@@ -260,6 +276,17 @@ export async function onRequest(context) {
       headers: applySecurityHeaders(new Headers({ 'Content-Type': 'application/json; charset=utf-8' }))
     });
   }
+
+  const publicCacheTtl = getPublicCacheTtl(context.request, route, url);
+  const edgeCache = publicCacheTtl > 0 ? globalThis.caches?.default : null;
+  const cacheRequest = edgeCache
+    ? new Request(url.toString(), { method: 'GET', headers: { Accept: context.request.headers.get('accept') || '*/*' } })
+    : null;
+  if (edgeCache && cacheRequest) {
+    const cachedResponse = await edgeCache.match(cacheRequest);
+    if (cachedResponse) return cachedResponse;
+  }
+
   if (isRateLimited(context.request, route.key)) {
     return new Response(JSON.stringify({ error: 'rate_limited' }), {
       status: 429,
@@ -294,7 +321,21 @@ export async function onRequest(context) {
   try {
     const handler = await loadHandler(route.key);
     const result = await handler(request, response);
-    return result instanceof Response ? result : finalize();
+    const finalResponse = result instanceof Response ? result : finalize();
+    if (!edgeCache || !cacheRequest || !finalResponse.ok) return finalResponse;
+
+    const headers = new Headers(finalResponse.headers);
+    headers.set(
+      'Cache-Control',
+      `public, max-age=60, s-maxage=${publicCacheTtl}, stale-while-revalidate=86400`
+    );
+    const cacheableResponse = new Response(finalResponse.body, {
+      status: finalResponse.status,
+      statusText: finalResponse.statusText,
+      headers
+    });
+    context.waitUntil(edgeCache.put(cacheRequest, cacheableResponse.clone()).catch(() => undefined));
+    return cacheableResponse;
   } catch {
     return new Response(JSON.stringify({ error: 'server_error' }), {
       status: 500,

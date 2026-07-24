@@ -935,7 +935,7 @@ function createServerPageContent(pathname, seo) {
   const content = contentMap[contentKey] || {
     heading: seo.title.split('|')[0].trim(),
     paragraphs: [seo.description],
-    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/community', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/community', '/guide', '/shops']
+    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops']
   };
   const links = content.links
     .map((path) => {
@@ -1033,7 +1033,7 @@ function getFixedPageSeo(normalized) {
   return null;
 }
 
-function getPageSeo(pathname) {
+export function getPageSeo(pathname) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
   if (isJapanesePath(normalized)) return getJapaneseSeo(normalized);
   const fixedSeo = getFixedPageSeo(normalized);
@@ -1328,7 +1328,7 @@ function createJsonLd(pathname, seo) {
   });
 }
 
-function applySeo(html, pathname, seo) {
+export function applySeo(html, pathname, seo) {
   const canonicalUrl = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
   const isJapanese = isJapanesePath(normalized);

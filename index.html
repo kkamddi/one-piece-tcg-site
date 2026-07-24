@@ -56,6 +56,18 @@
           }
           document.documentElement.classList.remove('card-pone-js-booting');
           document.documentElement.classList.add('card-pone-js-boot-failed');
+          const bootContent = document.querySelector('.card-pone-boot-content');
+          if (bootContent && !bootContent.querySelector('.card-pone-boot-error')) {
+            const error = document.createElement('p');
+            error.className = 'card-pone-boot-error';
+            error.innerHTML = '사이트를 불러오지 못했습니다.<br />잠시 후 다시 시도해 주세요.';
+            const retry = document.createElement('button');
+            retry.className = 'card-pone-boot-retry';
+            retry.type = 'button';
+            retry.textContent = '다시 시도';
+            retry.addEventListener('click', () => window.location.reload());
+            bootContent.append(error, retry);
+          }
         }, 10000);
       })();
     </script>
@@ -238,8 +250,6 @@
       <div class="card-pone-boot-content">
         <strong>CARD Pone</strong>
         <span class="card-pone-boot-spinner" aria-hidden="true"></span>
-        <p class="card-pone-boot-error">사이트를 불러오지 못했습니다.<br />잠시 후 다시 시도해 주세요.</p>
-        <button class="card-pone-boot-retry" type="button" onclick="window.location.reload()">다시 시도</button>
       </div>
     </div>
     <div id="root"></div>

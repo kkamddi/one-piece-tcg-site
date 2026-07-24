@@ -1299,13 +1299,42 @@ async function localFallback(params) {
       : [];
     if (summaryMode === 'portfolio' && !requestedApparelIds.length) return { items: [] };
     const apparelIdPlaceholders = requestedApparelIds.map(() => '?').join(', ');
-    const productFilterSql = requestedApparelIds.length ? ` and apparel_id in (${apparelIdPlaceholders})` : '';
+    const productFilterSql = requestedApparelIds.length ? ` and p.apparel_id in (${apparelIdPlaceholders})` : '';
     const rows = shouldReadD1Market()
       ? await queryD1(
-        `select apparel_id, latest_a_price_jpy, latest_psa10_price_jpy, latest_captured_at
-         from market_products
-         where source = 'snkrdunk' and is_active = 1${productFilterSql}
-         order by apparel_id asc`,
+        `select p.apparel_id,
+                coalesce(
+                  nullif(p.latest_a_price_jpy, 0),
+                  (
+                    select d.median_price_jpy
+                    from market_chart_daily_points d
+                    where d.source = p.source
+                      and d.apparel_id = p.apparel_id
+                      and d.condition_key = 'a'
+                      and d.median_price_jpy > 0
+                      and (d.trade_count is null or d.trade_count > 0)
+                    order by d.point_date desc
+                    limit 1
+                  )
+                ) as latest_a_price_jpy,
+                coalesce(
+                  nullif(p.latest_psa10_price_jpy, 0),
+                  (
+                    select d.median_price_jpy
+                    from market_chart_daily_points d
+                    where d.source = p.source
+                      and d.apparel_id = p.apparel_id
+                      and d.condition_key = 'psa10'
+                      and d.median_price_jpy > 0
+                      and (d.trade_count is null or d.trade_count > 0)
+                    order by d.point_date desc
+                    limit 1
+                  )
+                ) as latest_psa10_price_jpy,
+                p.latest_captured_at
+         from market_products p
+         where p.source = 'snkrdunk' and p.is_active = 1${productFilterSql}
+         order by p.apparel_id asc`,
         requestedApparelIds
       ).catch(() => [])
       : [];
@@ -1322,54 +1351,6 @@ async function localFallback(params) {
         psa10PriceUsd: jpyToUsd(psa10PriceJpy),
         capturedAt: row.latest_captured_at || ''
       });
-    }
-
-    if (shouldReadD1Market()) {
-      const chartRows = await queryD1(
-        `with latest_points as (
-           select source, apparel_id, condition_key, max(point_date) as point_date
-             from market_chart_daily_points
-             where source = 'snkrdunk'
-               and condition_key in ('a', 'psa10')
-               ${requestedApparelIds.length ? `and apparel_id in (${apparelIdPlaceholders})` : ''}
-               and (trade_count is null or trade_count > 0)
-           group by source, apparel_id, condition_key
-         )
-         select p.apparel_id, p.condition_key, p.median_price_jpy, p.point_date, p.updated_at
-         from market_chart_daily_points p
-         join latest_points l
-           on p.source = l.source
-          and p.apparel_id = l.apparel_id
-          and p.condition_key = l.condition_key
-         and p.point_date = l.point_date
-         where p.source = 'snkrdunk'
-           and (p.trade_count is null or p.trade_count > 0)
-         order by p.apparel_id asc`,
-        requestedApparelIds
-      ).catch(() => []);
-      for (const row of chartRows || []) {
-        const apparelId = String(row.apparel_id || '');
-        const price = Number(row.median_price_jpy || 0);
-        if (!apparelId || price <= 0) continue;
-        const item = latestByApparelId.get(apparelId) || {
-          apparelId: row.apparel_id,
-          aPriceJpy: 0,
-          aPriceUsd: 0,
-          psa10PriceJpy: 0,
-          psa10PriceUsd: 0,
-          capturedAt: row.updated_at || row.point_date || ''
-        };
-        if (row.condition_key === 'a' && Number(item.aPriceJpy || 0) <= 0) {
-          item.aPriceJpy = price;
-          item.aPriceUsd = jpyToUsd(price);
-        }
-        if (row.condition_key === 'psa10' && Number(item.psa10PriceJpy || 0) <= 0) {
-          item.psa10PriceJpy = price;
-          item.psa10PriceUsd = jpyToUsd(price);
-        }
-        if (!item.capturedAt) item.capturedAt = row.updated_at || row.point_date || '';
-        latestByApparelId.set(apparelId, item);
-      }
     }
 
     return {
@@ -1413,6 +1394,12 @@ export default async function handler(request, response) {
   }
 
   const params = normalizeParams(request.query);
+  const summaryMode = String(params.get('summary') || '').toLowerCase();
+  const cacheSeconds = summaryMode === 'latest' ? 900 : 300;
+  response.setHeader(
+    'Cache-Control',
+    `public, max-age=60, s-maxage=${cacheSeconds}, stale-while-revalidate=86400`
+  );
 
   if (!MARKET_API_ORIGIN || isSelfRequest(request)) {
     const fallback = await localFallback(params);
@@ -1439,6 +1426,5 @@ export default async function handler(request, response) {
   }
 
   response.setHeader('Content-Type', contentType || 'application/json; charset=utf-8');
-  response.setHeader('Cache-Control', 'no-store, max-age=0');
   response.status(upstreamResponse.status).send(text);
 }
