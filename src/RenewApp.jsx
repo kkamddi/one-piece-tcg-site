@@ -26,7 +26,7 @@ import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
-const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || '/api/card-thumb').replace(/\/+$/, '');
+const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = 'https://snkrdunk.com/en/invitation/AGJ872';
 const AUTH_CONSENT_VERSION = '2026-07-14';
 const PENDING_SOCIAL_CONSENT_KEY = 'card-pone-pending-social-consent';
@@ -1699,8 +1699,16 @@ function getCardThumbnailSrc(card) {
     : getCardImageSrc(card);
 }
 
+function getCardThumbnailProxySrc(card) {
+  const key = getCardThumbnailKey(card);
+  return key ? resolveApiUrl(`/api/card-thumb?key=${encodeURIComponent(key)}`) : '';
+}
+
 function placeholderImage(event) {
-  event.currentTarget.src = '/card-placeholder.svg';
+  const image = event.currentTarget;
+  if (image.dataset.placeholderApplied === '1') return;
+  image.dataset.placeholderApplied = '1';
+  image.src = '/card-placeholder.svg';
 }
 
 function getSeriesBoxCode(series) {
@@ -1736,9 +1744,17 @@ function RenewSeriesOptionContent({ series, boxImageByCode }) {
 }
 
 function fallbackToOriginalCardImage(event) {
-  const fallbackSrc = event.currentTarget.dataset.fallbackSrc;
-  if (fallbackSrc && event.currentTarget.src !== fallbackSrc) {
-    event.currentTarget.src = fallbackSrc;
+  const image = event.currentTarget;
+  const proxyFallbackSrc = image.dataset.proxyFallbackSrc;
+  if (proxyFallbackSrc && image.dataset.proxyFallbackAttempted !== '1') {
+    image.dataset.proxyFallbackAttempted = '1';
+    image.src = proxyFallbackSrc;
+    return;
+  }
+  const fallbackSrc = image.dataset.fallbackSrc;
+  if (fallbackSrc && image.dataset.originalFallbackAttempted !== '1') {
+    image.dataset.originalFallbackAttempted = '1';
+    image.src = fallbackSrc;
     return;
   }
   placeholderImage(event);
@@ -2304,7 +2320,9 @@ async function searchPortfolioCalculatorCards(query) {
   const cards = await searchCards(query, 'JP');
   return (Array.isArray(cards) ? cards : []).map((card) => ({
     ...card,
-    thumbnailUrl: getCardThumbnailSrc(card)
+    thumbnailUrl: getCardThumbnailSrc(card),
+    thumbnailProxyUrl: getCardThumbnailProxySrc(card),
+    thumbnailOriginalUrl: getCardImageSrc(card)
   }));
 }
 
@@ -7845,6 +7863,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
                     <div className="renew-card-image">
                       <img
                         src={getCardThumbnailSrc(card)}
+                        data-proxy-fallback-src={getCardThumbnailProxySrc(card)}
                         data-fallback-src={getCardImageSrc(card)}
                         alt={card.name}
                         onError={fallbackToOriginalCardImage}
@@ -7992,6 +8011,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
         <div className={`renew-card-modal-image ${imageLoaded ? 'is-loaded' : 'is-loading'}`}>
           <img
             src={getCardThumbnailSrc(card)}
+            data-proxy-fallback-src={getCardThumbnailProxySrc(card)}
             data-fallback-src={getCardImageSrc(card)}
             alt={card.name}
             onLoad={() => setImageLoaded(true)}
@@ -8673,7 +8693,7 @@ function RenewPackSimulator({ uiLang, onOpenCard, onOpenGuide }) {
                           disabled={card.isSimulatorOnly}
                           onClick={() => onOpenCard?.(card)}
                         >
-                          <img src={getCardThumbnailSrc(card)} data-fallback-src={getCardImageSrc(card)} alt={card.name || card.cardNo} onError={fallbackToOriginalCardImage} />
+                          <img src={getCardThumbnailSrc(card)} data-proxy-fallback-src={getCardThumbnailProxySrc(card)} data-fallback-src={getCardImageSrc(card)} alt={card.name || card.cardNo} onError={fallbackToOriginalCardImage} />
                         </button>
                         <div>
                           <span>{getSimulatorPoolKey(card)}</span>
@@ -8725,7 +8745,7 @@ function RenewPackSimulator({ uiLang, onOpenCard, onOpenGuide }) {
           <div className="renew-pack-summary-list">
             {groupedCards.map(({ card, quantity, priceUsd }) => (
               <button key={card.id} type="button" disabled={card.isSimulatorOnly} onClick={() => onOpenCard?.(card)}>
-                <img src={getCardThumbnailSrc(card)} data-fallback-src={getCardImageSrc(card)} alt="" onError={fallbackToOriginalCardImage} />
+                <img src={getCardThumbnailSrc(card)} data-proxy-fallback-src={getCardThumbnailProxySrc(card)} data-fallback-src={getCardImageSrc(card)} alt="" onError={fallbackToOriginalCardImage} />
                 <span>
                   <small>{getSimulatorPoolKey(card)} · {card.cardNo}</small>
                   <strong>{card.name}</strong>
@@ -9994,7 +10014,14 @@ function RenewMarketplace({ authUser, marketListings, setMarketListings, filterC
                   </div>
                   {registerLinkedCard ? (
                     <div className="renew-marketplace-linked-card">
-                      <img src={getCardThumbnailSrc(registerLinkedCard)} alt={registerLinkedCard.name || registerLinkedCard.cardNo} loading="lazy" />
+                      <img
+                        src={getCardThumbnailSrc(registerLinkedCard)}
+                        data-proxy-fallback-src={getCardThumbnailProxySrc(registerLinkedCard)}
+                        data-fallback-src={getCardImageSrc(registerLinkedCard)}
+                        alt={registerLinkedCard.name || registerLinkedCard.cardNo}
+                        loading="lazy"
+                        onError={fallbackToOriginalCardImage}
+                      />
                       <div>
                         <b>{registerLinkedCard.cardNo}</b>
                         <strong>{registerLinkedCard.name}</strong>
@@ -10007,7 +10034,14 @@ function RenewMarketplace({ authUser, marketListings, setMarketListings, filterC
                     <div className="renew-marketplace-card-candidates">
                       {registerCardCandidates.map((card) => (
                         <button type="button" key={card.id || `${card.locale}-${card.cardNo}-${card.variantKey}`} onClick={() => selectRegisterCard(card)}>
-                          <img src={getCardThumbnailSrc(card)} alt={card.name || card.cardNo} loading="lazy" />
+                          <img
+                            src={getCardThumbnailSrc(card)}
+                            data-proxy-fallback-src={getCardThumbnailProxySrc(card)}
+                            data-fallback-src={getCardImageSrc(card)}
+                            alt={card.name || card.cardNo}
+                            loading="lazy"
+                            onError={fallbackToOriginalCardImage}
+                          />
                           <span>
                             <b>{card.cardNo}</b>
                             <strong>{card.name}</strong>

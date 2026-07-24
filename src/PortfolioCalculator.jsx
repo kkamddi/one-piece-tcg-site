@@ -1,5 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 
+function fallbackCardImage(event) {
+  const image = event.currentTarget;
+  const proxyFallbackSrc = image.dataset.proxyFallbackSrc;
+  if (proxyFallbackSrc && image.dataset.proxyFallbackAttempted !== '1') {
+    image.dataset.proxyFallbackAttempted = '1';
+    image.src = proxyFallbackSrc;
+    return;
+  }
+  const originalFallbackSrc = image.dataset.originalFallbackSrc;
+  if (originalFallbackSrc && image.dataset.originalFallbackAttempted !== '1') {
+    image.dataset.originalFallbackAttempted = '1';
+    image.src = originalFallbackSrc;
+    return;
+  }
+  if (image.dataset.placeholderApplied !== '1') {
+    image.dataset.placeholderApplied = '1';
+    image.src = '/card-placeholder.svg';
+  }
+}
+
 const COPY = {
   KR: {
     eyebrow: 'PORTFOLIO TOOL',
@@ -329,7 +349,14 @@ export default function PortfolioCalculator({
             <div className="renew-portfolio-calculator-results">
               {results.map((card) => (
                 <button key={card.id} type="button" className={selected?.id === card.id ? 'is-active' : ''} onClick={() => setSelected(card)}>
-                  <img src={card.thumbnailUrl || card.imageUrl || '/card-placeholder.svg'} alt="" loading="lazy" />
+                  <img
+                    src={card.thumbnailUrl || card.imageUrl || '/card-placeholder.svg'}
+                    data-proxy-fallback-src={card.thumbnailProxyUrl || ''}
+                    data-original-fallback-src={card.thumbnailOriginalUrl || card.imageUrl || ''}
+                    alt=""
+                    loading="lazy"
+                    onError={fallbackCardImage}
+                  />
                   <span><b>{card.cardNo}</b><strong>{card.name}</strong><small>{card.rarity || card.seriesName}</small></span>
                 </button>
               ))}
@@ -341,7 +368,13 @@ export default function PortfolioCalculator({
           {selected ? (
             <>
               <article className="renew-portfolio-calculator-card">
-                <img src={selected.thumbnailUrl || selected.imageUrl || '/card-placeholder.svg'} alt={selected.name} />
+                <img
+                  src={selected.thumbnailUrl || selected.imageUrl || '/card-placeholder.svg'}
+                  data-proxy-fallback-src={selected.thumbnailProxyUrl || ''}
+                  data-original-fallback-src={selected.thumbnailOriginalUrl || selected.imageUrl || ''}
+                  alt={selected.name}
+                  onError={fallbackCardImage}
+                />
                 <div>
                   <b>{selected.cardNo}</b>
                   <strong>{selected.name}</strong>
