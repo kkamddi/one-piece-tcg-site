@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
 import { marketDateTimeLabelFromTimestamp } from '../lib/market-trade-date.js';
+import { readThroughR2Json } from '../lib/r2-json-cache.js';
 import priceChartingMarketLinks from '../src/data/pricecharting-market-links.js';
 
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
@@ -14,6 +15,7 @@ const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
 const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_LIMIT = 180;
 const LISTING_SNAPSHOT_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const MARKET_LATEST_SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
 const MARKET_DATA_SOURCE = String(process.env.MARKET_DATA_SOURCE || '').trim().toLowerCase();
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -610,18 +612,7 @@ async function saveListingFloorSnapshots(item, conditionPrices = [], capturedAt 
         ) values (
           'snkrdunk', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
-        on conflict(source, apparel_id, condition_key, captured_bucket) do update set
-          locale = excluded.locale,
-          code = excluded.code,
-          captured_at = excluded.captured_at,
-          price_amount_jpy = excluded.price_amount_jpy,
-          min_price_usd = excluded.min_price_usd,
-          listing_count = excluded.listing_count,
-          updated_at = excluded.updated_at
-        where market_listing_floor_snapshots.locale is not excluded.locale
-           or market_listing_floor_snapshots.code is not excluded.code
-           or market_listing_floor_snapshots.price_amount_jpy is not excluded.price_amount_jpy
-           or market_listing_floor_snapshots.min_price_usd is not excluded.min_price_usd`,
+        on conflict(source, apparel_id, condition_key, captured_bucket) do nothing`,
         [
           apparelId,
           item.locale || 'JP',
@@ -1304,8 +1295,9 @@ async function localFallback(params) {
     if (summaryMode === 'portfolio' && !requestedApparelIds.length) return { items: [] };
     const apparelIdPlaceholders = requestedApparelIds.map(() => '?').join(', ');
     const productFilterSql = requestedApparelIds.length ? ` and p.apparel_id in (${apparelIdPlaceholders})` : '';
-    const rows = shouldReadD1Market()
-      ? await queryD1(
+    const loadLatestRows = async () => {
+      if (!shouldReadD1Market()) return [];
+      const latestRows = await queryD1(
         `select p.apparel_id,
                 coalesce(
                   nullif(p.latest_a_price_jpy, 0),
@@ -1340,8 +1332,17 @@ async function localFallback(params) {
          where p.source = 'snkrdunk' and p.is_active = 1${productFilterSql}
          order by p.apparel_id asc`,
         requestedApparelIds
-      ).catch(() => [])
-      : [];
+      );
+      if (summaryMode === 'latest' && !latestRows.length) return null;
+      return latestRows;
+    };
+    const rows = summaryMode === 'latest'
+      ? await readThroughR2Json(
+        'public-data/market-latest-v1.json',
+        MARKET_LATEST_SNAPSHOT_MAX_AGE_MS,
+        loadLatestRows
+      )
+      : await loadLatestRows().catch(() => []);
     const latestByApparelId = new Map();
     for (const row of rows || []) {
       const aPriceJpy = Number(row.latest_a_price_jpy || 0);

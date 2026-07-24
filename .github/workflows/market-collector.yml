@@ -39,7 +39,9 @@ on:
         default: "1"
   schedule:
     # Four complete JP market refreshes per day.
-    - cron: "17 0,6,12,18 * * *"
+    # Persist listing-floor history only during the 00:17 UTC run.
+    - cron: "17 0 * * *"
+    - cron: "17 6,12,18 * * *"
 
 concurrency:
   group: market-price-collector
@@ -118,6 +120,7 @@ jobs:
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           COLLECT_SOLD_LISTINGS: ${{ github.event.inputs.collect_sold_listings || 'false' }}
           SOLD_LISTING_PAGES: ${{ github.event.inputs.sold_listing_pages || '1' }}
+          SCHEDULE_EXPRESSION: ${{ github.event.schedule || '' }}
         run: |
           if [ -z "$COLLECTOR_TOKEN" ]; then
             echo "MARKET_COLLECTOR_TOKEN secret is missing."
@@ -154,6 +157,10 @@ jobs:
           request_count=0
           done_flag=0
           expected_total=0
+          persist_listing_snapshots=0
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$SCHEDULE_EXPRESSION" = "17 0 * * *" ]; then
+            persist_listing_snapshots=1
+          fi
           strict_fixed_range=false
           if [ "$use_shards" = "true" ] && [ "$COLLECTOR_SCOPE" = "all-jp" ] && [ -z "$APPAREL_IDS" ] && [ "$stop_offset" -gt 0 ]; then
             strict_fixed_range=true
@@ -172,7 +179,7 @@ jobs:
             invalid_response_attempts=0
 
             while true; do
-              url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${request_limit}&offset=${offset}&concurrency=${request_concurrency}&listingSnapshots=1"
+              url="${COLLECTOR_URL}?scope=${COLLECTOR_SCOPE}&limit=${request_limit}&offset=${offset}&concurrency=${request_concurrency}&listingSnapshots=${persist_listing_snapshots}"
               if [ -n "$APPAREL_IDS" ]; then
                 url="${url}&apparelIds=${APPAREL_IDS}"
               fi

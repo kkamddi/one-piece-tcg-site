@@ -217,13 +217,14 @@ function getPublicCacheTtl(request, route, url) {
   if (route.key === 'market') {
     const summary = String(url.searchParams.get('summary') || '').toLowerCase();
     if (summary === 'portfolio') return 0;
-    return summary === 'latest' ? 900 : 300;
+    return 900;
   }
   if (route.key === 'marketIndex') return 3600;
   if (route.key === 'boxMarket') return 900;
   if (route.key === 'psa10Market') return 600;
-  if (['cardsIndex', 'cardsSearch', 'cardsId'].includes(route.key)) return 300;
-  if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 3600;
+  if (['cardsIndex', 'cardsSearch'].includes(route.key)) return 3600;
+  if (route.key === 'cardsId') return 900;
+  if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 21600;
   if (['cardImage', 'cardThumb'].includes(route.key)) return 86400;
   return 0;
 }
