@@ -1589,7 +1589,11 @@ function getSeriesSlug(series) {
 
 function getSeriesRoutePath(series) {
   const slug = getSeriesSlug(series);
-  return slug ? `/cards/${slug}` : '/cards';
+  if (!slug) return '/cards';
+  const hasLocaleCollision = seriesData.filter((item) => getSeriesSlug(item) === slug).length > 1;
+  return hasLocaleCollision
+    ? `/cards/series/${normalizeSeriesSlug(series?.id)}`
+    : `/cards/${slug}`;
 }
 
 function findSeriesByRouteSlug(slug, preferredLocale = 'JP') {
