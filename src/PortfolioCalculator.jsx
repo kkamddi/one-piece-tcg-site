@@ -332,7 +332,7 @@ export default function PortfolioCalculator({
         <div>
           <span>{copy.eyebrow}</span>
         </div>
-        <button type="button" className="renew-profit-guide-button" onClick={onOpenGuide}>{copy.guide}</button>
+        <button type="button" className="renew-profit-primary-button" onClick={onOpenGuide}>{copy.guide}</button>
       </header>
 
       <section className="renew-panel renew-portfolio-calculator-shell">

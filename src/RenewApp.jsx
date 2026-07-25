@@ -2758,6 +2758,7 @@ const PAGE_PATHS = {
   packSimulator: '/lab/pack-simulator',
   deckLab: '/lab/decks',
   deckBuilder: '/lab/decks/builder',
+  deckGuide: '/guides/deck-builder',
   centeringGuide: '/guides/centering',
   packSimulatorGuide: '/guides/pack-simulator',
   profitCalculator: '/tools/profit-calculator',
@@ -3036,6 +3037,13 @@ const PAGE_SEO = {
     keywords: '원피스카드 카드깡 시뮬레이터 사용법, 원피스카드 봉입률, 가상 카드 개봉',
     body: '시리즈와 개봉 단위를 선택하고 가상 개봉 결과와 참고 시세를 확인하는 방법을 안내합니다.'
   },
+  deckGuide: {
+    title: '원피스카드 덱 빌더 사용 가이드 | Card Pone',
+    h1: '덱 빌더 사용 가이드',
+    description: '리더와 카드 환경 선택, 검증된 덱 불러오기, 카드 추가와 덱 규칙 검사 방법을 안내합니다.',
+    keywords: '원피스카드 덱 빌더, 원피스카드 덱 구성, 원피스카드 리더 색상, 원피스카드 덱 규칙',
+    body: '리더 색상에 맞는 카드를 검색하고 검증된 덱을 불러와 50장 덱을 구성하는 방법을 안내합니다.'
+  },
   profitCalculator: {
     title: '카드 손익 계산기 | Card Pone',
     h1: '카드 손익 계산기',
@@ -3258,6 +3266,13 @@ const JP_PAGE_SEO = {
     description: 'シリーズと開封単位の選択、パック・ボックス・カートンの結果と確率の見方を案内します。',
     keywords: 'ワンピースカード 開封シミュレーター 使い方,封入率,仮想開封',
     body: 'シリーズと開封単位を選び、仮想開封結果と参考価格を確認する方法を案内します。'
+  },
+  deckGuide: {
+    title: 'ワンピースカード デッキビルダーガイド | Card Pone',
+    h1: 'デッキビルダーガイド',
+    description: 'リーダーとカード環境の選択、検証済みデッキの読み込み、カード追加とデッキルール確認方法を案内します。',
+    keywords: 'ワンピースカード デッキビルダー,デッキ構築,リーダーカラー,デッキルール',
+    body: 'リーダーの色に合うカードを検索し、検証済みデッキを読み込んで50枚のデッキを構築する方法を案内します。'
   },
   profitCalculator: {
     title: 'カード損益計算機 | Card Pone',
@@ -3539,6 +3554,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path === '/guides/portfolio-calculator') return { page: 'portfolioCalculator' };
   if (path === '/guides/centering') return { page: 'centering' };
   if (path === '/guides/pack-simulator') return { page: 'packSimulator' };
+  if (path === '/guides/deck-builder') return { page: 'deckLab' };
   if (path === '/lab/decks/builder') return { page: 'deckLab' };
   if (path === '/lab/decks') return { page: 'lab' };
   if (path.startsWith('/lab')) return { page: 'lab' };
@@ -3714,10 +3730,15 @@ function getPageJsonLd(page, seo, uiLang = 'KR') {
       }))
     });
   }
-  if (['centeringGuide', 'packSimulatorGuide'].includes(page)) {
+  if (['centeringGuide', 'packSimulatorGuide', 'deckGuide'].includes(page)) {
+    const guideType = page === 'centeringGuide'
+      ? 'centering'
+      : page === 'packSimulatorGuide'
+        ? 'packSimulator'
+        : 'deckBuilder';
     graph.push({
       '@type': 'FAQPage',
-      mainEntity: getLabToolGuideContent(page === 'centeringGuide' ? 'centering' : 'packSimulator', uiLang).faq.map((item) => ({
+      mainEntity: getLabToolGuideContent(guideType, uiLang).faq.map((item) => ({
         '@type': 'Question',
         name: item.question,
         acceptedAnswer: { '@type': 'Answer', text: item.answer }
@@ -4330,7 +4351,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
 
 function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
-  const isLabActive = ['lab', 'centering', 'packSimulator', 'portfolioCalculator', 'portfolioCalculatorGuide'].includes(activePage);
+  const isLabActive = ['lab', 'centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
@@ -8874,6 +8895,59 @@ function getLabToolGuideContent(type, uiLang = 'KR') {
         ],
         note: '仮想開封は購入結果を予測・保証するものではありません。封入ルールは確認資料に応じて更新される場合があります。'
       }
+    },
+    deckBuilder: {
+      KR: {
+        eyebrow: 'DECK BUILDER GUIDE',
+        title: '덱 빌더 사용 가이드',
+        tool: '덱 빌더로 돌아가기',
+        sections: [
+          ['1. 카드 환경과 리더 선택', '한국판, 일본판, 영어판 환경을 먼저 선택한 뒤 사용할 리더를 고릅니다. 리더를 선택하면 해당 리더 색상으로 사용할 수 있는 카드만 검색됩니다.'],
+          ['2. 시작할 덱 선택', '검증된 입상 덱을 불러오거나 리더만 선택해 빈 덱에서 시작할 수 있습니다. 불러온 덱도 카드 매수를 자유롭게 조정할 수 있습니다.'],
+          ['3. 카드 추가와 규칙 확인', '메인 덱은 50장으로 구성하며 같은 카드번호는 기본적으로 최대 4장까지 넣을 수 있습니다. 화면의 규칙 검사에서 매수, 색상, 금지·제한 카드 상태를 확인하세요.'],
+          ['4. 덱 저장과 비교', '구성한 덱은 현재 계정 또는 기기에 저장됩니다. 검증된 덱을 다시 불러와 카드 구성을 비교하거나 다른 버전으로 조정할 수 있습니다.']
+        ],
+        faq: [
+          { question: '처음 시작하는 사람도 사용할 수 있나요?', answer: '네. 첫 화면의 검증된 입상 덱을 불러오면 완성된 50장 구성에서 카드를 한 장씩 바꾸며 익힐 수 있습니다.' },
+          { question: '찾는 카드가 검색되지 않는 이유는 무엇인가요?', answer: '선택한 리더의 색상과 맞지 않거나 현재 선택한 한국판·일본판·영어판 환경에 없는 카드일 수 있습니다.' },
+          { question: '검증된 덱은 항상 현재 대회 환경과 같나요?', answer: '등록된 출처와 당시 카드 환경을 기준으로 구성된 참고 덱입니다. 금지·제한 카드와 발매 환경이 바뀌면 현재 사용 가능 여부가 달라질 수 있습니다.' }
+        ],
+        note: '덱 규칙 검사는 구성 보조 기능입니다. 실제 대회 참가 전에는 해당 지역의 최신 공식 규정과 금지·제한 카드 공지를 함께 확인하세요.'
+      },
+      EN: {
+        eyebrow: 'DECK BUILDER GUIDE',
+        title: 'Deck Builder Guide',
+        tool: 'Back to deck builder',
+        sections: [
+          ['1. Choose an environment and leader', 'Select KR, JP, or EN, then choose a leader. Card search is filtered to colors that the selected leader can use.'],
+          ['2. Choose a starting deck', 'Load a verified tournament deck or start from an empty deck with only a leader. Loaded deck counts remain editable.'],
+          ['3. Add cards and check rules', 'Build a 50-card main deck with up to four copies of the same card number by default. Review count, color, and restriction checks as you edit.'],
+          ['4. Save and compare', 'Your deck is stored for the current account or device. Reload a verified list to compare it with your changes or create another version.']
+        ],
+        faq: [
+          { question: 'Can a beginner use the deck builder?', answer: 'Yes. Load a verified 50-card list first, then learn the deck by replacing cards one at a time.' },
+          { question: 'Why is a card missing from search?', answer: 'It may not match the leader colors or may not exist in the selected KR, JP, or EN environment.' },
+          { question: 'Are verified decks always legal in the current format?', answer: 'They reflect their listed source and format. Always check current regional restrictions before entering an event.' }
+        ],
+        note: 'The rule checker assists deck construction. Confirm the latest official regional rules and restricted-card announcements before tournament play.'
+      },
+      JP: {
+        eyebrow: 'DECK BUILDER GUIDE',
+        title: 'デッキビルダーガイド',
+        tool: 'デッキビルダーに戻る',
+        sections: [
+          ['1. 環境とリーダーを選択', 'KR・JP・ENの環境を選び、使用するリーダーを選択します。カード検索はリーダーが使用できる色に絞り込まれます。'],
+          ['2. 開始デッキを選択', '検証済み大会デッキを読み込むか、リーダーだけを選んで空のデッキから開始できます。読み込んだ枚数も変更できます。'],
+          ['3. カード追加とルール確認', 'メインデッキは50枚で、同じカード番号は基本4枚までです。枚数、色、禁止・制限カードの確認結果を見ながら編集します。'],
+          ['4. 保存と比較', '作成したデッキは現在のアカウントまたは端末に保存されます。検証済みデッキを再度読み込み、変更内容を比較できます。']
+        ],
+        faq: [
+          { question: '初心者でも利用できますか？', answer: 'はい。検証済みの50枚デッキを読み込み、カードを少しずつ入れ替えながら構成を学べます。' },
+          { question: '検索にカードが表示されないのはなぜですか？', answer: 'リーダーの色と一致しないか、選択したKR・JP・EN環境に存在しない可能性があります。' },
+          { question: '検証済みデッキは現在も使用できますか？', answer: '登録された出典と当時の環境に基づく参考デッキです。大会前に最新の禁止・制限カードを確認してください。' }
+        ],
+        note: 'ルール確認はデッキ構築を補助する機能です。大会参加前に地域別の最新公式ルールを確認してください。'
+      }
     }
   };
   return copy[type]?.[locale] || copy[type]?.KR;
@@ -12463,7 +12537,7 @@ function RenewLeaderInsightsModal({ card, region, authUser, uiLang, onClose, onR
   );
 }
 
-function RenewDeckLabHomeV2({ uiLang, authUser, onOpenBuilder, onRequireLogin }) {
+function RenewDeckLabHomeV2({ uiLang, authUser, onOpenBuilder, onOpenGuide, onRequireLogin }) {
   const [region, setRegion] = useState('KR');
   const [keyword, setKeyword] = useState('');
   const [leaders, setLeaders] = useState([]);
@@ -12579,6 +12653,9 @@ function RenewDeckLabHomeV2({ uiLang, authUser, onOpenBuilder, onRequireLogin })
             }}>{item}</button>
           ))}
         </div>
+        <button type="button" className="renew-profit-primary-button" onClick={onOpenGuide}>
+          {getLocaleText(uiLang, '사용 가이드', 'User guide', '利用ガイド')}
+        </button>
       </section>
       {publishedTemplates.length ? (
         <section className="renew-deck-prebuilt">
@@ -12688,7 +12765,7 @@ function RenewDeckLabHomeV2({ uiLang, authUser, onOpenBuilder, onRequireLogin })
   );
 }
 
-function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, initialLeader, initialTemplate }) {
+function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, initialLeader, initialTemplate, onOpenGuide }) {
   const t = (key) => getUiText(uiLang, key);
   const [guestDeckState, setGuestDeckState] = useState(() => {
     if (typeof window === 'undefined') return {};
@@ -13093,19 +13170,23 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
         <section className="renew-deck-builder-head">
           <div>
             <span>DECK BUILDER</span>
-            <h1>{getLocaleText(uiLang, '덱 빌더', 'Deck Builder', 'デッキビルダー')}</h1>
           </div>
-          <div className="renew-deck-environment" aria-label={getLocaleText(uiLang, '카드 환경', 'Card environment', 'カード環境')}>
-            {['KR', 'JP', 'EN'].map((environment) => (
-              <button
-                key={environment}
-                type="button"
-                className={deckBuilder.environment === environment ? 'is-active' : ''}
-                onClick={() => changeEnvironment(environment)}
-              >
-                {environment}
-              </button>
-            ))}
+          <div className="renew-deck-builder-tools">
+            <div className="renew-deck-environment" aria-label={getLocaleText(uiLang, '카드 환경', 'Card environment', 'カード環境')}>
+              {['KR', 'JP', 'EN'].map((environment) => (
+                <button
+                  key={environment}
+                  type="button"
+                  className={deckBuilder.environment === environment ? 'is-active' : ''}
+                  onClick={() => changeEnvironment(environment)}
+                >
+                  {environment}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="renew-profit-primary-button" onClick={onOpenGuide}>
+              {getLocaleText(uiLang, '사용 가이드', 'User guide', '利用ガイド')}
+            </button>
           </div>
         </section>
 
@@ -13736,7 +13817,7 @@ export default function RenewApp() {
   const [routeRevision, setRouteRevision] = useState(0);
   const internalNavigationRef = useRef(false);
 
-  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'packSimulator', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
+  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const isAdminUser = useMemo(() => (
     authUser?.app_metadata?.role === 'admin'
@@ -14331,6 +14412,8 @@ export default function RenewApp() {
         <RenewLabToolGuide type="centering" uiLang={uiLang} onOpenTool={() => navigatePage('centering')} />
       ) : activePage === 'packSimulatorGuide' ? (
         <RenewLabToolGuide type="packSimulator" uiLang={uiLang} onOpenTool={() => navigatePage('packSimulator')} />
+      ) : activePage === 'deckGuide' ? (
+        <RenewLabToolGuide type="deckBuilder" uiLang={uiLang} onOpenTool={() => navigatePage('deckLab')} />
       ) : activePage === 'calendar' ? (
         <RenewCalendar uiLang={uiLang} />
       ) : activePage === 'lab' ? (
@@ -14347,6 +14430,7 @@ export default function RenewApp() {
           uiLang={uiLang}
           authUser={authUser}
           onRequireLogin={() => handleAuthClick('login')}
+          onOpenGuide={() => navigatePage('deckGuide')}
           onOpenBuilder={(leader = null, template = null) => {
             setDeckBuilderInitialLeader(leader);
             setDeckBuilderInitialTemplate(template);
@@ -14362,6 +14446,7 @@ export default function RenewApp() {
           uiLang={uiLang}
           initialLeader={deckBuilderInitialLeader}
           initialTemplate={deckBuilderInitialTemplate}
+          onOpenGuide={() => navigatePage('deckGuide')}
         />
       ) : activePage === 'packSimulator' ? (
         <RenewPackSimulator

@@ -1603,7 +1603,7 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
     <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}${phase === 'corners' ? ' is-corner-open' : ''}${phase === 'boundary' ? ' is-boundary-open' : ''}`}>
       <section className="centering-lab-head renew-profit-head">
         <div>
-          <span>{text.eyebrow}</span>
+          <span>CENTERING TOOL</span>
         </div>
         <button type="button" className="renew-profit-primary-button" onClick={onOpenGuide}>
           {uiLang === 'JP' ? '利用ガイド' : uiLang === 'EN' ? 'User guide' : '사용 가이드'}

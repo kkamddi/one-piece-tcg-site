@@ -13855,7 +13855,15 @@ button.renew-deck-entry:focus-visible {
 }
 
 .renew-deck-lab-head.is-controls-only {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.renew-deck-builder-tools {
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 .renew-deck-prebuilt {
@@ -14355,8 +14363,38 @@ button.renew-deck-entry:focus-visible {
 
   .renew-deck-lab-head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr;
     width: 100%;
+  }
+
+  .renew-deck-lab-head .renew-profit-primary-button {
+    width: 100%;
+  }
+
+  .renew-deck-builder-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .renew-deck-builder-tools {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .renew-deck-environment {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .renew-deck-builder-tools .renew-profit-primary-button {
+    width: 100%;
+  }
+
+  .renew-deck-environment button {
+    min-width: 0;
   }
 
   .renew-deck-region-tabs {
