@@ -38,6 +38,54 @@ function isCardNoQuery(value = '') {
   return /^(OP|ST|EB|PRB|P)-?\d/i.test(String(value).trim());
 }
 
+const CARD_COLOR_ALIASES = {
+  red: 'red',
+  '빨강': 'red',
+  '적': 'red',
+  '赤': 'red',
+  green: 'green',
+  '초록': 'green',
+  '녹': 'green',
+  '緑': 'green',
+  blue: 'blue',
+  '파랑': 'blue',
+  '청': 'blue',
+  '青': 'blue',
+  purple: 'purple',
+  '보라': 'purple',
+  '자': 'purple',
+  '紫': 'purple',
+  black: 'black',
+  '검정': 'black',
+  '흑': 'black',
+  '黒': 'black',
+  yellow: 'yellow',
+  '노랑': 'yellow',
+  '황': 'yellow',
+  '黄': 'yellow'
+};
+
+function normalizeCardColors(value = '') {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .split(/[,/·・\s]+/)
+    .map((item) => CARD_COLOR_ALIASES[item])
+    .filter(Boolean);
+}
+
+function matchesCardFilters(card, filters = {}) {
+  const requestedColors = new Set(normalizeCardColors(filters.color));
+  const cardColors = normalizeCardColors([card.color, card.colorKo].filter(Boolean).join(','));
+  const excludedCategory = normalizeSearch(filters.excludeCategory || '');
+  return (!filters.locale || card.locale === filters.locale)
+    && (!filters.series || card.series === filters.series)
+    && (!filters.rarity || card.rarity === filters.rarity)
+    && (!requestedColors.size || (cardColors.length && cardColors.every((color) => requestedColors.has(color))))
+    && (!excludedCategory || ![card.category, card.categoryKo, card.type]
+      .some((value) => normalizeSearch(value).includes(excludedCategory)));
+}
+
 function uniqueById(cards = []) {
   const seen = new Set();
   return cards.filter((card) => {
@@ -121,12 +169,10 @@ export async function fetchCards(filters = {}) {
   const url = `${API_BASE}${buildQuery(filters)}`;
   return safeFetchJson(url, async () => {
     const cardsFallback = await loadCardsFallback();
-    return cardsFallback.filter((card) => {
-      const matchesLocale = !filters.locale || card.locale === filters.locale;
-      const matchesSeries = !filters.series || card.series === filters.series;
-      const matchesRarity = !filters.rarity || card.rarity === filters.rarity;
-      return matchesLocale && matchesSeries && matchesRarity;
-    });
+    const filtered = cardsFallback.filter((card) => matchesCardFilters(card, filters));
+    const limit = Number(filters.limit || 0);
+    const page = Math.max(1, Number(filters.page || 1));
+    return limit > 0 ? filtered.slice((page - 1) * limit, page * limit) : filtered;
   });
 }
 

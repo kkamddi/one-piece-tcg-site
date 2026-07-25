@@ -14,6 +14,7 @@ const RATE_LIMITS = {
   series: 120,
   cardImage: 240,
   cardThumb: 300,
+  deckLab: 90,
   market: 120,
   marketplace: 120,
   psa10Market: 120,
@@ -199,6 +200,7 @@ function routeApi(pathParts) {
   if (first === 'series') return { key: 'series' };
   if (first === 'card-image') return { key: 'cardImage' };
   if (first === 'card-thumb') return { key: 'cardThumb' };
+  if (first === 'deck-lab') return { key: 'deckLab' };
   if (first === 'market') return { key: 'market' };
   if (first === 'marketplace') return { key: 'marketplace' };
   if (first === 'psa10-market') return { key: 'psa10Market' };
@@ -226,6 +228,7 @@ function getPublicCacheTtl(request, route, url) {
   if (route.key === 'cardsId') return 900;
   if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 21600;
   if (['cardImage', 'cardThumb'].includes(route.key)) return 86400;
+  if (route.key === 'deckLab') return 300;
   return 0;
 }
 
@@ -243,6 +246,7 @@ async function loadHandler(key) {
   if (key === 'series') return (await import('../../api/series.js')).default;
   if (key === 'cardImage') return (await import('../../api/card-image.js')).default;
   if (key === 'cardThumb') return (await import('../../api/card-thumb.js')).default;
+  if (key === 'deckLab') return (await import('../../api/deck-lab.js')).default;
   if (key === 'market') return (await import('../../api/market.js')).default;
   if (key === 'marketplace') return (await import('../../api/marketplace.js')).default;
   if (key === 'psa10Market') return (await import('../../api/psa10-market.js')).default;

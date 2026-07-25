@@ -4,7 +4,15 @@ import { fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
-import { fetchDeckLabReference } from './api/deck-lab';
+import {
+  deleteLeaderReview,
+  fetchDeckLabReference,
+  fetchDeckTemplateVersion,
+  fetchLeaderOverview,
+  fetchPopularDeckLeaders,
+  recordLeaderSelection,
+  saveLeaderReview
+} from './api/deck-lab';
 import { fetchMyState } from './api/me';
 import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
@@ -8935,13 +8943,12 @@ function RenewLabHome({ uiLang, isAdmin, onOpenCentering, onOpenSimulator, onOpe
     {
       id: 'deck-builder',
       icon: 'cards',
-      status: getLocaleText(uiLang, '관리자 테스트', 'Admin test', '管理者テスト'),
+      status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
       title: getLocaleText(uiLang, '덱 빌더', 'Deck Builder', 'デッキビルダー'),
       description: getLocaleText(uiLang, '리더를 선택하고 덱 규칙을 확인하며 카드를 구성합니다.', 'Choose a leader, build a deck, and check its rules.', 'リーダーを選び、ルールを確認しながらデッキを構築します。'),
-      onClick: isAdmin ? onOpenDeckLab : null,
-      adminOnly: true
+      onClick: onOpenDeckLab
     }
-  ].filter((tool) => !tool.adminOnly || isAdmin);
+  ];
 
   return (
     <main className="renew-subpage renew-lab-page">
@@ -12273,10 +12280,342 @@ function RenewDeckLabHome({ uiLang, onOpenBuilder }) {
   );
 }
 
+function normalizeDeckSearchText(value = '') {
+  return String(value || '').normalize('NFKC').toLowerCase().replace(/[\s.\u30fb\u00b7]/g, '');
+}
+
+function RenewLeaderInsightsModal({ card, region, authUser, uiLang, onClose, onRequireLogin }) {
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [rating, setRating] = useState(5);
+  const [content, setContent] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState('');
+  useBodyScrollLock(true);
+  const cardNo = getDeckCardNo(card);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchLeaderOverview(region, cardNo)
+      .then((payload) => {
+        if (cancelled) return;
+        setOverview(payload);
+        const mine = (payload?.reviews || []).find((item) => item.mine);
+        if (mine) {
+          setRating(Number(mine.rating || 5));
+          setContent(mine.content || '');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setOverview({ configured: false, reviews: [] });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [region, cardNo]);
+
+  async function submitReview() {
+    if (!authUser) {
+      onRequireLogin?.();
+      return;
+    }
+    if (!content.trim()) {
+      setNotice(getLocaleText(uiLang, '평가 내용을 입력해 주세요.', 'Write a short review.', '評価内容を入力してください。'));
+      return;
+    }
+    setSaving(true);
+    setNotice('');
+    try {
+      setOverview(await saveLeaderReview(region, cardNo, rating, content));
+      setNotice(getLocaleText(uiLang, '평가를 저장했습니다.', 'Review saved.', '評価を保存しました。'));
+    } catch {
+      setNotice(getLocaleText(uiLang, '평가를 저장하지 못했습니다.', 'Unable to save review.', '評価を保存できませんでした。'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeReview() {
+    if (!authUser) return;
+    setSaving(true);
+    try {
+      setOverview(await deleteLeaderReview(region, cardNo));
+      setRating(5);
+      setContent('');
+      setNotice(getLocaleText(uiLang, '평가를 삭제했습니다.', 'Review deleted.', '評価を削除しました。'));
+    } catch {
+      setNotice(getLocaleText(uiLang, '평가를 삭제하지 못했습니다.', 'Unable to delete review.', '評価を削除できませんでした。'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return createPortal(
+    <div className="renew-modal-backdrop renew-leader-insights-backdrop" role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) onClose();
+    }}>
+      <section className="renew-leader-insights-modal" role="dialog" aria-modal="true" aria-labelledby="leader-insights-title">
+        <header>
+          <div>
+            <small>LEADER</small>
+            <h2 id="leader-insights-title">{card.name}</h2>
+            <span>{cardNo} · {card.colorKo || card.color}</span>
+          </div>
+          <button type="button" className="renew-icon-button" onClick={onClose} aria-label={getLocaleText(uiLang, '닫기', 'Close', '閉じる')}>×</button>
+        </header>
+        <div className="renew-leader-insights-summary">
+          <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} />
+          <div>
+            <div>
+              <span>{getLocaleText(uiLang, '선택 사용자', 'Users selecting this leader', '選択ユーザー')}</span>
+              <strong>{Number(overview?.usageCount || 0).toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>{getLocaleText(uiLang, '사용자 평가', 'User rating', 'ユーザー評価')}</span>
+              <strong>{overview?.reviewCount ? `${Number(overview.averageRating || 0).toFixed(1)} / 5` : '-'}</strong>
+            </div>
+            {card.effect ? <p>{card.effect}</p> : null}
+          </div>
+        </div>
+        <div className="renew-leader-review-form">
+          <div className="renew-leader-rating" aria-label={getLocaleText(uiLang, '리더 평점', 'Leader rating', 'リーダー評価')}>
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button key={value} type="button" className={rating === value ? 'is-active' : ''} onClick={() => setRating(value)}>
+                {value}
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={content}
+            maxLength={800}
+            onChange={(event) => setContent(event.target.value)}
+            placeholder={getLocaleText(uiLang, '운영 난이도와 장단점을 남겨주세요.', 'Share its difficulty, strengths, and weaknesses.', '難易度や長所・短所を共有してください。')}
+            disabled={!authUser}
+          />
+          <div>
+            {authUser ? (
+              <>
+                {(overview?.reviews || []).some((item) => item.mine) ? (
+                  <button type="button" className="renew-secondary-button" onClick={removeReview} disabled={saving}>
+                    {getLocaleText(uiLang, '내 평가 삭제', 'Delete my review', '自分の評価を削除')}
+                  </button>
+                ) : <span />}
+                <button type="button" className="renew-primary-button" onClick={submitReview} disabled={saving}>
+                  {saving
+                    ? getLocaleText(uiLang, '저장 중', 'Saving', '保存中')
+                    : getLocaleText(uiLang, '평가 저장', 'Save review', '評価を保存')}
+                </button>
+              </>
+            ) : (
+              <button type="button" className="renew-primary-button" onClick={onRequireLogin}>
+                {getLocaleText(uiLang, '로그인 후 평가하기', 'Sign in to review', 'ログインして評価')}
+              </button>
+            )}
+          </div>
+          {notice ? <p role="status">{notice}</p> : null}
+        </div>
+        <div className="renew-leader-review-list">
+          <h3>{getLocaleText(uiLang, '리더 평가', 'Leader reviews', 'リーダー評価')}</h3>
+          {loading ? <p>{getLocaleText(uiLang, '불러오는 중', 'Loading', '読み込み中')}</p> : null}
+          {!loading && !(overview?.reviews || []).length ? (
+            <p>{getLocaleText(uiLang, '아직 등록된 평가가 없습니다.', 'No reviews yet.', 'まだ評価がありません。')}</p>
+          ) : null}
+          {(overview?.reviews || []).map((item) => (
+            <article key={item.id}>
+              <div><strong>{item.nickname}</strong><b>{item.rating} / 5</b></div>
+              <p>{item.content}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>,
+    document.body
+  );
+}
+
+function RenewDeckLabHomeV2({ uiLang, authUser, onOpenBuilder, onRequireLogin }) {
+  const [region, setRegion] = useState('KR');
+  const [keyword, setKeyword] = useState('');
+  const [leaders, setLeaders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [popular, setPopular] = useState([]);
+  const [referenceData, setReferenceData] = useState(null);
+  const [insightCard, setInsightCard] = useState(null);
+  const [leaderLimit, setLeaderLimit] = useState(30);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([
+      fetchCards({ locale: region, rarity: 'L' }),
+      fetchPopularDeckLeaders(region).catch(() => ({ items: [] })),
+      fetchDeckLabReference(region).catch(() => null)
+    ]).then(([cards, popularPayload, referencePayload]) => {
+      if (cancelled) return;
+      const canonical = new Map();
+      (Array.isArray(cards) ? cards : []).forEach((card) => {
+        if (!isDeckLeaderCard(card)) return;
+        const cardNo = getDeckCardNo(card);
+        if (!cardNo) return;
+        const current = canonical.get(cardNo);
+        if (!current || /_p\d+$/i.test(String(current.cardNo || current.id || ''))) canonical.set(cardNo, card);
+      });
+      setLeaders([...canonical.values()].sort((a, b) => getDeckCardNo(a).localeCompare(getDeckCardNo(b))));
+      setPopular(popularPayload?.items || []);
+      setReferenceData(referencePayload?.configured === false ? null : referencePayload);
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [region]);
+
+  useEffect(() => {
+    setLeaderLimit(30);
+  }, [region, keyword]);
+
+  const popularMap = useMemo(
+    () => new Map(popular.map((item) => [String(item.cardNo), Number(item.count || 0)])),
+    [popular]
+  );
+  const templateCountByLeader = useMemo(() => {
+    const leaderById = new Map((referenceData?.leaders || []).map((item) => [String(item.id), item]));
+    const archetypeById = new Map((referenceData?.archetypes || []).map((item) => [String(item.id), item]));
+    const counts = new Map();
+    (referenceData?.templates || []).forEach((template) => {
+      if (!template.current_version_id) return;
+      const archetype = archetypeById.get(String(template.archetype_id));
+      const leader = leaderById.get(String(archetype?.leader_id));
+      const cardNo = normalizeDeckSearchText(leader?.card_no);
+      if (cardNo) counts.set(cardNo, Number(counts.get(cardNo) || 0) + 1);
+    });
+    return counts;
+  }, [referenceData]);
+  const visibleLeaders = useMemo(() => {
+    const query = normalizeDeckSearchText(keyword);
+    const filtered = query
+      ? leaders.filter((card) => [card.name, card.nameEn, card.cardNo, card.baseCardNo]
+        .some((value) => normalizeDeckSearchText(value).includes(query)))
+      : leaders;
+    return [...filtered].sort((a, b) => {
+      const usageDelta = Number(popularMap.get(getDeckCardNo(b)) || 0) - Number(popularMap.get(getDeckCardNo(a)) || 0);
+      return usageDelta || getDeckCardNo(a).localeCompare(getDeckCardNo(b));
+    });
+  }, [leaders, keyword, popularMap]);
+
+  function startWithLeader(card) {
+    if (authUser) recordLeaderSelection(region, getDeckCardNo(card)).catch(() => {});
+    onOpenBuilder(card);
+  }
+
+  return (
+    <main className="renew-subpage renew-deck-lab">
+      <section className="renew-deck-lab-head">
+        <h1>{getLocaleText(uiLang, '덱 빌더', 'Deck Builder', 'デッキビルダー')}</h1>
+        <div className="renew-deck-region-tabs" aria-label={getLocaleText(uiLang, '카드 환경', 'Card environment', 'カード環境')}>
+          {['KR', 'JP', 'EN'].map((item) => (
+            <button key={item} type="button" className={region === item ? 'is-active' : ''} onClick={() => {
+              setRegion(item);
+              setKeyword('');
+            }}>{item}</button>
+          ))}
+        </div>
+      </section>
+      <section className="renew-deck-first-step">
+        <div>
+          <small>STEP 1</small>
+          <h2>{getLocaleText(uiLang, '사용할 리더를 먼저 선택하세요', 'Choose a leader first', '最初にリーダーを選択')}</h2>
+        </div>
+        <div className="renew-deck-leader-filter">
+          <input
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder={getLocaleText(uiLang, '리더 이름 또는 카드번호', 'Leader name or card number', 'リーダー名またはカード番号')}
+          />
+        </div>
+      </section>
+      {popular.length ? (
+        <section className="renew-deck-popular-strip">
+          <strong>{getLocaleText(uiLang, '많이 선택한 리더', 'Popular selections', '人気の選択')}</strong>
+          <div>
+            {popular.slice(0, 6).map((item) => (
+              <button key={item.cardNo} type="button" onClick={() => setKeyword(item.cardNo)}>
+                <span>{item.cardNo}</span><b>{item.count}</b>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+      <section className="renew-deck-reference">
+        {loading ? <p className="renew-deck-empty">{getLocaleText(uiLang, '리더를 불러오는 중입니다.', 'Loading leaders.', 'リーダーを読み込み中です。')}</p> : null}
+        {!loading && !visibleLeaders.length ? (
+          <p className="renew-deck-empty">{getLocaleText(uiLang, '검색된 리더가 없습니다.', 'No leaders found.', 'リーダーが見つかりません。')}</p>
+        ) : null}
+        <div className="renew-deck-leader-grid renew-deck-leader-catalog">
+          {visibleLeaders.slice(0, leaderLimit).map((card) => {
+            const cardNo = getDeckCardNo(card);
+            const templateCount = Number(templateCountByLeader.get(normalizeDeckSearchText(cardNo)) || 0);
+            return (
+              <article key={card.id}>
+                <img src={getCardImageSrc(card)} alt={card.name} onError={placeholderImage} />
+                <div>
+                  <b>{cardNo}</b>
+                  <strong>{card.name}</strong>
+                  <small>
+                    {card.colorKo || card.color}
+                    {templateCount ? ` · ${getLocaleText(uiLang, '추천 덱', 'Verified decks', '推奨デッキ')} ${templateCount}` : ''}
+                  </small>
+                </div>
+                <div className="renew-deck-leader-actions">
+                  <button type="button" className="renew-secondary-button" onClick={() => setInsightCard(card)}>
+                    {getLocaleText(uiLang, '평가 · 정보', 'Reviews', '評価・情報')}
+                  </button>
+                  <button type="button" className="renew-primary-button" onClick={() => startWithLeader(card)}>
+                    {getLocaleText(uiLang, '이 리더로 시작', 'Start', 'このリーダーで開始')}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        {visibleLeaders.length > leaderLimit ? (
+          <button type="button" className="renew-deck-load-more" onClick={() => setLeaderLimit((current) => current + 30)}>
+            {getLocaleText(uiLang, '리더 더 보기', 'Load more leaders', 'リーダーをさらに表示')}
+          </button>
+        ) : null}
+      </section>
+      {insightCard ? (
+        <RenewLeaderInsightsModal
+          card={insightCard}
+          region={region}
+          authUser={authUser}
+          uiLang={uiLang}
+          onClose={() => setInsightCard(null)}
+          onRequireLogin={onRequireLogin}
+        />
+      ) : null}
+    </main>
+  );
+}
+
 function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, initialLeader }) {
   const t = (key) => getUiText(uiLang, key);
-  const storedEntries = Array.isArray(userState?.deckEntries) ? userState.deckEntries : [];
-  const storedLeaderId = String(userState?.leaderCardId || '');
+  const [guestDeckState, setGuestDeckState] = useState(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      return JSON.parse(window.localStorage.getItem('card-pone-guest-deck-v1') || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const deckState = authUser ? (userState || {}) : guestDeckState;
+  const storedEntries = Array.isArray(deckState?.deckEntries) ? deckState.deckEntries : [];
+  const storedLeaderId = String(deckState?.leaderCardId || '');
   const storedLocale = String(storedLeaderId || storedEntries[0]?.id || '').split('::')[0];
   const [environment, setEnvironment] = useState(['KR', 'JP', 'EN'].includes(storedLocale) ? storedLocale : 'KR');
   const [cardCache, setCardCache] = useState({});
@@ -12286,6 +12625,9 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
   const [notice, setNotice] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
   const [deckReferenceData, setDeckReferenceData] = useState(null);
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [cardPage, setCardPage] = useState(1);
+  const [hasMoreCards, setHasMoreCards] = useState(false);
   const deckSaveQueue = useRef(Promise.resolve());
   const initialLeaderAppliedRef = useRef('');
   const storedEntryKey = storedEntries.map((entry) => `${entry?.id}:${entry?.count}`).join('|');
@@ -12293,7 +12635,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     .map((entry) => ({ card: cardCache[String(entry?.id)], count: Number(entry?.count || 0) }))
     .filter((entry) => entry.card && entry.count > 0);
   const leader = cardCache[storedLeaderId] || null;
-  const deckDataLoading = Boolean(stateLoading
+  const deckDataLoading = Boolean((authUser && stateLoading)
     || (storedLeaderId && !leader)
     || storedEntries.some((entry) => entry?.id && !cardCache[String(entry.id)]));
   const deckEntries = Object.fromEntries(entries.map((entry) => [String(entry.card.id), entry]));
@@ -12389,10 +12731,16 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
       .filter((entry) => entry?.card?.id && Number(entry.count) > 0)
       .map((entry) => ({ id: String(entry.card.id), count: Number(entry.count) }));
     const nextState = {
-      ...(userState || {}),
+      ...(deckState || {}),
       leaderCardId: nextLeader?.id || null,
       deckEntries: serializedEntries
     };
+    if (!authUser) {
+      setGuestDeckState(nextState);
+      window.localStorage.setItem('card-pone-guest-deck-v1', JSON.stringify(nextState));
+      setSaveStatus(getLocaleText(uiLang, '이 기기에 저장됨', 'Saved on this device', 'この端末に保存済み'));
+      return;
+    }
     setUserState(nextState);
     setSaveStatus(getLocaleText(uiLang, '저장 중', 'Saving', '保存中'));
     try {
@@ -12408,7 +12756,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
 
   useEffect(() => {
     const initialLeaderId = String(initialLeader?.id || '');
-    if (!initialLeaderId || initialLeaderAppliedRef.current === initialLeaderId || stateLoading) return;
+    if (!initialLeaderId || initialLeaderAppliedRef.current === initialLeaderId || (authUser && stateLoading)) return;
     const compactLeader = compactDeckCard(initialLeader);
     const initialRegion = initialLeaderId.split('::')[0];
     initialLeaderAppliedRef.current = initialLeaderId;
@@ -12418,7 +12766,51 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     setResults([]);
     setNotice('');
     persistDeck(compactLeader, {});
-  }, [initialLeader?.id, stateLoading]);
+  }, [initialLeader?.id, stateLoading, authUser]);
+
+  async function loadLegalCards({ page = 1, append = false, query = '' } = {}) {
+    if (!deckBuilder.leader) {
+      setResults([]);
+      setHasMoreCards(false);
+      return;
+    }
+    setSearching(true);
+    setNotice('');
+    try {
+      const found = await fetchCards({
+        locale: deckBuilder.environment,
+        color: getDeckCardColors(deckBuilder.leader).join(','),
+        excludeCategory: 'LEADER',
+        q: query.trim(),
+        limit: 48,
+        page
+      });
+      const legalCards = (Array.isArray(found) ? found : [])
+        .filter((card) => !isDeckLeaderCard(card) && isDeckColorLegal(card, deckBuilder.leader));
+      setResults((current) => append ? [...current, ...legalCards] : legalCards);
+      setCardPage(page);
+      setHasMoreCards(legalCards.length === 48);
+      setCardCache((current) => ({
+        ...current,
+        ...Object.fromEntries(legalCards.map((card) => [String(card.id), compactDeckCard(card)]))
+      }));
+    } catch {
+      if (!append) setResults([]);
+      setNotice(getLocaleText(uiLang, '사용 가능한 카드를 불러오지 못했습니다.', 'Unable to load legal cards.', '使用可能なカードを読み込めませんでした。'));
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  useEffect(() => {
+    setKeyword('');
+    setRoleFilter('all');
+    if (deckBuilder.leader) loadLegalCards({ page: 1 });
+    else {
+      setResults([]);
+      setHasMoreCards(false);
+    }
+  }, [deckBuilder.leader?.id, deckBuilder.environment]);
 
   async function runSearch() {
     const q = keyword.trim();
@@ -12426,9 +12818,24 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     setSearching(true);
     setNotice('');
     try {
-      const found = await searchCards(q, deckBuilder.environment);
-      const nextResults = Array.isArray(found) ? found.slice(0, 18) : [];
+      const found = deckBuilder.leader
+        ? await fetchCards({
+          locale: deckBuilder.environment,
+          color: getDeckCardColors(deckBuilder.leader).join(','),
+          excludeCategory: 'LEADER',
+          q,
+          limit: 48,
+          page: 1
+        })
+        : await searchCards(q, deckBuilder.environment);
+      const nextResults = (Array.isArray(found) ? found : [])
+        .filter((card) => deckBuilder.leader
+          ? (!isDeckLeaderCard(card) && isDeckColorLegal(card, deckBuilder.leader))
+          : isDeckLeaderCard(card))
+        .slice(0, 48);
       setResults(nextResults);
+      setCardPage(1);
+      setHasMoreCards(Boolean(deckBuilder.leader && nextResults.length === 48));
       setCardCache((current) => ({
         ...current,
         ...Object.fromEntries(nextResults.map((card) => [String(card.id), compactDeckCard(card)]))
@@ -12461,15 +12868,13 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     const compactCard = compactDeckCard(card);
     setCardCache((current) => ({ ...current, [String(card.id)]: compactCard }));
     setNotice('');
+    setKeyword('');
     persistDeck(compactCard, deckBuilder.entries);
+    if (authUser) recordLeaderSelection(deckBuilder.environment, getDeckCardNo(compactCard)).catch(() => {});
   }
 
   function updateDeckCard(card, delta) {
     if (deckDataLoading) return;
-    if (!authUser) {
-      window.alert(t('loginRequired'));
-      return;
-    }
     if (isDeckLeaderCard(card)) {
       setNotice(getLocaleText(uiLang, '리더 카드는 리더 슬롯에 설정해 주세요.', 'Set leader cards in the leader slot.', 'リーダーカードはリーダー枠に設定してください。'));
       return;
@@ -12516,6 +12921,63 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     persistDeck(null, {});
   }
 
+  const verifiedTemplates = useMemo(() => {
+    if (!deckBuilder.leader || !deckReferenceData) return [];
+    const canonicalLeaderNo = normalizeDeckSearchText(getDeckCardNo(deckBuilder.leader));
+    const referenceLeaderIds = new Set((deckReferenceData.leaders || [])
+      .filter((item) => normalizeDeckSearchText(item.card_no) === canonicalLeaderNo)
+      .map((item) => String(item.id)));
+    const archetypeIds = new Set((deckReferenceData.archetypes || [])
+      .filter((item) => referenceLeaderIds.has(String(item.leader_id)))
+      .map((item) => String(item.id)));
+    return (deckReferenceData.templates || []).filter((item) => (
+      archetypeIds.has(String(item.archetype_id)) && item.current_version_id
+    ));
+  }, [deckBuilder.leader?.id, deckReferenceData]);
+
+  async function loadVerifiedTemplate(template) {
+    if (!template?.current_version_id || !deckBuilder.leader) return;
+    setSearching(true);
+    setNotice('');
+    try {
+      const payload = await fetchDeckTemplateVersion(template.current_version_id);
+      const versionCards = payload?.item?.cards || [];
+      const cards = await Promise.all(versionCards.map((item) => fetchCardById(item.card_id)));
+      const nextEntries = {};
+      cards.forEach((card, index) => {
+        if (!card) return;
+        if (isDeckLeaderCard(card) || !isDeckColorLegal(card, deckBuilder.leader)) return;
+        const compactCard = compactDeckCard(card);
+        const count = Number(versionCards[index]?.quantity || 0);
+        if (count > 0) nextEntries[String(compactCard.id)] = { card: compactCard, count };
+      });
+      setCardCache((current) => ({
+        ...current,
+        ...Object.fromEntries(Object.values(nextEntries).map((entry) => [String(entry.card.id), entry.card]))
+      }));
+      await persistDeck(deckBuilder.leader, nextEntries);
+      setNotice(getLocaleText(uiLang, '검증된 덱 구성을 불러왔습니다.', 'Verified deck loaded.', '検証済みデッキを読み込みました。'));
+    } catch {
+      setNotice(getLocaleText(uiLang, '추천 덱을 불러오지 못했습니다.', 'Unable to load the recommended deck.', '推奨デッキを読み込めませんでした。'));
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  const roleFilteredResults = results.filter((card) => {
+    if (roleFilter === 'all') return true;
+    const effect = normalizeDeckSearchText(card.effect);
+    const category = normalizeDeckSearchText([card.category, card.categoryKo].join(' '));
+    const counter = Number(String(card.counter || '').replace(/[^\d]/g, '')) || 0;
+    const cost = Number(String(card.cost || '').replace(/[^\d]/g, '')) || 0;
+    if (roleFilter === 'counter2000') return counter >= 2000;
+    if (roleFilter === 'blocker') return /blocker|블로커|ブロッカー/.test(effect);
+    if (roleFilter === 'search') return /덱위|decktop|デッキの上/.test(effect) && /패|hand|手札/.test(effect);
+    if (roleFilter === 'finisher') return cost >= 7;
+    if (roleFilter === 'event') return /event|이벤트|イベント/.test(category);
+    return true;
+  });
+
   const ruleRows = [
     {
       label: getLocaleText(uiLang, '리더 카드 1장', 'One leader card', 'リーダーカード1枚'),
@@ -12543,7 +13005,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     <main className="renew-subpage renew-deck-builder-page">
         <section className="renew-deck-builder-head">
           <div>
-            <span>{getLocaleText(uiLang, '관리자 테스트', 'Admin test', '管理者テスト')}</span>
+            <span>DECK BUILDER</span>
             <h1>{getLocaleText(uiLang, '덱 빌더', 'Deck Builder', 'デッキビルダー')}</h1>
           </div>
           <div className="renew-deck-environment" aria-label={getLocaleText(uiLang, '카드 환경', 'Card environment', 'カード環境')}>
@@ -12571,7 +13033,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
                     <span>{getDeckCardNo(deckBuilder.leader)} · {deckBuilder.leader.colorKo || deckBuilder.leader.color}</span>
                   </>
                 ) : (
-                  <strong>{getLocaleText(uiLang, '리더를 검색해 설정하세요', 'Search and set a leader', 'リーダーを検索して設定')}</strong>
+                  <strong>{getLocaleText(uiLang, '먼저 리더를 검색해 설정하세요', 'Choose a leader first', '最初にリーダーを選択')}</strong>
                 )}
               </div>
               {deckBuilder.leader ? <img src={deckBuilder.leader.imageUrl} alt={deckBuilder.leader.name} onError={placeholderImage} /> : null}
@@ -12584,7 +13046,9 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') runSearch();
                 }}
-                placeholder={t('deckSearchPlaceholder')}
+                placeholder={deckBuilder.leader
+                  ? getLocaleText(uiLang, '이 리더가 사용할 수 있는 카드 검색', 'Search legal cards for this leader', 'このリーダーが使えるカードを検索')
+                  : getLocaleText(uiLang, '리더 이름 또는 카드번호 검색', 'Search leader name or card number', 'リーダー名またはカード番号を検索')}
               />
               <button type="button" onClick={runSearch} disabled={searching}>
                 {searching ? getLocaleText(uiLang, '검색 중', 'Searching', '検索中') : t('search')}
@@ -12592,8 +13056,38 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
             </div>
             {notice ? <p className="renew-deck-notice" role="status">{notice}</p> : null}
 
+            {deckBuilder.leader && verifiedTemplates.length ? (
+              <div className="renew-deck-template-actions">
+                <strong>{getLocaleText(uiLang, '검증된 덱에서 시작', 'Start from a verified deck', '検証済みデッキから開始')}</strong>
+                <div>
+                  {verifiedTemplates.map((template) => (
+                    <button key={template.id} type="button" onClick={() => loadVerifiedTemplate(template)}>
+                      {template.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {deckBuilder.leader ? (
+              <div className="renew-deck-role-filters" aria-label={getLocaleText(uiLang, '카드 역할 필터', 'Card role filters', 'カード役割フィルター')}>
+                {[
+                  ['all', getLocaleText(uiLang, '전체', 'All', 'すべて')],
+                  ['counter2000', 'Counter 2000'],
+                  ['blocker', getLocaleText(uiLang, '블로커', 'Blocker', 'ブロッカー')],
+                  ['search', getLocaleText(uiLang, '서치', 'Search', 'サーチ')],
+                  ['finisher', getLocaleText(uiLang, '고코스트', 'High cost', '高コスト')],
+                  ['event', getLocaleText(uiLang, '이벤트', 'Event', 'イベント')]
+                ].map(([key, label]) => (
+                  <button key={key} type="button" className={roleFilter === key ? 'is-active' : ''} onClick={() => setRoleFilter(key)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
             <div className="renew-deck-search-results">
-              {results.map((card) => {
+              {roleFilteredResults.map((card) => {
                 const leaderCard = isDeckLeaderCard(card);
                 const entry = deckBuilder.entries[String(card.id)];
                 return (
@@ -12619,6 +13113,16 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
                 );
               })}
             </div>
+            {deckBuilder.leader && hasMoreCards && roleFilter === 'all' ? (
+              <button
+                type="button"
+                className="renew-deck-load-more"
+                onClick={() => loadLegalCards({ page: cardPage + 1, append: true, query: keyword })}
+                disabled={searching}
+              >
+                {getLocaleText(uiLang, '사용 가능한 카드 더 보기', 'Load more legal cards', '使用可能なカードをさらに表示')}
+              </button>
+            ) : null}
           </div>
 
           <aside className="renew-deck-sidebar">
@@ -13751,40 +14255,24 @@ export default function RenewApp() {
           onOpenDeckLab={() => navigatePage('deckLab')}
         />
       ) : activePage === 'deckLab' ? (
-        isAdminUser ? (
-          <RenewDeckLabHome
-            uiLang={uiLang}
-            onOpenBuilder={(leader = null) => {
-              setDeckBuilderInitialLeader(leader);
-              navigatePage('deckBuilder');
-            }}
-          />
-        ) : (
-          <RenewAdminToolGate
-            authResolved={authResolved}
-            authUser={authUser}
-            uiLang={uiLang}
-            onLogin={() => handleAuthClick('login')}
-          />
-        )
+        <RenewDeckLabHomeV2
+          uiLang={uiLang}
+          authUser={authUser}
+          onRequireLogin={() => handleAuthClick('login')}
+          onOpenBuilder={(leader = null) => {
+            setDeckBuilderInitialLeader(leader);
+            navigatePage('deckBuilder');
+          }}
+        />
       ) : activePage === 'deckBuilder' ? (
-        isAdminUser ? (
-          <RenewDeck
-            authUser={authUser}
-            userState={userState}
-            setUserState={setUserState}
-            stateLoading={stateLoading}
-            uiLang={uiLang}
-            initialLeader={deckBuilderInitialLeader}
-          />
-        ) : (
-          <RenewAdminToolGate
-            authResolved={authResolved}
-            authUser={authUser}
-            uiLang={uiLang}
-            onLogin={() => handleAuthClick('login')}
-          />
-        )
+        <RenewDeck
+          authUser={authUser}
+          userState={userState}
+          setUserState={setUserState}
+          stateLoading={stateLoading}
+          uiLang={uiLang}
+          initialLeader={deckBuilderInitialLeader}
+        />
       ) : activePage === 'packSimulator' ? (
         <RenewPackSimulator
           uiLang={uiLang}
