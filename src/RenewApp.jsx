@@ -8988,7 +8988,7 @@ function RenewLabToolGuide({ type, uiLang, onOpenTool }) {
   );
 }
 
-function RenewLabHome({ uiLang, isAdmin, onOpenCentering, onOpenSimulator, onOpenPortfolioCalculator, onOpenDeckLab }) {
+function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfolioCalculator, onOpenDeckLab }) {
   const tools = [
     {
       id: 'centering',
@@ -14437,7 +14437,6 @@ export default function RenewApp() {
       ) : activePage === 'lab' ? (
         <RenewLabHome
           uiLang={uiLang}
-          isAdmin={isAdminUser}
           onOpenCentering={() => navigatePage('centering')}
           onOpenSimulator={() => navigatePage('packSimulator')}
           onOpenPortfolioCalculator={() => navigatePage('portfolioCalculator')}
