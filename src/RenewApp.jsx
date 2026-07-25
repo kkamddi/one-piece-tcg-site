@@ -14229,6 +14229,7 @@ export default function RenewApp() {
 
   const routeBackInfo = getRouteBackInfo(window.location.pathname, window.location.search);
   const hideLabBackOnDesktop = [
+    'lab',
     'centering',
     'centeringGuide',
     'packSimulator',
