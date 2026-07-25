@@ -331,7 +331,6 @@ export default function PortfolioCalculator({
       <header className="renew-profit-head">
         <div>
           <span>{copy.eyebrow}</span>
-          <h1>{copy.title}</h1>
         </div>
         <button type="button" className="renew-profit-guide-button" onClick={onOpenGuide}>{copy.guide}</button>
       </header>
