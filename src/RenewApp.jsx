@@ -10556,9 +10556,9 @@ function RenewMarketplace({ authUser, marketListings, setMarketListings, filterC
   );
 }
 
-function RenewRouteBackButton({ label = '뒤로가기', onClick }) {
+function RenewRouteBackButton({ label = '뒤로가기', onClick, hideOnDesktop = false }) {
   return (
-    <div className="renew-route-back-wrap" data-nosnippet>
+    <div className={`renew-route-back-wrap${hideOnDesktop ? ' is-mobile-only' : ''}`} data-nosnippet>
       <button type="button" className="renew-route-back-button" onClick={onClick}>
         <span aria-hidden="true">←</span>
         {label}
@@ -14228,6 +14228,17 @@ export default function RenewApp() {
   }
 
   const routeBackInfo = getRouteBackInfo(window.location.pathname, window.location.search);
+  const hideLabBackOnDesktop = [
+    'centering',
+    'centeringGuide',
+    'packSimulator',
+    'packSimulatorGuide',
+    'portfolioCalculator',
+    'portfolioCalculatorGuide',
+    'deckLab',
+    'deckBuilder',
+    'deckGuide',
+  ].includes(activePage);
 
   function handleRouteBack() {
     if (!routeBackInfo) return;
@@ -14261,7 +14272,13 @@ export default function RenewApp() {
         onNotificationSelect={handleNotificationSelect}
         onNotificationsReadAll={handleNotificationsReadAll}
       />
-      {routeBackInfo ? <RenewRouteBackButton label={getRouteBackLabel(uiLang)} onClick={handleRouteBack} /> : null}
+      {routeBackInfo ? (
+        <RenewRouteBackButton
+          label={getRouteBackLabel(uiLang)}
+          onClick={handleRouteBack}
+          hideOnDesktop={hideLabBackOnDesktop}
+        />
+      ) : null}
       {activePage === 'home' ? (
         <RenewHome
           authUser={authUser}

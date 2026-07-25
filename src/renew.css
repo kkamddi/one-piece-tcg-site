@@ -2391,6 +2391,12 @@
   color: #f7f7f8;
 }
 
+@media (min-width: 901px) {
+  .renew-route-back-wrap.is-mobile-only {
+    display: none;
+  }
+}
+
 .renew-catalog {
   display: grid;
   grid-template-columns: 290px minmax(0, 1fr);
