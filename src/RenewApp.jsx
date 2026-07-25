@@ -84,7 +84,7 @@ const THEME_STORAGE_KEY = 'one-piece-tcg-theme';
 const UI_LANG_STORAGE_KEY = 'one-piece-tcg-ui-lang';
 const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
-const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-21-community';
+const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-25-lab-tools';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
@@ -414,6 +414,17 @@ function useBodyScrollLock(active = true) {
 }
 
 const RENEW_HOME_UPDATES = [
+  {
+    id: '2026-07-25-lab-tools',
+    title: '[26.07.25] 업데이트 안내',
+    summary: '실험실 Tool 추가',
+    details: [
+      '센터링 측정기',
+      '카드깡 시뮬레이터',
+      '포트폴리오 수익률 계산기',
+      '덱 빌더'
+    ]
+  },
   {
     id: '2026-07-22-centering-lab',
     title: '[26.07.22] 업데이트 안내',
