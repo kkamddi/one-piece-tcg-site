@@ -213,36 +213,33 @@ const BOUNDARY_EDITOR_COPY = {
 const GRADING_REFERENCE_COPY = {
   KR: {
     title: '등급사별 전면 센터링 참고',
-    note: '전면 센터링만 비교한 예상값입니다. 표면·엣지·모서리·뒷면은 반영하지 않습니다.',
-    psaPass: 'PSA 10 기준 충족',
-    psaOutside: 'PSA 10 기준 초과',
-    cgcPristine: 'Pristine 10 기준',
-    cgcGem: 'Gem Mint 10 기준',
-    cgcOutside: 'Gem Mint 10 기준 초과',
+    note: '공식 공개 기준과 비교한 전면 센터링 참고값입니다. 실제 등급을 예측하거나 보장하지 않습니다.',
+    psaPass: 'PSA 10 앞면 센터링 범위 충족',
+    psaOutside: 'PSA 10 앞면 센터링 범위 초과',
+    unreliable: '경계를 다시 확인해 주세요',
+    unpublished: '공개 세부 비율 기준 미확인',
     brg: '공개 비율 기준 미확인',
-    ccg: '센터링 참고 범위'
+    ccg: '공개 비율 기준 미확인'
   },
   EN: {
     title: 'Front centering by grader',
-    note: 'Front centering only. Surface, edges, corners, and the back are not evaluated.',
-    psaPass: 'PSA 10 front reference',
-    psaOutside: 'Outside PSA 10 reference',
-    cgcPristine: 'Pristine 10 reference',
-    cgcGem: 'Gem Mint 10 reference',
-    cgcOutside: 'Outside Gem Mint 10 reference',
+    note: 'Front-centering reference based on published official criteria. This does not predict or guarantee a grade.',
+    psaPass: 'Within the PSA 10 front-centering range',
+    psaOutside: 'Outside the PSA 10 front-centering range',
+    unreliable: 'Check the boundaries again',
+    unpublished: 'No published detailed ratio',
     brg: 'No public ratio table',
-    ccg: 'Centering reference range'
+    ccg: 'No public ratio table'
   },
   JP: {
     title: '鑑定会社別・表面センタリング参考',
-    note: '表面のセンタリングのみの参考値です。表面状態、エッジ、角、裏面は評価しません。',
-    psaPass: 'PSA 10 表面基準内',
-    psaOutside: 'PSA 10 表面基準外',
-    cgcPristine: 'Pristine 10 基準内',
-    cgcGem: 'Gem Mint 10 基準内',
-    cgcOutside: 'Gem Mint 10 基準外',
+    note: '公式公開基準と比較した表面センタリングの参考値です。実際のグレードを予測・保証するものではありません。',
+    psaPass: 'PSA 10 表面センタリング範囲内',
+    psaOutside: 'PSA 10 表面センタリング範囲外',
+    unreliable: '境界をもう一度確認してください',
+    unpublished: '詳細な公開比率基準なし',
     brg: '公開比率基準なし',
-    ccg: 'センタリング参考範囲'
+    ccg: '公開比率基準なし'
   }
 };
 
@@ -933,17 +930,35 @@ function analyzeCapturedCanvas(canvas) {
   };
 }
 
-function getCenteringReport(boundaries) {
-  const horizontalTotal = Math.max(boundaries.left + boundaries.right, 0.1);
-  const verticalTotal = Math.max(boundaries.top + boundaries.bottom, 0.1);
-  const left = boundaries.left / horizontalTotal * 100;
-  const right = 100 - left;
-  const top = boundaries.top / verticalTotal * 100;
-  const bottom = 100 - top;
-  const worst = Math.max(left, right, top, bottom);
+function getAxisRatio(start, end) {
+  const total = Math.max(start + end, 0.1);
+  const first = start / total * 100;
+  return { first, second: 100 - first };
+}
+
+function getWorseAxisRatio(first, second) {
+  return Math.max(first.first, first.second) >= Math.max(second.first, second.second) ? first : second;
+}
+
+function getCenteringReport(boundaries, frame) {
+  const horizontal = frame
+    ? getWorseAxisRatio(
+      getAxisRatio(frame.tl.x, 100 - frame.tr.x),
+      getAxisRatio(frame.bl.x, 100 - frame.br.x)
+    )
+    : getAxisRatio(boundaries.left, boundaries.right);
+  const vertical = frame
+    ? getWorseAxisRatio(
+      getAxisRatio(frame.tl.y, 100 - frame.bl.y),
+      getAxisRatio(frame.tr.y, 100 - frame.br.y)
+    )
+    : getAxisRatio(boundaries.top, boundaries.bottom);
+  const left = horizontal.first;
+  const right = horizontal.second;
+  const top = vertical.first;
+  const bottom = vertical.second;
   const score = Math.round(clamp(100 - Math.max(Math.abs(left - 50), Math.abs(top - 50)) * 2, 0, 100));
-  const band = worst <= 55 ? 'PSA 10' : worst <= 60 ? 'PSA 9' : worst <= 65 ? 'PSA 8' : 'OUTSIDE';
-  return { left, right, top, bottom, score, band };
+  return { left, right, top, bottom, score };
 }
 
 function getBgsCenteringGrade(horizontalWorst, verticalWorst) {
@@ -960,25 +975,13 @@ function getBgsCenteringGrade(horizontalWorst, verticalWorst) {
   return '1';
 }
 
-function getCcgCenteringRange(worst) {
-  if (worst <= 50) return '10';
-  if (worst <= 55) return '10–9.5';
-  if (worst <= 60) return '9.5–9';
-  if (worst <= 65) return '9–8.5';
-  if (worst <= 70) return '8.5–8';
-  if (worst <= 75) return '7';
-  return '<7';
-}
-
 function getGraderCenteringReferences(report) {
   const horizontalWorst = Math.max(report.left, report.right);
   const verticalWorst = Math.max(report.top, report.bottom);
   const worst = Math.max(horizontalWorst, verticalWorst);
   return {
     psa10: worst <= 55,
-    bgs: getBgsCenteringGrade(horizontalWorst, verticalWorst),
-    cgc: worst <= 50 ? 'pristine' : worst <= 55 ? 'gem' : 'outside',
-    ccg: getCcgCenteringRange(worst)
+    bgs: getBgsCenteringGrade(horizontalWorst, verticalWorst)
   };
 }
 
@@ -1167,10 +1170,10 @@ function ResultOverlay({ boundaries, frame, report }) {
       <b className={`centering-result-ratio is-right${tightHorizontal === 'right' ? ' is-tight' : ''}`}>R {report.right.toFixed(1)}</b>
       <b className={`centering-result-ratio is-top${tightVertical === 'top' ? ' is-tight' : ''}`}>T {report.top.toFixed(1)}</b>
       <b className={`centering-result-ratio is-bottom${tightVertical === 'bottom' ? ' is-tight' : ''}`}>B {report.bottom.toFixed(1)}</b>
-      <span className="centering-result-corner is-tl" />
-      <span className="centering-result-corner is-tr" />
-      <span className="centering-result-corner is-bl" />
-      <span className="centering-result-corner is-br" />
+      <span className="centering-result-corner is-tl" style={{ left: `${frame.tl.x}%`, top: `${frame.tl.y}%` }} />
+      <span className="centering-result-corner is-tr" style={{ left: `${frame.tr.x}%`, top: `${frame.tr.y}%` }} />
+      <span className="centering-result-corner is-bl" style={{ left: `${frame.bl.x}%`, top: `${frame.bl.y}%` }} />
+      <span className="centering-result-corner is-br" style={{ left: `${frame.br.x}%`, top: `${frame.br.y}%` }} />
     </div>
   );
 }
@@ -1217,9 +1220,10 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
   const pinchRef = useRef({ points: new Map(), startDistance: 0, startZoom: 0 });
   const panRef = useRef({ pointerId: null, startX: 0, startY: 0, viewport: null });
 
-  const report = useMemo(() => getCenteringReport(boundaries), [boundaries]);
+  const report = useMemo(() => getCenteringReport(boundaries, boundaryFrame), [boundaries, boundaryFrame]);
   const graderReferences = useMemo(() => getGraderCenteringReferences(report), [report]);
   const confidencePercent = Math.round(confidence * 100);
+  const isReferenceReliable = confidence >= 0.65;
   const outlineValidation = useMemo(() => {
     const source = rawCanvasRef.current;
     return getOutlineValidation(cornerPoints, source?.width || 100, source?.height || 100);
@@ -1595,9 +1599,11 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
     setPhase('result');
   }
 
-  const referenceLabel = report.band === 'OUTSIDE'
-    ? (uiLang === 'JP' ? 'PSA 8の表面基準外' : uiLang === 'EN' ? 'Outside PSA 8 front reference' : 'PSA 8 앞면 참고 범위 밖')
-    : `${report.band} ${uiLang === 'JP' ? '表面参考範囲' : uiLang === 'EN' ? 'front reference' : '앞면 참고 범위'}`;
+  const referenceLabel = !isReferenceReliable
+    ? gradingText.unreliable
+    : graderReferences.psa10
+      ? gradingText.psaPass
+      : gradingText.psaOutside;
 
   return (
     <main className={`renew-subpage centering-lab${phase === 'camera' ? ' is-camera-open' : ''}${phase === 'corners' ? ' is-corner-open' : ''}${phase === 'boundary' ? ' is-boundary-open' : ''}`}>
@@ -1801,13 +1807,13 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
                 <div><b>{editorText.title}</b><span>{editorText.help}</span></div>
                 <button type="button" className="is-primary" onClick={() => setPhase('boundary')}>{editorText.edit}</button>
               </div>
-              <small>{confidence < 0.35 ? text.lowConfidence : text.highConfidence}</small>
+              <small>{confidence < 0.65 ? text.lowConfidence : text.highConfidence}</small>
             </div>
             <div className="centering-report">
               <div className="centering-score-block">
                 <span>{text.score}</span>
                 <strong>{report.score}</strong>
-                <b className={report.band === 'PSA 10' ? 'is-top' : ''}>{referenceLabel}</b>
+                <b className={isReferenceReliable && graderReferences.psa10 ? 'is-top' : ''}>{referenceLabel}</b>
               </div>
               <div className="centering-metrics">
                 <div><span>{text.horizontal}</span><strong>{report.left.toFixed(1)} <i>/</i> {report.right.toFixed(1)}</strong></div>
@@ -1817,20 +1823,20 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
               <section className="centering-grading-reference">
                 <header><b>{gradingText.title}</b><span>{gradingText.note}</span></header>
                 <div className="centering-grading-reference-grid">
-                  <div className={graderReferences.psa10 ? 'is-pass' : ''}>
+                  <div className={isReferenceReliable && graderReferences.psa10 ? 'is-pass' : ''}>
                     <a href="https://www.psacard.com/gradingstandards" target="_blank" rel="noreferrer">PSA</a>
-                    <strong>{graderReferences.psa10 ? '10' : '—'}</strong>
-                    <small>{graderReferences.psa10 ? gradingText.psaPass : gradingText.psaOutside}</small>
+                    <strong>{isReferenceReliable ? (graderReferences.psa10 ? 'PASS' : '—') : 'CHECK'}</strong>
+                    <small>{isReferenceReliable ? (graderReferences.psa10 ? gradingText.psaPass : gradingText.psaOutside) : gradingText.unreliable}</small>
                   </div>
                   <div>
                     <a href="https://www.beckett.com/grading/scale" target="_blank" rel="noreferrer">BGS</a>
-                    <strong>{graderReferences.bgs}</strong>
-                    <small>Centering subgrade</small>
+                    <strong>{isReferenceReliable ? graderReferences.bgs : 'CHECK'}</strong>
+                    <small>{isReferenceReliable ? 'Official centering subgrade reference' : gradingText.unreliable}</small>
                   </div>
-                  <div className={graderReferences.cgc !== 'outside' ? 'is-pass' : ''}>
-                    <a href="https://www.cgccards.com/card-grading/grading-scale/" target="_blank" rel="noreferrer">CGC</a>
-                    <strong>{graderReferences.cgc === 'pristine' || graderReferences.cgc === 'gem' ? '10' : '—'}</strong>
-                    <small>{graderReferences.cgc === 'pristine' ? gradingText.cgcPristine : graderReferences.cgc === 'gem' ? gradingText.cgcGem : gradingText.cgcOutside}</small>
+                  <div>
+                    <a href="https://www.cgcgrading.com/en-US/grading/cards" target="_blank" rel="noreferrer">CGC</a>
+                    <strong>—</strong>
+                    <small>{gradingText.unpublished}</small>
                   </div>
                   <div>
                     <a href="https://break.co.kr/" target="_blank" rel="noreferrer">BRG</a>
@@ -1838,8 +1844,8 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
                     <small>{gradingText.brg}</small>
                   </div>
                   <div>
-                    <a href="https://ccgcard.kr/HowWeGrade" target="_blank" rel="noreferrer">CCG</a>
-                    <strong>{graderReferences.ccg}</strong>
+                    <a href="https://ccgcard.kr/FAQ" target="_blank" rel="noreferrer">CCG</a>
+                    <strong>—</strong>
                     <small>{gradingText.ccg}</small>
                   </div>
                 </div>
