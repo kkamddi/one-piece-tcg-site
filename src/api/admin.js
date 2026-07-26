@@ -28,6 +28,10 @@ export function trackVisit(visitorToken, path) {
   return requestJson('/api/admin?action=visit', { method: 'POST', body: { visitorToken, path } });
 }
 
-export function fetchAdminStats(username) {
-  return requestJson('/api/admin?action=stats', { auth: true, headers: { 'x-admin-username': username } });
+export function fetchAdminStats(username, days = 7) {
+  const period = [1, 7, 30].includes(Number(days)) ? Number(days) : 7;
+  return requestJson(`/api/admin?action=stats&days=${period}`, {
+    auth: true,
+    headers: { 'x-admin-username': username }
+  });
 }

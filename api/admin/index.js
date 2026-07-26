@@ -2,16 +2,39 @@ import { listAllAuthUsers, supabaseAdmin } from '../../lib/supabase-admin.js';
 
 const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
 
-function getTodayStartIso() {
+function getKstDayStartIso(daysAgo = 0) {
   const now = new Date();
   const koreaNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const startKstUtcMs = Date.UTC(
     koreaNow.getUTCFullYear(),
     koreaNow.getUTCMonth(),
-    koreaNow.getUTCDate(),
+    koreaNow.getUTCDate() - Math.max(0, Number(daysAgo) || 0),
     -9, 0, 0, 0
   );
   return new Date(startKstUtcMs).toISOString();
+}
+
+function getKstDateKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Date(date.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function normalizeVisitPath(value = '/') {
+  let path = String(value || '/').trim().split(/[?#]/)[0] || '/';
+  if (!path.startsWith('/')) path = `/${path}`;
+  path = path.replace(/\/+/g, '/').replace(/\/+$/, '') || '/';
+
+  const isJapanese = path === '/jp' || path.startsWith('/jp/');
+  const appPath = isJapanese ? path.slice(3) || '/' : path;
+  let normalized = appPath;
+  if (appPath.startsWith('/cards/')) normalized = '/cards';
+  else if (appPath.startsWith('/prices/card/')) normalized = '/prices/card';
+  else if (appPath.startsWith('/prices/product/')) normalized = '/prices/product';
+  else if (appPath.startsWith('/prices/box/')) normalized = '/prices/box';
+  else if (appPath.startsWith('/shops/') && appPath !== '/shops/partners') normalized = '/shops/detail';
+
+  return `${isJapanese ? '/jp' : ''}${normalized === '/' ? (isJapanese ? '' : '/') : normalized}` || '/';
 }
 
 function getClientIp(request) {
@@ -51,31 +74,52 @@ async function handleVisit(request, response) {
   const visitIdentity = buildVisitIdentity(request, visitorToken);
   if (!visitIdentity) return response.status(400).json({ error: 'invalid_request' });
 
-  const todayStart = getTodayStartIso();
-  const { data: existing, error: existingError } = await supabaseAdmin
+  const todayStart = getKstDayStartIso();
+  const normalizedPath = normalizeVisitPath(path);
+  const { data: existingRows, error: existingError } = await supabaseAdmin
     .from(COMMUNITY_TABLE)
-    .select('id')
-    .eq('board_id', '__visit__')
+    .select('id,board_id,content')
+    .in('board_id', ['__visit__', '__pageview__'])
     .eq('author_token', visitIdentity)
     .gte('created_at', todayStart)
-    .limit(1);
+    .limit(100);
 
   if (existingError) throw existingError;
 
-  if (!existing?.length) {
-    const { error } = await supabaseAdmin.from(COMMUNITY_TABLE).insert({
+  const rowsToInsert = [];
+  if (!(existingRows ?? []).some((row) => row.board_id === '__visit__')) {
+    rowsToInsert.push({
       id: `visit-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       board_id: '__visit__',
       nickname: 'visit',
       title: 'visit',
       card_name: '',
       image_url: '',
-      content: String(path).slice(0, 200),
+      content: normalizedPath,
       likes: 0,
       views: 0,
       author_token: visitIdentity,
       liked_tokens: []
     });
+  }
+  if (!(existingRows ?? []).some((row) => row.board_id === '__pageview__' && normalizeVisitPath(row.content) === normalizedPath)) {
+    rowsToInsert.push({
+      id: `pageview-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      board_id: '__pageview__',
+      nickname: 'pageview',
+      title: 'pageview',
+      card_name: '',
+      image_url: '',
+      content: normalizedPath,
+      likes: 0,
+      views: 0,
+      author_token: visitIdentity,
+      liked_tokens: []
+    });
+  }
+
+  if (rowsToInsert.length) {
+    const { error } = await supabaseAdmin.from(COMMUNITY_TABLE).insert(rowsToInsert);
     if (error) throw error;
   }
 
@@ -87,29 +131,80 @@ async function handleStats(request, response) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
   if (!token) return response.status(401).json({ error: 'unauthorized' });
   const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
-  if (authError || authData?.user?.user_metadata?.username !== 'admin') {
+  const authUser = authData?.user;
+  const isAdmin = authUser?.app_metadata?.role === 'admin'
+    || authUser?.user_metadata?.username === 'admin';
+  if (authError || !isAdmin) {
     return response.status(403).json({ error: 'forbidden' });
   }
 
-  const todayStart = getTodayStartIso();
+  const requestedDays = Number(request.query?.days);
+  const periodDays = [1, 7, 30].includes(requestedDays) ? requestedDays : 7;
+  const todayStart = getKstDayStartIso();
+  const periodStart = getKstDayStartIso(periodDays - 1);
   const users = await listAllAuthUsers();
   const [
     { count: totalVisits, error: visitCountError },
     { data: todayVisitRows, error: todayVisitRowsError },
+    { data: analyticsRows, error: analyticsRowsError },
     { data: postRows, error: postRowsError }
   ] = await Promise.all([
     supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__'),
     supabaseAdmin.from(COMMUNITY_TABLE).select('author_token').eq('board_id', '__visit__').gte('created_at', todayStart).limit(10000),
+    supabaseAdmin
+      .from(COMMUNITY_TABLE)
+      .select('board_id,content,author_token,created_at')
+      .in('board_id', ['__visit__', '__pageview__'])
+      .gte('created_at', periodStart)
+      .order('created_at', { ascending: true })
+      .limit(10000),
     supabaseAdmin.from(COMMUNITY_TABLE).select('id,board_id').limit(10000)
   ]);
 
   if (visitCountError) throw visitCountError;
   if (todayVisitRowsError) throw todayVisitRowsError;
+  if (analyticsRowsError) throw analyticsRowsError;
   if (postRowsError) throw postRowsError;
 
   const publicPostRows = (postRows ?? []).filter((row) => !String(row.board_id ?? '').startsWith('__'));
   const todayUniqueVisitors = new Set((todayVisitRows ?? []).map((row) => row.author_token)).size;
   const todaySignups = users.filter((user) => String(user.created_at ?? '') >= todayStart).length;
+  const pageViewRows = (analyticsRows ?? []).filter((row) => row.board_id === '__pageview__');
+  const pageViewVisitorDays = new Set(pageViewRows.map((row) => `${row.author_token}|${getKstDateKey(row.created_at)}`));
+  const mergedAnalyticsRows = [
+    ...pageViewRows,
+    ...(analyticsRows ?? []).filter((row) => (
+      row.board_id === '__visit__'
+      && !pageViewVisitorDays.has(`${row.author_token}|${getKstDateKey(row.created_at)}`)
+    ))
+  ];
+  const pageMap = new Map();
+  const dailyMap = new Map();
+
+  for (const row of mergedAnalyticsRows) {
+    const path = normalizeVisitPath(row.content);
+    const date = getKstDateKey(row.created_at);
+    if (!date) continue;
+    const page = pageMap.get(path) ?? { path, views: 0, visitors: new Set() };
+    page.views += 1;
+    page.visitors.add(row.author_token);
+    pageMap.set(path, page);
+    const day = dailyMap.get(date) ?? { date, views: 0, visitors: new Set() };
+    day.views += 1;
+    day.visitors.add(row.author_token);
+    dailyMap.set(date, day);
+  }
+
+  const popularPages = [...pageMap.values()]
+    .map((item) => ({ path: item.path, views: item.views, visitors: item.visitors.size }))
+    .sort((a, b) => b.views - a.views || b.visitors - a.visitors || a.path.localeCompare(b.path))
+    .slice(0, 12);
+  const dailyTrend = [...dailyMap.values()]
+    .map((item) => ({ date: item.date, views: item.views, visitors: item.visitors.size }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const periodUniqueVisitors = new Set(mergedAnalyticsRows.map((row) => row.author_token)).size;
+  const todayKey = getKstDateKey(new Date());
+  const todayPageViews = dailyMap.get(todayKey)?.views ?? 0;
 
   response.setHeader('Cache-Control', 'no-store, max-age=0');
   return response.status(200).json({
@@ -118,7 +213,13 @@ async function handleStats(request, response) {
     todayUniqueVisitors,
     totalUsers: users.length,
     todaySignups,
-    totalPosts: publicPostRows.length
+    totalPosts: publicPostRows.length,
+    periodDays,
+    periodPageViews: mergedAnalyticsRows.length,
+    periodUniqueVisitors,
+    todayPageViews,
+    popularPages,
+    dailyTrend
   });
 }
 

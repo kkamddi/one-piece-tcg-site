@@ -2761,6 +2761,7 @@ function getLocalizedCurrencyText(value, uiLang) {
 }
 const PAGE_PATHS = {
   home: '/',
+  adminAnalytics: '/admin/analytics',
   cards: '/cards',
   prices: '/prices',
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
@@ -2806,6 +2807,19 @@ function getAppPath(pathname = '/') {
   if (path === JAPANESE_ROUTE_PREFIX) return '/';
   if (path.startsWith(`${JAPANESE_ROUTE_PREFIX}/`)) return path.slice(JAPANESE_ROUTE_PREFIX.length) || '/';
   return path;
+}
+
+function getAnalyticsVisitPath(pathname = '/') {
+  const sitePath = normalizeSitePath(pathname);
+  const isJapanese = sitePath === JAPANESE_ROUTE_PREFIX || sitePath.startsWith(`${JAPANESE_ROUTE_PREFIX}/`);
+  const appPath = getAppPath(sitePath);
+  let normalized = appPath;
+  if (appPath.startsWith('/cards/')) normalized = '/cards';
+  else if (appPath.startsWith('/prices/card/')) normalized = '/prices/card';
+  else if (appPath.startsWith('/prices/product/')) normalized = '/prices/product';
+  else if (appPath.startsWith('/prices/box/')) normalized = '/prices/box';
+  else if (appPath.startsWith('/shops/') && appPath !== '/shops/partners') normalized = '/shops/detail';
+  return `${isJapanese ? JAPANESE_ROUTE_PREFIX : ''}${normalized === '/' ? (isJapanese ? '' : '/') : normalized}` || '/';
 }
 
 function localizeAppPath(pathname = '/', uiLang = 'KR') {
@@ -3553,6 +3567,7 @@ function getPageFromPath(pathname = '/') {
 function getRouteBackInfo(pathname = '/', search = '') {
   const path = getAppPath(pathname);
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
+  if (path === '/admin/analytics') return { page: 'home' };
   if (path.startsWith('/shops/partners/')) return { page: 'partnerShops' };
   if (path === '/shops/partners') return { page: 'shops' };
   if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
@@ -4431,6 +4446,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             </button>
             {isLoggedIn ? (
               <div className="renew-account-dropdown">
+                {isAdmin ? <button type="button" onClick={() => { setAccountMenuOpen(false); onNavigate('adminAnalytics'); }}>관리자 통계</button> : null}
                 <button type="button" onClick={() => handleAccountMenu('mypage')}>{getLocaleText(uiLang, '마이페이지', 'My page', 'マイページ')}</button>
                 <button type="button" onClick={() => handleAccountMenu('logout')}>{t('logout')}</button>
               </div>
@@ -4463,6 +4479,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             </button>
             {isLoggedIn ? (
               <div className="renew-account-dropdown">
+                {isAdmin ? <button type="button" onClick={() => { setAccountMenuOpen(false); onNavigate('adminAnalytics'); }}>관리자 통계</button> : null}
                 <button type="button" onClick={() => handleAccountMenu('mypage')}>{getLocaleText(uiLang, '마이페이지', 'My page', 'マイページ')}</button>
                 <button type="button" onClick={() => handleAccountMenu('logout')}>{t('logout')}</button>
               </div>
@@ -13385,6 +13402,184 @@ const STATS_SERIES = [
   { label: 'PROMO', owned: 24, wish: 41, percent: 55 }
 ];
 
+function getAdminPageLabel(path = '/') {
+  const isJapanese = path === '/jp' || path.startsWith('/jp/');
+  const appPath = isJapanese ? path.slice(3) || '/' : path;
+  const labels = {
+    '/': '홈',
+    '/cards': '카드 도감',
+    '/prices': '시세',
+    '/prices/card': '카드 시세 상세',
+    '/prices/product': '스니덩크 상품 상세',
+    '/prices/box': '박스 시세 상세',
+    '/lab': '실험실',
+    '/lab/centering': '센터링 측정기',
+    '/lab/pack-simulator': '카드깡 시뮬레이터',
+    '/lab/decks': '덱 빌더',
+    '/lab/decks/builder': '덱 편집기',
+    '/tools/portfolio-calculator': '포트폴리오 계산기',
+    '/news': '정보',
+    '/calendar': '캘린더',
+    '/shops': '구매처',
+    '/shops/partners': '제휴 카드샵',
+    '/shops/detail': '구매처 상세',
+    '/about': '서비스 소개'
+  };
+  const label = labels[appPath] || appPath;
+  return isJapanese ? `${label} (JP)` : label;
+}
+
+function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = {} }) {
+  const isAdmin = authUser?.app_metadata?.role === 'admin'
+    || authUser?.user_metadata?.username === 'admin';
+  const [periodDays, setPeriodDays] = useState(7);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!isAdmin) return undefined;
+    let cancelled = false;
+    const loadStats = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const payload = await fetchAdminStats('admin', periodDays);
+        if (!cancelled) setStats(payload || null);
+      } catch {
+        if (!cancelled) setError('통계 정보를 불러오지 못했습니다.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadStats();
+    const timer = window.setInterval(loadStats, 60000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [isAdmin, periodDays]);
+
+  if (!isAdmin) {
+    return (
+      <main className="renew-subpage renew-admin-analytics">
+        <section className="renew-admin-analytics-empty">
+          <strong>관리자 전용 페이지입니다.</strong>
+          <p>ADMIN 계정으로 로그인한 경우에만 통계를 확인할 수 있습니다.</p>
+        </section>
+      </main>
+    );
+  }
+
+  const popularPages = Array.isArray(stats?.popularPages) ? stats.popularPages : [];
+  const dailyTrend = Array.isArray(stats?.dailyTrend) ? stats.dailyTrend : [];
+  const livePages = Object.entries(onlinePageCounts)
+    .map(([path, count]) => ({ path, count: Number(count) || 0 }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count);
+  const maxTrendViews = Math.max(1, ...dailyTrend.map((item) => Number(item.views) || 0));
+  const maxPopularViews = Math.max(1, ...popularPages.map((item) => Number(item.views) || 0));
+
+  return (
+    <main className="renew-subpage renew-admin-analytics">
+      <section className="renew-admin-analytics-head">
+        <div>
+          <span>ADMIN ANALYTICS</span>
+          <h1>사이트 통계</h1>
+        </div>
+        <div className="renew-admin-period" aria-label="통계 기간">
+          {[1, 7, 30].map((days) => (
+            <button key={days} type="button" className={periodDays === days ? 'is-active' : ''} onClick={() => setPeriodDays(days)}>
+              {days === 1 ? '오늘' : `${days}일`}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="renew-admin-analytics-metrics">
+        {[
+          ['현재 접속 중', onlineVisitors, true],
+          ['오늘 방문자', stats?.todayUniqueVisitors, false],
+          ['오늘 페이지 방문', stats?.todayPageViews, false],
+          [`최근 ${periodDays}일 방문자`, stats?.periodUniqueVisitors, false],
+          [`최근 ${periodDays}일 페이지 방문`, stats?.periodPageViews, false],
+          ['전체 회원', stats?.totalUsers, false]
+        ].map(([label, value, isLive]) => (
+          <article key={label} className={isLive ? 'is-live' : undefined}>
+            <span>{label}</span>
+            <strong>{Number(value || 0).toLocaleString('ko-KR')}</strong>
+          </article>
+        ))}
+      </section>
+
+      {error ? <p className="renew-admin-analytics-error">{error}</p> : null}
+
+      <section className="renew-admin-analytics-grid">
+        <article className="renew-admin-analytics-panel">
+          <header>
+            <div>
+              <span>LIVE</span>
+              <h2>현재 보고 있는 페이지</h2>
+            </div>
+            <strong>{Number(onlineVisitors || 0).toLocaleString('ko-KR')}명</strong>
+          </header>
+          <div className="renew-admin-live-list">
+            {livePages.length ? livePages.map((item) => (
+              <div key={item.path}>
+                <span>{getAdminPageLabel(item.path)}</span>
+                <strong>{item.count}명</strong>
+              </div>
+            )) : <p>현재 접속 정보가 없습니다.</p>}
+          </div>
+        </article>
+
+        <article className="renew-admin-analytics-panel">
+          <header>
+            <div>
+              <span>TREND</span>
+              <h2>일자별 방문 추이</h2>
+            </div>
+          </header>
+          <div className="renew-admin-trend" aria-label="일자별 페이지 방문 추이">
+            {dailyTrend.length ? dailyTrend.map((item) => (
+              <div key={item.date}>
+                <span>{item.date.slice(5).replace('-', '.')}</span>
+                <i><b style={{ height: `${Math.max(6, (Number(item.views) / maxTrendViews) * 100)}%` }} /></i>
+                <strong>{Number(item.views).toLocaleString('ko-KR')}</strong>
+                <small>{Number(item.visitors).toLocaleString('ko-KR')}명</small>
+              </div>
+            )) : <p>{loading ? '통계를 불러오는 중입니다.' : '집계된 방문 기록이 없습니다.'}</p>}
+          </div>
+        </article>
+      </section>
+
+      <section className="renew-admin-analytics-panel renew-admin-popular">
+        <header>
+          <div>
+            <span>POPULAR PAGES</span>
+            <h2>많이 본 페이지</h2>
+          </div>
+          <small>같은 브라우저가 같은 페이지를 하루에 여러 번 열어도 1회로 집계합니다.</small>
+        </header>
+        <div className="renew-admin-popular-list">
+          {popularPages.length ? popularPages.map((item, index) => (
+            <article key={item.path}>
+              <b>{index + 1}</b>
+              <div>
+                <strong>{getAdminPageLabel(item.path)}</strong>
+                <span>{item.path}</span>
+              </div>
+              <i><em style={{ width: `${Math.max(4, (Number(item.views) / maxPopularViews) * 100)}%` }} /></i>
+              <span>{Number(item.visitors).toLocaleString('ko-KR')}명</span>
+              <strong>{Number(item.views).toLocaleString('ko-KR')}회</strong>
+            </article>
+          )) : <p>{loading ? '통계를 불러오는 중입니다.' : '페이지별 집계는 이번 업데이트 이후부터 누적됩니다.'}</p>}
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function RenewStatsPrototype() {
   return (
     <main className="renew-subpage renew-stats-prototype">
@@ -13799,6 +13994,7 @@ export default function RenewApp() {
   const [stateLoading, setStateLoading] = useState(false);
   const [adminStats, setAdminStats] = useState(null);
   const [onlineVisitors, setOnlineVisitors] = useState(0);
+  const [onlinePageCounts, setOnlinePageCounts] = useState({});
   const [visitorToken, setVisitorToken] = useState('');
   const [legalOpen, setLegalOpen] = useState(null);
   const [catalogInitialSearch, setCatalogInitialSearch] = useState(null);
@@ -13827,6 +14023,7 @@ export default function RenewApp() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [routeRevision, setRouteRevision] = useState(0);
   const internalNavigationRef = useRef(false);
+  const presenceChannelRef = useRef(null);
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
@@ -13971,9 +14168,14 @@ export default function RenewApp() {
   }, []);
 
   useEffect(() => {
-    if (!visitorToken) return undefined;
+    if (!visitorToken || !authResolved || isAdminUser) return undefined;
+    const analyticsPath = getAnalyticsVisitPath(window.location.pathname);
+    const storageKey = `optcg_visit_${getKstDateKey(Date.now())}_${analyticsPath}`;
+    if (window.localStorage.getItem(storageKey)) return undefined;
     const reportVisit = () => {
-      trackVisit(visitorToken, window.location.pathname).catch(() => {});
+      trackVisit(visitorToken, analyticsPath)
+        .then(() => window.localStorage.setItem(storageKey, '1'))
+        .catch(() => {});
     };
     if ('requestIdleCallback' in window) {
       const idleId = window.requestIdleCallback(reportVisit, { timeout: 2500 });
@@ -13981,16 +14183,29 @@ export default function RenewApp() {
     }
     const timer = window.setTimeout(reportVisit, 1500);
     return () => window.clearTimeout(timer);
-  }, [visitorToken]);
+  }, [activePage, authResolved, isAdminUser, routeRevision, visitorToken]);
 
   useEffect(() => {
-    if (!supabase || !visitorToken) return undefined;
+    if (!supabase || !visitorToken || !authResolved) return undefined;
 
     const channel = supabase.channel('site-presence-v1', {
       config: { presence: { key: visitorToken } }
     });
+    presenceChannelRef.current = channel;
     const syncOnlineVisitors = () => {
-      setOnlineVisitors(Object.keys(channel.presenceState() || {}).length);
+      const presenceState = channel.presenceState() || {};
+      const pageCounts = {};
+      let visitorCount = 0;
+      Object.values(presenceState).forEach((metas) => {
+        if (!Array.isArray(metas) || !metas.length) return;
+        visitorCount += 1;
+        const sortedMetas = [...metas].sort((a, b) => String(a.onlineAt || '').localeCompare(String(b.onlineAt || '')));
+        const latest = sortedMetas[sortedMetas.length - 1];
+        const page = getAnalyticsVisitPath(latest?.page || '/');
+        pageCounts[page] = (pageCounts[page] || 0) + 1;
+      });
+      setOnlineVisitors(visitorCount);
+      setOnlinePageCounts(pageCounts);
     };
 
     channel
@@ -13998,7 +14213,7 @@ export default function RenewApp() {
       .on('presence', { event: 'join' }, syncOnlineVisitors)
       .on('presence', { event: 'leave' }, syncOnlineVisitors)
       .subscribe(async (status) => {
-        if (status !== 'SUBSCRIBED') return;
+        if (status !== 'SUBSCRIBED' || isAdminUser) return;
         await channel.track({
           page: window.location.pathname,
           onlineAt: new Date().toISOString()
@@ -14006,10 +14221,20 @@ export default function RenewApp() {
       });
 
     return () => {
+      if (presenceChannelRef.current === channel) presenceChannelRef.current = null;
       channel.untrack().catch(() => {});
       supabase.removeChannel(channel);
     };
-  }, [visitorToken]);
+  }, [authResolved, isAdminUser, visitorToken]);
+
+  useEffect(() => {
+    const channel = presenceChannelRef.current;
+    if (!channel || !visitorToken || isAdminUser) return;
+    channel.track({
+      page: getAnalyticsVisitPath(window.location.pathname),
+      onlineAt: new Date().toISOString()
+    }).catch(() => {});
+  }, [activePage, isAdminUser, routeRevision, visitorToken]);
 
   useEffect(() => {
     if (!supabase) {
@@ -14105,12 +14330,11 @@ export default function RenewApp() {
 
   useEffect(() => {
     let cancelled = false;
-    const username = authUser?.user_metadata?.username;
-    if (username !== 'admin') {
+    if (!isAdminUser) {
       setAdminStats(null);
       return undefined;
     }
-    fetchAdminStats(username)
+    fetchAdminStats('admin', 7)
       .then((stats) => {
         if (!cancelled) setAdminStats(stats || null);
       })
@@ -14120,7 +14344,7 @@ export default function RenewApp() {
     return () => {
       cancelled = true;
     };
-  }, [authUser]);
+  }, [authUser, isAdminUser]);
 
   async function handleAuthClick(action = 'login') {
     if (action === 'mypage' && authUser) {
@@ -14318,6 +14542,12 @@ export default function RenewApp() {
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
           onOpenPrices={() => navigatePage('prices')}
+        />
+      ) : activePage === 'adminAnalytics' ? (
+        <RenewAdminAnalytics
+          authUser={authUser}
+          onlineVisitors={onlineVisitors}
+          onlinePageCounts={onlinePageCounts}
         />
       ) : activePage === 'cards' ? (
         <RenewCatalog
