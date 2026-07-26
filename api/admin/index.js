@@ -142,17 +142,30 @@ async function handleStats(request, response) {
   const periodDays = [1, 7, 30].includes(requestedDays) ? requestedDays : 7;
   const todayStart = getKstDayStartIso();
   const periodStart = getKstDayStartIso(periodDays - 1);
+  const dailyVisitRanges = Array.from({ length: periodDays }, (_, index) => {
+    const daysAgo = periodDays - 1 - index;
+    return {
+      date: getKstDateKey(getKstDayStartIso(daysAgo)),
+      start: getKstDayStartIso(daysAgo),
+      end: daysAgo > 0 ? getKstDayStartIso(daysAgo - 1) : ''
+    };
+  });
   const users = await listAllAuthUsers();
   const [
     { count: totalVisits, error: visitCountError },
-    { count: todayVisits, error: todayVisitCountError },
-    { count: periodVisits, error: periodVisitCountError },
+    dailyVisitResults,
     { data: analyticsRows, error: analyticsRowsError },
     { data: postRows, error: postRowsError }
   ] = await Promise.all([
     supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__'),
-    supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__').gte('created_at', todayStart),
-    supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__').gte('created_at', periodStart),
+    Promise.all(dailyVisitRanges.map(({ start, end }) => {
+      const query = supabaseAdmin
+        .from(COMMUNITY_TABLE)
+        .select('id', { count: 'exact', head: true })
+        .eq('board_id', '__visit__')
+        .gte('created_at', start);
+      return end ? query.lt('created_at', end) : query;
+    })),
     supabaseAdmin
       .from(COMMUNITY_TABLE)
       .select('board_id,content,author_token,created_at')
@@ -164,8 +177,8 @@ async function handleStats(request, response) {
   ]);
 
   if (visitCountError) throw visitCountError;
-  if (todayVisitCountError) throw todayVisitCountError;
-  if (periodVisitCountError) throw periodVisitCountError;
+  const dailyVisitError = dailyVisitResults.find((result) => result.error)?.error;
+  if (dailyVisitError) throw dailyVisitError;
   if (analyticsRowsError) throw analyticsRowsError;
   if (postRowsError) throw postRowsError;
 
@@ -182,7 +195,6 @@ async function handleStats(request, response) {
     ))
   ];
   const pageMap = new Map();
-  const dailyMap = new Map();
 
   for (const row of mergedAnalyticsRows) {
     const path = normalizeVisitPath(row.content);
@@ -194,21 +206,16 @@ async function handleStats(request, response) {
     pageMap.set(path, page);
   }
 
-  for (const row of visitRows) {
-    const date = getKstDateKey(row.created_at);
-    if (!date) continue;
-    const day = dailyMap.get(date) ?? { date, visitors: new Set() };
-    day.visitors.add(row.author_token);
-    dailyMap.set(date, day);
-  }
-
   const popularPages = [...pageMap.values()]
     .map((item) => ({ path: item.path, visits: item.visits.size, visitors: item.visitors.size }))
     .sort((a, b) => b.visits - a.visits || b.visitors - a.visitors || a.path.localeCompare(b.path))
     .slice(0, 12);
-  const dailyTrend = [...dailyMap.values()]
-    .map((item) => ({ date: item.date, visits: item.visitors.size }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const dailyTrend = dailyVisitRanges.map(({ date }, index) => ({
+    date,
+    visits: dailyVisitResults[index].count ?? 0
+  }));
+  const todayVisits = dailyTrend.at(-1)?.visits ?? 0;
+  const periodVisits = dailyTrend.reduce((sum, item) => sum + item.visits, 0);
   const periodUniqueVisitors = new Set(visitRows.map((row) => row.author_token)).size;
 
   response.setHeader('Cache-Control', 'no-store, max-age=0');
