@@ -145,12 +145,14 @@ async function handleStats(request, response) {
   const users = await listAllAuthUsers();
   const [
     { count: totalVisits, error: visitCountError },
-    { data: todayVisitRows, error: todayVisitRowsError },
+    { count: todayVisits, error: todayVisitCountError },
+    { count: periodVisits, error: periodVisitCountError },
     { data: analyticsRows, error: analyticsRowsError },
     { data: postRows, error: postRowsError }
   ] = await Promise.all([
     supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__'),
-    supabaseAdmin.from(COMMUNITY_TABLE).select('author_token').eq('board_id', '__visit__').gte('created_at', todayStart).limit(10000),
+    supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__').gte('created_at', todayStart),
+    supabaseAdmin.from(COMMUNITY_TABLE).select('id', { count: 'exact', head: true }).eq('board_id', '__visit__').gte('created_at', periodStart),
     supabaseAdmin
       .from(COMMUNITY_TABLE)
       .select('board_id,content,author_token,created_at')
@@ -162,12 +164,12 @@ async function handleStats(request, response) {
   ]);
 
   if (visitCountError) throw visitCountError;
-  if (todayVisitRowsError) throw todayVisitRowsError;
+  if (todayVisitCountError) throw todayVisitCountError;
+  if (periodVisitCountError) throw periodVisitCountError;
   if (analyticsRowsError) throw analyticsRowsError;
   if (postRowsError) throw postRowsError;
 
   const publicPostRows = (postRows ?? []).filter((row) => !String(row.board_id ?? '').startsWith('__'));
-  const todayUniqueVisitors = new Set((todayVisitRows ?? []).map((row) => row.author_token)).size;
   const todaySignups = users.filter((user) => String(user.created_at ?? '') >= todayStart).length;
   const pageViewRows = (analyticsRows ?? []).filter((row) => row.board_id === '__pageview__');
   const visitRows = (analyticsRows ?? []).filter((row) => row.board_id === '__visit__');
@@ -207,19 +209,18 @@ async function handleStats(request, response) {
   const dailyTrend = [...dailyMap.values()]
     .map((item) => ({ date: item.date, visits: item.visitors.size }))
     .sort((a, b) => a.date.localeCompare(b.date));
-  const periodVisitKeys = new Set(visitRows.map((row) => `${row.author_token}|${getKstDateKey(row.created_at)}`));
   const periodUniqueVisitors = new Set(visitRows.map((row) => row.author_token)).size;
 
   response.setHeader('Cache-Control', 'no-store, max-age=0');
   return response.status(200).json({
     totalVisits: totalVisits ?? 0,
-    todayVisits: todayUniqueVisitors,
-    todayUniqueVisitors,
+    todayVisits: todayVisits ?? 0,
+    todayUniqueVisitors: todayVisits ?? 0,
     totalUsers: users.length,
     todaySignups,
     totalPosts: publicPostRows.length,
     periodDays,
-    periodVisits: periodVisitKeys.size,
+    periodVisits: periodVisits ?? 0,
     periodUniqueVisitors,
     popularPages,
     dailyTrend
