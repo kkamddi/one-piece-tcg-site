@@ -35,3 +35,10 @@ export function fetchAdminStats(username, days = 7) {
     headers: { 'x-admin-username': username }
   });
 }
+
+export function fetchAdminOperations(username) {
+  return requestJson('/api/admin?action=operations', {
+    auth: true,
+    headers: { 'x-admin-username': username }
+  });
+}

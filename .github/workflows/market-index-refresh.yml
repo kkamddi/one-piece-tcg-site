@@ -68,24 +68,6 @@ jobs:
           fi
           MARKET_INDEX_CONDITION=psa10 npm run rebuild:market-indexes
 
-      - name: Notify Telegram on success
-        if: success()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "Telegram secrets are not configured; skipping notification."
-            exit 0
-          fi
-          message="PSA10 market index refresh succeeded.
-          Workflow: $GITHUB_WORKFLOW
-          Run: $RUN_URL"
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${message}" || echo "Telegram notification failed."
-
       - name: Notify Telegram on failure
         if: failure()
         env:

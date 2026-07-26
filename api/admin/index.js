@@ -226,6 +226,31 @@ async function handleStats(request, response) {
   });
 }
 
+async function handleOperations(request, response) {
+  const authHeader = String(request.headers.authorization ?? '');
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!token) return response.status(401).json({ error: 'unauthorized' });
+  const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+  const authUser = authData?.user;
+  const isAdmin = authUser?.app_metadata?.role === 'admin'
+    || authUser?.user_metadata?.username === 'admin';
+  if (authError || !isAdmin) {
+    return response.status(403).json({ error: 'forbidden' });
+  }
+
+  const bucket = process.env?.CARD_THUMBNAILS;
+  if (!bucket || typeof bucket.get !== 'function') {
+    return response.status(503).json({ error: 'operations_store_unavailable' });
+  }
+  const object = await bucket.get('operations/status/latest.json');
+  if (!object) {
+    return response.status(404).json({ error: 'operations_status_not_found' });
+  }
+  const payload = JSON.parse(await object.text());
+  response.setHeader('Cache-Control', 'no-store, max-age=0');
+  return response.status(200).json(payload);
+}
+
 export default async function handler(request, response) {
   if (!supabaseAdmin) return response.status(500).json({ error: 'supabase_admin_not_configured' });
 
@@ -234,6 +259,7 @@ export default async function handler(request, response) {
   try {
     if (request.method === 'POST' && action === 'visit') return await handleVisit(request, response);
     if (request.method === 'GET' && action === 'stats') return await handleStats(request, response);
+    if (request.method === 'GET' && action === 'operations') return await handleOperations(request, response);
     return response.status(405).json({ error: 'method_not_allowed' });
   } catch (error) {
     return response.status(500).json({ error: error?.message || 'server_error' });

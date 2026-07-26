@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
-import { fetchAdminStats, trackVisit } from './api/admin';
+import { fetchAdminOperations, fetchAdminStats, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
@@ -13413,13 +13413,40 @@ function getAdminPageLabel(path = '/') {
   return isJapanese ? `${label} (JP)` : label;
 }
 
+const OPERATIONS_STATUS_LABELS = {
+  normal: '정상',
+  warning: '주의',
+  critical: '위험',
+  unknown: '확인 필요'
+};
+
+function getOperationsStatusLabel(status) {
+  return OPERATIONS_STATUS_LABELS[status] || OPERATIONS_STATUS_LABELS.unknown;
+}
+
+function formatOperationsUpdatedAt(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(date);
+}
+
 function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = {} }) {
   const isAdmin = authUser?.app_metadata?.role === 'admin'
     || authUser?.user_metadata?.username === 'admin';
   const [periodDays, setPeriodDays] = useState(7);
   const [stats, setStats] = useState(null);
+  const [operations, setOperations] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [operationsError, setOperationsError] = useState('');
 
   useEffect(() => {
     if (!isAdmin) return undefined;
@@ -13444,6 +13471,28 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
     };
   }, [isAdmin, periodDays]);
 
+  useEffect(() => {
+    if (!isAdmin) return undefined;
+    let cancelled = false;
+    const loadOperations = async () => {
+      try {
+        const payload = await fetchAdminOperations('admin');
+        if (!cancelled) {
+          setOperations(payload || null);
+          setOperationsError('');
+        }
+      } catch {
+        if (!cancelled) setOperationsError('운영 상태 리포트가 아직 생성되지 않았거나 불러오지 못했습니다.');
+      }
+    };
+    loadOperations();
+    const timer = window.setInterval(loadOperations, 60000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [isAdmin]);
+
   if (!isAdmin) {
     return (
       <main className="renew-subpage renew-admin-analytics">
@@ -13463,6 +13512,20 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
     .sort((a, b) => b.count - a.count);
   const maxTrendVisits = Math.max(1, ...dailyTrend.map((item) => Number(item.visits) || 0));
   const maxPopularVisits = Math.max(1, ...popularPages.map((item) => Number(item.visits) || 0));
+  const operationsServices = operations ? [
+    ['Cloudflare', operations.services?.cloudflare?.status],
+    ['GitHub Actions', operations.services?.github?.status],
+    ['SNKRDUNK', operations.services?.snkrdunk?.status],
+    ['Supabase', operations.services?.supabase?.status],
+    ['홈페이지', operations.services?.website?.status]
+  ] : [];
+  const d1Usage = operations?.services?.cloudflare?.d1;
+  const d1Metrics = d1Usage ? [
+    ['D1 읽기', d1Usage.readPercent, `${Number(d1Usage.rowsRead || 0).toLocaleString('ko-KR')}행`],
+    ['D1 쓰기', d1Usage.writePercent, `${Number(d1Usage.rowsWritten || 0).toLocaleString('ko-KR')}행`],
+    ['D1 저장공간', d1Usage.storagePercent, `${Number(d1Usage.storagePercent || 0).toFixed(1)}%`]
+  ] : [];
+  const freshness = Array.isArray(operations?.dataFreshness) ? operations.dataFreshness : [];
 
   return (
     <main className="renew-subpage renew-admin-analytics">
@@ -13479,6 +13542,86 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
           ))}
         </div>
       </section>
+
+      <section className="renew-operations-head">
+        <div>
+          <span>OPERATIONS</span>
+          <h2>운영 상태</h2>
+          <small>
+            {operations
+              ? `최근 확인 ${formatOperationsUpdatedAt(operations.generatedAt)}`
+              : '운영 상태를 확인하는 중입니다.'}
+          </small>
+        </div>
+        <strong className={`is-${operations?.overallStatus || 'unknown'}`}>
+          {getOperationsStatusLabel(operations?.overallStatus)}
+        </strong>
+      </section>
+
+      {operationsError ? <p className="renew-admin-analytics-error">{operationsError}</p> : null}
+
+      {operations ? (
+        <>
+          <section className="renew-operations-services" aria-label="서비스별 운영 상태">
+            {operationsServices.map(([label, status]) => (
+              <article key={label}>
+                <span>{label}</span>
+                <strong className={`is-${status || 'unknown'}`}>{getOperationsStatusLabel(status)}</strong>
+              </article>
+            ))}
+          </section>
+
+          <section className="renew-operations-grid">
+            <article className="renew-admin-analytics-panel renew-operations-usage">
+              <header>
+                <div>
+                  <span>FREE QUOTA</span>
+                  <h2>Cloudflare 사용량</h2>
+                </div>
+                <small>최근 24시간</small>
+              </header>
+              <div className="renew-operations-meter-list">
+                {d1Metrics.map(([label, value, detail]) => (
+                  <div key={label}>
+                    <div>
+                      <span>{label}</span>
+                      <strong>{Number(value || 0).toFixed(1)}%</strong>
+                    </div>
+                    <i><em className={Number(value || 0) >= 95 ? 'is-critical' : Number(value || 0) >= 70 ? 'is-warning' : ''} style={{ width: `${Math.min(100, Math.max(0, Number(value || 0)))}%` }} /></i>
+                    <small>{detail}</small>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="renew-admin-analytics-panel renew-operations-freshness">
+              <header>
+                <div>
+                  <span>DATA FRESHNESS</span>
+                  <h2>데이터 최신 상태</h2>
+                </div>
+              </header>
+              <div>
+                {freshness.map((item) => (
+                  <div key={item.key}>
+                    <span>{item.label}</span>
+                    <small>{formatOperationsUpdatedAt(item.updatedAt)}</small>
+                    <strong className={`is-${item.status || 'unknown'}`}>{getOperationsStatusLabel(item.status)}</strong>
+                  </div>
+                ))}
+              </div>
+              <footer>
+                <span>최근 24시간 자동화</span>
+                <strong>
+                  성공 {Number(operations.services?.github?.summary?.success || 0)}
+                  {' · '}실패 {Number(operations.services?.github?.summary?.failed || 0)}
+                  {' · '}진행 {Number(operations.services?.github?.summary?.running || 0)}
+                </strong>
+              </footer>
+            </article>
+          </section>
+        </>
+      ) : null}
 
       <section className="renew-admin-analytics-metrics">
         {[

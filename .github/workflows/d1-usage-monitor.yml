@@ -2,9 +2,6 @@ name: D1 usage monitor
 
 on:
   workflow_dispatch:
-  schedule:
-    # Daily at 09:45 KST. Alert when the Cloudflare Free daily quota reaches 70%.
-    - cron: "45 0 * * *"
 
 concurrency:
   group: d1-usage-monitor

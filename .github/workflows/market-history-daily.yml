@@ -122,23 +122,22 @@ jobs:
           if-no-files-found: warn
 
   notify:
-    name: Notify collection result
-    if: always()
+    name: Notify failed collection
+    if: ${{ always() && needs.collect.result != 'success' }}
     needs: collect
     runs-on: ubuntu-latest
     steps:
-      - name: Send Telegram result
+      - name: Send Telegram failure
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          COLLECT_RESULT: ${{ needs.collect.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "Telegram secrets are not configured; skipping notification."
             exit 0
           fi
-          message="Daily market trading history ${COLLECT_RESULT}.
+          message="Daily market trading history failed.
           Scope: all JP cards + curated EN cards / Single + PSA10 / recent page
           Run: ${RUN_URL}"
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
@@ -146,5 +145,4 @@ jobs:
             --data-urlencode "text=${message}" || echo "Telegram notification failed."
 
       - name: Fail when collection failed
-        if: needs.collect.result != 'success'
         run: exit 1

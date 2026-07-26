@@ -69,19 +69,6 @@ jobs:
           fi
           npx wrangler@4 pages deploy dist --project-name optcgkorea-static --branch main --commit-hash "$(git rev-parse HEAD)"
 
-      - name: Notify successful production deploy
-        if: success()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            exit 0
-          fi
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=Production deploy succeeded from synchronized main."
-
       - name: Notify failed production deploy
         if: failure()
         env:

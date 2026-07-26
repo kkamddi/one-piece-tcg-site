@@ -1,0 +1,133 @@
+name: Operations daily report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 * * * *"
+
+concurrency:
+  group: operations-daily-report
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Measure D1 usage
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.112.0 d1 info optcgkorea-public-shadow --json > d1-info.json
+
+      - name: Download previous operations status
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+        run: |
+          npx --yes wrangler@4.112.0 r2 object get optcg-card-thumbnails/operations/status/latest.json \
+            --file previous-operations-status.json
+
+      - name: Build operations report
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          D1_INFO_PATH: d1-info.json
+          GITHUB_TOKEN: ${{ github.token }}
+          SUPABASE_URL: https://omxrcqjmnsthxyvnunjj.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_Es05CnslUVmRqOeGehdMkA_pciWLFlD
+          PREVIOUS_OPS_STATUS_PATH: previous-operations-status.json
+          OPS_STATUS_OUTPUT: operations-status.json
+          TELEGRAM_MESSAGE_OUTPUT: operations-telegram-message.txt
+          IMMEDIATE_MESSAGE_OUTPUT: operations-immediate-message.txt
+        run: node scripts/buildOperationsReport.js
+
+      - name: Store latest status in R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.112.0 r2 object put optcg-card-thumbnails/operations/status/latest.json \
+            --file operations-status.json \
+            --content-type application/json
+
+      - name: Write workflow summary
+        run: |
+          {
+            echo "### Operations report"
+            echo '```json'
+            cat operations-status.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Send daily Telegram report
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notification."
+            exit 0
+          fi
+          current_hour=$(date -u +%H)
+          if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ] && [ "$current_hour" != "00" ]; then
+            echo "Hourly snapshot stored; daily Telegram report is sent at 00:10 UTC."
+            exit 0
+          fi
+          message=$(cat operations-telegram-message.txt)
+          keyboard='{"inline_keyboard":[[{"text":"관리자 대시보드","url":"https://www.optcgkorea.com/admin/analytics"},{"text":"GitHub Actions","url":"https://github.com/kkamddi/one-piece-tcg-site/actions"}]]}'
+          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=true" \
+            --data-urlencode "reply_markup=${keyboard}"
+
+      - name: Send immediate critical transition
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ] || [ ! -s operations-immediate-message.txt ]; then
+            exit 0
+          fi
+          current_hour=$(date -u +%H)
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$current_hour" = "00" ]; then
+            echo "Critical state is already included in the daily report."
+            exit 0
+          fi
+          message=$(cat operations-immediate-message.txt)
+          keyboard='{"inline_keyboard":[[{"text":"관리자 대시보드","url":"https://www.optcgkorea.com/admin/analytics"},{"text":"GitHub Actions","url":"https://github.com/kkamddi/one-piece-tcg-site/actions"}]]}'
+          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=true" \
+            --data-urlencode "reply_markup=${keyboard}"
+
+      - name: Notify Telegram on report failure
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            exit 0
+          fi
+          message="CARD Pone 운영 리포트 생성 실패
+          Run: ${RUN_URL}"
+          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${message}" || true
