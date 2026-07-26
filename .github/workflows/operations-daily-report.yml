@@ -37,7 +37,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
         run: |
           npx --yes wrangler@4.112.0 r2 object get optcg-card-thumbnails/operations/status/latest.json \
-            --file previous-operations-status.json
+            --file previous-operations-status.json \
+            --remote
 
       - name: Build operations report
         env:
@@ -61,7 +62,8 @@ jobs:
           set -euo pipefail
           npx --yes wrangler@4.112.0 r2 object put optcg-card-thumbnails/operations/status/latest.json \
             --file operations-status.json \
-            --content-type application/json
+            --content-type application/json \
+            --remote
 
       - name: Write workflow summary
         run: |
