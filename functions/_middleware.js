@@ -572,6 +572,24 @@ const SEO_PRIMARY = {
     keywords: '원피스카드 카드깡, 원피스카드 시뮬레이터, 원피스카드 팩 개봉, 원피스카드 박스 개봉',
     schemaType: 'WebApplication'
   },
+  '/lab/decks': {
+    title: '원피스카드 덱 빌더 - 리더별 덱 구성 | 카드포네',
+    description: '원피스카드 리더와 사용 환경을 선택하고 색상에 맞는 카드로 50장 덱을 구성하며 카드 매수와 덱 규칙을 확인할 수 있습니다.',
+    keywords: '원피스카드 덱 빌더, 원피스카드 덱 구성, 원피스카드 리더, 원피스카드 덱 레시피',
+    schemaType: 'WebApplication'
+  },
+  '/lab/decks/builder': {
+    title: '원피스카드 덱 편집기 - 50장 덱 구성 | 카드포네',
+    description: '리더 색상에 맞는 원피스카드를 검색하고 카드별 투입 매수와 50장 덱 규칙을 확인하며 덱을 편집할 수 있습니다.',
+    keywords: '원피스카드 덱 편집기, 원피스카드 50장 덱, 원피스카드 카드 매수, 원피스카드 리더 색상',
+    schemaType: 'WebApplication'
+  },
+  '/guides/deck-builder': {
+    title: '원피스카드 덱 빌더 사용 가이드 | 카드포네',
+    description: '리더와 카드 환경 선택, 검증된 덱 불러오기, 카드 추가와 원피스카드 덱 규칙 확인 방법을 안내합니다.',
+    keywords: '원피스카드 덱 빌더 사용법, 원피스카드 덱 규칙, 원피스카드 리더 색상, 원피스카드 덱 구성',
+    schemaType: 'FAQPage'
+  },
   '/guides/centering': {
     title: '원피스카드 센터링 측정기 사용 가이드 | 카드포네',
     description: '원피스카드 촬영 준비, 카드 외곽과 내부 인쇄 경계 조정, 센터링 결과 해석 방법을 안내합니다.',
@@ -689,6 +707,30 @@ const SERVER_PAGE_CONTENT = {
       '도감에 연결된 카드 이미지와 번호, 등급, 확인 가능한 참고 시세를 보여주며 실제 상품의 봉입 결과를 보장하지 않습니다.'
     ],
     links: ['/guides/pack-simulator', '/lab', '/cards', '/prices']
+  },
+  '/lab/decks': {
+    heading: '원피스카드 덱 빌더',
+    paragraphs: [
+      '리더와 한국판·일본판·영문판 환경을 선택하고 리더 색상에 맞는 카드를 검색해 50장 덱을 구성할 수 있습니다.',
+      '리더 1장, 메인 덱 50장, 동일 카드번호 최대 매수, 리더 색상과 카드 색상 일치 여부를 화면에서 확인할 수 있습니다.'
+    ],
+    links: ['/lab/decks/builder', '/guides/deck-builder', '/cards', '/lab']
+  },
+  '/lab/decks/builder': {
+    heading: '원피스카드 덱 편집기',
+    paragraphs: [
+      '리더를 먼저 선택하면 사용할 수 있는 색상의 카드가 필터링되며 카드별 투입 매수를 조정해 덱을 구성할 수 있습니다.',
+      '완성한 덱은 50장 구성, 동일 카드번호 매수, 리더 색상과 금지·제한 카드 기준으로 검사할 수 있습니다.'
+    ],
+    links: ['/lab/decks', '/guides/deck-builder', '/cards', '/lab']
+  },
+  '/guides/deck-builder': {
+    heading: '원피스카드 덱 빌더 사용 가이드',
+    paragraphs: [
+      '사용할 카드 환경과 리더를 선택한 뒤 리더 색상에 맞는 카드를 검색해 덱에 추가하는 순서를 안내합니다.',
+      '리더 1장과 메인 덱 50장, 동일 카드번호 투입 매수, 색상 일치와 금지·제한 카드 검사 결과를 확인할 수 있습니다.'
+    ],
+    links: ['/lab/decks', '/lab/decks/builder', '/cards', '/lab']
   },
   '/guides/centering': {
     heading: '센터링 측정기 사용 가이드',

@@ -6629,6 +6629,10 @@
   object-fit: cover;
 }
 
+.renew-topic-thumb > span {
+  display: none;
+}
+
 .renew-topic-body {
   min-width: 0;
 }
@@ -6762,6 +6766,10 @@
   font-size: 22px;
   font-weight: 900;
   text-decoration: none;
+}
+
+.renew-topic-thumb.is-empty > span {
+  display: block;
 }
 
 .renew-news-links {

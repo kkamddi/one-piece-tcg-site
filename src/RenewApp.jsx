@@ -3062,6 +3062,13 @@ const PAGE_SEO = {
     keywords: '원피스카드 카드깡 시뮬레이터 사용법, 원피스카드 봉입률, 가상 카드 개봉',
     body: '시리즈와 개봉 단위를 선택하고 가상 개봉 결과와 참고 시세를 확인하는 방법을 안내합니다.'
   },
+  deckLab: {
+    title: '원피스카드 덱 빌더 - 리더 색상과 덱 규칙 검사 | Card Pone',
+    h1: '원피스카드 덱 빌더',
+    description: '원피스카드 리더를 선택하고 색상에 맞는 카드로 50장 덱을 구성하며 카드 매수와 덱 규칙을 확인할 수 있습니다.',
+    keywords: '원피스카드 덱 빌더, 원피스카드 덱 구성, 원피스카드 리더, 원피스카드 덱 레시피',
+    body: '리더와 사용 환경을 선택하고 색상에 맞는 카드를 검색해 50장 덱을 구성하며 기본 덱 규칙을 확인하는 공개 도구입니다.'
+  },
   deckGuide: {
     title: '원피스카드 덱 빌더 사용 가이드 | Card Pone',
     h1: '덱 빌더 사용 가이드',
@@ -3582,7 +3589,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path === '/guides/pack-simulator') return { page: 'packSimulator' };
   if (path === '/guides/deck-builder') return { page: 'deckLab' };
   if (path === '/lab/decks/builder') return { page: 'deckLab' };
-  if (path === '/lab/decks') return { page: 'lab' };
+  if (path === '/lab/decks') return { page: 'deckLab' };
   if (path.startsWith('/lab')) return { page: 'lab' };
   if (path.startsWith('/news') || path.startsWith('/guide') || path.startsWith('/faq')) return { page: 'news' };
   if (path.startsWith('/shops')) return { page: 'shops' };
@@ -5727,6 +5734,11 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!authUser?.id) {
+      setRenewalNoticeOpen(false);
+      setRenewalNoticeChecked(true);
+      return;
+    }
     if (isJp) {
       setRenewalNoticeOpen(false);
       setRenewalNoticeChecked(true);
@@ -5737,7 +5749,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       setRenewalNoticeOpen(true);
     }
     setRenewalNoticeChecked(true);
-  }, [isJp]);
+  }, [authUser?.id, isJp]);
 
   useEffect(() => {
     if (!PARTNER_NEWS_POPUP_ENABLED || typeof window === 'undefined' || !latestPartnerNews || !renewalNoticeChecked || renewalNoticeOpen) return;
@@ -6898,7 +6910,18 @@ function RenewNews({ uiLang, onOpenCalendar }) {
               {officialTopics.map((item) => (
                 <article key={item.id} className="renew-topic-card">
                   <a className={`renew-topic-thumb${item.imageUrl ? '' : ' is-empty'}`} href={item.url} target="_blank" rel="noreferrer" aria-label={item.title}>
-                    {item.imageUrl ? <img src={item.imageUrl} alt="" loading="lazy" /> : <span>{item.locale}</span>}
+                    <span>{item.locale}</span>
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.parentElement?.classList.add('is-empty');
+                          event.currentTarget.remove();
+                        }}
+                      />
+                    ) : null}
                   </a>
                   <div className="renew-topic-body">
                     <div className="renew-topic-meta">
