@@ -170,6 +170,7 @@ async function handleStats(request, response) {
   const todayUniqueVisitors = new Set((todayVisitRows ?? []).map((row) => row.author_token)).size;
   const todaySignups = users.filter((user) => String(user.created_at ?? '') >= todayStart).length;
   const pageViewRows = (analyticsRows ?? []).filter((row) => row.board_id === '__pageview__');
+  const visitRows = (analyticsRows ?? []).filter((row) => row.board_id === '__visit__');
   const pageViewVisitorDays = new Set(pageViewRows.map((row) => `${row.author_token}|${getKstDateKey(row.created_at)}`));
   const mergedAnalyticsRows = [
     ...pageViewRows,
@@ -185,26 +186,29 @@ async function handleStats(request, response) {
     const path = normalizeVisitPath(row.content);
     const date = getKstDateKey(row.created_at);
     if (!date) continue;
-    const page = pageMap.get(path) ?? { path, views: 0, visitors: new Set() };
-    page.views += 1;
+    const page = pageMap.get(path) ?? { path, visits: new Set(), visitors: new Set() };
+    page.visits.add(`${row.author_token}|${date}`);
     page.visitors.add(row.author_token);
     pageMap.set(path, page);
-    const day = dailyMap.get(date) ?? { date, views: 0, visitors: new Set() };
-    day.views += 1;
+  }
+
+  for (const row of visitRows) {
+    const date = getKstDateKey(row.created_at);
+    if (!date) continue;
+    const day = dailyMap.get(date) ?? { date, visitors: new Set() };
     day.visitors.add(row.author_token);
     dailyMap.set(date, day);
   }
 
   const popularPages = [...pageMap.values()]
-    .map((item) => ({ path: item.path, views: item.views, visitors: item.visitors.size }))
-    .sort((a, b) => b.views - a.views || b.visitors - a.visitors || a.path.localeCompare(b.path))
+    .map((item) => ({ path: item.path, visits: item.visits.size, visitors: item.visitors.size }))
+    .sort((a, b) => b.visits - a.visits || b.visitors - a.visitors || a.path.localeCompare(b.path))
     .slice(0, 12);
   const dailyTrend = [...dailyMap.values()]
-    .map((item) => ({ date: item.date, views: item.views, visitors: item.visitors.size }))
+    .map((item) => ({ date: item.date, visits: item.visitors.size }))
     .sort((a, b) => a.date.localeCompare(b.date));
-  const periodUniqueVisitors = new Set(mergedAnalyticsRows.map((row) => row.author_token)).size;
-  const todayKey = getKstDateKey(new Date());
-  const todayPageViews = dailyMap.get(todayKey)?.views ?? 0;
+  const periodVisitKeys = new Set(visitRows.map((row) => `${row.author_token}|${getKstDateKey(row.created_at)}`));
+  const periodUniqueVisitors = new Set(visitRows.map((row) => row.author_token)).size;
 
   response.setHeader('Cache-Control', 'no-store, max-age=0');
   return response.status(200).json({
@@ -215,9 +219,8 @@ async function handleStats(request, response) {
     todaySignups,
     totalPosts: publicPostRows.length,
     periodDays,
-    periodPageViews: mergedAnalyticsRows.length,
+    periodVisits: periodVisitKeys.size,
     periodUniqueVisitors,
-    todayPageViews,
     popularPages,
     dailyTrend
   });

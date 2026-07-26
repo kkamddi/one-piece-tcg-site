@@ -13477,8 +13477,8 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
     .map(([path, count]) => ({ path, count: Number(count) || 0 }))
     .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count);
-  const maxTrendViews = Math.max(1, ...dailyTrend.map((item) => Number(item.views) || 0));
-  const maxPopularViews = Math.max(1, ...popularPages.map((item) => Number(item.views) || 0));
+  const maxTrendVisits = Math.max(1, ...dailyTrend.map((item) => Number(item.visits) || 0));
+  const maxPopularVisits = Math.max(1, ...popularPages.map((item) => Number(item.visits) || 0));
 
   return (
     <main className="renew-subpage renew-admin-analytics">
@@ -13499,10 +13499,8 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
       <section className="renew-admin-analytics-metrics">
         {[
           ['현재 접속 중', onlineVisitors, true],
-          ['오늘 방문자', stats?.todayUniqueVisitors, false],
-          ['오늘 페이지 방문', stats?.todayPageViews, false],
-          [`최근 ${periodDays}일 방문자`, stats?.periodUniqueVisitors, false],
-          [`최근 ${periodDays}일 페이지 방문`, stats?.periodPageViews, false],
+          ['오늘 방문', stats?.todayVisits, false],
+          [`최근 ${periodDays}일 방문`, stats?.periodVisits, false],
           ['전체 회원', stats?.totalUsers, false]
         ].map(([label, value, isLive]) => (
           <article key={label} className={isLive ? 'is-live' : undefined}>
@@ -13540,13 +13538,12 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
               <h2>일자별 방문 추이</h2>
             </div>
           </header>
-          <div className="renew-admin-trend" aria-label="일자별 페이지 방문 추이">
+          <div className="renew-admin-trend" aria-label="일자별 방문 추이">
             {dailyTrend.length ? dailyTrend.map((item) => (
               <div key={item.date}>
                 <span>{item.date.slice(5).replace('-', '.')}</span>
-                <i><b style={{ height: `${Math.max(6, (Number(item.views) / maxTrendViews) * 100)}%` }} /></i>
-                <strong>{Number(item.views).toLocaleString('ko-KR')}</strong>
-                <small>{Number(item.visitors).toLocaleString('ko-KR')}명</small>
+                <i><b style={{ height: `${Math.max(6, (Number(item.visits) / maxTrendVisits) * 100)}%` }} /></i>
+                <strong>{Number(item.visits).toLocaleString('ko-KR')}</strong>
               </div>
             )) : <p>{loading ? '통계를 불러오는 중입니다.' : '집계된 방문 기록이 없습니다.'}</p>}
           </div>
@@ -13569,9 +13566,8 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
                 <strong>{getAdminPageLabel(item.path)}</strong>
                 <span>{item.path}</span>
               </div>
-              <i><em style={{ width: `${Math.max(4, (Number(item.views) / maxPopularViews) * 100)}%` }} /></i>
-              <span>{Number(item.visitors).toLocaleString('ko-KR')}명</span>
-              <strong>{Number(item.views).toLocaleString('ko-KR')}회</strong>
+              <i><em style={{ width: `${Math.max(4, (Number(item.visits) / maxPopularVisits) * 100)}%` }} /></i>
+              <strong>{Number(item.visits).toLocaleString('ko-KR')}회</strong>
             </article>
           )) : <p>{loading ? '통계를 불러오는 중입니다.' : '페이지별 집계는 이번 업데이트 이후부터 누적됩니다.'}</p>}
         </div>
