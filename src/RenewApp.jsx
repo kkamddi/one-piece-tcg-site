@@ -5536,7 +5536,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, adminStats, onlineVisitors, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
@@ -5886,22 +5886,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           </button>
         </article>
       </section>
-      {adminStats ? (
-        <section className="renew-admin-stats" aria-label="관리자 통계">
-          {[
-            [t('visitorsOnline'), onlineVisitors, true],
-            [t('visitorsTotal'), adminStats.totalVisits, false],
-            [t('visitorsToday'), adminStats.todayVisits, false],
-            [t('usersTotal'), adminStats.totalUsers, false],
-            [t('signupsToday'), adminStats.todaySignups, false]
-          ].map(([label, value, isLive]) => (
-            <article key={label} className={isLive ? 'is-live' : undefined}>
-              <span>{label}</span>
-              <strong aria-live={isLive ? 'polite' : undefined}>{Number(value || 0).toLocaleString('ko-KR')}</strong>
-            </article>
-          ))}
-        </section>
-      ) : null}
       {!isJp ? <button type="button" className="renew-home-updates-mini" onClick={() => setUpdatesOpen(true)}>
         <span>업데이트 내역</span>
       </button> : null}
@@ -13501,7 +13485,8 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
           ['현재 접속 중', onlineVisitors, true],
           ['오늘 방문', stats?.todayVisits, false],
           [`최근 ${periodDays}일 방문`, stats?.periodVisits, false],
-          ['전체 회원', stats?.totalUsers, false]
+          ['전체 유저 수', stats?.totalUsers, false],
+          ['오늘 가입', stats?.todaySignups, false]
         ].map(([label, value, isLive]) => (
           <article key={label} className={isLive ? 'is-live' : undefined}>
             <span>{label}</span>
@@ -13988,7 +13973,6 @@ export default function RenewApp() {
   const [userState, setUserState] = useState(null);
   const [portfolioHoldings, setPortfolioHoldings] = useState([]);
   const [stateLoading, setStateLoading] = useState(false);
-  const [adminStats, setAdminStats] = useState(null);
   const [onlineVisitors, setOnlineVisitors] = useState(0);
   const [onlinePageCounts, setOnlinePageCounts] = useState({});
   const [visitorToken, setVisitorToken] = useState('');
@@ -14324,24 +14308,6 @@ export default function RenewApp() {
     };
   }, [authUser]);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!isAdminUser) {
-      setAdminStats(null);
-      return undefined;
-    }
-    fetchAdminStats('admin', 7)
-      .then((stats) => {
-        if (!cancelled) setAdminStats(stats || null);
-      })
-      .catch(() => {
-        if (!cancelled) setAdminStats(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [authUser, isAdminUser]);
-
   async function handleAuthClick(action = 'login') {
     if (action === 'mypage' && authUser) {
       setAccountOpen(true);
@@ -14518,8 +14484,6 @@ export default function RenewApp() {
           portfolioHoldings={portfolioHoldings}
           setPortfolioHoldings={setPortfolioHoldings}
           stateLoading={stateLoading}
-          adminStats={adminStats}
-          onlineVisitors={onlineVisitors}
           uiLang={uiLang}
           onSubmitSearch={(search) => {
             setCatalogViewState(null);
