@@ -3,7 +3,8 @@ name: Operations daily report
 on:
   workflow_dispatch:
   schedule:
-    - cron: "10 * * * *"
+    # 09:10 / 21:10 KST
+    - cron: "10 0,12 * * *"
 
 concurrency:
   group: operations-daily-report
@@ -82,7 +83,7 @@ jobs:
           fi
           current_hour=$(date -u +%H)
           if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ] && [ "$current_hour" != "00" ]; then
-            echo "Hourly snapshot stored; daily Telegram report is sent at 00:10 UTC."
+            echo "Scheduled snapshot stored; daily Telegram report is sent at 00:10 UTC."
             exit 0
           fi
           message=$(cat operations-telegram-message.txt)

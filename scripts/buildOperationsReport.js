@@ -188,6 +188,49 @@ async function checkHttpStatus(url, headers = {}) {
   }
 }
 
+async function fetchSupabaseUsage() {
+  const token = process.env.SUPABASE_ACCESS_TOKEN;
+  const projectUrl = process.env.SUPABASE_URL;
+  const projectRef = process.env.SUPABASE_PROJECT_REF
+    || String(projectUrl || '').match(/^https:\/\/([^.]+)\.supabase\.co/)?.[1];
+  if (!token || !projectRef) return null;
+
+  try {
+    const payload = await fetchJson(
+      `https://api.supabase.com/v1/projects/${projectRef}/analytics/endpoints/usage.api-counts`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      }
+    );
+    const rows = Array.isArray(payload?.result) ? payload.result : [];
+    const timestamps = rows
+      .map((row) => Date.parse(row?.timestamp))
+      .filter(Number.isFinite)
+      .sort((a, b) => a - b);
+    const totals = rows.reduce((result, row) => ({
+      authRequests: result.authRequests + asNumber(row?.total_auth_requests),
+      realtimeRequests: result.realtimeRequests + asNumber(row?.total_realtime_requests),
+      restRequests: result.restRequests + asNumber(row?.total_rest_requests),
+      storageRequests: result.storageRequests + asNumber(row?.total_storage_requests)
+    }), {
+      authRequests: 0,
+      realtimeRequests: 0,
+      restRequests: 0,
+      storageRequests: 0
+    });
+    return {
+      ...totals,
+      from: timestamps.length ? new Date(timestamps[0]).toISOString() : null,
+      to: timestamps.length ? new Date(timestamps[timestamps.length - 1]).toISOString() : null
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function fetchWorkersUsage() {
   const token = process.env.CLOUDFLARE_API_TOKEN;
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -335,7 +378,7 @@ const d1 = {
   storagePercent: percent(storageBytes, 5 * 1024 * 1024 * 1024)
 };
 
-const [github, website, supabase, workers] = await Promise.all([
+const [github, website, supabase, supabaseUsage, workers] = await Promise.all([
   fetchGitHubRuns(),
   checkHttpStatus('https://www.optcgkorea.com/'),
   checkHttpStatus(
@@ -344,6 +387,7 @@ const [github, website, supabase, workers] = await Promise.all([
       ? { apikey: process.env.SUPABASE_PUBLISHABLE_KEY }
       : {}
   ),
+  fetchSupabaseUsage(),
   fetchWorkersUsage()
 ]);
 
@@ -395,8 +439,10 @@ const report = {
     github,
     supabase: {
       ...supabase,
-      usage: null,
-      note: '정확한 무료 할당량은 Supabase Management API 토큰 연결 후 표시'
+      usage: supabaseUsage,
+      note: supabaseUsage
+        ? 'Management API 기본 조회 구간 요청량'
+        : '정확한 요청량은 로컬 Supabase Management API 토큰을 로드한 수동 점검에서 표시'
     },
     snkrdunk: {
       status: snkrdunkStatus,
