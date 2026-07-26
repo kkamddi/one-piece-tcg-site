@@ -108,9 +108,9 @@ const PAGE_SEO = {
     keywords: '원피스카드 구매처, 원피스 카드 공인점포, 원피스카드 매장, 원피스카드 취급점포'
   },
   '/about': {
-    title: 'Card Pone 소개 | 원피스카드 도감·시세·컬렉션 관리',
-    description: 'Card Pone의 운영 목적, 제공 기능, 비공식 팬 서비스 고지와 문의 채널을 안내합니다.',
-    keywords: 'Card Pone 소개, 원피스카드 도감, 원피스카드 시세, 원피스카드 컬렉션'
+    title: 'Card Pone 서비스 안내 | 원피스카드 도감·시세·컬렉션 관리',
+    description: 'Card Pone에서 제공하는 원피스카드 도감, 시세, 컬렉션과 실험실 기능 및 문의 채널을 안내합니다.',
+    keywords: 'Card Pone 서비스 안내, 원피스카드 도감, 원피스카드 시세, 원피스카드 컬렉션'
   },
   '/data-policy': {
     title: '데이터 운영 정책 | Card Pone',
@@ -821,10 +821,10 @@ const SERVER_PAGE_CONTENT = {
     links: ['/guide', '/cards', '/prices', '/shops']
   },
   '/about': {
-    heading: 'Card Pone 서비스 소개',
+    heading: '서비스 안내',
     paragraphs: [
-      'Card Pone은 원피스카드 도감, 시세, 포트폴리오, 일정과 커뮤니티를 제공하는 비공식 팬 서비스입니다.',
-      '공식 판매처나 권리자가 아니며 카드 정보와 시장 데이터는 수집과 비교를 돕는 참고 자료로 제공합니다.'
+      'Card Pone은 원피스카드 도감, 시세, 컬렉션, 일정과 실험실 도구를 제공하는 비공식 서비스입니다.',
+      '카드 정보와 시세는 수집과 비교를 돕기 위한 참고 자료이며, 오류와 서비스 문의는 사이트의 안내된 이메일로 접수합니다.'
     ],
     links: ['/data-policy', '/terms', '/privacy', '/cards']
   },

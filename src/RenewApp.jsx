@@ -2495,7 +2495,7 @@ const UI_TEXT = {
     catalogSortPrice: '가격순',
     cardOwned: '보유',
     cardNotOwned: '미보유',
-    about: '소개',
+    about: '서비스 안내',
     dataPolicy: '데이터 운영 원칙',
     terms: '이용약관',
     privacy: '개인정보처리방침',
@@ -3126,10 +3126,10 @@ const PAGE_SEO = {
     body: '구매처 페이지에서는 지역별 오프라인 공인점포와 취급점포를 필터로 찾고 네이버지도 또는 카카오맵으로 위치를 확인할 수 있습니다.'
   },
   about: {
-    title: 'Card Pone 소개 | 원피스카드 도감·시세·컬렉션 관리',
-    h1: 'Card Pone 소개',
-    description: 'Card Pone의 운영 목적, 제공 기능, 비공식 팬 서비스 고지와 문의 채널을 안내합니다.',
-    keywords: 'Card Pone 소개, 원피스카드 도감, 원피스카드 시세, 원피스카드 컬렉션',
+    title: 'Card Pone 서비스 안내 | 원피스카드 도감·시세·컬렉션 관리',
+    h1: '서비스 안내',
+    description: 'Card Pone에서 제공하는 원피스카드 도감, 시세, 컬렉션과 실험실 기능 및 문의 채널을 안내합니다.',
+    keywords: 'Card Pone 서비스 안내, 원피스카드 도감, 원피스카드 시세, 원피스카드 컬렉션',
     body: 'Card Pone는 원피스 카드게임 유저가 카드 도감, 시세, 컬렉션, 구매처 정보를 한 곳에서 확인할 수 있도록 만든 비공식 정보 서비스입니다.'
   },
   dataPolicy: {
@@ -3853,39 +3853,26 @@ const PRIVACY_SECTIONS = [
 
 const STATIC_INFO_PAGES = {
   about: {
-    title: 'Card Pone 소개',
-    lead: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세 확인, 컬렉션 관리 서비스입니다.',
+    title: '서비스 안내',
+    lead: 'Card Pone는 원피스 카드게임의 카드 정보와 수집 기능을 한곳에 모은 비공식 서비스입니다.',
     sections: [
       {
-        title: '서비스 목적',
+        title: '서비스',
         body: [
-          '한글판과 일본판 원피스 카드게임 카드를 한 곳에서 검색하고 비교할 수 있도록 정리합니다.',
-          '카드별 시세, 박스 가격, 수집 진행도, 구매처 정보를 함께 제공해 수집 판단에 필요한 정보를 줄이는 것을 목표로 합니다.'
+          '한글판·일본판 카드 도감과 시세, 보유 카드 관리, 일정, 구매처 정보를 제공합니다.',
+          '센터링 측정기, 카드깡 시뮬레이터, 수익률 계산기와 덱 빌더는 실험실에서 이용할 수 있습니다.'
         ]
       },
       {
-        title: '제공 기능',
-        list: [
-          '한글판·일본판 카드 도감 검색',
-          '카드별 시세, 최근 거래 기록, 가격 그래프 확인',
-          '박스 가격과 OPTCG Index 확인',
-          '보유 카드, 위시리스트, 포트폴리오 관리',
-          '지역별 공인점포·취급점포 검색',
-          '카메라 기반 카드 센터링 비율 측정',
-          '공지사항, 사전예약, 가이드, Q&A 정보 제공'
-        ]
-      },
-      {
-        title: '운영 고지',
+        title: '안내',
         body: [
-          '본 사이트는 BANDAI 및 ONE PIECE CARD GAME 공식 유통사와 제휴된 공식 서비스가 아닙니다.',
-          'ONE PIECE CARD GAME 관련 이미지, 명칭, 상표의 권리는 각 권리자에게 있습니다.',
-          '시세 정보는 참고용이며 실제 거래 가격, 환율, 수수료, 배송비와 차이가 있을 수 있습니다.'
+          'Card Pone는 BANDAI 및 ONE PIECE CARD GAME의 공식 서비스가 아닙니다.',
+          '카드와 일정은 공식 공개 자료를 참고하며, 시세는 실제 거래 시점과 상태에 따라 달라질 수 있습니다.'
         ]
       },
       {
         title: '문의',
-        body: ['서비스 오류, 데이터 수정, 광고·제휴 문의는 optkr26@gmail.com 으로 연락할 수 있습니다.']
+        body: ['카드 정보 오류와 서비스 문의는 optkr26@gmail.com 으로 보내주세요.']
       }
     ]
   },
@@ -7074,6 +7061,11 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             <span>CATALOG GUIDE</span>
             <strong>원피스카드 도감 사용법</strong>
             <small>한글판, 일본판, OP/EB/ST/PR 시리즈와 일련번호 검색 방법을 확인합니다.</small>
+          </a>
+          <a className="renew-guide-feature-link" href="/about" onClick={() => rememberCurrentAppView()}>
+            <span>CARD PONE</span>
+            <strong>서비스 안내</strong>
+            <small>제공 기능과 문의 방법을 확인합니다.</small>
           </a>
           </>
         ) : null}
