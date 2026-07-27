@@ -973,6 +973,25 @@ const PARTNER_AD_ITEMS = [
       { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://naver.me/xQe4VQum' },
       { labelKr: '인스타그램', labelEn: 'Instagram', href: 'https://www.instagram.com/card_sungji/' }
     ]
+  },
+  {
+    key: 'moa-card-shop',
+    labelKr: 'CARD SHOP',
+    labelEn: 'CARD SHOP',
+    titleKr: '모아카드샵',
+    titleEn: 'Moa Card Shop',
+    bodyKr: '서울 성동구 마조로5길 3-3 2층',
+    bodyEn: '2F, 3-3, Majo-ro 5-gil, Seongdong-gu, Seoul',
+    metaKr: '',
+    metaEn: '',
+    sido: '서울',
+    gungu: '성동구',
+    lat: 37.559779,
+    lng: 127.0406847,
+    actions: [
+      { labelKr: '네이버지도', labelEn: 'Naver Map', href: 'https://naver.me/GKIpPGQ5' },
+      { labelKr: '카카오맵', labelEn: 'Kakao Map', href: 'https://kko.to/gSETTkCWPY' }
+    ]
   }
 ];
 
@@ -1002,7 +1021,8 @@ function getPartnerShopRows(uiLang = 'KR') {
     lng: item.lng,
     sourceType: 'partner',
     sourceLabel: getLocaleText(uiLang, '카드숍', 'Card Shop', 'カードショップ'),
-    naverMapUrl: item.actions?.find((action) => /map\.naver\.com|naver\.me/i.test(action.href))?.href || ''
+    naverMapUrl: item.actions?.find((action) => /map\.naver\.com|naver\.me/i.test(action.href))?.href || '',
+    kakaoMapUrl: item.actions?.find((action) => /map\.kakao\.com|kko\.to/i.test(action.href))?.href || ''
   }));
 }
 
