@@ -28,7 +28,7 @@ function getUserNickname(user) {
 }
 
 function isAdminUser(user) {
-  return String(user?.user_metadata?.username || '').toLowerCase() === 'admin';
+  return String(user?.app_metadata?.role || '').toLowerCase() === 'admin';
 }
 
 export default async function handler(request, response) {

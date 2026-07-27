@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminStats, trackVisit } from './api/admin';
-import { checkAuthAvailability, deleteMyAccount, resolveLoginEmail } from './api/auth';
+import { checkAuthAvailability, deleteMyAccount, signInWithIdentifier } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
 import {
@@ -4739,10 +4739,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
     setMessage('');
     try {
       if (isSignup) throw new Error('신규 가입은 카카오톡 또는 Google을 이용해 주세요.');
-      const lookup = await resolveLoginEmail(identifier.trim());
-      const loginEmail = lookup?.email || identifier.trim();
-      const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
-      if (error) throw error;
+      const data = await signInWithIdentifier(identifier.trim(), password);
       onSignedIn(data?.user || null);
       onClose();
     } catch (error) {
@@ -8110,7 +8107,7 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, marketL
           name: card?.name || '',
           previewImageUrl: getCardImageSrc(card)
         }}
-        isAdmin={authUser?.user_metadata?.username === 'admin'}
+        isAdmin={authUser?.app_metadata?.role === 'admin'}
         onClose={() => setPriceAlertOpen(false)}
       />
     ) : null}
@@ -9293,7 +9290,7 @@ function RenewMarketplace({ authUser, marketListings, setMarketListings, filterC
     if (!nextDistance || !touchState.distance) return;
     setMarketViewerScale(touchState.scale * (nextDistance / touchState.distance));
   };
-  const isMarketplaceAdmin = authUser?.user_metadata?.username === 'admin';
+  const isMarketplaceAdmin = authUser?.app_metadata?.role === 'admin';
   const isListingOwner = Boolean(authUser?.id && listing?.sellerUserId && authUser.id === listing.sellerUserId);
   const listingInterested = Boolean(listing?.id && likedListingIds.has(String(listing.id)));
   const sellerVerificationApproved = sellerVerification?.status === 'approved';
@@ -11909,7 +11906,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     : recentSales.find((sale) => sale?.sourceUrl && !/snkrdunk\.com/i.test(sale.sourceUrl))?.sourceUrl || '';
   const currentPriceLabel = normalizedCondition === 'psa10' ? t('psa10IntegratedPrice') : t('snkrLowestPrice');
   const showMarketHome = !code.trim() && !selected && !candidates.length;
-  const canMapInitialCard = authUser?.user_metadata?.username === 'admin' && Boolean(initialCardId);
+  const canMapInitialCard = authUser?.app_metadata?.role === 'admin' && Boolean(initialCardId);
 
   return (
     <main className="renew-subpage">
@@ -12100,7 +12097,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
             a: Number(getMarketConditionBucket(marketDetail?.latestByCondition, 'a')?.price || 0),
             psa10: Number(getMarketConditionBucket(marketDetail?.latestByCondition, 'psa10')?.price || 0)
           }}
-          isAdmin={authUser?.user_metadata?.username === 'admin'}
+          isAdmin={authUser?.app_metadata?.role === 'admin'}
           onClose={() => setPriceAlertOpen(false)}
         />
       ) : null}
@@ -13429,8 +13426,7 @@ function getAdminPageLabel(path = '/') {
 }
 
 function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = {} }) {
-  const isAdmin = authUser?.app_metadata?.role === 'admin'
-    || authUser?.user_metadata?.username === 'admin';
+  const isAdmin = authUser?.app_metadata?.role === 'admin';
   const [periodDays, setPeriodDays] = useState(7);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14021,10 +14017,7 @@ export default function RenewApp() {
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
-  const isAdminUser = useMemo(() => (
-    authUser?.app_metadata?.role === 'admin'
-    || authUser?.user_metadata?.username === 'admin'
-  ), [authUser]);
+  const isAdminUser = useMemo(() => authUser?.app_metadata?.role === 'admin', [authUser]);
   const needsSocialConsent = useMemo(() => {
     const provider = String(authUser?.app_metadata?.provider || '').toLowerCase();
     return Boolean(authUser?.id
@@ -14237,8 +14230,13 @@ export default function RenewApp() {
     }
     let mounted = true;
     supabase.auth.getSession()
-      .then(({ data }) => {
-        if (mounted) setAuthUser(data.session?.user || null);
+      .then(async ({ data }) => {
+        let user = data.session?.user || null;
+        if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
+          const { data: freshData } = await supabase.auth.getUser();
+          user = freshData?.user || user;
+        }
+        if (mounted) setAuthUser(user);
       })
       .catch(() => {
         if (mounted) setAuthUser(null);

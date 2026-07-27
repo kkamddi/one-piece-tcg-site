@@ -53,17 +53,26 @@ export function signupWithProfile(payload) {
   return requestJson('/api/auth?action=signup', { method: 'POST', body: payload });
 }
 
-export function resolveLoginEmail(identifier) {
-  return requestJson(`/api/auth?action=lookup&identifier=${encodeURIComponent(identifier)}`).then((payload) => {
-    if (payload?.email) return payload;
-    const localEmail = getLocalPreviewEmail(identifier);
-    if (localEmail) return { email: localEmail };
-    return payload;
-  }).catch((error) => {
-    const localEmail = getLocalPreviewEmail(identifier);
-    if (localEmail) return { email: localEmail };
-    throw error;
+export async function signInWithIdentifier(identifier, password) {
+  const value = String(identifier ?? '').trim();
+  const localEmail = getLocalPreviewEmail(value);
+
+  if (localEmail) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: localEmail, password });
+    if (error) throw error;
+    return data;
+  }
+
+  const payload = await requestJson('/api/auth?action=login', {
+    method: 'POST',
+    body: { identifier: value, password }
   });
+  const { data, error } = await supabase.auth.setSession({
+    access_token: payload.accessToken,
+    refresh_token: payload.refreshToken
+  });
+  if (error) throw error;
+  return data;
 }
 
 export async function deleteMyAccount() {

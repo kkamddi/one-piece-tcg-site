@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 import { hasSupabaseAdmin, listAllAuthUsers, supabaseAdmin } from '../../lib/supabase-admin.js';
 
 const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
@@ -24,9 +25,20 @@ async function runCleanup(query) {
   if (error && !isMissingTableError(error)) throw error;
 }
 
+async function signInWithPassword(email, password) {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  if (!supabaseUrl || !serviceRoleKey) throw new Error('supabase_admin_not_configured');
+
+  const authClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+  });
+  return authClient.auth.signInWithPassword({ email, password });
+}
+
 async function deleteAccountData(user) {
   const userId = user.id;
-  if (String(user.user_metadata?.username || '').toLowerCase() === 'admin') throw new Error('admin_account_cannot_be_deleted');
+  if (String(user.app_metadata?.role || '').toLowerCase() === 'admin') throw new Error('admin_account_cannot_be_deleted');
 
   const { data: listings, error: listingsError } = await supabaseAdmin
     .from(MARKET_LISTINGS_TABLE)
@@ -73,10 +85,12 @@ export default async function handler(request, response) {
       const { type, q } = request.query ?? {};
       const value = String(q ?? '').trim().toLowerCase();
       if (!type || !value) return response.status(400).json({ error: 'invalid_request' });
+      if (!['username', 'nickname'].includes(String(type))) {
+        return response.status(400).json({ error: 'invalid_request' });
+      }
       const users = await listAllAuthUsers();
       const taken = users.some((user) => {
         const metadata = user.user_metadata ?? {};
-        if (type === 'email') return String(user.email ?? '').toLowerCase() === value;
         if (type === 'username') return String(metadata.username ?? '').toLowerCase() === value;
         if (type === 'nickname') return String(metadata.nickname ?? '').toLowerCase() === value;
         return false;
@@ -85,13 +99,28 @@ export default async function handler(request, response) {
     }
 
     if (action === 'lookup') {
-      const identifier = String(request.query?.identifier ?? '').trim();
-      if (!identifier) return response.status(400).json({ error: 'invalid_request' });
-      if (identifier.includes('@')) return response.status(200).json({ email: identifier });
-      const users = await listAllAuthUsers();
-      const found = users.find((user) => String(user.user_metadata?.username ?? '').toLowerCase() === identifier.toLowerCase());
-      if (!found?.email) return response.status(404).json({ error: 'invalid_credentials' });
-      return response.status(200).json({ email: found.email });
+      return response.status(410).json({ error: 'lookup_retired' });
+    }
+
+    if (action === 'login' && request.method === 'POST') {
+      const identifier = String(request.body?.identifier ?? '').trim();
+      const password = String(request.body?.password ?? '');
+      if (!identifier || !password) return response.status(400).json({ error: 'invalid_request' });
+
+      let email = identifier;
+      if (!identifier.includes('@')) {
+        const users = await listAllAuthUsers();
+        const found = users.find((user) => String(user.user_metadata?.username ?? '').toLowerCase() === identifier.toLowerCase());
+        email = found?.email || '';
+      }
+      if (!email) return response.status(401).json({ error: 'invalid_credentials' });
+
+      const { data, error } = await signInWithPassword(email, password);
+      if (error || !data?.session) return response.status(401).json({ error: 'invalid_credentials' });
+      return response.status(200).json({
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token
+      });
     }
 
     if (action === 'signup' && request.method === 'POST') {

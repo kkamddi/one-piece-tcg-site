@@ -132,8 +132,7 @@ async function handleStats(request, response) {
   if (!token) return response.status(401).json({ error: 'unauthorized' });
   const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
   const authUser = authData?.user;
-  const isAdmin = authUser?.app_metadata?.role === 'admin'
-    || authUser?.user_metadata?.username === 'admin';
+  const isAdmin = String(authUser?.app_metadata?.role || '').toLowerCase() === 'admin';
   if (authError || !isAdmin) {
     return response.status(403).json({ error: 'forbidden' });
   }
@@ -240,8 +239,7 @@ async function handleOperations(request, response) {
   if (!token) return response.status(401).json({ error: 'unauthorized' });
   const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
   const authUser = authData?.user;
-  const isAdmin = authUser?.app_metadata?.role === 'admin'
-    || authUser?.user_metadata?.username === 'admin';
+  const isAdmin = String(authUser?.app_metadata?.role || '').toLowerCase() === 'admin';
   if (authError || !isAdmin) {
     return response.status(403).json({ error: 'forbidden' });
   }

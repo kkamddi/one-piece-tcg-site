@@ -22,7 +22,7 @@ async function getAuthenticatedUser(request) {
 }
 
 function isAdminUser(user) {
-  return user?.user_metadata?.username === 'admin';
+  return String(user?.app_metadata?.role || '').toLowerCase() === 'admin';
 }
 
 async function getApprovedVerification(userId) {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchAdminStats, trackVisit } from './api/admin';
-import { checkAuthAvailability, resolveLoginEmail, signupWithProfile } from './api/auth';
+import { checkAuthAvailability, signInWithIdentifier, signupWithProfile } from './api/auth';
 import { fetchMyState, saveMyState } from './api/me';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { addCommunityComment, createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityComments, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
@@ -559,9 +559,14 @@ export default function App() {
 
     let alive = true;
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (!alive) return;
-      setAuthUser(data.session?.user ?? null);
+      let user = data.session?.user ?? null;
+      if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
+        const { data: freshData } = await supabase.auth.getUser();
+        user = freshData?.user || user;
+      }
+      if (alive) setAuthUser(user);
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -828,7 +833,7 @@ export default function App() {
     : currentLocale === 'EN'
       ? 'https://en.onepiece-cardgame.com/'
       : OFFICIAL_SITE_URL;
-  const isAdminUser = authUser?.user_metadata?.username === 'admin';
+  const isAdminUser = authUser?.app_metadata?.role === 'admin';
   const defaultCollapsedRarities = useMemo(() => {
     if (cards.length < 30) return ['UC'];
     if (cards.length >= 100) return ['R', 'UC', 'C'];
@@ -1347,9 +1352,7 @@ export default function App() {
         setAuthMode('login');
         setAuthIdentifier(username);
       } else {
-        const lookup = await resolveLoginEmail(identifier);
-        const { error } = await supabase.auth.signInWithPassword({ email: lookup.email, password });
-        if (error) throw error;
+        await signInWithIdentifier(identifier, password);
         setAuthModalOpen(false);
         setAuthIdentifier('');
         setAuthEmail('');
@@ -2290,7 +2293,7 @@ export default function App() {
               )}
             </main>
 
-            {authUser?.user_metadata?.username === 'admin' && adminStats ? (
+            {authUser?.app_metadata?.role === 'admin' && adminStats ? (
               <section className={`mt-5 border ${panelClass} rounded-2xl p-5`}>
                 <div className="mb-3 text-lg font-black">관리자 통계</div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
