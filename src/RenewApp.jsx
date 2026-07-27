@@ -6198,7 +6198,7 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose, uiL
     () => current.series.filter((series) => getProgressSeriesGroup(series) === progressGroup),
     [current.series, progressGroup]
   );
-  return (
+  const modal = (
     <div className="renew-modal-backdrop" onClick={onClose}>
       <div className="renew-info-modal renew-progress-modal" onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
@@ -6245,6 +6245,7 @@ function RenewProgressModal({ progressData, locale, onLocaleChange, onClose, uiL
       </div>
     </div>
   );
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
 function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdit, onOpenPrices, uiLang }) {
