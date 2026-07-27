@@ -11258,7 +11258,6 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
                 <em>{box.code}</em>
                 <span>{BOX_SHORT_TITLES[box.code] || box.name}</span>
               </span>
-              <small>SNKRDUNK #{box.apparelId}</small>
               <b>{formatBoxMarketPrice(box) || t('checkPrice')}</b>
             </div>
           </a>
