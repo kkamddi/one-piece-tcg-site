@@ -3,6 +3,7 @@ import cardMarketLinks from '../src/data/card-market-links.js';
 import { collectMarketSnapshot } from './market.js';
 import { filterDailyTradePrices, medianNumber } from '../lib/market-outlier-filter.js';
 import { marketTradeDateKey } from '../lib/market-trade-date.js';
+import { invalidateR2Json } from '../lib/r2-json-cache.js';
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 50;
@@ -725,6 +726,11 @@ export default async function handler(request, response) {
   }
 
   const mode = String(request.query?.mode || request.query?.action || '').toLowerCase();
+  if (mode === 'invalidate-public-cache') {
+    const invalidated = await invalidateR2Json('public-data/market-latest-v1.json');
+    return response.status(200).json({ ok: true, invalidated });
+  }
+
   if (mode === 'history' || mode === 'trades') {
     if (request.method !== 'POST') {
       return response.status(405).json({ error: 'history_ingest_requires_post' });

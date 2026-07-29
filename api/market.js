@@ -15,7 +15,8 @@ const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
 const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_LIMIT = 180;
 const LISTING_SNAPSHOT_INTERVAL_MS = 24 * 60 * 60 * 1000;
-const MARKET_LATEST_SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
+const MARKET_LATEST_SNAPSHOT_MAX_AGE_MS = 13 * 60 * 60 * 1000;
+const MARKET_HISTORY_CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 const MARKET_DATA_SOURCE = String(process.env.MARKET_DATA_SOURCE || '').trim().toLowerCase();
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -826,13 +827,17 @@ async function readStoredMarketTrades(apparelId) {
   let d1Trades = { a: [], psa10: [] };
   if (shouldReadD1Market() && apparelId) {
     try {
-      const rows = await queryD1(
-        `select condition_key, trade_date_text, price_amount_jpy, price_text, last_seen_at
-         from market_recent_trades
-         where source = 'snkrdunk' and apparel_id = ? and condition_key in ('a', 'psa10')
-         order by coalesce(trade_date, last_seen_at) desc
-         limit 500`,
-        [Number(apparelId)]
+      const rows = await readThroughR2Json(
+        `public-data/market-detail-v1/${Number(apparelId)}/recent-trades.json`,
+        MARKET_HISTORY_CACHE_MAX_AGE_MS,
+        () => queryD1(
+          `select condition_key, trade_date_text, price_amount_jpy, price_text, last_seen_at
+           from market_recent_trades
+           where source = 'snkrdunk' and apparel_id = ? and condition_key in ('a', 'psa10')
+           order by coalesce(trade_date, last_seen_at) desc
+           limit 500`,
+          [Number(apparelId)]
+        )
       );
       const grouped = (rows || []).reduce((acc, row) => {
         const key = conditionKey(row.condition_key);
@@ -893,17 +898,21 @@ async function readStoredMarketChartPoints(apparelId) {
   const chartCutoffDate = dateKeyDaysAgo(365);
   if (shouldReadD1Market() && apparelId) {
     try {
-      const rows = await queryD1(
-        `select condition_key, point_date, median_price_jpy
-         from market_chart_daily_points
-         where source = 'snkrdunk'
-           and apparel_id = ?
-           and condition_key in ('a', 'psa10')
-           and median_price_jpy > 0
-           and point_date >= ?
-         order by point_date asc
-         limit 1200`,
-        [Number(apparelId), chartCutoffDate]
+      const rows = await readThroughR2Json(
+        `public-data/market-detail-v1/${Number(apparelId)}/daily-points-1y.json`,
+        MARKET_HISTORY_CACHE_MAX_AGE_MS,
+        () => queryD1(
+          `select condition_key, point_date, median_price_jpy
+           from market_chart_daily_points
+           where source = 'snkrdunk'
+             and apparel_id = ?
+             and condition_key in ('a', 'psa10')
+             and median_price_jpy > 0
+             and point_date >= ?
+           order by point_date asc
+           limit 1200`,
+          [Number(apparelId), chartCutoffDate]
+        )
       );
       const points = (rows || []).reduce((acc, row) => {
         const key = conditionKey(row.condition_key);
@@ -983,15 +992,19 @@ async function readStoredMarketChartPoints(apparelId) {
 async function readListingFloorChartPoints(apparelId) {
   if (!shouldReadD1Market() || !apparelId) return { a: [], psa10: [] };
   try {
-    const rows = await queryD1(
-      `select condition_key, captured_at, price_amount_jpy
-       from market_listing_floor_snapshots
-       where source = 'snkrdunk'
-         and apparel_id = ?
-         and condition_key in ('a', 'psa10')
-       order by captured_at asc
-       limit 1200`,
-      [Number(apparelId)]
+    const rows = await readThroughR2Json(
+      `public-data/market-detail-v1/${Number(apparelId)}/listing-floor.json`,
+      MARKET_HISTORY_CACHE_MAX_AGE_MS,
+      () => queryD1(
+        `select condition_key, captured_at, price_amount_jpy
+         from market_listing_floor_snapshots
+         where source = 'snkrdunk'
+           and apparel_id = ?
+           and condition_key in ('a', 'psa10')
+         order by captured_at asc
+         limit 1200`,
+        [Number(apparelId)]
+      )
     );
     return (rows || []).reduce((acc, row) => {
       const key = conditionKey(row.condition_key);

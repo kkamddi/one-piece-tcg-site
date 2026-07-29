@@ -7484,7 +7484,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
     Promise.all([
       loadCardMarketLinks(),
       import('./data/market-cards.js'),
-      fetch('/api/market?summary=latest', { cache: 'no-store' })
+      fetch('/api/market?summary=latest')
         .then((res) => res.ok ? res.json() : null)
         .catch(() => null),
       fetch('/api/psa10-market?summary=latest', { cache: 'no-store' })
@@ -8524,7 +8524,7 @@ function RenewPackSimulator({ uiLang, onOpenCard, onOpenGuide }) {
     Promise.all([
       loadCardMarketLinks(),
       import('./data/market-cards.js'),
-      fetch('/api/market?summary=latest', { cache: 'no-store' })
+      fetch('/api/market?summary=latest')
         .then((response) => (response.ok ? response.json() : null))
         .catch(() => null)
     ])

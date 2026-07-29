@@ -38,10 +38,10 @@ on:
         required: false
         default: "1"
   schedule:
-    # Four complete JP market refreshes per day.
+    # Two complete JP market refreshes per day.
     # Persist listing-floor history only during the 00:17 UTC run.
     - cron: "17 0 * * *"
-    - cron: "17 6,12,18 * * *"
+    - cron: "17 12 * * *"
 
 concurrency:
   group: market-price-collector
@@ -284,6 +284,31 @@ jobs:
           fi
           echo "Collector coverage complete: shard=$SHARD_ID offset=$offset stop_offset=$stop_offset total=$expected_total done=$done_flag requests=$request_count"
 
+  refresh-public-cache:
+    name: Refresh public market cache
+    needs: collect
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Invalidate and prewarm latest market prices
+        env:
+          COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
+          MARKET_URL: https://www.optcgkorea.com/api/market
+          COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          if [ -z "$COLLECTOR_TOKEN" ]; then
+            echo "MARKET_COLLECTOR_TOKEN secret is missing."
+            exit 1
+          fi
+          curl -fsS --retry 3 --retry-delay 10 \
+            -H "Authorization: Bearer ${COLLECTOR_TOKEN}" \
+            "${COLLECTOR_URL}?action=invalidate-public-cache"
+          json=$(curl -fsS --retry 3 --retry-delay 10 \
+            "${MARKET_URL}?summary=latest&refresh=${RUN_ID}")
+          node -e "const p=JSON.parse(process.argv[1]); if (!Array.isArray(p.items) || !p.items.length) process.exit(1)" "$json"
+
   evaluate-alerts:
     name: Evaluate price alerts
     needs: collect
@@ -335,8 +360,9 @@ jobs:
     needs:
       - discover
       - collect
+      - refresh-public-cache
       - evaluate-alerts
-    if: ${{ always() && (needs.discover.result == 'failure' || needs.collect.result == 'failure' || needs.evaluate-alerts.result == 'failure') }}
+    if: ${{ always() && (needs.discover.result == 'failure' || needs.collect.result == 'failure' || needs.refresh-public-cache.result == 'failure' || needs.evaluate-alerts.result == 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - name: Notify Telegram
