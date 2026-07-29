@@ -92,6 +92,7 @@ const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
 const MARKET_INDEX_PUBLIC_ENABLED = true;
+const RENEWAL_NOTICE_POPUP_ENABLED = false;
 const PARTNER_NEWS_POPUP_ENABLED = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
@@ -5738,6 +5739,11 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!RENEWAL_NOTICE_POPUP_ENABLED) {
+      setRenewalNoticeOpen(false);
+      setRenewalNoticeChecked(true);
+      return;
+    }
     if (!authUser?.id) {
       setRenewalNoticeOpen(false);
       setRenewalNoticeChecked(true);
