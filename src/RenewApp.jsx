@@ -13500,6 +13500,7 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
     .sort((a, b) => b.count - a.count);
   const maxTrendVisits = Math.max(1, ...dailyTrend.map((item) => Number(item.visits) || 0));
   const maxPopularVisits = Math.max(1, ...popularPages.map((item) => Number(item.visits) || 0));
+  const periodLabel = periodDays === 1 ? '일별' : periodDays === 7 ? '주간' : '월간';
   return (
     <main className="renew-subpage renew-admin-analytics">
       <section className="renew-admin-analytics-head">
@@ -13510,7 +13511,7 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
         <div className="renew-admin-period" aria-label="통계 기간">
           {[1, 7, 30].map((days) => (
             <button key={days} type="button" className={periodDays === days ? 'is-active' : ''} onClick={() => setPeriodDays(days)}>
-              {days === 1 ? '오늘' : `${days}일`}
+              {days === 1 ? '일별' : days === 7 ? '주간' : '월간'}
             </button>
           ))}
         </div>
@@ -13575,7 +13576,7 @@ function RenewAdminAnalytics({ authUser, onlineVisitors = 0, onlinePageCounts = 
         <header>
           <div>
             <span>POPULAR PAGES</span>
-            <h2>많이 본 페이지</h2>
+            <h2>{periodLabel} 많이 본 페이지</h2>
           </div>
           <small>같은 브라우저가 같은 페이지를 하루에 여러 번 열어도 1회로 집계합니다.</small>
         </header>
