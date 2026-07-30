@@ -305,9 +305,10 @@ jobs:
           curl -fsS --retry 3 --retry-delay 10 \
             -H "Authorization: Bearer ${COLLECTOR_TOKEN}" \
             "${COLLECTOR_URL}?action=invalidate-public-cache"
-          json=$(curl -fsS --retry 3 --retry-delay 10 \
-            "${MARKET_URL}?summary=latest&refresh=${RUN_ID}")
-          node -e "const p=JSON.parse(process.argv[1]); if (!Array.isArray(p.items) || !p.items.length) process.exit(1)" "$json"
+          curl -fsS --retry 3 --retry-delay 10 \
+            -o /tmp/market-latest.json \
+            "${MARKET_URL}?summary=latest&refresh=${RUN_ID}"
+          node -e "const p=require('/tmp/market-latest.json'); if (!Array.isArray(p.items) || !p.items.length) process.exit(1)"
 
   evaluate-alerts:
     name: Evaluate price alerts
