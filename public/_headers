@@ -4,3 +4,71 @@
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(self), microphone=(), geolocation=(self), payment=()
+
+/cards/series/*
+  X-Robots-Tag: noindex, follow
+
+/prices/card/*
+  X-Robots-Tag: noindex, follow
+
+/prices/product/*
+  X-Robots-Tag: noindex, follow
+
+/prices/box/*
+  X-Robots-Tag: noindex, follow
+
+/jp/cards/*
+  X-Robots-Tag: noindex, follow
+
+/jp/prices/card/*
+  X-Robots-Tag: noindex, follow
+
+/jp/prices/product/*
+  X-Robots-Tag: noindex, follow
+
+/jp/prices/box/*
+  X-Robots-Tag: noindex, follow
+
+/news/preorder
+  X-Robots-Tag: noindex, follow
+
+/news/oripa
+  X-Robots-Tag: noindex, follow
+
+/news/supplies
+  X-Robots-Tag: noindex, follow
+
+/shops/busan
+  X-Robots-Tag: noindex, follow
+/shops/chungbuk
+  X-Robots-Tag: noindex, follow
+/shops/chungnam
+  X-Robots-Tag: noindex, follow
+/shops/daegu
+  X-Robots-Tag: noindex, follow
+/shops/daejeon
+  X-Robots-Tag: noindex, follow
+/shops/gangwon
+  X-Robots-Tag: noindex, follow
+/shops/gwangju
+  X-Robots-Tag: noindex, follow
+/shops/gyeongbuk
+  X-Robots-Tag: noindex, follow
+/shops/gyeonggi
+  X-Robots-Tag: noindex, follow
+/shops/gyeongnam
+  X-Robots-Tag: noindex, follow
+/shops/incheon
+  X-Robots-Tag: noindex, follow
+/shops/jeju
+  X-Robots-Tag: noindex, follow
+/shops/jeonbuk
+  X-Robots-Tag: noindex, follow
+/shops/jeonnam
+  X-Robots-Tag: noindex, follow
+/shops/sejong
+  X-Robots-Tag: noindex, follow
+/shops/seoul
+  X-Robots-Tag: noindex, follow
+/shops/ulsan
+  X-Robots-Tag: noindex, follow
