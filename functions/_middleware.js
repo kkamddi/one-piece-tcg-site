@@ -838,6 +838,243 @@ const SERVER_PAGE_CONTENT = {
   }
 };
 
+const SERVER_PAGE_DETAILS = {
+  '/': [
+    {
+      heading: '주요 기능',
+      items: [
+        '한글판과 일본판 카드를 카드명, 카드번호, 시리즈와 레어도로 검색할 수 있습니다.',
+        'Single과 PSA10의 최근 거래 기록과 기간별 가격 흐름을 같은 화면에서 비교할 수 있습니다.',
+        '센터링 측정, 가상 개봉, 덱 구성과 손익 계산 도구는 로그인 없이 먼저 사용할 수 있습니다.',
+        '국내 공인점포와 취급점포는 지역과 매장명으로 찾을 수 있습니다.'
+      ]
+    },
+    {
+      heading: '데이터를 확인할 때',
+      paragraphs: [
+        '카드 가격은 카드 상태, 거래 시점, 환율과 거래량에 따라 달라집니다. 단일 가격만 보지 않고 최근 거래일과 기간별 기록을 함께 확인하는 것이 좋습니다.',
+        '보유 카드, 위시리스트와 포트폴리오 저장은 로그인 사용자에게 제공하며 도감 검색, 시세 열람과 실험실 도구는 비로그인 상태에서도 이용할 수 있습니다.'
+      ]
+    }
+  ],
+  '/cards': [
+    {
+      heading: '도감 검색 방법',
+      items: [
+        'OP05-119, ST21-014처럼 카드번호를 알고 있다면 번호 검색이 가장 정확합니다.',
+        '카드명 검색은 같은 캐릭터의 다른 카드와 패러렐 버전을 함께 비교할 때 사용합니다.',
+        'OP는 정규 부스터, EB는 엑스트라 부스터, ST는 스타터덱, PR은 프로모 계열로 구분합니다.',
+        '한글판과 일본판은 별도 데이터로 관리하므로 먼저 언어판을 선택해야 합니다.'
+      ]
+    },
+    {
+      heading: '카드 상세에서 확인할 수 있는 정보',
+      paragraphs: [
+        '카드 이미지, 카드번호, 레어도, 수록 상품과 효과를 확인하고 연결된 시세 상품이 있으면 최근 가격 화면으로 이동할 수 있습니다.',
+        '로그인 사용자는 보유중과 위시리스트를 저장하고 시세 알림 조건을 등록할 수 있습니다.'
+      ]
+    }
+  ],
+  '/prices': [
+    {
+      heading: '가격을 구분하는 기준',
+      items: [
+        'Single은 SNKRDUNK의 A등급 거래를 Card Pone에서 표시하는 이름입니다.',
+        'PSA10은 PSA 10으로 분류된 거래만 별도로 표시합니다.',
+        '최근 시세와 거래 기록이 없는 기간에는 임의의 거래를 만들지 않고 데이터가 없음을 표시합니다.',
+        '여러 장 묶음이나 비정상적으로 큰 가격 편차는 일반적인 단일 카드 거래와 분리해 검토합니다.'
+      ]
+    },
+    {
+      heading: '차트 읽는 방법',
+      paragraphs: [
+        '7일, 1개월과 1년 버튼은 같은 거래 데이터를 조회 기간만 바꿔 보여줍니다. 거래가 없는 날은 새로운 거래로 계산하지 않습니다.',
+        'Market Index는 PSA10 거래가 있는 구성 카드의 개별 지수를 동일 비중으로 평균한 참고 지표이며 실제 매입가나 판매가를 보장하지 않습니다.'
+      ]
+    }
+  ],
+  '/lab': [
+    {
+      heading: '실험실 도구',
+      items: [
+        '센터링 측정기: 촬영한 카드의 앞면 좌우·상하 인쇄 비율을 기기 안에서 계산합니다.',
+        '카드깡 시뮬레이터: 시리즈와 팩·박스·카톤 단위를 선택해 가상 개봉을 진행합니다.',
+        '덱 빌더: 리더 색상과 카드 투입 규칙을 확인하며 50장 덱을 구성합니다.',
+        '포트폴리오 계산기: 매입가와 현재 참고 시세를 비교해 평가손익과 수익률을 계산합니다.'
+      ]
+    },
+    {
+      heading: '결과 사용 범위',
+      paragraphs: [
+        '실험실 결과는 수집과 덱 구성을 돕는 참고값입니다. 감정 등급, 실제 상품 봉입 결과, 대회 적합성과 실제 거래 수익을 보장하지 않습니다.'
+      ]
+    }
+  ],
+  '/lab/centering': [
+    {
+      heading: '측정 순서',
+      items: [
+        '슬리브와 탑로더를 제거하고 카드 네 모서리가 모두 보이게 촬영합니다.',
+        '카드 외곽 네 점을 실제 둥근 모서리의 끝에 맞춰 원근을 보정합니다.',
+        '보정된 카드에서 내부 인쇄 테두리의 좌우·상하 경계를 직접 확인합니다.',
+        '결과 화면에서 비율과 측정 신뢰도, 추가 보정이 필요한 방향을 확인합니다.'
+      ]
+    },
+    {
+      heading: '측정에 포함되지 않는 항목',
+      paragraphs: [
+        '표면 흠집, 화이트닝, 모서리 마모, 인쇄 결함과 카드 진위는 분석하지 않습니다. 표시 점수는 센터링 참고값이며 감정 회사의 최종 등급이 아닙니다.'
+      ]
+    }
+  ],
+  '/lab/pack-simulator': [
+    {
+      heading: '개봉 단위',
+      items: [
+        '1팩은 가상 카톤에서 박스와 팩을 차례로 선택한 결과를 보여줍니다.',
+        '1박스는 한 박스에 배정된 팩을 순서대로 열고 주요 획득 카드를 정리합니다.',
+        '1카톤은 설정된 봉입 규칙에 따라 전체 박스 결과와 주요 히트를 요약합니다.'
+      ]
+    },
+    {
+      heading: '확률과 가격 안내',
+      paragraphs: [
+        '시리즈별 규칙이 확인된 경우 해당 설정을 사용하고, 확인되지 않은 항목은 시뮬레이션용 규칙을 적용합니다. 망가 카드와 특수 팩은 실제 구매 결과를 예측하지 않습니다.',
+        '결과 카드의 가격은 도감에 연결된 참고 시세가 있을 때만 표시하며 가격이 없다고 카드가 존재하지 않는 것은 아닙니다.'
+      ]
+    }
+  ],
+  '/lab/decks': [
+    {
+      heading: '덱 구성 순서',
+      items: [
+        '먼저 사용할 언어판 환경과 리더 카드 1장을 선택합니다.',
+        '리더 색상에 맞게 필터링된 카드에서 메인 덱 50장을 구성합니다.',
+        '같은 카드번호의 최대 투입 매수와 금지·제한 카드 경고를 확인합니다.',
+        '저장한 덱은 다시 불러와 카드 매수를 수정하거나 다른 버전으로 비교할 수 있습니다.'
+      ]
+    }
+  ],
+  '/guide/card-catalog': [
+    {
+      heading: '카드를 정확하게 찾는 순서',
+      items: [
+        '카드 하단의 카드번호를 확인하고 하이픈을 포함해 검색합니다.',
+        '같은 번호의 카드가 여러 장이면 이미지, 수록 상품과 패러렐 여부를 비교합니다.',
+        '카드번호를 모르면 캐릭터명으로 검색한 뒤 언어판과 시리즈 필터로 범위를 줄입니다.',
+        '프로모 카드는 정규 부스터와 별도로 PR 또는 프로모 계열에서 확인합니다.'
+      ]
+    },
+    {
+      heading: '보유 카드 관리',
+      paragraphs: [
+        '로그인 후 카드 상세에서 보유중 또는 위시리스트를 선택할 수 있습니다. 같은 카드번호라도 이미지와 언어판이 다르면 별도 카드로 저장됩니다.'
+      ]
+    }
+  ],
+  '/guide/card-price': [
+    {
+      heading: '시세를 비교하는 순서',
+      items: [
+        '카드번호와 이미지를 확인해 같은 버전의 상품인지 먼저 확인합니다.',
+        'Single과 PSA10을 섞지 않고 원하는 상태의 거래만 선택합니다.',
+        '최근 거래일과 거래 건수를 확인한 뒤 7일·1개월·1년 흐름을 비교합니다.',
+        '거래가 드문 카드는 마지막 거래가 오래됐을 수 있으므로 현재 판매 희망가와 동일하게 보지 않습니다.'
+      ]
+    },
+    {
+      heading: '원화 환산과 참고 범위',
+      paragraphs: [
+        '원화 표시는 수집 시점의 환율을 적용한 참고값입니다. 실제 결제 금액에는 환율 변동, 플랫폼 수수료, 배송비와 관세가 추가될 수 있습니다.'
+      ]
+    }
+  ],
+  '/guide/card-storage': [
+    {
+      heading: '보관 단계',
+      items: [
+        '카드를 만지기 전에 손의 수분과 먼지를 제거하고 카드에 맞는 소프트 슬리브를 사용합니다.',
+        '가치가 높은 카드는 슬리브 후 탑로더나 카드세이버에 넣어 휨과 눌림을 줄입니다.',
+        '바인더는 링이 카드에 닿지 않고 옆으로 넣는 포켓 구조인지 확인합니다.',
+        '직사광선, 높은 습도와 급격한 온도 변화를 피하고 세워서 보관합니다.'
+      ]
+    }
+  ],
+  '/guide/shops': [
+    {
+      heading: '구매처 확인 순서',
+      items: [
+        '공식 홈페이지에서 공인점포와 취급점포 여부를 먼저 확인합니다.',
+        '구매처 페이지에서 지역과 시군구를 선택하고 내 주변순으로 방문 가능한 매장을 찾습니다.',
+        '영업시간, 휴무일과 상품 재고는 방문 전에 매장 지도 또는 공식 채널에서 다시 확인합니다.',
+        '제휴 카드샵 표시는 Card Pone에 상세 정보 제공에 동의한 매장을 구분하기 위한 항목입니다.'
+      ]
+    }
+  ],
+  '/news': [
+    {
+      heading: '정보를 정리하는 기준',
+      paragraphs: [
+        '상품 발매와 이벤트 일정은 한글판과 일본판 공식 출처를 구분하고 원문 링크와 게시일을 함께 표시합니다. Card Pone에서 내용을 임의로 확정하지 않으며 변경 사항은 원문을 우선합니다.',
+        '가이드 문서는 도감, 시세와 구매처를 실제로 사용하는 순서에 맞춰 작성하고 외부 구매 링크가 포함된 경우 해당 성격을 표시합니다.'
+      ]
+    }
+  ],
+  '/calendar': [
+    {
+      heading: '일정 표시 기준',
+      items: [
+        '상품은 공식 또는 연결된 상품 페이지의 발매일을 기준으로 표시합니다.',
+        '공식 공지와 이벤트는 공지 게시일과 실제 개최일을 구분합니다.',
+        '일본판 일정의 제목은 핵심 내용을 한국어로 요약하되 원문 링크를 함께 제공합니다.',
+        '일정은 변경될 수 있으므로 참가나 구매 전 공식 원문을 다시 확인해야 합니다.'
+      ]
+    }
+  ],
+  '/shops': [
+    {
+      heading: '매장 검색 방법',
+      items: [
+        '전체 매장, 공인점포, 취급점포와 제휴 카드샵 유형을 선택할 수 있습니다.',
+        '지역과 시군구를 선택하거나 위치 권한을 허용해 내 주변순으로 정렬할 수 있습니다.',
+        '매장 상세에서 주소, 영업시간과 네이버지도·카카오맵 등 공개된 이동 경로를 확인합니다.'
+      ]
+    },
+    {
+      heading: '방문 전 확인',
+      paragraphs: [
+        'Card Pone은 실시간 재고를 보장하지 않습니다. 행사 일정, 재고, 구매 제한과 영업시간은 방문 전에 해당 매장에 직접 확인해야 합니다.'
+      ]
+    }
+  ],
+  '/about': [
+    {
+      heading: '운영 목적',
+      paragraphs: [
+        'Card Pone은 국내 원피스카드 수집가가 언어판별 카드 정보, 공개 시장의 참고 시세, 발매 일정과 구매처를 여러 사이트에서 반복해서 찾는 불편을 줄이기 위해 운영합니다.',
+        'BANDAI 및 공식 유통사와 제휴된 서비스가 아니며 카드와 상품의 권리는 각 권리자에게 있습니다.'
+      ]
+    },
+    {
+      heading: '오류와 문의',
+      paragraphs: [
+        '카드 이미지, 카드번호, 상품 매핑, 가격 기록이나 매장 정보의 오류는 운영자가 원문과 수집 기록을 대조한 뒤 수정합니다. 문의 주소는 사이트 하단의 서비스 안내에서 확인할 수 있습니다.'
+      ]
+    }
+  ],
+  '/data-policy': [
+    {
+      heading: '수집 데이터의 구분',
+      items: [
+        '카드 기본 정보와 이미지는 언어판과 수록 상품을 구분해 관리합니다.',
+        '시세는 Single과 PSA10을 분리하고 거래일, 가격과 데이터 출처를 함께 저장합니다.',
+        '거래가 없는 날짜는 임의 가격을 생성하지 않으며 마지막 거래 기록과 구분합니다.',
+        '매장과 공식 일정은 공개된 원문을 기준으로 갱신하고 원문 변경 가능성을 안내합니다.'
+      ]
+    }
+  ]
+};
+
 const JAPANESE_SERVER_PAGE_CONTENT = {
   '/': {
     heading: 'ワンピースカードゲームのカード図鑑と相場をひとつに',
@@ -969,6 +1206,114 @@ const JAPANESE_SERVER_PAGE_CONTENT = {
   }
 };
 
+const JAPANESE_SERVER_PAGE_DETAILS = {
+  '/': [
+    {
+      heading: '主な機能',
+      items: [
+        '日本版カードをカード名、カード番号、シリーズ、レアリティから検索できます。',
+        'SingleとPSA10を分けて、最近の取引記録と期間別の価格推移を確認できます。',
+        'センタリング測定、開封シミュレーター、デッキ作成、損益計算をログイン前に試せます。',
+        '公式情報、発売予定、ショップ情報をカード図鑑とあわせて確認できます。'
+      ]
+    },
+    {
+      heading: '価格情報について',
+      paragraphs: [
+        '表示価格はカードの状態、取引日、取引件数、為替によって変わります。単一の価格だけでなく、最新取引日と期間別の記録をあわせて確認してください。'
+      ]
+    }
+  ],
+  '/cards': [
+    {
+      heading: 'カードの探し方',
+      items: [
+        'カード番号が分かる場合は、OP05-119やST21-014のように番号で検索します。',
+        '同じキャラクターの別カードやパラレルを比較する場合はカード名検索を使います。',
+        'OP、EB、ST、プロモを選び、シリーズとレアリティで候補を絞り込みます。',
+        '同じカード番号でも画像や収録商品が異なるカードは別の項目として確認します。'
+      ]
+    }
+  ],
+  '/prices': [
+    {
+      heading: '相場の見方',
+      items: [
+        'SingleとPSA10は混ぜず、確認したい状態を選択します。',
+        '最近の取引日と件数を確認してから、7日・1か月・1年の推移を比較します。',
+        '取引がない日は新しい取引として生成せず、データがないことを表示します。',
+        '複数枚販売や通常から大きく外れた価格は、単品取引と分けて確認します。'
+      ]
+    }
+  ],
+  '/lab': [
+    {
+      heading: '利用できるツール',
+      items: [
+        'センタリング測定では、表面の左右・上下の印刷比率を端末内で計算します。',
+        '開封シミュレーターでは、シリーズとパック・ボックス・カートンを選んで仮想開封できます。',
+        'デッキビルダーでは、リーダーの色と投入枚数ルールを確認しながら50枚のデッキを作成します。',
+        'ポートフォリオ計算では、購入価格と参考相場から評価損益を確認できます。'
+      ]
+    }
+  ],
+  '/lab/centering': [
+    {
+      heading: '測定手順',
+      items: [
+        'スリーブとローダーを外し、カードの四隅が見えるように撮影します。',
+        '外枠の四点を実際の角に合わせて遠近を補正します。',
+        '補正後の画像で内側の印刷境界を上下左右に合わせます。',
+        '比率と信頼度を確認し、必要な場合は境界を再調整します。'
+      ]
+    },
+    {
+      heading: '測定対象外',
+      paragraphs: [
+        '表面の傷、白欠け、角の摩耗、印刷不良、真贋は判定しません。表示結果はセンタリングのみの参考値です。'
+      ]
+    }
+  ],
+  '/lab/pack-simulator': [
+    {
+      heading: '開封単位',
+      items: [
+        '1パックは仮想カートンからボックスとパックを選んだ結果を表示します。',
+        '1ボックスは割り当てられたパックを順番に開封し、主なカードをまとめます。',
+        '1カートンは設定された封入ルールを使い、ボックス別の主な結果を表示します。'
+      ]
+    }
+  ],
+  '/calendar': [
+    {
+      heading: '日程の基準',
+      items: [
+        '商品は公式またはリンク先の商品ページに記載された発売日を使用します。',
+        '公式告知の掲載日とイベントの開催日は分けて表示します。',
+        '予定は変更される場合があるため、参加や購入前に公式原文を確認してください。'
+      ]
+    }
+  ],
+  '/news': [
+    {
+      heading: '情報源',
+      paragraphs: [
+        '商品、イベント、公式告知は日本版と韓国版の情報源を分け、原文リンクと日付を表示します。内容が変更された場合は公式原文を優先します。'
+      ]
+    }
+  ],
+  '/shops': [
+    {
+      heading: 'ショップ検索',
+      items: [
+        '地域または店舗名から公式ショップと公認店を検索できます。',
+        '店舗詳細で住所、営業時間、地図と公式ページへのリンクを確認できます。',
+        '在庫と営業時間は保証されないため、訪問前に店舗へ確認してください。'
+      ]
+    }
+  ]
+};
+
 function createServerPageContent(pathname, seo) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
   const isJapanese = isJapanesePath(normalized);
@@ -979,6 +1324,8 @@ function createServerPageContent(pathname, seo) {
     paragraphs: [seo.description],
     links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops']
   };
+  const detailMap = isJapanese ? JAPANESE_SERVER_PAGE_DETAILS : SERVER_PAGE_DETAILS;
+  const details = content.sections || detailMap[contentKey] || [];
   const links = content.links
     .map((path) => {
       const item = SITE_NAVIGATION_ITEMS.find((entry) => new URL(entry.url).pathname === path);
@@ -987,10 +1334,20 @@ function createServerPageContent(pathname, seo) {
     })
     .join('');
   const paragraphs = content.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
+  const detailSections = details.map((section) => {
+    const sectionParagraphs = (section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
+    const items = (section.items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+    return `<section>
+        <h2>${escapeHtml(section.heading)}</h2>
+        ${sectionParagraphs}
+        ${items ? `<ul>${items}</ul>` : ''}
+      </section>`;
+  }).join('');
 
   return `<main class="server-page-content">
       <h1>${escapeHtml(content.heading)}</h1>
       ${paragraphs}
+      ${detailSections}
       <nav aria-label="${isJapanese ? '関連ページ' : '관련 페이지'}"><ul>${links}</ul></nav>
     </main>`;
 }
@@ -1370,6 +1727,28 @@ function createJsonLd(pathname, seo) {
   });
 }
 
+const THIN_REGION_PATHS = new Set([
+  '/shops/busan', '/shops/chungbuk', '/shops/chungnam', '/shops/daegu', '/shops/daejeon',
+  '/shops/gangwon', '/shops/gwangju', '/shops/gyeongbuk', '/shops/gyeonggi', '/shops/gyeongnam',
+  '/shops/incheon', '/shops/jeju', '/shops/jeonbuk', '/shops/jeonnam', '/shops/sejong',
+  '/shops/seoul', '/shops/ulsan'
+]);
+
+function getRobotsDirective(pathname, seo) {
+  if (seo.robots) return seo.robots;
+  const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const basePath = isJapanesePath(normalized) ? getJapaneseBasePath(normalized) : normalized;
+  const directSeriesSlug = basePath.startsWith('/cards/') ? basePath.slice('/cards/'.length) : '';
+  const isGeneratedSeries = basePath.startsWith('/cards/series/')
+    || (isJapanesePath(normalized) && directSeriesSlug && !directSeriesSlug.includes('/'));
+  const isGeneratedMarketDetail = /^\/prices\/(?:card|product|box)\//.test(basePath);
+  const isAffiliateListing = ['/news/preorder', '/news/oripa', '/news/supplies'].includes(basePath);
+  if (isGeneratedSeries || isGeneratedMarketDetail || THIN_REGION_PATHS.has(basePath) || isAffiliateListing) {
+    return 'noindex,follow';
+  }
+  return 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+}
+
 export function applySeo(html, pathname, seo) {
   const canonicalUrl = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
@@ -1382,6 +1761,7 @@ export function applySeo(html, pathname, seo) {
   const keywords = escapeHtml(seo.keywords);
   const url = escapeHtml(canonicalUrl);
   const image = `${SITE_ORIGIN}/og-card-pone.jpg`;
+  const robots = getRobotsDirective(pathname, seo);
 
   let nextHtml = html
     .replace(/<html\b[^>]*\blang="[^"]*"/i, `<html lang="${isJapanese ? 'ja' : 'ko'}"`)
@@ -1390,7 +1770,7 @@ export function applySeo(html, pathname, seo) {
 
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="description" content="[^"]*"\s*\/?>/i, `<meta name="description" content="${description}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="keywords" content="[^"]*"\s*\/?>/i, `<meta name="keywords" content="${keywords}" />`);
-  nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="robots" content="[^"]*"\s*\/?>/i, `<meta name="robots" content="${seo.robots || 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'}" />`);
+  nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="robots" content="[^"]*"\s*\/?>/i, `<meta name="robots" content="${robots}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:title" content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${title}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:description" content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${description}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:url" content="[^"]*"\s*\/?>/i, `<meta property="og:url" content="${url}" />`);
