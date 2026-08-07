@@ -46,13 +46,8 @@ const paths = [
   '/lab/pack-simulator',
   '/lab/decks',
   '/lab/decks/builder',
-  '/guides/deck-builder',
-  '/guides/centering',
-  '/guides/pack-simulator',
   '/tools/profit-calculator',
-  '/guides/profit-calculator',
-  '/tools/portfolio-calculator',
-  '/guides/portfolio-calculator'
+  '/tools/portfolio-calculator'
 ];
 
 function escapeXml(value) {

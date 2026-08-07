@@ -55,24 +55,6 @@
     <priority>0.82</priority>
   </url>
   <url>
-    <loc>https://www.optcgkorea.com/jp/guides/centering</loc>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/centering" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/centering" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/centering" />
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.82</priority>
-  </url>
-  <url>
-    <loc>https://www.optcgkorea.com/jp/guides/pack-simulator</loc>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/pack-simulator" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/pack-simulator" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/pack-simulator" />
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.82</priority>
-  </url>
-  <url>
     <loc>https://www.optcgkorea.com/jp/tools/profit-calculator</loc>
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/tools/profit-calculator" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/tools/profit-calculator" />
@@ -82,28 +64,10 @@
     <priority>0.82</priority>
   </url>
   <url>
-    <loc>https://www.optcgkorea.com/jp/guides/profit-calculator</loc>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/profit-calculator" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/profit-calculator" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/profit-calculator" />
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.82</priority>
-  </url>
-  <url>
     <loc>https://www.optcgkorea.com/jp/tools/portfolio-calculator</loc>
     <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/tools/portfolio-calculator" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/tools/portfolio-calculator" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/tools/portfolio-calculator" />
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.82</priority>
-  </url>
-  <url>
-    <loc>https://www.optcgkorea.com/jp/guides/portfolio-calculator</loc>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://www.optcgkorea.com/jp/guides/portfolio-calculator" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://www.optcgkorea.com/guides/portfolio-calculator" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.optcgkorea.com/guides/portfolio-calculator" />
     <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.82</priority>

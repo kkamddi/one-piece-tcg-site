@@ -38,6 +38,25 @@
 /news/supplies
   X-Robots-Tag: noindex, follow
 
+/guides/deck-builder
+  X-Robots-Tag: noindex, follow
+/guides/centering
+  X-Robots-Tag: noindex, follow
+/guides/pack-simulator
+  X-Robots-Tag: noindex, follow
+/guides/profit-calculator
+  X-Robots-Tag: noindex, follow
+/guides/portfolio-calculator
+  X-Robots-Tag: noindex, follow
+/jp/guides/centering
+  X-Robots-Tag: noindex, follow
+/jp/guides/pack-simulator
+  X-Robots-Tag: noindex, follow
+/jp/guides/profit-calculator
+  X-Robots-Tag: noindex, follow
+/jp/guides/portfolio-calculator
+  X-Robots-Tag: noindex, follow
+
 /shops/busan
   X-Robots-Tag: noindex, follow
 /shops/chungbuk
