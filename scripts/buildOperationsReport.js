@@ -17,7 +17,9 @@ const WORKFLOW_LABELS = {
 };
 
 const WORKFLOW_FRESHNESS_HOURS = {
-  'Market price collector': { warning: 8, critical: 12 },
+  // The collector runs twice daily. Warn after one delayed cycle and fail only
+  // after more than two expected cycles have been missed.
+  'Market price collector': { warning: 18, critical: 30 },
   'Daily market trading history': { warning: 30, critical: 48 },
   'PSA10 index history refresh': { warning: 8, critical: 12 },
   'Market index refresh': { warning: 30, critical: 48 },

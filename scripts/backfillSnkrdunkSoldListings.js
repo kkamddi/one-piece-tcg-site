@@ -126,12 +126,20 @@ async function fetchJsonWithRetry(url, options = {}, attempts = 4) {
       const body = await response.json().catch(() => null);
       if (response.ok) return body;
       lastError = new Error(`${response.status}:${body?.error || body?.message || response.statusText}`);
+      lastError.status = response.status;
+      lastError.url = url;
     } catch (error) {
+      if (error?.status === 404) throw error;
       lastError = error;
     }
     if (attempt < attempts) await sleep(1000 * attempt);
   }
   throw lastError || new Error('request_failed');
+}
+
+function isMissingProductError(error) {
+  return error?.status === 404
+    && /\/products\/[^/]+\/trading-histories(?:\?|$)/.test(String(error?.url || ''));
 }
 
 async function queryD1(sql, params = []) {
@@ -1043,6 +1051,7 @@ async function main() {
     dailyPointsPruned: 0,
     dailyWindowsComplete: 0,
     dailyWindowsIncomplete: 0,
+    missingProducts: 0,
     failed: 0,
     capped: 0,
     stoppedAtDailyCutoff: 0,
@@ -1106,6 +1115,22 @@ async function main() {
       console.log(JSON.stringify(payload));
       await appendProgress(progressPath, payload);
     } catch (error) {
+      if (isMissingProductError(error)) {
+        summary.missingProducts += 1;
+        const payload = {
+          event: 'card_skipped',
+          reason: 'product_not_found',
+          index: startIndex + index,
+          selectedIndex: index,
+          apparelId: Number(item?.apparelId || 0),
+          code: item?.code || '',
+          historySource,
+          error: error?.message || '404:Not Found',
+        };
+        console.warn(JSON.stringify(payload));
+        await appendProgress(progressPath, payload);
+        continue;
+      }
       summary.failed += 1;
       const payload = {
         event: 'card_failed',
