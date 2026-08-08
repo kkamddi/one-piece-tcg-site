@@ -626,6 +626,18 @@ const SEO_PRIMARY = {
     keywords: '카드 포트폴리오 사용법, 카드 수익률 계산 방법, 원피스카드 매입가, 카드 평가손익',
     schemaType: 'FAQPage'
   },
+  '/shops/official': {
+    title: '원피스카드 공인점포·취급점포 찾기 | 카드포네',
+    description: '원피스 카드게임 공식 공인점포와 취급점포를 지역별로 검색하고 지도와 거리 정보를 확인할 수 있습니다.',
+    keywords: '원피스카드 공인점포, 원피스카드 취급점포, 원피스카드 공식 매장',
+    schemaType: 'CollectionPage'
+  },
+  '/shops/partners': {
+    title: '카드포네 제휴 카드샵 안내 | 카드포네',
+    description: '카드포네 제휴 카드샵의 주소, 영업시간, 지도, 스토어와 공개 채널 정보를 확인할 수 있습니다.',
+    keywords: '카드포네 제휴 카드샵, 원피스카드 매장, 원피스카드 구매처',
+    schemaType: 'CollectionPage'
+  },
   '/faq': {
     title: '원피스카드 Q&A | 카드포네',
     description: '원피스카드 언어판, 봉입률, 박스 구매, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
@@ -674,7 +686,7 @@ const SERVER_PAGE_CONTENT = {
       '카드 일련번호나 이름으로 SNKRDUNK에 매핑된 상품을 찾고 Single과 PSA10의 최근 시세, 거래 기록, 7일·1개월·1년 가격 흐름을 확인할 수 있습니다.',
       'Market Index는 거래 데이터가 있는 PSA10 구성 종목의 일별 중앙값을 사용합니다. 이상 거래를 분리한 뒤 카드별 지수를 동일 비중 평균해 Manga, Luffy 섹터 흐름을 비교합니다.'
     ],
-    links: ['/prices/cards', '/prices/boxes', '/prices/index', '/guide/card-price']
+    links: ['/prices/cards', '/prices/boxes', '/prices/index/manga', '/guide/card-price']
   },
   '/community': {
     heading: '원피스카드 커뮤니티',
