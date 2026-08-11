@@ -3864,12 +3864,12 @@ const PRIVACY_SECTIONS = [
   ['1. 수집하는 개인정보 항목', '본 서비스는 기능 제공을 위해 다음 정보를 수집할 수 있습니다.\n- 계정 정보: 이메일, 아이디, 닉네임, 소셜 로그인 제공자의 계정 식별자 및 프로필 정보\n- 서비스 이용 정보: 보유 카드, 위시리스트, 컬렉션 정보, 시세 알림 조건\n- 커뮤니티 정보: 게시글, 댓글, 업로드 이미지, 좋아요, 출석 및 포인트 내역\n- 알림 정보: Android 앱의 푸시 알림 기기 토큰 및 알림 수신 상태\n- 자동 수집 정보: 접속 IP, 브라우저·앱·기기 정보, 접속 기록, 쿠키\n- 문의 시 수집 정보: 이메일 주소, 문의 내용\n센터링 측정을 위해 카메라 권한을 요청할 수 있으나, 촬영 이미지는 기기 안에서만 분석하며 서버로 수집·저장·전송하지 않습니다.'],
   ['2. 개인정보의 이용 목적', '수집한 개인정보는 다음 목적으로 이용됩니다.\n- 회원 식별 및 로그인 기능 제공\n- 컬렉션 관리, 위시리스트, 보유 카드 저장 기능 제공\n- 커뮤니티 운영, 출석 확인 및 포인트 중복 적립 방지\n- 서비스 이용 기록 관리 및 부정 이용 방지\n- 문의 응대 및 공지사항 전달\n- 서비스 개선 및 통계 분석\n- 광고 표시 및 광고 성과 분석'],
   ['3. 개인정보의 보유 및 이용 기간', '개인정보는 서비스 제공 목적이 달성될 때까지 보관합니다. 이용자는 웹과 앱의 마이페이지에서 계정을 직접 삭제할 수 있으며, 탈퇴 시 계정 정보, 컬렉션, 커뮤니티 활동, 출석·포인트, 시세 알림과 푸시 토큰을 지체 없이 삭제합니다.\n다만 관련 법령에 따라 보관이 필요한 정보는 해당 기간 동안 분리 보관할 수 있습니다.'],
-  ['4. 쿠키 및 광고 서비스 이용', '본 사이트는 서비스 이용 분석, 사용자 편의 제공 및 광고 표시를 위해 쿠키를 사용할 수 있습니다.\n또한 Google AdSense 등 제3자 광고 서비스를 이용할 수 있으며, 이 과정에서 광고 제공자가 쿠키를 사용하여 이용자의 관심사에 기반한 광고를 표시할 수 있습니다.\n이용자는 브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수 있습니다.\n단, 쿠키를 차단할 경우 일부 서비스 이용에 제한이 있을 수 있습니다.'],
+  ['4. 쿠키 및 광고 서비스 이용', '본 사이트는 서비스 이용 분석, 사용자 편의 제공 및 광고 표시를 위해 쿠키를 사용할 수 있습니다.\nGoogle과 광고 파트너는 이용자의 이전 방문 기록을 바탕으로 광고를 제공하기 위해 쿠키를 사용할 수 있습니다. 이용자는 Google 광고 설정(https://adssettings.google.com/)에서 맞춤 광고를 관리할 수 있으며, Google의 광고 데이터 이용 방식은 https://policies.google.com/technologies/ads 에서 확인할 수 있습니다.\n브라우저 설정에서 쿠키를 거부하거나 삭제할 수 있으나 일부 서비스 이용이 제한될 수 있습니다. Google 광고가 동의 대상 지역에서 제공되는 경우 Google 인증 동의 관리 도구를 적용합니다.'],
   ['5. 개인정보의 제3자 제공', '본 사이트는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.\n다만 법령에 따른 요청이 있거나 이용자의 동의가 있는 경우에는 예외로 합니다.'],
   ['6. 개인정보 처리의 위탁', '본 서비스는 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.\n- Supabase: 회원 인증, 계정 및 컬렉션 데이터 저장\n- Kakao Login, Google Identity 및 Naver Login: 소셜 로그인 제공\n- Firebase Cloud Messaging: Android 푸시 알림 전송\n- Cloudflare: 웹·API 제공 및 보안\n- Google AdSense: 웹사이트 광고 제공\n사용하는 서비스가 변경될 경우 본 방침을 통해 안내합니다.'],
   ['7. 이용자의 권리', '이용자는 언제든지 본인의 개인정보를 조회·수정하거나 마이페이지에서 계정을 삭제할 수 있습니다. 별도 요청이 필요한 경우 아래 이메일로 접수할 수 있습니다.\n이메일: optkr26@gmail.com'],
   ['8. 개인정보 보호책임자', '개인정보 관련 문의는 아래 연락처로 문의할 수 있습니다.\n운영자: Card Pone\n이메일: optkr26@gmail.com'],
-  ['9. 개인정보처리방침 변경', '본 개인정보처리방침은 법령, 서비스 변경 사항에 따라 수정될 수 있으며, 변경 시 사이트 공지사항 또는 본 페이지를 통해 안내합니다.\n시행일: 2026년 7월 21일']
+  ['9. 개인정보처리방침 변경', '본 개인정보처리방침은 법령, 서비스 변경 사항에 따라 수정될 수 있으며, 변경 시 사이트 공지사항 또는 본 페이지를 통해 안내합니다.\n시행일: 2026년 8월 11일']
 ];
 
 const STATIC_INFO_PAGES = {
@@ -3878,17 +3878,31 @@ const STATIC_INFO_PAGES = {
     lead: 'Card Pone는 원피스 카드게임의 카드 정보와 수집 기능을 한곳에 모은 비공식 서비스입니다.',
     sections: [
       {
-        title: '서비스',
+        title: '제공하는 기능',
         body: [
           '한글판·일본판 카드 도감과 시세, 보유 카드 관리, 일정, 구매처 정보를 제공합니다.',
           '센터링 측정기, 카드깡 시뮬레이터, 수익률 계산기와 덱 빌더는 실험실에서 이용할 수 있습니다.'
         ]
       },
       {
-        title: '안내',
+        title: '운영 목적',
         body: [
-          'Card Pone는 BANDAI 및 ONE PIECE CARD GAME의 공식 서비스가 아닙니다.',
-          '카드와 일정은 공식 공개 자료를 참고하며, 시세는 실제 거래 시점과 상태에 따라 달라질 수 있습니다.'
+          '국내 수집가가 언어판별 카드 정보, 공개 시장의 참고 시세, 발매 일정과 구매처를 여러 사이트에서 반복해 찾는 불편을 줄이기 위해 운영합니다.',
+          '도감 검색과 시세 비교에 그치지 않고 센터링 측정, 가상 개봉, 덱 구성과 손익 계산처럼 직접 사용할 수 있는 도구를 함께 제공합니다.'
+        ]
+      },
+      {
+        title: '편집과 정정 원칙',
+        body: [
+          '카드와 일정은 확인 가능한 공식 공개 자료를 우선하며, 외부 공지는 원문 링크와 날짜를 함께 표시합니다.',
+          '카드번호, 상품 매핑, 가격 기록 또는 매장 정보의 오류가 접수되면 원문과 수집 기록을 대조한 뒤 수정합니다.'
+        ]
+      },
+      {
+        title: '독립성 안내',
+        body: [
+          'Card Pone는 BANDAI 및 ONE PIECE CARD GAME의 공식 서비스가 아니며 카드와 상품의 권리는 각 권리자에게 있습니다.',
+          '광고 또는 제휴 여부는 도감 수록, 시세 표시, 구매처 검색 결과와 데이터 정정 기준에 영향을 주지 않습니다.'
         ]
       },
       {
@@ -3914,6 +3928,20 @@ const STATIC_INFO_PAGES = {
           '시세는 SNKRDUNK 등 공개적으로 확인 가능한 거래·상품 정보를 바탕으로 수집 및 정리합니다.',
           'PSA10 통합 시세처럼 외부 플랫폼 데이터가 함께 표시되는 경우 플랫폼명이 함께 노출됩니다.',
           '가격은 환율, 판매 상태, 수수료, 배송비, 플랫폼 정책에 따라 실제 구매·판매 금액과 다를 수 있습니다.'
+        ]
+      },
+      {
+        title: '출처 표시와 편집',
+        body: [
+          '외부 플랫폼 데이터는 출처를 구분해 표시하고, 공식 공지와 상품 일정은 확인 가능한 원문으로 연결합니다.',
+          '외부 자료를 그대로 재게시하기보다 카드 검색, 언어판 구분, 거래 조건 비교와 기간별 확인에 필요한 형태로 정리합니다.'
+        ]
+      },
+      {
+        title: '갱신과 오류 처리',
+        body: [
+          '수집 작업이 실패하거나 거래 기록을 확인할 수 없는 경우 임의의 가격이나 거래일을 만들지 않습니다.',
+          '오류가 확인된 데이터는 원문과 수집 기록을 다시 대조하며, 수정 전까지 표시를 보류하거나 데이터 없음으로 안내할 수 있습니다.'
         ]
       },
       {
@@ -3995,6 +4023,17 @@ const STATIC_INFO_PAGES = {
         ]
       },
       {
+        title: '광고와 쿠키',
+        body: [
+          'Google과 광고 파트너는 이전 방문 기록을 바탕으로 광고를 제공하기 위해 쿠키를 사용할 수 있습니다.',
+          '브라우저에서 쿠키를 거부하거나 삭제할 수 있으며, Google 광고가 동의 대상 지역에서 제공되는 경우 Google 인증 동의 관리 도구를 적용합니다.'
+        ],
+        links: [
+          { href: 'https://adssettings.google.com/', label: 'Google 광고 설정' },
+          { href: 'https://policies.google.com/technologies/ads', label: 'Google 광고 데이터 안내' }
+        ]
+      },
+      {
         title: '외부 서비스',
         body: [
           '본 서비스는 Supabase, Kakao Login, Google Identity, Naver Login, Firebase Cloud Messaging, Cloudflare를 사용하며 웹사이트에서 Google AdSense를 사용할 수 있습니다.',
@@ -4010,6 +4049,13 @@ const STATIC_INFO_PAGES = {
         ],
         actionUrl: 'mailto:optkr26@gmail.com?subject=Card%20Pone%20계정%20삭제%20요청',
         actionLabel: '계정 삭제 요청 이메일 보내기'
+      },
+      {
+        title: '방침 변경',
+        body: [
+          '법령 또는 서비스 변경에 따라 본 방침을 수정할 수 있으며 변경 내용은 본 페이지 또는 공지사항을 통해 안내합니다.',
+          '시행일: 2026년 8월 11일'
+        ]
       }
     ]
   }
@@ -7391,6 +7437,13 @@ function RenewStaticInfoPage({ type }) {
                   {section.list.map((item) => <li key={item}>{item}</li>)}
                 </ul>
               ) : null}
+              {Array.isArray(section.links) ? (
+                <div className="renew-static-info-links">
+                  {section.links.map((link) => (
+                    <a key={link.href} className="renew-static-info-action" href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+                  ))}
+                </div>
+              ) : null}
               {section.actionUrl ? <a className="renew-static-info-action" href={section.actionUrl}>{section.actionLabel}</a> : null}
             </section>
           ))}
@@ -9097,6 +9150,26 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
             </span>
           </article>
         ))}
+      </section>
+      <section className="renew-lab-context" aria-label={getLocaleText(uiLang, '실험실 이용 안내', 'Lab usage notes', 'ラボ利用案内')}>
+        <article>
+          <h2>{getLocaleText(uiLang, '로그인 없이 사용', 'Available without login', 'ログイン不要')}</h2>
+          <p>{getLocaleText(
+            uiLang,
+            '센터링 측정, 가상 개봉, 덱 구성과 수익률 계산은 로그인하지 않아도 사용할 수 있습니다. 저장이 필요한 기능만 로그인을 요청합니다.',
+            'Centering checks, virtual openings, deck building, and return calculations are available without signing in. Sign-in is requested only when saving data.',
+            'センタリング測定、開封シミュレーション、デッキ構築、収益率計算はログインなしで利用できます。保存時のみログインが必要です。'
+          )}</p>
+        </article>
+        <article>
+          <h2>{getLocaleText(uiLang, '결과의 범위', 'How to read results', '結果の範囲')}</h2>
+          <p>{getLocaleText(
+            uiLang,
+            '측정값, 가상 봉입 결과, 덱 검사와 참고 시세 계산은 수집을 돕는 보조 정보이며 감정 등급, 실제 개봉 결과, 대회 적합성 또는 거래 수익을 보장하지 않습니다.',
+            'Measurements, simulated pulls, deck checks, and reference-price calculations are supporting information and do not guarantee grading, actual pulls, tournament legality, or profit.',
+            '測定値、仮想封入結果、デッキチェック、参考相場の計算は補助情報であり、鑑定結果、実際の開封結果、大会適合性、利益を保証しません。'
+          )}</p>
+        </article>
       </section>
     </main>
   );
