@@ -63,7 +63,8 @@ jobs:
           fi
           message=$(cat operations-telegram-message.txt)
           keyboard='{"inline_keyboard":[[{"text":"GitHub Actions","url":"https://github.com/kkamddi/one-piece-tcg-site/actions"}]]}'
-          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
             --data-urlencode "text=${message}" \
             --data-urlencode "parse_mode=HTML" \
@@ -82,6 +83,7 @@ jobs:
           fi
           message="CARD Pone 운영 리포트 생성 실패
           Run: ${RUN_URL}"
-          curl -fsS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
             --data-urlencode "text=${message}" || true

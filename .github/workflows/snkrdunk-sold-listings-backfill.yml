@@ -161,9 +161,10 @@ jobs:
           Workflow: $GITHUB_WORKFLOW
           Run: $RUN_URL
           Check SNKRDUNK_COOKIE if the error is 401/403."
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+            --data-urlencode "text=${message}"
 
       - name: Upload progress
         if: always()

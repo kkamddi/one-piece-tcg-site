@@ -142,6 +142,10 @@ function isMissingProductError(error) {
     && /\/products\/[^/]+\/trading-histories(?:\?|$)/.test(String(error?.url || ''));
 }
 
+function isAuthenticationError(error) {
+  return error?.status === 401 || error?.status === 403;
+}
+
 async function queryD1(sql, params = []) {
   if (!D1_API_TOKEN || !D1_ACCOUNT_ID || !D1_DATABASE_ID) return [];
   const body = await fetchJsonWithRetry(
@@ -1143,6 +1147,9 @@ async function main() {
       };
       console.error(JSON.stringify(payload));
       await appendProgress(progressPath, payload);
+      if (isAuthenticationError(error)) {
+        throw new Error(`SNKRDUNK authentication rejected (${error.status}). Refresh the GitHub Actions authentication secrets.`);
+      }
       await sleep(2000);
     }
   }

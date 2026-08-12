@@ -53,6 +53,7 @@ jobs:
           BACKFILL_MODE: aggregate
           BACKFILL_RECENT_RAW_DAYS: "7"
           BACKFILL_DAILY_DAYS: "14"
+          BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
           TRADING_HISTORY_PER_PAGE: "12"
           TRADING_HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '2' }}
@@ -106,6 +107,11 @@ jobs:
             };
             fs.appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(values).map(([key, value]) => `${key}=${value}`).join("\n") + "\n");
             console.log(values);
+            const latest = Date.parse(`${values.latest_trade_date}T00:00:00Z`);
+            const ageDays = Number.isFinite(latest) ? Math.floor((Date.now() - latest) / 86400000) : Infinity;
+            if (ageDays > 2 || values.index_date !== values.latest_trade_date) {
+              throw new Error(`PSA10 market data is stale: trade=${values.latest_trade_date}, index=${values.index_date}, age=${ageDays}d`);
+            }
           '
 
       - name: Notify Telegram on failure
@@ -123,6 +129,7 @@ jobs:
           Workflow: $GITHUB_WORKFLOW
           Run: $RUN_URL
           Check SNKRDUNK_COOKIE if the error is 401/403."
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${message}" || echo "Telegram notification failed."
+            --data-urlencode "text=${message}"
