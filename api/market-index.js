@@ -1,11 +1,13 @@
 import marketIndexes from '../src/data/market-index-components.js';
 import { buildEqualWeightedMarketIndex } from '../lib/market-index-chain.js';
+import { readThroughR2Json } from '../lib/r2-json-cache.js';
 
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
 const CACHE_SECONDS = 60 * 60;
+const INDEX_SOURCE_CACHE_MAX_AGE_MS = CACHE_SECONDS * 1000;
 const INDEX_MIN_DATE = '2022-01-01';
 const CURRENT_OVERLAY_MAX_CHANGE_PERCENT = 20;
 const INDEX_TYPE_ALIASES = {
@@ -486,25 +488,35 @@ export default async function handler(request, response) {
   const apparelIds = indexConfig.components.map((item) => Number(item.apparelId)).filter(Boolean);
 
   try {
-    const storedRows = await queryD1(
-      `select point_date, index_value, active_component_count, component_count
-       from market_index_daily_points
-       where index_code = ? and condition_key = ?
-       order by point_date asc`,
-      [indexConfig.code, conditionKey]
-    ).catch(() => []);
+    const storedSource = await readThroughR2Json(
+      `public-data/market-index-source-v1/${indexConfig.code}-${conditionKey}.json`,
+      INDEX_SOURCE_CACHE_MAX_AGE_MS,
+      async () => {
+        const storedRows = await queryD1(
+          `select point_date, index_value, active_component_count, component_count
+           from market_index_daily_points
+           where index_code = ? and condition_key = ?
+           order by point_date asc`,
+          [indexConfig.code, conditionKey]
+        ).catch(() => []);
+        if (!storedRows.length) return { storedRows: [], componentRows: [] };
+        const componentRows = await queryD1(
+          `select apparel_id, point_date, price_jpy, base_price_jpy, component_index_value
+           from (
+             select c.apparel_id, c.point_date, c.price_jpy, c.base_price_jpy, c.component_index_value,
+                    row_number() over (partition by c.apparel_id order by c.point_date desc) as rn
+             from market_index_component_daily_points c
+             where c.index_code = ? and c.condition_key = ?
+           )
+           where rn <= 2`,
+          [indexConfig.code, conditionKey]
+        ).catch(() => []);
+        return { storedRows, componentRows };
+      }
+    );
+    const storedRows = storedSource?.storedRows || [];
     if (storedRows.length) {
-      const componentRows = await queryD1(
-        `select apparel_id, point_date, price_jpy, base_price_jpy, component_index_value
-         from (
-           select c.apparel_id, c.point_date, c.price_jpy, c.base_price_jpy, c.component_index_value,
-                  row_number() over (partition by c.apparel_id order by c.point_date desc) as rn
-           from market_index_component_daily_points c
-           where c.index_code = ? and c.condition_key = ?
-         )
-         where rn <= 2`,
-        [indexConfig.code, conditionKey]
-      ).catch(() => []);
+      const componentRows = storedSource?.componentRows || [];
       const payload = buildStoredIndexPayload(indexConfig, storedRows, componentRows, conditionKey, range);
       if (payload) {
         response.setHeader?.('Cache-Control', `public, max-age=${CACHE_SECONDS}, s-maxage=${CACHE_SECONDS}`);

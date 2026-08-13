@@ -1272,24 +1272,42 @@ async function findStoredMarketCandidates({ apparelId, code }) {
   if (!shouldReadD1Market()) return [];
   const normalizedCode = String(code || '').trim().toUpperCase().replace(/^OPC-/, '');
   if (!apparelId && !normalizedCode) return [];
-  const where = ["source = 'snkrdunk'", 'is_active = 1'];
-  const params = [];
   if (apparelId) {
-    where.push('apparel_id = ?');
-    params.push(Number(apparelId));
-  } else {
-    where.push("(upper(code) = ? OR upper(replace(code, 'OPC-', '')) = ? OR upper(name) LIKE ?)");
-    params.push(normalizedCode, normalizedCode, `%[${normalizedCode}]%`);
+    try {
+      const rows = await queryD1(`
+        SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
+        FROM market_products
+        WHERE source = 'snkrdunk' AND is_active = 1 AND apparel_id = ?
+        LIMIT 24
+      `, [Number(apparelId)]);
+      return rows.map(parseStoredMarketItem).filter(Boolean);
+    } catch {
+      return [];
+    }
   }
+
   try {
-    const rows = await queryD1(`
+    const exactRows = await queryD1(`
       SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
       FROM market_products
-      WHERE ${where.join(' AND ')}
+      WHERE source = 'snkrdunk'
+        AND is_active = 1
+        AND code COLLATE NOCASE IN (?, ?)
       ORDER BY updated_at DESC
       LIMIT 24
-    `, params);
-    return rows.map(parseStoredMarketItem).filter(Boolean);
+    `, [normalizedCode, `OPC-${normalizedCode}`]);
+    if (exactRows.length) return exactRows.map(parseStoredMarketItem).filter(Boolean);
+
+    const nameRows = await queryD1(`
+      SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
+      FROM market_products
+      WHERE source = 'snkrdunk'
+        AND is_active = 1
+        AND name LIKE ?
+      ORDER BY updated_at DESC
+      LIMIT 24
+    `, [`%[${normalizedCode}]%`]);
+    return nameRows.map(parseStoredMarketItem).filter(Boolean);
   } catch {
     return [];
   }

@@ -2,8 +2,6 @@ name: SNKRDUNK sold listings backfill
 
 on:
   schedule:
-    # Daily incremental trading-history refresh at 04:00 KST.
-    - cron: "0 19 * * *"
     # Weekly Monday 06:00 KST one-year retry for approved cards with no daily history.
     - cron: "0 21 * * 0"
   push:

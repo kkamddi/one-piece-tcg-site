@@ -3,7 +3,7 @@ import cardMarketLinks from '../src/data/card-market-links.js';
 import { collectMarketSnapshot } from './market.js';
 import { filterDailyTradePrices, medianNumber } from '../lib/market-outlier-filter.js';
 import { marketTradeDateKey } from '../lib/market-trade-date.js';
-import { invalidateR2Json } from '../lib/r2-json-cache.js';
+import { invalidateR2Json, readThroughR2Json } from '../lib/r2-json-cache.js';
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 50;
@@ -18,6 +18,8 @@ const DISCOVERY_MAX_PAGES = 3;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
+const MARKET_CATALOG_CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const MARKET_OVERRIDES_CACHE_MAX_AGE_MS = 60 * 60 * 1000;
 
 function getD1Binding() {
   const binding = process.env?.[D1_BINDING_NAME] || process.env?.DB || null;
@@ -136,13 +138,17 @@ function parseStoredMarketCard(row) {
 
 async function fetchDiscoveredMarketCards() {
   try {
-    const rows = await queryD1(`
-      SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
-      FROM market_products
-      WHERE source = 'snkrdunk'
-        AND is_active = 1
-        AND json_extract(raw_market_card_json, '$.catalogDiscovered') = 1
-    `);
+    const rows = await readThroughR2Json(
+      'public-data/discovered-market-cards-v1.json',
+      MARKET_CATALOG_CACHE_MAX_AGE_MS,
+      () => queryD1(`
+        SELECT source, apparel_id, locale, code, name, set_name, source_url, preview_image_url, raw_market_card_json
+        FROM market_products
+        WHERE source = 'snkrdunk'
+          AND is_active = 1
+          AND json_extract(raw_market_card_json, '$.catalogDiscovered') = 1
+      `)
+    );
     return uniqueByApparelId(rows.map(parseStoredMarketCard).filter(Boolean));
   } catch {
     return [];
@@ -583,12 +589,16 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
 
 async function fetchApprovedOverrideIds() {
   try {
-    const rows = await queryD1(`
-      SELECT apparel_id AS apparelId
-      FROM card_market_link_overrides
-      WHERE status = 'approved'
-        AND apparel_id > 0
-    `);
+    const rows = await readThroughR2Json(
+      'public-data/approved-market-overrides-v1.json',
+      MARKET_OVERRIDES_CACHE_MAX_AGE_MS,
+      () => queryD1(`
+        SELECT apparel_id AS apparelId
+        FROM card_market_link_overrides
+        WHERE status = 'approved'
+          AND apparel_id > 0
+      `)
+    );
     return rows.map((row) => Number(row.apparelId || row.apparel_id || 0)).filter((id) => id > 0);
   } catch {
     return [];
@@ -706,6 +716,7 @@ async function discoverNewMarketCards() {
     ? await collectBatch(additions, Math.min(DEFAULT_CONCURRENCY, 3), { persistListingSnapshot: true })
     : { collected: 0, priced: 0, failed: 0, errors: [] };
   if (snapshot.failed > 0) throw new Error(`catalog_snapshot_failed:${snapshot.failed}`);
+  if (additions.length) await invalidateR2Json('public-data/discovered-market-cards-v1.json');
   return {
     ok: true,
     scanned: fetched.length,

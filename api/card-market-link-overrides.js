@@ -1,9 +1,12 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
+import { invalidateR2Json, readThroughR2Json } from '../lib/r2-json-cache.js';
 
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const D1_DATABASE_ID = String(process.env.D1_DATABASE_ID || '').trim();
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
+const OVERRIDES_CACHE_KEY = 'public-data/card-market-link-overrides-v1.json';
+const OVERRIDES_CACHE_MAX_AGE_MS = 60 * 60 * 1000;
 
 function getD1Binding() {
   const binding = process.env?.[D1_BINDING_NAME] || process.env?.DB || null;
@@ -71,17 +74,21 @@ export default async function handler(request, response) {
   try {
     if (request.method === 'GET') {
       try {
-        const rows = await queryD1(`
-          SELECT
-            card_id AS cardId,
-            apparel_id AS apparelId,
-            status,
-            note,
-            updated_at AS updatedAt
-          FROM card_market_link_overrides
-          WHERE status IN ('approved', 'blocked')
-          ORDER BY updated_at DESC
-        `);
+        const rows = await readThroughR2Json(
+          OVERRIDES_CACHE_KEY,
+          OVERRIDES_CACHE_MAX_AGE_MS,
+          () => queryD1(`
+            SELECT
+              card_id AS cardId,
+              apparel_id AS apparelId,
+              status,
+              note,
+              updated_at AS updatedAt
+            FROM card_market_link_overrides
+            WHERE status IN ('approved', 'blocked')
+            ORDER BY updated_at DESC
+          `)
+        );
         response.setHeader('Cache-Control', 'no-store, max-age=0');
         return response.status(200).json({ items: rows });
       } catch (error) {
@@ -121,6 +128,8 @@ export default async function handler(request, response) {
           created_by = excluded.created_by,
           updated_at = CURRENT_TIMESTAMP
       `, [cardId, status === 'blocked' ? 0 : Math.round(apparelId), status, note, user.id]);
+      await invalidateR2Json(OVERRIDES_CACHE_KEY);
+      await invalidateR2Json('public-data/approved-market-overrides-v1.json');
 
       return response.status(200).json({
         ok: true,
@@ -142,6 +151,8 @@ export default async function handler(request, response) {
 
       await ensureTable();
       await queryD1('DELETE FROM card_market_link_overrides WHERE card_id = ?', [cardId]);
+      await invalidateR2Json(OVERRIDES_CACHE_KEY);
+      await invalidateR2Json('public-data/approved-market-overrides-v1.json');
       return response.status(200).json({ ok: true, cardId });
     }
 
