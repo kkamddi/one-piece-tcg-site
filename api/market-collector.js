@@ -18,8 +18,8 @@ const DISCOVERY_MAX_PAGES = 3;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const D1_BINDING_NAME = String(process.env.MARKET_D1_BINDING || 'OPTCG_PUBLIC_D1').trim();
-const MARKET_CATALOG_CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000;
-const MARKET_OVERRIDES_CACHE_MAX_AGE_MS = 60 * 60 * 1000;
+const MARKET_CATALOG_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const MARKET_OVERRIDES_CACHE_MAX_AGE_MS = 13 * 60 * 60 * 1000;
 
 function getD1Binding() {
   const binding = process.env?.[D1_BINDING_NAME] || process.env?.DB || null;

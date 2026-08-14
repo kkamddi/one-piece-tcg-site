@@ -432,11 +432,14 @@ async function uploadListingImage(request, response, user) {
 
   const key = `market/listings/${user.id}/${Date.now()}-${crypto.randomUUID()}.${getImageExtension(mimeType)}`;
   await bucket.put(key, bytes, {
-    httpMetadata: { contentType: mimeType }
+    httpMetadata: {
+      contentType: mimeType,
+      cacheControl: 'public, max-age=2592000, immutable'
+    }
   });
   return response.status(201).json({
     key,
-    imageUrl: `/api/card-thumb?key=${encodeURIComponent(key)}`
+    imageUrl: `https://cards.optcgkorea.com/${key}`
   });
 }
 

@@ -332,7 +332,7 @@ export async function onRequest(context) {
     const headers = new Headers(finalResponse.headers);
     headers.set(
       'Cache-Control',
-      `public, max-age=60, s-maxage=${publicCacheTtl}, stale-while-revalidate=86400`
+      `public, max-age=${Math.min(publicCacheTtl, 600)}, s-maxage=${publicCacheTtl}, stale-while-revalidate=86400`
     );
     const cacheableResponse = new Response(finalResponse.body, {
       status: finalResponse.status,

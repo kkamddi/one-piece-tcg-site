@@ -1715,12 +1715,6 @@ function getRarityBucket(rarity = '') {
 function getCardImageSrc(card) {
   const source = card?.imageUrl || card?.image_url || card?.image || '';
   if (!source) return '/card-placeholder.svg';
-  if (/^https:\/\/(www\.)?onepiece-cardgame\.(com|kr)\//.test(source)) {
-    if (typeof window !== 'undefined' && /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname)) {
-      return source;
-    }
-    return resolveApiUrl(`/api/card-image?url=${encodeURIComponent(source)}`);
-  }
   return source;
 }
 
@@ -1741,8 +1735,7 @@ function getCardThumbnailSrc(card) {
 }
 
 function getCardThumbnailProxySrc(card) {
-  const key = getCardThumbnailKey(card);
-  return key ? resolveApiUrl(`/api/card-thumb?key=${encodeURIComponent(key)}`) : '';
+  return '';
 }
 
 function placeholderImage(event) {
@@ -2314,7 +2307,7 @@ async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   if (code) params.set('code', code);
   if (apparelId) params.set('apparelId', String(apparelId));
   if (summary) params.set('summary', '1');
-  const response = await fetch(`/api/market?${params.toString()}`, { cache: 'no-store' });
+  const response = await fetch(`/api/market?${params.toString()}`);
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
@@ -2324,7 +2317,7 @@ async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
 async function fetchPsa10MarketPrice(cardId) {
   if (!cardId) return null;
   const params = new URLSearchParams({ cardId });
-  const response = await fetch(`/api/psa10-market?${params.toString()}`, { cache: 'no-store' });
+  const response = await fetch(`/api/psa10-market?${params.toString()}`);
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) return null;
@@ -5642,7 +5635,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
     for (let index = 0; index < apparelIds.length; index += 200) apparelIdChunks.push(apparelIds.slice(index, index + 200));
     Promise.all(apparelIdChunks.map((chunk) => {
       const params = new URLSearchParams({ summary: 'portfolio', apparelIds: chunk.join(',') });
-      return fetch(`/api/market?${params.toString()}`, { cache: 'no-store' })
+      return fetch(`/api/market?${params.toString()}`)
         .then((response) => response.ok ? response.json() : null)
         .catch(() => null);
     })).then((summaries) => ({ items: summaries.flatMap((summary) => Array.isArray(summary?.items) ? summary.items : []) }))
@@ -6146,7 +6139,7 @@ function RenewHomeMarketIndex({ onOpen }) {
   useEffect(() => {
     let cancelled = false;
     Promise.all(HOME_MARKET_INDEX_OPTIONS.map(async (option) => {
-      const response = await fetch(`/api/market-index?type=${option.key}&condition=${MARKET_INDEX_CONDITION}&range=7d`, { cache: 'no-store' });
+      const response = await fetch(`/api/market-index?type=${option.key}&condition=${MARKET_INDEX_CONDITION}&range=7d`);
       return [option.key, response.ok ? await response.json() : null];
     }))
       .then((entries) => {
@@ -6627,19 +6620,6 @@ function RenewCalendar({ uiLang }) {
     if (getPageFromPath(window.location.pathname) !== 'calendar') return;
     replaceAppHistoryState({ calendarViewState: { monthKey, selectedDate, localeFilter, kindFilter } });
   }, [monthKey, selectedDate, localeFilter, kindFilter]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/box-market', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (!cancelled && Array.isArray(payload?.items)) setBoxes(payload.items);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const events = useMemo(() => buildCalendarEvents(boxes), [boxes]);
   const filteredEvents = useMemo(() => events.filter((event) => (
@@ -7540,7 +7520,7 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       fetch('/api/market?summary=latest')
         .then((res) => res.ok ? res.json() : null)
         .catch(() => null),
-      fetch('/api/psa10-market?summary=latest', { cache: 'no-store' })
+      fetch('/api/psa10-market?summary=latest')
         .then((res) => res.ok ? res.json() : null)
         .catch(() => null)
     ])
@@ -7639,26 +7619,6 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
       openSection
     });
   }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter, catalogSortMode, openSection, onViewStateChange]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/box-market', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (cancelled || !Array.isArray(payload?.items)) return;
-        setSeriesBoxImageByCode((current) => {
-          const next = new Map(current);
-          payload.items.forEach((item) => {
-            if (item?.code && item?.previewImageUrl) next.set(item.code, item.previewImageUrl);
-          });
-          return next;
-        });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -8551,26 +8511,6 @@ function RenewPackSimulator({ uiLang, onOpenCard, onOpenGuide }) {
     setFastOpened(false);
     setAutoOpening(false);
   }, [locale, selectedSeriesId, unit]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/box-market', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (cancelled || !Array.isArray(payload?.items)) return;
-        setBoxImageByCode((current) => {
-          const next = new Map(current);
-          payload.items.forEach((item) => {
-            if (item?.code && item?.previewImageUrl) next.set(item.code, item.previewImageUrl);
-          });
-          return next;
-        });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -11085,7 +11025,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     let cancelled = false;
     setPayload(null);
     setLoading(true);
-    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${MARKET_INDEX_CONDITION}&range=${range}`, { cache: 'no-store' })
+    fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${MARKET_INDEX_CONDITION}&range=${range}`)
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!cancelled) setPayload(data);
@@ -11286,18 +11226,6 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
     if (getPageFromPath(window.location.pathname) !== 'prices') return;
     replaceAppHistoryState({ boxMarketViewState: { sortMode, boxPage } });
   }, [sortMode, boxPage]);
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/box-market', { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (!cancelled && Array.isArray(payload?.items)) setBoxes(payload.items);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   useEffect(() => {
     const previous = previousBoxViewRef.current;
     previousBoxViewRef.current = { sortMode, initialBoxCode };

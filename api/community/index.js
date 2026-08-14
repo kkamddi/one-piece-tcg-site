@@ -6,6 +6,9 @@ import {
 import { resolveCommunityAuthorGrades } from '../../lib/community-grade-profile.js';
 import { supabaseAdmin } from '../../lib/supabase-admin.js';
 
+const PUBLIC_IMAGE_BASE_URL = 'https://cards.optcgkorea.com';
+const PUBLIC_IMAGE_CACHE_CONTROL = 'public, max-age=2592000, immutable';
+
 function getAuthToken(request) {
   const authHeader = String(request.headers.authorization ?? '');
   return authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
@@ -65,10 +68,12 @@ async function uploadCommunityImage(request, response, user) {
   if (bytes.byteLength > 900 * 1024) return response.status(413).json({ error: 'image_too_large' });
 
   const key = `community/posts/${user.id}/${Date.now()}-${crypto.randomUUID()}.${getImageExtension(mimeType)}`;
-  await bucket.put(key, bytes, { httpMetadata: { contentType: mimeType } });
+  await bucket.put(key, bytes, {
+    httpMetadata: { contentType: mimeType, cacheControl: PUBLIC_IMAGE_CACHE_CONTROL }
+  });
   return response.status(201).json({
     key,
-    imageUrl: `/api/card-thumb?key=${encodeURIComponent(key)}`
+    imageUrl: `${PUBLIC_IMAGE_BASE_URL}/${key}`
   });
 }
 
