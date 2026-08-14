@@ -4514,15 +4514,17 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </a>
 
         <nav className="renew-tabs" aria-label="주요 메뉴">
-          {NAV_ITEMS.map((item) => (
-            <a
-              key={item.id}
-              href={getLocalizedPagePath(item.id, uiLang)}
-              className={`renew-tab ${(item.id === 'lab' ? isLabActive : activePage === item.id) ? 'is-active' : ''}`}
-              onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
-            >
-              {t(item.labelKey)}
-            </a>
+          {NAV_ITEMS.map((item, index) => (
+            <React.Fragment key={item.id}>
+              {index > 0 ? <span className="renew-tab-divider" aria-hidden="true">|</span> : null}
+              <a
+                href={getLocalizedPagePath(item.id, uiLang)}
+                className={`renew-tab ${(item.id === 'lab' ? isLabActive : activePage === item.id) ? 'is-active' : ''}`}
+                onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
+              >
+                {t(item.labelKey)}
+              </a>
+            </React.Fragment>
           ))}
         </nav>
 
