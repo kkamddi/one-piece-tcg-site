@@ -628,16 +628,15 @@ const SUPPLY_FILTERS = [
 const NEWS_LINK_GROUPS = [
   {
     id: 'preorder',
-    title: '아마존 사전예약 응모',
+    title: '아마존 히로인즈2 응모',
     description: '',
     status: 'AMAZON',
     links: [
       {
-        label: 'OP-17 사전예약',
+        label: '히로인즈2 응모',
         subLabel: 'Amazon Japan',
-        href: 'https://www.amazon.co.jp/dp/B0H43ZX8LK/ref=nosim?tag=optcgkorea26-22',
-        imageUrl: '/uploads/amazon-op17.png',
-        badge: 'OP-17'
+        href: 'https://link.amazon/B04fyW76r',
+        badge: 'EB-05'
       }
     ]
   },
@@ -894,7 +893,7 @@ const CARD_CATALOG_GUIDE = {
 };
 const HOME_NEWS_LINKS = [
   {
-    label: 'OP-17 사전예약 응모',
+    label: '히로인즈2 응모',
     description: 'Amazon Japan 바로가기',
     query: 'section=preorder'
   },
@@ -1070,7 +1069,7 @@ function getHomeNewsLinks() {
   const preorderLink = NEWS_LINK_GROUPS.find((item) => item.id === 'preorder')?.links?.[0];
   return HOME_NEWS_LINKS.map((item) => {
     if (item.query === 'section=preorder' && preorderLink?.label) {
-      return { ...item, label: preorderLink.label, description: 'Amazon Japan 사전예약 응모' };
+      return { ...item, label: preorderLink.label, description: 'Amazon Japan 응모 바로가기' };
     }
     if (item.query === 'section=notice&locale=JP' && krTopic?.title) {
       return {
@@ -1408,7 +1407,7 @@ const GUIDE_QA_GROUPS = [
 ];
 const NEWS_GUIDE_CONTENT = {
   preorder: {
-    title: '아마존 사전예약 응모 안내',
+    title: '아마존 히로인즈2 응모 안내',
     description: '',
     sections: [
       {
@@ -1416,7 +1415,7 @@ const NEWS_GUIDE_CONTENT = {
         type: 'steps',
         items: [
           '일본 아마존 계정으로 로그인합니다.',
-          'OP-17 상품 페이지에 접속합니다.',
+          '히로인즈2 상품 페이지에 접속합니다.',
           '상품 페이지에서 Request Invite 버튼을 누릅니다.',
           '신청이 완료되면 등록된 이메일로 결과를 기다립니다.',
           '구매 초대에 선정되면 이메일로 안내가 도착합니다.',
