@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getSeriesGuideEntries, seriesGuideSourcePaths } from './seriesGuideSeo.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputPath = path.join(rootDir, 'public', 'sitemap.xml');
@@ -8,7 +9,8 @@ const siteOrigin = 'https://www.optcgkorea.com';
 
 const sourcePaths = [
   path.join(rootDir, 'src', 'RenewApp.jsx'),
-  path.join(rootDir, 'functions', '_middleware.js')
+  path.join(rootDir, 'functions', '_middleware.js'),
+  ...seriesGuideSourcePaths
 ];
 
 const lastmod = new Date(Math.max(...sourcePaths.map((sourcePath) => fs.statSync(sourcePath).mtimeMs)))
@@ -59,7 +61,8 @@ function escapeXml(value) {
     .replaceAll("'", '&apos;');
 }
 
-const entries = paths.map((urlPath) => {
+const seriesGuidePaths = getSeriesGuideEntries().map((entry) => entry.pathname);
+const entries = [...paths, ...seriesGuidePaths].map((urlPath) => {
   const priority = urlPath === '/' ? '1.0' : urlPath.split('/').filter(Boolean).length === 1 ? '0.9' : '0.8';
   return [
     '  <url>',

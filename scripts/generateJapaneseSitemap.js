@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getSeriesGuideEntries, seriesGuideSourcePaths } from './seriesGuideSeo.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputPath = path.join(rootDir, 'public', 'sitemap-jp.xml');
@@ -47,7 +48,7 @@ function renderUrl(japanesePath, { lastmod, changefreq, priority }) {
   ].join('\n');
 }
 
-const pageLastmod = getLastModified([sourcePaths.app, sourcePaths.middleware]);
+const pageLastmod = getLastModified([sourcePaths.app, sourcePaths.middleware, ...seriesGuideSourcePaths]);
 
 const basePaths = [
   '/jp',
@@ -67,6 +68,9 @@ const entries = basePaths.map((urlPath) => renderUrl(urlPath, {
   changefreq: 'weekly',
   priority: urlPath === '/jp' ? '0.9' : '0.82'
 }));
+for (const { pathname } of getSeriesGuideEntries({ japanese: true })) {
+  entries.push(renderUrl(pathname, { lastmod: pageLastmod, changefreq: 'weekly', priority: '0.78' }));
+}
 
 const xml = [
   '<?xml version="1.0" encoding="UTF-8"?>',

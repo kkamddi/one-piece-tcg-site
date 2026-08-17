@@ -3461,13 +3461,26 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     const series = findSeriesByRouteSlug(path.slice('/guides/series/'.length));
     if (series) {
       const code = getBaseSeriesId(series);
-      const name = series.koName || series.enName || code;
+      const isJapanese = uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP';
+      const name = (isJapanese ? series.enName : series.koName) || series.enName || series.koName || code;
+      const locale = series.locale || 'JP';
+      const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series.id] || 0);
+      if (isJapanese) {
+        const localeLabel = locale === 'JP' ? '日本版' : locale === 'EN' ? '英語版' : '韓国版';
+        return {
+          title: `${code} ${name} カードリスト・シリーズガイド | Card Pone`,
+          h1: `${code} ${name} シリーズガイド`,
+          description: `${localeLabel}${code} ${name}の登録カード${cardCount}枚をカード番号、レアリティ、画像から確認できるシリーズガイドです。`,
+          keywords: `${code},${name},ワンピースカードゲーム,カードリスト,${localeLabel}`,
+          body: `${code}シリーズの基本情報と収録カードをCard Poneのカード図鑑・相場データとあわせて確認できます。`
+        };
+      }
       return {
-        title: `${code} ${name} 가이드 | Card Pone`,
-        h1: `${code} ${name} 가이드`,
-        description: `${code} ${name}의 상품 정보와 수록 카드, 카드별 도감 및 시세 연결을 확인할 수 있습니다.`,
-        keywords: `${code}, ${name}, 원피스카드 시리즈, 원피스카드 수록 카드`,
-        body: `${code} 시리즈의 상품 정보와 수록 카드를 기존 Card Pone 도감 및 시세 데이터와 연결해 정리한 가이드입니다.`
+        title: `${code} ${name} 카드 리스트·시리즈 가이드 | Card Pone`,
+        h1: `${code} ${name} 시리즈 가이드`,
+        description: `${code} ${name}의 도감 등록 카드 ${cardCount}장을 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
+        keywords: `${code}, ${name}, 원피스카드 리스트, 원피스카드 도감`,
+        body: `${code} 시리즈의 상품 정보와 수록 카드를 Card Pone 도감 및 시세 데이터와 연결해 정리한 가이드입니다.`
       };
     }
   }

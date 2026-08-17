@@ -1551,9 +1551,10 @@ function createServerPageContent(pathname, seo) {
   const contentMap = isJapanese ? JAPANESE_SERVER_PAGE_CONTENT : SERVER_PAGE_CONTENT;
   const contentKey = isJapanese ? getJapaneseBasePath(normalized) : normalized;
   const content = contentMap[contentKey] || {
-    heading: seo.title.split('|')[0].trim(),
-    paragraphs: [seo.description],
-    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops']
+    heading: seo.heading || seo.title.split('|')[0].trim(),
+    paragraphs: seo.paragraphs || [seo.description],
+    sections: seo.sections || [],
+    links: seo.links || (isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops'])
   };
   const detailMap = isJapanese ? JAPANESE_SERVER_PAGE_DETAILS : SERVER_PAGE_DETAILS;
   const details = content.sections || detailMap[contentKey] || [];
@@ -2035,7 +2036,7 @@ export function applySeo(html, pathname, seo) {
   }
   const serverContent = createServerPageContent(pathname, seo);
   nextHtml = nextHtml.replace(
-    /<div id="root"><\/div>/i,
+    /<div id="root">(?:<main class="server-page-content">.*?<\/main>)?<\/div>/is,
     `<div id="root">${serverContent}</div>`
   );
   return nextHtml;
