@@ -8910,7 +8910,7 @@
 /* Series guide prototype */
 .renew-series-guide {
   width: min(1180px, calc(100% - 40px));
-  margin: 0;
+  margin: 0 auto;
   padding: 28px 0 72px;
 }
 

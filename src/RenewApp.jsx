@@ -24,7 +24,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
-import boxMarketPrices from './data/box-market-prices';
+import boxMarketPrices from './data/box-market-prices.json';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
@@ -38,6 +38,16 @@ import './renew.css';
 const LOGO_SRC = '/optcg-logo-light.png';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = 'https://snkrdunk.com/en/invitation/AGJ872';
+const resolvedBoxMarketItems = boxMarketItems.map((item) => {
+  const snapshot = boxMarketPrices.items?.[String(item.apparelId)];
+  if (!snapshot) return item;
+  return {
+    ...item,
+    ...snapshot,
+    previewImageUrl: snapshot.previewImageUrl || item.previewImageUrl,
+    releaseDate: snapshot.releaseDate || item.releaseDate
+  };
+});
 const AUTH_CONSENT_VERSION = '2026-07-14';
 const PENDING_SOCIAL_CONSENT_KEY = 'card-pone-pending-social-consent';
 const ALL_SERIES_ID = '__ALL_SERIES__';
@@ -6794,7 +6804,7 @@ function RenewCalendar({ uiLang }) {
   const [selectedDate, setSelectedDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(savedViewState.selectedDate || '') ? savedViewState.selectedDate : todayKey);
   const [localeFilter, setLocaleFilter] = useState(() => ['ALL', 'KR', 'JP'].includes(savedViewState.localeFilter) ? savedViewState.localeFilter : 'ALL');
   const [kindFilter, setKindFilter] = useState(() => ['all', 'release', 'event', 'notice'].includes(savedViewState.kindFilter) ? savedViewState.kindFilter : 'all');
-  const [boxes, setBoxes] = useState(boxMarketItems);
+  const [boxes, setBoxes] = useState(resolvedBoxMarketItems);
 
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'calendar') return;
@@ -7466,9 +7476,10 @@ function RenewBoxRecommendationGuide() {
             .sort((a, b) => b.price - a.price);
           const prices = pricedHits.map((item) => item.price);
           const boxLatest = latestByApparelId.get(String(box.apparelId));
-          const boxPriceKrw = Number(boxMarketPrices[String(box.apparelId)]?.priceKrw || 0);
+          const boxSnapshot = boxMarketPrices?.items?.[String(box.apparelId)] || null;
+          const snapshotPriceUsd = Number(boxSnapshot?.minPrice || 0);
           const boxPrice = Number(boxLatest?.aPriceJpy || 0)
-            || (boxPriceKrw > 0 ? boxPriceKrw / (MARKET_USD_TO_KRW / MARKET_USD_TO_JPY) : 0)
+            || (snapshotPriceUsd > 0 ? snapshotPriceUsd * MARKET_USD_TO_JPY : 0)
             || (Number(box.minPrice || 0) * MARKET_USD_TO_JPY);
           if (!pricedHits.length) return null;
           const median = getMedian(prices);
@@ -11820,7 +11831,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
   const savedViewState = getAppHistoryState().boxMarketViewState || {};
   const [sortMode, setSortMode] = useState(() => ['latest', 'high', 'low'].includes(savedViewState.sortMode) ? savedViewState.sortMode : 'latest');
   const [boxPage, setBoxPage] = useState(() => Math.max(1, Number(savedViewState.boxPage) || 1));
-  const [boxes, setBoxes] = useState(boxMarketItems);
+  const [boxes, setBoxes] = useState(resolvedBoxMarketItems);
   const previousBoxViewRef = useRef({ sortMode, initialBoxCode });
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'prices') return;
