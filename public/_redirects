@@ -26,9 +26,9 @@
 /prices/index/sp /prices/index/manga 301
 /prices/index/heroines /prices/index/manga 301
 /prices/luffy-index /prices/index/luffy 301
-/jp/cards/series/569022 /jp/cards 301
-/jp/cards/series/569105 /jp/cards 301
-/jp/cards/series/569203 /jp/cards 301
+/jp/cards/series/569022 /jp/cards/st22 301
+/jp/cards/series/569105 /jp/cards/op05 301
+/jp/cards/series/569203 /jp/cards/eb03 301
 /jp/shops/partners/* /jp/shops 301
 /admin/analytics / 200
 /stats-prototype / 200
