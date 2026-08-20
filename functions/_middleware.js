@@ -238,17 +238,38 @@ function getJapaneseBasePath(pathname) {
   return pathname.slice(JAPANESE_ROUTE_PREFIX.length) || '/';
 }
 
+function isSeriesRouteSlug(value) {
+  return /^(?:(?:kr|jp)?(?:op|eb|st|prb)\d{1,2}|(?:kr|jp)?promo|ebk-\d{1,2})$/i.test(String(value || ''));
+}
+
+function getSeriesRouteSlug(pathname, prefix) {
+  if (!pathname.startsWith(prefix)) return '';
+  const slug = pathname.slice(prefix.length);
+  return slug && !slug.includes('/') && isSeriesRouteSlug(slug) ? slug : '';
+}
+
 function getJapaneseSeo(pathname) {
   const basePath = getJapaneseBasePath(pathname);
   if (JAPANESE_SEO[basePath]) return JAPANESE_SEO[basePath];
-  const directSeriesSlug = basePath.startsWith('/cards/') ? basePath.slice('/cards/'.length) : '';
-  if (basePath.startsWith('/cards/series/') || (directSeriesSlug && !directSeriesSlug.includes('/') && !['jp', 'kr'].includes(directSeriesSlug.toLowerCase()))) {
-    const series = basePath.split('/').pop()?.toUpperCase() || 'SERIES';
+  const nestedSeriesSlug = getSeriesRouteSlug(basePath, '/cards/series/');
+  const directSeriesSlug = getSeriesRouteSlug(basePath, '/cards/');
+  if (nestedSeriesSlug || directSeriesSlug) {
+    const series = (nestedSeriesSlug || directSeriesSlug).toUpperCase();
     return {
       title: `${series} ワンピースカードゲーム カードリスト | Card Pone`,
       description: `${series}シリーズのONE PIECE CARD GAMEカードをカード番号、レアリティ、カード名から確認できます。`,
       keywords: `${series},ワンピースカードゲーム,ワンピカード,カードリスト`,
       schemaType: 'CollectionPage'
+    };
+  }
+  const guideSeriesSlug = getSeriesRouteSlug(basePath, '/guides/series/');
+  if (guideSeriesSlug) {
+    const series = guideSeriesSlug.toUpperCase();
+    return {
+      title: `${series} ワンピースカードゲーム シリーズガイド | Card Pone`,
+      description: `${series}シリーズの収録カード、代表カード、レアリティ構成を確認できます。`,
+      keywords: `${series},ワンピースカードゲーム,シリーズガイド,カードリスト`,
+      schemaType: 'Article'
     };
   }
   if (basePath.startsWith('/prices/product/')) {
@@ -278,7 +299,15 @@ function getJapaneseSeo(pathname) {
       schemaType: 'WebPage'
     };
   }
-  return JAPANESE_SEO['/'];
+  const fallbackSeo = getFixedPageSeo(basePath) || ROUTE_SEO[basePath] || PAGE_SEO[basePath];
+  if (fallbackSeo) {
+    return {
+      ...fallbackSeo,
+      robots: 'noindex,follow',
+      hasLocalizedContent: false
+    };
+  }
+  return null;
 }
 
 const ROUTE_SEO = {
@@ -1622,8 +1651,10 @@ function getFixedPageSeo(normalized) {
   if (SEO_PRIMARY[normalized]) return SEO_PRIMARY[normalized];
   if (aliasTarget && SEO_FIXES[aliasTarget]) return SEO_FIXES[aliasTarget];
   if (SEO_FIXES[normalized]) return SEO_FIXES[normalized];
-  if (normalized.startsWith('/cards/series/')) {
-    const series = normalized.split('/').pop()?.toUpperCase() || 'SERIES';
+  const nestedSeriesSlug = getSeriesRouteSlug(normalized, '/cards/series/');
+  const directSeriesSlug = getSeriesRouteSlug(normalized, '/cards/');
+  if (nestedSeriesSlug || directSeriesSlug) {
+    const series = (nestedSeriesSlug || directSeriesSlug).toUpperCase();
     return {
       title: `${series} 원피스카드 리스트 | Card Pone`,
       description: `${series} 시리즈의 원피스 카드게임 카드 목록, 일련번호, 레어도, 보유 카드 정보를 확인할 수 있습니다.`,
@@ -1631,7 +1662,17 @@ function getFixedPageSeo(normalized) {
       schemaType: 'CollectionPage'
     };
   }
-  if (normalized.startsWith('/shops/')) {
+  const guideSeriesSlug = getSeriesRouteSlug(normalized, '/guides/series/');
+  if (guideSeriesSlug) {
+    const series = guideSeriesSlug.toUpperCase();
+    return {
+      title: `${series} 원피스카드 시리즈 가이드 | Card Pone`,
+      description: `${series} 시리즈의 수록 카드, 대표 고가 카드, 레어도 구성을 확인할 수 있습니다.`,
+      keywords: `${series} 원피스카드, ${series} 시리즈 가이드, 원피스카드 카드 리스트`,
+      schemaType: 'Article'
+    };
+  }
+  if (THIN_REGION_PATHS.has(normalized)) {
     const region = decodeURIComponent(normalized.split('/').pop() || '').replace(/-/g, ' ');
     return {
       title: `${region} 원피스카드 구매처 | Card Pone`,
@@ -1667,24 +1708,6 @@ function getFixedPageSeo(normalized) {
       schemaType: 'WebPage'
     };
   }
-  if (normalized.startsWith('/guide/')) {
-    const topic = decodeURIComponent(normalized.slice('/guide/'.length)).replace(/-/g, ' ');
-    return {
-      title: `원피스카드 가이드 - ${topic} | Card Pone`,
-      description: `원피스카드 수집가를 위한 ${topic} 가이드입니다.`,
-      keywords: `원피스카드 가이드, ${topic}, Card Pone`,
-      schemaType: 'Article'
-    };
-  }
-  if (normalized.startsWith('/faq/')) {
-    const topic = decodeURIComponent(normalized.slice('/faq/'.length)).replace(/-/g, ' ');
-    return {
-      title: `원피스카드 Q&A - ${topic} | Card Pone`,
-      description: `원피스카드 ${topic} 관련 자주 묻는 질문과 답변을 확인할 수 있습니다.`,
-      keywords: `원피스카드 Q&A, ${topic}, Card Pone`,
-      schemaType: 'FAQPage'
-    };
-  }
   return null;
 }
 
@@ -1695,22 +1718,6 @@ export function getPageSeo(pathname) {
   if (fixedSeo) return fixedSeo;
   if (ROUTE_SEO[normalized]) return ROUTE_SEO[normalized];
   if (PAGE_SEO[normalized]) return PAGE_SEO[normalized];
-  if (normalized.startsWith('/cards/series/')) {
-    const series = normalized.split('/').pop()?.toUpperCase() || 'SERIES';
-    return {
-      title: `${series} 원피스카드 리스트 | Card Pone`,
-      description: `${series} 시리즈의 원피스 카드게임 카드 목록과 보유 카드 정보를 확인할 수 있습니다.`,
-      keywords: `${series} 원피스카드, ${series} 카드 리스트, 원피스카드 도감`
-    };
-  }
-  if (normalized.startsWith('/shops/')) {
-    const region = decodeURIComponent(normalized.split('/').pop() || '').replace(/-/g, ' ');
-    return {
-      title: `${region} 원피스카드 구매처 | Card Pone`,
-      description: `${region} 지역의 원피스 카드게임 공인점포와 취급점포 정보를 확인할 수 있습니다.`,
-      keywords: `${region} 원피스카드 매장, ${region} 원피스카드 구매처`
-    };
-  }
   if (normalized.startsWith('/prices/product/')) {
     const id = normalized.slice('/prices/product/'.length);
     return {
@@ -1733,22 +1740,6 @@ export function getPageSeo(pathname) {
       title: `${code} 박스 시세 | Card Pone`,
       description: `원피스 카드게임 ${code} 부스터 박스 가격과 SNKRDUNK 상품 정보를 확인할 수 있습니다.`,
       keywords: `${code} 박스 시세, 원피스카드 박스 가격`
-    };
-  }
-  if (normalized.startsWith('/guide/')) {
-    const topic = decodeURIComponent(normalized.slice('/guide/'.length)).replace(/-/g, ' ');
-    return {
-      title: `원피스카드 가이드 - ${topic} | Card Pone`,
-      description: `원피스카드 수집가를 위한 ${topic} 가이드입니다.`,
-      keywords: `원피스카드 가이드, ${topic}, Card Pone`
-    };
-  }
-  if (normalized.startsWith('/faq/')) {
-    const topic = decodeURIComponent(normalized.slice('/faq/'.length)).replace(/-/g, ' ');
-    return {
-      title: `원피스카드 Q&A - ${topic} | Card Pone`,
-      description: `원피스카드 ${topic} 관련 자주 묻는 질문과 답변을 확인할 수 있습니다.`,
-      keywords: `원피스카드 Q&A, ${topic}, Card Pone`
     };
   }
   return null;
@@ -2044,9 +2035,13 @@ export function applySeo(html, pathname, seo) {
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:title" content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${title}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:description" content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${description}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:image" content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${image}" />`);
+  const japaneseSeo = getJapaneseSeo(`${JAPANESE_ROUTE_PREFIX}${basePath === '/' ? '' : basePath}`);
+  const hasJapaneseAlternate = japaneseSeo && japaneseSeo.hasLocalizedContent !== false;
   const hreflangLinks = [
     `<link rel="alternate" hreflang="ko" href="${escapeHtml(defaultUrl)}" data-card-pone-hreflang="true" />`,
-    `<link rel="alternate" hreflang="ja" href="${escapeHtml(japaneseUrl)}" data-card-pone-hreflang="true" />`,
+    ...(hasJapaneseAlternate
+      ? [`<link rel="alternate" hreflang="ja" href="${escapeHtml(japaneseUrl)}" data-card-pone-hreflang="true" />`]
+      : []),
     `<link rel="alternate" hreflang="x-default" href="${escapeHtml(defaultUrl)}" data-card-pone-hreflang="true" />`
   ].join('\n    ');
   nextHtml = nextHtml.replace(/\s*<link rel="alternate" hreflang="(?:ko|ja|x-default)"[^>]*data-card-pone-hreflang="true"\s*\/>/gi, '');
@@ -2070,6 +2065,41 @@ function shouldSkip(pathname) {
   if (pathname.startsWith('/api/')) return true;
   if (pathname === '/robots.txt' || pathname === '/sitemap.xml' || pathname === '/rss.xml' || pathname === '/ads.txt') return true;
   return /\.[a-z0-9]{2,8}$/i.test(pathname);
+}
+
+const APP_ONLY_PATHS = new Set(['/admin/analytics', '/stats-prototype']);
+
+function isAppOnlyPath(pathname) {
+  const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  return APP_ONLY_PATHS.has(normalized);
+}
+
+function renderNotFoundPage() {
+  return `<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,follow" />
+    <title>페이지를 찾을 수 없습니다 | Card Pone</title>
+    <style>
+      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #fff; color: #17191d; font-family: Pretendard, SUIT, -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+      main { width: min(520px, calc(100vw - 40px)); text-align: center; }
+      strong { color: #d34b35; font-size: 13px; }
+      h1 { margin: 10px 0 12px; font-size: clamp(28px, 7vw, 44px); }
+      p { margin: 0 0 24px; color: #687080; line-height: 1.6; }
+      a { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; padding: 0 22px; border-radius: 8px; background: #17191d; color: #fff; font-weight: 800; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <strong>404</strong>
+      <h1>페이지를 찾을 수 없습니다</h1>
+      <p>주소가 변경되었거나 존재하지 않는 페이지입니다.</p>
+      <a href="/">메인으로 돌아가기</a>
+    </main>
+  </body>
+</html>`;
 }
 
 function hasMarketPreviewAccess(request) {
@@ -2152,7 +2182,18 @@ export async function onRequest(context) {
   if (shouldSkip(url.pathname)) return context.next();
 
   const seo = getPageSeo(url.pathname);
-  if (!seo) return context.next();
+  if (!seo) {
+    if (isAppOnlyPath(url.pathname)) return context.next();
+    const headers = new Headers({
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=60',
+      'X-Robots-Tag': 'noindex, follow'
+    });
+    return new Response(context.request.method === 'HEAD' ? null : renderNotFoundPage(), {
+      status: 404,
+      headers
+    });
+  }
 
   const response = await context.next();
   const contentType = response.headers.get('content-type') || '';
