@@ -8631,6 +8631,45 @@
   text-align: center;
 }
 
+.renew-box-guide-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px 14px;
+  border: 1px solid #efc5b9;
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: #fff4ef;
+}
+
+.renew-box-guide-summary > span {
+  grid-row: 1 / 3;
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.renew-box-guide-summary > strong {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 17px;
+}
+
+.renew-box-guide-summary > p {
+  margin: 0;
+  color: #656b75;
+  font-size: 12px;
+}
+
+.renew-box-guide-summary > time {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  color: #777d87;
+  font-size: 10px;
+}
+
 .renew-box-guide-categories {
   display: grid;
   gap: 34px;
@@ -8761,6 +8800,37 @@
   line-height: 1.45;
 }
 
+.renew-box-guide-featured-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  margin-bottom: 12px;
+  border: 1px solid #eee3de;
+  border-radius: 6px;
+  padding: 9px 10px;
+  color: #17191c;
+  background: #faf7f5;
+}
+
+.renew-box-guide-featured-card span {
+  grid-column: 1 / -1;
+  color: #737984;
+  font-size: 9px;
+}
+
+.renew-box-guide-featured-card strong {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+
+.renew-box-guide-featured-card b {
+  color: #c94d35;
+  font-size: 11px;
+}
+
 .renew-box-guide-item dl {
   display: grid;
   gap: 7px;
@@ -8889,7 +8959,9 @@
 }
 
 .renew-app.is-dark .renew-box-guide-hub > a,
-.renew-app.is-dark .renew-box-guide-detail a {
+.renew-app.is-dark .renew-box-guide-detail a,
+.renew-app.is-dark .renew-box-guide-featured-card,
+.renew-app.is-dark .renew-box-guide-summary {
   border-color: rgba(255, 255, 255, 0.12);
   color: #f8fafc;
   background: #171b23;
@@ -8902,9 +8974,28 @@
 .renew-app.is-dark .renew-box-guide-head p,
 .renew-app.is-dark .renew-box-guide-category-head p,
 .renew-app.is-dark .renew-box-guide-note p,
+.renew-app.is-dark .renew-box-guide-summary > p,
 .renew-app.is-dark .renew-box-guide-item-body > p,
 .renew-app.is-dark .renew-box-guide-item dt {
   color: #b8bec8;
+}
+
+@media (max-width: 720px) {
+  .renew-box-guide-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    padding: 14px;
+  }
+
+  .renew-box-guide-summary > span,
+  .renew-box-guide-summary > time {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .renew-box-guide-summary > strong {
+    white-space: normal;
+  }
 }
 
 /* Series guide prototype */

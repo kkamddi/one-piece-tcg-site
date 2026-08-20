@@ -3282,9 +3282,9 @@ const CLIENT_ROUTE_SEO = {
   '/guide/box-recommendation/high-price': {
     title: '최고가 카드를 노리는 원피스카드 박스 추천 | Card Pone',
     h1: '최고가 카드 노리기',
-    description: '박스 현재가와 수록 카드 Single 시세를 비교해 최고가 카드의 가격 비중이 큰 원피스카드 부스터를 확인합니다.',
+    description: '원피스카드 부스터별 수록 카드의 최신 Single 최고가를 비교해 고가 카드를 노릴 때 확인할 박스를 순위로 보여줍니다.',
     keywords: '원피스카드 최고가 카드, 원피스카드 박스 추천, 원피스카드 고점',
-    body: '박스 가격 대비 최고가 카드와 상위 가격 카드의 비중을 기준으로 부스터 박스를 비교합니다.'
+    body: '박스 가격은 순위에 반영하지 않고, 각 부스터에 실제로 수록된 카드의 최신 Single 최고가만 비교합니다.'
   },
   '/guide/box-recommendation/stable': {
     title: '가격 분포가 안정적인 원피스카드 박스 추천 | Card Pone',
@@ -7426,6 +7426,12 @@ function getBoxRecommendationReason(categoryId, item) {
   return `박스 현재가의 35% 이상인 카드가 ${item.validHitCount}장 확인되며, 대상 카드 가격 데이터 커버리지는 ${Math.round(item.coverage * 100)}%입니다.`;
 }
 
+function getBoxRecommendationSummary(categoryId, item) {
+  if (categoryId === 'jackpot') return `수록 카드 최고가 ${formatYen(item.maximum)}로 현재 비교 대상 중 가장 높습니다.`;
+  if (categoryId === 'stable') return `박스 현재가, 카드 가격 중앙값과 가격 쏠림을 함께 비교한 결과입니다.`;
+  return `박스 현재가의 35% 이상인 카드가 ${item.validHitCount}장 확인됩니다.`;
+}
+
 function RenewBoxRecommendationGuide() {
   const currentPath = getAppPath(window.location.pathname);
   const activeCategory = getBoxRecommendationCategory(currentPath);
@@ -7517,7 +7523,7 @@ function RenewBoxRecommendationGuide() {
 
       setState({
         loading: false,
-        updatedAt: summary?.generatedAt || summary?.updatedAt || '',
+        updatedAt: summary?.generatedAt || summary?.updatedAt || boxMarketPrices?.updatedAt || '',
         categories: [{
           ...activeCategory,
           items: [...categoryAnalyses].sort((a, b) => b[activeCategory.score] - a[activeCategory.score]).slice(0, 5)
@@ -7563,6 +7569,18 @@ function RenewBoxRecommendationGuide() {
       </header>
       {state.loading ? <p className="renew-box-guide-status">가격 데이터를 계산하고 있습니다.</p> : null}
       {!state.loading && !state.categories.length ? <p className="renew-box-guide-status">추천을 계산할 수 있는 가격 데이터가 부족합니다.</p> : null}
+      {!state.loading && state.categories[0]?.items?.[0] ? (() => {
+        const firstItem = state.categories[0].items[0];
+        const firstSeries = getBoxSeriesMeta(firstItem.seriesId);
+        return (
+          <aside className="renew-box-guide-summary" aria-label="현재 추천 결과 요약">
+            <span>현재 1위</span>
+            <strong>{firstSeries.code} · {firstSeries.title}</strong>
+            <p>{getBoxRecommendationSummary(activeCategory.id, firstItem)}</p>
+            {state.updatedAt ? <time dateTime={state.updatedAt}>데이터 기준 {new Date(state.updatedAt).toLocaleString('ko-KR')}</time> : null}
+          </aside>
+        );
+      })() : null}
       <div className="renew-box-guide-categories">
         {state.categories.map((category) => (
           <section key={category.id} className="renew-box-guide-category">
@@ -7573,11 +7591,18 @@ function RenewBoxRecommendationGuide() {
                 return (
                 <article key={`${category.id}-${item.apparelId}`} className="renew-box-guide-item">
                   <div className="renew-box-guide-rank">{index + 1}</div>
-                  <img src={item.previewImageUrl || '/card-placeholder.svg'} alt="" loading="lazy" />
+                  <img src={item.previewImageUrl || '/card-placeholder.svg'} alt={`${series.code} ${series.title} 박스`} loading="lazy" />
                   <div className="renew-box-guide-item-body">
                     <span>{series.code}</span>
                     <h3>{series.code} · {series.title}</h3>
                     <small className="renew-box-guide-product-name">{item.name}</small>
+                    {item.strongestCard?.card ? (
+                      <a className="renew-box-guide-featured-card" href={`/cards?cardId=${encodeURIComponent(item.strongestCard.card.id)}`}>
+                        <span>대표 고가 카드</span>
+                        <strong>{item.strongestCard.card.name || item.strongestCard.card.koName || item.strongestCard.card.id}</strong>
+                        <b>{formatYen(item.maximum)}</b>
+                      </a>
+                    ) : null}
                     <dl>
                       <div><dt>박스 현재가</dt><dd>{item.boxPrice > 0 ? formatYen(item.boxPrice) : '수집 중'}</dd></div>
                       <div><dt>최고가 카드</dt><dd>{formatYen(item.maximum)}</dd></div>
@@ -7593,13 +7618,6 @@ function RenewBoxRecommendationGuide() {
                       <summary>상세 분석 보기</summary>
                       <div>
                         <p>{getBoxRecommendationReason(category.id, item)}</p>
-                        {item.strongestCard?.card ? (
-                          <a href={`/cards?cardId=${encodeURIComponent(item.strongestCard.card.id)}`}>
-                            <span>현재 최고가 카드</span>
-                            <strong>{item.strongestCard.card.name || item.strongestCard.card.koName || item.strongestCard.card.id}</strong>
-                            <small>{item.strongestCard.card.cardNumber || item.strongestCard.card.number || item.strongestCard.card.id} · {formatYen(item.maximum)}</small>
-                          </a>
-                        ) : null}
                       </div>
                     </details>
                   </div>
