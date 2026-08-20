@@ -30,3 +30,12 @@
 /jp/cards/series/569105 /jp/cards 301
 /jp/cards/series/569203 /jp/cards 301
 /jp/shops/partners/* /jp/shops 301
+/admin/analytics / 200
+/stats-prototype / 200
+/prices/card/* /prices 200
+/prices/product/* /prices 200
+/prices/box/* /prices 200
+/jp/prices/card/* /jp/prices 200
+/jp/prices/product/* /jp/prices 200
+/jp/prices/box/* /jp/prices 200
+/shops/partners/* /shops 200

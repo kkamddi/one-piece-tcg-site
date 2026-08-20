@@ -152,7 +152,11 @@ export function getSeriesGuideEntries({ japanese = false } = {}) {
       const cardSummary = getSeriesCardSummary(series);
       return {
         pathname: japanese ? `/jp${basePath}` : basePath,
-        seo: createSeo(series, cardCount, cardSummary, japanese)
+        seo: createSeo(series, cardCount, cardSummary, japanese),
+        catalogSlugs: [...new Set([
+          normalizeSeriesSlug(series.id),
+          normalizeSeriesSlug(series.baseSeriesId)
+        ].filter(Boolean))]
       };
     })
     .filter(Boolean);
