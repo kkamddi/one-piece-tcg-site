@@ -479,6 +479,30 @@ const SEO_FIXES = {
     keywords: '원피스카드 도감 사용법, 원피스카드 일련번호, 원피스카드 검색',
     schemaType: 'Article'
   },
+  '/guide/box-recommendation': {
+    title: '원피스카드 박스 추천 가이드 | Card Pone',
+    description: '최고가 카드, 안정적인 가격 분포, 유효 히트 수를 기준으로 원피스카드 부스터 박스를 목적별로 비교합니다.',
+    keywords: '원피스카드 박스 추천, 원피스카드 박스 가격, 원피스카드 히트 카드',
+    schemaType: 'Article'
+  },
+  '/guide/box-recommendation/high-price': {
+    title: '최고가 카드를 노리는 원피스카드 박스 추천 | Card Pone',
+    description: '박스 현재가 대비 최고가 Single 카드의 가격 비중이 큰 원피스카드 부스터를 비교합니다.',
+    keywords: '원피스카드 최고가 카드, 원피스카드 박스 추천, 원피스카드 고점',
+    schemaType: 'Article'
+  },
+  '/guide/box-recommendation/stable': {
+    title: '가격 분포가 안정적인 원피스카드 박스 추천 | Card Pone',
+    description: '매핑된 히트 카드 가격이 일부 카드에만 집중되지 않은 원피스카드 부스터를 비교합니다.',
+    keywords: '원피스카드 안정적인 박스, 원피스카드 박스 추천, 원피스카드 히트 카드',
+    schemaType: 'Article'
+  },
+  '/guide/box-recommendation/more-hits': {
+    title: '히트 카드가 많은 원피스카드 박스 추천 | Card Pone',
+    description: '박스 가격과 비교해 의미 있는 Single 시세가 확인되는 히트 카드가 많은 부스터를 비교합니다.',
+    keywords: '원피스카드 히트 많은 박스, 원피스카드 박스 추천, 원피스카드 카드깡',
+    schemaType: 'Article'
+  },
   '/faq': {
     title: '원피스카드 Q&A | Card Pone',
     description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
@@ -1551,9 +1575,10 @@ function createServerPageContent(pathname, seo) {
   const contentMap = isJapanese ? JAPANESE_SERVER_PAGE_CONTENT : SERVER_PAGE_CONTENT;
   const contentKey = isJapanese ? getJapaneseBasePath(normalized) : normalized;
   const content = contentMap[contentKey] || {
-    heading: seo.title.split('|')[0].trim(),
-    paragraphs: [seo.description],
-    links: isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops']
+    heading: seo.heading || seo.title.split('|')[0].trim(),
+    paragraphs: seo.paragraphs || [seo.description],
+    sections: seo.sections || [],
+    links: seo.links || (isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops'])
   };
   const detailMap = isJapanese ? JAPANESE_SERVER_PAGE_DETAILS : SERVER_PAGE_DETAILS;
   const details = content.sections || detailMap[contentKey] || [];
@@ -2035,7 +2060,7 @@ export function applySeo(html, pathname, seo) {
   }
   const serverContent = createServerPageContent(pathname, seo);
   nextHtml = nextHtml.replace(
-    /<div id="root"><\/div>/i,
+    /<div id="root">(?:<main class="server-page-content">.*?<\/main>)?<\/div>/is,
     `<div id="root">${serverContent}</div>`
   );
   return nextHtml;

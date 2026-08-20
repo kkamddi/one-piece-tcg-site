@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
-import { fetchAdminStats, trackVisit } from './api/admin';
+import { fetchAdminStats, fetchPopularSearches, trackPopularSearch, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, signInWithIdentifier } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
@@ -24,6 +24,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
 import boxMarketItems from './data/box-market-items';
+import boxMarketPrices from './data/box-market-prices';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
@@ -628,16 +629,15 @@ const SUPPLY_FILTERS = [
 const NEWS_LINK_GROUPS = [
   {
     id: 'preorder',
-    title: '아마존 사전예약 응모',
+    title: '아마존 히로인즈2 응모',
     description: '',
     status: 'AMAZON',
     links: [
       {
-        label: 'OP-17 사전예약',
+        label: '히로인즈2 응모',
         subLabel: 'Amazon Japan',
-        href: 'https://www.amazon.co.jp/dp/B0H43ZX8LK/ref=nosim?tag=optcgkorea26-22',
-        imageUrl: '/uploads/amazon-op17.png',
-        badge: 'OP-17'
+        href: 'https://link.amazon/B04fyW76r',
+        badge: 'EB-05'
       }
     ]
   },
@@ -894,7 +894,7 @@ const CARD_CATALOG_GUIDE = {
 };
 const HOME_NEWS_LINKS = [
   {
-    label: 'OP-17 사전예약 응모',
+    label: '히로인즈2 응모',
     description: 'Amazon Japan 바로가기',
     query: 'section=preorder'
   },
@@ -1070,7 +1070,7 @@ function getHomeNewsLinks() {
   const preorderLink = NEWS_LINK_GROUPS.find((item) => item.id === 'preorder')?.links?.[0];
   return HOME_NEWS_LINKS.map((item) => {
     if (item.query === 'section=preorder' && preorderLink?.label) {
-      return { ...item, label: preorderLink.label, description: 'Amazon Japan 사전예약 응모' };
+      return { ...item, label: preorderLink.label, description: 'Amazon Japan 응모 바로가기' };
     }
     if (item.query === 'section=notice&locale=JP' && krTopic?.title) {
       return {
@@ -1408,7 +1408,7 @@ const GUIDE_QA_GROUPS = [
 ];
 const NEWS_GUIDE_CONTENT = {
   preorder: {
-    title: '아마존 사전예약 응모 안내',
+    title: '아마존 히로인즈2 응모 안내',
     description: '',
     sections: [
       {
@@ -1416,7 +1416,7 @@ const NEWS_GUIDE_CONTENT = {
         type: 'steps',
         items: [
           '일본 아마존 계정으로 로그인합니다.',
-          'OP-17 상품 페이지에 접속합니다.',
+          '히로인즈2 상품 페이지에 접속합니다.',
           '상품 페이지에서 Request Invite 버튼을 누릅니다.',
           '신청이 완료되면 등록된 이메일로 결과를 기다립니다.',
           '구매 초대에 선정되면 이메일로 안내가 도착합니다.',
@@ -1637,6 +1637,11 @@ function getSeriesRoutePath(series) {
     : `/cards/${slug}`;
 }
 
+function getSeriesGuideRoutePath(series) {
+  const slug = normalizeSeriesSlug(series?.id || getBaseSeriesId(series));
+  return slug ? `/guides/series/${slug}` : '/cards';
+}
+
 function findSeriesByRouteSlug(slug, preferredLocale = 'JP') {
   const normalized = normalizeSeriesSlug(slug);
   if (!normalized) return null;
@@ -1656,6 +1661,14 @@ function getProgressSeriesGroup(series) {
   if (/^ST\d+/.test(baseId)) return 'ST';
   if (baseId === 'PROMO' || /^P-?/.test(baseId)) return 'PR';
   return 'OP';
+}
+
+function getSeriesSectionId(series) {
+  const group = getProgressSeriesGroup(series);
+  if (group === 'EB') return 'extra';
+  if (group === 'ST') return 'starter';
+  if (group === 'PR') return 'promo';
+  return 'regular';
 }
 
 function sortDescByCode(items) {
@@ -2785,6 +2798,7 @@ const PAGE_PATHS = {
   deckLab: '/lab/decks',
   deckBuilder: '/lab/decks/builder',
   deckGuide: '/guides/deck-builder',
+  seriesGuide: '/guides/series/ebk-03',
   centeringGuide: '/guides/centering',
   packSimulatorGuide: '/guides/pack-simulator',
   profitCalculator: '/tools/profit-calculator',
@@ -2910,6 +2924,7 @@ function restoreAppScrollPosition(targetY, { onDone, timeoutMs = 3000 } = {}) {
 function getRouteSeoPage(pathname = '/') {
   const path = getAppPath(pathname);
   if (PATH_PAGES[path]) return PATH_PAGES[path];
+  if (path.startsWith('/guides/series/')) return 'seriesGuide';
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
   if (path.startsWith('/community')) return 'lab';
@@ -3019,6 +3034,13 @@ const PAGE_SEO = {
     description: '한글판과 일본판 원피스카드의 OP, EB, ST, 프로모 카드를 카드명과 일련번호로 검색할 수 있습니다.',
     keywords: '원피스카드 도감, 원피스 카드 검색, OP16, OP15, 일본판 원피스카드, 한글판 원피스카드',
     body: '원피스카드 도감에서는 한글판과 일본판 카드를 OP, EB, ST, 프로모 시리즈별로 확인하고 카드명 또는 일련번호로 검색할 수 있습니다.'
+  },
+  seriesGuide: {
+    title: 'EBK-03 히로인즈 에디션 가이드 | Card Pone',
+    h1: 'EBK-03 ONE PIECE Heroines Edition 가이드',
+    description: '한글판 EBK-03 히로인즈 에디션의 발매 정보와 수록 카드, 카드별 도감 및 시세 연결을 확인할 수 있습니다.',
+    keywords: 'EBK-03, 히로인즈 에디션, 원피스카드 한글판, 원피스카드 수록 카드',
+    body: 'EBK-03 히로인즈 에디션의 상품 정보와 수록 카드를 기존 Card Pone 도감 및 시세 데이터와 연결해 정리한 시리즈 가이드입니다.'
   },
   prices: {
     title: '원피스카드 시세 - 카드별 시세 그래프와 박스 가격 | Card Pone',
@@ -3240,6 +3262,34 @@ const CLIENT_ROUTE_SEO = {
     keywords: '원피스카드 입문, 원피스카드 수집 가이드, 원피스카드 보관',
     body: '원피스카드를 처음 수집하는 이용자를 위한 기본 가이드입니다.'
   },
+  '/guide/box-recommendation': {
+    title: '원피스카드 박스 추천 가이드 | Card Pone',
+    h1: '원피스카드 박스 추천 가이드',
+    description: '박스 현재가와 수록 카드 Single 시세를 비교해 최고가 카드, 안정적인 가격 분포, 유효 히트 수 기준으로 부스터 박스를 살펴봅니다.',
+    keywords: '원피스카드 박스 추천, 원피스카드 박스 가격, 원피스카드 히트 카드',
+    body: 'Card Pone의 박스 및 카드 시세 연결 데이터를 이용해 목적별 부스터 박스를 비교합니다.'
+  },
+  '/guide/box-recommendation/high-price': {
+    title: '최고가 카드를 노리는 원피스카드 박스 추천 | Card Pone',
+    h1: '최고가 카드 노리기',
+    description: '박스 현재가와 수록 카드 Single 시세를 비교해 최고가 카드의 가격 비중이 큰 원피스카드 부스터를 확인합니다.',
+    keywords: '원피스카드 최고가 카드, 원피스카드 박스 추천, 원피스카드 고점',
+    body: '박스 가격 대비 최고가 카드와 상위 가격 카드의 비중을 기준으로 부스터 박스를 비교합니다.'
+  },
+  '/guide/box-recommendation/stable': {
+    title: '가격 분포가 안정적인 원피스카드 박스 추천 | Card Pone',
+    h1: '가격 분포가 안정적인 박스',
+    description: '일부 카드에 가격이 집중되지 않고 매핑된 히트 카드 가격이 비교적 고른 원피스카드 부스터를 확인합니다.',
+    keywords: '원피스카드 안정적인 박스, 원피스카드 박스 추천, 원피스카드 히트 카드',
+    body: '최고가와 중앙값의 차이, 가격 분산과 데이터 커버리지를 함께 비교합니다.'
+  },
+  '/guide/box-recommendation/more-hits': {
+    title: '히트 카드가 많은 원피스카드 박스 추천 | Card Pone',
+    h1: '유효 히트가 많은 박스',
+    description: '박스 가격과 비교했을 때 의미 있는 Single 시세가 확인되는 히트 카드가 많은 부스터를 살펴봅니다.',
+    keywords: '원피스카드 히트 많은 박스, 원피스카드 박스 추천, 원피스카드 카드깡',
+    body: '박스 가격의 일정 비율 이상인 수록 카드 수와 가격 데이터 커버리지를 기준으로 비교합니다.'
+  },
   '/faq': {
     title: '원피스카드 Q&A | Card Pone',
     h1: '원피스카드 Q&A',
@@ -3425,6 +3475,33 @@ function getJapaneseRouteSeo(pathname, page) {
 function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
+  if (path.startsWith('/guides/series/')) {
+    const series = findSeriesByRouteSlug(path.slice('/guides/series/'.length));
+    if (series) {
+      const code = getBaseSeriesId(series);
+      const isJapanese = uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP';
+      const name = (isJapanese ? series.enName : series.koName) || series.enName || series.koName || code;
+      const locale = series.locale || 'JP';
+      const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series.id] || 0);
+      if (isJapanese) {
+        const localeLabel = locale === 'JP' ? '日本版' : locale === 'EN' ? '英語版' : '韓国版';
+        return {
+          title: `${code} ${name} カードリスト・シリーズガイド | Card Pone`,
+          h1: `${code} ${name} シリーズガイド`,
+          description: `${localeLabel}${code} ${name}の登録カード${cardCount}枚をカード番号、レアリティ、画像から確認できるシリーズガイドです。`,
+          keywords: `${code},${name},ワンピースカードゲーム,カードリスト,${localeLabel}`,
+          body: `${code}シリーズの基本情報と収録カードをCard Poneのカード図鑑・相場データとあわせて確認できます。`
+        };
+      }
+      return {
+        title: `${code} ${name} 카드 리스트·시리즈 가이드 | Card Pone`,
+        h1: `${code} ${name} 시리즈 가이드`,
+        description: `${code} ${name}의 도감 등록 카드 ${cardCount}장을 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
+        keywords: `${code}, ${name}, 원피스카드 리스트, 원피스카드 도감`,
+        body: `${code} 시리즈의 상품 정보와 수록 카드를 Card Pone 도감 및 시세 데이터와 연결해 정리한 가이드입니다.`
+      };
+    }
+  }
   if (uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP') return getJapaneseRouteSeo(window.location.pathname, page);
   const seoAliases = {
     '/prices/collector-index': '/prices/index',
@@ -3593,6 +3670,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path === '/shops/partners') return { page: 'shops' };
   if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
   if (path.startsWith('/cards')) return { page: 'cards' };
+  if (path.startsWith('/guides/series/')) return { page: 'cards' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { page: 'prices' };
   if (path.startsWith('/community')) return { page: 'community' };
   if (path === '/tools/profit-calculator') return { page: 'home' };
@@ -4636,36 +4714,136 @@ function RenewSuppliesModal({ onClose }) {
   );
 }
 
-function RenewSearch({ onSubmitSearch, uiLang }) {
+function normalizePopularSearchText(value = '') {
+  return String(value).normalize('NFKC').toLowerCase().replace(/[^0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣ぁ-んァ-ヶ一-龯]+/g, '');
+}
+
+async function resolvePopularSearchItem(query, locale) {
+  const normalizedQuery = normalizePopularSearchText(query);
+  const matchedBox = boxMarketItems.find((item) => (
+    normalizePopularSearchText(item.code) === normalizedQuery
+    || normalizePopularSearchText(item.name) === normalizedQuery
+  ));
+  if (matchedBox) {
+    return {
+      type: 'box',
+      locale: 'JP',
+      label: matchedBox.code,
+      query: matchedBox.name,
+      targetId: String(matchedBox.apparelId)
+    };
+  }
+
+  try {
+    const cards = await searchCards(query, locale);
+    const exactCard = cards.find((card) => normalizePopularSearchText(card.cardNo) === normalizedQuery)
+      || cards.find((card) => normalizePopularSearchText(card.name) === normalizedQuery);
+    if (exactCard) {
+      return {
+        type: 'card',
+        locale: exactCard.locale || locale,
+        label: `${exactCard.cardNo} ${exactCard.name}`.trim(),
+        query,
+        targetId: exactCard.id
+      };
+    }
+  } catch {
+    // Search navigation should still work when ranking resolution is unavailable.
+  }
+  return { type: 'query', locale, label: query, query, targetId: '' };
+}
+
+function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) {
   const [locale, setLocale] = useState(() => isJapaneseUi(uiLang) ? 'JP' : 'KR');
   const [keyword, setKeyword] = useState('');
+  const [popularItems, setPopularItems] = useState([]);
+  const [popularOpen, setPopularOpen] = useState(false);
+  const popularRef = useRef(null);
   const t = (key) => getUiText(uiLang, key);
 
   useEffect(() => {
     if (isJapaneseUi(uiLang)) setLocale('JP');
   }, [uiLang]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = () => fetchPopularSearches()
+      .then((payload) => {
+        if (!cancelled) setPopularItems(Array.isArray(payload?.items) ? payload.items : []);
+      })
+      .catch(() => {});
+    refresh();
+    const timer = window.setInterval(refresh, 5 * 60 * 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!popularOpen) return undefined;
+    const close = (event) => {
+      if (!popularRef.current?.contains(event.target)) setPopularOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, [popularOpen]);
+
   function submitSearch(event) {
     event.preventDefault();
     const q = keyword.trim();
     if (!q) return;
     onSubmitSearch?.({ locale, q });
+    resolvePopularSearchItem(q, locale)
+      .then((item) => trackPopularSearch(visitorToken, item))
+      .catch(() => {});
   }
 
   return (
-    <form className="renew-search" onSubmit={submitSearch}>
-      <div className="renew-locale-switch" aria-label="검색 언어">
-        <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => setLocale('KR')}>{t('searchKr')}</button>
-        <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => setLocale('JP')}>{t('searchJp')}</button>
+    <div className="renew-search-row">
+      <form className="renew-search" onSubmit={submitSearch}>
+        <div className="renew-locale-switch" aria-label="검색 언어">
+          <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => setLocale('KR')}>{t('searchKr')}</button>
+          <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => setLocale('JP')}>{t('searchJp')}</button>
+        </div>
+        <input
+          value={keyword}
+          onChange={(event) => setKeyword(event.target.value)}
+          placeholder={t('searchPlaceholder')}
+          aria-label="카드명 또는 일련번호 검색"
+        />
+        <button type="submit" className="renew-search-submit" aria-label="검색">↑</button>
+      </form>
+      <div
+        ref={popularRef}
+        className={`renew-popular-search${popularOpen ? ' is-open' : ''}`}
+        onMouseEnter={() => setPopularOpen(true)}
+        onMouseLeave={() => setPopularOpen(false)}
+      >
+        <button type="button" className="renew-popular-trigger" onClick={() => setPopularOpen((value) => !value)} aria-expanded={popularOpen}>
+          <span>실시간 인기 검색어</span>
+          <strong>{popularItems[0]?.label || '집계 중'}</strong>
+          <b aria-hidden="true">⌄</b>
+        </button>
+        <div className="renew-popular-panel" aria-label="실시간 인기 검색어 순위">
+          <div><strong>실시간 인기 검색어</strong><small>최근 24시간</small></div>
+          {popularItems.length ? popularItems.map((item, index) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => {
+                setPopularOpen(false);
+                onSelectPopular?.(item);
+              }}
+            >
+              <b>{index + 1}</b>
+              <span>{item.label}</span>
+              <small>{item.type === 'box' ? '박스' : item.type === 'card' ? '카드' : '검색'}</small>
+            </button>
+          )) : <p>검색 데이터 집계 중입니다.</p>}
+        </div>
       </div>
-      <input
-        value={keyword}
-        onChange={(event) => setKeyword(event.target.value)}
-        placeholder={t('searchPlaceholder')}
-        aria-label="카드명 또는 일련번호 검색"
-      />
-      <button type="submit" className="renew-search-submit" aria-label="검색">↑</button>
-    </form>
+    </div>
   );
 }
 
@@ -5589,7 +5767,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
@@ -5847,7 +6025,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       <h1 className="renew-sr-only">{PAGE_SEO.home.h1}</h1>
       <p className="renew-sr-only">{PAGE_SEO.home.body}</p>
       <section className="renew-hero" aria-label="메인 검색">
-        <RenewSearch onSubmitSearch={onSubmitSearch} uiLang={uiLang} />
+        <RenewSearch onSubmitSearch={onSubmitSearch} onSelectPopular={onSelectPopular} visitorToken={visitorToken} uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
       </section>
 
@@ -6863,6 +7041,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const isShopBuyingGuide = initialPath === '/guide/shops';
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
+  const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = initialPath === '/guide' || initialPath === '/faq'
     ? 'guide'
@@ -7080,7 +7259,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7113,6 +7292,11 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             <span>CATALOG GUIDE</span>
             <strong>원피스카드 도감 사용법</strong>
             <small>한글판, 일본판, OP/EB/ST/PR 시리즈와 일련번호 검색 방법을 확인합니다.</small>
+          </a>
+          <a className="renew-guide-feature-link" href="/guide/box-recommendation" onClick={() => rememberCurrentAppView()}>
+            <span>BOX GUIDE</span>
+            <strong>목적별 카드 박스 추천</strong>
+            <small>박스 현재가와 수록 카드 Single 시세를 기준으로 최고가, 안정성, 유효 히트를 비교합니다.</small>
           </a>
           <a className="renew-guide-feature-link" href="/about" onClick={() => rememberCurrentAppView()}>
             <span>CARD PONE</span>
@@ -7147,6 +7331,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
       {isShopBuyingGuide ? <RenewShopBuyingGuide /> : null}
       {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
       {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
+      {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewSeoSummary page="news" titleAs="h1" placement="footer" uiLang={uiLang} />
       {guideTarget ? (
@@ -7156,6 +7341,270 @@ function RenewNews({ uiLang, onOpenCalendar }) {
         />
       ) : null}
     </main>
+  );
+}
+
+function getBoxSeriesId(code = '') {
+  const match = String(code).toUpperCase().match(/^(OP|EB|PRB)-(\d{2})$/);
+  return match ? `${match[1]}${match[2]}` : '';
+}
+
+function getMedian(values = []) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function getCoefficientOfVariation(values = []) {
+  if (values.length < 2) return 0;
+  const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+  if (!average) return 0;
+  const variance = values.reduce((sum, value) => sum + ((value - average) ** 2), 0) / values.length;
+  return Math.sqrt(variance) / average;
+}
+
+const BOX_RECOMMENDATION_CATEGORIES = [
+  {
+    id: 'jackpot',
+    path: '/guide/box-recommendation/high-price',
+    eyebrow: 'HIGH CEILING',
+    title: '최고가 카드 노리기',
+    description: '박스 가격과 관계없이 각 시리즈에 수록된 Single 카드의 현재 최고가 순으로 비교합니다.',
+    score: 'maximum'
+  },
+  {
+    id: 'stable',
+    path: '/guide/box-recommendation/stable',
+    eyebrow: 'BALANCED',
+    title: '가격과 히트가 균형적인 박스',
+    description: '박스 현재가 대비 카드 가격이 괜찮고, 일부 카드에만 가치가 몰리지 않은 상품을 비교합니다.',
+    score: 'stableScore'
+  },
+  {
+    id: 'hits',
+    path: '/guide/box-recommendation/more-hits',
+    eyebrow: 'MORE HITS',
+    title: '유효 히트가 많은 박스',
+    description: '박스 가격의 35% 이상인 Single 히트 카드가 상대적으로 많이 확인되는 박스를 비교합니다.',
+    score: 'hitScore'
+  }
+];
+
+function getBoxRecommendationCategory(pathname = '') {
+  return BOX_RECOMMENDATION_CATEGORIES.find((category) => category.path === pathname) || null;
+}
+
+function getBoxSeriesMeta(seriesId = '') {
+  const matched = seriesData.find((series) => (series.locale || 'KR') === 'KR' && getBaseSeriesId(series) === seriesId)
+    || seriesData.find((series) => getBaseSeriesId(series) === seriesId);
+  const code = String(seriesId).replace(/^(OP|EB|PRB)(\d{2})$/, '$1-$2');
+  return {
+    code,
+    title: matched?.koName || matched?.enName || BOX_SHORT_TITLES[code] || seriesId,
+    guidePath: matched ? getSeriesGuideRoutePath(matched) : '/cards'
+  };
+}
+
+function getBoxRecommendationReason(categoryId, item) {
+  if (categoryId === 'jackpot') {
+    return `현재 확인된 최고가 카드는 ${formatYen(item.maximum)}이며, 상위 3장 합계는 ${formatYen(item.top3Total)}입니다. 이 순위에는 박스 가격을 반영하지 않습니다.`;
+  }
+  if (categoryId === 'stable') {
+    return `박스 가격 대비 중앙값은 ${Math.round((item.median / item.boxPrice) * 100)}%이며, 최고가 쏠림과 매핑된 히트 카드 ${item.pricedHitCount}장의 가격 분포를 함께 반영했습니다.`;
+  }
+  return `박스 현재가의 35% 이상인 카드가 ${item.validHitCount}장 확인되며, 대상 카드 가격 데이터 커버리지는 ${Math.round(item.coverage * 100)}%입니다.`;
+}
+
+function RenewBoxRecommendationGuide() {
+  const currentPath = getAppPath(window.location.pathname);
+  const activeCategory = getBoxRecommendationCategory(currentPath);
+  const [state, setState] = useState({ loading: true, categories: [], updatedAt: '' });
+
+  useEffect(() => {
+    if (!activeCategory) {
+      setState({ loading: false, categories: [], updatedAt: '' });
+      return undefined;
+    }
+    let cancelled = false;
+    Promise.all([
+      import('./data/cards.json').then((module) => Array.isArray(module.default) ? module.default : []),
+      loadCardMarketLinks(),
+      fetch(import.meta.env.DEV ? '/__prod_api/api/market?summary=latest' : '/api/market?summary=latest')
+        .then((response) => response.ok ? response.json() : null)
+    ]).then(([cards, links, summary]) => {
+      if (cancelled) return;
+      const cardsById = new Map(cards.map((card) => [card.id, card]));
+      const latestByApparelId = new Map(
+        (Array.isArray(summary?.items) ? summary.items : [])
+          .filter((item) => item?.apparelId)
+          .map((item) => [String(item.apparelId), item])
+      );
+      const pricedCardById = new Map();
+      (links || []).forEach((link) => {
+        if (link?.status !== 'approved' || !link.cardId || !link.apparelId || pricedCardById.has(link.cardId)) return;
+        const latest = latestByApparelId.get(String(link.apparelId));
+        const price = Number(latest?.aPriceJpy || 0);
+        const card = cardsById.get(link.cardId);
+        if (!card || price <= 0) return;
+        pricedCardById.set(link.cardId, { card, price, apparelId: link.apparelId });
+      });
+
+      const analyses = boxMarketItems
+        .filter((box) => getBoxSeriesId(box.code))
+        .map((box) => {
+          const seriesId = getBoxSeriesId(box.code);
+          const eligibleCards = cards.filter((card) => {
+            const listedSeriesId = String(card.series || card.baseSeriesId || '').replace(/^JP-/, '');
+            if (card.locale !== 'JP' || listedSeriesId !== seriesId) return false;
+            const isParallel = /_p\d*$/i.test(card.id || '');
+            return isParallel || ['SEC', 'SP'].includes(String(card.rarity || '').toUpperCase());
+          });
+          const pricedHits = eligibleCards
+            .map((card) => pricedCardById.get(card.id))
+            .filter(Boolean)
+            .sort((a, b) => b.price - a.price);
+          const prices = pricedHits.map((item) => item.price);
+          const boxLatest = latestByApparelId.get(String(box.apparelId));
+          const boxPriceKrw = Number(boxMarketPrices[String(box.apparelId)]?.priceKrw || 0);
+          const boxPrice = Number(boxLatest?.aPriceJpy || 0)
+            || (boxPriceKrw > 0 ? boxPriceKrw / (MARKET_USD_TO_KRW / MARKET_USD_TO_JPY) : 0)
+            || (Number(box.minPrice || 0) * MARKET_USD_TO_JPY);
+          if (!pricedHits.length) return null;
+          const median = getMedian(prices);
+          const maximum = prices[0] || 0;
+          const validHitCount = boxPrice > 0 ? prices.filter((price) => price >= boxPrice * 0.35).length : 0;
+          const coverage = eligibleCards.length ? pricedHits.length / eligibleCards.length : 0;
+          const cv = getCoefficientOfVariation(prices);
+          const top3Total = prices.slice(0, 3).reduce((sum, price) => sum + price, 0);
+          return {
+            ...box,
+            seriesId,
+            boxPrice,
+            pricedHitCount: pricedHits.length,
+            eligibleHitCount: eligibleCards.length,
+            validHitCount,
+            coverage,
+            median,
+            maximum,
+            cv,
+            top3Total,
+            strongestCard: pricedHits[0],
+            stableScore: boxPrice > 0 && pricedHits.length >= 3 && coverage >= 0.25
+              ? (median / boxPrice) * (1 / (1 + cv)) * Math.log2(pricedHits.length + 1) * coverage
+              : 0,
+            hitScore: boxPrice > 0 && pricedHits.length >= 3 && coverage >= 0.25
+              ? validHitCount * Math.max(coverage, 0.35) + Math.min(pricedHits.length, 12) / 12
+              : 0
+          };
+        })
+        .filter(Boolean);
+
+      const categoryAnalyses = activeCategory.id === 'jackpot'
+        ? analyses
+        : analyses.filter((item) => item.boxPrice > 0 && item[activeCategory.score] > 0);
+
+      setState({
+        loading: false,
+        updatedAt: summary?.generatedAt || summary?.updatedAt || '',
+        categories: [{
+          ...activeCategory,
+          items: [...categoryAnalyses].sort((a, b) => b[activeCategory.score] - a[activeCategory.score]).slice(0, 5)
+        }]
+      });
+    }).catch(() => {
+      if (!cancelled) setState({ loading: false, categories: [], updatedAt: '' });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCategory]);
+
+  if (!activeCategory) {
+    return (
+      <section className="renew-panel renew-news-panel renew-box-guide" aria-labelledby="box-recommendation-heading">
+        <header className="renew-box-guide-head">
+          <span>BOX GUIDE</span>
+          <h1 id="box-recommendation-heading">원피스카드 박스 구매 가이드</h1>
+          <p>원하는 개봉 방향을 선택하면 해당 기준으로 계산된 박스만 따로 확인할 수 있습니다.</p>
+        </header>
+        <nav className="renew-box-guide-hub" aria-label="박스 구매 가이드 선택">
+          {BOX_RECOMMENDATION_CATEGORIES.map((category) => (
+            <a key={category.id} href={category.path} onClick={() => rememberCurrentAppView()}>
+              <span>{category.eyebrow}</span>
+              <strong>{category.title}</strong>
+              <p>{category.description}</p>
+              <b>추천 박스 보기</b>
+            </a>
+          ))}
+        </nav>
+      </section>
+    );
+  }
+
+  return (
+    <section className="renew-panel renew-news-panel renew-box-guide" aria-labelledby="box-recommendation-heading">
+      <header className="renew-box-guide-head">
+        <a className="renew-box-guide-back" href="/guide/box-recommendation">박스 구매 가이드</a>
+        <span>{activeCategory.eyebrow}</span>
+        <h1 id="box-recommendation-heading">{activeCategory.title}</h1>
+        <p>{activeCategory.description}</p>
+      </header>
+      {state.loading ? <p className="renew-box-guide-status">가격 데이터를 계산하고 있습니다.</p> : null}
+      {!state.loading && !state.categories.length ? <p className="renew-box-guide-status">추천을 계산할 수 있는 가격 데이터가 부족합니다.</p> : null}
+      <div className="renew-box-guide-categories">
+        {state.categories.map((category) => (
+          <section key={category.id} className="renew-box-guide-category">
+            <div className="renew-box-guide-grid">
+              {!category.items.length ? <p className="renew-box-guide-status">박스 가격과 카드 가격이 함께 확인된 시리즈가 없습니다.</p> : null}
+              {category.items.map((item, index) => {
+                const series = getBoxSeriesMeta(item.seriesId);
+                return (
+                <article key={`${category.id}-${item.apparelId}`} className="renew-box-guide-item">
+                  <div className="renew-box-guide-rank">{index + 1}</div>
+                  <img src={item.previewImageUrl || '/card-placeholder.svg'} alt="" loading="lazy" />
+                  <div className="renew-box-guide-item-body">
+                    <span>{series.code}</span>
+                    <h3>{series.code} · {series.title}</h3>
+                    <small className="renew-box-guide-product-name">{item.name}</small>
+                    <dl>
+                      <div><dt>박스 현재가</dt><dd>{item.boxPrice > 0 ? formatYen(item.boxPrice) : '수집 중'}</dd></div>
+                      <div><dt>최고가 카드</dt><dd>{formatYen(item.maximum)}</dd></div>
+                      <div><dt>가격 중앙값</dt><dd>{formatYen(item.median)}</dd></div>
+                      <div><dt>유효 히트</dt><dd>{item.validHitCount}장</dd></div>
+                    </dl>
+                    <p>가격 확인 {item.pricedHitCount}/{item.eligibleHitCount}장 · 데이터 커버리지 {Math.round(item.coverage * 100)}%</p>
+                    <div className="renew-box-guide-actions">
+                      <a href={`/prices?tab=box&code=${encodeURIComponent(item.code)}&apparelId=${encodeURIComponent(item.apparelId)}`}>박스 시세 보기</a>
+                      <a href={series.guidePath}>시리즈 상세 보기</a>
+                    </div>
+                    <details className="renew-box-guide-detail">
+                      <summary>상세 분석 보기</summary>
+                      <div>
+                        <p>{getBoxRecommendationReason(category.id, item)}</p>
+                        {item.strongestCard?.card ? (
+                          <a href={`/cards?cardId=${encodeURIComponent(item.strongestCard.card.id)}`}>
+                            <span>현재 최고가 카드</span>
+                            <strong>{item.strongestCard.card.name || item.strongestCard.card.koName || item.strongestCard.card.id}</strong>
+                            <small>{item.strongestCard.card.cardNumber || item.strongestCard.card.number || item.strongestCard.card.id} · {formatYen(item.maximum)}</small>
+                          </a>
+                        ) : null}
+                      </div>
+                    </details>
+                  </div>
+                </article>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+      <footer className="renew-box-guide-note">
+        <strong>계산 기준</strong>
+        <p>미개봉 박스와 패러렐·SEC·SP 카드에 연결된 최신 Single 시세만 사용합니다. 봉입률이 반영된 기대값이나 수익 보장이 아니며, 가격 데이터가 부족한 상품은 추천에서 제외됩니다.</p>
+        {state.updatedAt ? <time dateTime={state.updatedAt}>데이터 기준 {new Date(state.updatedAt).toLocaleString('ko-KR')}</time> : null}
+      </footer>
+    </section>
   );
 }
 
@@ -7468,7 +7917,153 @@ function RenewLegalModal({ type, onClose }) {
   );
 }
 
-function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, viewStateRevision = 0, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, onRequireLogin, marketListings = [], uiLang }) {
+function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
+  const guideSlug = getAppPath(window.location.pathname).slice('/guides/series/'.length);
+  const series = findSeriesByRouteSlug(guideSlug);
+  const locale = series?.locale || 'JP';
+  const seriesCode = getBaseSeriesId(series);
+  const seriesName = series?.koName || series?.enName || seriesCode;
+  const localeLabel = locale === 'KR' ? '한글판' : locale === 'EN' ? '영문판' : '일본판';
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const boxImageByCode = useMemo(() => new Map(
+    boxMarketItems
+      .filter((item) => item.code && item.previewImageUrl)
+      .map((item) => [item.code, item.previewImageUrl])
+  ), []);
+  const productImageUrl = getSeriesBoxPreviewUrl(series, boxImageByCode);
+  const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series?.id] || 0);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!series?.id) {
+      setCards([]);
+      setLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setLoading(true);
+    fetchCards({ locale, series: series.id })
+      .then((items) => {
+        if (!cancelled) setCards(Array.isArray(items) ? items.slice(0, 8) : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCards([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, series?.id]);
+
+  if (!series) {
+    return (
+      <main className="renew-series-guide">
+        <div className="renew-empty renew-panel">시리즈 정보를 찾을 수 없습니다.</div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="renew-series-guide">
+      <section className="renew-series-guide-hero renew-panel">
+        <div className="renew-series-guide-copy">
+          <div className="renew-series-guide-tags">
+            <span>{localeLabel}</span>
+            <span>{series.kindEn || series.kindKo || 'CARD SERIES'}</span>
+          </div>
+          <p className="renew-series-guide-code">{seriesCode}</p>
+          <h1>{seriesName}</h1>
+          {series.enName && series.enName !== seriesName ? <p className="renew-series-guide-en-name">{series.enName}</p> : null}
+          <p>상품 기본 정보와 실제 수록 카드를 한 화면에서 확인하고, 도감과 카드별 시세로 바로 이동하는 시리즈 가이드입니다.</p>
+          <div className="renew-series-guide-actions">
+            <button type="button" onClick={() => onOpenCatalog?.(series)}>수록 카드 전체 보기</button>
+            <button type="button" className="is-secondary" onClick={onOpenPrices}>카드 시세 보기</button>
+          </div>
+        </div>
+        <div className="renew-series-guide-product">
+          <div className="renew-series-guide-product-image">
+            {productImageUrl ? (
+              <img src={productImageUrl} alt={`${seriesName} 상품`} onError={placeholderImage} />
+            ) : (
+              <span className="renew-series-guide-product-fallback">{seriesCode}</span>
+            )}
+          </div>
+          <small>{productImageUrl ? '상품 이미지는 도감에서 사용 중인 데이터를 재사용합니다.' : '등록된 상품 이미지가 없어 시리즈 코드로 표시합니다.'}</small>
+        </div>
+      </section>
+
+      <section className="renew-series-guide-facts" aria-label="상품 기본 정보">
+        <article><span>언어</span><strong>{localeLabel}</strong></article>
+        <article><span>분류</span><strong>{series.kindKo || series.kindEn || '-'}</strong></article>
+        <article><span>도감 등록</span><strong>{cardCount || cards.length}장</strong></article>
+        <article><span>시리즈</span><strong>{seriesCode}</strong></article>
+      </section>
+
+      <section className="renew-series-guide-section renew-panel">
+        <div className="renew-series-guide-section-head">
+          <div>
+            <span>CHECK POINT</span>
+            <h2>이 시리즈에서 바로 확인할 것</h2>
+          </div>
+        </div>
+        <div className="renew-series-guide-points">
+          <article><b>수록 카드</b><p>카드번호, 레어도와 이미지를 기존 {localeLabel} 도감 데이터로 확인합니다.</p></article>
+          <article><b>카드별 시세</b><p>시세가 연결된 카드는 도감 상세에서 Single과 PSA10 가격으로 이어집니다.</p></article>
+          <article><b>봉입 정보</b><p>공식적으로 확인되지 않은 카톤 봉입률은 임의로 단정하지 않습니다.</p></article>
+        </div>
+      </section>
+
+      <section className="renew-series-guide-section renew-panel">
+        <div className="renew-series-guide-section-head">
+          <div>
+            <span>CARD PREVIEW</span>
+            <h2>수록 카드 미리보기</h2>
+          </div>
+          <button type="button" onClick={() => onOpenCatalog?.(series)}>전체 보기</button>
+        </div>
+        {loading ? <div className="renew-empty">카드를 불러오는 중입니다.</div> : null}
+        {!loading && !cards.length ? <div className="renew-empty">수록 카드 데이터를 불러오지 못했습니다.</div> : null}
+        {!loading && cards.length ? (
+          <div className="renew-series-guide-card-grid">
+            {cards.map((card) => (
+              <button key={card.id} type="button" onClick={() => onOpenCard?.(series, card)}>
+                <span className="renew-series-guide-card-image">
+                  <img
+                    src={getCardThumbnailSrc(card)}
+                    data-fallback-src={getCardImageSrc(card)}
+                    alt={card.name}
+                    onError={fallbackToOriginalCardImage}
+                    loading="lazy"
+                  />
+                </span>
+                <small>{card.cardNo} · {card.rarity}</small>
+                <strong>{card.name}</strong>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <section className="renew-series-guide-section renew-series-guide-faq renew-panel">
+        <div className="renew-series-guide-section-head">
+          <div>
+            <span>QUICK GUIDE</span>
+            <h2>처음 보는 사람을 위한 안내</h2>
+          </div>
+        </div>
+        <details open><summary>{seriesCode}은 어떤 시리즈인가요?</summary><p>{series.kindKo || series.kindEn || '원피스 카드게임 상품'}으로 분류된 {localeLabel} 시리즈입니다. 이 페이지에서는 확인되지 않은 설명보다 실제 도감 수록 카드 확인을 우선합니다.</p></details>
+        <details><summary>카드 가격은 어디에서 확인하나요?</summary><p>수록 카드를 누르면 기존 도감 상세로 이동하며, 시세가 연결된 카드는 시세 화면에서 최근 가격과 거래 이력을 확인할 수 있습니다.</p></details>
+        <details><summary>카톤 봉입률도 확인할 수 있나요?</summary><p>현재는 공식 확인이 가능한 상품 정보만 제공합니다. 확인되지 않은 봉입률이나 체감 확률은 확정 정보처럼 표시하지 않습니다.</p></details>
+      </section>
+    </main>
+  );
+}
+
+function RenewCatalog({ authUser, userState, setUserState, initialSearch, initialViewState, viewStateRevision = 0, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, onOpenSeriesGuide, onRequireLogin, marketListings = [], uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const hasInitialSearch = Boolean(initialSearch?.q);
   const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (initialViewState?.locale || 'JP');
@@ -7928,6 +8523,9 @@ function RenewCatalog({ authUser, userState, setUserState, initialSearch, initia
             <h2>{searchKeyword.trim() ? t('searchResults') : isAllSeriesMode ? t('all') : currentSeries?.koName}</h2>
             <p>{locale}-{searchKeyword.trim() ? 'SEARCH' : isAllSeriesMode ? 'ALL' : getBaseSeriesId(currentSeries)} {visibleCards.length}{t('cardsUnit')}</p>
           </div>
+          {!searchKeyword.trim() && !isAllSeriesMode && currentSeries?.id ? (
+            <button type="button" className="renew-series-guide-link" onClick={() => onOpenSeriesGuide?.(currentSeries)}>시리즈 가이드</button>
+          ) : null}
         </div>
 
         {loading ? <div className="renew-empty">{t('loading')}</div> : null}
@@ -14045,7 +14643,7 @@ export default function RenewApp() {
   const internalNavigationRef = useRef(false);
   const presenceChannelRef = useRef(null);
 
-  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
+  const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (activePage === 'seriesGuide' ? 'cards' : ['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
   const isAdminUser = useMemo(() => authUser?.app_metadata?.role === 'admin', [authUser]);
   const needsSocialConsent = useMemo(() => {
@@ -14526,6 +15124,7 @@ export default function RenewApp() {
           portfolioHoldings={portfolioHoldings}
           setPortfolioHoldings={setPortfolioHoldings}
           stateLoading={stateLoading}
+          visitorToken={visitorToken}
           uiLang={uiLang}
           onSubmitSearch={(search) => {
             setCatalogViewState(null);
@@ -14583,9 +15182,61 @@ export default function RenewApp() {
             if (cardId) query.set('cardId', cardId);
             navigatePage('marketplace', { query: query.toString() });
           }) : undefined}
+          onOpenSeriesGuide={(series) => {
+            setActivePage('seriesGuide');
+            internalNavigationRef.current = true;
+            pushAppHistory(localizeAppPath(getSeriesGuideRoutePath(series), uiLang));
+          }}
           onRequireLogin={() => handleAuthClick('login')}
           marketListings={MARKETPLACE_ENABLED ? marketListings : []}
           uiLang={uiLang}
+        />
+      ) : activePage === 'seriesGuide' ? (
+        <RenewSeriesGuide
+          onOpenCatalog={(series) => {
+            setCatalogViewState({
+              locale: series?.locale || 'JP',
+              selectedSeries: series?.id || getDefaultRenewSeriesId('JP'),
+              searchKeyword: '',
+              activeRarity: 'ALL',
+              collectionFilter: 'all',
+              catalogSortMode: 'rarity',
+              openSection: getSeriesSectionId(series)
+            });
+            navigatePage('cards');
+          }}
+          onSelectPopular={(item) => {
+            if (item.type === 'box' && item.targetId) {
+              setMarketInitialCode(item.label || item.query || '');
+              setMarketInitialApparelId(item.targetId);
+              setMarketInitialCardId('');
+              navigatePage('prices', { query: `tab=box&code=${encodeURIComponent(item.label || '')}&apparelId=${encodeURIComponent(item.targetId)}` });
+              return;
+            }
+            setCatalogViewState(null);
+            setCatalogInitialSearch({
+              locale: item.locale || 'JP',
+              q: String(item.query || item.label || '').trim(),
+              id: Date.now()
+            });
+            const query = item.type === 'card' && item.targetId
+              ? `cardId=${encodeURIComponent(item.targetId)}`
+              : '';
+            navigatePage('cards', query ? { query } : undefined);
+          }}
+          onOpenCard={(series, card) => {
+            setCatalogViewState({
+              locale: series?.locale || 'JP',
+              selectedSeries: series?.id || getDefaultRenewSeriesId('JP'),
+              searchKeyword: '',
+              activeRarity: 'ALL',
+              collectionFilter: 'all',
+              catalogSortMode: 'rarity',
+              openSection: getSeriesSectionId(series)
+            });
+            navigatePage('cards', { query: `cardId=${encodeURIComponent(card.id)}` });
+          }}
+          onOpenPrices={() => navigatePage('prices')}
         />
       ) : activePage === 'prices' ? (
         <RenewMarket

@@ -233,6 +233,93 @@ async function handleStats(request, response) {
   });
 }
 
+function normalizeSearchItem(value) {
+  const source = value && typeof value === 'object' ? value : {};
+  const type = ['card', 'box', 'query'].includes(source.type) ? source.type : 'query';
+  const locale = ['KR', 'JP', 'EN'].includes(String(source.locale || '').toUpperCase())
+    ? String(source.locale).toUpperCase()
+    : 'JP';
+  const label = String(source.label || '').normalize('NFKC').replace(/\s+/g, ' ').trim().slice(0, 80);
+  const query = String(source.query || label).normalize('NFKC').replace(/\s+/g, ' ').trim().slice(0, 80);
+  const targetId = String(source.targetId || '').trim().slice(0, 120);
+  const keySource = targetId || query.toLowerCase().replace(/[^0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣ぁ-んァ-ヶ一-龯]+/g, '');
+  const key = `${type}:${locale}:${keySource}`.slice(0, 180);
+  if (!label || !query || keySource.length < 1) return null;
+  return { type, locale, label, query, targetId, key };
+}
+
+async function handleSearch(request, response) {
+  const { visitorToken, item } = request.body ?? {};
+  const visitIdentity = buildVisitIdentity(request, visitorToken);
+  const normalized = normalizeSearchItem(item);
+  if (!visitIdentity || !normalized) return response.status(400).json({ error: 'invalid_request' });
+
+  const duplicateWindow = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const { data: existingRows, error: existingError } = await supabaseAdmin
+    .from(COMMUNITY_TABLE)
+    .select('id')
+    .eq('board_id', '__search__')
+    .eq('author_token', visitIdentity)
+    .eq('title', normalized.key)
+    .gte('created_at', duplicateWindow)
+    .limit(1);
+  if (existingError) throw existingError;
+
+  if (!(existingRows ?? []).length) {
+    const { error } = await supabaseAdmin.from(COMMUNITY_TABLE).insert({
+      id: `search-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      board_id: '__search__',
+      nickname: normalized.label,
+      title: normalized.key,
+      card_name: normalized.type,
+      image_url: '',
+      content: JSON.stringify(normalized),
+      likes: 0,
+      views: 0,
+      author_token: visitIdentity,
+      liked_tokens: []
+    });
+    if (error) throw error;
+  }
+
+  return response.status(200).json({ ok: true });
+}
+
+async function handlePopularSearches(request, response) {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabaseAdmin
+    .from(COMMUNITY_TABLE)
+    .select('title,nickname,card_name,content,author_token,created_at')
+    .eq('board_id', '__search__')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(5000);
+  if (error) throw error;
+
+  const grouped = new Map();
+  for (const row of data ?? []) {
+    let item;
+    try {
+      item = normalizeSearchItem(JSON.parse(row.content || '{}'));
+    } catch {
+      item = null;
+    }
+    if (!item) continue;
+    const entry = grouped.get(item.key) || { ...item, searches: 0, visitors: new Set(), latestAt: '' };
+    entry.searches += 1;
+    entry.visitors.add(row.author_token);
+    if (!entry.latestAt || row.created_at > entry.latestAt) entry.latestAt = row.created_at;
+    grouped.set(item.key, entry);
+  }
+
+  const items = [...grouped.values()]
+    .map(({ visitors, ...item }) => ({ ...item, visitors: visitors.size }))
+    .sort((a, b) => b.visitors - a.visitors || b.searches - a.searches || b.latestAt.localeCompare(a.latestAt))
+    .slice(0, 10);
+  response.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+  return response.status(200).json({ items, windowHours: 24 });
+}
+
 async function handleOperations(request, response) {
   const authHeader = String(request.headers.authorization ?? '');
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
@@ -264,6 +351,8 @@ export default async function handler(request, response) {
 
   try {
     if (request.method === 'POST' && action === 'visit') return await handleVisit(request, response);
+    if (request.method === 'POST' && action === 'search') return await handleSearch(request, response);
+    if (request.method === 'GET' && action === 'popular-searches') return await handlePopularSearches(request, response);
     if (request.method === 'GET' && action === 'stats') return await handleStats(request, response);
     if (request.method === 'GET' && action === 'operations') return await handleOperations(request, response);
     return response.status(405).json({ error: 'method_not_allowed' });

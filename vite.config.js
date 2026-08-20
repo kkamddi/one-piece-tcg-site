@@ -19,6 +19,13 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5173
+    port: 5173,
+    proxy: {
+      '/__prod_api': {
+        target: 'https://www.optcgkorea.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/__prod_api/, '')
+      }
+    }
   }
 });

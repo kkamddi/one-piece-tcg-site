@@ -36,19 +36,22 @@ jobs:
       - name: Sync new Japanese box products
         run: node scripts/syncSnkrdunkBoxProducts.js --lookback-days "${{ inputs.lookback_days || '21' }}"
 
+      - name: Sync recommendation box prices
+        run: node scripts/syncSnkrdunkBoxPrices.js
+
       - name: Sync popular card ranking
         run: node scripts/syncSnkrdunkPopularCards.js
 
       - name: Commit catalog updates
         id: commit
         run: |
-          if git diff --quiet -- src/data/box-market-items.js src/data/snkrdunk-popular-cards.js src/data/market-cards.js; then
+          if git diff --quiet -- src/data/box-market-items.js src/data/box-market-prices.js src/data/snkrdunk-popular-cards.js src/data/market-cards.js; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/box-market-items.js src/data/snkrdunk-popular-cards.js src/data/market-cards.js
+          git add src/data/box-market-items.js src/data/box-market-prices.js src/data/snkrdunk-popular-cards.js src/data/market-cards.js
           git commit -m "chore: sync SNKRDUNK catalog"
           git push origin HEAD:main
           echo "changed=true" >> "$GITHUB_OUTPUT"

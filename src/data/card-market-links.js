@@ -15676,15 +15676,9 @@ const cardMarketLinks = [
     "cardNo": "OP09-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 4 JP market candidates",
-    "candidateApparelIds": [
-      676008,
-      349470,
-      349472,
-      349471
-    ]
+    "apparelId": 349470,
+    "status": "approved",
+    "note": "manually verified base: Gol D. Roger SEC [OP09-118]"
   },
   {
     "cardId": "JP::OP09-118_p1",
@@ -15700,30 +15694,18 @@ const cardMarketLinks = [
     "cardNo": "OP09-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 4 JP market candidates",
-    "candidateApparelIds": [
-      676008,
-      349470,
-      349472,
-      349471
-    ]
+    "apparelId": 349472,
+    "status": "approved",
+    "note": "manually verified manga: Gol D. Roger SEC-GSP [OP09-118]"
   },
   {
     "cardId": "JP::OP09-118_p3",
     "cardNo": "OP09-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 4 JP market candidates",
-    "candidateApparelIds": [
-      676008,
-      349470,
-      349472,
-      349471
-    ]
+    "apparelId": 676008,
+    "status": "approved",
+    "note": "manually verified wanted: Gol D. Roger SEC-SPC [OP09-118]"
   },
   {
     "cardId": "JP::OP09-119",
@@ -19072,60 +19054,36 @@ const cardMarketLinks = [
     "cardNo": "OP13-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676009,
-      676068,
-      735737,
-      676024,
-      676003,
-      676002
-    ]
+    "apparelId": 676002,
+    "status": "approved",
+    "note": "manually verified comic parallel: Monkey.D.Luffy SEC-SP [OP13-118]"
   },
   {
     "cardId": "JP::OP13-118_p3",
     "cardNo": "OP13-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676009,
-      676068,
-      735737,
-      676024,
-      676003,
-      676002
-    ]
+    "apparelId": 676003,
+    "status": "approved",
+    "note": "manually verified red comic parallel: Monkey.D.Luffy SEC-RSP [OP13-118]"
   },
   {
     "cardId": "JP::OP13-118_p4",
     "cardNo": "OP13-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676009,
-      676068,
-      735737,
-      676024,
-      676003,
-      676002
-    ]
+    "apparelId": 676009,
+    "status": "approved",
+    "note": "manually verified wanted: Monkey.D.Luffy SEC-SPC [OP13-118]"
   },
   {
     "cardId": "JP::OP13-118_p5",
     "cardNo": "OP13-118",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": 676009,
+    "apparelId": 735737,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Monkey.D.Luffy : Wanted SEC-SPC [OP13-118](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "manually verified championship promo: Monkey.D.Luffy SEC [OP13-118]"
   },
   {
     "cardId": "JP::OP13-119",
@@ -19150,60 +19108,36 @@ const cardMarketLinks = [
     "cardNo": "OP13-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676010,
-      676069,
-      714209,
-      676025,
-      676005,
-      676004
-    ]
+    "apparelId": 676004,
+    "status": "approved",
+    "note": "manually verified comic parallel: Portgas.D.Ace SEC-SP [OP13-119]"
   },
   {
     "cardId": "JP::OP13-119_p3",
     "cardNo": "OP13-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676010,
-      676069,
-      714209,
-      676025,
-      676005,
-      676004
-    ]
+    "apparelId": 676005,
+    "status": "approved",
+    "note": "manually verified red comic parallel: Portgas.D.Ace SEC-RSP [OP13-119]"
   },
   {
     "cardId": "JP::OP13-119_p4",
     "cardNo": "OP13-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676010,
-      676069,
-      714209,
-      676025,
-      676005,
-      676004
-    ]
+    "apparelId": 676010,
+    "status": "approved",
+    "note": "manually verified wanted: Portgas.D.Ace SEC-SPC [OP13-119]"
   },
   {
     "cardId": "JP::OP13-119_p5",
     "cardNo": "OP13-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": 676010,
+    "apparelId": 714209,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Portgas.D.Ace : Wanted SEC-SPC [OP13-119](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "manually verified tournament promo: Portgas.D.Ace SEC [OP13-119]"
   },
   {
     "cardId": "JP::OP13-120",
@@ -19228,60 +19162,36 @@ const cardMarketLinks = [
     "cardNo": "OP13-120",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676011,
-      676070,
-      714210,
-      676026,
-      676007,
-      676006
-    ]
+    "apparelId": 676006,
+    "status": "approved",
+    "note": "manually verified comic parallel: Sabo SEC-SP [OP13-120]"
   },
   {
     "cardId": "JP::OP13-120_p3",
     "cardNo": "OP13-120",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676011,
-      676070,
-      714210,
-      676026,
-      676007,
-      676006
-    ]
+    "apparelId": 676007,
+    "status": "approved",
+    "note": "manually verified red comic parallel: Sabo SEC-RSP [OP13-120]"
   },
   {
     "cardId": "JP::OP13-120_p4",
     "cardNo": "OP13-120",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "pending review: 6 JP market candidates",
-    "candidateApparelIds": [
-      676011,
-      676070,
-      714210,
-      676026,
-      676007,
-      676006
-    ]
+    "apparelId": 676011,
+    "status": "approved",
+    "note": "manually verified wanted: Sabo SEC-SPC [OP13-120]"
   },
   {
     "cardId": "JP::OP13-120_p5",
     "cardNo": "OP13-120",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": 676011,
+    "apparelId": 714210,
     "status": "approved",
-    "note": "auto approved p5-wanted-spc: Sabo : Wanted SEC-SPC [OP13-120](Booster Pack \"CARRYING ON HIS WILL\")"
+    "note": "manually verified tournament promo: Sabo SEC [OP13-120]"
   },
   {
     "cardId": "JP::OP14-001",
