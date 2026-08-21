@@ -518,7 +518,6 @@ const RENEW_HOME_UPDATES = [
     details: [
       '한글판·일본판 공식 공지사항 영역 추가',
       'OP-17 아마존 사전예약 응모 바로가기 추가',
-      '온라인 오리파 바로가기 추가',
       '가이드/Q&A 섹션 추가',
       '카드 보관용품 바로가기 및 미리보기 추가'
     ]
@@ -650,35 +649,6 @@ const NEWS_LINK_GROUPS = [
         badge: 'EB-05'
       }
     ]
-  },
-  {
-    id: 'oripa',
-    title: '온라인 오리파',
-    description: '',
-    status: 'Online Mystery pack',
-    links: [
-      {
-        label: 'Beezie',
-        subLabel: 'Mystery pack',
-        href: 'https://beezie.com/r/grailhunter_266594',
-        imageUrl: '/uploads/oripa-beezie.png',
-        badge: 'BZ'
-      },
-      {
-        label: 'Phygitals',
-        subLabel: 'Online mystery pack',
-        href: 'https://phygitals.com/invite/7deb4f',
-        imageUrl: '/uploads/oripa-phygitals.png',
-        badge: 'PH'
-      },
-      {
-        label: 'Renaiss',
-        subLabel: 'Online mystery pack',
-        href: 'https://www.renaiss.xyz/ref/badgersfail8806',
-        imageUrl: '/uploads/oripa-renaiss.png',
-        badge: 'RN'
-      }
-    ]
   }
 ];
 const NEWS_FILTERS = [
@@ -686,7 +656,6 @@ const NEWS_FILTERS = [
   { id: 'notice', label: '공지사항' },
   { id: 'guide', label: '가이드/Q&A' },
   { id: 'preorder', label: '사전예약' },
-  { id: 'oripa', label: '오리파' },
   { id: 'supplies', label: '카드용품' }
 ];
 const CARD_STORAGE_GUIDE = {
@@ -1160,15 +1129,11 @@ const GUIDE_QA_GROUPS = [
   {
     id: 'buying',
     kind: 'guide',
-    title: '구매/예약/오리파 가이드',
+    title: '구매/예약 가이드',
     items: [
       {
         question: '공인점포와 취급점포는 무엇이 다른가요?',
         answer: '공인점포와 취급점포는 공식 홈페이지 기준의 매장 구분입니다. 지역별 검색, 내 주변순 정렬, 지도 바로가기는 /guide/shops에서 확인할 수 있습니다.'
-      },
-      {
-        question: '온라인 오리파 이용 시 주의할 점은 무엇인가요?',
-        answer: '온라인 오리파는 확률형 상품이므로 원하는 카드가 반드시 나오는 구조가 아닙니다. 이용 전 가격, 확률, 배송 가능 여부, 수수료, 관세 가능성을 확인하고 소액으로 먼저 테스트하는 것이 좋습니다.'
       }
     ]
   },
@@ -1441,143 +1406,6 @@ const NEWS_GUIDE_CONTENT = {
           '아마존에서 구매 초대 이메일을 받아야 실제 구매가 가능합니다.',
           '구매 초대 이메일은 일정 시간 안에 사용해야 할 수 있으므로 이메일함과 스팸함을 함께 확인하는 것이 좋습니다.',
           '상품 가격, 배송 가능 여부, 배송비, 관세는 시점에 따라 달라질 수 있으니 결제 전 최종 화면을 확인해야 합니다.'
-        ]
-      }
-    ]
-  },
-  oripa: {
-    title: '온라인 오리파란?',
-    description: '',
-    sections: [
-      {
-        title: '온라인 오리파 설명',
-        paragraphs: [
-          '온라인 오리파는 온라인에서 랜덤팩을 열고, 뽑힌 카드를 사이트 안에 보관하거나 판매하거나 실물 배송 신청을 할 수 있는 서비스입니다.'
-        ],
-        items: [
-          '사이트 안에 카드 보관',
-          '획득 카드 판매',
-          '실물 배송 신청'
-        ]
-      },
-      {
-        title: '일반적인 흐름',
-        type: 'steps',
-        items: [
-          '사이트 가입',
-          '결제수단 연결 또는 포인트 충전',
-          '원하는 팩 선택',
-          '온라인으로 팩 오픈',
-          '결과 카드 확인',
-          '사이트 내 보관, 판매, 교환 또는 실물 배송 신청'
-        ]
-      },
-      {
-        title: '주의사항',
-        items: [
-          '온라인 오리파는 확률형 상품입니다.',
-          '원하는 카드가 반드시 나오는 구조가 아닙니다.',
-          '뽑기 비용보다 낮은 가치의 카드가 나올 수도 있습니다.'
-        ]
-      }
-    ],
-    platforms: [
-      {
-        id: 'beezie',
-        label: 'Beezie',
-        title: 'Beezie 사용법',
-        description: '',
-        sections: [
-          {
-            title: '기본 사용 흐름',
-            type: 'steps',
-            items: [
-              'Beezie 사이트에 접속합니다.',
-              '회원가입 또는 로그인을 진행합니다.',
-              '원하는 뽑기 또는 마켓 메뉴를 선택합니다.',
-              '상품 가격과 확률, 구성품을 확인합니다.',
-              '결제 후 뽑기를 진행합니다.',
-              '획득한 아이템을 계정 내 보관함에서 확인합니다.',
-              '필요하면 실물 배송, 교환, 판매 기능을 이용합니다.'
-            ]
-          },
-          {
-            title: '확인할 점',
-            items: [
-              '배송 국가 지원 여부',
-              '배송비',
-              '보험 선택 여부',
-              '관세 발생 가능성',
-              '리딤 후 취소 가능 여부'
-            ]
-          }
-        ]
-      },
-      {
-        id: 'phygitals',
-        label: 'Phygitals',
-        title: 'Phygitals 사용법',
-        description: '',
-        sections: [
-          {
-            title: '기본 사용 흐름',
-            type: 'steps',
-            items: [
-              'Phygitals 사이트에 접속합니다.',
-              '회원가입 또는 로그인을 진행합니다.',
-              'Packs 또는 Marketplace 메뉴를 확인합니다.',
-              '원하는 카드팩이나 상품을 선택합니다.',
-              '가격, 구성, 확률, 배송 조건을 확인합니다.',
-              '결제 후 팩을 오픈합니다.',
-              '획득한 카드를 계정 내에서 확인합니다.',
-              '보관, 판매, 바이백 또는 실물 배송을 선택합니다.'
-            ]
-          },
-          {
-            title: '확인할 점',
-            items: [
-              '팩 가격',
-              '카드별 확률',
-              '바이백 가능 여부',
-              '바이백 비율',
-              '실물 배송 가능 여부',
-              '배송비와 보험',
-              '한국 배송 가능 여부',
-              '관세 발생 가능성'
-            ]
-          }
-        ]
-      },
-      {
-        id: 'renaiss',
-        label: 'Renaiss',
-        title: 'Renaiss 사용법',
-        description: '',
-        sections: [
-          {
-            title: '기본 사용 흐름',
-            type: 'steps',
-            items: [
-              'Renaiss 사이트에 접속합니다.',
-              '회원가입 또는 지갑 연결을 진행합니다.',
-              'Gacha 또는 Marketplace 메뉴를 확인합니다.',
-              '원하는 팩이나 상품을 선택합니다.',
-              '가격, 확률, 리딤 조건을 확인합니다.',
-              '결제 또는 지갑 승인을 진행합니다.',
-              '결과 아이템을 확인합니다.',
-              '보관, 마켓 판매 또는 실물 리딤을 선택합니다.'
-            ]
-          },
-          {
-            title: '확인할 점',
-            items: [
-              '지갑 연결 필요 여부',
-              '디지털 자산 구조 이해',
-              '리딤 조건',
-              '거래 취소 불가 가능성',
-              '수수료 / 가스비 발생 가능성'
-            ]
-          }
         ]
       }
     ]
@@ -3153,9 +2981,9 @@ const PAGE_SEO = {
   news: {
     title: '원피스카드 정보 - 공지사항, 가이드, 사전예약 | Card Pone',
     h1: '원피스카드 정보',
-    description: '원피스카드 공식 소식, 업데이트 공지, 이용 가이드, 사전예약, 온라인 오리파, 카드 보관용품 정보를 확인할 수 있습니다.',
+    description: '원피스카드 공식 소식, 업데이트 공지, 이용 가이드, 사전예약, 카드 보관용품 정보를 확인할 수 있습니다.',
     keywords: 'Card Pone 정보, 원피스카드 공지사항, 원피스카드 뉴스, 원피스카드 가이드, 원피스카드 Q&A',
-    body: '정보 영역에서는 업데이트 공지, 공식 소식, 사전예약, 온라인 오리파, 카드 보관용품, 이용 가이드를 확인할 수 있습니다.'
+    body: '정보 영역에서는 업데이트 공지, 공식 소식, 사전예약, 카드 보관용품, 이용 가이드를 확인할 수 있습니다.'
   },
   calendar: {
     title: '원피스카드 캘린더 - 발매일·이벤트·공식 공지 | Card Pone',
@@ -4864,7 +4692,6 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
             >
               <b>{index + 1}</b>
               <span>{item.label}</span>
-              <small>{item.type === 'box' ? '박스' : item.type === 'card' ? '카드' : '검색'}</small>
             </button>
           )) : <p>검색 데이터 집계 중입니다.</p>}
         </div>
@@ -7075,11 +6902,9 @@ function RenewNews({ uiLang, onOpenCalendar }) {
       ? 'notice'
       : initialPath.startsWith('/news/preorder')
         ? 'preorder'
-        : initialPath.startsWith('/news/oripa')
-          ? 'oripa'
-          : initialPath.startsWith('/news/supplies')
-            ? 'supplies'
-            : '';
+        : initialPath.startsWith('/news/supplies')
+          ? 'supplies'
+          : '';
   const initialSection = initialRouteState.section || routeSection || initialParams.get('section') || 'all';
   const initialLocale = (initialParams.get('locale') || (isJp ? 'JP' : 'KR')).toUpperCase();
   const [newsFilter, setNewsFilter] = useState(() => {
@@ -7185,7 +7010,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
           ) : null}
 
           {visibleLinkGroups.length ? (
-          <div className={`renew-news-links ${visibleLinkGroups.length === 1 ? 'is-single' : ''}`} aria-label="예약구매 및 온라인 오리파">
+          <div className={`renew-news-links ${visibleLinkGroups.length === 1 ? 'is-single' : ''}`} aria-label="예약구매">
             {visibleLinkGroups.map((item) => (
               <section key={item.id} className="renew-news-link-card">
                 <span>{item.status}</span>
@@ -7871,7 +7696,7 @@ function RenewNewsGuideModal({ guideId, onClose }) {
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
         {guide.platforms ? (
-          <div className="renew-news-guide-tabs" role="group" aria-label="오리파 플랫폼 선택">
+          <div className="renew-news-guide-tabs" role="group" aria-label="플랫폼 선택">
             {guide.platforms.map((platform) => (
               <button
                 key={platform.id}

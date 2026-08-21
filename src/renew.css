@@ -9096,7 +9096,7 @@
 
 .renew-popular-panel > button {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   width: 100%;
