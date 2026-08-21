@@ -4768,6 +4768,7 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
   const [keyword, setKeyword] = useState('');
   const [popularItems, setPopularItems] = useState([]);
   const [popularOpen, setPopularOpen] = useState(false);
+  const [popularIndex, setPopularIndex] = useState(0);
   const popularRef = useRef(null);
   const t = (key) => getUiText(uiLang, key);
 
@@ -4799,6 +4800,19 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
     return () => document.removeEventListener('pointerdown', close);
   }, [popularOpen]);
 
+  useEffect(() => {
+    const itemCount = Math.min(popularItems.length, 10);
+    if (itemCount < 2) {
+      setPopularIndex(0);
+      return undefined;
+    }
+    setPopularIndex((index) => index % itemCount);
+    const timer = window.setInterval(() => {
+      setPopularIndex((index) => (index + 1) % itemCount);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [popularItems.length]);
+
   function submitSearch(event) {
     event.preventDefault();
     const q = keyword.trim();
@@ -4808,6 +4822,8 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
       .then((item) => trackPopularSearch(visitorToken, item))
       .catch(() => {});
   }
+
+  const currentPopular = popularItems[popularIndex];
 
   return (
     <div className="renew-search-row">
@@ -4827,12 +4843,12 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
       <div
         ref={popularRef}
         className={`renew-popular-search${popularOpen ? ' is-open' : ''}`}
-        onMouseEnter={() => setPopularOpen(true)}
-        onMouseLeave={() => setPopularOpen(false)}
       >
         <button type="button" className="renew-popular-trigger" onClick={() => setPopularOpen((value) => !value)} aria-expanded={popularOpen}>
           <span>실시간 인기 검색어</span>
-          <strong>{popularItems[0]?.label || '집계 중'}</strong>
+          <strong>
+            {currentPopular ? <><em>{popularIndex + 1}위</em>{currentPopular.label}</> : '집계 중'}
+          </strong>
           <b aria-hidden="true">⌄</b>
         </button>
         <div className="renew-popular-panel" aria-label="실시간 인기 검색어 순위">

@@ -9036,11 +9036,22 @@
 }
 
 .renew-popular-trigger strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   font-size: 15px;
+}
+
+.renew-popular-trigger strong em {
+  flex: 0 0 auto;
+  color: #c94d35;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
 }
 
 .renew-popular-trigger b {
@@ -9060,8 +9071,7 @@
   box-shadow: 0 22px 48px rgba(15, 23, 42, 0.18);
 }
 
-.renew-popular-search.is-open .renew-popular-panel,
-.renew-popular-search:focus-within .renew-popular-panel {
+.renew-popular-search.is-open .renew-popular-panel {
   display: block;
 }
 
