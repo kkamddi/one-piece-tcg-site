@@ -1,4 +1,5 @@
 const API_BASE = '/api/cards';
+const CARD_CATALOG_REVISION = '2026-08-21-op14';
 const CARD_API_CACHE_TTL_MS = 5 * 60 * 1000;
 let cardsFallbackPromise;
 const responseCache = new Map();
@@ -166,7 +167,7 @@ async function safeFetchJson(url, fallback) {
 }
 
 export async function fetchCards(filters = {}) {
-  const url = `${API_BASE}${buildQuery(filters)}`;
+  const url = `${API_BASE}${buildQuery({ ...filters, catalog: CARD_CATALOG_REVISION })}`;
   return safeFetchJson(url, async () => {
     const cardsFallback = await loadCardsFallback();
     const filtered = cardsFallback.filter((card) => matchesCardFilters(card, filters));
@@ -180,7 +181,7 @@ export async function searchCards(query, locale) {
   const trimmed = query?.trim() ?? '';
   if (!trimmed) return [];
 
-  const url = `${API_BASE}/search${buildQuery({ q: trimmed, locale })}`;
+  const url = `${API_BASE}/search${buildQuery({ q: trimmed, locale, catalog: CARD_CATALOG_REVISION })}`;
   return safeFetchJson(url, async () => {
     const cardsFallback = await loadCardsFallback();
     const results = filterFallbackCards(cardsFallback, trimmed, locale);
@@ -212,7 +213,7 @@ export async function searchCards(query, locale) {
 export async function fetchCardById(id) {
   if (!id) return null;
 
-  const url = `${API_BASE}/${encodeURIComponent(id)}`;
+  const url = `${API_BASE}/${encodeURIComponent(id)}${buildQuery({ catalog: CARD_CATALOG_REVISION })}`;
   return safeFetchJson(url, async () => {
     const cardsFallback = await loadCardsFallback();
     return cardsFallback.find((card) => card.id === id) ?? null;
