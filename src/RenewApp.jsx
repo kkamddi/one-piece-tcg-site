@@ -638,7 +638,7 @@ const SUPPLY_FILTERS = [
 const NEWS_LINK_GROUPS = [
   {
     id: 'preorder',
-    title: '아마존 히로인즈2 응모',
+    title: '아마존 응모',
     description: '',
     status: 'AMAZON',
     links: [

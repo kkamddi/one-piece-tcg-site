@@ -156,6 +156,18 @@
     "baseSeriesId": "OP13"
   },
   {
+    "id": "KR-OP14",
+    "koName": "창해의 칠걸",
+    "enName": "THE AZURE SEA'S SEVEN",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-14] 부스터 팩 창해의 칠걸",
+    "officialSeriesKeyword": "OP-14",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈",
+    "locale": "KR",
+    "baseSeriesId": "OP14"
+  },
+  {
     "id": "KR-EB01",
     "koName": "메모리얼 컬렉션",
     "enName": "MEMORIAL COLLECTION",

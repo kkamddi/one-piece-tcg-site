@@ -13,6 +13,19 @@ const countsPath = path.join(rootDir, 'src/data/series-card-counts.json');
 const OFFICIAL_BASE = 'https://onepiece-cardgame.kr';
 const CARD_LIST_URL = `${OFFICIAL_BASE}/cardlist.do`;
 const targets = {
+  OP14: {
+    seriesId: 'KR-OP14',
+    baseSeriesId: 'OP14',
+    optionCode: 'OPK-14',
+    koName: '창해의 칠걸',
+    enName: "THE AZURE SEA'S SEVEN",
+    kindKo: '부스터 팩',
+    kindEn: 'BOOSTER PACK',
+    officialSeriesKeyword: 'OP-14',
+    description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈',
+    insertAfter: 'KR-OP13',
+    minimumCardCount: 100
+  },
   OP13: {
     seriesId: 'KR-OP13',
     baseSeriesId: 'OP13',
