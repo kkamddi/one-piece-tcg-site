@@ -2160,6 +2160,7 @@ async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   if (code) params.set('code', code);
   if (apparelId) params.set('apparelId', String(apparelId));
   if (summary) params.set('summary', '1');
+  if (!summary && apparelId) params.set('cacheMinute', String(Math.floor(Date.now() / 60000)));
   const response = await fetch(`/api/market?${params.toString()}`);
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
