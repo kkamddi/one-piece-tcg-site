@@ -577,6 +577,14 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
     }
   }
 
+  const touchedApparelIds = [...new Set(
+    [...touched.values()].map((item) => Number(item.apparelId || 0)).filter((id) => id > 0)
+  )];
+  const cacheInvalidations = await Promise.all(touchedApparelIds.flatMap((apparelId) => [
+    invalidateR2Json(`public-data/market-detail-v1/${apparelId}/recent-trades.json`),
+    invalidateR2Json(`public-data/market-detail-v1/${apparelId}/daily-points-1y.json`),
+  ]));
+
   return {
     ok: true,
     mode: 'history',
@@ -584,6 +592,7 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
     tradesSeen,
     tradesStored,
     dailyPointsUpdated,
+    detailCachesInvalidated: cacheInvalidations.filter(Boolean).length,
   };
 }
 
