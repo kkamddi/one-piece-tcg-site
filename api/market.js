@@ -1431,10 +1431,12 @@ export default async function handler(request, response) {
 
   const params = normalizeParams(request.query);
   const summaryMode = String(params.get('summary') || '').toLowerCase();
-  const cacheSeconds = summaryMode === 'latest' ? 900 : 300;
+  const isLatestSummary = summaryMode === 'latest';
+  const cacheSeconds = isLatestSummary ? 900 : 60;
+  const staleSeconds = isLatestSummary ? 86400 : 60;
   response.setHeader(
     'Cache-Control',
-    `public, max-age=60, s-maxage=${cacheSeconds}, stale-while-revalidate=86400`
+    `public, max-age=60, s-maxage=${cacheSeconds}, stale-while-revalidate=${staleSeconds}`
   );
 
   if (!MARKET_API_ORIGIN || isSelfRequest(request)) {
