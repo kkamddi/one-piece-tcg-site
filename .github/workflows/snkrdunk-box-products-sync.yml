@@ -36,6 +36,9 @@ jobs:
       - name: Sync new Japanese box products
         run: node scripts/syncSnkrdunkBoxProducts.js --lookback-days "${{ inputs.lookback_days || '21' }}"
 
+      - name: Sync newly released Japanese card products
+        run: node scripts/syncSnkrdunkOnePieceMarketCards.js --write --max-pages=8
+
       - name: Sync Japanese box prices
         run: node scripts/syncSnkrdunkBoxPrices.js
 

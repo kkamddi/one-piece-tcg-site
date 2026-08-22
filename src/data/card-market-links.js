@@ -26437,6 +26437,1527 @@ const cardMarketLinks = [
     "apparelId": null,
     "status": "pending",
     "note": "OP16 pending: 0 SNKRDUNK candidate(s)"
+  },
+  {
+    "cardId": "JP::EB04-061_p3",
+    "cardNo": "EB04-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871034,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy SEC-SP (Manga Alt Art) :Pirate Crew Super Parallel [EB04-061](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-001",
+    "cardNo": "OP17-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881548,
+    "status": "approved",
+    "note": "OP17 auto approved: Edward.Newgate L [OP17-001](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-001_p1",
+    "cardNo": "OP17-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871035,
+    "status": "approved",
+    "note": "OP17 auto approved: Edward.Newgate L-P [OP17-001](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-002",
+    "cardNo": "OP17-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881549,
+    "status": "approved",
+    "note": "OP17 auto approved: Atmos C [OP17-002](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-003",
+    "cardNo": "OP17-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881550,
+    "status": "approved",
+    "note": "OP17 auto approved: Izo R [OP17-003](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-004",
+    "cardNo": "OP17-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881551,
+    "status": "approved",
+    "note": "OP17 auto approved: Inuarashi & Nekomamushi C [OP17-004](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-005",
+    "cardNo": "OP17-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881552,
+    "status": "approved",
+    "note": "OP17 auto approved: Edward.Newgate SR [OP17-005](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-005_p1",
+    "cardNo": "OP17-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871036,
+    "status": "approved",
+    "note": "OP17 auto approved: Edward.Newgate SR-P [OP17-005](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-005_p2",
+    "cardNo": "OP17-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871065,
+    "status": "approved",
+    "note": "OP17 auto approved: Edward.Newgate SR-SP (Manga Alt Art) [OP17-005](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-006",
+    "cardNo": "OP17-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881553,
+    "status": "approved",
+    "note": "OP17 auto approved: Kingdew C [OP17-006](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-006_p1",
+    "cardNo": "OP17-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881554,
+    "status": "approved",
+    "note": "OP17 auto approved: Kingdew C-P [OP17-006](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-007",
+    "cardNo": "OP17-007",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881555,
+    "status": "approved",
+    "note": "OP17 auto approved: Kouzuki Oden R [OP17-007](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-008",
+    "cardNo": "OP17-008",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881556,
+    "status": "approved",
+    "note": "OP17 auto approved: Jozu R [OP17-008](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-009",
+    "cardNo": "OP17-009",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881557,
+    "status": "approved",
+    "note": "OP17 auto approved: Haruta UC [OP17-009](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-010",
+    "cardNo": "OP17-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881558,
+    "status": "approved",
+    "note": "OP17 auto approved: Fossa C [OP17-010](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-011",
+    "cardNo": "OP17-011",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881559,
+    "status": "approved",
+    "note": "OP17 auto approved: Blamenco C [OP17-011](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-012",
+    "cardNo": "OP17-012",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881560,
+    "status": "approved",
+    "note": "OP17 auto approved: Blenheim C [OP17-012](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-013",
+    "cardNo": "OP17-013",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881561,
+    "status": "approved",
+    "note": "OP17 auto approved: Portgas.D.Ace UC [OP17-013](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-014",
+    "cardNo": "OP17-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881562,
+    "status": "approved",
+    "note": "OP17 auto approved: Whitey Bay C [OP17-014](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-015",
+    "cardNo": "OP17-015",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881563,
+    "status": "approved",
+    "note": "OP17 auto approved: Marco UC [OP17-015](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-016",
+    "cardNo": "OP17-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881564,
+    "status": "approved",
+    "note": "OP17 auto approved: Rakuyo UC [OP17-016](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-017",
+    "cardNo": "OP17-017",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881565,
+    "status": "approved",
+    "note": "OP17 auto approved: Gurararararara!!! C [OP17-017](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-018",
+    "cardNo": "OP17-018",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881566,
+    "status": "approved",
+    "note": "OP17 auto approved: The Power to Destroy the World UC [OP17-018](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-019",
+    "cardNo": "OP17-019",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881567,
+    "status": "approved",
+    "note": "OP17 auto approved: I don't want to talk to a snot-nosed brat! R [OP17-019](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-020",
+    "cardNo": "OP17-020",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881568,
+    "status": "approved",
+    "note": "OP17 auto approved: Shanks L [OP17-020](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-020_p1",
+    "cardNo": "OP17-020",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871037,
+    "status": "approved",
+    "note": "OP17 auto approved: Shanks L-P [OP17-020](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-021",
+    "cardNo": "OP17-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881569,
+    "status": "approved",
+    "note": "OP17 auto approved: Old Lady Ori UC [OP17-021](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-022",
+    "cardNo": "OP17-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881570,
+    "status": "approved",
+    "note": "OP17 auto approved: Shanks SR [OP17-022](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-022_p1",
+    "cardNo": "OP17-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 4 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-022_p2",
+    "cardNo": "OP17-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 4 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-023",
+    "cardNo": "OP17-023",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881571,
+    "status": "approved",
+    "note": "OP17 auto approved: Nami UC [OP17-023](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-024",
+    "cardNo": "OP17-024",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881572,
+    "status": "approved",
+    "note": "OP17 auto approved: C [OP17-024](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-025",
+    "cardNo": "OP17-025",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881573,
+    "status": "approved",
+    "note": "OP17 auto approved: Building Snake UC [OP17-025](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-025_p1",
+    "cardNo": "OP17-025",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881574,
+    "status": "approved",
+    "note": "OP17 auto approved: Building Snake UC-P [OP17-025](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-026",
+    "cardNo": "OP17-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881575,
+    "status": "approved",
+    "note": "OP17 auto approved: Fugar UC [OP17-026](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-027",
+    "cardNo": "OP17-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881576,
+    "status": "approved",
+    "note": "OP17 auto approved: Benn.Beckman R [OP17-027](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-027_p1",
+    "cardNo": "OP17-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871039,
+    "status": "approved",
+    "note": "OP17 auto approved: Benn.Beckman R-P [OP17-027](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-028",
+    "cardNo": "OP17-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881577,
+    "status": "approved",
+    "note": "OP17 auto approved: Punk Punch & Monster C [OP17-028](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-029",
+    "cardNo": "OP17-029",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881578,
+    "status": "approved",
+    "note": "OP17 auto approved: Hongo R [OP17-029](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-030",
+    "cardNo": "OP17-030",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881579,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy C [OP17-030](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-031",
+    "cardNo": "OP17-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881580,
+    "status": "approved",
+    "note": "OP17 auto approved: Yasopp SR [OP17-031](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-031_p1",
+    "cardNo": "OP17-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871040,
+    "status": "approved",
+    "note": "OP17 auto approved: Yasopp SR-P [OP17-031](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-032",
+    "cardNo": "OP17-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881581,
+    "status": "approved",
+    "note": "OP17 auto approved: Limejuice R [OP17-032](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-033",
+    "cardNo": "OP17-033",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-033_p1",
+    "cardNo": "OP17-033",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-034",
+    "cardNo": "OP17-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881583,
+    "status": "approved",
+    "note": "OP17 auto approved: Rockstar C [OP17-034](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-035",
+    "cardNo": "OP17-035",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881584,
+    "status": "approved",
+    "note": "OP17 auto approved: Roronoa Zoro C [OP17-035](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-036",
+    "cardNo": "OP17-036",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881585,
+    "status": "approved",
+    "note": "OP17 auto approved: Everybody listen. Withdraw now and... allow me to save face UC [OP17-036](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-037",
+    "cardNo": "OP17-037",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881586,
+    "status": "approved",
+    "note": "OP17 auto approved: Are You That Afraid of the \"New Era\"?! R [OP17-037](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-037_p1",
+    "cardNo": "OP17-037",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871042,
+    "status": "approved",
+    "note": "OP17 auto approved: Are You That Afraid of the \"New Era\"?! R-P [OP17-037](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-038",
+    "cardNo": "OP17-038",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881587,
+    "status": "approved",
+    "note": "OP17 auto approved: Looks like you saw a bad future... C [OP17-038](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-039",
+    "cardNo": "OP17-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881588,
+    "status": "approved",
+    "note": "OP17 auto approved: Rocks D. Xebec L [OP17-039](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-039_p1",
+    "cardNo": "OP17-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-040",
+    "cardNo": "OP17-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881589,
+    "status": "approved",
+    "note": "OP17 auto approved: Edward.Newgate R [OP17-040](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-041",
+    "cardNo": "OP17-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881590,
+    "status": "approved",
+    "note": "OP17 auto approved: Wang Zhi UC [OP17-041](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-042",
+    "cardNo": "OP17-042",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881591,
+    "status": "approved",
+    "note": "OP17 auto approved: Kaido R [OP17-042](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-043",
+    "cardNo": "OP17-043",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881592,
+    "status": "approved",
+    "note": "OP17 auto approved: Ganzui UC [OP17-043](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-044",
+    "cardNo": "OP17-044",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881593,
+    "status": "approved",
+    "note": "OP17 auto approved: Captain John UC [OP17-044](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-045",
+    "cardNo": "OP17-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881594,
+    "status": "approved",
+    "note": "OP17 auto approved: Kyo UC [OP17-045](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-045_p1",
+    "cardNo": "OP17-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881595,
+    "status": "approved",
+    "note": "OP17 auto approved: Kyo UC-P [OP17-045](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-046",
+    "cardNo": "OP17-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881596,
+    "status": "approved",
+    "note": "OP17 auto approved: Gloriosa SR [OP17-046](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-046_p1",
+    "cardNo": "OP17-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-047",
+    "cardNo": "OP17-047",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881597,
+    "status": "approved",
+    "note": "OP17 auto approved: Shiki C [OP17-047](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-048",
+    "cardNo": "OP17-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881598,
+    "status": "approved",
+    "note": "OP17 auto approved: Shiki SR [OP17-048](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-048_p1",
+    "cardNo": "OP17-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871046,
+    "status": "approved",
+    "note": "OP17 auto approved: Shiki SR-P [OP17-048](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-049",
+    "cardNo": "OP17-049",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881599,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Linlin R [OP17-049](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-049_p1",
+    "cardNo": "OP17-049",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-050",
+    "cardNo": "OP17-050",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881600,
+    "status": "approved",
+    "note": "OP17 auto approved: Streusen C [OP17-050](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-051",
+    "cardNo": "OP17-051",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881601,
+    "status": "approved",
+    "note": "OP17 auto approved: Jinbe C [OP17-051](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-052",
+    "cardNo": "OP17-052",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881602,
+    "status": "approved",
+    "note": "OP17 auto approved: Don Marlon C [OP17-052](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-053",
+    "cardNo": "OP17-053",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881603,
+    "status": "approved",
+    "note": "OP17 auto approved: Barbel C [OP17-053](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-054",
+    "cardNo": "OP17-054",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881604,
+    "status": "approved",
+    "note": "OP17 auto approved: Miss Buckingham Stussy R [OP17-054](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-054_p1",
+    "cardNo": "OP17-054",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871048,
+    "status": "approved",
+    "note": "OP17 auto approved: Miss Buckingham Stussy R-P [OP17-054](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-055",
+    "cardNo": "OP17-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881605,
+    "status": "approved",
+    "note": "OP17 auto approved: There is no such thing as everlasting power in this world!!! R [OP17-055](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-056",
+    "cardNo": "OP17-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-057",
+    "cardNo": "OP17-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-058",
+    "cardNo": "OP17-058",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881608,
+    "status": "approved",
+    "note": "OP17 auto approved: Kaido L [OP17-058](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-058_p1",
+    "cardNo": "OP17-058",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871049,
+    "status": "approved",
+    "note": "OP17 auto approved: Kaido L-P [OP17-058](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-059",
+    "cardNo": "OP17-059",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881609,
+    "status": "approved",
+    "note": "OP17 auto approved: Aramaki UC [OP17-059](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-060",
+    "cardNo": "OP17-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881610,
+    "status": "approved",
+    "note": "OP17 auto approved: Ulti & Page One R [OP17-060](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-061",
+    "cardNo": "OP17-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881611,
+    "status": "approved",
+    "note": "OP17 auto approved: Lead Performer R [OP17-061](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-061_p1",
+    "cardNo": "OP17-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871050,
+    "status": "approved",
+    "note": "OP17 auto approved: Lead Performer R-P [OP17-061](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-062",
+    "cardNo": "OP17-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881612,
+    "status": "approved",
+    "note": "OP17 auto approved: Kaido SR [OP17-062](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-062_p1",
+    "cardNo": "OP17-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 4 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-062_p2",
+    "cardNo": "OP17-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 4 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-062_p3",
+    "cardNo": "OP17-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP17 pending: 4 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-063",
+    "cardNo": "OP17-063",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881613,
+    "status": "approved",
+    "note": "OP17 auto approved: Kaido SR [OP17-063](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-063_p1",
+    "cardNo": "OP17-063",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871053,
+    "status": "approved",
+    "note": "OP17 auto approved: Kaido SR-P [OP17-063](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-064",
+    "cardNo": "OP17-064",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881614,
+    "status": "approved",
+    "note": "OP17 auto approved: King C [OP17-064](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-065",
+    "cardNo": "OP17-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881615,
+    "status": "approved",
+    "note": "OP17 auto approved: Queen UC [OP17-065](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-066",
+    "cardNo": "OP17-066",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881616,
+    "status": "approved",
+    "note": "OP17 auto approved: Kurozumi Orochi C [OP17-066](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-067",
+    "cardNo": "OP17-067",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881617,
+    "status": "approved",
+    "note": "OP17 auto approved: Kurozumi Kanjuro C [OP17-067](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-068",
+    "cardNo": "OP17-068",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881618,
+    "status": "approved",
+    "note": "OP17 auto approved: Sasaki C [OP17-068](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-069",
+    "cardNo": "OP17-069",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881619,
+    "status": "approved",
+    "note": "OP17 auto approved: Jack UC [OP17-069](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-070",
+    "cardNo": "OP17-070",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881620,
+    "status": "approved",
+    "note": "OP17 auto approved: Scratchmen Apoo C [OP17-070](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-070_p1",
+    "cardNo": "OP17-070",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881621,
+    "status": "approved",
+    "note": "OP17 auto approved: Scratchmen Apoo C-P [OP17-070](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-071",
+    "cardNo": "OP17-071",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881622,
+    "status": "approved",
+    "note": "OP17 auto approved: Who's.Who C [OP17-071](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-072",
+    "cardNo": "OP17-072",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881623,
+    "status": "approved",
+    "note": "OP17 auto approved: Black Maria C [OP17-072](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-073",
+    "cardNo": "OP17-073",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881624,
+    "status": "approved",
+    "note": "OP17 auto approved: Basil Hawkins UC [OP17-073](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-074",
+    "cardNo": "OP17-074",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881625,
+    "status": "approved",
+    "note": "OP17 auto approved: Yamato R [OP17-074](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-075",
+    "cardNo": "OP17-075",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881626,
+    "status": "approved",
+    "note": "OP17 auto approved: X.Drake C [OP17-075](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-076",
+    "cardNo": "OP17-076",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881627,
+    "status": "approved",
+    "note": "OP17 auto approved: Wororororo...!! That sobered me right up! R [OP17-076](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-077",
+    "cardNo": "OP17-077",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881628,
+    "status": "approved",
+    "note": "OP17 auto approved: Gundari Dragon Swarm UC [OP17-077](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-078",
+    "cardNo": "OP17-078",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881629,
+    "status": "approved",
+    "note": "OP17 auto approved: Shuron Hakke C [OP17-078](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-079",
+    "cardNo": "OP17-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881630,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy L [OP17-079](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-079_p1",
+    "cardNo": "OP17-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871054,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy L-P [OP17-079](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-079_p2",
+    "cardNo": "OP17-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871055,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy L-SP (Manga Alt Art) [OP17-079](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-080",
+    "cardNo": "OP17-080",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881631,
+    "status": "approved",
+    "note": "OP17 auto approved: Usopp SR [OP17-080](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-080_p1",
+    "cardNo": "OP17-080",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871056,
+    "status": "approved",
+    "note": "OP17 auto approved: Usopp SR-P [OP17-080](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-081",
+    "cardNo": "OP17-081",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881632,
+    "status": "approved",
+    "note": "OP17 auto approved: Gerd R [OP17-081](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-082",
+    "cardNo": "OP17-082",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881633,
+    "status": "approved",
+    "note": "OP17 auto approved: Sanji C [OP17-082](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-083",
+    "cardNo": "OP17-083",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881634,
+    "status": "approved",
+    "note": "OP17 auto approved: Jinbe C [OP17-083](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-084",
+    "cardNo": "OP17-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881635,
+    "status": "approved",
+    "note": "OP17 auto approved: Tony Tony.Chopper UC [OP17-084](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-085",
+    "cardNo": "OP17-085",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881636,
+    "status": "approved",
+    "note": "OP17 auto approved: Dorry UC [OP17-085](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-086",
+    "cardNo": "OP17-086",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881637,
+    "status": "approved",
+    "note": "OP17 auto approved: Nami UC [OP17-086](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-087",
+    "cardNo": "OP17-087",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881638,
+    "status": "approved",
+    "note": "OP17 auto approved: Nico Robin R [OP17-087](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-087_p1",
+    "cardNo": "OP17-087",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871057,
+    "status": "approved",
+    "note": "OP17 auto approved: Nico Robin R-P [OP17-087](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-088",
+    "cardNo": "OP17-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881639,
+    "status": "approved",
+    "note": "OP17 auto approved: Hajrudin C [OP17-088](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-088_p1",
+    "cardNo": "OP17-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881640,
+    "status": "approved",
+    "note": "OP17 auto approved: Hajrudin C-P [OP17-088](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-089",
+    "cardNo": "OP17-089",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881641,
+    "status": "approved",
+    "note": "OP17 auto approved: Jaguar.D.Saul R [OP17-089](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-090",
+    "cardNo": "OP17-090",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881642,
+    "status": "approved",
+    "note": "OP17 auto approved: Franky C [OP17-090](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-091",
+    "cardNo": "OP17-091",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881643,
+    "status": "approved",
+    "note": "OP17 auto approved: Brook C [OP17-091](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-092",
+    "cardNo": "OP17-092",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881644,
+    "status": "approved",
+    "note": "OP17 auto approved: Brogy UC [OP17-092](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-093",
+    "cardNo": "OP17-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881645,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy SR [OP17-093](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-093_p1",
+    "cardNo": "OP17-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871058,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy SR-P [OP17-093](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-094",
+    "cardNo": "OP17-094",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881646,
+    "status": "approved",
+    "note": "OP17 auto approved: Road UC [OP17-094](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-095",
+    "cardNo": "OP17-095",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881647,
+    "status": "approved",
+    "note": "OP17 auto approved: Roronoa Zoro C [OP17-095](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-096",
+    "cardNo": "OP17-096",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881648,
+    "status": "approved",
+    "note": "OP17 auto approved: I'm Luffy! The Man Who Will Become the Pirate King! R [OP17-096](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-097",
+    "cardNo": "OP17-097",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881649,
+    "status": "approved",
+    "note": "OP17 auto approved: Take my wrath!!! I'll destroy the \"world\"!!! C [OP17-097](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-098",
+    "cardNo": "OP17-098",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881650,
+    "status": "approved",
+    "note": "OP17 auto approved: Gomu Gomu no Kong Gun C [OP17-098](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-099",
+    "cardNo": "OP17-099",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881651,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Linlin L [OP17-099](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-099_p1",
+    "cardNo": "OP17-099",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871059,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Linlin L-P [OP17-099](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-100",
+    "cardNo": "OP17-100",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881652,
+    "status": "approved",
+    "note": "OP17 auto approved: Capone\"Gang\"Bege C [OP17-100](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-101",
+    "cardNo": "OP17-101",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881653,
+    "status": "approved",
+    "note": "OP17 auto approved: Caribou C [OP17-101](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-102",
+    "cardNo": "OP17-102",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881654,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Oven UC [OP17-102](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-103",
+    "cardNo": "OP17-103",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881655,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Katakuri UC [OP17-103](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-104",
+    "cardNo": "OP17-104",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881656,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Cracker UC [OP17-104](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-105",
+    "cardNo": "OP17-105",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881657,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Chiffon C [OP17-105](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-106",
+    "cardNo": "OP17-106",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881658,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Smoothie C [OP17-106](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-107",
+    "cardNo": "OP17-107",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881659,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Daifuku UC [OP17-107](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-107_p1",
+    "cardNo": "OP17-107",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881660,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Daifuku UC-P [OP17-107](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-108",
+    "cardNo": "OP17-108",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881661,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Brulee C [OP17-108](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-109",
+    "cardNo": "OP17-109",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881662,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Pudding R [OP17-109](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-110",
+    "cardNo": "OP17-110",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881663,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Perospero C [OP17-110](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-111",
+    "cardNo": "OP17-111",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881664,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Mont-d'or C [OP17-111](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-112",
+    "cardNo": "OP17-112",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881665,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Linlin SR [OP17-112](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-112_p1",
+    "cardNo": "OP17-112",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871060,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Linlin SR-P [OP17-112](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-112_p2",
+    "cardNo": "OP17-112",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871068,
+    "status": "approved",
+    "note": "OP17 auto approved: Charlotte Linlin SR-SP (Manga Alt Art) [OP17-112](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-113",
+    "cardNo": "OP17-113",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881666,
+    "status": "approved",
+    "note": "OP17 auto approved: Streusen R [OP17-113](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-114",
+    "cardNo": "OP17-114",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881667,
+    "status": "approved",
+    "note": "OP17 auto approved: Sweet 3 Generals R [OP17-114](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-114_p1",
+    "cardNo": "OP17-114",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871061,
+    "status": "approved",
+    "note": "OP17 auto approved: Sweet 3 Generals R-P [OP17-114](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-115",
+    "cardNo": "OP17-115",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881668,
+    "status": "approved",
+    "note": "OP17 auto approved: There's a thing called honor, you idiot!!! R [OP17-115](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-116",
+    "cardNo": "OP17-116",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881669,
+    "status": "approved",
+    "note": "OP17 auto approved: Fulgora UC [OP17-116](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-117",
+    "cardNo": "OP17-117",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881670,
+    "status": "approved",
+    "note": "OP17 auto approved: Maser Saber C [OP17-117](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-118",
+    "cardNo": "OP17-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881671,
+    "status": "approved",
+    "note": "OP17 auto approved: Rocks D. Xebec SEC [OP17-118](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-118_p1",
+    "cardNo": "OP17-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871063,
+    "status": "approved",
+    "note": "OP17 auto approved: Rocks D. Xebec SEC-P [OP17-118](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-118_p2",
+    "cardNo": "OP17-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871062,
+    "status": "approved",
+    "note": "OP17 auto approved: Rocks D. Xebec SEC-SP (Manga Alt Art) :Pirate Crew Super Parallel [OP17-118](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-119",
+    "cardNo": "OP17-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 881672,
+    "status": "approved",
+    "note": "OP17 auto approved: Loki SEC [OP17-119](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP17-119_p1",
+    "cardNo": "OP17-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871064,
+    "status": "approved",
+    "note": "OP17 auto approved: Loki SEC-P [OP17-119](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::EB04-007_p2",
+    "cardNo": "EB04-007",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871073,
+    "status": "approved",
+    "note": "OP17 auto approved: Roronoa Zoro SR-SPC :Conqueror's Haki Special Card [EB04-007](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP12-056_p2",
+    "cardNo": "OP12-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871075,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Garp SR-SPC :Conqueror's Haki Special Card [OP12-056](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP13-028_p2",
+    "cardNo": "OP13-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871070,
+    "status": "approved",
+    "note": "OP17 auto approved: Shanks SR-SPC :New Four Emperors Special Card [OP13-028](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP14-108_p1",
+    "cardNo": "OP14-108",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871078,
+    "status": "approved",
+    "note": "OP17 auto approved: Silvers Rayleigh R-SPC :Conqueror's Haki Special Card [OP14-108](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::OP16-098_p2",
+    "cardNo": "OP16-098",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871077,
+    "status": "approved",
+    "note": "OP17 auto approved: Yamato SR-SPC :Conqueror's Haki Special Card [OP16-098](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::P-084_p1",
+    "cardNo": "P-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871071,
+    "status": "approved",
+    "note": "OP17 auto approved: Buggy P-SPC :New Four Emperors Special Card [P-084](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::P-107_p1",
+    "cardNo": "P-107",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871076,
+    "status": "approved",
+    "note": "OP17 auto approved: Gol.D.Roger P-SPC :Conqueror's Haki Special Card [P-107](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::ST27-005_p1",
+    "cardNo": "ST27-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871072,
+    "status": "approved",
+    "note": "OP17 auto approved: Marshall.D.Teach SR-SPC :New Four Emperors Special Card [ST27-005](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::ST31-004_p1",
+    "cardNo": "ST31-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871069,
+    "status": "approved",
+    "note": "OP17 auto approved: Monkey.D.Luffy SR-SPC :New Four Emperors Special Card [ST31-004](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::ST32-002_p1",
+    "cardNo": "ST32-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 871074,
+    "status": "approved",
+    "note": "OP17 auto approved: Kouzuki Oden SR-SPC :Conqueror's Haki Special Card [ST32-002](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
   }
 ];
 
