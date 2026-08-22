@@ -4,6 +4,9 @@ Allow: /
 User-agent: Googlebot
 Allow: /
 
+User-agent: Mediapartners-Google
+Allow: /ads.txt
+
 User-agent: OAI-SearchBot
 Allow: /
 
