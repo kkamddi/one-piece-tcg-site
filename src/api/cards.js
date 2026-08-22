@@ -1,5 +1,5 @@
 const API_BASE = '/api/cards';
-const CARD_CATALOG_REVISION = '2026-08-22-op17';
+const CARD_CATALOG_REVISION = '2026-08-22-op17-v2';
 const CARD_API_CACHE_TTL_MS = 5 * 60 * 1000;
 let cardsFallbackPromise;
 const responseCache = new Map();
