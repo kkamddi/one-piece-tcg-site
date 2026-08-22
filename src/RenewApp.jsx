@@ -36,6 +36,7 @@ import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
+const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = 'https://snkrdunk.com/en/invitation/AGJ872';
 const resolvedBoxMarketItems = boxMarketItems.map((item) => {
@@ -14964,7 +14965,7 @@ export default function RenewApp() {
   }
 
   return (
-    <div className={`renew-app ${isDark ? 'is-dark' : ''}`}>
+    <div className={`renew-app ${isDark ? 'is-dark' : ''}`} data-build-revision={APP_BUILD_REVISION}>
       <RenewHeader
         activePage={activePage}
         onNavigate={navigatePage}
