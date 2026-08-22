@@ -190,6 +190,28 @@ async function checkHttpStatus(url, headers = {}) {
   }
 }
 
+async function checkAdsTxt() {
+  const expectedEntry = 'google.com, pub-5802425633398708, DIRECT, f08c47fec0942fa0';
+  try {
+    const startedAt = Date.now();
+    const response = await fetch('https://optcgkorea.com/ads.txt', {
+      headers: { 'User-Agent': 'Mediapartners-Google' },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000)
+    });
+    const body = await response.text();
+    const valid = response.ok && body.split(/\r?\n/).map((line) => line.trim()).includes(expectedEntry);
+    return {
+      status: valid ? 'normal' : 'critical',
+      httpStatus: response.status,
+      latencyMs: Date.now() - startedAt,
+      authorized: valid
+    };
+  } catch {
+    return { status: 'critical', httpStatus: 0, latencyMs: null, authorized: false };
+  }
+}
+
 async function fetchSupabaseUsage() {
   const token = process.env.SUPABASE_ACCESS_TOKEN;
   const projectUrl = process.env.SUPABASE_URL;
@@ -305,6 +327,7 @@ function buildTelegramMessage(report) {
     `SNKRDUNK 수집  ${statusLabel(report.services.snkrdunk.status)}`,
     `Supabase Auth  ${statusLabel(report.services.supabase.status)}`,
     `홈페이지  ${statusLabel(report.services.website.status)} · ${report.services.website.latencyMs ?? '-'}ms`,
+    `Ads.txt  ${statusLabel(report.services.adsTxt.status)} · ${report.services.adsTxt.httpStatus || '-'} · ${report.services.adsTxt.authorized ? '게시자 확인' : '게시자 미확인'}`,
     '',
     '<b>[자동화 최근 24시간]</b>',
     github.summary
@@ -333,7 +356,8 @@ function criticalKeyLabel(key) {
     github: 'GitHub Actions',
     supabase: 'Supabase',
     snkrdunk: 'SNKRDUNK',
-    website: '홈페이지'
+    website: '홈페이지',
+    adsTxt: 'Ads.txt'
   }[value] || value;
 }
 
@@ -380,9 +404,10 @@ const d1 = {
   storagePercent: percent(storageBytes, 5 * 1024 * 1024 * 1024)
 };
 
-const [github, website, supabase, supabaseUsage, workers] = await Promise.all([
+const [github, website, adsTxt, supabase, supabaseUsage, workers] = await Promise.all([
   fetchGitHubRuns(),
   checkHttpStatus('https://www.optcgkorea.com/'),
+  checkAdsTxt(),
   checkHttpStatus(
     `${process.env.SUPABASE_URL || 'https://omxrcqjmnsthxyvnunjj.supabase.co'}/auth/v1/health`,
     process.env.SUPABASE_PUBLISHABLE_KEY
@@ -408,7 +433,7 @@ const snkrWorkflows = github.runs.filter((item) => (
 const snkrdunkStatus = snkrWorkflows.length
   ? worstStatus(...snkrWorkflows.map((item) => item.status))
   : 'unknown';
-const cloudflareStatus = worstStatus(d1.status, website.status);
+const cloudflareStatus = worstStatus(d1.status, website.status, adsTxt.status);
 const overallStatus = worstStatus(
   cloudflareStatus,
   github.status,
@@ -450,7 +475,8 @@ const report = {
       status: snkrdunkStatus,
       workflows: snkrWorkflows
     },
-    website
+    website,
+    adsTxt
   },
   dataFreshness: freshness
 };
