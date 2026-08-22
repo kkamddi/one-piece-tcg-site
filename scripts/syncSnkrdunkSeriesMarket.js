@@ -11,6 +11,8 @@ const shouldWrite = args.includes('--write');
 const seriesPattern = new RegExp(args.find((arg) => arg.startsWith('--series-pattern='))?.slice(17) || 'WORLD.?S STRONGEST WARRIORS|世界最強の戦士', 'i');
 const officialSeriesPattern = new RegExp(args.find((arg) => arg.startsWith('--official-series-pattern='))?.slice(26) || '世界最強の戦士', 'i');
 const maxPages = Number(args.find((arg) => arg.startsWith('--max-pages='))?.split('=')[1] || 8);
+const KRW_PER_USD = 1457;
+const JPY_PER_USD = 155;
 
 function normalize(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -24,16 +26,29 @@ function parseCount(value) {
   return Number(String(value ?? '').match(/\d+/)?.[0] || 0);
 }
 
+function normalizePrice(item) {
+  const amount = Number(item?.minPrice || 0);
+  const format = String(item?.minPriceFormat || '');
+  if (!Number.isFinite(amount) || amount <= 0) return { minPrice: 0, minPriceFormat: 'US $ -' };
+  const usd = format.includes('₩')
+    ? amount / KRW_PER_USD
+    : (/[¥￥円]/.test(format) ? amount / JPY_PER_USD : amount);
+  return {
+    minPrice: Math.round(usd * 100) / 100,
+    minPriceFormat: `US $${Math.round(usd).toLocaleString('en-US')}`
+  };
+}
+
 function toMarketCard(item) {
   const apparelId = Number(item.id);
+  const price = normalizePrice(item);
   return {
     code: normalize(item.productNumber),
     locale: 'JP',
     apparelId,
     name: normalize(item.name),
     setName: parseSetName(item.name),
-    minPrice: Number(item.minPrice || 0),
-    minPriceFormat: item.minPriceFormat || 'US $ -',
+    ...price,
     listingCount: parseCount(item.listingCount),
     sourceUrl: `https://snkrdunk.com/en/trading-cards/${apparelId}?slide=right`,
     previewImageUrl: item.thumbnailUrl || ''

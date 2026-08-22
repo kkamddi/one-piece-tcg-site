@@ -9,6 +9,8 @@ const shouldUpdateExisting = args.has('--update-existing');
 const perPage = Number(process.argv.find((arg) => arg.startsWith('--per-page='))?.split('=')[1] || 100);
 const delayMs = Number(process.argv.find((arg) => arg.startsWith('--delay='))?.split('=')[1] || 400);
 const maxPages = Number(process.argv.find((arg) => arg.startsWith('--max-pages='))?.split('=')[1] || 200);
+const KRW_PER_USD = 1457;
+const JPY_PER_USD = 155;
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -33,16 +35,29 @@ function isJapaneseProduct(item) {
   return !/\[(EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/i.test(name);
 }
 
+function normalizePrice(item) {
+  const amount = Number(item?.minPrice || 0);
+  const format = String(item?.minPriceFormat || '');
+  if (!Number.isFinite(amount) || amount <= 0) return { minPrice: 0, minPriceFormat: 'US $ -' };
+  const usd = format.includes('₩')
+    ? amount / KRW_PER_USD
+    : (/[¥￥円]/.test(format) ? amount / JPY_PER_USD : amount);
+  return {
+    minPrice: Math.round(usd * 100) / 100,
+    minPriceFormat: `US $${Math.round(usd).toLocaleString('en-US')}`
+  };
+}
+
 function toMarketCard(item) {
   const apparelId = Number(item.id);
+  const price = normalizePrice(item);
   return {
     code: normalizeText(item.productNumber),
     locale: 'JP',
     apparelId,
     name: normalizeText(item.name),
     setName: parseSetName(item.name),
-    minPrice: Number(item.minPrice || 0),
-    minPriceFormat: item.minPriceFormat || 'US $ -',
+    ...price,
     listingCount: parseListingCount(item.listingCount),
     sourceUrl: `https://snkrdunk.com/en/trading-cards/${apparelId}?slide=right`,
     previewImageUrl: item.thumbnailUrl || ''
