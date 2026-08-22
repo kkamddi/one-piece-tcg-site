@@ -13,6 +13,13 @@ const JP_SITE = 'https://www.onepiece-cardgame.com';
 const JP_CARD_LIST_URL = `${JP_SITE}/cardlist/`;
 const USER_AGENT = 'one-piece-tcg-site-sync/0.4 (+internal tooling)';
 const REQUEST_DELAY_MS = 350;
+const targetSeriesArg = process.argv.find((arg) => arg.startsWith('--series='));
+const targetBaseSeriesIds = new Set(
+  String(targetSeriesArg?.slice('--series='.length) || '')
+    .split(',')
+    .map((item) => item.trim().toUpperCase())
+    .filter(Boolean)
+);
 
 const jpColorMap = {
   '赤': '적색',
@@ -254,12 +261,13 @@ async function fetchJapaneseSeriesAndCards() {
   const dropdownHtml = await fetchText(JP_CARD_LIST_URL);
   const parsedSeries = parseJpSeriesOptions(dropdownHtml);
   const filteredSeries = parsedSeries.filter((series) => {
+    if (targetBaseSeriesIds.size && !targetBaseSeriesIds.has(series.baseSeriesId)) return false;
     return /^OP\d+/.test(series.baseSeriesId)
       || /^(EB|PRB)\d+/.test(series.baseSeriesId)
       || /^ST\d+/.test(series.baseSeriesId)
       || series.baseSeriesId === 'PROMO';
   });
-  const seriesMap = new Map(filteredSeries.map((series) => [series.id, series]));
+  const seriesMap = new Map(parsedSeries.map((series) => [series.id, series]));
   const cards = [];
 
   for (const series of filteredSeries) {
@@ -277,6 +285,34 @@ async function fetchJapaneseSeriesAndCards() {
 async function main() {
   const existingSeries = await readJson(seriesPath);
   const existingCards = await readJson(cardsPath);
+
+  if (targetBaseSeriesIds.size) {
+    const jp = await fetchJapaneseSeriesAndCards();
+    const targetIds = new Set(jp.series.map((item) => item.id));
+    if (!jp.series.length || !jp.cards.length) {
+      throw new Error(`No Japanese cards found for ${[...targetBaseSeriesIds].join(', ')}`);
+    }
+
+    const mergedSeries = existingSeries.filter((item) => !targetIds.has(item.id));
+    for (const item of jp.series) {
+      const previousIndex = mergedSeries.findIndex((series) => (
+        series.locale === 'JP'
+        && /^OP\d+$/.test(series.baseSeriesId || '')
+        && Number((series.baseSeriesId || '').slice(2)) === Number(item.baseSeriesId.slice(2)) - 1
+      ));
+      mergedSeries.splice(previousIndex >= 0 ? previousIndex + 1 : mergedSeries.length, 0, item);
+    }
+
+    const mergedCards = [
+      ...existingCards.filter((item) => !targetIds.has(item.series)),
+      ...jp.cards.map((card, index) => ({ ...card, sortOrder: index + 1 }))
+    ];
+
+    await writeFile(seriesPath, `${JSON.stringify(mergedSeries, null, 2)}\n`, 'utf8');
+    await writeFile(cardsPath, `${JSON.stringify(mergedCards, null, 2)}\n`, 'utf8');
+    console.log(`[merge] targeted ${[...targetBaseSeriesIds].join(', ')}: ${jp.series.length} series / ${jp.cards.length} cards`);
+    return;
+  }
 
   const krSeries = existingSeries.filter((item) => item.locale !== 'JP').map(convertKrSeries);
   const krCards = existingCards.filter((item) => item.locale !== 'JP').map(convertKrCard);

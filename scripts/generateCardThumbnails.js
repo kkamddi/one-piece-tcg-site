@@ -71,7 +71,7 @@ function uploadToR2(filePath, key) {
     '--content-type',
     'image/webp',
     '--cache-control',
-    'public, max-age=2592000, immutable'
+    'public,max-age=2592000,immutable'
   ], { stdio: 'pipe', encoding: 'utf8', shell: process.platform === 'win32' });
   if (result.status !== 0) {
     throw new Error((result.error?.message || result.stderr || result.stdout || 'r2_upload_failed').trim());

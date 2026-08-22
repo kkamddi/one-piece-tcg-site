@@ -1606,6 +1606,7 @@ function getSeriesBoxPreviewUrl(series, boxImageByCode) {
   const boxCode = getSeriesBoxCode(series);
   if (!boxCode || boxCode === 'PROMO') return '';
   return boxImageByCode?.get(boxCode)
+    || boxImageByCode?.get(`OPC-TCG-${boxCode}`)
     || boxMarketItems.find((item) => item.code === boxCode)?.previewImageUrl
     || '';
 }
