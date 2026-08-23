@@ -7225,6 +7225,8 @@ const BOX_RECOMMENDATION_CATEGORIES = [
     eyebrow: 'HIGH CEILING',
     title: '최고가 카드 노리기',
     description: '박스 가격과 관계없이 각 시리즈에 수록된 Single 카드의 현재 최고가 순으로 비교합니다.',
+    audience: '최상위 희귀 카드 한 장의 가격을 가장 중요하게 보는 경우',
+    caution: '박스 가격과 봉입률은 순위에 반영하지 않아 개봉 결과의 편차가 클 수 있습니다.',
     score: 'maximum'
   },
   {
@@ -7233,6 +7235,8 @@ const BOX_RECOMMENDATION_CATEGORIES = [
     eyebrow: 'BALANCED',
     title: '가격과 히트가 균형적인 박스',
     description: '박스 현재가 대비 카드 가격이 괜찮고, 일부 카드에만 가치가 몰리지 않은 상품을 비교합니다.',
+    audience: '최고가 한 장보다 여러 유효 카드의 가격 분포를 함께 보고 싶은 경우',
+    caution: '카드별 실제 봉입률을 적용한 기대값은 아니므로 수익을 보장하지 않습니다.',
     score: 'stableScore'
   },
   {
@@ -7241,6 +7245,8 @@ const BOX_RECOMMENDATION_CATEGORIES = [
     eyebrow: 'MORE HITS',
     title: '유효 히트가 많은 박스',
     description: '박스 가격의 35% 이상인 Single 히트 카드가 상대적으로 많이 확인되는 박스를 비교합니다.',
+    audience: '박스 가격 대비 의미 있는 가격의 카드가 여러 장인 시리즈를 찾는 경우',
+    caution: '유효 히트 수는 현재 가격 기준이며 카드 가격이 바뀌면 순위도 달라집니다.',
     score: 'hitScore'
   }
 ];
@@ -7351,6 +7357,7 @@ function RenewBoxRecommendationGuide() {
             cv,
             top3Total,
             strongestCard: pricedHits[0],
+            topCards: pricedHits.slice(0, 3),
             stableScore: boxPrice > 0 && pricedHits.length >= 3 && coverage >= 0.25
               ? (median / boxPrice) * (1 / (1 + cv)) * Math.log2(pricedHits.length + 1) * coverage
               : 0,
@@ -7399,6 +7406,18 @@ function RenewBoxRecommendationGuide() {
             </a>
           ))}
         </nav>
+        <section className="renew-box-guide-reading" aria-labelledby="box-guide-reading-heading">
+          <h2 id="box-guide-reading-heading">어떤 기준을 선택해야 하나요?</h2>
+          <div>
+            {BOX_RECOMMENDATION_CATEGORIES.map((category) => (
+              <article key={`${category.id}-reading`}>
+                <strong>{category.title}</strong>
+                <p>{category.audience}</p>
+              </article>
+            ))}
+          </div>
+          <p>추천 결과는 Card Pone에 연결된 박스 현재가와 수록 카드의 최신 Single 시세를 비교합니다. 개봉 확률이나 미확인 카드 가격은 임의로 추정하지 않습니다.</p>
+        </section>
       </section>
     );
   }
@@ -7425,6 +7444,16 @@ function RenewBoxRecommendationGuide() {
           </aside>
         );
       })() : null}
+      <div className="renew-box-guide-context" aria-label="추천 기준 안내">
+        <div>
+          <strong>이 기준이 맞는 경우</strong>
+          <p>{activeCategory.audience}</p>
+        </div>
+        <div>
+          <strong>확인할 점</strong>
+          <p>{activeCategory.caution}</p>
+        </div>
+      </div>
       <div className="renew-box-guide-categories">
         {state.categories.map((category) => (
           <section key={category.id} className="renew-box-guide-category">
@@ -7440,12 +7469,20 @@ function RenewBoxRecommendationGuide() {
                     <span>{series.code}</span>
                     <h3>{series.code} · {series.title}</h3>
                     <small className="renew-box-guide-product-name">{item.name}</small>
-                    {item.strongestCard?.card ? (
-                      <a className="renew-box-guide-featured-card" href={`/cards?cardId=${encodeURIComponent(item.strongestCard.card.id)}`}>
-                        <span>대표 고가 카드</span>
-                        <strong>{item.strongestCard.card.name || item.strongestCard.card.koName || item.strongestCard.card.id}</strong>
-                        <b>{formatYen(item.maximum)}</b>
-                      </a>
+                    {item.topCards?.length ? (
+                      <div className="renew-box-guide-top-cards">
+                        <strong>현재가 상위 카드</strong>
+                        <ol>
+                          {item.topCards.map((topCard) => (
+                            <li key={topCard.card.id}>
+                              <a href={`/cards?cardId=${encodeURIComponent(topCard.card.id)}`}>
+                                <span>{topCard.card.name || topCard.card.koName || topCard.card.id}</span>
+                                <b>{formatYen(topCard.price)}</b>
+                              </a>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
                     ) : null}
                     <dl>
                       <div><dt>박스 현재가</dt><dd>{item.boxPrice > 0 ? formatYen(item.boxPrice) : '수집 중'}</dd></div>

@@ -8716,6 +8716,67 @@
   font-size: 12px;
 }
 
+.renew-box-guide-reading {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #e4e5e8;
+  padding-top: 24px;
+}
+
+.renew-box-guide-reading h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.renew-box-guide-reading > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.renew-box-guide-reading article {
+  border-left: 2px solid #e56a4b;
+  padding-left: 13px;
+}
+
+.renew-box-guide-reading article strong {
+  font-size: 14px;
+}
+
+.renew-box-guide-reading p {
+  margin: 6px 0 0;
+  color: #656b75;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.renew-box-guide-context {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #e4e5e8;
+  border-radius: 8px;
+  background: #e4e5e8;
+}
+
+.renew-box-guide-context > div {
+  padding: 14px 16px;
+  background: #fff;
+}
+
+.renew-box-guide-context strong,
+.renew-box-guide-top-cards > strong {
+  font-size: 11px;
+}
+
+.renew-box-guide-context p {
+  margin: 5px 0 0;
+  color: #656b75;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
 .renew-box-guide-back {
   display: block;
   margin-bottom: 10px;
@@ -8829,6 +8890,55 @@
 .renew-box-guide-featured-card b {
   color: #c94d35;
   font-size: 11px;
+}
+
+.renew-box-guide-top-cards {
+  margin-bottom: 12px;
+}
+
+.renew-box-guide-top-cards ol {
+  display: grid;
+  gap: 5px;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.renew-box-guide-top-cards a {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  color: #17191c;
+  font-size: 10px;
+}
+
+.renew-box-guide-top-cards li::before {
+  content: counter(list-item);
+  display: none;
+}
+
+.renew-box-guide-top-cards a::before {
+  content: counter(list-item);
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: #c94d35;
+  background: #fff0ea;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.renew-box-guide-top-cards a span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.renew-box-guide-top-cards a b {
+  font-size: 10px;
 }
 
 .renew-box-guide-item dl {
@@ -8961,6 +9071,7 @@
 .renew-app.is-dark .renew-box-guide-hub > a,
 .renew-app.is-dark .renew-box-guide-detail a,
 .renew-app.is-dark .renew-box-guide-featured-card,
+.renew-app.is-dark .renew-box-guide-context > div,
 .renew-app.is-dark .renew-box-guide-summary {
   border-color: rgba(255, 255, 255, 0.12);
   color: #f8fafc;
@@ -8971,10 +9082,20 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+.renew-app.is-dark .renew-box-guide-context {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-box-guide-top-cards a {
+  color: #f8fafc;
+}
+
 .renew-app.is-dark .renew-box-guide-head p,
 .renew-app.is-dark .renew-box-guide-category-head p,
 .renew-app.is-dark .renew-box-guide-note p,
 .renew-app.is-dark .renew-box-guide-summary > p,
+.renew-app.is-dark .renew-box-guide-reading p,
+.renew-app.is-dark .renew-box-guide-context p,
 .renew-app.is-dark .renew-box-guide-item-body > p,
 .renew-app.is-dark .renew-box-guide-item dt {
   color: #b8bec8;
@@ -8995,6 +9116,11 @@
 
   .renew-box-guide-summary > strong {
     white-space: normal;
+  }
+
+  .renew-box-guide-reading > div,
+  .renew-box-guide-context {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
