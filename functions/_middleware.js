@@ -1742,6 +1742,16 @@ export function getPageSeo(pathname) {
       keywords: `${code} 박스 시세, 원피스카드 박스 가격`
     };
   }
+  const boxGuideMatch = normalized.match(/^\/guide\/box-recommendation\/series\/(op|eb|prb)-(\d{2})$/i);
+  if (boxGuideMatch) {
+    const code = `${boxGuideMatch[1].toUpperCase()}-${boxGuideMatch[2]}`;
+    return {
+      title: `${code} 박스 추천·가격 가이드 | Card Pone`,
+      description: `${code} 원피스카드 박스의 현재 가격, 최고가 수록 카드, 가격 중앙값과 유효 히트를 최신 시세 데이터로 확인합니다.`,
+      keywords: `${code} 박스 추천, ${code} 박스 가격, 원피스카드 박스 추천, 원피스카드 박스 시세`,
+      schemaType: 'Article'
+    };
+  }
   return null;
 }
 

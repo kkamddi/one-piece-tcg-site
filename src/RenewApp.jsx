@@ -3316,6 +3316,19 @@ function getJapaneseRouteSeo(pathname, page) {
 function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
+  if (path.startsWith('/guide/box-recommendation/series/')) {
+    const seriesId = getBoxRecommendationSeriesId(path);
+    if (seriesId) {
+      const series = getBoxSeriesMeta(seriesId);
+      return {
+        title: `${series.code} ${series.title} 박스 추천·가격 가이드 | Card Pone`,
+        h1: `${series.code} ${series.title} 박스 가이드`,
+        description: `${series.code} ${series.title} 박스의 현재 가격, 최고가 수록 카드, 가격 중앙값과 유효 히트를 최신 시세 데이터로 확인합니다.`,
+        keywords: `${series.code} 박스 추천, ${series.code} 박스 가격, ${series.title}, 원피스카드 박스`,
+        body: `${series.code} 박스와 수록 카드의 최신 Single 시세를 연결한 데이터 기반 구매 가이드입니다.`
+      };
+    }
+  }
   if (path.startsWith('/guides/series/')) {
     const series = findSeriesByRouteSlug(path.slice('/guides/series/'.length));
     if (series) {
@@ -7199,8 +7212,23 @@ function RenewNews({ uiLang, onOpenCalendar }) {
 }
 
 function getBoxSeriesId(code = '') {
-  const match = String(code).toUpperCase().match(/^(OP|EB|PRB)-(\d{2})$/);
+  const normalized = String(code).toUpperCase();
+  const match = normalized.match(/^(OP|EB|PRB)-(\d{2})$/)
+    || normalized.match(/^OPC-TCG-(OP|EB|PRB)-(\d{2})$/);
   return match ? `${match[1]}${match[2]}` : '';
+}
+
+function getBoxRecommendationSeriesId(pathname = '') {
+  const path = getAppPath(pathname);
+  const prefix = '/guide/box-recommendation/series/';
+  if (!path.startsWith(prefix)) return '';
+  const match = path.slice(prefix.length).toUpperCase().match(/^(OP|EB|PRB)-?(\d{2})$/);
+  return match ? `${match[1]}${match[2]}` : '';
+}
+
+function getBoxRecommendationSeriesPath(seriesId = '') {
+  const code = String(seriesId).replace(/^(OP|EB|PRB)(\d{2})$/, '$1-$2').toLowerCase();
+  return code ? `/guide/box-recommendation/series/${code}` : '/guide/box-recommendation';
 }
 
 function getMedian(values = []) {
@@ -7285,11 +7313,13 @@ function getBoxRecommendationSummary(categoryId, item) {
 function RenewBoxRecommendationGuide() {
   const currentPath = getAppPath(window.location.pathname);
   const activeCategory = getBoxRecommendationCategory(currentPath);
-  const [state, setState] = useState({ loading: true, categories: [], updatedAt: '' });
+  const detailSeriesId = getBoxRecommendationSeriesId(currentPath);
+  const requestedApparelId = new URLSearchParams(window.location.search).get('apparelId');
+  const [state, setState] = useState({ loading: true, categories: [], detailItem: null, updatedAt: '' });
 
   useEffect(() => {
-    if (!activeCategory) {
-      setState({ loading: false, categories: [], updatedAt: '' });
+    if (!activeCategory && !detailSeriesId) {
+      setState({ loading: false, categories: [], detailItem: null, updatedAt: '' });
       return undefined;
     }
     let cancelled = false;
@@ -7337,7 +7367,6 @@ function RenewBoxRecommendationGuide() {
           const boxPrice = Number(boxLatest?.aPriceJpy || 0)
             || (snapshotPriceUsd > 0 ? snapshotPriceUsd * MARKET_USD_TO_JPY : 0)
             || (Number(box.minPrice || 0) * MARKET_USD_TO_JPY);
-          if (!pricedHits.length) return null;
           const median = getMedian(prices);
           const maximum = prices[0] || 0;
           const validHitCount = boxPrice > 0 ? prices.filter((price) => price >= boxPrice * 0.35).length : 0;
@@ -7368,27 +7397,36 @@ function RenewBoxRecommendationGuide() {
         })
         .filter(Boolean);
 
-      const categoryAnalyses = activeCategory.id === 'jackpot'
-        ? analyses
-        : analyses.filter((item) => item.boxPrice > 0 && item[activeCategory.score] > 0);
+      const categoryAnalyses = !activeCategory
+        ? []
+        : activeCategory.id === 'jackpot'
+          ? analyses.filter((item) => item.pricedHitCount > 0)
+          : analyses.filter((item) => item.pricedHitCount > 0 && item.boxPrice > 0 && item[activeCategory.score] > 0);
+
+      const detailItem = detailSeriesId
+        ? analyses.find((item) => item.seriesId === detailSeriesId && requestedApparelId && String(item.apparelId) === String(requestedApparelId))
+          || analyses.find((item) => item.seriesId === detailSeriesId)
+          || null
+        : null;
 
       setState({
         loading: false,
+        detailItem,
         updatedAt: summary?.generatedAt || summary?.updatedAt || boxMarketPrices?.updatedAt || '',
-        categories: [{
+        categories: activeCategory ? [{
           ...activeCategory,
           items: [...categoryAnalyses].sort((a, b) => b[activeCategory.score] - a[activeCategory.score]).slice(0, 5)
-        }]
+        }] : []
       });
     }).catch(() => {
-      if (!cancelled) setState({ loading: false, categories: [], updatedAt: '' });
+      if (!cancelled) setState({ loading: false, categories: [], detailItem: null, updatedAt: '' });
     });
     return () => {
       cancelled = true;
     };
-  }, [activeCategory]);
+  }, [activeCategory, detailSeriesId, requestedApparelId]);
 
-  if (!activeCategory) {
+  if (!activeCategory && !detailSeriesId) {
     return (
       <section className="renew-panel renew-news-panel renew-box-guide" aria-labelledby="box-recommendation-heading">
         <header className="renew-box-guide-head">
@@ -7418,6 +7456,89 @@ function RenewBoxRecommendationGuide() {
           </div>
           <p>추천 결과는 Card Pone에 연결된 박스 현재가와 수록 카드의 최신 Single 시세를 비교합니다. 개봉 확률이나 미확인 카드 가격은 임의로 추정하지 않습니다.</p>
         </section>
+      </section>
+    );
+  }
+
+  if (detailSeriesId) {
+    const item = state.detailItem;
+    const series = getBoxSeriesMeta(detailSeriesId);
+    return (
+      <section className="renew-panel renew-news-panel renew-box-guide renew-box-series-guide" aria-labelledby="box-series-guide-heading">
+        <header className="renew-box-guide-head">
+          <a className="renew-box-guide-back" href="/guide/box-recommendation">박스 구매 가이드</a>
+          <span>BOX DETAIL</span>
+          <h1 id="box-series-guide-heading">{series.code} · {series.title} 박스 가이드</h1>
+          <p>박스 현재가와 수록 카드의 최신 Single 시세를 연결해 가격 분포와 주요 카드를 확인합니다.</p>
+        </header>
+        {state.loading ? <p className="renew-box-guide-status">박스와 카드 가격 데이터를 불러오고 있습니다.</p> : null}
+        {!state.loading && !item ? <p className="renew-box-guide-status">이 시리즈의 박스 정보를 아직 확인할 수 없습니다.</p> : null}
+        {!state.loading && item ? (
+          <>
+            <div className="renew-box-series-hero">
+              <div className="renew-box-series-image">
+                <img src={item.previewImageUrl || '/card-placeholder.svg'} alt={`${series.code} ${series.title} 박스`} />
+              </div>
+              <div className="renew-box-series-overview">
+                <span>{series.code}</span>
+                <h2>{series.title}</h2>
+                <p>{item.name}</p>
+                <dl>
+                  <div><dt>발매일</dt><dd>{item.releaseDate || '확인 중'}</dd></div>
+                  <div><dt>박스 현재가</dt><dd>{item.boxPrice > 0 ? formatYen(item.boxPrice) : '수집 중'}</dd></div>
+                  <div><dt>가격 확인</dt><dd>{item.pricedHitCount}/{item.eligibleHitCount}장</dd></div>
+                  <div><dt>데이터 기준</dt><dd>{state.updatedAt ? new Date(state.updatedAt).toLocaleDateString('ko-KR') : '확인 중'}</dd></div>
+                </dl>
+                <div className="renew-box-series-actions">
+                  <a href={`/prices?tab=box&code=${encodeURIComponent(item.code)}&apparelId=${encodeURIComponent(item.apparelId)}`}>박스 시세 보기</a>
+                  <a href={series.guidePath}>수록 카드 보기</a>
+                </div>
+              </div>
+            </div>
+            <section className="renew-box-series-metrics" aria-labelledby="box-series-metrics-heading">
+              <h2 id="box-series-metrics-heading">현재 가격 분포</h2>
+              <div>
+                <article><span>최고가 카드</span><strong>{item.maximum > 0 ? formatYen(item.maximum) : '수집 중'}</strong></article>
+                <article><span>상위 3장 합계</span><strong>{item.top3Total > 0 ? formatYen(item.top3Total) : '수집 중'}</strong></article>
+                <article><span>가격 중앙값</span><strong>{item.median > 0 ? formatYen(item.median) : '수집 중'}</strong></article>
+                <article><span>유효 히트</span><strong>{item.boxPrice > 0 ? `${item.validHitCount}장` : '수집 중'}</strong></article>
+              </div>
+              <p>유효 히트는 현재 박스 가격의 35% 이상인 Single 카드입니다. 봉입률을 적용한 기대값은 아닙니다.</p>
+            </section>
+            <section className="renew-box-series-hits" aria-labelledby="box-series-hits-heading">
+              <div className="renew-box-series-section-head">
+                <div>
+                  <span>TOP CARDS</span>
+                  <h2 id="box-series-hits-heading">현재가 상위 카드</h2>
+                </div>
+                <p>가격이 연결된 패러렐·SEC·SP 카드 기준</p>
+              </div>
+              {item.topCards?.length ? (
+                <div className="renew-box-series-hit-grid">
+                  {item.topCards.map((topCard, index) => (
+                    <a key={topCard.card.id} href={`/cards?cardId=${encodeURIComponent(topCard.card.id)}`}>
+                      <span>{index + 1}</span>
+                      <img src={getCardImageSrc(topCard.card)} alt={topCard.card.name || topCard.card.id} loading="lazy" />
+                      <div>
+                        <small>{topCard.card.cardNo || topCard.card.id} · {topCard.card.rarity || '-'}</small>
+                        <strong>{topCard.card.name || topCard.card.koName || topCard.card.id}</strong>
+                        <b>{formatYen(topCard.price)}</b>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : <p className="renew-box-guide-status">연결된 카드 가격을 수집 중입니다.</p>}
+            </section>
+            <section className="renew-box-series-reading" aria-labelledby="box-series-reading-heading">
+              <h2 id="box-series-reading-heading">이 박스를 확인할 때</h2>
+              <div>
+                <p><strong>고점 확인</strong> 최고가 카드와 상위 3장 가격을 함께 보면 한 장에 가격이 집중됐는지 확인할 수 있습니다.</p>
+                <p><strong>가격 균형</strong> 최고가와 중앙값의 차이가 클수록 일부 카드에 가격이 집중된 시리즈일 가능성이 높습니다.</p>
+                <p><strong>데이터 범위</strong> 가격이 연결되지 않은 카드와 실제 봉입률은 계산에서 제외하므로 개봉 수익을 보장하지 않습니다.</p>
+              </div>
+            </section>
+          </>
+        ) : null}
       </section>
     );
   }
@@ -7493,7 +7614,7 @@ function RenewBoxRecommendationGuide() {
                     <p>가격 확인 {item.pricedHitCount}/{item.eligibleHitCount}장 · 데이터 커버리지 {Math.round(item.coverage * 100)}%</p>
                     <div className="renew-box-guide-actions">
                       <a href={`/prices?tab=box&code=${encodeURIComponent(item.code)}&apparelId=${encodeURIComponent(item.apparelId)}`}>박스 시세 보기</a>
-                      <a href={series.guidePath}>시리즈 상세 보기</a>
+                      <a href={`${getBoxRecommendationSeriesPath(item.seriesId)}?apparelId=${encodeURIComponent(item.apparelId)}`}>박스 상세 가이드</a>
                     </div>
                     <details className="renew-box-guide-detail">
                       <summary>상세 분석 보기</summary>
