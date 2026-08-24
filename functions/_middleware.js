@@ -1,6 +1,9 @@
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
 const LEGACY_REDIRECTS = {
+  '/jp/prices/boxes': '/jp/prices',
+  '/jp/guide': '/jp/news',
+  '/cards/series/569008': '/cards/st08',
   '/deck': '/news',
   '/deck-simulator': '/news',
   '/collection': '/',

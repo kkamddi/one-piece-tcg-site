@@ -1,0 +1,8 @@
+name = "optcg-card-thumbnail-root-redirect"
+main = "workers/card-thumbnail-root-redirect.js"
+compatibility_date = "2026-08-24"
+workers_dev = false
+
+[[routes]]
+pattern = "cards.optcgkorea.com"
+zone_name = "optcgkorea.com"
