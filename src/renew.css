@@ -3012,7 +3012,7 @@
 .renew-route-back-wrap {
   width: min(1440px, 100%);
   margin: 0 auto;
-  padding: 18px clamp(18px, 4vw, 48px) 0;
+  padding: 18px clamp(18px, 4vw, 48px) 14px;
 }
 
 .renew-route-back-button {
@@ -20776,7 +20776,7 @@ button.renew-deck-entry:focus-visible {
 
 @media (max-width: 640px) {
   .renew-route-back-wrap {
-    padding: 10px 12px 0;
+    padding: 10px 12px 12px;
   }
 
   .renew-route-back-button {

@@ -1330,37 +1330,13 @@ async function localFallback(params) {
       if (!shouldReadD1Market()) return [];
       const latestRows = await queryD1(
         `select p.apparel_id,
-                coalesce(
-                  nullif(p.latest_a_price_jpy, 0),
-                  (
-                    select d.median_price_jpy
-                    from market_chart_daily_points d
-                    where d.source = p.source
-                      and d.apparel_id = p.apparel_id
-                      and d.condition_key = 'a'
-                      and d.median_price_jpy > 0
-                      and (d.trade_count is null or d.trade_count > 0)
-                    order by d.point_date desc
-                    limit 1
-                  )
-                ) as latest_a_price_jpy,
-                coalesce(
-                  nullif(p.latest_psa10_price_jpy, 0),
-                  (
-                    select d.median_price_jpy
-                    from market_chart_daily_points d
-                    where d.source = p.source
-                      and d.apparel_id = p.apparel_id
-                      and d.condition_key = 'psa10'
-                      and d.median_price_jpy > 0
-                      and (d.trade_count is null or d.trade_count > 0)
-                    order by d.point_date desc
-                    limit 1
-                  )
-                ) as latest_psa10_price_jpy,
+                p.latest_a_price_jpy,
+                p.latest_psa10_price_jpy,
                 p.latest_captured_at
          from market_products p
-         where p.source = 'snkrdunk' and p.is_active = 1${productFilterSql}
+         where p.source = 'snkrdunk'
+           and p.is_active = 1
+           and (p.latest_a_price_jpy > 0 or p.latest_psa10_price_jpy > 0)${productFilterSql}
          order by p.apparel_id asc`,
         requestedApparelIds
       );
@@ -1369,7 +1345,7 @@ async function localFallback(params) {
     };
     const rows = summaryMode === 'latest'
       ? await readThroughR2Json(
-        'public-data/market-latest-v1.json',
+        'public-data/market-latest-v2.json',
         MARKET_LATEST_SNAPSHOT_MAX_AGE_MS,
         loadLatestRows
       )
@@ -1389,9 +1365,16 @@ async function localFallback(params) {
       });
     }
 
+    const items = Array.from(latestByApparelId.values())
+      .filter((item) => item.apparelId && (item.aPriceJpy > 0 || item.psa10PriceJpy > 0));
+    const updatedAt = items.reduce((latest, item) => {
+      if (!item.capturedAt) return latest;
+      return !latest || item.capturedAt > latest ? item.capturedAt : latest;
+    }, '');
+
     return {
-      items: Array.from(latestByApparelId.values())
-        .filter((item) => item.apparelId && (item.aPriceJpy > 0 || item.psa10PriceJpy > 0))
+      items,
+      updatedAt
     };
   }
   const apparelId = params.get('apparelId');

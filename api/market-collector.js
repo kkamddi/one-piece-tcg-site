@@ -747,8 +747,11 @@ export default async function handler(request, response) {
 
   const mode = String(request.query?.mode || request.query?.action || '').toLowerCase();
   if (mode === 'invalidate-public-cache') {
-    const invalidated = await invalidateR2Json('public-data/market-latest-v1.json');
-    return response.status(200).json({ ok: true, invalidated });
+    const invalidated = await Promise.all([
+      invalidateR2Json('public-data/market-latest-v1.json'),
+      invalidateR2Json('public-data/market-latest-v2.json'),
+    ]);
+    return response.status(200).json({ ok: true, invalidated: invalidated.filter(Boolean).length });
   }
 
   if (mode === 'history' || mode === 'trades') {
