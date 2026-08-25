@@ -12301,7 +12301,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, uiLang }) {
+function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const savedViewState = getAppHistoryState().marketViewState || {};
   const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
@@ -12681,6 +12681,11 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     resetMarketHomeFromLocation();
   }
 
+  useEffect(() => {
+    onBackHandlerChange?.(selected ? returnFromMarketDetail : null);
+    return () => onBackHandlerChange?.(null);
+  }, [selected, candidates.length, onBackHandlerChange, uiLang]);
+
   async function mapCandidateToInitialCard(event, item) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
@@ -12816,11 +12821,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
         {selected ? (
           <div className="renew-market-detail" ref={marketDetailRef}>
-            <button type="button" className="renew-market-detail-back" onClick={returnFromMarketDetail}>
-              ← {candidates.length > 1
-                ? t('reselectVariant')
-                : getLocaleText(uiLang, '이전 화면', 'Back', '前の画面')}
-            </button>
             <div className="renew-market-card">
               <img src={selected.previewImageUrl || '/card-placeholder.svg'} alt={selected.name} onError={placeholderImage} />
               <div>
@@ -14835,7 +14835,9 @@ export default function RenewApp() {
   const [newsComingSoonOpen, setNewsComingSoonOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [routeRevision, setRouteRevision] = useState(0);
+  const [hasContextualRouteBack, setHasContextualRouteBack] = useState(false);
   const internalNavigationRef = useRef(false);
+  const contextualRouteBackRef = useRef(null);
   const presenceChannelRef = useRef(null);
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (activePage === 'seriesGuide' ? 'cards' : ['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
@@ -14852,6 +14854,10 @@ export default function RenewApp() {
     setCatalogViewState(nextViewState);
     if (getPageFromPath(window.location.pathname) !== 'cards') return;
     replaceAppHistoryState({ catalogViewState: nextViewState });
+  }, []);
+  const handleBackHandlerChange = useCallback((handler) => {
+    contextualRouteBackRef.current = typeof handler === 'function' ? handler : null;
+    setHasContextualRouteBack(Boolean(contextualRouteBackRef.current));
   }, []);
   const refreshNotifications = useCallback(async () => {
     if (!authUser?.id) {
@@ -15274,6 +15280,10 @@ export default function RenewApp() {
   ].includes(activePage);
 
   function handleRouteBack() {
+    if (contextualRouteBackRef.current) {
+      contextualRouteBackRef.current();
+      return;
+    }
     if (!routeBackInfo) return;
     const sameOriginReferrer = document.referrer && document.referrer.startsWith(SITE_ORIGIN);
     if (internalNavigationRef.current || sameOriginReferrer || window.history.state?.cardPoneInternal) {
@@ -15305,7 +15315,7 @@ export default function RenewApp() {
         onNotificationSelect={handleNotificationSelect}
         onNotificationsReadAll={handleNotificationsReadAll}
       />
-      {routeBackInfo ? (
+      {routeBackInfo || hasContextualRouteBack ? (
         <RenewRouteBackButton
           label={getRouteBackLabel(uiLang)}
           onClick={handleRouteBack}
@@ -15443,6 +15453,7 @@ export default function RenewApp() {
           initialCardId={marketInitialCardId}
           routeRevision={routeRevision}
           onRequireLogin={() => handleAuthClick('login')}
+          onBackHandlerChange={handleBackHandlerChange}
           uiLang={uiLang}
         />
       ) : activePage === 'marketplace' ? (
