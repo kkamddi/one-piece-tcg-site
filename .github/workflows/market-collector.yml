@@ -194,22 +194,27 @@ jobs:
                 fi
                 ;;
               protect|*)
-                chunk_size=500
-                chunk_count=16
+                chunk_size=650
+                chunk_count=8
                 chunk_id=$(((utc_day * 2 + schedule_phase) % chunk_count))
                 chunk_start=$((chunk_id * chunk_size))
                 chunk_stop=$((chunk_start + chunk_size))
+                chunk_end=$chunk_stop
+                if [ "$chunk_id" -eq $((chunk_count - 1)) ]; then
+                  chunk_stop=0
+                  chunk_end=999999999
+                fi
                 shard_end=$stop_offset
                 if [ "$shard_end" -eq 0 ]; then
                   shard_end=999999999
                 fi
-                if [ "$chunk_start" -ge "$shard_end" ] || [ "$chunk_stop" -le "$offset" ]; then
+                if [ "$chunk_start" -ge "$shard_end" ] || [ "$chunk_end" -le "$offset" ]; then
                   echo "D1 protect profile: shard $SHARD_ID has no work in rotating chunk $chunk_id."
                   exit 0
                 fi
                 if [ "$chunk_start" -gt "$offset" ]; then offset=$chunk_start; fi
-                if [ "$chunk_stop" -lt "$shard_end" ]; then stop_offset=$chunk_stop; fi
-                echo "D1 protect profile: collecting rotating range ${offset}-${stop_offset}."
+                if [ "$chunk_stop" -gt 0 ] && [ "$chunk_stop" -lt "$shard_end" ]; then stop_offset=$chunk_stop; fi
+                echo "D1 protect profile: collecting rotating range ${offset}-${stop_offset:-end}."
                 ;;
             esac
           fi
