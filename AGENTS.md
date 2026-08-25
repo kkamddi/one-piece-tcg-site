@@ -15,6 +15,14 @@
 - Use `.github/workflows/deploy-production.yml` for every production deployment.
 - A data-sync workflow may update `main`, but it must delegate deployment to the production workflow.
 
+## Cloudflare D1 free-tier budget rules
+
+- Every new scheduled workflow that reads from or writes to D1 must use `.github/actions/d1-budget/action.yml` before performing database work.
+- Do not stop all collection merely because usage is high. Preserve new-card discovery, current-price alerts, and the minimum PSA10 index refresh; reduce bulk scans, history depth, rebuild windows, and backfills first.
+- Deferred card ranges must rotate across later runs so no fixed shard or card range is permanently starved.
+- A failed usage lookup must use the conservative `critical` profile instead of running an unrestricted workload or disabling essential work.
+- Do not raise the free-tier thresholds, bypass the budget action, or run a full backfill/rebuild without explicit user approval.
+
 - 크레딧 사용량을 최소화해서 작업한다.
 - 전체 코드베이스를 스캔하지 않는다. 사용자가 명시적으로 요청한 경우에만 전체 탐색한다.
 - 작업 전 관련 파일 후보를 먼저 좁히고, 가능한 최소 파일만 확인한다.
