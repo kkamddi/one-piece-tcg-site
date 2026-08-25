@@ -7442,7 +7442,7 @@ function RenewBoxRecommendationGuide() {
     Promise.all([
       import('./data/cards.json').then((module) => Array.isArray(module.default) ? module.default : []),
       loadCardMarketLinks(),
-      fetch(import.meta.env.DEV ? '/__prod_api/api/market?summary=latest' : '/api/market?summary=latest')
+      fetch(import.meta.env.DEV ? '/__prod_api/api/market?summary=latest&v=2' : '/api/market?summary=latest&v=2')
         .then((response) => response.ok ? response.json() : null)
     ]).then(([cards, links, summary]) => {
       if (cancelled) return;
