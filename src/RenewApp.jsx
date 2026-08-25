@@ -7226,7 +7226,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
-            <span>GUIDE / Q&A</span>
+            <span>정보 가이드</span>
             <h2 id="guide-qa-heading">가이드/Q&A</h2>
           </div>
           <div className="renew-news-toggle renew-guide-qa-toggle" role="group" aria-label="가이드 Q&A 선택">
@@ -7240,27 +7240,27 @@ function RenewNews({ uiLang, onOpenCalendar }) {
           {!isGuideHub ? (
           <>
           <a className="renew-guide-feature-link" href="/guide/card-storage" onClick={() => rememberCurrentAppView()}>
-            <span>STORAGE GUIDE</span>
+            <span>보관 가이드</span>
             <strong>원피스카드 보관 방법</strong>
             <small>슬리브, 탑로더, 카드세이버, 바인더 보관 기준을 확인합니다.</small>
           </a>
           <a className="renew-guide-feature-link" href="/guide/shops" onClick={() => rememberCurrentAppView()}>
-            <span>SHOP GUIDE</span>
+            <span>구매처 가이드</span>
             <strong>원피스카드 사는 방법</strong>
             <small>공인점포, 취급점포, 지역별 검색과 내 주변 구매처 찾는 방법을 확인합니다.</small>
           </a>
           <a className="renew-guide-feature-link" href="/guide/card-price" onClick={() => rememberCurrentAppView()}>
-            <span>PRICE GUIDE</span>
+            <span>시세 가이드</span>
             <strong>원피스카드 시세 보는 방법</strong>
             <small>카드 가격, 박스 가격, 최근 거래 기록과 기간별 그래프를 확인하는 방법을 정리했습니다.</small>
           </a>
           <a className="renew-guide-feature-link" href="/guide/card-catalog" onClick={() => rememberCurrentAppView()}>
-            <span>CATALOG GUIDE</span>
+            <span>도감 가이드</span>
             <strong>원피스카드 도감 사용법</strong>
             <small>한글판, 일본판, OP/EB/ST/PR 시리즈와 일련번호 검색 방법을 확인합니다.</small>
           </a>
           <a className="renew-guide-feature-link" href="/guide/box-recommendation" onClick={() => rememberCurrentAppView()}>
-            <span>BOX GUIDE</span>
+            <span>박스 구매 가이드</span>
             <strong>목적별 카드 박스 추천</strong>
             <small>박스 현재가와 수록 카드 Single 시세를 기준으로 최고가, 안정성, 유효 히트를 비교합니다.</small>
           </a>
@@ -7546,14 +7546,14 @@ function RenewBoxRecommendationGuide() {
     return (
       <section className="renew-panel renew-news-panel renew-box-guide" aria-labelledby="box-recommendation-heading">
         <header className="renew-box-guide-head">
-          <span>BOX GUIDE</span>
+          <span>카드 박스</span>
           <h1 id="box-recommendation-heading">원피스카드 박스 구매 가이드</h1>
           <p>원하는 개봉 방향을 선택하면 해당 기준으로 계산된 박스만 따로 확인할 수 있습니다.</p>
         </header>
         <nav className="renew-box-guide-hub" aria-label="박스 구매 가이드 선택">
           {BOX_RECOMMENDATION_CATEGORIES.map((category) => (
             <a key={category.id} href={category.path} onClick={() => rememberCurrentAppView()}>
-              <span>{category.eyebrow}</span>
+              <span>분석 기준</span>
               <strong>{category.title}</strong>
               <p>{category.description}</p>
               <b>추천 박스 보기</b>
@@ -7575,7 +7575,7 @@ function RenewBoxRecommendationGuide() {
         <section className="renew-box-guide-series-index" aria-labelledby="box-guide-series-index-heading">
           <header>
             <div>
-              <span>SERIES GUIDE</span>
+              <span>시리즈별 분석</span>
               <h2 id="box-guide-series-index-heading">시리즈별 박스 분석</h2>
             </div>
             <p>출시된 박스의 현재가, 가격이 연결된 주요 카드와 가격 분포를 시리즈별로 확인합니다.</p>
@@ -7604,7 +7604,6 @@ function RenewBoxRecommendationGuide() {
       <section className="renew-panel renew-news-panel renew-box-guide renew-box-series-guide" aria-labelledby="box-series-guide-heading">
         <header className="renew-box-guide-head">
           <a className="renew-box-guide-back" href="/guide/box-recommendation">박스 구매 가이드</a>
-          <span>BOX DETAIL</span>
           <h1 id="box-series-guide-heading">{series.code} · {series.title} 박스 가이드</h1>
           <p>박스 현재가와 수록 카드의 최신 Single 시세를 연결해 가격 분포와 주요 카드를 확인합니다.</p>
         </header>
@@ -7684,7 +7683,6 @@ function RenewBoxRecommendationGuide() {
     <section className="renew-panel renew-news-panel renew-box-guide" aria-labelledby="box-recommendation-heading">
       <header className="renew-box-guide-head">
         <a className="renew-box-guide-back" href="/guide/box-recommendation">박스 구매 가이드</a>
-        <span>{activeCategory.eyebrow}</span>
         <h1 id="box-recommendation-heading">{activeCategory.title}</h1>
         <p>{activeCategory.description}</p>
       </header>
@@ -7787,7 +7785,7 @@ function RenewGuideHub() {
     <div className="renew-guide-hub" aria-label="원피스카드 가이드 주제">
       <header className="renew-guide-hub-intro">
         <div>
-          <span>GUIDE COLLECTION</span>
+          <span>가이드 모음</span>
           <h3>무엇을 확인하려고 하나요?</h3>
         </div>
         <p>필요한 답부터 찾을 수 있도록 카드 검색, 가격 판단, 보관과 도구 사용 순서로 나눴습니다.</p>
@@ -7819,13 +7817,12 @@ function RenewGuideHub() {
   );
 }
 
-function RenewEditorialGuide({ guide, guideKey, eyebrow, headingId, cta }) {
+function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
   const details = GUIDE_ARTICLE_DETAILS[guideKey];
   return (
     <section className="renew-panel renew-news-panel renew-card-storage-guide renew-editorial-guide" aria-labelledby={headingId}>
       <header className="renew-editorial-guide-head">
-        <a href="/guide" onClick={() => rememberCurrentAppView()}>가이드</a>
-        <span>{eyebrow}</span>
+        <a href="/guide" onClick={() => rememberCurrentAppView()}>가이드/Q&amp;A</a>
         <h1 id={headingId}>{guide.title}</h1>
         <p>{guide.intro}</p>
         <div className="renew-guide-editorial-meta" aria-label="콘텐츠 검수 정보">
@@ -7897,19 +7894,19 @@ function RenewEditorialGuide({ guide, guideKey, eyebrow, headingId, cta }) {
 }
 
 function RenewCardStorageGuide() {
-  return <RenewEditorialGuide guide={CARD_STORAGE_GUIDE} guideKey="storage" eyebrow="STORAGE GUIDE" headingId="card-storage-guide-heading" cta={{ eyebrow: 'SUPPLIES', title: '카드 보관용품이 필요하다면', description: '슬리브, 탑로더, 카드세이버와 바인더처럼 보관 단계에 맞는 용품을 확인합니다.', href: '/news/supplies', label: '보관용품 보기' }} />;
+  return <RenewEditorialGuide guide={CARD_STORAGE_GUIDE} guideKey="storage" headingId="card-storage-guide-heading" cta={{ eyebrow: '보관용품', title: '카드 보관용품이 필요하다면', description: '슬리브, 탑로더, 카드세이버와 바인더처럼 보관 단계에 맞는 용품을 확인합니다.', href: '/news/supplies', label: '보관용품 보기' }} />;
 }
 
 function RenewShopBuyingGuide() {
-  return <RenewEditorialGuide guide={SHOP_BUYING_GUIDE} guideKey="shops" eyebrow="SHOP GUIDE" headingId="shop-buying-guide-heading" cta={{ eyebrow: 'SHOPS', title: '가까운 구매처를 찾고 싶다면', description: '지역, 매장 유형과 내 주변순으로 실제 방문 가능한 매장을 확인합니다.', href: '/shops', label: '구매처 보기' }} />;
+  return <RenewEditorialGuide guide={SHOP_BUYING_GUIDE} guideKey="shops" headingId="shop-buying-guide-heading" cta={{ eyebrow: '구매처', title: '가까운 구매처를 찾고 싶다면', description: '지역, 매장 유형과 내 주변순으로 실제 방문 가능한 매장을 확인합니다.', href: '/shops', label: '구매처 보기' }} />;
 }
 
 function RenewCardPriceGuide() {
-  return <RenewEditorialGuide guide={CARD_PRICE_GUIDE} guideKey="price" eyebrow="PRICE GUIDE" headingId="card-price-guide-heading" cta={{ eyebrow: 'PRICES', title: '카드 시세를 직접 확인하려면', description: '카드번호 또는 이름으로 같은 카드의 버전별 가격과 최근 거래를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+  return <RenewEditorialGuide guide={CARD_PRICE_GUIDE} guideKey="price" headingId="card-price-guide-heading" cta={{ eyebrow: '카드 시세', title: '카드 시세를 직접 확인하려면', description: '카드번호 또는 이름으로 같은 카드의 버전별 가격과 최근 거래를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
 }
 
 function RenewCardCatalogGuide() {
-  return <RenewEditorialGuide guide={CARD_CATALOG_GUIDE} guideKey="catalog" eyebrow="CATALOG GUIDE" headingId="card-catalog-guide-heading" cta={{ eyebrow: 'CARDS', title: '도감에서 카드를 찾으려면', description: '언어판, 시리즈, 레어도와 카드번호를 조합해 원하는 버전을 찾습니다.', href: '/cards', label: '도감 보기' }} />;
+  return <RenewEditorialGuide guide={CARD_CATALOG_GUIDE} guideKey="catalog" headingId="card-catalog-guide-heading" cta={{ eyebrow: '카드 도감', title: '도감에서 카드를 찾으려면', description: '언어판, 시리즈, 레어도와 카드번호를 조합해 원하는 버전을 찾습니다.', href: '/cards', label: '도감 보기' }} />;
 }
 
 function RenewNewsGuideModal({ guideId, onClose }) {
@@ -8185,7 +8182,7 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
       <section className="renew-series-guide-section renew-series-guide-faq renew-panel">
         <div className="renew-series-guide-section-head">
           <div>
-            <span>QUICK GUIDE</span>
+            <span>빠른 안내</span>
             <h2>처음 보는 사람을 위한 안내</h2>
           </div>
         </div>
