@@ -48,8 +48,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  budget:
+    name: Resolve D1 budget
+    runs-on: ubuntu-latest
+    outputs:
+      profile: ${{ steps.budget.outputs.profile }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: budget
+        uses: ./.github/actions/d1-budget
+        with:
+          cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          cloudflare_account_id: ed82677cb22fd8679792f6cff73a00d6
+
   discover:
     name: Discover newly listed JP cards
+    needs: budget
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -80,7 +94,7 @@ jobs:
 
   collect:
     name: Collect market prices (${{ matrix.shard_name }})
-    needs: discover
+    needs: [budget, discover]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -121,6 +135,7 @@ jobs:
           COLLECT_SOLD_LISTINGS: ${{ github.event.inputs.collect_sold_listings || 'false' }}
           SOLD_LISTING_PAGES: ${{ github.event.inputs.sold_listing_pages || '1' }}
           SCHEDULE_EXPRESSION: ${{ github.event.schedule || '' }}
+          D1_BUDGET_PROFILE: ${{ needs.budget.outputs.profile }}
         run: |
           if [ -z "$COLLECTOR_TOKEN" ]; then
             echo "MARKET_COLLECTOR_TOKEN secret is missing."
@@ -151,6 +166,52 @@ jobs:
           elif [ "$SHARD_ID" != "0" ]; then
             echo "Focused or resumed manual run uses shard 0 only."
             exit 0
+          fi
+
+          # Manual focused/resume runs keep their explicit range. Recurring full scans
+          # rotate smaller ranges as D1 approaches the free-tier limit.
+          if [ "$use_shards" = "true" ] && [ "$COLLECTOR_SCOPE" = "all-jp" ] && [ -z "$APPAREL_IDS" ]; then
+            utc_day=$((10#$(date -u +%s) / 86400))
+            schedule_phase=0
+            if [ "$SCHEDULE_EXPRESSION" = "17 12 * * *" ]; then
+              schedule_phase=1
+            fi
+            case "${D1_BUDGET_PROFILE:-critical}" in
+              normal)
+                ;;
+              conserve)
+                wanted_parity=$schedule_phase
+                if [ $((10#$SHARD_ID % 2)) -ne "$wanted_parity" ]; then
+                  echo "D1 conserve profile: shard $SHARD_ID is deferred to the other daily run."
+                  exit 0
+                fi
+                ;;
+              critical)
+                wanted_shard=$(((utc_day * 2 + schedule_phase) % 4))
+                if [ $((10#$SHARD_ID)) -ne "$wanted_shard" ]; then
+                  echo "D1 critical profile: shard $SHARD_ID is deferred; selected shard is $wanted_shard."
+                  exit 0
+                fi
+                ;;
+              protect|*)
+                chunk_size=500
+                chunk_count=16
+                chunk_id=$(((utc_day * 2 + schedule_phase) % chunk_count))
+                chunk_start=$((chunk_id * chunk_size))
+                chunk_stop=$((chunk_start + chunk_size))
+                shard_end=$stop_offset
+                if [ "$shard_end" -eq 0 ]; then
+                  shard_end=999999999
+                fi
+                if [ "$chunk_start" -ge "$shard_end" ] || [ "$chunk_stop" -le "$offset" ]; then
+                  echo "D1 protect profile: shard $SHARD_ID has no work in rotating chunk $chunk_id."
+                  exit 0
+                fi
+                if [ "$chunk_start" -gt "$offset" ]; then offset=$chunk_start; fi
+                if [ "$chunk_stop" -lt "$shard_end" ]; then stop_offset=$chunk_stop; fi
+                echo "D1 protect profile: collecting rotating range ${offset}-${stop_offset}."
+                ;;
+            esac
           fi
 
           max_requests=$((10#$COLLECTOR_MAX_PAGES * 5))
@@ -286,7 +347,7 @@ jobs:
 
   refresh-public-cache:
     name: Refresh public market cache
-    needs: collect
+    needs: [budget, collect]
     if: ${{ success() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -312,7 +373,7 @@ jobs:
 
   evaluate-alerts:
     name: Evaluate price alerts
-    needs: collect
+    needs: [budget, collect]
     if: ${{ success() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -333,7 +394,7 @@ jobs:
 
   notify-new-cards:
     name: Notify newly discovered cards
-    needs: discover
+    needs: [budget, discover]
     if: ${{ needs.discover.result == 'success' && needs.discover.outputs.added != '0' }}
     runs-on: ubuntu-latest
     steps:

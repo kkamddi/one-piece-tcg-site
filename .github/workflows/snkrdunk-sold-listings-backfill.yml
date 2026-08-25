@@ -115,6 +115,28 @@ jobs:
         with:
           node-version: 22
 
+      - id: budget
+        uses: ./.github/actions/d1-budget
+        with:
+          cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          cloudflare_account_id: ed82677cb22fd8679792f6cff73a00d6
+
+      - name: Apply adaptive backfill limits
+        env:
+          D1_BUDGET_PROFILE: ${{ steps.budget.outputs.profile }}
+          REQUESTED_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
+          REQUESTED_MAX_PAGES: ${{ github.event.inputs.trading_history_max_pages || '120' }}
+        run: |
+          case "${D1_BUDGET_PROFILE:-critical}" in
+            normal) cards="$REQUESTED_CARD_LIMIT"; pages="$REQUESTED_MAX_PAGES" ;;
+            conserve) cards=100; pages=20 ;;
+            critical) cards=30; pages=5 ;;
+            protect|*) cards=10; pages=2 ;;
+          esac
+          echo "BACKFILL_CARD_LIMIT=$cards" >> "$GITHUB_ENV"
+          echo "TRADING_HISTORY_MAX_PAGES=$pages" >> "$GITHUB_ENV"
+          echo "D1 ${D1_BUDGET_PROFILE} profile: backfill cards=$cards pages=$pages"
+
       - name: Backfill sold listings
         env:
           COLLECTOR_URL: ${{ github.event.inputs.collector_url || 'https://www.optcgkorea.com/api/market-collector' }}
@@ -129,7 +151,6 @@ jobs:
           BACKFILL_MISSING_CONDITION: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && 'any' || github.event.inputs.missing_condition || 'none' }}
           APPAREL_IDS: ${{ github.event.inputs.apparel_ids || '' }}
           BACKFILL_START_INDEX: ${{ github.event.inputs.start_index || '0' }}
-          BACKFILL_CARD_LIMIT: ${{ github.event.inputs.card_limit || '0' }}
           BACKFILL_MODE: ${{ github.event.inputs.mode || 'aggregate' }}
           BACKFILL_DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
           BACKFILL_RECENT_RAW_DAYS: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && '30' || github.event_name == 'schedule' && '7' || github.event.inputs.recent_raw_days || '30' }}
@@ -138,7 +159,6 @@ jobs:
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
           BACKFILL_TRADING_HISTORIES: '1'
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.trading_history_per_page || '12' }}
-          TRADING_HISTORY_MAX_PAGES: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * 0' && '120' || github.event_name == 'schedule' && '5' || github.event.inputs.trading_history_max_pages || '120' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '1000' }}
           BACKFILL_HISTORY_CHUNK_SIZE: ${{ github.event.inputs.history_chunk_size || '10' }}
           BACKFILL_PROGRESS_PATH: sold-listings-backfill-progress.jsonl

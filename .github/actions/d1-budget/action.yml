@@ -1,0 +1,80 @@
+name: Resolve D1 free-tier budget
+description: Selects an adaptive workload profile without disabling essential refreshes.
+
+inputs:
+  cloudflare_api_token:
+    description: Cloudflare API token with D1 read access
+    required: true
+  cloudflare_account_id:
+    description: Cloudflare account ID
+    required: true
+  database_name:
+    description: D1 database name
+    required: false
+    default: optcgkorea-public-shadow
+
+outputs:
+  profile:
+    description: normal, conserve, critical, or protect
+    value: ${{ steps.policy.outputs.profile }}
+  read_percent:
+    description: Rolling 24-hour D1 read usage percentage
+    value: ${{ steps.policy.outputs.read_percent }}
+  write_percent:
+    description: Rolling 24-hour D1 write usage percentage
+    value: ${{ steps.policy.outputs.write_percent }}
+  measured:
+    description: Whether Cloudflare usage was measured successfully
+    value: ${{ steps.policy.outputs.measured }}
+
+runs:
+  using: composite
+  steps:
+    - id: policy
+      shell: bash
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ inputs.cloudflare_api_token }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ inputs.cloudflare_account_id }}
+        D1_DATABASE_NAME: ${{ inputs.database_name }}
+      run: |
+        set -uo pipefail
+        info=""
+        if [ -n "${CLOUDFLARE_API_TOKEN:-}" ] && [ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+          info=$(npx --yes wrangler@4.112.0 d1 info "$D1_DATABASE_NAME" --json 2>/tmp/d1-budget-error.log || true)
+        fi
+
+        D1_INFO="$info" node - "$GITHUB_OUTPUT" "$GITHUB_STEP_SUMMARY" <<'NODE'
+        const fs = require('node:fs');
+        const [outputPath, summaryPath] = process.argv.slice(2);
+        let measured = false;
+        let rowsRead = 0;
+        let rowsWritten = 0;
+        try {
+          const info = JSON.parse(process.env.D1_INFO || '');
+          rowsRead = Number(info.rows_read_24h || 0);
+          rowsWritten = Number(info.rows_written_24h || 0);
+          measured = Number.isFinite(rowsRead) && Number.isFinite(rowsWritten);
+        } catch {}
+
+        const readPercent = measured ? rowsRead / 5_000_000 * 100 : 80;
+        const writePercent = measured ? rowsWritten / 100_000 * 100 : 80;
+        const peak = Math.max(readPercent, writePercent);
+        const profile = peak >= 88 ? 'protect' : peak >= 75 ? 'critical' : peak >= 60 ? 'conserve' : 'normal';
+        const values = {
+          profile,
+          measured: String(measured),
+          read_percent: readPercent.toFixed(1),
+          write_percent: writePercent.toFixed(1)
+        };
+        fs.appendFileSync(outputPath, Object.entries(values).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
+        fs.appendFileSync(summaryPath, [
+          '### D1 budget policy',
+          `- Profile: **${profile}**`,
+          `- Reads: ${readPercent.toFixed(1)}%`,
+          `- Writes: ${writePercent.toFixed(1)}%`,
+          `- Usage measured: ${measured}`,
+          measured ? '' : '- Cloudflare usage lookup failed; essential work continues with the critical profile.',
+          ''
+        ].join('\n'));
+        console.log(JSON.stringify({ profile, measured, rowsRead, rowsWritten, readPercent, writePercent }));
+        NODE

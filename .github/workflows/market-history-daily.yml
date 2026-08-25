@@ -36,8 +36,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  budget:
+    name: Resolve D1 budget
+    runs-on: ubuntu-latest
+    outputs:
+      profile: ${{ steps.budget.outputs.profile }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: budget
+        uses: ./.github/actions/d1-budget
+        with:
+          cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          cloudflare_account_id: ed82677cb22fd8679792f6cff73a00d6
+
   collect:
     name: Collect history (${{ matrix.shard_name }})
+    needs: budget
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -103,6 +117,8 @@ jobs:
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '750' }}
           BACKFILL_HISTORY_CHUNK_SIZE: "20"
           BACKFILL_PROGRESS_PATH: daily-market-history-${{ matrix.shard_start }}.jsonl
+          D1_BUDGET_PROFILE: ${{ needs.budget.outputs.profile }}
+          SHARD_ORDINAL: ${{ strategy.job-index }}
         run: |
           if [ -z "$MARKET_COLLECTOR_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
             echo "Required collector or Cloudflare secret is missing."
@@ -111,6 +127,17 @@ jobs:
           if [ -z "$SNKRDUNK_COOKIE" ] && [ -z "$SNKRDUNK_AUTHORIZATION" ]; then
             echo "SNKRDUNK trading-history authentication is missing."
             exit 1
+          fi
+          utc_day=$((10#$(date -u +%s) / 86400))
+          case "${D1_BUDGET_PROFILE:-critical}" in
+            normal) divisor=1; slot=0 ;;
+            conserve) divisor=2; slot=$((utc_day % 2)) ;;
+            critical) divisor=4; slot=$((utc_day % 4)) ;;
+            protect|*) divisor=8; slot=$((utc_day % 8)) ;;
+          esac
+          if [ $((10#$SHARD_ORDINAL % divisor)) -ne "$slot" ]; then
+            echo "D1 ${D1_BUDGET_PROFILE} profile: history shard ${SHARD_ORDINAL} is deferred (slot ${slot}/${divisor})."
+            exit 0
           fi
           npm run backfill:sold-listings
 
@@ -124,7 +151,7 @@ jobs:
   notify:
     name: Notify failed collection
     if: ${{ always() && needs.collect.result != 'success' }}
-    needs: collect
+    needs: [budget, collect]
     runs-on: ubuntu-latest
     steps:
       - name: Send Telegram failure

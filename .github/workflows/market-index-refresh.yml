@@ -42,6 +42,25 @@ jobs:
         with:
           node-version: 22
 
+      - id: budget
+        uses: ./.github/actions/d1-budget
+        with:
+          cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          cloudflare_account_id: ed82677cb22fd8679792f6cff73a00d6
+
+      - name: Apply adaptive rebuild window
+        env:
+          D1_BUDGET_PROFILE: ${{ steps.budget.outputs.profile }}
+          REQUESTED_WINDOW_DAYS: ${{ github.event_name == 'workflow_run' && '3' || github.event.inputs.rebuild_window_days || '14' }}
+        run: |
+          case "${D1_BUDGET_PROFILE:-critical}" in
+            normal) days="$REQUESTED_WINDOW_DAYS" ;;
+            conserve) days=2 ;;
+            critical|protect|*) days=1 ;;
+          esac
+          echo "MARKET_INDEX_REBUILD_WINDOW_DAYS=$days" >> "$GITHUB_ENV"
+          echo "D1 ${D1_BUDGET_PROFILE} profile: index rebuild window=${days}d"
+
       - name: Wait after history collection
         env:
           INDEX_REBUILD_DELAY_SECONDS: ${{ github.event_name == 'workflow_run' && '0' || github.event.inputs.delay_seconds || '0' }}
@@ -58,7 +77,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
           D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
-          MARKET_INDEX_REBUILD_WINDOW_DAYS: ${{ github.event_name == 'workflow_run' && '3' || github.event.inputs.rebuild_window_days || '14' }}
           MARKET_INDEX_DRY_RUN: ${{ github.event_name == 'workflow_run' && '0' || github.event.inputs.dry_run == 'true' && '1' || '0' }}
           MARKET_INDEX_CODES: ${{ github.event_name == 'workflow_run' && 'manga,luffy' || github.event.inputs.index_codes || 'manga,luffy' }}
         run: |
