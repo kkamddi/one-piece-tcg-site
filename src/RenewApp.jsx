@@ -7382,6 +7382,53 @@ const BOX_RECOMMENDATION_CATEGORIES = [
   }
 ];
 
+function getBoxSeriesPriceInsight(item) {
+  const coveragePercent = Math.round(item.coverage * 100);
+  const concentration = item.top3Total > 0 ? item.maximum / item.top3Total : 0;
+  const concentrationPercent = Math.round(concentration * 100);
+  const maximumToBox = item.boxPrice > 0 ? item.maximum / item.boxPrice : 0;
+  const maximumToBoxLabel = maximumToBox > 0 ? `${maximumToBox.toFixed(maximumToBox >= 10 ? 0 : 1)}배` : '확인 중';
+  let type = '상위 카드 중심형';
+  let description = `최고가 카드와 가격 중앙값의 차이가 커 상위 카드와 일반 히트의 가격을 나눠 확인해야 합니다.`;
+  let audience = '상위 카드뿐 아니라 중간 가격대 카드까지 함께 비교하려는 경우';
+
+  if (item.coverage < 0.5 || item.pricedHitCount < 3) {
+    type = '데이터 확인 중';
+    description = `가격 연결률이 ${coveragePercent}%여서 현재 분포만으로 시리즈 성향을 확정하지 않습니다.`;
+    audience = '가격이 연결된 카드만 먼저 확인하고 이후 데이터 보강을 기다리는 경우';
+  } else if (concentration >= 0.58) {
+    type = '최고가 집중형';
+    description = `상위 3장 가격 합계 중 최고가 카드 비중이 ${concentrationPercent}%로, 최상위 카드 한 장의 영향이 큰 편입니다.`;
+    audience = '여러 중간 가격대 카드보다 최상위 희귀 카드의 현재가를 중요하게 보는 경우';
+  } else if (item.validHitCount >= 8) {
+    type = '유효 히트형';
+    description = `박스 현재가의 35% 이상인 카드가 ${item.validHitCount}장 확인되어 가격이 있는 카드가 비교적 여러 장에 분포합니다.`;
+    audience = '한 장의 최고가보다 가격이 확인되는 여러 히트 카드를 함께 보고 싶은 경우';
+  } else if (item.cv <= 1.1 && item.pricedHitCount >= 5) {
+    type = '가격 분산형';
+    description = `가격이 확인된 ${item.pricedHitCount}장의 편차가 비교적 완만해 일부 카드에만 가격이 집중되지 않은 편입니다.`;
+    audience = '상위 카드와 중간 가격대 카드의 균형을 함께 확인하려는 경우';
+  }
+
+  return {
+    type,
+    description,
+    audience,
+    coveragePercent,
+    concentrationPercent,
+    maximumToBoxLabel,
+    caution: item.coverage < 0.8
+      ? `가격 연결률이 ${coveragePercent}%이므로 미확인 카드가 추가되면 분포가 달라질 수 있습니다.`
+      : '봉입률과 카드 상태별 편차는 반영하지 않으므로 개봉 기대수익으로 해석할 수 없습니다.',
+    bars: [
+      { label: '최고가 카드', value: item.maximum },
+      { label: '상위 3장 평균', value: item.top3Total / Math.max(1, Math.min(3, item.pricedHitCount)) },
+      { label: '가격 중앙값', value: item.median },
+      { label: '박스 현재가', value: item.boxPrice }
+    ].filter((entry) => entry.value > 0)
+  };
+}
+
 function getBoxRecommendationCategory(pathname = '') {
   return BOX_RECOMMENDATION_CATEGORIES.find((category) => category.path === pathname) || null;
 }
@@ -7503,6 +7550,7 @@ function RenewBoxRecommendationGuide() {
             top3Total,
             strongestCard: pricedHits[0],
             topCards: pricedHits.slice(0, 3),
+            detailTopCards: pricedHits.slice(0, 6),
             stableScore: boxPrice > 0 && pricedHits.length >= 3 && coverage >= 0.25
               ? (median / boxPrice) * (1 / (1 + cv)) * Math.log2(pricedHits.length + 1) * coverage
               : 0,
@@ -7600,6 +7648,8 @@ function RenewBoxRecommendationGuide() {
   if (detailSeriesId) {
     const item = state.detailItem;
     const series = getBoxSeriesMeta(detailSeriesId);
+    const priceInsight = item ? getBoxSeriesPriceInsight(item) : null;
+    const chartMaximum = priceInsight?.bars.reduce((maximum, entry) => Math.max(maximum, entry.value), 0) || 0;
     return (
       <section className="renew-panel renew-news-panel renew-box-guide renew-box-series-guide" aria-labelledby="box-series-guide-heading">
         <header className="renew-box-guide-head">
@@ -7641,6 +7691,37 @@ function RenewBoxRecommendationGuide() {
               </div>
               <p>유효 히트는 현재 박스 가격의 35% 이상인 Single 카드입니다. 봉입률을 적용한 기대값은 아닙니다.</p>
             </section>
+            {priceInsight ? (
+              <section className="renew-box-series-insight" aria-labelledby="box-series-insight-heading">
+                <div className="renew-box-series-section-head">
+                  <div>
+                    <span>데이터 해석</span>
+                    <h2 id="box-series-insight-heading">이 시리즈의 현재 가격 특징</h2>
+                  </div>
+                  <b>{priceInsight.type}</b>
+                </div>
+                <p className="renew-box-series-insight-summary">{priceInsight.description}</p>
+                <div className="renew-box-series-distribution" aria-label="가격 분포 비교">
+                  {priceInsight.bars.map((entry) => (
+                    <div key={entry.label}>
+                      <span>{entry.label}</span>
+                      <i><b style={{ width: `${Math.max(4, (entry.value / chartMaximum) * 100)}%` }} /></i>
+                      <strong>{formatYen(entry.value)}</strong>
+                    </div>
+                  ))}
+                </div>
+                <dl className="renew-box-series-insight-stats">
+                  <div><dt>최고가 집중도</dt><dd>{priceInsight.concentrationPercent}%</dd></div>
+                  <div><dt>박스 대비 최고가</dt><dd>{priceInsight.maximumToBoxLabel}</dd></div>
+                  <div><dt>유효 히트</dt><dd>{item.validHitCount}장</dd></div>
+                  <div><dt>가격 연결률</dt><dd>{priceInsight.coveragePercent}%</dd></div>
+                </dl>
+                <div className="renew-box-series-insight-notes">
+                  <p><strong>이런 경우에 확인</strong>{priceInsight.audience}</p>
+                  <p><strong>확인할 점</strong>{priceInsight.caution}</p>
+                </div>
+              </section>
+            ) : null}
             <section className="renew-box-series-hits" aria-labelledby="box-series-hits-heading">
               <div className="renew-box-series-section-head">
                 <div>
@@ -7649,12 +7730,17 @@ function RenewBoxRecommendationGuide() {
                 </div>
                 <p>가격이 연결된 패러렐·SEC·SP 카드 기준</p>
               </div>
-              {item.topCards?.length ? (
+              {item.detailTopCards?.length ? (
                 <div className="renew-box-series-hit-grid">
-                  {item.topCards.map((topCard, index) => (
+                  {item.detailTopCards.map((topCard, index) => (
                     <a key={topCard.card.id} href={`/cards?cardId=${encodeURIComponent(topCard.card.id)}`}>
                       <span>{index + 1}</span>
-                      <img src={getCardImageSrc(topCard.card)} alt={topCard.card.name || topCard.card.id} loading="lazy" />
+                      <img
+                        src={getCardThumbnailSrc(topCard.card)}
+                        alt={topCard.card.name || topCard.card.id}
+                        loading="lazy"
+                        onError={placeholderImage}
+                      />
                       <div>
                         <small>{topCard.card.cardNo || topCard.card.id} · {topCard.card.rarity || '-'}</small>
                         <strong>{topCard.card.name || topCard.card.koName || topCard.card.id}</strong>
