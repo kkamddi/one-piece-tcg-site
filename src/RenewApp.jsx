@@ -7225,7 +7225,6 @@ function RenewNews({ uiLang, onOpenCalendar }) {
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
-            <span>정보 가이드</span>
             <h2 id="guide-qa-heading">가이드/Q&A</h2>
           </div>
           <div className="renew-news-toggle renew-guide-qa-toggle" role="group" aria-label="가이드 Q&A 선택">
@@ -7855,13 +7854,6 @@ function splitGuideAnswer(answer = '') {
 function RenewGuideHub() {
   return (
     <div className="renew-guide-hub" aria-label="원피스카드 가이드 주제">
-      <header className="renew-guide-hub-intro">
-        <div>
-          <span>가이드 모음</span>
-          <h3>무엇을 확인하려고 하나요?</h3>
-        </div>
-        <p>필요한 답부터 찾을 수 있도록 카드 검색, 가격 판단, 보관과 도구 사용 순서로 나눴습니다.</p>
-      </header>
       <div className="renew-guide-hub-grid">
         {GUIDE_HUB_COLLECTIONS.map((collection) => (
           <section key={collection.id} className="renew-guide-hub-group">

@@ -6602,8 +6602,8 @@
 
 .renew-guide-hub {
   display: grid;
-  gap: 20px;
-  margin: 18px 26px 0;
+  gap: 16px;
+  margin: 10px 26px 0;
 }
 
 .renew-guide-hub-intro,
