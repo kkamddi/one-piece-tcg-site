@@ -6572,8 +6572,275 @@
   line-height: 1.55;
 }
 
+/* Guide discovery and article navigation */
+.renew-app.is-dark .renew-guide-hub-group,
+.renew-app.is-dark .renew-guide-hub-group nav a,
+.renew-app.is-dark .renew-editorial-guide-faq details,
+.renew-app.is-dark .renew-editorial-guide-related nav a,
+.renew-app.is-dark .renew-box-guide-series-index > div > a {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(19, 23, 31, 0.92);
+  color: #f5f6f8;
+}
+
+.renew-app.is-dark .renew-guide-hub-intro h3,
+.renew-app.is-dark .renew-guide-hub-group h3,
+.renew-app.is-dark .renew-guide-hub-group nav strong,
+.renew-app.is-dark .renew-editorial-guide-head h1,
+.renew-app.is-dark .renew-editorial-guide-faq h2,
+.renew-app.is-dark .renew-editorial-guide-faq summary,
+.renew-app.is-dark .renew-editorial-guide-related h2,
+.renew-app.is-dark .renew-editorial-guide-related nav strong,
+.renew-app.is-dark .renew-box-guide-series-index h2,
+.renew-app.is-dark .renew-box-guide-series-index strong {
+  color: #f5f6f8;
+}
+
+.renew-guide-hub {
+  display: grid;
+  gap: 20px;
+  margin: 18px 26px 0;
+}
+
+.renew-guide-hub-intro,
+.renew-box-guide-series-index > header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.renew-guide-hub-intro span,
+.renew-guide-hub-group > span,
+.renew-box-guide-series-index header span,
+.renew-editorial-guide-head > span,
+.renew-editorial-guide-related > div span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.renew-guide-hub-intro h3,
+.renew-box-guide-series-index h2 {
+  margin: 5px 0 0;
+  color: #17191c;
+  font-size: 23px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.renew-guide-hub-intro p,
+.renew-box-guide-series-index header p {
+  max-width: 480px;
+  margin: 0;
+  color: #656b75;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.renew-guide-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.renew-guide-hub-group {
+  padding: 20px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.renew-guide-hub-group h3 {
+  margin: 6px 0 4px;
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.renew-guide-hub-group > p {
+  margin: 0 0 14px;
+  color: #6b7280;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.renew-guide-hub-group nav,
+.renew-editorial-guide-related nav {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #e8e9eb;
+  border-radius: 6px;
+  background: #e8e9eb;
+}
+
+.renew-guide-hub-group nav a,
+.renew-editorial-guide-related nav a {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  padding: 13px 36px 13px 14px;
+  background: #fff;
+  color: #17191c;
+  text-decoration: none;
+}
+
+.renew-guide-hub-group nav strong,
+.renew-editorial-guide-related nav strong {
+  font-size: 13.5px;
+  font-weight: 900;
+}
+
+.renew-guide-hub-group nav small,
+.renew-editorial-guide-related nav small {
+  color: #747983;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.renew-guide-hub-group nav b,
+.renew-editorial-guide-related nav b {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+}
+
+.renew-guide-hub-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #747983;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.renew-guide-hub-meta > * + *::before {
+  content: "·";
+  margin-right: 10px;
+  color: #c8cbd0;
+}
+
+.renew-guide-hub-meta a {
+  color: #4b5563;
+}
+
 .renew-card-storage-guide {
   padding: 0 0 30px;
+}
+
+.renew-editorial-guide-head {
+  max-width: 800px;
+  padding: 24px 26px 0;
+}
+
+.renew-editorial-guide-head > a {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-editorial-guide-head h1 {
+  margin: 7px 0 10px;
+  color: #17191c;
+  font-size: clamp(27px, 4vw, 40px);
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.renew-editorial-guide-head > p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+.renew-editorial-guide-head .renew-guide-editorial-meta {
+  margin-top: 14px;
+  padding: 0;
+}
+
+.renew-editorial-guide-toc {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 18px;
+  margin: 24px 26px 0;
+  padding: 18px 20px;
+  border: 1px solid #e4e5e8;
+  border-radius: 8px;
+}
+
+.renew-editorial-guide-toc > strong {
+  font-size: 13px;
+}
+
+.renew-editorial-guide-toc ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.renew-editorial-guide-toc a {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.renew-editorial-guide-faq,
+.renew-editorial-guide-related {
+  margin: 22px 26px 0;
+  padding-top: 22px;
+  border-top: 1px solid #e4e5e8;
+}
+
+.renew-editorial-guide-faq h2,
+.renew-editorial-guide-related h2 {
+  margin: 0 0 14px;
+  color: #17191c;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+.renew-editorial-guide-faq > div {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-editorial-guide-faq details {
+  border: 1px solid #e4e5e8;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.renew-editorial-guide-faq summary {
+  padding: 15px 16px;
+  color: #17191c;
+  font-size: 13.5px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.renew-editorial-guide-faq p {
+  margin: 0;
+  padding: 0 16px 16px;
+  color: #5f6670;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.renew-editorial-guide-related nav {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .renew-card-storage-intro {
@@ -8750,6 +9017,63 @@
   line-height: 1.65;
 }
 
+.renew-box-guide-series-index {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid #e4e5e8;
+  padding-top: 24px;
+}
+
+.renew-box-guide-series-index > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-box-guide-series-index > div > a {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 102px;
+  padding: 12px;
+  border: 1px solid #e4e5e8;
+  border-radius: 8px;
+  color: #17191c;
+  text-decoration: none;
+}
+
+.renew-box-guide-series-index img {
+  width: 72px;
+  height: 78px;
+  object-fit: contain;
+}
+
+.renew-box-guide-series-index a > span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.renew-box-guide-series-index small {
+  color: #c94d35;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.renew-box-guide-series-index strong {
+  overflow: hidden;
+  color: #17191c;
+  font-size: 13px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.renew-box-guide-series-index b {
+  color: #747983;
+  font-size: 10.5px;
+}
+
 .renew-box-guide-context {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -9639,6 +9963,29 @@
   font-size: 16px;
   font-weight: 700;
   line-height: 1.75;
+}
+
+.renew-guide-editorial-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 12px;
+  color: #747b87;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.renew-guide-editorial-meta time::before {
+  content: "·";
+  margin-right: 12px;
+}
+
+@media (max-width: 520px) {
+  .renew-guide-editorial-meta time::before {
+    content: "";
+    margin-right: 0;
+  }
 }
 
 .renew-series-guide-actions {
@@ -21217,5 +21564,40 @@ button.renew-deck-entry:focus-visible {
 
   .renew-box-guide-actions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .renew-guide-hub {
+    margin: 16px 14px 0;
+  }
+
+  .renew-guide-hub-intro,
+  .renew-box-guide-series-index > header {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .renew-guide-hub-grid,
+  .renew-editorial-guide-related nav,
+  .renew-box-guide-series-index > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .renew-editorial-guide-head {
+    padding: 20px 16px 0;
+  }
+
+  .renew-editorial-guide-toc {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 20px 16px 0;
+  }
+
+  .renew-editorial-guide-toc ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .renew-editorial-guide-faq,
+  .renew-editorial-guide-related {
+    margin: 20px 16px 0;
   }
 }

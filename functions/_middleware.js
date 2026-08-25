@@ -875,10 +875,10 @@ const SERVER_PAGE_CONTENT = {
   '/guide': {
     heading: '원피스카드 입문과 수집 가이드',
     paragraphs: [
-      '카드 도감 검색, 시세 확인, 카드 보관, 구매처 탐색처럼 수집을 시작할 때 필요한 절차를 주제별로 정리합니다.',
-      '카드 상태와 언어판, 최근 거래 기록을 구분해 확인하는 방법과 Card Pone의 각 도구를 사용하는 기준을 안내합니다.'
+      '카드를 처음 찾는 단계부터 가격 판단, 보관과 실험실 도구 사용까지 필요한 답을 목적별로 나눠 확인할 수 있습니다.',
+      '각 가이드는 실제 도감과 시세 화면으로 이어지며 카드 상태, 언어판, 최근 거래 기록과 계산 결과의 범위를 구분해 안내합니다.'
     ],
-    links: ['/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops']
+    links: ['/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
   },
   '/faq': {
     heading: '원피스카드 자주 묻는 질문',
@@ -1262,11 +1262,24 @@ const SERVER_PAGE_DETAILS = {
   ],
   '/guide': [
     {
-      heading: '가이드 구성',
+      heading: '처음 시작할 때',
       items: [
-        '도감 검색, 카드 시세 확인, 보관 방법과 구매처 찾기를 실제 이용 순서에 맞춰 설명합니다.',
-        '처음 수집하는 사용자는 카드번호 확인과 언어판 구분부터 읽고 필요한 주제로 이동할 수 있습니다.',
-        '가격과 매장 정보는 변할 수 있으므로 가이드와 함께 최신 거래일과 공식 원문을 확인해야 합니다.'
+        '도감 사용법에서 카드번호, 언어판과 같은 번호의 다른 버전을 구분하는 순서를 확인합니다.',
+        '구매처 가이드에서 공인점포, 지역 검색과 방문 전 확인할 항목을 정리합니다.'
+      ]
+    },
+    {
+      heading: '가격과 수집을 판단할 때',
+      items: [
+        '시세 가이드에서 Single과 PSA10, 최근 시세와 실제 거래 기록을 구분합니다.',
+        '박스 구매 가이드에서 최고가 카드, 가격 균형과 유효 히트 기준을 각각 비교합니다.',
+        '보관 가이드와 센터링 가이드에서 카드 상태를 유지하고 앞면 인쇄 비율을 확인하는 순서를 안내합니다.'
+      ]
+    },
+    {
+      heading: '도구를 사용할 때',
+      paragraphs: [
+        '가상 카드깡, 덱 빌더와 수익률 계산 결과는 실제 구매 결과나 수익을 보장하지 않습니다. 각 도구의 사용 가이드에서 입력 기준과 결과에 포함되지 않는 항목을 먼저 확인할 수 있습니다.'
       ]
     }
   ],
@@ -1622,6 +1635,9 @@ function createServerPageContent(pathname, seo) {
     })
     .join('');
   const paragraphs = content.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
+  const editorialMeta = seo.editor || seo.reviewedAt
+    ? `<p class="server-page-meta">${escapeHtml([seo.editor, seo.reviewedAt ? `최종 검수 ${seo.reviewedAt}` : ''].filter(Boolean).join(' · '))}</p>`
+    : '';
   const detailSections = details.map((section) => {
     const sectionParagraphs = (section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
     const items = (section.items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
@@ -1634,6 +1650,7 @@ function createServerPageContent(pathname, seo) {
 
   return `<main class="server-page-content">
       <h1>${escapeHtml(content.heading)}</h1>
+      ${editorialMeta}
       ${paragraphs}
       ${detailSections}
       <nav aria-label="${isJapanese ? '関連ページ' : '관련 페이지'}"><ul>${links}</ul></nav>
@@ -1795,9 +1812,12 @@ function createJsonLd(pathname, seo) {
 
   if (schemaType === 'Article') {
     pageNode.headline = seo.title;
-    pageNode.author = { '@type': 'Organization', name: 'Card Pone' };
+    pageNode.author = { '@type': 'Organization', name: seo.editor || 'Card Pone' };
     pageNode.publisher = { '@id': `${SITE_ORIGIN}/#organization` };
   }
+
+  if (seo.editor) pageNode.editor = { '@type': 'Organization', name: seo.editor };
+  if (seo.reviewedAt) pageNode.dateModified = seo.reviewedAt;
 
   if (schemaType === 'Product') {
     pageNode.brand = { '@type': 'Brand', name: 'ONE PIECE Card Game' };
@@ -2008,7 +2028,7 @@ function getRobotsDirective(pathname, seo) {
   const basePath = isJapanesePath(normalized) ? getJapaneseBasePath(normalized) : normalized;
   const directSeriesSlug = basePath.startsWith('/cards/') ? basePath.slice('/cards/'.length) : '';
   const isGeneratedSeries = basePath.startsWith('/cards/series/')
-    || (isJapanesePath(normalized) && directSeriesSlug && !directSeriesSlug.includes('/'));
+    || (directSeriesSlug && !['kr', 'jp'].includes(directSeriesSlug) && !directSeriesSlug.includes('/'));
   const isGeneratedMarketDetail = /^\/prices\/(?:card|product|box)\//.test(basePath);
   const isAffiliateListing = ['/news/preorder', '/news/oripa', '/news/supplies'].includes(basePath);
   if (isGeneratedSeries || isGeneratedMarketDetail || THIN_REGION_PATHS.has(basePath)
@@ -2019,6 +2039,7 @@ function getRobotsDirective(pathname, seo) {
 }
 
 export function applySeo(html, pathname, seo) {
+  const hasPrerenderedContent = /<div id="root">\s*<main class="server-page-content">/i.test(html);
   const canonicalUrl = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
   const isJapanese = isJapanesePath(normalized);
@@ -2061,16 +2082,18 @@ export function applySeo(html, pathname, seo) {
   nextHtml = nextHtml.replace('</head>', `    ${hreflangLinks}\n  </head>`);
 
   const pageJsonLd = `<script type="application/ld+json" id="optcg-server-page-jsonld">${createJsonLd(pathname, seo)}</script>`;
-  if (nextHtml.includes('id="optcg-server-page-jsonld"')) {
+  if (nextHtml.includes('id="optcg-server-page-jsonld"') && !hasPrerenderedContent) {
     nextHtml = nextHtml.replace(/<script type="application\/ld\+json" id="optcg-server-page-jsonld">.*?<\/script>/is, pageJsonLd);
-  } else {
+  } else if (!nextHtml.includes('id="optcg-server-page-jsonld"')) {
     nextHtml = nextHtml.replace('</head>', `    ${pageJsonLd}\n  </head>`);
   }
-  const serverContent = createServerPageContent(pathname, seo);
-  nextHtml = nextHtml.replace(
-    /<div id="root">(?:<main class="server-page-content">.*?<\/main>)?<\/div>/is,
-    `<div id="root">${serverContent}</div>`
-  );
+  if (!hasPrerenderedContent) {
+    const serverContent = createServerPageContent(pathname, seo);
+    nextHtml = nextHtml.replace(
+      /<div id="root">(?:<main class="server-page-content">.*?<\/main>)?<\/div>/is,
+      `<div id="root">${serverContent}</div>`
+    );
+  }
   return nextHtml;
 }
 
