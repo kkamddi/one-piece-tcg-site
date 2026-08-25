@@ -7006,7 +7006,6 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
-  const isGuideHub = initialPath === '/guide';
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = initialPath === '/guide' || initialPath === '/faq'
     ? 'guide'
@@ -7234,46 +7233,8 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             <button type="button" className={guideQaMode === 'qa' ? 'is-active' : ''} onClick={() => setGuideQaMode('qa')}>Q&A</button>
           </div>
         </div>
-        {guideQaMode === 'guide' ? (
-          <>
-          {isGuideHub ? <RenewGuideHub /> : null}
-          {!isGuideHub ? (
-          <>
-          <a className="renew-guide-feature-link" href="/guide/card-storage" onClick={() => rememberCurrentAppView()}>
-            <span>보관 가이드</span>
-            <strong>원피스카드 보관 방법</strong>
-            <small>슬리브, 탑로더, 카드세이버, 바인더 보관 기준을 확인합니다.</small>
-          </a>
-          <a className="renew-guide-feature-link" href="/guide/shops" onClick={() => rememberCurrentAppView()}>
-            <span>구매처 가이드</span>
-            <strong>원피스카드 사는 방법</strong>
-            <small>공인점포, 취급점포, 지역별 검색과 내 주변 구매처 찾는 방법을 확인합니다.</small>
-          </a>
-          <a className="renew-guide-feature-link" href="/guide/card-price" onClick={() => rememberCurrentAppView()}>
-            <span>시세 가이드</span>
-            <strong>원피스카드 시세 보는 방법</strong>
-            <small>카드 가격, 박스 가격, 최근 거래 기록과 기간별 그래프를 확인하는 방법을 정리했습니다.</small>
-          </a>
-          <a className="renew-guide-feature-link" href="/guide/card-catalog" onClick={() => rememberCurrentAppView()}>
-            <span>도감 가이드</span>
-            <strong>원피스카드 도감 사용법</strong>
-            <small>한글판, 일본판, OP/EB/ST/PR 시리즈와 일련번호 검색 방법을 확인합니다.</small>
-          </a>
-          <a className="renew-guide-feature-link" href="/guide/box-recommendation" onClick={() => rememberCurrentAppView()}>
-            <span>박스 구매 가이드</span>
-            <strong>목적별 카드 박스 추천</strong>
-            <small>박스 현재가와 수록 카드 Single 시세를 기준으로 최고가, 안정성, 유효 히트를 비교합니다.</small>
-          </a>
-          <a className="renew-guide-feature-link" href="/about" onClick={() => rememberCurrentAppView()}>
-            <span>CARD PONE</span>
-            <strong>서비스 안내</strong>
-            <small>제공 기능과 문의 방법을 확인합니다.</small>
-          </a>
-          </>
-          ) : null}
-          </>
-        ) : null}
-        {(!isGuideHub || guideQaMode === 'qa') ? (
+        {guideQaMode === 'guide' ? <RenewGuideHub /> : null}
+        {guideQaMode === 'qa' ? (
         <div className="renew-guide-qa-grid">
           {visibleGuideQaGroups.map((group) => (
             <section key={group.id} className="renew-guide-qa-group">
@@ -7429,6 +7390,11 @@ function getBoxSeriesPriceInsight(item) {
   };
 }
 
+function getPrintedCardSeries(card) {
+  const cardNo = String(card?.cardNo || card?.id || '').replace(/^[A-Z]+::/, '');
+  return cardNo.match(/^(?:OP|EB|ST|PRB)\d{2}/i)?.[0]?.toUpperCase() || '';
+}
+
 function getBoxRecommendationCategory(pathname = '') {
   return BOX_RECOMMENDATION_CATEGORIES.find((category) => category.path === pathname) || null;
 }
@@ -7489,9 +7455,10 @@ function RenewBoxRecommendationGuide() {
     Promise.all([
       import('./data/cards.json').then((module) => Array.isArray(module.default) ? module.default : []),
       loadCardMarketLinks(),
+      import('./data/market-cards.js').then((module) => Array.isArray(module.default) ? module.default : []),
       fetch(import.meta.env.DEV ? '/__prod_api/api/market?summary=latest&v=2' : '/api/market?summary=latest&v=2')
         .then((response) => response.ok ? response.json() : null)
-    ]).then(([cards, links, summary]) => {
+    ]).then(([cards, links, marketCards, summary]) => {
       if (cancelled) return;
       const cardsById = new Map(cards.map((card) => [card.id, card]));
       const latestByApparelId = new Map(
@@ -7499,14 +7466,30 @@ function RenewBoxRecommendationGuide() {
           .filter((item) => item?.apparelId)
           .map((item) => [String(item.apparelId), item])
       );
+      const marketCardByApparelId = new Map(
+        marketCards
+          .filter((item) => item?.locale === 'JP' && item?.apparelId)
+          .map((item) => [String(item.apparelId), item])
+      );
       const pricedCardById = new Map();
       (links || []).forEach((link) => {
         if (link?.status !== 'approved' || !link.cardId || !link.apparelId || pricedCardById.has(link.cardId)) return;
         const latest = latestByApparelId.get(String(link.apparelId));
-        const price = Number(latest?.aPriceJpy || 0);
+        const livePrice = Number(latest?.aPriceJpy || 0);
+        const marketCard = marketCardByApparelId.get(String(link.apparelId));
+        const snapshotPriceUsd = Number(marketCard?.minPrice || 0);
+        const snapshotPrice = Number(marketCard?.listingCount || 0) > 0 && snapshotPriceUsd > 0
+          ? Math.round(snapshotPriceUsd * MARKET_USD_TO_JPY)
+          : 0;
+        const price = livePrice || snapshotPrice;
         const card = cardsById.get(link.cardId);
         if (!card || price <= 0) return;
-        pricedCardById.set(link.cardId, { card, price, apparelId: link.apparelId });
+        pricedCardById.set(link.cardId, {
+          card,
+          price,
+          apparelId: link.apparelId,
+          priceSource: livePrice > 0 ? 'latest' : 'listing'
+        });
       });
 
       const analyses = boxMarketItems
@@ -7744,6 +7727,9 @@ function RenewBoxRecommendationGuide() {
                       <div>
                         <small>{topCard.card.cardNo || topCard.card.id} · {topCard.card.rarity || '-'}</small>
                         <strong>{topCard.card.name || topCard.card.koName || topCard.card.id}</strong>
+                        {getPrintedCardSeries(topCard.card) && getPrintedCardSeries(topCard.card) !== item.seriesId
+                          ? <em>{series.code} 재록 수록</em>
+                          : null}
                         <b>{formatYen(topCard.price)}</b>
                       </div>
                     </a>
