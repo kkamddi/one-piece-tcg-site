@@ -2821,6 +2821,274 @@
   padding: 24px 26px;
 }
 
+.renew-home-movers {
+  width: 100%;
+  padding: 22px;
+}
+
+.renew-home-calendar {
+  width: 100%;
+  padding: 22px;
+}
+
+.renew-home-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 0;
+  padding: 0 0 12px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-home-calendar-head span,
+.renew-home-calendar-list span {
+  display: grid;
+  min-width: 0;
+}
+
+.renew-home-calendar-head span {
+  gap: 3px;
+}
+
+.renew-home-calendar-head small {
+  color: #cf4d35;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.renew-home-calendar-head strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.renew-home-calendar-head b {
+  font-size: 18px;
+}
+
+.renew-home-calendar-list {
+  display: grid;
+  gap: 5px;
+}
+
+.renew-home-calendar-list button {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 10px;
+  padding: 7px 9px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.55);
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-home-calendar-list button:hover {
+  border-color: rgba(207, 77, 53, 0.32);
+  background: rgba(207, 77, 53, 0.045);
+}
+
+.renew-home-calendar-list time {
+  color: #cf4d35;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.renew-home-calendar-list span {
+  gap: 2px;
+}
+
+.renew-home-calendar-list strong,
+.renew-home-calendar-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-home-calendar-list strong {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.renew-home-calendar-list small {
+  color: #747a84;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.renew-home-calendar-list > p {
+  display: grid;
+  min-height: 96px;
+  margin: 0;
+  place-items: center;
+  color: #8a9099;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.renew-home-movers-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.renew-home-movers-head > div:first-child {
+  min-width: 0;
+}
+
+.renew-home-movers-head small,
+.renew-home-movers-note {
+  color: #747a84;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.renew-home-movers-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f2f3f5;
+}
+
+.renew-home-movers-tabs button {
+  min-height: 28px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #626872;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.renew-home-movers-tabs button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-home-movers-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.renew-home-movers-group {
+  min-width: 0;
+}
+
+.renew-home-movers-group h3 {
+  margin: 0 0 7px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-home-movers-group.is-gainers h3,
+.renew-home-movers-group.is-gainers em {
+  color: #cf4d35;
+}
+
+.renew-home-movers-group.is-losers h3,
+.renew-home-movers-group.is-losers em {
+  color: #2563d9;
+}
+
+.renew-home-movers-list {
+  display: grid;
+  gap: 3px;
+}
+
+.renew-home-movers-list button {
+  display: grid;
+  grid-template-columns: 16px 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  padding: 3px 5px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-home-movers-list button:hover {
+  background: rgba(23, 25, 28, 0.045);
+}
+
+.renew-home-movers-list button > b {
+  color: #8a9099;
+  font-size: 10px;
+  text-align: center;
+}
+
+.renew-home-movers-list img {
+  width: 26px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: #f1f2f4;
+}
+
+.renew-home-movers-list span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.renew-home-movers-list strong,
+.renew-home-movers-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-home-movers-list strong {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.renew-home-movers-list small {
+  color: #747a84;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.renew-home-movers-list em {
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.renew-home-movers-empty {
+  display: grid;
+  min-height: 64px;
+  margin: 0;
+  place-items: center;
+  color: #8a9099;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.renew-home-movers-note {
+  margin: 12px 0 0;
+}
+
 .renew-home-news-list {
   display: grid;
   gap: 9px;
@@ -5985,6 +6253,10 @@
 }
 
 @media (max-width: 720px) {
+  .renew-home-movers-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .renew-box-guide {
     gap: 22px;
   }
@@ -17844,6 +18116,53 @@ button.renew-deck-entry:focus-visible {
   color: #cbd5e1;
 }
 
+.renew-app.is-dark .renew-home-movers-tabs {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.renew-app.is-dark .renew-home-movers-tabs button {
+  color: #cbd5e1;
+}
+
+.renew-app.is-dark .renew-home-movers-tabs button.is-active {
+  color: #17191c;
+  background: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-home-movers-list button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.renew-app.is-dark .renew-home-movers-list strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-home-movers-head small,
+.renew-app.is-dark .renew-home-movers-list small,
+.renew-app.is-dark .renew-home-movers-note,
+.renew-app.is-dark .renew-home-movers-empty {
+  color: #aeb6c2;
+}
+
+.renew-app.is-dark .renew-home-calendar-list button {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.renew-app.is-dark .renew-home-calendar-list button:hover {
+  border-color: rgba(224, 100, 76, 0.4);
+  background: rgba(224, 100, 76, 0.08);
+}
+
+.renew-app.is-dark .renew-home-calendar-list strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-home-calendar-list small,
+.renew-app.is-dark .renew-home-calendar-list > p {
+  color: #aeb6c2;
+}
+
 .renew-app.is-dark .renew-home-guide-links {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(17, 21, 29, 0.78);
@@ -20072,6 +20391,18 @@ button.renew-deck-entry:focus-visible {
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
     margin-top: 34px;
+  }
+
+  .renew-dashboard .renew-value {
+    order: 1;
+  }
+
+  .renew-dashboard .renew-home-movers {
+    order: 2;
+  }
+
+  .renew-dashboard .renew-home-calendar {
+    order: 3;
   }
 
   .renew-market-chart-box svg {

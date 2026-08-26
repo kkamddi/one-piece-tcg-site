@@ -17,6 +17,7 @@ const SNAPSHOT_LIMIT = 180;
 const LISTING_SNAPSHOT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const MARKET_LATEST_SNAPSHOT_MAX_AGE_MS = 13 * 60 * 60 * 1000;
 const MARKET_HISTORY_CACHE_MAX_AGE_MS = 13 * 60 * 60 * 1000;
+const MARKET_DAILY_MOVERS_CACHE_MAX_AGE_MS = 2 * 60 * 60 * 1000;
 const MARKET_DATA_SOURCE = String(process.env.MARKET_DATA_SOURCE || '').trim().toLowerCase();
 const D1_API_TOKEN = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const D1_ACCOUNT_ID = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
@@ -80,6 +81,14 @@ function todayDateKey(value = Date.now()) {
 
 function dateKeyDaysAgo(days) {
   return new Date(Date.now() - Number(days || 0) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function kstDateKey(value = Date.now()) {
+  return new Date(Number(value || Date.now()) + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function previousDateKey(dateKey) {
+  return new Date(Date.parse(`${dateKey}T00:00:00Z`) - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 function listingSnapshotBucket(value = Date.now()) {
@@ -1056,6 +1065,98 @@ function medianNumber(values = []) {
     : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
 }
 
+async function readDailyMarketMovers() {
+  const date = kstDateKey();
+  const previousDate = previousDateKey(date);
+  const empty = { date, previousDate, conditions: { a: { gainers: [], losers: [] }, psa10: { gainers: [], losers: [] } } };
+  if (!shouldReadD1Market()) return empty;
+
+  const rows = await readThroughR2Json(
+    `public-data/market-daily-movers-v1/${date}.json`,
+    MARKET_DAILY_MOVERS_CACHE_MAX_AGE_MS,
+    () => queryD1(
+      `with approved_links as (
+         select source, apparel_id, min(card_id) as card_id
+         from card_market_links
+         where source = 'snkrdunk' and status = 'approved'
+         group by source, apparel_id
+       )
+       select d.apparel_id,
+              d.condition_key,
+              d.point_date,
+              d.median_price_jpy,
+              d.trade_count,
+              c.id as card_id,
+              c.locale,
+              c.card_no,
+              c.name as card_name,
+              c.image_url
+       from approved_links l
+       join market_chart_daily_points d
+         on d.source = l.source
+        and d.apparel_id = l.apparel_id
+        and d.condition_key in ('a', 'psa10')
+        and d.point_date in (?, ?)
+        and d.trade_count > 0
+       join cards c on c.id = l.card_id
+       order by d.condition_key, d.apparel_id, d.point_date`,
+      [previousDate, date]
+    )
+  );
+
+  const grouped = new Map();
+  for (const row of rows || []) {
+    const condition = conditionKey(row.condition_key);
+    const apparelId = Number(row.apparel_id || 0);
+    const price = Number(row.median_price_jpy || 0);
+    if (!condition || !apparelId || price <= 0) continue;
+    const key = `${condition}:${apparelId}`;
+    const item = grouped.get(key) || {
+      apparelId,
+      condition,
+      cardId: row.card_id || '',
+      locale: row.locale || 'JP',
+      code: row.card_no || '',
+      name: row.card_name || row.card_no || '',
+      imageUrl: row.image_url || '',
+      today: null,
+      previous: null
+    };
+    const point = { price: Math.round(price), tradeCount: Number(row.trade_count || 0) };
+    if (row.point_date === date) item.today = point;
+    if (row.point_date === previousDate) item.previous = point;
+    grouped.set(key, item);
+  }
+
+  const conditions = empty.conditions;
+  for (const item of grouped.values()) {
+    if (!item.today || !item.previous || item.previous.price <= 0) continue;
+    const changePercent = ((item.today.price - item.previous.price) / item.previous.price) * 100;
+    if (!Number.isFinite(changePercent) || changePercent === 0) continue;
+    const mover = {
+      apparelId: item.apparelId,
+      cardId: item.cardId,
+      locale: item.locale,
+      code: item.code,
+      name: item.name,
+      imageUrl: item.imageUrl,
+      priceJpy: item.today.price,
+      previousPriceJpy: item.previous.price,
+      tradeCount: item.today.tradeCount,
+      changePercent: Number(changePercent.toFixed(2))
+    };
+    if (changePercent > 0) conditions[item.condition].gainers.push(mover);
+    else conditions[item.condition].losers.push(mover);
+  }
+
+  for (const bucket of Object.values(conditions)) {
+    bucket.gainers.sort((a, b) => b.changePercent - a.changePercent).splice(5);
+    bucket.losers.sort((a, b) => a.changePercent - b.changePercent).splice(5);
+  }
+
+  return { date, previousDate, conditions };
+}
+
 function aggregateDailyMedian(points = []) {
   const dayMs = 24 * 60 * 60 * 1000;
   const kstOffsetMs = 9 * 60 * 60 * 1000;
@@ -1316,6 +1417,7 @@ async function findStoredMarketCandidates({ apparelId, code }) {
 async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
   const summaryMode = String(params.get('summary') || '').toLowerCase();
+  if (summaryMode === 'movers') return readDailyMarketMovers();
   if (summaryMode === 'latest' || summaryMode === 'portfolio') {
     const requestedApparelIds = summaryMode === 'portfolio'
       ? [...new Set(String(params.get('apparelIds') || '')
@@ -1415,8 +1517,9 @@ export default async function handler(request, response) {
   const params = normalizeParams(request.query);
   const summaryMode = String(params.get('summary') || '').toLowerCase();
   const isLatestSummary = summaryMode === 'latest';
-  const cacheSeconds = isLatestSummary ? 900 : 60;
-  const staleSeconds = isLatestSummary ? 86400 : 60;
+  const isMoversSummary = summaryMode === 'movers';
+  const cacheSeconds = isLatestSummary || isMoversSummary ? 900 : 60;
+  const staleSeconds = isLatestSummary || isMoversSummary ? 86400 : 60;
   response.setHeader(
     'Cache-Control',
     `public, max-age=60, s-maxage=${cacheSeconds}, stale-while-revalidate=${staleSeconds}`

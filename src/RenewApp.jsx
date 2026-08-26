@@ -5731,7 +5731,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, uiLang }) {
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
   const [marketTotalJpy, setMarketTotalJpy] = useState(null);
   const [marketCards, setMarketCards] = useState([]);
@@ -5747,6 +5747,9 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const [attendance, setAttendance] = useState(null);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceNotice, setAttendanceNotice] = useState('');
+  const [moversCondition, setMoversCondition] = useState('a');
+  const [dailyMovers, setDailyMovers] = useState(null);
+  const [dailyMoversLoading, setDailyMoversLoading] = useState(true);
   const ownedCount = Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds.length : 0;
   const valuationEntries = (Array.isArray(portfolioHoldings) ? portfolioHoldings : []).map((item) => [item.id, item]);
   const totalJpy = marketTotalJpy ?? 0;
@@ -5761,6 +5764,30 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const portfolioProfitJpy = portfolioCurrentForCostJpy - portfolioCostJpy;
   const portfolioReturnPercent = portfolioCostJpy > 0 ? (portfolioProfitJpy / portfolioCostJpy) * 100 : null;
   const costCards = marketCards.filter((item) => item.costJpy > 0);
+  const upcomingCalendarEvents = useMemo(() => {
+    const today = getCalendarTodayKey();
+    return buildCalendarEvents(resolvedBoxMarketItems)
+      .filter((event) => (event.endDate || event.date) >= today)
+      .slice(0, 3);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/market?summary=movers')
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        if (!cancelled) setDailyMovers(payload || null);
+      })
+      .catch(() => {
+        if (!cancelled) setDailyMovers(null);
+      })
+      .finally(() => {
+        if (!cancelled) setDailyMoversLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -5994,23 +6021,26 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       </section>
 
       <section className="renew-dashboard" aria-label={getLocaleText(uiLang, '메인 현황', 'Site overview', 'サイト概要')}>
-        <button type="button" className="renew-float-card renew-progress" onClick={() => setProgressOpen(true)}>
-          <div className="renew-card-title">{t('progress')}</div>
-          {[
-            ['KR', getLocaleText(uiLang, '한글판', 'Korean', '韓国版')],
-            ['JP', getLocaleText(uiLang, '일본판', 'Japanese', '日本版')]
-          ].map(([locale, label]) => (
-            <div key={locale} className="renew-progress-category-row">
-              <div>
-                <strong>{label}</strong>
-                <span>{progressData[locale].owned} / {progressData[locale].total}</span>
-              </div>
-              <div className="renew-progress-track"><i style={{ width: `${progressData[locale].percent}%` }} /></div>
-              <b>{stateLoading ? '...' : formatPercent(progressData[locale].percent)}</b>
-              <em>+</em>
-            </div>
-          ))}
-        </button>
+        <article className="renew-float-card renew-home-calendar">
+          <button type="button" className="renew-home-calendar-head" onClick={() => onOpenCalendar?.()}>
+            <span>
+              <small>SCHEDULE</small>
+              <strong>{getLocaleText(uiLang, '캘린더', 'Calendar', 'カレンダー')}</strong>
+            </span>
+            <b aria-hidden="true">→</b>
+          </button>
+          <div className="renew-home-calendar-list">
+            {upcomingCalendarEvents.length ? upcomingCalendarEvents.map((event) => (
+              <button key={event.id} type="button" onClick={() => onOpenCalendar?.()}>
+                <time dateTime={event.date}>{event.date.slice(5).replace('-', '.')}</time>
+                <span>
+                  <strong>{getCalendarDisplayTitle(event, uiLang)}</strong>
+                  <small>{event.locale} · {event.kind === 'release' ? getLocaleText(uiLang, '발매', 'Release', '発売') : getLocaleText(uiLang, '공식 일정', 'Official schedule', '公式日程')}</small>
+                </span>
+              </button>
+            )) : <p>{getLocaleText(uiLang, '예정된 일정이 없습니다.', 'No upcoming schedules.', '今後の予定はありません。')}</p>}
+          </div>
+        </article>
 
         <article className="renew-float-card renew-value">
           <div className="renew-value-head">
@@ -6076,19 +6106,53 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
         </article>
 
-        <article className="renew-float-card renew-home-news">
-          <div className="renew-card-title">{getLocaleText(uiLang, '새 소식', 'Latest news', '最新情報')}</div>
-          <div className="renew-home-news-list">
-            {homeNewsLinks.map((item, index) => (
-              <button key={`${item.query}-${item.description}-${index}`} type="button" onClick={() => onNavigateNews?.(item.query)}>
-                <strong>{item.label}</strong>
-                <span>{item.description}</span>
-              </button>
-            ))}
+        <article className="renew-float-card renew-home-movers">
+          <div className="renew-home-movers-head">
+            <div>
+              <div className="renew-card-title">{getLocaleText(uiLang, '오늘의 시세 움직임', 'Today\'s market moves', '本日の価格変動')}</div>
+              <small>{dailyMovers?.date || getLocaleText(uiLang, 'KST 기준', 'KST', '韓国時間基準')}</small>
+            </div>
+            <div className="renew-home-movers-tabs" aria-label={getLocaleText(uiLang, '등급 선택', 'Select condition', '状態を選択')}>
+              <button type="button" className={moversCondition === 'a' ? 'is-active' : ''} onClick={() => setMoversCondition('a')}>Single</button>
+              <button type="button" className={moversCondition === 'psa10' ? 'is-active' : ''} onClick={() => setMoversCondition('psa10')}>PSA10</button>
+            </div>
           </div>
-          <button type="button" className="renew-home-news-more" onClick={() => onNavigateNews?.('section=all')}>
-            {getLocaleText(uiLang, '전체 소식 보기', 'View all news', 'すべてのお知らせを見る')}
-          </button>
+          <div className="renew-home-movers-columns">
+            {[
+              ['gainers', getLocaleText(uiLang, '상승 TOP 5', 'Top gainers', '上昇 TOP 5')],
+              ['losers', getLocaleText(uiLang, '하락 TOP 5', 'Top losers', '下落 TOP 5')]
+            ].map(([key, label]) => {
+              const items = dailyMovers?.conditions?.[moversCondition]?.[key] || [];
+              return (
+                <section key={key} className={`renew-home-movers-group is-${key}`}>
+                  <h3>{label}</h3>
+                  {dailyMoversLoading ? <p className="renew-home-movers-empty">...</p> : items.length ? (
+                    <div className="renew-home-movers-list">
+                      {items.map((item, index) => (
+                        <button key={`${item.apparelId}-${key}`} type="button" onClick={() => onOpenPrices?.(item)}>
+                          <b>{index + 1}</b>
+                          <img
+                            src={getCardThumbnailSrc({ id: item.cardId, locale: item.locale, imageUrl: item.imageUrl })}
+                            alt=""
+                            loading="lazy"
+                            onError={placeholderImage}
+                          />
+                          <span>
+                            <strong>{item.code || item.name}</strong>
+                            <small>{isJp ? formatYen(item.priceJpy) : formatWonFromYen(item.priceJpy)} · {item.tradeCount}{getLocaleText(uiLang, '건', ' trades', '件')}</small>
+                          </span>
+                          <em>{item.changePercent > 0 ? '+' : ''}{item.changePercent.toFixed(2)}%</em>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="renew-home-movers-empty">{getLocaleText(uiLang, '비교 가능한 거래 없음', 'No comparable trades', '比較可能な取引なし')}</p>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+          <p className="renew-home-movers-note">{getLocaleText(uiLang, '오늘과 전일 모두 거래된 카드의 일별 중앙값 기준', 'Daily median for cards traded on both days', '当日・前日とも取引があるカードの日次中央値')}</p>
         </article>
       </section>
       {!isJp ? <button type="button" className="renew-home-updates-mini" onClick={() => setUpdatesOpen(true)}>
@@ -15347,7 +15411,21 @@ export default function RenewApp() {
             setMarketInitialCardId('');
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
-          onOpenPrices={() => navigatePage('prices')}
+          onOpenPrices={(item) => {
+            if (!item) {
+              navigatePage('prices');
+              return;
+            }
+            setMarketInitialCode(item.code || '');
+            setMarketInitialApparelId(item.apparelId || null);
+            setMarketInitialCardId(item.cardId || '');
+            const query = new URLSearchParams();
+            if (item.code) query.set('code', item.code);
+            if (item.apparelId) query.set('apparelId', String(item.apparelId));
+            if (item.cardId) query.set('cardId', item.cardId);
+            navigatePage('prices', { query: query.toString() });
+          }}
+          onOpenCalendar={() => navigatePage('calendar')}
         />
       ) : activePage === 'adminAnalytics' ? (
         <RenewAdminAnalytics
