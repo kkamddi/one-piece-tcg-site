@@ -7116,10 +7116,11 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const supplyItems = COUPANG_PARTNER_ITEMS
     .filter((item) => supplyFilter === 'all' || item.category === supplyFilter);
   const visibleLinkGroups = (isJp ? [] : NEWS_LINK_GROUPS)
-    .filter((item) => newsFilter === 'all' || item.id === newsFilter);
-  const showNotice = isJp || newsFilter === 'all' || newsFilter === 'notice';
-  const showGuide = !isJp && (newsFilter === 'all' || newsFilter === 'guide');
-  const showSupplies = !isJp && (newsFilter === 'all' || newsFilter === 'supplies');
+    .filter((item) => item.id === newsFilter);
+  const showOverview = !isJp && newsFilter === 'all';
+  const showNotice = isJp || newsFilter === 'notice';
+  const showGuide = !isJp && newsFilter === 'guide';
+  const showSupplies = !isJp && newsFilter === 'supplies';
   const showTopSection = showNotice || visibleLinkGroups.length > 0;
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
 
@@ -7132,14 +7133,6 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   }, [newsFilter, noticeLocale, supplyFilter, guideQaMode]);
   return (
     <main className="renew-main renew-news-main">
-      <a className="renew-news-calendar-link" href={getLocalizedPagePath('calendar', uiLang)} onClick={(event) => { event.preventDefault(); onOpenCalendar?.(); }}>
-        <span>SCHEDULE</span>
-        <div>
-          <strong>{uiLang === 'JP' ? 'ONE PIECE CARD GAME カレンダー' : uiLang === 'EN' ? 'ONE PIECE Card Game Calendar' : '원피스카드 캘린더'}</strong>
-          <small>{uiLang === 'JP' ? '発売日と公式イベント告知を月別に確認できます。' : uiLang === 'EN' ? 'Check releases and official event notices by month.' : '발매일과 공식 이벤트 공지를 월별로 확인하세요.'}</small>
-        </div>
-        <b aria-hidden="true">›</b>
-      </a>
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.map((item) => (
           <button
@@ -7152,6 +7145,35 @@ function RenewNews({ uiLang, onOpenCalendar }) {
           </button>
         ))}
       </div> : null}
+
+      {showOverview ? (
+        <section className="renew-news-hub" aria-label="정보 바로가기">
+          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('notice')}>
+            <span>NEWS</span>
+            <strong>공식 소식</strong>
+            <small>{officialTopics[0]?.titleKo || officialTopics[0]?.title || '최근 공식 공지를 확인하세요.'}</small>
+            <b aria-hidden="true">›</b>
+          </button>
+          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('guide')}>
+            <span>GUIDE</span>
+            <strong>이용 가이드</strong>
+            <small>도감, 시세, 보관과 실험실 도구 사용법</small>
+            <b aria-hidden="true">›</b>
+          </button>
+          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('preorder')}>
+            <span>PREORDER</span>
+            <strong>사전예약</strong>
+            <small>{NEWS_LINK_GROUPS[0]?.links?.[0]?.label || '진행 중인 예약과 응모 정보'}</small>
+            <b aria-hidden="true">›</b>
+          </button>
+          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('supplies')}>
+            <span>SUPPLIES</span>
+            <strong>카드용품</strong>
+            <small>슬리브, 탑로더, 케이스와 보관함</small>
+            <b aria-hidden="true">›</b>
+          </button>
+        </section>
+      ) : null}
 
       {showTopSection ? (
         <div className={`renew-news-overview ${newsFilter !== 'all' ? 'is-filtered' : ''}`}>

@@ -7437,6 +7437,70 @@
   grid-template-columns: 1fr;
 }
 
+.renew-news-hub {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.renew-news-hub-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 16px;
+  min-height: 132px;
+  padding: 20px 54px 20px 22px;
+  border: 1px solid rgba(23, 25, 28, 0.11);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #17191c;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.renew-news-hub-card:hover {
+  border-color: rgba(201, 77, 53, 0.48);
+  box-shadow: 0 12px 28px rgba(23, 25, 28, 0.07);
+  transform: translateY(-2px);
+}
+
+.renew-news-hub-card span,
+.renew-news-hub-card strong,
+.renew-news-hub-card small {
+  grid-column: 1;
+}
+
+.renew-news-hub-card span {
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.renew-news-hub-card strong {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.renew-news-hub-card small {
+  overflow: hidden;
+  color: #687180;
+  font-size: 13px;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-news-hub-card b {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  font-size: 25px;
+  font-weight: 500;
+  transform: translateY(-50%);
+}
+
 .renew-news-card,
 .renew-news-link-card {
   border: 1px solid rgba(23, 25, 28, 0.1);
@@ -18347,6 +18411,16 @@ button.renew-deck-entry:focus-visible {
   background: rgba(17, 21, 29, 0.82);
 }
 
+.renew-app.is-dark .renew-news-hub-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.82);
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-hub-card small {
+  color: rgba(245, 242, 236, 0.66);
+}
+
 .renew-app.is-dark .renew-news-card-head h2,
 .renew-app.is-dark .renew-news-link-card h2,
 .renew-app.is-dark .renew-news-supplies-panel .renew-section-head h2,
@@ -19946,6 +20020,25 @@ button.renew-deck-entry:focus-visible {
   .renew-news-overview,
   .renew-news-supply-wrap {
     padding: 14px 0 18px;
+  }
+
+  .renew-news-hub {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .renew-news-hub-card {
+    min-height: 104px;
+    padding: 16px 48px 16px 17px;
+    border-radius: 16px;
+  }
+
+  .renew-news-hub-card strong {
+    font-size: 18px;
+  }
+
+  .renew-news-hub-card b {
+    right: 18px;
   }
 
   .renew-guide-qa-grid {
