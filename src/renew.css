@@ -4183,9 +4183,16 @@
   display: none;
 }
 
-.renew-modal-more-actions {
+.renew-card-modal-info .renew-modal-more-actions {
   position: relative;
+  width: 44px;
+  height: 44px;
   min-width: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
 }
 
 .renew-modal-more-actions > summary {
@@ -4210,6 +4217,10 @@
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 14px 30px rgba(23, 25, 28, 0.14);
+}
+
+.renew-card-modal-info .renew-modal-more-actions .renew-modal-more-menu {
+  margin-top: 0;
 }
 
 .renew-modal-actions .renew-modal-more-menu button,
@@ -4276,6 +4287,11 @@
 .renew-app.is-dark .renew-modal-more-menu {
   border-color: rgba(255, 255, 255, 0.14);
   background: #24272d;
+}
+
+.renew-app.is-dark .renew-card-modal-info .renew-modal-more-actions {
+  border: 0;
+  background: transparent;
 }
 
 .renew-app.is-dark .renew-modal-actions .renew-modal-more-menu button,
@@ -18975,6 +18991,11 @@ button.renew-deck-entry:focus-visible {
     min-width: 42px;
     height: 42px;
     min-height: 42px;
+  }
+
+  .renew-card-modal-info .renew-modal-more-actions {
+    width: 42px;
+    height: 42px;
   }
 
   .renew-modal-action-full {
