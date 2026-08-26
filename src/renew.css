@@ -2822,13 +2822,8 @@
 }
 
 .renew-home-movers {
-  align-self: stretch;
   width: 100%;
   padding: 22px;
-}
-
-.renew-dashboard .renew-value {
-  align-self: stretch;
 }
 
 .renew-home-calendar {

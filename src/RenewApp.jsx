@@ -6132,8 +6132,8 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
                 <h2>{conditionLabel}</h2>
                 <div className="renew-home-movers-columns">
                   {[
-                    ['gainers', getLocaleText(uiLang, '상승 TOP 5', 'Top gainers', '上昇 TOP 5')],
-                    ['losers', getLocaleText(uiLang, '하락 TOP 5', 'Top losers', '下落 TOP 5')]
+                    ['gainers', getLocaleText(uiLang, '상승 TOP 3', 'Top gainers', '上昇 TOP 3')],
+                    ['losers', getLocaleText(uiLang, '하락 TOP 3', 'Top losers', '下落 TOP 3')]
                   ].map(([key, label]) => {
                     const items = dailyMovers?.conditions?.[conditionKey]?.[key] || [];
                     return (
@@ -6141,7 +6141,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
                         <h3>{label}</h3>
                         {dailyMoversLoading ? <p className="renew-home-movers-empty">...</p> : items.length ? (
                           <div className="renew-home-movers-list">
-                            {items.map((item, index) => (
+                            {items.slice(0, 3).map((item, index) => (
                               <button key={`${conditionKey}-${item.apparelId}-${key}`} type="button" onClick={() => onOpenPrices?.(item)}>
                                 <b>{index + 1}</b>
                                 <img
