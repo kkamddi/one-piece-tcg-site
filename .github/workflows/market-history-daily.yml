@@ -28,8 +28,8 @@ on:
         required: false
         default: ""
   schedule:
-    # 22:30 KST. This avoids the existing market and index refresh windows.
-    - cron: "30 13 * * *"
+    # 09:00 KST.
+    - cron: "0 0 * * *"
 
 concurrency:
   group: daily-market-trading-history
