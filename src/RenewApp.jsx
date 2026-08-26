@@ -9068,18 +9068,44 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, onAddPo
             <summary>{t('effect')}</summary>
             <div>{card.effect || t('effectPending')}</div>
           </details>
-          <div className="renew-modal-actions">
-            <button type="button" onClick={() => onOpenMarket?.(card)}>{t('openMarket')}</button>
-            <button type="button" onClick={() => onAddPortfolio?.(card)}>+ {getLocaleText(uiLang, '포트폴리오 추가', 'Add to portfolio', 'ポートフォリオに追加')}</button>
-            {snkrdunkApparelId && !isJapaneseUi(uiLang) ? <button type="button" className="renew-alert-button" onClick={openPriceAlert}>{getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}</button> : null}
-            {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
-            {marketListingCount ? (
-              <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
-                {getLocaleText(uiLang, `관련 매물 ${marketListingCount}개 보기`, `View ${marketListingCount} related listings`, `関連出品 ${marketListingCount}件を見る`)}
+          <div className={`renew-modal-actions ${snkrdunkApparelId && !isJapaneseUi(uiLang) ? 'has-alert' : 'no-alert'}`}>
+            <button type="button" className="renew-modal-primary-action" onClick={() => onOpenMarket?.(card)}>
+              <span className="renew-modal-action-full">{getLocaleText(uiLang, '시세 보기', 'View prices', '相場を見る')}</span>
+              <span className="renew-modal-action-compact">{getLocaleText(uiLang, '시세', 'Prices', '相場')}</span>
+            </button>
+            <button type="button" className="renew-modal-portfolio-action" onClick={() => onAddPortfolio?.(card)}>
+              <span className="renew-modal-action-full">+ {getLocaleText(uiLang, '포트폴리오 추가', 'Add to portfolio', 'ポートフォリオに追加')}</span>
+              <span className="renew-modal-action-compact">+ {getLocaleText(uiLang, '포트폴리오', 'Portfolio', 'ポートフォリオ')}</span>
+            </button>
+            {snkrdunkApparelId && !isJapaneseUi(uiLang) ? (
+              <button
+                type="button"
+                className="renew-modal-icon-action renew-modal-alert-action"
+                onClick={openPriceAlert}
+                aria-label={getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}
+                title={getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}
+              >
+                <MobileNavIcon type="bell" />
               </button>
             ) : null}
-            <button type="button" onClick={() => onSearchSameName?.(card.name)}>{t('searchSameName')}</button>
-            {card.officialUrl ? <a href={card.officialUrl} target="_blank" rel="noreferrer">{t('officialInfo')}</a> : null}
+            <details className="renew-modal-more-actions">
+              <summary
+                aria-label={getLocaleText(uiLang, '더보기', 'More actions', 'その他')}
+                title={getLocaleText(uiLang, '더보기', 'More actions', 'その他')}
+              >
+                <span aria-hidden="true">⋮</span>
+              </summary>
+              <div className="renew-modal-more-menu">
+                {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
+                {marketListingCount ? (
+                  <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
+                    {getLocaleText(uiLang, `관련 매물 ${marketListingCount}개 보기`, `View ${marketListingCount} related listings`, `関連出品 ${marketListingCount}件を見る`)}
+                  </button>
+                ) : null}
+                <button type="button" onClick={() => onSearchSameName?.(card.name)}>{t('searchSameName')}</button>
+                {card.officialUrl ? <a href={card.officialUrl} target="_blank" rel="noreferrer">{t('officialInfo')}</a> : null}
+              </div>
+            </details>
           </div>
         </div>
       </div>
