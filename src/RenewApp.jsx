@@ -5775,25 +5775,55 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const costCards = marketCards.filter((item) => item.costJpy > 0);
   const upcomingCalendarEvents = useMemo(() => {
     const today = getCalendarTodayKey();
+    const weekCells = getCalendarWeekCells(today);
+    const weekStart = weekCells[0]?.key || today;
+    const weekEnd = weekCells[6]?.key || today;
     return buildCalendarEvents(resolvedBoxMarketItems)
-      .filter((event) => (event.endDate || event.date) >= today)
-      .slice(0, 3);
+      .filter((event) => event.date >= weekStart && event.date <= weekEnd);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/market?summary=movers')
-      .then((response) => response.ok ? response.json() : null)
-      .then((payload) => {
-        if (cancelled) return;
-        setDailyMovers(payload || null);
-      })
-      .catch(() => {
-        if (!cancelled) setDailyMovers(null);
-      })
-      .finally(() => {
-        if (!cancelled) setDailyMoversLoading(false);
-      });
+    const cacheKey = 'card-pone:daily-movers';
+    const readCachedMovers = () => {
+      try {
+        const cached = JSON.parse(window.localStorage.getItem(cacheKey) || 'null');
+        return cached?.conditions ? cached : null;
+      } catch {
+        return null;
+      }
+    };
+    const loadDailyMovers = async () => {
+      const cached = readCachedMovers();
+      if (cached && !cancelled) setDailyMovers(cached);
+
+      const requestUrls = [
+        '/api/market?summary=movers',
+        'https://www.optcgkorea.com/api/market?summary=movers'
+      ];
+      for (const url of requestUrls) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) continue;
+          const payload = await response.json();
+          if (!payload?.conditions) continue;
+          if (!cancelled) setDailyMovers(payload);
+          try {
+            window.localStorage.setItem(cacheKey, JSON.stringify(payload));
+          } catch {
+            // Private browsing can block local storage; live data still remains usable.
+          }
+          return;
+        } catch {
+          // Retry through the canonical production origin below.
+        }
+      }
+      if (!cancelled && !cached) setDailyMovers(null);
+    };
+
+    loadDailyMovers().finally(() => {
+      if (!cancelled) setDailyMoversLoading(false);
+    });
     return () => {
       cancelled = true;
     };
@@ -6035,7 +6065,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           <button type="button" className="renew-home-calendar-head" onClick={() => onOpenCalendar?.()}>
             <span>
               <small>SCHEDULE</small>
-              <strong>{getLocaleText(uiLang, '캘린더', 'Calendar', 'カレンダー')}</strong>
+              <strong>{getLocaleText(uiLang, '이번 주 일정', 'This week', '今週の予定')}</strong>
             </span>
             <b aria-hidden="true">→</b>
           </button>
@@ -6048,7 +6078,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
                   <small>{event.locale} · {event.kind === 'release' ? getLocaleText(uiLang, '발매', 'Release', '発売') : getLocaleText(uiLang, '공식 일정', 'Official schedule', '公式日程')}</small>
                 </span>
               </button>
-            )) : <p>{getLocaleText(uiLang, '예정된 일정이 없습니다.', 'No upcoming schedules.', '今後の予定はありません。')}</p>}
+            )) : <p>{getLocaleText(uiLang, '이번 주 일정이 없습니다.', 'No schedules this week.', '今週の予定はありません。')}</p>}
           </div>
         </article>
 
@@ -6881,14 +6911,9 @@ function RenewCalendar({ uiLang }) {
   const weekRangeLabel = weekCells.length
     ? `${new Intl.DateTimeFormat(dateLocale, { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[0].key}T00:00:00`))} - ${new Intl.DateTimeFormat(dateLocale, { month: 'short', day: 'numeric' }).format(new Date(`${weekCells[6].key}T00:00:00`))}`
     : '';
-  const mobileGroups = useMemo(() => {
-    const groups = new Map();
-    monthEvents.forEach((event) => {
-      const displayDate = getEventDisplayDate(event);
-      groups.set(displayDate, [...(groups.get(displayDate) || []), event]);
-    });
-    return [...groups.entries()];
-  }, [monthEvents, monthStart]);
+  const mobileWeekGroups = useMemo(() => weekCells
+    .map((cell) => [cell.key, weekEventsByDate.get(cell.key) || []])
+    .filter(([, dayEvents]) => dayEvents.length), [weekCells, weekEventsByDate]);
 
   const changeMonth = (delta) => {
     const [year, month] = monthKey.split('-').map(Number);
@@ -7059,13 +7084,13 @@ function RenewCalendar({ uiLang }) {
         </div>
 
         <div className="renew-calendar-mobile-list">
-          {mobileGroups.map(([date, dayEvents]) => (
+          {mobileWeekGroups.map(([date, dayEvents]) => (
             <section key={date}>
               <time dateTime={date}>{new Intl.DateTimeFormat(dateLocale, { month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T00:00:00`))}</time>
               <div>{dayEvents.map((event) => <RenewCalendarEventCard key={event.id} event={event} uiLang={uiLang} />)}</div>
             </section>
           ))}
-          {!mobileGroups.length ? <p>{isJp ? '選択した条件に一致する予定はありません。' : isEn ? 'No schedules match the selected filters.' : '선택한 조건에 맞는 일정이 없습니다.'}</p> : null}
+          {!mobileWeekGroups.length ? <p>{isJp ? 'この週に登録された予定はありません。' : isEn ? 'No schedules this week.' : '이번 주에 등록된 일정이 없습니다.'}</p> : null}
         </div>
 
         <footer className="renew-calendar-note">

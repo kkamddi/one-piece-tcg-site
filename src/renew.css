@@ -6467,8 +6467,7 @@
   }
 
   .renew-calendar-month-control {
-    display: grid;
-    grid-template-columns: 36px minmax(0, 1fr) 36px auto;
+    display: none;
   }
 
   .renew-calendar-month-control h2 {
@@ -6641,7 +6640,7 @@
   }
 
   .renew-calendar-highlights {
-    order: 4;
+    display: none;
   }
 
   .renew-calendar-note {
@@ -6649,7 +6648,9 @@
   }
 
   .renew-calendar-mobile-list {
-    display: none;
+    display: grid;
+    gap: 16px;
+    order: 4;
   }
 
   .renew-calendar-weekdays span {
@@ -6689,9 +6690,7 @@
   }
 
   .renew-calendar-agenda {
-    gap: 12px;
-    min-width: 0;
-    padding: 16px 14px;
+    display: none;
   }
 
   .renew-calendar-agenda h2 {
