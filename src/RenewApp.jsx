@@ -10076,6 +10076,42 @@ function getCardWorldCupVariantLabel(card) {
   return /_p\d+$/i.test(String(card?.id || '')) ? `${rarity}-P` : rarity;
 }
 
+const CARD_WORLD_CUP_PENDING_RESULTS_KEY = 'card-pone:world-cup:pending-results:v1';
+let cardWorldCupPendingMemory = [];
+
+function readPendingCardWorldCupResults() {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(CARD_WORLD_CUP_PENDING_RESULTS_KEY) || '[]');
+    const stored = Array.isArray(value) ? value.filter((item) => item?.eventId) : [];
+    const merged = [...stored, ...cardWorldCupPendingMemory];
+    return merged.filter((item, index) => merged.findIndex((candidate) => candidate.eventId === item.eventId) === index);
+  } catch {
+    return cardWorldCupPendingMemory;
+  }
+}
+
+function enqueueCardWorldCupResult(payload) {
+  const pending = readPendingCardWorldCupResults();
+  if (!pending.some((item) => item.eventId === payload.eventId)) pending.push(payload);
+  cardWorldCupPendingMemory = pending;
+  try {
+    window.localStorage.setItem(CARD_WORLD_CUP_PENDING_RESULTS_KEY, JSON.stringify(cardWorldCupPendingMemory));
+  } catch {
+    // Keep the in-memory queue active when persistent browser storage is unavailable.
+  }
+}
+
+function removePendingCardWorldCupResult(eventId) {
+  const pending = readPendingCardWorldCupResults().filter((item) => item.eventId !== eventId);
+  cardWorldCupPendingMemory = pending;
+  try {
+    if (pending.length) window.localStorage.setItem(CARD_WORLD_CUP_PENDING_RESULTS_KEY, JSON.stringify(pending));
+    else window.localStorage.removeItem(CARD_WORLD_CUP_PENDING_RESULTS_KEY);
+  } catch {
+    // The in-memory queue has already been updated.
+  }
+}
+
 function RenewCardWorldCup({ uiLang, onOpenCard }) {
   const roundOptions = [16, 32, 64, 128];
   const [roundSize, setRoundSize] = useState(16);
@@ -10095,6 +10131,10 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
   const [resultSaving, setResultSaving] = useState(false);
   const tournamentResultsRef = useRef({});
   const tournamentEventIdRef = useRef('');
+  const resultQueueFlushingRef = useRef(false);
+  const resultRetryAttemptRef = useRef(0);
+  const resultRetryTimerRef = useRef(null);
+  const resultQueueMountedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -10126,6 +10166,56 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
     setRanking(Array.isArray(result?.ranking) ? result.ranking : []);
     setCompletedTournaments(Number(result?.completedTournaments || 0));
   }
+
+  function schedulePendingResultFlush() {
+    if (!resultQueueMountedRef.current) return;
+    window.clearTimeout(resultRetryTimerRef.current);
+    const delay = Math.min(30000, 1000 * (2 ** Math.min(resultRetryAttemptRef.current, 5)));
+    resultRetryTimerRef.current = window.setTimeout(flushPendingTournamentResults, delay);
+  }
+
+  async function flushPendingTournamentResults() {
+    if (resultQueueFlushingRef.current) return;
+    const payload = readPendingCardWorldCupResults()[0];
+    if (!payload) {
+      if (resultQueueMountedRef.current) setResultSaving(false);
+      return;
+    }
+
+    resultQueueFlushingRef.current = true;
+    if (resultQueueMountedRef.current) {
+      setResultSaving(true);
+      setRankingError('');
+    }
+    try {
+      const result = await submitCardWorldCupResult(payload);
+      removePendingCardWorldCupResult(payload.eventId);
+      resultRetryAttemptRef.current = 0;
+      if (resultQueueMountedRef.current) applyRankingResult(result);
+    } catch {
+      resultRetryAttemptRef.current += 1;
+    } finally {
+      resultQueueFlushingRef.current = false;
+      if (readPendingCardWorldCupResults().length) schedulePendingResultFlush();
+      else if (resultQueueMountedRef.current) setResultSaving(false);
+    }
+  }
+
+  useEffect(() => {
+    resultQueueMountedRef.current = true;
+    const handleOnline = () => flushPendingTournamentResults();
+    window.addEventListener('online', handleOnline);
+    flushPendingTournamentResults();
+    return () => {
+      resultQueueMountedRef.current = false;
+      window.clearTimeout(resultRetryTimerRef.current);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (champion && rankingError && tournamentEventIdRef.current) saveTournamentResult(champion);
+  }, [champion, rankingError]);
 
   async function openRanking() {
     if (showRanking) {
@@ -10166,16 +10256,13 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
 
   function saveTournamentResult(winner) {
     if (!winner || !startingSize || !tournamentEventIdRef.current) return;
-    setResultSaving(true);
-    setRankingError('');
-    submitCardWorldCupResult({
+    enqueueCardWorldCupResult({
       eventId: tournamentEventIdRef.current,
       roundSize: startingSize,
       championId: winner.id,
       results: Object.values(tournamentResultsRef.current)
-    }).then(applyRankingResult).catch(() => {
-      setRankingError(getLocaleText(uiLang, '결과를 공용 랭킹에 반영하지 못했습니다.', 'The result could not be added to the shared ranking.', '結果を共有ランキングに反映できませんでした。'));
-    }).finally(() => setResultSaving(false));
+    });
+    flushPendingTournamentResults();
   }
 
   function selectWinner(winner, loser) {
@@ -10285,11 +10372,6 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
             <button type="button" className="is-primary" onClick={startTournament}>{getLocaleText(uiLang, '다시 시작', 'Play again', 'もう一度')}</button>
           </div>
           {resultSaving ? <p className="renew-world-cup-saving">{getLocaleText(uiLang, '공용 랭킹 반영 중', 'Updating shared ranking', '共有ランキングを更新中')}</p> : null}
-          {rankingError && !resultSaving ? (
-            <button type="button" className="renew-world-cup-retry-button" onClick={() => saveTournamentResult(champion)}>
-              {getLocaleText(uiLang, '랭킹 저장 재시도', 'Retry ranking update', 'ランキング保存を再試行')}
-            </button>
-          ) : null}
         </section>
       ) : null}
 

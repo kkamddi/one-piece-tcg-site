@@ -11656,19 +11656,6 @@
   font-weight: 700;
 }
 
-.renew-world-cup-retry-button {
-  min-height: 42px;
-  margin-top: 12px;
-  padding: 0 16px;
-  border: 1px solid #cf4b35;
-  border-radius: 8px;
-  background: #fff;
-  color: #cf4b35;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
 .renew-world-cup-match {
   display: grid;
   gap: 18px;
@@ -11878,7 +11865,6 @@
 .renew-app.is-dark .renew-world-cup-card,
 .renew-app.is-dark .renew-world-cup-round-select select,
 .renew-app.is-dark .renew-world-cup-ranking-button,
-.renew-app.is-dark .renew-world-cup-retry-button,
 .renew-app.is-dark .renew-world-cup-result-actions button {
   border-color: #36383e;
   background: #202126;

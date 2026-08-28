@@ -65,7 +65,7 @@ export default async function handler(request, response) {
   if (!db) return response.status(503).json({ error: 'ranking_storage_unavailable' });
 
   if (request.method === 'GET') {
-    response.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    response.setHeader('Cache-Control', 'no-store');
     return response.status(200).json(await readRanking(db));
   }
   if (request.method !== 'POST') return response.status(405).json({ error: 'method_not_allowed' });

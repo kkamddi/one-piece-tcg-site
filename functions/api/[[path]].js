@@ -231,7 +231,7 @@ function getPublicCacheTtl(request, route, url) {
   if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 21600;
   if (['cardImage', 'cardThumb'].includes(route.key)) return 86400;
   if (route.key === 'deckLab') return 300;
-  if (route.key === 'cardWorldCup') return 60;
+  if (route.key === 'cardWorldCup') return 0;
   return 0;
 }
 
