@@ -5799,10 +5799,10 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       const cached = readCachedMovers();
       if (cached && !cancelled) setDailyMovers(cached);
 
-      const requestUrls = [
-        '/api/market?summary=movers',
-        'https://www.optcgkorea.com/api/market?summary=movers'
-      ];
+      const isLocalPreview = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+      const requestUrls = isLocalPreview
+        ? ['https://www.optcgkorea.com/api/market?summary=movers', '/api/market?summary=movers']
+        : ['/api/market?summary=movers'];
       for (const url of requestUrls) {
         try {
           const response = await fetch(url, { cache: 'no-store' });
@@ -10071,6 +10071,11 @@ function isCardWorldCupCandidate(card) {
     || ['SEC', 'SP', 'TR'].includes(rarity);
 }
 
+function getCardWorldCupVariantLabel(card) {
+  const rarity = getRarityBucket(card?.rarity);
+  return /_p\d+$/i.test(String(card?.id || '')) ? `${rarity}-P` : rarity;
+}
+
 function RenewCardWorldCup({ uiLang, onOpenCard }) {
   const roundOptions = [16, 32, 64, 128];
   const [roundSize, setRoundSize] = useState(16);
@@ -10245,7 +10250,7 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
                     <img src={getCardThumbnailSrc(card)} alt={card.name} onError={placeholderImage} />
                   </span>
                   <span className="renew-world-cup-card-copy">
-                    <small>{card.cardNo}</small>
+                    <small>{card.cardNo} · {getCardWorldCupVariantLabel(card)}</small>
                     <strong>{card.name}</strong>
                     <span>{getLocaleText(uiLang, '선택', 'Choose', '選択')}</span>
                   </span>

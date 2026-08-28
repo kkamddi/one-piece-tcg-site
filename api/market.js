@@ -1068,6 +1068,7 @@ function medianNumber(values = []) {
 async function readDailyMarketMovers() {
   const date = kstDateKey();
   const previousDate = previousDateKey(date);
+  const dayBeforePrevious = previousDateKey(previousDate);
   const empty = { date, previousDate, conditions: { a: { gainers: [], losers: [] }, psa10: { gainers: [], losers: [] } } };
   if (!shouldReadD1Market()) return empty;
 
@@ -1096,11 +1097,11 @@ async function readDailyMarketMovers() {
          on d.source = l.source
         and d.apparel_id = l.apparel_id
         and d.condition_key in ('a', 'psa10')
-        and d.point_date in (?, ?)
+        and d.point_date in (?, ?, ?)
         and d.trade_count > 0
        join cards c on c.id = l.card_id
        order by d.condition_key, d.apparel_id, d.point_date`,
-      [previousDate, date]
+      [dayBeforePrevious, previousDate, date]
     )
   );
 
@@ -1119,42 +1120,47 @@ async function readDailyMarketMovers() {
       code: row.card_no || '',
       name: row.card_name || row.card_no || '',
       imageUrl: row.image_url || '',
-      today: null,
-      previous: null
+      points: {}
     };
     const point = { price: Math.round(price), tradeCount: Number(row.trade_count || 0) };
-    if (row.point_date === date) item.today = point;
-    if (row.point_date === previousDate) item.previous = point;
+    item.points[row.point_date] = point;
     grouped.set(key, item);
   }
 
-  const conditions = empty.conditions;
-  for (const item of grouped.values()) {
-    if (!item.today || !item.previous || item.previous.price <= 0) continue;
-    const changePercent = ((item.today.price - item.previous.price) / item.previous.price) * 100;
-    if (!Number.isFinite(changePercent) || changePercent === 0) continue;
-    const mover = {
-      apparelId: item.apparelId,
-      cardId: item.cardId,
-      locale: item.locale,
-      code: item.code,
-      name: item.name,
-      imageUrl: item.imageUrl,
-      priceJpy: item.today.price,
-      previousPriceJpy: item.previous.price,
-      tradeCount: item.today.tradeCount,
-      changePercent: Number(changePercent.toFixed(2))
-    };
-    if (changePercent > 0) conditions[item.condition].gainers.push(mover);
-    else conditions[item.condition].losers.push(mover);
-  }
+  const buildComparison = (comparisonDate, comparisonPreviousDate) => {
+    const conditions = { a: { gainers: [], losers: [] }, psa10: { gainers: [], losers: [] } };
+    for (const item of grouped.values()) {
+      const today = item.points[comparisonDate];
+      const previous = item.points[comparisonPreviousDate];
+      if (!today || !previous || previous.price <= 0) continue;
+      const changePercent = ((today.price - previous.price) / previous.price) * 100;
+      if (!Number.isFinite(changePercent) || changePercent === 0) continue;
+      const mover = {
+        apparelId: item.apparelId,
+        cardId: item.cardId,
+        locale: item.locale,
+        code: item.code,
+        name: item.name,
+        imageUrl: item.imageUrl,
+        priceJpy: today.price,
+        previousPriceJpy: previous.price,
+        tradeCount: today.tradeCount,
+        changePercent: Number(changePercent.toFixed(2))
+      };
+      if (changePercent > 0) conditions[item.condition].gainers.push(mover);
+      else conditions[item.condition].losers.push(mover);
+    }
+    for (const bucket of Object.values(conditions)) {
+      bucket.gainers.sort((a, b) => b.changePercent - a.changePercent).splice(5);
+      bucket.losers.sort((a, b) => a.changePercent - b.changePercent).splice(5);
+    }
+    return { date: comparisonDate, previousDate: comparisonPreviousDate, conditions };
+  };
 
-  for (const bucket of Object.values(conditions)) {
-    bucket.gainers.sort((a, b) => b.changePercent - a.changePercent).splice(5);
-    bucket.losers.sort((a, b) => a.changePercent - b.changePercent).splice(5);
-  }
-
-  return { date, previousDate, conditions };
+  const current = buildComparison(date, previousDate);
+  const hasCurrentMovers = Object.values(current.conditions)
+    .some((bucket) => bucket.gainers.length || bucket.losers.length);
+  return hasCurrentMovers ? current : buildComparison(previousDate, dayBeforePrevious);
 }
 
 function aggregateDailyMedian(points = []) {
