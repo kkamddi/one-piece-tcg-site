@@ -52,6 +52,7 @@ const paths = [
   '/lab',
   '/lab/centering',
   '/lab/pack-simulator',
+  '/lab/card-world-cup',
   '/lab/decks',
   '/lab/decks/builder',
   '/tools/profit-calculator',

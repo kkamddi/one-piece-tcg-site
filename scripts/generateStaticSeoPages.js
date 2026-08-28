@@ -20,6 +20,7 @@ const requiredPaths = [
   '/lab',
   '/lab/centering',
   '/lab/pack-simulator',
+  '/lab/card-world-cup',
   '/lab/decks',
   '/lab/decks/builder',
   '/guides/deck-builder',

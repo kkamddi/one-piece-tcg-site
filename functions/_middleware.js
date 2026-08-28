@@ -76,6 +76,12 @@ const PAGE_SEO = {
     keywords: '원피스카드 카드깡, 원피스카드 시뮬레이터, 원피스카드 팩 개봉, 원피스카드 박스 개봉',
     schemaType: 'WebApplication'
   },
+  '/lab/card-world-cup': {
+    title: '원피스카드 월드컵 - 인기 카드 이상형 월드컵 | Card Pone',
+    description: '일본판 원피스카드의 패러렐과 특수 카드를 16강부터 128강까지 비교하고, 이용자들의 공용 우승 순위와 승률을 확인할 수 있습니다.',
+    keywords: '원피스카드 월드컵, 원피스카드 이상형 월드컵, 원피스카드 인기 순위, 원피스카드 패러렐',
+    schemaType: 'WebApplication'
+  },
   '/guides/centering': {
     title: '원피스카드 센터링 측정기 사용 가이드 | Card Pone',
     description: '원피스카드 촬영 준비, 카드 외곽과 내부 인쇄 경계 조정, 센터링 결과 해석 방법을 안내합니다.',
@@ -775,6 +781,14 @@ const SERVER_PAGE_CONTENT = {
       '도감에 연결된 카드 이미지와 번호, 등급, 확인 가능한 참고 시세를 보여주며 실제 상품의 봉입 결과를 보장하지 않습니다.'
     ],
     links: ['/guides/pack-simulator', '/lab', '/cards', '/prices']
+  },
+  '/lab/card-world-cup': {
+    heading: '원피스카드 월드컵',
+    paragraphs: [
+      '일본판 원피스카드 도감에 등록된 패러렐과 특수 카드 중 무작위로 구성된 대진에서 더 마음에 드는 카드를 선택할 수 있습니다.',
+      '16강, 32강, 64강, 128강을 지원하며 완료된 결과는 공용 랭킹의 우승 비율과 승률에 반영됩니다.'
+    ],
+    links: ['/lab', '/cards/jp', '/prices', '/guide']
   },
   '/lab/decks': {
     heading: '원피스카드 덱 빌더',
