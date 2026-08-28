@@ -6756,11 +6756,7 @@ function PortfolioValueImage({ item, src, resolveImage, onError }) {
   useEffect(() => {
     let cancelled = false;
     setImageSrc(src);
-    if (!isPlaceholderImageUrl(src)) {
-      resolveImage(item, true).then((fallbackSrc) => {
-        if (!cancelled && fallbackSrc) setImageSrc(fallbackSrc);
-      });
-    } else {
+    if (isPlaceholderImageUrl(src)) {
       resolveImage(item, true).then((fallbackSrc) => {
         if (!cancelled && fallbackSrc) setImageSrc(fallbackSrc);
       });
