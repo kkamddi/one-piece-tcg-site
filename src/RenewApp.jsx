@@ -6588,11 +6588,17 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
   const pageCount = Math.max(1, Math.ceil(filteredCards.length / pageSize));
   const visibleCards = filteredCards.slice(page * pageSize, page * pageSize + pageSize);
   const getImageCacheKey = (item) => `${item.code || ''}::${item.apparelId || ''}`;
+  const getPortfolioThumbnailSrc = (item, fallbackSource = '') => {
+    const cardId = String(item.cardId || '');
+    if (!cardId) return fallbackSource || '/card-placeholder.svg';
+    const locale = cardId.match(/^([A-Z]+)::/)?.[1] || 'JP';
+    return getCardThumbnailSrc({ id: cardId, locale, imageUrl: fallbackSource });
+  };
   const getValueImageSrc = (item) => {
     const cachedSource = imageCacheRef.current[getImageCacheKey(item)];
-    if (cachedSource) return getCardImageSrc({ imageUrl: cachedSource });
-    if (!isPlaceholderImageUrl(item.imageUrl)) return item.imageUrl;
-    if (!isPlaceholderImageUrl(item.previewImageUrl)) return item.previewImageUrl;
+    if (cachedSource) return getPortfolioThumbnailSrc(item, cachedSource);
+    if (!isPlaceholderImageUrl(item.imageUrl)) return getPortfolioThumbnailSrc(item, item.imageUrl);
+    if (!isPlaceholderImageUrl(item.previewImageUrl)) return getPortfolioThumbnailSrc(item, item.previewImageUrl);
     return '/card-placeholder.svg';
   };
 
@@ -6603,9 +6609,10 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
         const linkedCard = await fetchCardById(approvedLink.cardId);
         const linkedSource = linkedCard?.imageUrl || linkedCard?.image_url || linkedCard?.image;
         if (linkedSource) {
-          imageCacheRef.current = { ...imageCacheRef.current, [getImageCacheKey(item)]: linkedSource };
+          const thumbnailSource = getCardThumbnailSrc(linkedCard);
+          imageCacheRef.current = { ...imageCacheRef.current, [getImageCacheKey(item)]: thumbnailSource };
           savePortfolioImageCache(imageCacheRef.current);
-          return getCardImageSrc({ imageUrl: linkedSource });
+          return thumbnailSource;
         }
       }
       if (!allowSearchFallback) return '';
@@ -6616,9 +6623,10 @@ function RenewValueModal({ initialGrade = 'all', cards, onClose, onRemove, onEdi
       )) || matches.find((card) => card.imageUrl || card.image_url || card.image);
       const fallbackSource = fallbackCard?.imageUrl || fallbackCard?.image_url || fallbackCard?.image;
       if (!fallbackSource) return '';
-      imageCacheRef.current = { ...imageCacheRef.current, [getImageCacheKey(item)]: fallbackSource };
+      const thumbnailSource = getCardThumbnailSrc(fallbackCard);
+      imageCacheRef.current = { ...imageCacheRef.current, [getImageCacheKey(item)]: thumbnailSource };
       savePortfolioImageCache(imageCacheRef.current);
-      return getCardImageSrc({ imageUrl: fallbackSource });
+      return thumbnailSource;
     } catch {
       return '';
     }
@@ -10397,7 +10405,12 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
             {ranking.slice(0, 100).map((item, index) => (
               <li key={item.id}>
                 <b>{index + 1}</b>
-                <img src={item.imageUrl || '/card-placeholder.svg'} alt="" onError={placeholderImage} />
+                <img
+                  src={getCardThumbnailSrc({ id: item.id, locale: 'JP', imageUrl: item.imageUrl })}
+                  data-fallback-src={item.imageUrl || ''}
+                  alt=""
+                  onError={fallbackToOriginalCardImage}
+                />
                 <span><small>{item.cardNo}</small><strong>{item.name}</strong></span>
                 <span><small>{item.titles}{getLocaleText(uiLang, '회 우승', ' titles', '回優勝')}</small><strong>{Number(item.titleRate || 0).toFixed(2)}%</strong></span>
                 <span><small>{item.matchWins}/{item.matches}</small><strong>{Number(item.winRate || 0).toFixed(2)}%</strong></span>
