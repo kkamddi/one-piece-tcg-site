@@ -1,4 +1,4 @@
-const API_BASE = '/api/card-world-cup';
+const API_BASE = import.meta.env.DEV ? '/__prod_api/api/card-world-cup' : '/api/card-world-cup';
 
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {

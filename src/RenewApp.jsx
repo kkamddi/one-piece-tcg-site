@@ -10164,6 +10164,20 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
     setRankingError('');
   }
 
+  function saveTournamentResult(winner) {
+    if (!winner || !startingSize || !tournamentEventIdRef.current) return;
+    setResultSaving(true);
+    setRankingError('');
+    submitCardWorldCupResult({
+      eventId: tournamentEventIdRef.current,
+      roundSize: startingSize,
+      championId: winner.id,
+      results: Object.values(tournamentResultsRef.current)
+    }).then(applyRankingResult).catch(() => {
+      setRankingError(getLocaleText(uiLang, '결과를 공용 랭킹에 반영하지 못했습니다.', 'The result could not be added to the shared ranking.', '結果を共有ランキングに反映できませんでした。'));
+    }).finally(() => setResultSaving(false));
+  }
+
   function selectWinner(winner, loser) {
     const winnerResult = tournamentResultsRef.current[winner.id];
     const loserResult = tournamentResultsRef.current[loser.id];
@@ -10186,16 +10200,7 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
       setRoundWinners([]);
       setMatchIndex(0);
       setShowRanking(true);
-      setResultSaving(true);
-      setRankingError('');
-      submitCardWorldCupResult({
-        eventId: tournamentEventIdRef.current,
-        roundSize: startingSize,
-        championId: winner.id,
-        results: Object.values(tournamentResultsRef.current)
-      }).then(applyRankingResult).catch(() => {
-        setRankingError(getLocaleText(uiLang, '결과를 공용 랭킹에 반영하지 못했습니다. 다시 시작해도 이번 결과가 중복 저장되지는 않습니다.', 'The result could not be added to the shared ranking.', '結果を共有ランキングに反映できませんでした。'));
-      }).finally(() => setResultSaving(false));
+      saveTournamentResult(winner);
       return;
     }
     setRoundCards(shuffleCardWorldCupCards(winners));
@@ -10280,6 +10285,11 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
             <button type="button" className="is-primary" onClick={startTournament}>{getLocaleText(uiLang, '다시 시작', 'Play again', 'もう一度')}</button>
           </div>
           {resultSaving ? <p className="renew-world-cup-saving">{getLocaleText(uiLang, '공용 랭킹 반영 중', 'Updating shared ranking', '共有ランキングを更新中')}</p> : null}
+          {rankingError && !resultSaving ? (
+            <button type="button" className="renew-world-cup-retry-button" onClick={() => saveTournamentResult(champion)}>
+              {getLocaleText(uiLang, '랭킹 저장 재시도', 'Retry ranking update', 'ランキング保存を再試行')}
+            </button>
+          ) : null}
         </section>
       ) : null}
 
