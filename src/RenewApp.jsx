@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { fetchAdminStats, fetchPopularSearches, trackPopularSearch, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, signInWithIdentifier } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
+import { fetchCardWorldCupRanking, submitCardWorldCupResult } from './api/card-world-cup';
 import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
 import {
   deleteLeaderReview,
@@ -2729,6 +2730,7 @@ const PAGE_PATHS = {
   prices: '/prices',
   ...(MARKETPLACE_TAB_VISIBLE ? { marketplace: '/market' } : {}),
   lab: '/lab',
+  cardWorldCup: '/lab/card-world-cup',
   centering: '/lab/centering',
   packSimulator: '/lab/pack-simulator',
   deckLab: '/lab/decks',
@@ -10052,8 +10054,270 @@ function RenewLabToolGuide({ type, uiLang, onOpenTool }) {
   );
 }
 
-function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfolioCalculator, onOpenDeckLab }) {
+function shuffleCardWorldCupCards(cards = []) {
+  const next = [...cards];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(Math.random() * (index + 1));
+    [next[index], next[target]] = [next[target], next[index]];
+  }
+  return next;
+}
+
+function isCardWorldCupCandidate(card) {
+  const rarity = getRarityBucket(card?.rarity);
+  const isParallel = /_p\d+$/i.test(String(card?.id || ''))
+    && card?.series === card?.originSeries;
+  return (isParallel && ['R', 'SR', 'L'].includes(rarity))
+    || ['SEC', 'SP', 'TR'].includes(rarity);
+}
+
+function RenewCardWorldCup({ uiLang, onOpenCard }) {
+  const roundOptions = [16, 32, 64, 128];
+  const [roundSize, setRoundSize] = useState(16);
+  const [cardPool, setCardPool] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [roundCards, setRoundCards] = useState([]);
+  const [roundWinners, setRoundWinners] = useState([]);
+  const [matchIndex, setMatchIndex] = useState(0);
+  const [startingSize, setStartingSize] = useState(0);
+  const [champion, setChampion] = useState(null);
+  const [ranking, setRanking] = useState([]);
+  const [completedTournaments, setCompletedTournaments] = useState(0);
+  const [showRanking, setShowRanking] = useState(false);
+  const [rankingLoading, setRankingLoading] = useState(false);
+  const [rankingError, setRankingError] = useState('');
+  const [resultSaving, setResultSaving] = useState(false);
+  const tournamentResultsRef = useRef({});
+  const tournamentEventIdRef = useRef('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchCards({ locale: 'JP' })
+      .then((cards) => {
+        if (cancelled) return;
+        const seen = new Set();
+        const eligible = (Array.isArray(cards) ? cards : [])
+          .filter((card) => card?.id && card?.name && getCardImageSrc(card) !== '/card-placeholder.svg' && isCardWorldCupCandidate(card))
+          .filter((card) => {
+            if (seen.has(card.id)) return false;
+            seen.add(card.id);
+            return true;
+          });
+        setCardPool(eligible);
+        setLoadError(eligible.length >= 128 ? '' : getLocaleText(uiLang, '월드컵에 사용할 일본판 카드가 부족합니다.', 'Not enough Japanese cards are available.', '日本版カードが不足しています。'));
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError(getLocaleText(uiLang, '일본판 카드 목록을 불러오지 못했습니다.', 'Could not load Japanese cards.', '日本版カードを読み込めませんでした。'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [uiLang]);
+
+  function applyRankingResult(result) {
+    setRanking(Array.isArray(result?.ranking) ? result.ranking : []);
+    setCompletedTournaments(Number(result?.completedTournaments || 0));
+  }
+
+  async function openRanking() {
+    if (showRanking) {
+      setShowRanking(false);
+      return;
+    }
+    setShowRanking(true);
+    setRankingLoading(true);
+    setRankingError('');
+    try {
+      applyRankingResult(await fetchCardWorldCupRanking());
+    } catch {
+      setRankingError(getLocaleText(uiLang, '공용 랭킹을 불러오지 못했습니다.', 'Could not load the shared ranking.', '共有ランキングを読み込めませんでした。'));
+    } finally {
+      setRankingLoading(false);
+    }
+  }
+
+  function startTournament() {
+    if (cardPool.length < roundSize) return;
+    const selectedCards = shuffleCardWorldCupCards(cardPool).slice(0, roundSize);
+    tournamentResultsRef.current = Object.fromEntries(selectedCards.map((card) => [card.id, {
+      id: card.id,
+      matches: 0,
+      wins: 0
+    }]));
+    tournamentEventIdRef.current = typeof window.crypto?.randomUUID === 'function'
+      ? window.crypto.randomUUID()
+      : `${Date.now().toString(16).slice(-8).padStart(8, '0')}-0000-4000-8000-${Math.random().toString(16).slice(2, 14).padEnd(12, '0')}`;
+    setRoundCards(selectedCards);
+    setRoundWinners([]);
+    setMatchIndex(0);
+    setStartingSize(roundSize);
+    setChampion(null);
+    setShowRanking(false);
+    setRankingError('');
+  }
+
+  function selectWinner(winner, loser) {
+    const winnerResult = tournamentResultsRef.current[winner.id];
+    const loserResult = tournamentResultsRef.current[loser.id];
+    if (winnerResult) {
+      winnerResult.matches += 1;
+      winnerResult.wins += 1;
+    }
+    if (loserResult) loserResult.matches += 1;
+
+    const winners = [...roundWinners, winner];
+    const matchesInRound = roundCards.length / 2;
+    if (matchIndex + 1 < matchesInRound) {
+      setRoundWinners(winners);
+      setMatchIndex(matchIndex + 1);
+      return;
+    }
+    if (winners.length === 1) {
+      setChampion(winner);
+      setRoundCards([]);
+      setRoundWinners([]);
+      setMatchIndex(0);
+      setShowRanking(true);
+      setResultSaving(true);
+      setRankingError('');
+      submitCardWorldCupResult({
+        eventId: tournamentEventIdRef.current,
+        roundSize: startingSize,
+        championId: winner.id,
+        results: Object.values(tournamentResultsRef.current)
+      }).then(applyRankingResult).catch(() => {
+        setRankingError(getLocaleText(uiLang, '결과를 공용 랭킹에 반영하지 못했습니다. 다시 시작해도 이번 결과가 중복 저장되지는 않습니다.', 'The result could not be added to the shared ranking.', '結果を共有ランキングに反映できませんでした。'));
+      }).finally(() => setResultSaving(false));
+      return;
+    }
+    setRoundCards(shuffleCardWorldCupCards(winners));
+    setRoundWinners([]);
+    setMatchIndex(0);
+  }
+
+  const activeMatch = roundCards.length ? roundCards.slice(matchIndex * 2, matchIndex * 2 + 2) : [];
+  const roundLabel = roundCards.length > 2
+    ? `${roundCards.length}${getLocaleText(uiLang, '강', ' Round', '強')}`
+    : getLocaleText(uiLang, '결승', 'Final', '決勝');
+
+  return (
+    <main className="renew-subpage renew-world-cup-page">
+      {!roundCards.length && !champion ? (
+        <section className="renew-panel renew-world-cup-start">
+          <div className="renew-world-cup-heading">
+            <span>ONE PIECE CARD WORLD CUP</span>
+            <h1>{getLocaleText(uiLang, '원피스카드 월드컵', 'One Piece Card World Cup', 'ワンピースカード ワールドカップ')}</h1>
+          </div>
+          <div className="renew-world-cup-rounds" aria-label={getLocaleText(uiLang, '대진 규모', 'Tournament size', 'トーナメント規模')}>
+            {roundOptions.map((size) => (
+              <button key={size} type="button" className={roundSize === size ? 'is-active' : ''} onClick={() => setRoundSize(size)}>
+                {size}{getLocaleText(uiLang, '강', '', '強')}
+              </button>
+            ))}
+          </div>
+          <div className="renew-world-cup-start-actions">
+            <button type="button" className="renew-world-cup-start-button" disabled={loading || Boolean(loadError)} onClick={startTournament}>
+              {loading ? getLocaleText(uiLang, '카드 준비 중', 'Preparing cards', 'カード準備中') : getLocaleText(uiLang, '월드컵 시작', 'Start World Cup', 'ワールドカップ開始')}
+            </button>
+            <button type="button" className="renew-world-cup-ranking-button" onClick={openRanking}>
+              {getLocaleText(uiLang, showRanking ? '랭킹 닫기' : '랭킹 보기', showRanking ? 'Close ranking' : 'View ranking', showRanking ? 'ランキングを閉じる' : 'ランキングを見る')}
+            </button>
+          </div>
+          {loadError ? <p className="renew-world-cup-error">{loadError}</p> : null}
+        </section>
+      ) : null}
+
+      {activeMatch.length === 2 ? (
+        <section className="renew-world-cup-match">
+          <header>
+            <span>{startingSize}{getLocaleText(uiLang, '강 월드컵', '-card World Cup', '強ワールドカップ')}</span>
+            <strong>{roundLabel} · {matchIndex + 1}/{roundCards.length / 2}</strong>
+          </header>
+          <div className="renew-world-cup-versus">
+            {activeMatch.map((card, index) => {
+              const opponent = activeMatch[index === 0 ? 1 : 0];
+              return (
+                <button key={card.id} type="button" className="renew-world-cup-card" onClick={() => selectWinner(card, opponent)}>
+                  <span className="renew-world-cup-card-image">
+                    <img src={getCardThumbnailSrc(card)} alt={card.name} onError={placeholderImage} />
+                  </span>
+                  <span className="renew-world-cup-card-copy">
+                    <small>{card.cardNo}</small>
+                    <strong>{card.name}</strong>
+                    <span>{getLocaleText(uiLang, '선택', 'Choose', '選択')}</span>
+                  </span>
+                </button>
+              );
+            })}
+            <span className="renew-world-cup-vs">VS</span>
+          </div>
+        </section>
+      ) : null}
+
+      {champion ? (
+        <section className="renew-panel renew-world-cup-champion">
+          <span>CHAMPION</span>
+          <div className="renew-world-cup-champion-image">
+            <img src={getCardThumbnailSrc(champion)} alt={champion.name} onError={placeholderImage} />
+          </div>
+          <small>{champion.cardNo}</small>
+          <h2>{champion.name}</h2>
+          <div className="renew-world-cup-result-actions">
+            <button type="button" onClick={() => onOpenCard?.(champion)}>{getLocaleText(uiLang, '도감에서 보기', 'View in catalog', '図鑑で見る')}</button>
+            <button type="button" className="is-primary" onClick={startTournament}>{getLocaleText(uiLang, '다시 시작', 'Play again', 'もう一度')}</button>
+          </div>
+          {resultSaving ? <p className="renew-world-cup-saving">{getLocaleText(uiLang, '공용 랭킹 반영 중', 'Updating shared ranking', '共有ランキングを更新中')}</p> : null}
+        </section>
+      ) : null}
+
+      {showRanking && !roundCards.length ? (
+        <section className="renew-panel renew-world-cup-ranking">
+          <div className="renew-world-cup-ranking-heading">
+            <div>
+              <span>RANKING</span>
+              <h2>{getLocaleText(uiLang, '우승 카드 순위', 'Champion ranking', '優勝カードランキング')}</h2>
+            </div>
+            <small>{getLocaleText(uiLang, `완료된 월드컵 ${completedTournaments.toLocaleString()}회`, `${completedTournaments.toLocaleString()} completed tournaments`, `完了したワールドカップ ${completedTournaments.toLocaleString()}回`)}</small>
+          </div>
+          <div className="renew-world-cup-ranking-columns" aria-hidden="true">
+            <span>{getLocaleText(uiLang, '순위', 'Rank', '順位')}</span>
+            <span>{getLocaleText(uiLang, '카드', 'Card', 'カード')}</span>
+            <span>{getLocaleText(uiLang, '우승비율', 'Title rate', '優勝率')}</span>
+            <span>{getLocaleText(uiLang, '승률', 'Win rate', '勝率')}</span>
+          </div>
+          {rankingLoading ? <p className="renew-world-cup-empty">{getLocaleText(uiLang, '랭킹을 불러오는 중입니다.', 'Loading ranking.', 'ランキングを読み込み中です。')}</p> : null}
+          {rankingError ? <p className="renew-world-cup-error">{rankingError}</p> : null}
+          {!rankingLoading && !rankingError && !ranking.length ? <p className="renew-world-cup-empty">{getLocaleText(uiLang, '아직 완료된 월드컵이 없습니다.', 'No World Cups have been completed yet.', '完了したワールドカップはまだありません。')}</p> : null}
+          <ol>
+            {ranking.slice(0, 100).map((item, index) => (
+              <li key={item.id}>
+                <b>{index + 1}</b>
+                <img src={item.imageUrl || '/card-placeholder.svg'} alt="" onError={placeholderImage} />
+                <span><small>{item.cardNo}</small><strong>{item.name}</strong></span>
+                <span><small>{item.titles}{getLocaleText(uiLang, '회 우승', ' titles', '回優勝')}</small><strong>{Number(item.titleRate || 0).toFixed(2)}%</strong></span>
+                <span><small>{item.matchWins}/{item.matches}</small><strong>{Number(item.winRate || 0).toFixed(2)}%</strong></span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+    </main>
+  );
+}
+
+function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfolioCalculator, onOpenDeckLab, onOpenCardWorldCup }) {
   const tools = [
+    {
+      id: 'card-world-cup',
+      icon: 'cards',
+      status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
+      title: getLocaleText(uiLang, '원피스카드 월드컵', 'Card World Cup', 'カードワールドカップ'),
+      description: getLocaleText(uiLang, '무작위 일본판 카드 중 마음에 드는 한 장을 선택합니다.', 'Choose your favorite from randomly selected Japanese cards.', 'ランダムな日本版カードからお気に入りを選びます。'),
+      onClick: onOpenCardWorldCup
+    },
     {
       id: 'centering',
       icon: 'lab',
@@ -15782,6 +16046,17 @@ export default function RenewApp() {
           onOpenSimulator={() => navigatePage('packSimulator')}
           onOpenPortfolioCalculator={() => navigatePage('portfolioCalculator')}
           onOpenDeckLab={() => navigatePage('deckLab')}
+          onOpenCardWorldCup={() => navigatePage('cardWorldCup')}
+        />
+      ) : activePage === 'cardWorldCup' ? (
+        <RenewCardWorldCup
+          uiLang={uiLang}
+          onOpenCard={(card) => {
+            const query = new URLSearchParams();
+            query.set('locale', 'JP');
+            if (card?.id) query.set('cardId', card.id);
+            navigatePage('cards', { query: query.toString() });
+          }}
         />
       ) : activePage === 'deckLab' ? (
         <RenewDeckLabHomeV2

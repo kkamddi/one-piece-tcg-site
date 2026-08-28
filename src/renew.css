@@ -11530,6 +11530,400 @@
   line-height: 1.65;
 }
 
+.renew-world-cup-page {
+  display: grid;
+  gap: 22px;
+}
+
+.renew-world-cup-start,
+.renew-world-cup-champion,
+.renew-world-cup-ranking {
+  padding: clamp(24px, 4vw, 54px);
+}
+
+.renew-world-cup-heading {
+  max-width: 760px;
+}
+
+.renew-world-cup-heading > span,
+.renew-world-cup-champion > span,
+.renew-world-cup-ranking-heading > div > span {
+  color: var(--renew-accent, #cf4b35);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-world-cup-heading h1 {
+  margin: 10px 0 14px;
+  font-size: clamp(30px, 5vw, 58px);
+  line-height: 1.05;
+}
+
+.renew-world-cup-heading p {
+  margin: 0;
+  color: var(--renew-muted, #69707d);
+  line-height: 1.65;
+}
+
+.renew-world-cup-rounds {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 620px;
+  margin-top: 30px;
+}
+
+.renew-world-cup-rounds button,
+.renew-world-cup-start-button,
+.renew-world-cup-ranking-button,
+.renew-world-cup-result-actions button {
+  min-height: 48px;
+  border: 1px solid var(--renew-line, #e1e2e5);
+  border-radius: 8px;
+  background: #fff;
+  color: #17181b;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.renew-world-cup-rounds button.is-active,
+.renew-world-cup-start-button,
+.renew-world-cup-result-actions button.is-primary {
+  border-color: #17181b;
+  background: #17181b;
+  color: #fff;
+}
+
+.renew-world-cup-start-button {
+  width: 100%;
+}
+
+.renew-world-cup-start-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 8px;
+  width: min(100%, 620px);
+  margin-top: 12px;
+}
+
+.renew-world-cup-ranking-button {
+  background: #fff;
+}
+
+.renew-world-cup-start-button:disabled {
+  cursor: wait;
+  opacity: .5;
+}
+
+.renew-world-cup-error {
+  color: #cf4b35;
+  font-weight: 700;
+}
+
+.renew-world-cup-saving {
+  margin: 14px 0 0;
+  color: var(--renew-muted, #69707d);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.renew-world-cup-match {
+  display: grid;
+  gap: 18px;
+}
+
+.renew-world-cup-match > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.renew-world-cup-match > header span {
+  color: #cf4b35;
+  font-weight: 900;
+}
+
+.renew-world-cup-versus {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 4vw, 54px);
+}
+
+.renew-world-cup-card {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--renew-line, #e1e2e5);
+  border-radius: 8px;
+  background: #fff;
+  color: #17181b;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.renew-world-cup-card:hover,
+.renew-world-cup-card:focus-visible {
+  border-color: #cf4b35;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .1);
+  transform: translateY(-3px);
+}
+
+.renew-world-cup-card-image {
+  display: grid;
+  place-items: center;
+  min-height: clamp(340px, 52vw, 690px);
+  padding: clamp(18px, 4vw, 44px);
+  background: #f4f4f5;
+}
+
+.renew-world-cup-card-image img {
+  width: 100%;
+  height: 100%;
+  max-height: 620px;
+  object-fit: contain;
+}
+
+.renew-world-cup-card-copy {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 5px 16px;
+  padding: 18px;
+  text-align: left;
+}
+
+.renew-world-cup-card-copy small {
+  grid-column: 1 / -1;
+  color: #cf4b35;
+  font-weight: 800;
+}
+
+.renew-world-cup-card-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: clamp(17px, 2vw, 24px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-world-cup-card-copy > span {
+  border-radius: 999px;
+  background: #17181b;
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-world-cup-vs {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 5px solid var(--renew-bg, #fff);
+  border-radius: 50%;
+  background: #17181b;
+  color: #fff;
+  font-weight: 900;
+  transform: translate(-50%, -50%);
+}
+
+.renew-world-cup-champion {
+  text-align: center;
+}
+
+.renew-world-cup-champion-image {
+  width: min(360px, 72vw);
+  aspect-ratio: 63 / 88;
+  margin: 20px auto;
+}
+
+.renew-world-cup-champion-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.renew-world-cup-champion h2 {
+  margin: 6px 0 24px;
+  font-size: clamp(24px, 4vw, 42px);
+}
+
+.renew-world-cup-result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  justify-content: center;
+  gap: 8px;
+}
+
+.renew-world-cup-ranking-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.renew-world-cup-ranking-heading h2 {
+  margin: 6px 0 0;
+}
+
+.renew-world-cup-ranking-heading > small,
+.renew-world-cup-empty {
+  color: var(--renew-muted, #69707d);
+}
+
+.renew-world-cup-ranking ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.renew-world-cup-ranking-columns {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) minmax(70px, auto) minmax(80px, auto);
+  gap: 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--renew-line, #e1e2e5);
+  color: var(--renew-muted, #69707d);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-world-cup-ranking li {
+  display: grid;
+  grid-template-columns: 36px 54px minmax(0, 1fr) minmax(70px, auto) minmax(80px, auto);
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--renew-line, #e1e2e5);
+}
+
+.renew-world-cup-ranking li > b {
+  text-align: center;
+}
+
+.renew-world-cup-ranking li > img {
+  width: 54px;
+  height: 68px;
+  object-fit: contain;
+}
+
+.renew-world-cup-ranking li > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.renew-world-cup-ranking li > span > small {
+  color: var(--renew-muted, #69707d);
+}
+
+.renew-world-cup-ranking li > span:first-of-type strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-app.is-dark .renew-world-cup-card,
+.renew-app.is-dark .renew-world-cup-rounds button,
+.renew-app.is-dark .renew-world-cup-ranking-button,
+.renew-app.is-dark .renew-world-cup-result-actions button {
+  border-color: #36383e;
+  background: #202126;
+  color: #f7f7f8;
+}
+
+.renew-app.is-dark .renew-world-cup-card-image {
+  background: #17181b;
+}
+
+.renew-app.is-dark .renew-world-cup-rounds button.is-active,
+.renew-app.is-dark .renew-world-cup-start-button,
+.renew-app.is-dark .renew-world-cup-result-actions button.is-primary,
+.renew-app.is-dark .renew-world-cup-card-copy > span {
+  background: #f7f7f8;
+  color: #17181b;
+}
+
+@media (max-width: 720px) {
+  .renew-world-cup-start,
+  .renew-world-cup-champion,
+  .renew-world-cup-ranking {
+    padding: 22px 18px;
+  }
+
+  .renew-world-cup-heading h1 {
+    font-size: 32px;
+  }
+
+  .renew-world-cup-versus {
+    gap: 8px;
+  }
+
+  .renew-world-cup-start-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-world-cup-card-image {
+    min-height: 280px;
+    padding: 10px;
+  }
+
+  .renew-world-cup-card-copy {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .renew-world-cup-card-copy strong {
+    font-size: 15px;
+  }
+
+  .renew-world-cup-card-copy > span {
+    display: none;
+  }
+
+  .renew-world-cup-vs {
+    top: 43%;
+    width: 42px;
+    height: 42px;
+    border-width: 4px;
+    font-size: 12px;
+  }
+
+  .renew-world-cup-ranking-heading {
+    display: grid;
+  }
+
+  .renew-world-cup-ranking li {
+    grid-template-columns: 22px 38px minmax(0, 1fr) 54px 54px;
+    gap: 9px;
+  }
+
+  .renew-world-cup-ranking-columns {
+    grid-template-columns: 69px minmax(0, 1fr) 54px 54px;
+    gap: 9px;
+  }
+
+  .renew-world-cup-ranking li > img {
+    width: 42px;
+    height: 56px;
+  }
+
+  .renew-world-cup-ranking li > span:nth-last-child(-n + 2) strong {
+    font-size: 12px;
+  }
+}
+
 .renew-lab-tool {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
