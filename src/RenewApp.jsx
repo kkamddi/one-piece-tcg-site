@@ -10216,20 +10216,25 @@ function RenewCardWorldCup({ uiLang, onOpenCard }) {
             <span>ONE PIECE CARD WORLD CUP</span>
             <h1>{getLocaleText(uiLang, '원피스카드 월드컵', 'One Piece Card World Cup', 'ワンピースカード ワールドカップ')}</h1>
           </div>
-          <div className="renew-world-cup-rounds" aria-label={getLocaleText(uiLang, '대진 규모', 'Tournament size', 'トーナメント規模')}>
-            {roundOptions.map((size) => (
-              <button key={size} type="button" className={roundSize === size ? 'is-active' : ''} onClick={() => setRoundSize(size)}>
-                {size}{getLocaleText(uiLang, '강', '', '強')}
+          <div className="renew-world-cup-setup">
+            <label className="renew-world-cup-round-select">
+              <span>{getLocaleText(uiLang, '대진 규모', 'Tournament size', 'トーナメント規模')}</span>
+              <select value={roundSize} onChange={(event) => setRoundSize(Number(event.target.value))}>
+                {roundOptions.map((size) => (
+                  <option key={size} value={size}>
+                    {size}{getLocaleText(uiLang, '강', ' cards', '強')}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="renew-world-cup-start-actions">
+              <button type="button" className="renew-world-cup-start-button" disabled={loading || Boolean(loadError)} onClick={startTournament}>
+                {loading ? getLocaleText(uiLang, '카드 준비 중', 'Preparing cards', 'カード準備中') : getLocaleText(uiLang, '월드컵 시작', 'Start World Cup', 'ワールドカップ開始')}
               </button>
-            ))}
-          </div>
-          <div className="renew-world-cup-start-actions">
-            <button type="button" className="renew-world-cup-start-button" disabled={loading || Boolean(loadError)} onClick={startTournament}>
-              {loading ? getLocaleText(uiLang, '카드 준비 중', 'Preparing cards', 'カード準備中') : getLocaleText(uiLang, '월드컵 시작', 'Start World Cup', 'ワールドカップ開始')}
-            </button>
-            <button type="button" className="renew-world-cup-ranking-button" onClick={openRanking}>
-              {getLocaleText(uiLang, showRanking ? '랭킹 닫기' : '랭킹 보기', showRanking ? 'Close ranking' : 'View ranking', showRanking ? 'ランキングを閉じる' : 'ランキングを見る')}
-            </button>
+              <button type="button" className="renew-world-cup-ranking-button" onClick={openRanking}>
+                {getLocaleText(uiLang, showRanking ? '랭킹 닫기' : '랭킹 보기', showRanking ? 'Close ranking' : 'View ranking', showRanking ? 'ランキングを閉じる' : 'ランキングを見る')}
+              </button>
+            </div>
           </div>
           {loadError ? <p className="renew-world-cup-error">{loadError}</p> : null}
         </section>

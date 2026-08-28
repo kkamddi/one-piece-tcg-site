@@ -11541,6 +11541,13 @@
   padding: clamp(24px, 4vw, 54px);
 }
 
+.renew-world-cup-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 470px);
+  align-items: center;
+  gap: clamp(32px, 6vw, 88px);
+}
+
 .renew-world-cup-heading {
   max-width: 760px;
 }
@@ -11565,15 +11572,11 @@
   line-height: 1.65;
 }
 
-.renew-world-cup-rounds {
+.renew-world-cup-setup {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  max-width: 620px;
-  margin-top: 30px;
+  gap: 12px;
 }
 
-.renew-world-cup-rounds button,
 .renew-world-cup-start-button,
 .renew-world-cup-ranking-button,
 .renew-world-cup-result-actions button {
@@ -11587,7 +11590,6 @@
   cursor: pointer;
 }
 
-.renew-world-cup-rounds button.is-active,
 .renew-world-cup-start-button,
 .renew-world-cup-result-actions button.is-primary {
   border-color: #17181b;
@@ -11597,6 +11599,30 @@
 
 .renew-world-cup-start-button {
   width: 100%;
+}
+
+.renew-world-cup-round-select {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-world-cup-round-select > span {
+  color: var(--renew-muted, #69707d);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-world-cup-round-select select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 44px 0 16px;
+  border: 1px solid var(--renew-line, #e1e2e5);
+  border-radius: 8px;
+  background: #fff;
+  color: #17181b;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .renew-world-cup-start-actions {
@@ -11617,6 +11643,8 @@
 }
 
 .renew-world-cup-error {
+  grid-column: 1 / -1;
+  margin: 0;
   color: #cf4b35;
   font-weight: 700;
 }
@@ -11835,7 +11863,7 @@
 }
 
 .renew-app.is-dark .renew-world-cup-card,
-.renew-app.is-dark .renew-world-cup-rounds button,
+.renew-app.is-dark .renew-world-cup-round-select select,
 .renew-app.is-dark .renew-world-cup-ranking-button,
 .renew-app.is-dark .renew-world-cup-result-actions button {
   border-color: #36383e;
@@ -11847,7 +11875,6 @@
   background: #17181b;
 }
 
-.renew-app.is-dark .renew-world-cup-rounds button.is-active,
 .renew-app.is-dark .renew-world-cup-start-button,
 .renew-app.is-dark .renew-world-cup-result-actions button.is-primary,
 .renew-app.is-dark .renew-world-cup-card-copy > span {
@@ -11864,6 +11891,11 @@
 
   .renew-world-cup-heading h1 {
     font-size: 32px;
+  }
+
+  .renew-world-cup-start {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
 
   .renew-world-cup-versus {
