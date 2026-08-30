@@ -2874,23 +2874,59 @@
   gap: 5px;
 }
 
-.renew-home-calendar-list button {
+.renew-home-calendar-day {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: start;
   gap: 10px;
   width: 100%;
-  min-height: 48px;
   border: 1px solid rgba(23, 25, 28, 0.08);
   border-radius: 10px;
   padding: 7px 9px;
-  color: inherit;
   background: rgba(255, 255, 255, 0.55);
+}
+
+.renew-home-calendar-date,
+.renew-home-calendar-event,
+.renew-home-calendar-more {
+  border: 0;
+  color: inherit;
+  background: transparent;
   text-align: left;
   cursor: pointer;
 }
 
-.renew-home-calendar-list button:hover {
+.renew-home-calendar-date {
+  min-height: 34px;
+  padding: 3px 0;
+}
+
+.renew-home-calendar-events {
+  display: grid;
+  min-width: 0;
+}
+
+.renew-home-calendar-event {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  padding: 3px 0 5px;
+}
+
+.renew-home-calendar-event + .renew-home-calendar-event {
+  border-top: 1px solid rgba(23, 25, 28, 0.07);
+  padding-top: 6px;
+}
+
+.renew-home-calendar-more {
+  width: max-content;
+  padding: 4px 0 2px;
+  color: #cf4d35;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.renew-home-calendar-day:hover {
   border-color: rgba(207, 77, 53, 0.32);
   background: rgba(207, 77, 53, 0.045);
 }
@@ -2900,10 +2936,6 @@
   font-size: 11px;
   font-weight: 900;
   text-align: center;
-}
-
-.renew-home-calendar-list span {
-  gap: 2px;
 }
 
 .renew-home-calendar-list strong,
@@ -18738,14 +18770,18 @@ button.renew-deck-entry:focus-visible {
   color: #aeb6c2;
 }
 
-.renew-app.is-dark .renew-home-calendar-list button {
+.renew-app.is-dark .renew-home-calendar-day {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.035);
 }
 
-.renew-app.is-dark .renew-home-calendar-list button:hover {
+.renew-app.is-dark .renew-home-calendar-day:hover {
   border-color: rgba(224, 100, 76, 0.4);
   background: rgba(224, 100, 76, 0.08);
+}
+
+.renew-app.is-dark .renew-home-calendar-event + .renew-home-calendar-event {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .renew-app.is-dark .renew-home-calendar-list strong {

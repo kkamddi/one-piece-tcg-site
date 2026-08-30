@@ -5783,6 +5783,13 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
     return buildCalendarEvents(resolvedBoxMarketItems)
       .filter((event) => event.date >= weekStart && event.date <= weekEnd);
   }, []);
+  const upcomingCalendarDays = useMemo(() => {
+    const eventsByDate = new Map();
+    upcomingCalendarEvents.forEach((event) => {
+      eventsByDate.set(event.date, [...(eventsByDate.get(event.date) || []), event]);
+    });
+    return [...eventsByDate.entries()];
+  }, [upcomingCalendarEvents]);
 
   useEffect(() => {
     let cancelled = false;
@@ -6072,14 +6079,25 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
             <b aria-hidden="true">→</b>
           </button>
           <div className="renew-home-calendar-list">
-            {upcomingCalendarEvents.length ? upcomingCalendarEvents.map((event) => (
-              <button key={event.id} type="button" onClick={() => onOpenCalendar?.()}>
-                <time dateTime={event.date}>{event.date.slice(5).replace('-', '.')}</time>
-                <span>
-                  <strong>{getCalendarDisplayTitle(event, uiLang)}</strong>
-                  <small>{event.locale} · {event.kind === 'release' ? getLocaleText(uiLang, '발매', 'Release', '発売') : getLocaleText(uiLang, '공식 일정', 'Official schedule', '公式日程')}</small>
-                </span>
-              </button>
+            {upcomingCalendarDays.length ? upcomingCalendarDays.map(([date, events]) => (
+              <div key={date} className="renew-home-calendar-day">
+                <button type="button" className="renew-home-calendar-date" onClick={() => onOpenCalendar?.(date)}>
+                  <time dateTime={date}>{date.slice(5).replace('-', '.')}</time>
+                </button>
+                <div className="renew-home-calendar-events">
+                  {events.slice(0, 2).map((event) => (
+                    <button key={event.id} type="button" className="renew-home-calendar-event" onClick={() => onOpenCalendar?.(date)}>
+                      <strong>{getCalendarDisplayTitle(event, uiLang)}</strong>
+                      <small>{event.locale} · {event.kind === 'release' ? getLocaleText(uiLang, '발매', 'Release', '発売') : getLocaleText(uiLang, '공식 일정', 'Official schedule', '公式日程')}</small>
+                    </button>
+                  ))}
+                  {events.length > 2 ? (
+                    <button type="button" className="renew-home-calendar-more" onClick={() => onOpenCalendar?.(date)}>
+                      {getLocaleText(uiLang, `+${events.length - 2}개 더보기`, `+${events.length - 2} more`, `+${events.length - 2}件`)}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
             )) : <p>{getLocaleText(uiLang, '이번 주 일정이 없습니다.', 'No schedules this week.', '今週の予定はありません。')}</p>}
           </div>
         </article>
@@ -6870,9 +6888,14 @@ function RenewCalendar({ uiLang }) {
   const isJp = uiLang === 'JP';
   const dateLocale = isJp ? 'ja-JP' : isEn ? 'en-US' : 'ko-KR';
   const todayKey = getCalendarTodayKey();
+  const requestedDate = new URLSearchParams(window.location.search).get('date') || '';
+  const validRequestedDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) ? requestedDate : '';
   const savedViewState = getAppHistoryState().calendarViewState || {};
-  const [monthKey, setMonthKey] = useState(() => /^\d{4}-\d{2}$/.test(savedViewState.monthKey || '') ? savedViewState.monthKey : todayKey.slice(0, 7));
-  const [selectedDate, setSelectedDate] = useState(() => /^\d{4}-\d{2}-\d{2}$/.test(savedViewState.selectedDate || '') ? savedViewState.selectedDate : todayKey);
+  const [monthKey, setMonthKey] = useState(() => validRequestedDate
+    ? validRequestedDate.slice(0, 7)
+    : (/^\d{4}-\d{2}$/.test(savedViewState.monthKey || '') ? savedViewState.monthKey : todayKey.slice(0, 7)));
+  const [selectedDate, setSelectedDate] = useState(() => validRequestedDate
+    || (/^\d{4}-\d{2}-\d{2}$/.test(savedViewState.selectedDate || '') ? savedViewState.selectedDate : todayKey));
   const [localeFilter, setLocaleFilter] = useState(() => ['ALL', 'KR', 'JP'].includes(savedViewState.localeFilter) ? savedViewState.localeFilter : 'ALL');
   const [kindFilter, setKindFilter] = useState(() => ['all', 'release', 'event', 'notice'].includes(savedViewState.kindFilter) ? savedViewState.kindFilter : 'all');
   const [boxes, setBoxes] = useState(resolvedBoxMarketItems);
@@ -15961,7 +15984,7 @@ export default function RenewApp() {
             if (item.cardId) query.set('cardId', item.cardId);
             navigatePage('prices', { query: query.toString() });
           }}
-          onOpenCalendar={() => navigatePage('calendar')}
+          onOpenCalendar={(date = '') => navigatePage('calendar', { query: date ? `date=${encodeURIComponent(date)}` : '' })}
         />
       ) : activePage === 'adminAnalytics' ? (
         <RenewAdminAnalytics
