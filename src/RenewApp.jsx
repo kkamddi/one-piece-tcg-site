@@ -107,6 +107,7 @@ const MARKETPLACE_ENABLED = false;
 const MARKET_INDEX_PUBLIC_ENABLED = true;
 const RENEWAL_NOTICE_POPUP_ENABLED = false;
 const PARTNER_NEWS_POPUP_ENABLED = false;
+const PARTNER_SHOPS_VISIBLE = false;
 const RARITY_ORDER = ['SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C', 'P'];
 const DEFERRED_RARITIES = new Set(['C', 'UC']);
 const PACK_SIMULATOR_DEFAULT_RULE = Object.freeze({
@@ -6269,6 +6270,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 }
 
 function RenewPartnerAdSection({ uiLang, placement = 'home' }) {
+  if (!PARTNER_SHOPS_VISIBLE) return null;
   const isEn = uiLang === 'EN';
   const getActionPresentation = (action) => {
     const actionKey = `${action?.labelEn || ''} ${action?.href || ''}`.toLowerCase();
@@ -6335,6 +6337,7 @@ function RenewPartnerAdSection({ uiLang, placement = 'home' }) {
 }
 
 function RenewPartnerShopSeoPage({ uiLang }) {
+  if (!PARTNER_SHOPS_VISIBLE) return <RenewShops uiLang={uiLang} />;
   const isEn = uiLang === 'EN';
   const { shop } = getPartnerShopRoute();
 
@@ -15230,7 +15233,10 @@ function RenewShops({ uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const initialShopRouteState = getShopRouteState();
   const savedViewState = getAppHistoryState().shopsViewState || {};
-  const [type, setType] = useState(() => savedViewState.type ?? (initialShopRouteState?.type || ''));
+  const [type, setType] = useState(() => {
+    const initialType = savedViewState.type ?? (initialShopRouteState?.type || '');
+    return !PARTNER_SHOPS_VISIBLE && initialType === 'partner' ? '' : initialType;
+  });
   const [sido, setSido] = useState(() => savedViewState.sido ?? (initialShopRouteState?.sido || '전체'));
   const [gungu, setGungu] = useState(() => savedViewState.gungu || '전체');
   const [draftQuery, setDraftQuery] = useState(() => savedViewState.draftQuery || '');
@@ -15240,7 +15246,7 @@ function RenewShops({ uiLang }) {
   const [userPosition, setUserPosition] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
-  const partnerShopRows = useMemo(() => getPartnerShopRows(uiLang), [uiLang]);
+  const partnerShopRows = useMemo(() => PARTNER_SHOPS_VISIBLE ? getPartnerShopRows(uiLang) : [], [uiLang]);
 
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'shops') return;
@@ -15336,20 +15342,22 @@ function RenewShops({ uiLang }) {
   return (
     <main className="renew-subpage">
       <section className="renew-panel renew-shops">
-        <div className="renew-shop-partner-link">
-          <div>
-            <small>{uiLang === 'EN' ? 'PARTNER SHOPS' : 'PARTNER SHOPS'}</small>
-            <strong>{uiLang === 'EN' ? 'Partner card shops' : '제휴 카드샵'}</strong>
-            <span>{uiLang === 'EN' ? 'Check partner stores and shop news.' : '제휴 카드샵 위치와 입고소식을 확인할 수 있습니다.'}</span>
+        {PARTNER_SHOPS_VISIBLE ? (
+          <div className="renew-shop-partner-link">
+            <div>
+              <small>PARTNER SHOPS</small>
+              <strong>{uiLang === 'EN' ? 'Partner card shops' : '제휴 카드샵'}</strong>
+              <span>{uiLang === 'EN' ? 'Check partner stores and shop news.' : '제휴 카드샵 위치와 입고소식을 확인할 수 있습니다.'}</span>
+            </div>
+            <a href="/shops/partners" onClick={() => rememberCurrentAppView()}>{uiLang === 'EN' ? 'View' : '보기'}</a>
           </div>
-          <a href="/shops/partners" onClick={() => rememberCurrentAppView()}>{uiLang === 'EN' ? 'View' : '보기'}</a>
-        </div>
+        ) : null}
         <div className="renew-shop-filters">
           <select value={type} onChange={(event) => { setType(event.target.value); setSido('전체'); setGungu('전체'); }}>
             <option value="">{t('allShops')}</option>
             <option value="official">{t('officialShop')}</option>
             <option value="general">{t('searchShop')}</option>
-            <option value="partner">{t('partnerShop')}</option>
+            {PARTNER_SHOPS_VISIBLE ? <option value="partner">{t('partnerShop')}</option> : null}
           </select>
           <select value={sido} onChange={(event) => { setSido(event.target.value); setGungu('전체'); }}>
             <option value="전체">{t('allRegions')}</option>
