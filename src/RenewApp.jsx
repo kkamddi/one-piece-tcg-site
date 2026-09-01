@@ -5750,7 +5750,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const [marketCards, setMarketCards] = useState([]);
   const [valueModalGrade, setValueModalGrade] = useState(null);
   const [portfolioEditorItem, setPortfolioEditorItem] = useState(null);
-  const [updatesOpen, setUpdatesOpen] = useState(false);
   const [renewalNoticeOpen, setRenewalNoticeOpen] = useState(false);
   const [renewalNoticeChecked, setRenewalNoticeChecked] = useState(false);
   const [partnerNewsOpen, setPartnerNewsOpen] = useState(false);
@@ -6223,9 +6222,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           <p className="renew-home-movers-note">{getLocaleText(uiLang, '오늘과 전일 모두 거래된 카드의 일별 중앙값 기준', 'Daily median for cards traded on both days', '当日・前日とも取引があるカードの日次中央値')}</p>
         </article>
       </section>
-      {!isJp ? <button type="button" className="renew-home-updates-mini" onClick={() => setUpdatesOpen(true)}>
-        <span>업데이트 내역</span>
-      </button> : null}
       {valueModalGrade ? (
         <RenewValueModal
           initialGrade={valueModalGrade}
@@ -6251,7 +6247,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           uiLang={uiLang}
         />
       ) : null}
-      {updatesOpen && !isJp ? <RenewUpdateModal onClose={() => setUpdatesOpen(false)} /> : null}
       {renewalNoticeOpen && !isJp ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
       {PARTNER_NEWS_POPUP_ENABLED && partnerNewsOpen && latestPartnerNews ? (
         <PartnerShopNewsModal news={latestPartnerNews} uiLang={uiLang} onClose={closePartnerNews} />
