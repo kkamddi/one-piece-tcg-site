@@ -9175,7 +9175,6 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, onAddPo
                 <span aria-hidden="true">⋮</span>
               </summary>
               <div className="renew-modal-more-menu">
-                {snkrdunkUrl ? <a href={snkrdunkUrl} target="_blank" rel="noreferrer">{t('openSnkrdunk')}</a> : null}
                 {marketListingCount ? (
                   <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
                     {getLocaleText(uiLang, `관련 매물 ${marketListingCount}개 보기`, `View ${marketListingCount} related listings`, `関連出品 ${marketListingCount}件を見る`)}
@@ -9185,6 +9184,13 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, onAddPo
                 {card.officialUrl ? <a href={card.officialUrl} target="_blank" rel="noreferrer">{t('officialInfo')}</a> : null}
               </div>
             </details>
+            {snkrdunkUrl ? (
+              <a className="renew-modal-snkrdunk-action" href={snkrdunkUrl} target="_blank" rel="noreferrer">
+                <img src="/snkrdunk-logo.png" alt="SNKRDUNK" />
+                <span>{getLocaleText(uiLang, 'SNKRDUNK에서 상품 보기', 'View product on SNKRDUNK', 'SNKRDUNKで商品を見る')}</span>
+                <MobileNavIcon type="external" />
+              </a>
+            ) : null}
           </div>
         </div>
       </div>

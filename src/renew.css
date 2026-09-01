@@ -4190,6 +4190,35 @@
   background: #17191c;
 }
 
+.renew-modal-actions .renew-modal-snkrdunk-action {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  color: #17191c;
+  background: #fff;
+  text-align: left;
+  text-decoration: none;
+}
+
+.renew-modal-snkrdunk-action img {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.renew-modal-snkrdunk-action span {
+  font-weight: 900;
+}
+
+.renew-modal-snkrdunk-action svg {
+  width: 17px;
+  height: 17px;
+}
+
 .renew-modal-actions .renew-modal-icon-action,
 .renew-modal-more-actions > summary {
   display: inline-grid;
@@ -4340,6 +4369,12 @@
   border-color: #d93f2f;
   color: #fff;
   background: #d93f2f;
+}
+
+.renew-app.is-dark .renew-modal-actions .renew-modal-snkrdunk-action {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #17191c;
+  background: #fff;
 }
 
 .renew-placeholder {
