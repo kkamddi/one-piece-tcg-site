@@ -4814,6 +4814,63 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
   );
 }
 
+function RenewHomePromoCarousel({ uiLang }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const slides = [
+    {
+      key: 'advertising',
+      eyebrow: 'ADVERTISING',
+      title: getLocaleText(uiLang, '광고, 배너 문의', 'Advertise on Card Pone', 'Card Pone 広告・バナーお問い合わせ'),
+      body: getLocaleText(uiLang, '브랜드, 상품, 캠페인을 카드 수집가에게 소개해보세요.', 'Introduce your brand, products, and campaigns to card collectors.', 'ブランドや商品、キャンペーンをカードコレクターに紹介できます。'),
+      subject: 'Card Pone 광고 문의'
+    },
+    {
+      key: 'partnership',
+      eyebrow: 'PARTNERSHIP',
+      title: getLocaleText(uiLang, '카드샵·행사·서비스 제휴 문의', 'Card shop and service partnerships', 'カードショップ・イベント・サービス提携'),
+      body: getLocaleText(uiLang, '카드샵, 행사, 수집 서비스와 다양한 협업을 기다립니다.', 'We welcome collaborations with card shops, events, and collector services.', 'カードショップ、イベント、収集サービスとの協業を募集しています。'),
+      subject: 'Card Pone 제휴 문의'
+    }
+  ];
+
+  useEffect(() => {
+    if (paused || slides.length < 2) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveIndex((index) => (index + 1) % slides.length);
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [paused, slides.length]);
+
+  return (
+    <section
+      className="renew-home-promo"
+      aria-label={getLocaleText(uiLang, '광고 및 제휴 안내', 'Advertising and partnership', '広告・提携案内')}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      <div className="renew-home-promo-viewport">
+        <div className="renew-home-promo-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+          {slides.map((slide, index) => (
+            <article key={slide.key} className={`renew-home-promo-slide is-${slide.key}`} aria-hidden={activeIndex !== index}>
+              <div>
+                <small>{slide.eyebrow}</small>
+                <strong>{slide.title}</strong>
+              </div>
+              <a href={`mailto:optkr26@gmail.com?subject=${encodeURIComponent(slide.subject)}`} tabIndex={activeIndex === index ? 0 : -1}>
+                <span>optkr26@gmail.com</span>
+                <MobileNavIcon type="external" />
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function RenewOfficialLinks({ uiLang }) {
   const items = OFFICIAL_LINK_ITEMS.filter((item) => !item.locales || item.locales.includes(uiLang));
   return (
@@ -5756,9 +5813,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const [progressOpen, setProgressOpen] = useState(false);
   const [progressLocale, setProgressLocale] = useState('KR');
   const [progressData, setProgressData] = useState({ KR: { owned: 0, total: 0, percent: 0, series: [] }, JP: { owned: 0, total: 0, percent: 0, series: [] } });
-  const [attendance, setAttendance] = useState(null);
-  const [attendanceLoading, setAttendanceLoading] = useState(false);
-  const [attendanceNotice, setAttendanceNotice] = useState('');
   const [dailyMovers, setDailyMovers] = useState(null);
   const [dailyMoversLoading, setDailyMoversLoading] = useState(true);
   const ownedCount = Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds.length : 0;
@@ -5958,45 +6012,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const latestPartnerNews = useMemo(() => isJp ? null : getActivePartnerShopNews()[0] || null, [isJp]);
 
   useEffect(() => {
-    if (!authUser?.id) {
-      setAttendance(null);
-      return undefined;
-    }
-    let cancelled = false;
-    fetchCommunityPointOverview()
-      .then((overview) => {
-        if (!cancelled) setAttendance(overview || null);
-      })
-      .catch(() => {
-        if (!cancelled) setAttendance(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [authUser?.id]);
-
-  async function checkInFromHome() {
-    if (attendanceLoading || attendance?.checkedToday) return;
-    setAttendanceLoading(true);
-    setAttendanceNotice('');
-    try {
-      const status = await checkInCommunityAttendance();
-      try {
-        setAttendance(await fetchCommunityPointOverview());
-      } catch {
-        setAttendance((current) => ({ ...(current || {}), ...status }));
-      }
-      setAttendanceNotice(status?.awarded
-        ? getLocaleText(uiLang, '+1P 적립 완료', '+1P awarded', '+1P獲得完了')
-        : getLocaleText(uiLang, '오늘 출석 완료', 'Checked in today', '本日は出席済み'));
-    } catch {
-      setAttendanceNotice(getLocaleText(uiLang, '출석 처리 실패', 'Check-in failed', '出席に失敗しました'));
-    } finally {
-      setAttendanceLoading(false);
-    }
-  }
-
-  useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!RENEWAL_NOTICE_POPUP_ENABLED) {
       setRenewalNoticeOpen(false);
@@ -6067,6 +6082,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       <section className="renew-hero" aria-label="메인 검색">
         <RenewSearch onSubmitSearch={onSubmitSearch} onSelectPopular={onSelectPopular} visitorToken={visitorToken} uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
+        <RenewHomePromoCarousel uiLang={uiLang} />
       </section>
 
       <section className="renew-dashboard" aria-label={getLocaleText(uiLang, '메인 현황', 'Site overview', 'サイト概要')}>
@@ -6144,25 +6160,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
               <strong>{psa10Count}</strong>
             </button>
           </div>
-          {authUser ? (
-            <div className="renew-home-attendance">
-              <div>
-                <span>{getLocaleText(uiLang, '오늘의 출석', 'Today\'s check-in', '今日の出席')}</span>
-                <strong>{attendance?.checkedToday
-                  ? getLocaleText(uiLang, '출석 완료', 'Complete', '出席済み')
-                  : getLocaleText(uiLang, '매일 1회 +1P', '+1P once a day', '1日1回 +1P')}</strong>
-                <small>{getLocaleText(uiLang, `연속 ${Number(attendance?.streak || 0)}일 · ${Number(attendance?.totalPoints || 0).toLocaleString('ko-KR')}P`, `${Number(attendance?.streak || 0)}-day streak · ${Number(attendance?.totalPoints || 0)}P`, `${Number(attendance?.streak || 0)}日連続 · ${Number(attendance?.totalPoints || 0)}P`)}</small>
-              </div>
-              <button type="button" onClick={checkInFromHome} disabled={attendanceLoading || attendance?.checkedToday}>
-                {attendanceLoading
-                  ? getLocaleText(uiLang, '처리 중', 'Checking in', '処理中')
-                  : attendance?.checkedToday
-                    ? getLocaleText(uiLang, '완료', 'Done', '完了')
-                    : getLocaleText(uiLang, '출석체크', 'Check in', '出席')}
-              </button>
-              {attendanceNotice ? <em>{attendanceNotice}</em> : null}
-            </div>
-          ) : null}
           {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
         </article>
 
@@ -9134,14 +9131,6 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, onAddPo
           <div className="renew-modal-code">{card.cardNo} · {card.rarity}</div>
           <h2>{card.name}</h2>
           <p>{card.seriesName}</p>
-          <details>
-            <summary>{t('cardInfo')}</summary>
-            <div>{card.categoryKo} · {card.colorKo} · {t('cost')} {card.cost} · {t('power')} {card.power}</div>
-          </details>
-          <details>
-            <summary>{t('effect')}</summary>
-            <div>{card.effect || t('effectPending')}</div>
-          </details>
           <div className={`renew-modal-actions ${snkrdunkApparelId && !isJapaneseUi(uiLang) ? 'has-alert' : 'no-alert'}`}>
             <button type="button" className="renew-modal-primary-action" onClick={() => onOpenMarket?.(card)}>
               <span className="renew-modal-action-full">{getLocaleText(uiLang, '시세 보기', 'View prices', '相場を見る')}</span>
