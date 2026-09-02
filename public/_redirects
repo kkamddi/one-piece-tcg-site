@@ -37,6 +37,10 @@
 /jp/shops/partners/* /jp/shops 301
 /admin/analytics / 200
 /stats-prototype / 200
+/cards/kr/* /cards 200
+/cards/jp/* /cards 200
+/jp/cards/kr/* /jp/cards 200
+/jp/cards/jp/* /jp/cards 200
 /prices/card/* /prices 200
 /prices/product/* /prices 200
 /prices/box/* /prices 200
