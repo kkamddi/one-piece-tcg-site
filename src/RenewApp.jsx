@@ -4814,58 +4814,19 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
   );
 }
 
-function RenewHomePromoCarousel({ uiLang }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const slides = [
-    {
-      key: 'advertising',
-      eyebrow: 'ADVERTISING',
-      title: getLocaleText(uiLang, '광고, 배너 문의', 'Advertise on Card Pone', 'Card Pone 広告・バナーお問い合わせ'),
-      body: getLocaleText(uiLang, '브랜드, 상품, 캠페인을 카드 수집가에게 소개해보세요.', 'Introduce your brand, products, and campaigns to card collectors.', 'ブランドや商品、キャンペーンをカードコレクターに紹介できます。'),
-      subject: 'Card Pone 광고 문의'
-    },
-    {
-      key: 'partnership',
-      eyebrow: 'PARTNERSHIP',
-      title: getLocaleText(uiLang, '카드샵·행사·서비스 제휴 문의', 'Card shop and service partnerships', 'カードショップ・イベント・サービス提携'),
-      body: getLocaleText(uiLang, '카드샵, 행사, 수집 서비스와 다양한 협업을 기다립니다.', 'We welcome collaborations with card shops, events, and collector services.', 'カードショップ、イベント、収集サービスとの協業を募集しています。'),
-      subject: 'Card Pone 제휴 문의'
-    }
-  ];
-
-  useEffect(() => {
-    if (paused || slides.length < 2) return undefined;
-    const timer = window.setInterval(() => {
-      setActiveIndex((index) => (index + 1) % slides.length);
-    }, 2000);
-    return () => window.clearInterval(timer);
-  }, [paused, slides.length]);
-
+function RenewHomePromoBanner({ uiLang }) {
   return (
-    <section
-      className="renew-home-promo"
-      aria-label={getLocaleText(uiLang, '광고 및 제휴 안내', 'Advertising and partnership', '広告・提携案内')}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
+    <section className="renew-home-promo" aria-label={getLocaleText(uiLang, '광고 문의', 'Advertising inquiry', '広告お問い合わせ')}>
       <div className="renew-home-promo-viewport">
-        <div className="renew-home-promo-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
-          {slides.map((slide, index) => (
-            <article key={slide.key} className={`renew-home-promo-slide is-${slide.key}`} aria-hidden={activeIndex !== index}>
-              <div>
-                <small>{slide.eyebrow}</small>
-                <strong>{slide.title}</strong>
-              </div>
-              <a href={`mailto:optkr26@gmail.com?subject=${encodeURIComponent(slide.subject)}`} tabIndex={activeIndex === index ? 0 : -1}>
-                <span>optkr26@gmail.com</span>
-                <MobileNavIcon type="external" />
-              </a>
-            </article>
-          ))}
-        </div>
+        <article className="renew-home-promo-slide is-advertising">
+          <div>
+            <strong>{getLocaleText(uiLang, '광고, 배너 문의', 'Advertising inquiry', '広告・バナーお問い合わせ')}</strong>
+          </div>
+          <a href={`mailto:optkr26@gmail.com?subject=${encodeURIComponent('Card Pone 광고 문의')}`}>
+            <span>optkr26@gmail.com</span>
+            <MobileNavIcon type="external" />
+          </a>
+        </article>
       </div>
     </section>
   );
@@ -6082,7 +6043,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       <section className="renew-hero" aria-label="메인 검색">
         <RenewSearch onSubmitSearch={onSubmitSearch} onSelectPopular={onSelectPopular} visitorToken={visitorToken} uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
-        <RenewHomePromoCarousel uiLang={uiLang} />
+        <RenewHomePromoBanner uiLang={uiLang} />
       </section>
 
       <section className="renew-dashboard" aria-label={getLocaleText(uiLang, '메인 현황', 'Site overview', 'サイト概要')}>

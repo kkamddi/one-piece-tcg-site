@@ -1892,19 +1892,14 @@
   box-shadow: rgba(4, 23, 43, 0.04) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 20px 30px -22px;
 }
 
-.renew-home-promo-track {
-  display: flex;
-  transition: transform 0.45s ease;
-}
-
 .renew-home-promo-slide {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 28px;
   min-width: 100%;
-  min-height: 88px;
-  padding: 16px 26px;
+  min-height: 72px;
+  padding: 12px 22px;
 }
 
 .renew-home-promo-slide.is-advertising {
@@ -1912,27 +1907,14 @@
   background: #fff;
 }
 
-.renew-home-promo-slide.is-partnership {
-  color: #fff;
-  background: #17191c;
-}
-
 .renew-home-promo-slide > div {
   min-width: 0;
-}
-
-.renew-home-promo-slide small {
-  display: block;
-  margin-bottom: 5px;
-  color: #c94d35;
-  font-size: 10px;
-  font-weight: 950;
 }
 
 .renew-home-promo-slide strong {
   display: block;
   overflow: hidden;
-  font-size: 20px;
+  font-size: 17px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1960,12 +1942,6 @@
 .renew-app.is-dark .renew-home-promo-viewport {
   border-color: rgba(255, 255, 255, 0.14);
   background: #171b23;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .renew-home-promo-track {
-    transition: none;
-  }
 }
 
 .renew-official-links a:hover {
@@ -21205,16 +21181,15 @@ button.renew-deck-entry:focus-visible {
   }
 
   .renew-home-promo-slide {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    gap: 9px;
-    min-height: 88px;
-    padding: 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 64px;
+    padding: 10px 12px;
   }
 
   .renew-home-promo-slide strong {
-    font-size: 16px;
-    white-space: normal;
+    font-size: 14px;
+    white-space: nowrap;
   }
 
   .renew-home-promo-slide a {
