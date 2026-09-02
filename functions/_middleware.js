@@ -1747,6 +1747,28 @@ function getFixedPageSeo(normalized) {
 
 export function getPageSeo(pathname) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const cardDetailMatch = normalized.match(/^\/(jp\/)?cards\/(kr|jp)\/([^/]+)$/i);
+  if (cardDetailMatch) {
+    const japaneseUi = Boolean(cardDetailMatch[1]);
+    let cardKey = cardDetailMatch[3];
+    try {
+      cardKey = decodeURIComponent(cardKey);
+    } catch {
+      // Keep the encoded identifier so a malformed URL still receives a stable app shell.
+    }
+    const cardCode = cardKey.replace(/-p(\d+)$/i, ' P$1').toUpperCase();
+    return japaneseUi ? {
+      title: `${cardCode} カード情報 | Card Pone`,
+      description: `ONE PIECEカードゲーム ${cardCode} のカード画像、収録情報、相場へのリンクを確認できます。`,
+      keywords: `${cardCode}, ONE PIECEカードゲーム, ワンピースカード`,
+      schemaType: 'Product'
+    } : {
+      title: `${cardCode} 원피스카드 정보 | Card Pone`,
+      description: `원피스 카드게임 ${cardCode}의 카드 이미지, 수록 정보와 시세 바로가기를 확인할 수 있습니다.`,
+      keywords: `${cardCode}, 원피스카드, 원피스카드 도감`,
+      schemaType: 'Product'
+    };
+  }
   if (isJapanesePath(normalized)) return getJapaneseSeo(normalized);
   const fixedSeo = getFixedPageSeo(normalized);
   if (fixedSeo) return fixedSeo;

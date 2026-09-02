@@ -2794,6 +2794,29 @@ function localizeAppPath(pathname = '/', uiLang = 'KR') {
   return uiLang === 'JP' ? `${JAPANESE_ROUTE_PREFIX}${path === '/' ? '' : path}` : path;
 }
 
+function getCatalogCardRouteId(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
+  const path = getAppPath(pathname);
+  const match = path.match(/^\/cards\/(kr|jp)\/([^/]+)$/i);
+  if (!match) return '';
+  try {
+    const locale = match[1].toUpperCase();
+    const cardKey = decodeURIComponent(match[2]).replace(/-p(\d+)$/i, '_p$1');
+    return cardKey ? `${locale}::${cardKey}` : '';
+  } catch {
+    return '';
+  }
+}
+
+function getCatalogCardDetailPath(cardOrId, uiLang = 'KR') {
+  const card = cardOrId && typeof cardOrId === 'object' ? cardOrId : null;
+  const id = String(card?.id || card?.cardId || cardOrId || '');
+  const idMatch = id.match(/^(KR|JP)::(.+)$/i);
+  const locale = String(idMatch?.[1] || card?.locale || 'JP').toUpperCase();
+  const cardKey = String(idMatch?.[2] || card?.cardNo || '').replace(/_p(\d+)$/i, '-p$1');
+  if (!cardKey || !['KR', 'JP'].includes(locale)) return getLocalizedPagePath('cards', uiLang);
+  return localizeAppPath(`/cards/${locale.toLowerCase()}/${encodeURIComponent(cardKey)}`, uiLang);
+}
+
 function getLocalizedPagePath(page, uiLang = 'KR') {
   return localizeAppPath(PAGE_PATHS[page] || '/', uiLang);
 }
@@ -2882,6 +2905,8 @@ function getRouteSeoPage(pathname = '/') {
 
 function getCatalogRouteViewState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   const path = getAppPath(pathname);
+  const cardRouteId = getCatalogCardRouteId(pathname);
+  if (cardRouteId) return { locale: cardRouteId.startsWith('KR::') ? 'KR' : 'JP' };
   if (path === '/cards/jp') return { locale: 'JP' };
   if (path === '/cards/kr') return { locale: 'KR' };
   if (path.startsWith('/cards/series/')) {
@@ -8372,10 +8397,11 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
   );
 }
 
-function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, setPortfolioHoldings, initialSearch, initialViewState, viewStateRevision = 0, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenMarket, onOpenMarketplace, onOpenSeriesGuide, onRequireLogin, marketListings = [], uiLang }) {
+function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, setPortfolioHoldings, initialSearch, initialViewState, initialCardId = '', viewStateRevision = 0, restoreScrollY = null, onRestoreScrollDone, onViewStateChange, onOpenCardRoute, onCloseCardRoute, onOpenMarket, onOpenMarketplace, onOpenSeriesGuide, onRequireLogin, marketListings = [], uiLang }) {
   const t = (key) => getUiText(uiLang, key);
   const hasInitialSearch = Boolean(initialSearch?.q);
-  const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (initialViewState?.locale || 'JP');
+  const routeCardLocale = String(initialCardId).match(/^(KR|JP)::/)?.[1] || '';
+  const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (routeCardLocale || initialViewState?.locale || 'JP');
   const [locale, setLocale] = useState(initialLocale);
   const [selectedSeries, setSelectedSeries] = useState(() => hasInitialSearch ? getDefaultRenewSeriesId(initialLocale) : (initialViewState?.selectedSeries || getDefaultRenewSeriesId(initialLocale)));
   const [openSection, setOpenSection] = useState(() => hasInitialSearch ? '' : (initialViewState?.openSection || ''));
@@ -8387,6 +8413,8 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [cardDetailError, setCardDetailError] = useState(false);
+  const cardDetailRequestRef = useRef(0);
   const [portfolioEditorItem, setPortfolioEditorItem] = useState(null);
   const [portfolioEditorDetail, setPortfolioEditorDetail] = useState(null);
   const [catalogMarketPriceByCardId, setCatalogMarketPriceByCardId] = useState(() => new Map());
@@ -8641,17 +8669,31 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     await persistState({ ...(userState || {}), [field]: nextList }, [field]);
   }
 
-  function openCard(cardId) {
+  function openCard(cardId, { updateRoute = true } = {}) {
+    const requestId = cardDetailRequestRef.current + 1;
+    cardDetailRequestRef.current = requestId;
     const summary = cards.find((card) => card.id === cardId) || null;
-    setSelectedCard(summary);
+    setCardDetailError(false);
+    setSelectedCard(summary || {
+      id: cardId,
+      cardId,
+      locale: String(cardId).startsWith('KR::') ? 'KR' : 'JP'
+    });
+    if (updateRoute) onOpenCardRoute?.(cardId);
     fetchCardById(cardId)
       .then((detail) => {
-        if (!detail) return;
+        if (cardDetailRequestRef.current !== requestId) return;
+        if (!detail) {
+          setCardDetailError(true);
+          return;
+        }
         setSelectedCard((current) => (
-          !current || current.id === cardId ? { ...(current || {}), ...detail } : current
+          current?.id === cardId || current?.cardId === cardId ? { ...current, ...detail } : current
         ));
       })
-      .catch(() => {});
+      .catch(() => {
+        if (cardDetailRequestRef.current === requestId) setCardDetailError(true);
+      });
   }
 
   async function openCatalogPortfolio(card) {
@@ -8684,7 +8726,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
       sourceUrl: `https://snkrdunk.com/en/trading-cards/${marketLink.apparelId}?slide=right`,
       grade: 'a'
     });
-    setSelectedCard(null);
+    if (!initialCardId) setSelectedCard(null);
   }
 
   async function saveCatalogPortfolioLot({ grade, lot }) {
@@ -8705,26 +8747,49 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
   }
 
   useEffect(() => {
-    const routeCardId = new URLSearchParams(window.location.search).get('cardId');
-    if (routeCardId) openCard(routeCardId);
-  }, [viewStateRevision]);
+    const queryCardId = new URLSearchParams(window.location.search).get('cardId') || '';
+    const pathCardId = getCatalogCardRouteId(window.location.pathname);
+    const routeCardId = initialCardId || queryCardId;
+    if (!routeCardId) {
+      cardDetailRequestRef.current += 1;
+      setSelectedCard(null);
+      setCardDetailError(false);
+      return;
+    }
+    openCard(routeCardId, { updateRoute: false });
+    if (!pathCardId && queryCardId) onOpenCardRoute?.(queryCardId, { replace: true });
+  }, [initialCardId, viewStateRevision]);
 
   useEffect(() => {
-    if (!selectedCard) {
+    if (!selectedCard?.name) {
       setJsonLd('optcg-detail-jsonld', null);
       return;
+    }
+    const detailPath = getCatalogCardDetailPath(selectedCard, uiLang);
+    const detailUrl = `${SITE_ORIGIN}${detailPath}`;
+    const description = `${selectedCard.cardNo || ''} ${selectedCard.name || ''} ${selectedCard.rarity || ''} ${selectedCard.seriesName || ''}`.trim();
+    const image = getCardImageSrc(selectedCard);
+    if (getCatalogCardRouteId(window.location.pathname)) {
+      const title = `${selectedCard.cardNo || ''} ${selectedCard.name || ''} | Card Pone`.trim();
+      document.title = title;
+      setHeadMeta('meta[name="description"]', { content: description });
+      setHeadMeta('link[rel="canonical"]', { rel: 'canonical', href: detailUrl });
+      setHeadMeta('meta[property="og:title"]', { property: 'og:title', content: title });
+      setHeadMeta('meta[property="og:description"]', { property: 'og:description', content: description });
+      setHeadMeta('meta[property="og:url"]', { property: 'og:url', content: detailUrl });
+      setHeadMeta('meta[property="og:image"]', { property: 'og:image', content: image });
     }
     setJsonLd('optcg-detail-jsonld', {
       '@context': 'https://schema.org',
       '@type': 'CreativeWork',
       name: selectedCard.name,
       identifier: selectedCard.cardNo,
-      image: selectedCard.imageUrl,
-      inLanguage: locale === 'JP' ? 'ja-JP' : 'ko-KR',
-      description: `${selectedCard.cardNo} ${selectedCard.rarity} ${selectedCard.seriesName || ''}`.trim(),
-      url: `${SITE_ORIGIN}${localizeAppPath(`/prices/card/${encodeURIComponent(selectedCard.cardNo)}`, uiLang)}`
+      image,
+      inLanguage: selectedCard.locale === 'JP' ? 'ja-JP' : 'ko-KR',
+      description,
+      url: detailUrl
     });
-  }, [selectedCard, locale, uiLang]);
+  }, [selectedCard, uiLang]);
 
   const selectCatalogSeries = (series, options = {}) => {
     setSelectedSeries(series.id);
@@ -8747,6 +8812,72 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     setActiveRarity('ALL');
     setRarityPanelOpen(false);
   };
+
+  const selectedCardView = selectedCard?.name ? (
+    <RenewCardModal
+      card={selectedCard}
+      standalone={Boolean(initialCardId)}
+      onClose={() => {
+        setSelectedCard(null);
+        if (initialCardId) onCloseCardRoute?.();
+      }}
+      onOpenMarket={async (card) => {
+        const marketLink = await findApprovedCardMarketLink(card);
+        onOpenMarket?.({
+          code: card?.marketCode || card?.cardNo || '',
+          apparelId: marketLink?.apparelId || null,
+          cardId: card?.id || card?.cardId || ''
+        });
+      }}
+      onSearchSameName={(name) => {
+        setSearchKeyword(name || '');
+        setSelectedCard(null);
+        if (initialCardId) onCloseCardRoute?.();
+      }}
+      onAddPortfolio={openCatalogPortfolio}
+      marketListingCount={MARKETPLACE_ENABLED ? (listingCountByCardId.get(selectedCard.id) || 0) : 0}
+      authUser={authUser}
+      onRequireLogin={onRequireLogin}
+      onOpenMarketplace={MARKETPLACE_ENABLED ? ((card) => onOpenMarketplace?.(card)) : undefined}
+      uiLang={uiLang}
+    />
+  ) : null;
+
+  const portfolioEditorModal = portfolioEditorItem ? (
+    <RenewPortfolioEditorModal
+      item={portfolioEditorItem}
+      initialGrade={portfolioEditorItem.grade}
+      holdings={portfolioHoldings}
+      initialDetail={portfolioEditorDetail}
+      onSave={saveCatalogPortfolioLot}
+      onDeleteLot={deleteCatalogPortfolioLot}
+      onClose={() => {
+        setPortfolioEditorItem(null);
+        setPortfolioEditorDetail(null);
+      }}
+      uiLang={uiLang}
+    />
+  ) : null;
+
+  if (initialCardId) {
+    return (
+      <>
+        <main className="renew-card-detail-page">
+          {cardDetailError ? (
+            <section className="renew-card-detail-state">
+              <strong>{getLocaleText(uiLang, '카드를 찾을 수 없습니다.', 'Card not found.', 'カードが見つかりません。')}</strong>
+              <button type="button" onClick={() => onCloseCardRoute?.()}>{getRouteBackLabel(uiLang)}</button>
+            </section>
+          ) : selectedCardView || (
+            <section className="renew-card-detail-state">
+              <span>{t('loading')}</span>
+            </section>
+          )}
+        </main>
+        {portfolioEditorModal}
+      </>
+    );
+  }
 
   return (
     <main className="renew-catalog">
@@ -8939,8 +9070,8 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
                       <div className="renew-card-body">
                         <a
                           className="renew-card-code-link"
-                          href={localizeAppPath(`/prices/card/${encodeURIComponent(card.cardNo)}`, uiLang)}
-                          title={`${card.cardNo} ${card.name} ${getLocaleText(uiLang, '시세', 'price', '相場')}`}
+                          href={getCatalogCardDetailPath(card, uiLang)}
+                          title={`${card.cardNo} ${card.name}`}
                           onClick={(event) => {
                             event.preventDefault();
                             event.stopPropagation();
@@ -8991,55 +9122,14 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
       </section>
 
       <RenewSeoSummary page="cards" titleAs="h1" placement="footer" uiLang={uiLang} />
-      {selectedCard ? (
-        <RenewCardModal
-          card={selectedCard}
-          onClose={() => setSelectedCard(null)}
-          onOpenMarket={async (card) => {
-            const marketLink = await findApprovedCardMarketLink(card);
-            setSelectedCard(null);
-            onOpenMarket?.({
-              code: card?.marketCode || card?.cardNo || '',
-              apparelId: marketLink?.apparelId || null,
-              cardId: card?.id || card?.cardId || ''
-            });
-          }}
-          onSearchSameName={(name) => {
-            setSearchKeyword(name || '');
-            setSelectedCard(null);
-          }}
-          onAddPortfolio={openCatalogPortfolio}
-          marketListingCount={MARKETPLACE_ENABLED ? (listingCountByCardId.get(selectedCard.id) || 0) : 0}
-          authUser={authUser}
-          onRequireLogin={onRequireLogin}
-          onOpenMarketplace={MARKETPLACE_ENABLED ? ((card) => {
-            setSelectedCard(null);
-            onOpenMarketplace?.(card);
-          }) : undefined}
-          uiLang={uiLang}
-        />
-      ) : null}
-      {portfolioEditorItem ? (
-        <RenewPortfolioEditorModal
-          item={portfolioEditorItem}
-          initialGrade={portfolioEditorItem.grade}
-          holdings={portfolioHoldings}
-          initialDetail={portfolioEditorDetail}
-          onSave={saveCatalogPortfolioLot}
-          onDeleteLot={deleteCatalogPortfolioLot}
-          onClose={() => {
-            setPortfolioEditorItem(null);
-            setPortfolioEditorDetail(null);
-          }}
-          uiLang={uiLang}
-        />
-      ) : null}
+      {selectedCardView}
+      {portfolioEditorModal}
     </main>
   );
 }
 
-function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, onAddPortfolio, marketListingCount = 0, onOpenMarketplace, authUser, onRequireLogin, uiLang }) {
-  useBodyScrollLock();
+function RenewCardModal({ card, standalone = false, onClose, onOpenMarket, onSearchSameName, onAddPortfolio, marketListingCount = 0, onOpenMarketplace, authUser, onRequireLogin, uiLang }) {
+  useBodyScrollLock(!standalone);
   const t = (key) => getUiText(uiLang, key);
   const [snkrdunkApparelId, setSnkrdunkApparelId] = useState(null);
   const [priceAlertOpen, setPriceAlertOpen] = useState(false);
@@ -9071,75 +9161,76 @@ function RenewCardModal({ card, onClose, onOpenMarket, onSearchSameName, onAddPo
     }
     setPriceAlertOpen(true);
   };
-  return (
-    <>
-    <div className="renew-modal-backdrop" onClick={onClose}>
-      <div className="renew-card-modal" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="renew-modal-close renew-card-modal-close" onClick={onClose}>×</button>
-        <div className={`renew-card-modal-image ${imageLoaded ? 'is-loaded' : 'is-loading'}`}>
-          <img
-            src={getCardThumbnailSrc(card)}
-            data-proxy-fallback-src={getCardThumbnailProxySrc(card)}
-            data-fallback-src={getCardImageSrc(card)}
-            alt={card.name}
-            onLoad={() => setImageLoaded(true)}
-            onError={fallbackToOriginalCardImage}
-            decoding="async"
-            fetchPriority="high"
-          />
-        </div>
-        <div className="renew-card-modal-info">
-          <div className="renew-modal-code">{card.cardNo} · {card.rarity}</div>
-          <h2>{card.name}</h2>
-          <p>{card.seriesName}</p>
-          <div className={`renew-modal-actions ${snkrdunkApparelId && !isJapaneseUi(uiLang) ? 'has-alert' : 'no-alert'}`}>
-            <button type="button" className="renew-modal-primary-action" onClick={() => onOpenMarket?.(card)}>
-              <span className="renew-modal-action-full">{getLocaleText(uiLang, '시세 보기', 'View prices', '相場を見る')}</span>
-              <span className="renew-modal-action-compact">{getLocaleText(uiLang, '시세', 'Prices', '相場')}</span>
+  const cardContent = (
+    <div className={`renew-card-modal${standalone ? ' is-page' : ''}`} onClick={(event) => event.stopPropagation()}>
+      {!standalone ? <button type="button" className="renew-modal-close renew-card-modal-close" onClick={onClose}>×</button> : null}
+      <div className={`renew-card-modal-image ${imageLoaded ? 'is-loaded' : 'is-loading'}`}>
+        <img
+          src={getCardThumbnailSrc(card)}
+          data-proxy-fallback-src={getCardThumbnailProxySrc(card)}
+          data-fallback-src={getCardImageSrc(card)}
+          alt={card.name}
+          onLoad={() => setImageLoaded(true)}
+          onError={fallbackToOriginalCardImage}
+          decoding="async"
+          fetchPriority="high"
+        />
+      </div>
+      <div className="renew-card-modal-info">
+        <div className="renew-modal-code">{card.cardNo} · {card.rarity}</div>
+        <h2>{card.name}</h2>
+        <p>{card.seriesName}</p>
+        <div className={`renew-modal-actions ${snkrdunkApparelId && !isJapaneseUi(uiLang) ? 'has-alert' : 'no-alert'}`}>
+          <button type="button" className="renew-modal-primary-action" onClick={() => onOpenMarket?.(card)}>
+            <span className="renew-modal-action-full">{getLocaleText(uiLang, '시세 보기', 'View prices', '相場を見る')}</span>
+            <span className="renew-modal-action-compact">{getLocaleText(uiLang, '시세', 'Prices', '相場')}</span>
+          </button>
+          <button type="button" className="renew-modal-portfolio-action" onClick={() => onAddPortfolio?.(card)}>
+            <span className="renew-modal-action-full">+ {getLocaleText(uiLang, '포트폴리오 추가', 'Add to portfolio', 'ポートフォリオに追加')}</span>
+            <span className="renew-modal-action-compact">+ {getLocaleText(uiLang, '포트폴리오', 'Portfolio', 'ポートフォリオ')}</span>
+          </button>
+          {snkrdunkApparelId && !isJapaneseUi(uiLang) ? (
+            <button
+              type="button"
+              className="renew-modal-icon-action renew-modal-alert-action"
+              onClick={openPriceAlert}
+              aria-label={getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}
+              title={getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}
+            >
+              <MobileNavIcon type="bell" />
             </button>
-            <button type="button" className="renew-modal-portfolio-action" onClick={() => onAddPortfolio?.(card)}>
-              <span className="renew-modal-action-full">+ {getLocaleText(uiLang, '포트폴리오 추가', 'Add to portfolio', 'ポートフォリオに追加')}</span>
-              <span className="renew-modal-action-compact">+ {getLocaleText(uiLang, '포트폴리오', 'Portfolio', 'ポートフォリオ')}</span>
-            </button>
-            {snkrdunkApparelId && !isJapaneseUi(uiLang) ? (
-              <button
-                type="button"
-                className="renew-modal-icon-action renew-modal-alert-action"
-                onClick={openPriceAlert}
-                aria-label={getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}
-                title={getLocaleText(uiLang, '시세 알림', 'Price alert', '相場アラート')}
-              >
-                <MobileNavIcon type="bell" />
-              </button>
-            ) : null}
-            <details className="renew-modal-more-actions">
-              <summary
-                aria-label={getLocaleText(uiLang, '더보기', 'More actions', 'その他')}
-                title={getLocaleText(uiLang, '더보기', 'More actions', 'その他')}
-              >
-                <span aria-hidden="true">⋮</span>
-              </summary>
-              <div className="renew-modal-more-menu">
-                {marketListingCount ? (
-                  <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
-                    {getLocaleText(uiLang, `관련 매물 ${marketListingCount}개 보기`, `View ${marketListingCount} related listings`, `関連出品 ${marketListingCount}件を見る`)}
-                  </button>
-                ) : null}
-                <button type="button" onClick={() => onSearchSameName?.(card.name)}>{t('searchSameName')}</button>
-                {card.officialUrl ? <a href={card.officialUrl} target="_blank" rel="noreferrer">{t('officialInfo')}</a> : null}
-              </div>
-            </details>
-            {snkrdunkUrl ? (
-              <a className="renew-modal-snkrdunk-action" href={snkrdunkUrl} target="_blank" rel="noreferrer">
-                <img src="/snkrdunk-logo.png" alt="SNKRDUNK" />
-                <span>{getLocaleText(uiLang, 'SNKRDUNK에서 상품 보기', 'View product on SNKRDUNK', 'SNKRDUNKで商品を見る')}</span>
-                <MobileNavIcon type="external" />
-              </a>
-            ) : null}
-          </div>
+          ) : null}
+          <details className="renew-modal-more-actions">
+            <summary
+              aria-label={getLocaleText(uiLang, '더보기', 'More actions', 'その他')}
+              title={getLocaleText(uiLang, '더보기', 'More actions', 'その他')}
+            >
+              <span aria-hidden="true">⋮</span>
+            </summary>
+            <div className="renew-modal-more-menu">
+              {marketListingCount ? (
+                <button type="button" className="renew-modal-market-link" onClick={() => onOpenMarketplace?.(card)}>
+                  {getLocaleText(uiLang, `관련 매물 ${marketListingCount}개 보기`, `View ${marketListingCount} related listings`, `関連出品 ${marketListingCount}件を見る`)}
+                </button>
+              ) : null}
+              <button type="button" onClick={() => onSearchSameName?.(card.name)}>{t('searchSameName')}</button>
+              {card.officialUrl ? <a href={card.officialUrl} target="_blank" rel="noreferrer">{t('officialInfo')}</a> : null}
+            </div>
+          </details>
+          {snkrdunkUrl ? (
+            <a className="renew-modal-snkrdunk-action" href={snkrdunkUrl} target="_blank" rel="noreferrer">
+              <img src="/snkrdunk-logo.png" alt="SNKRDUNK" />
+              <span>{getLocaleText(uiLang, 'SNKRDUNK에서 상품 보기', 'View product on SNKRDUNK', 'SNKRDUNKで商品を見る')}</span>
+              <MobileNavIcon type="external" />
+            </a>
+          ) : null}
         </div>
       </div>
     </div>
+  );
+  return (
+    <>
+    {standalone ? cardContent : <div className="renew-modal-backdrop" onClick={onClose}>{cardContent}</div>}
     {priceAlertOpen && snkrdunkApparelId ? (
       <RenewPriceAlertModal
         item={{
@@ -15421,6 +15512,10 @@ export default function RenewApp() {
   const internalNavigationRef = useRef(false);
   const contextualRouteBackRef = useRef(null);
   const presenceChannelRef = useRef(null);
+  const catalogRouteCardId = getCatalogCardRouteId(window.location.pathname)
+    || (getAppPath(window.location.pathname) === '/cards'
+      ? new URLSearchParams(window.location.search).get('cardId') || ''
+      : '');
 
   const pageTitle = useMemo(() => getUiText(uiLang, NAV_ITEMS.find((item) => item.id === (activePage === 'seriesGuide' ? 'cards' : ['centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage) ? 'lab' : activePage))?.labelKey), [activePage, uiLang]);
   const displayName = useMemo(() => getUserDisplayName(authUser), [authUser]);
@@ -15452,7 +15547,7 @@ export default function RenewApp() {
 
   useEffect(() => {
     applyPageSeo(activePage, uiLang);
-  }, [activePage, uiLang]);
+  }, [activePage, uiLang, routeRevision]);
 
   useEffect(() => {
     if (window.location.pathname === '/deck' || window.location.pathname === '/deck-simulator') {
@@ -15960,10 +16055,30 @@ export default function RenewApp() {
           setPortfolioHoldings={setPortfolioHoldings}
           initialSearch={catalogInitialSearch}
           initialViewState={catalogViewState}
+          initialCardId={catalogRouteCardId}
           viewStateRevision={routeRevision}
           restoreScrollY={catalogReturnScrollY}
           onRestoreScrollDone={() => setCatalogReturnScrollY(null)}
           onViewStateChange={handleCatalogViewStateChange}
+          onOpenCardRoute={(cardId, { replace = false } = {}) => {
+            const nextPath = getCatalogCardDetailPath(cardId, uiLang);
+            const nextState = { catalogViewState: catalogViewState || getCatalogRouteViewState() };
+            if (replace) replaceAppHistoryState(nextState, nextPath);
+            else {
+              internalNavigationRef.current = true;
+              pushAppHistory(nextPath, nextState);
+            }
+            setRouteRevision((value) => value + 1);
+          }}
+          onCloseCardRoute={() => {
+            if (window.history.state?.cardPoneInternal) {
+              window.history.back();
+              return;
+            }
+            const nextPath = getLocalizedPagePath('cards', uiLang);
+            replaceAppHistoryState({ catalogViewState }, nextPath);
+            setRouteRevision((value) => value + 1);
+          }}
           onOpenMarket={(marketTarget) => {
             const nextCode = typeof marketTarget === 'object' ? marketTarget?.code : marketTarget;
             const nextApparelId = typeof marketTarget === 'object' ? marketTarget?.apparelId : null;
