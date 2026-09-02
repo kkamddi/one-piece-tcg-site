@@ -1727,7 +1727,7 @@
   width: min(1440px, 100%);
   min-height: 820px;
   margin: 0 auto;
-  padding: clamp(70px, 9vw, 150px) clamp(18px, 4vw, 48px) 72px;
+  padding: clamp(42px, 5vw, 86px) clamp(18px, 4vw, 48px) 72px;
 }
 
 .renew-disclaimer {
@@ -1898,8 +1898,8 @@
   align-items: center;
   gap: 28px;
   min-width: 100%;
-  min-height: 72px;
-  padding: 12px 22px;
+  min-height: 96px;
+  padding: 16px 24px;
 }
 
 .renew-home-promo-slide.is-advertising {
@@ -21183,8 +21183,8 @@ button.renew-deck-entry:focus-visible {
   .renew-home-promo-slide {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
-    min-height: 64px;
-    padding: 10px 12px;
+    min-height: 78px;
+    padding: 12px 14px;
   }
 
   .renew-home-promo-slide strong {
@@ -21197,6 +21197,34 @@ button.renew-deck-entry:focus-visible {
     min-height: 30px;
     padding: 0 9px;
     font-size: 10px;
+  }
+
+  .renew-value {
+    padding: 20px 18px 16px;
+  }
+
+  .renew-value-total {
+    margin-top: 8px;
+    font-size: 22px;
+  }
+
+  .renew-value-grid {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .renew-value-grid button {
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  .renew-value-grid span {
+    font-size: 11px;
+  }
+
+  .renew-value-grid strong {
+    margin-top: 4px;
+    font-size: 18px;
   }
 
   .renew-dashboard {
