@@ -10,6 +10,7 @@ const siteOrigin = 'https://www.optcgkorea.com';
 
 const sourcePaths = [
   path.join(rootDir, 'src', 'RenewApp.jsx'),
+  path.join(rootDir, 'src', 'data', 'collection-guide.js'),
   path.join(rootDir, 'functions', '_middleware.js'),
   ...seriesGuideSourcePaths,
   ...boxRecommendationSourcePaths.map((sourceUrl) => fileURLToPath(sourceUrl))
@@ -42,6 +43,11 @@ const paths = [
   '/guide/shops',
   '/guide/card-price',
   '/guide/card-catalog',
+  '/guide/collection',
+  '/guide/collection/manga',
+  '/guide/collection/championship',
+  '/guide/collection/flagship',
+  '/guide/collection/promo',
   '/guide/box-recommendation',
   '/guide/box-recommendation/high-price',
   '/guide/box-recommendation/stable',

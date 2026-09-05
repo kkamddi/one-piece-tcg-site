@@ -1944,6 +1944,95 @@
   background: #171b23;
 }
 
+.renew-ad-inquiry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 0;
+  border-top: 1px solid rgba(23, 25, 28, 0.12);
+  border-bottom: 1px solid rgba(23, 25, 28, 0.12);
+  padding: 14px 2px;
+}
+
+.renew-ad-inquiry-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.renew-ad-inquiry-copy small {
+  color: #c94d35;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.renew-ad-inquiry-copy strong {
+  color: #17191c;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.renew-ad-inquiry a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: #434a55;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.renew-ad-inquiry a:hover {
+  color: #c94d35;
+}
+
+.renew-ad-inquiry a svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
+.renew-ad-inquiry.is-sidebar {
+  display: grid;
+  align-items: start;
+  margin-top: 18px;
+  padding: 16px 2px 2px;
+  border-bottom: 0;
+}
+
+.renew-ad-inquiry.is-sidebar a {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.renew-news-main > .renew-ad-inquiry {
+  margin-bottom: 18px;
+}
+
+.renew-shops > .renew-ad-inquiry,
+.renew-market > .renew-ad-inquiry {
+  margin: 18px 0;
+}
+
+.renew-app.is-dark .renew-ad-inquiry {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.renew-app.is-dark .renew-ad-inquiry-copy strong,
+.renew-app.is-dark .renew-ad-inquiry a {
+  color: #f1f5f9;
+}
+
+@media (max-width: 620px) {
+  .renew-ad-inquiry:not(.is-sidebar) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+}
+
 .renew-official-links a:hover {
   border-color: rgba(201, 77, 53, 0.26);
   background: rgba(255, 255, 255, 0.88);
@@ -3372,8 +3461,7 @@
 }
 
 .renew-route-back-wrap {
-  width: min(1440px, 100%);
-  margin: 0 auto;
+  width: 100%;
   padding: 18px clamp(18px, 4vw, 48px) 14px;
 }
 
@@ -3381,15 +3469,20 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 38px;
-  padding: 0 16px;
-  border: 1px solid rgba(23, 25, 28, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  color: #17191c;
+  min-height: 28px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #4b5563;
   font-size: 14px;
-  font-weight: 800;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.renew-route-back-button:hover {
+  color: #17191c;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .renew-route-back-button span {
@@ -3398,9 +3491,12 @@
 }
 
 .renew-app.is-dark .renew-route-back-button {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(19, 23, 31, 0.82);
-  color: #f7f7f8;
+  color: #cbd5e1;
+  background: transparent;
+}
+
+.renew-app.is-dark .renew-route-back-button:hover {
+  color: #fff;
 }
 
 @media (min-width: 901px) {
@@ -4288,6 +4384,13 @@
   border-color: #17191c;
   color: #fff;
   background: #17191c;
+}
+
+.renew-modal-actions .renew-modal-primary-action:disabled {
+  border-color: #d8dadd;
+  color: #777b82;
+  background: #eef0f2;
+  cursor: default;
 }
 
 .renew-modal-actions .renew-modal-snkrdunk-action {
@@ -11089,6 +11192,460 @@
   font-size: 13px;
   font-weight: 800;
   text-decoration: none;
+}
+
+/* Collection guide */
+.renew-collection-guide {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 30px 0 84px;
+}
+
+.renew-collection-guide-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px 28px;
+  border-bottom: 1px solid rgba(23, 25, 28, 0.12);
+  padding: 34px 0 28px;
+}
+
+.renew-collection-guide-head > span,
+.renew-collection-guide-title span {
+  grid-column: 1 / -1;
+  color: #c94d35;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.renew-collection-guide-head h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.renew-collection-guide-head dl {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 24px;
+  margin: 0;
+}
+
+.renew-collection-guide-head dl div {
+  display: grid;
+  gap: 5px;
+}
+
+.renew-collection-guide-head dt {
+  color: #7a808b;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.renew-collection-guide-head dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.renew-collection-guide-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 18px 0;
+  scrollbar-width: none;
+}
+
+.renew-collection-guide-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.renew-collection-guide-nav a,
+.renew-collection-guide-nav span {
+  flex: 0 0 auto;
+  min-height: 38px;
+  border: 1px solid rgba(23, 25, 28, 0.13);
+  border-radius: 8px;
+  padding: 9px 14px;
+  color: #616773;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.renew-collection-guide-nav a.is-active {
+  border-color: #17191c;
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-collection-guide-nav span {
+  color: #9398a2;
+  background: #f7f7f8;
+}
+
+.renew-collection-guide-section {
+  padding-top: 20px;
+}
+
+.renew-collection-guide-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.renew-collection-guide-title h2 {
+  margin: 6px 0 0;
+  font-size: 27px;
+}
+
+.renew-collection-guide-title p {
+  margin: 0;
+  color: #737984;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.renew-collection-guide-status {
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 8px;
+  padding: 30px;
+  color: #737984;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.renew-collection-guide-status.is-error {
+  color: #c94d35;
+}
+
+.renew-collection-series-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 30px 22px;
+}
+
+.renew-collection-series {
+  display: grid;
+  flex: 0 1 calc((132px * var(--collection-card-count)) + (12px * (var(--collection-card-count) - 1)));
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  max-width: 100%;
+  border-top: 1px solid rgba(23, 25, 28, 0.1);
+  padding: 15px 0 0;
+}
+
+.renew-collection-series h3 {
+  margin: 3px 0 0;
+  color: #c94d35;
+  font-size: 17px;
+}
+
+.renew-collection-card-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--collection-card-count), minmax(0, 132px));
+  gap: 12px;
+}
+
+.renew-collection-card {
+  align-self: start;
+  display: block;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.renew-collection-card:disabled {
+  cursor: default;
+}
+
+.renew-collection-card-image {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 7px;
+  background: #f3f4f6;
+}
+
+.renew-collection-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 160ms ease;
+}
+
+.renew-collection-card:hover .renew-collection-card-image img {
+  transform: scale(1.025);
+}
+
+.renew-collection-card small,
+.renew-collection-card strong,
+.renew-collection-card em {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-collection-card small {
+  margin-top: 9px;
+  color: #c94d35;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.renew-collection-card strong {
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+.renew-collection-card em {
+  margin-top: 2px;
+  color: #8b3030;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.renew-championship-guide-section {
+  margin-top: 58px;
+  border-top: 1px solid rgba(23, 25, 28, 0.12);
+  padding-top: 42px;
+}
+
+.renew-collection-locale-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 3px;
+  border: 1px solid rgba(23, 25, 28, 0.12);
+  border-radius: 8px;
+  padding: 3px;
+  background: #f5f5f6;
+}
+
+.renew-collection-locale-tabs button {
+  min-width: 74px;
+  min-height: 32px;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: #747a84;
+  font-size: 11px;
+  font-weight: 850;
+  background: transparent;
+  cursor: pointer;
+}
+
+.renew-collection-locale-tabs button.is-active {
+  color: #fff;
+  background: #17191c;
+}
+
+.renew-championship-event-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 28px;
+}
+
+.renew-championship-year-list {
+  display: grid;
+  gap: 46px;
+}
+
+.renew-championship-year > h3 {
+  margin: 0 0 18px;
+  border-bottom: 2px solid #17191c;
+  padding-bottom: 10px;
+  font-size: 24px;
+}
+
+.renew-championship-event {
+  min-width: 0;
+  border-top: 1px solid rgba(23, 25, 28, 0.1);
+  padding-top: 15px;
+}
+
+.renew-championship-event h3,
+.renew-championship-event h4 {
+  margin: 2px 0 12px;
+  font-size: 16px;
+}
+
+.renew-championship-card-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--collection-card-count, 3), minmax(0, 132px));
+  align-items: start;
+  gap: 14px 12px;
+}
+
+.renew-promo-event-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 36px;
+}
+
+.renew-horizontal-card-row {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 132px;
+  justify-content: start;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-bottom: 10px;
+}
+
+.renew-promo-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(112px, 132px));
+  justify-content: start;
+  overflow: visible;
+}
+
+.renew-app.is-dark .renew-collection-guide-head,
+.renew-app.is-dark .renew-collection-series,
+.renew-app.is-dark .renew-championship-guide-section,
+.renew-app.is-dark .renew-championship-event {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.renew-app.is-dark .renew-collection-guide-nav a,
+.renew-app.is-dark .renew-collection-guide-nav span,
+.renew-app.is-dark .renew-collection-card-image {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #d9dde5;
+  background: #171b23;
+}
+
+.renew-app.is-dark .renew-collection-guide-nav a.is-active {
+  color: #17191c;
+  background: #fff;
+}
+
+.renew-app.is-dark .renew-collection-locale-tabs {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #171b23;
+}
+
+.renew-app.is-dark .renew-collection-locale-tabs button.is-active {
+  color: #17191c;
+  background: #fff;
+}
+
+@media (max-width: 900px) {
+  .renew-collection-guide-head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .renew-collection-card-grid {
+    grid-template-columns: repeat(var(--collection-card-count), minmax(0, 132px));
+  }
+
+  .renew-championship-event-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .renew-collection-guide {
+    width: min(100% - 24px, 560px);
+    padding-top: 12px;
+  }
+
+  .renew-collection-guide-head {
+    padding: 22px 0 20px;
+  }
+
+  .renew-collection-guide-head h1 {
+    font-size: 30px;
+  }
+
+  .renew-collection-guide-head dl {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .renew-collection-guide-head dl div {
+    border-left: 1px solid rgba(23, 25, 28, 0.1);
+    padding-left: 10px;
+  }
+
+  .renew-collection-guide-head dl div:first-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .renew-collection-guide-title {
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .renew-collection-guide-title h2 {
+    font-size: 22px;
+  }
+
+  .renew-championship-guide-section {
+    margin-top: 42px;
+    padding-top: 32px;
+  }
+
+  .renew-collection-locale-tabs {
+    align-self: stretch;
+  }
+
+  .renew-collection-locale-tabs button {
+    width: 100%;
+  }
+
+  .renew-collection-series-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 12px;
+    container-type: inline-size;
+  }
+
+  .renew-collection-series {
+    width: auto;
+    padding-top: 14px;
+  }
+
+  .renew-collection-series.has-multiple {
+    grid-column: 1 / -1;
+  }
+
+  .renew-collection-card-grid {
+    grid-template-columns: repeat(var(--collection-card-count), minmax(0, 1fr));
+    gap: 14px 9px;
+  }
+
+  .renew-collection-series:not(.has-multiple) .renew-collection-card-grid {
+    grid-template-columns: minmax(0, min(132px, calc((100cqw - 18px) / 3)));
+  }
+
+  .renew-collection-series.has-multiple .renew-collection-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .renew-championship-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px 9px;
+  }
+
+  .renew-collection-card strong {
+    font-size: 11px;
+  }
 }
 
 .renew-static-info-links {
@@ -22171,8 +22728,8 @@ button.renew-deck-entry:focus-visible {
   }
 
   .renew-route-back-button {
-    min-height: 34px;
-    padding: 0 13px;
+    min-height: 28px;
+    padding: 4px 0;
     font-size: 13px;
   }
 }

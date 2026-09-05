@@ -1,12 +1,13 @@
+import specialPromoCards from '../data/special-promo-cards';
 const API_BASE = '/api/cards';
-const CARD_CATALOG_REVISION = '2026-08-22-op17-v2';
+const CARD_CATALOG_REVISION = '2026-09-03-special-promos-v1';
 const CARD_API_CACHE_TTL_MS = 5 * 60 * 1000;
 let cardsFallbackPromise;
 const responseCache = new Map();
 const pendingRequests = new Map();
 
 async function loadCardsFallback() {
-  cardsFallbackPromise ??= import('../data/cards.json').then((module) => module.default);
+  cardsFallbackPromise ??= import('../data/cards.json').then((module) => uniqueById([...module.default, ...specialPromoCards]));
   return cardsFallbackPromise;
 }
 
@@ -214,8 +215,34 @@ export async function fetchCardById(id) {
   if (!id) return null;
 
   const url = `${API_BASE}/${encodeURIComponent(id)}${buildQuery({ catalog: CARD_CATALOG_REVISION })}`;
-  return safeFetchJson(url, async () => {
+  const card = await safeFetchJson(url, async () => {
     const cardsFallback = await loadCardsFallback();
     return cardsFallback.find((card) => card.id === id) ?? null;
   });
+  if (card) return card;
+
+  const cardsFallback = await loadCardsFallback();
+  return cardsFallback.find((fallbackCard) => fallbackCard.id === id) ?? null;
+}
+
+export async function fetchCardsByIds(ids = []) {
+  const uniqueIds = [...new Set(ids.filter(Boolean))];
+  if (!uniqueIds.length) return [];
+
+  const url = `${API_BASE}${buildQuery({ ids: uniqueIds.join(','), catalog: CARD_CATALOG_REVISION })}`;
+  const cards = await safeFetchJson(url, async () => {
+    const cardsFallback = await loadCardsFallback();
+    const requestedIds = new Set(uniqueIds);
+    return cardsFallback.filter((card) => requestedIds.has(card.id));
+  });
+  const resolvedCards = Array.isArray(cards) ? cards : [];
+  const resolvedIds = new Set(resolvedCards.map((card) => card.id));
+  if (resolvedIds.size === uniqueIds.length) return resolvedCards;
+
+  const missingIds = new Set(uniqueIds.filter((id) => !resolvedIds.has(id)));
+  const cardsFallback = await loadCardsFallback();
+  return uniqueById([
+    ...resolvedCards,
+    ...cardsFallback.filter((card) => missingIds.has(card.id))
+  ]);
 }

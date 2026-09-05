@@ -31,6 +31,7 @@ import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
 import CenteringLab from './CenteringLab';
+import CollectionGuide from './CollectionGuide';
 import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuide } from './PortfolioCalculator';
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
 import { getCommunityGrade } from '../lib/community-grades.js';
@@ -902,6 +903,7 @@ const GUIDE_HUB_COLLECTIONS = [
     title: '수집하고 보관할 때',
     description: '카드 상태를 확인하고 수집 기록을 유지하는 기준입니다.',
     links: [
+      { href: '/guide/collection', title: '수집 방향 정하기', meta: '망가·챔피언십·플래그십·프로모' },
       { href: '/guide/card-storage', title: '카드 보관 방법', meta: '슬리브·탑로더·바인더' },
       { href: '/guides/centering', title: '센터링 측정 순서', meta: '외곽·내부 테두리·결과 해석' }
     ]
@@ -1673,6 +1675,7 @@ function getCardThumbnailKey(card) {
 }
 
 function getCardThumbnailSrc(card) {
+  if (card?.thumbnailUrl) return card.thumbnailUrl;
   if (card?.isSimulatorOnly) return getCardImageSrc(card);
   const key = getCardThumbnailKey(card);
   if (CARD_THUMBNAIL_BASE_URL === '/api/card-thumb' && key) {
@@ -1905,6 +1908,15 @@ async function blockCardMarketLinkOverride(cardId) {
 
 async function findApprovedCardMarketLink(card) {
   if (!card) return null;
+  if (Number(card.marketApparelId) > 0) {
+    return {
+      cardId: card.id || card.cardId || '',
+      apparelId: Number(card.marketApparelId),
+      status: 'approved',
+      note: 'curated special promo mapping'
+    };
+  }
+  if (card.specialPromo) return null;
   const cardMarketLinks = await loadCardMarketLinks();
   const targetCardId = card.id || card.cardId;
   if (targetCardId && cardMarketLinks.some((link) => link.status === 'blocked' && link.cardId === targetCardId)) {
@@ -2746,6 +2758,7 @@ const PAGE_PATHS = {
   portfolioCalculatorGuide: '/guides/portfolio-calculator',
   calendar: '/calendar',
   news: '/news',
+  collectionGuide: '/guide/collection',
   shops: '/shops',
   partnerShops: '/shops/partners',
   about: '/about',
@@ -2886,6 +2899,7 @@ function restoreAppScrollPosition(targetY, { onDone, timeoutMs = 3000 } = {}) {
 function getRouteSeoPage(pathname = '/') {
   const path = getAppPath(pathname);
   if (PATH_PAGES[path]) return PATH_PAGES[path];
+  if (path.startsWith('/guide/collection/')) return 'collectionGuide';
   if (path.startsWith('/guides/series/')) return 'seriesGuide';
   if (path.startsWith('/cards')) return 'cards';
   if (path.startsWith('/prices')) return 'prices';
@@ -3439,6 +3453,47 @@ function getJapaneseRouteSeo(pathname, page) {
 function getClientRouteSeo(page, uiLang = 'KR') {
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
+  if (path === '/guide/collection' || path.startsWith('/guide/collection/')) {
+    const section = path.split('/').filter(Boolean).at(-1);
+    const collectionSeo = {
+      collection: {
+        title: '원피스카드 수집 가이드 - 무엇을 모아야 할까? | Card Pone',
+        h1: '원피스카드 수집 가이드: 무엇을 모아야 할까?',
+        description: '망가 카드, 챔피언십, 플래그십, 프로모 중 무엇을 모을지 예산과 희소성, 수집 방식에 따라 비교하고 실제 카드 목록을 확인합니다.',
+        keywords: '원피스카드 뭐 모아야, 원피스카드 수집 추천, 원피스카드 수집 가이드',
+        body: '원피스카드 수집 목표를 정하고 망가 카드, 대회 한정 카드와 프로모 카드의 실제 목록을 비교하는 가이드입니다.'
+      },
+      manga: {
+        title: '원피스카드 망가 카드 수집 가이드 - 시리즈별 목록 | Card Pone',
+        h1: '원피스카드 망가 카드 수집 가이드',
+        description: '희소한 대표 카드를 중심으로 모으려는 수집가를 위해 OP-01부터 OP-17까지 일본판 망가 카드를 시리즈별로 정리합니다.',
+        keywords: '원피스카드 망가 카드, 망가레어 목록, 원피스카드 수집 추천',
+        body: '시리즈를 대표하는 망가 카드의 카드번호와 이미지를 비교하고 도감 상세로 연결합니다.'
+      },
+      championship: {
+        title: '원피스카드 챔피언십 수집 가이드 - 대회 배포 카드 | Card Pone',
+        h1: '원피스카드 챔피언십 카드 수집 가이드',
+        description: '대회 성적과 배포 이력이 분명한 카드를 모으려는 수집가를 위해 일본판과 한국판 챔피언십 카드를 연도와 대회별로 정리합니다.',
+        keywords: '원피스카드 챔피언십 카드, 대회 한정 카드, 원피스카드 수집 가이드',
+        body: '챔피언십 지역 대회와 결승, 월드 파이널 배포 카드를 연도별로 비교합니다.'
+      },
+      flagship: {
+        title: '원피스카드 플래그십 수집 가이드 - 연도별 우승·TOP 8 카드 | Card Pone',
+        h1: '원피스카드 플래그십 카드 수집 가이드',
+        description: '플래그십 배틀 한정 카드를 연도 단위로 모으려는 수집가를 위해 일본판 우승 카드와 TOP 8 카드를 정리합니다.',
+        keywords: '원피스카드 플래그십, 플래그십 우승 카드, 플래그십 TOP 8',
+        body: '일본판 플래그십 배틀 우승 및 TOP 8 카드를 연도별로 비교합니다.'
+      },
+      promo: {
+        title: '원피스카드 프로모 수집 가이드 - 잡지 부록·응모 카드 | Card Pone',
+        h1: '원피스카드 프로모 카드 수집 가이드',
+        description: '다양한 배포처와 예산 범위에서 모으려는 수집가를 위해 V JUMP, 최강점프, 주간 소년 점프 부록과 응모 카드를 정리합니다.',
+        keywords: '원피스카드 프로모 카드, 원피스카드 잡지 부록, 원피스카드 응모 카드',
+        body: '잡지 부록, 응모, 매거진과 극장판 특전 프로모를 배포처별로 비교합니다.'
+      }
+    };
+    return collectionSeo[section] || collectionSeo.collection;
+  }
   if (path.startsWith('/guide/box-recommendation/series/')) {
     const seriesId = getBoxRecommendationSeriesId(path);
     if (seriesId) {
@@ -3648,6 +3703,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
   if (path.startsWith('/cards')) return { page: 'cards' };
   if (path.startsWith('/guides/series/')) return { page: 'cards' };
+  if (path === '/guide/collection' || path.startsWith('/guide/collection/')) return { page: 'news' };
   if (path.startsWith('/prices') || (path === '/prices' && hasSearch)) return { page: 'prices' };
   if (path.startsWith('/community')) return { page: 'community' };
   if (path === '/tools/profit-calculator') return { page: 'home' };
@@ -4857,6 +4913,24 @@ function RenewHomePromoBanner({ uiLang }) {
   );
 }
 
+function RenewAdInquiry({ uiLang, placement = 'inline' }) {
+  return (
+    <section
+      className={`renew-ad-inquiry is-${placement}`}
+      aria-label={getLocaleText(uiLang, '광고 및 배너 문의', 'Advertising and banner inquiry', '広告・バナーお問い合わせ')}
+    >
+      <div className="renew-ad-inquiry-copy">
+        <small>AD / BANNER</small>
+        <strong>{getLocaleText(uiLang, '광고·배너 문의', 'Advertising inquiry', '広告・バナーお問い合わせ')}</strong>
+      </div>
+      <a href={`mailto:optkr26@gmail.com?subject=${encodeURIComponent('Card Pone 광고 문의')}`}>
+        <span>optkr26@gmail.com</span>
+        <MobileNavIcon type="external" />
+      </a>
+    </section>
+  );
+}
+
 function RenewOfficialLinks({ uiLang }) {
   const items = OFFICIAL_LINK_ITEMS.filter((item) => !item.locales || item.locales.includes(uiLang));
   return (
@@ -4894,13 +4968,13 @@ const PAGE_SEO_JA = {
   }
 };
 
-function RenewSeoSummary({ page, titleAs = 'h1', placement = 'page', uiLang = 'KR' }) {
+function RenewSeoSummary({ page, titleAs = 'h1', uiLang = 'KR' }) {
   const seo = isJapaneseUi(uiLang)
     ? (PAGE_SEO_JA[page] || PAGE_SEO[page] || PAGE_SEO.home)
     : (PAGE_SEO[page] || PAGE_SEO.home);
   const Heading = titleAs;
   return (
-    <section className={`renew-seo-summary renew-seo-summary-${page} renew-seo-summary-${placement}`} aria-label={`${seo.h1} 설명`}>
+    <section className="renew-sr-only" aria-label={`${seo.h1} 설명`}>
       <Heading>{seo.h1}</Heading>
       <p>{seo.body}</p>
     </section>
@@ -7181,6 +7255,8 @@ function RenewNews({ uiLang, onOpenCalendar }) {
         ))}
       </div> : null}
 
+      <RenewAdInquiry uiLang={uiLang} />
+
       {showOverview ? (
         <section className="renew-news-hub" aria-label="정보 바로가기">
           <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('notice')}>
@@ -8956,6 +9032,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
             </div>
           ))}
         </div>
+        <RenewAdInquiry uiLang={uiLang} placement="sidebar" />
       </aside>
 
       <section className="renew-catalog-main" aria-busy={loading || catalogPending}>
@@ -9133,10 +9210,9 @@ function RenewCardModal({ card, standalone = false, onClose, onOpenMarket, onSea
   const t = (key) => getUiText(uiLang, key);
   const [snkrdunkApparelId, setSnkrdunkApparelId] = useState(null);
   const [priceAlertOpen, setPriceAlertOpen] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [card?.id, card?.cardId]);
+  const cardImageKey = card?.id || card?.cardId || card?.imageUrl || '';
+  const [loadedCardImageKey, setLoadedCardImageKey] = useState('');
+  const imageLoaded = Boolean(cardImageKey) && loadedCardImageKey === cardImageKey;
   useEffect(() => {
     let cancelled = false;
     setSnkrdunkApparelId(null);
@@ -9154,6 +9230,7 @@ function RenewCardModal({ card, standalone = false, onClose, onOpenMarket, onSea
   const snkrdunkUrl = snkrdunkApparelId
     ? `https://snkrdunk.com/en/trading-cards/${snkrdunkApparelId}?slide=right`
     : '';
+  const marketUnavailable = Boolean(card.specialPromo && !snkrdunkApparelId);
   const openPriceAlert = () => {
     if (!authUser) {
       onRequireLogin?.();
@@ -9170,7 +9247,7 @@ function RenewCardModal({ card, standalone = false, onClose, onOpenMarket, onSea
           data-proxy-fallback-src={getCardThumbnailProxySrc(card)}
           data-fallback-src={getCardImageSrc(card)}
           alt={card.name}
-          onLoad={() => setImageLoaded(true)}
+          onLoad={() => setLoadedCardImageKey(cardImageKey)}
           onError={fallbackToOriginalCardImage}
           decoding="async"
           fetchPriority="high"
@@ -9181,9 +9258,9 @@ function RenewCardModal({ card, standalone = false, onClose, onOpenMarket, onSea
         <h2>{card.name}</h2>
         <p>{card.seriesName}</p>
         <div className={`renew-modal-actions ${snkrdunkApparelId && !isJapaneseUi(uiLang) ? 'has-alert' : 'no-alert'}`}>
-          <button type="button" className="renew-modal-primary-action" onClick={() => onOpenMarket?.(card)}>
-            <span className="renew-modal-action-full">{getLocaleText(uiLang, '시세 보기', 'View prices', '相場を見る')}</span>
-            <span className="renew-modal-action-compact">{getLocaleText(uiLang, '시세', 'Prices', '相場')}</span>
+          <button type="button" className="renew-modal-primary-action" onClick={() => onOpenMarket?.(card)} disabled={marketUnavailable}>
+            <span className="renew-modal-action-full">{marketUnavailable ? getLocaleText(uiLang, '시세 준비 중', 'Price pending', '相場準備中') : getLocaleText(uiLang, '시세 보기', 'View prices', '相場を見る')}</span>
+            <span className="renew-modal-action-compact">{marketUnavailable ? getLocaleText(uiLang, '준비 중', 'Pending', '準備中') : getLocaleText(uiLang, '시세', 'Prices', '相場')}</span>
           </button>
           <button type="button" className="renew-modal-portfolio-action" onClick={() => onAddPortfolio?.(card)}>
             <span className="renew-modal-action-full">+ {getLocaleText(uiLang, '포트폴리오 추가', 'Add to portfolio', 'ポートフォリオに追加')}</span>
@@ -10554,6 +10631,7 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
           </article>
         ))}
       </section>
+      <RenewAdInquiry uiLang={uiLang} />
       <section className="renew-lab-context" aria-label={getLocaleText(uiLang, '실험실 이용 안내', 'Lab usage notes', 'ラボ利用案内')}>
         <article>
           <h2>{getLocaleText(uiLang, '로그인 없이 사용', 'Available without login', 'ログイン不要')}</h2>
@@ -13421,6 +13499,8 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
+        <RenewAdInquiry uiLang={uiLang} />
+
         {loading ? <div className="renew-empty">{t('marketLoading')}</div> : null}
         {message ? <div className="renew-empty">{message}</div> : null}
 
@@ -15430,6 +15510,7 @@ function RenewShops({ uiLang }) {
           </button>
           {locationError ? <small role="status">{locationError}</small> : null}
         </div>
+        <RenewAdInquiry uiLang={uiLang} />
         <div className="renew-shop-grid">
           {displayedShops.map((shop) => {
             const links = getShopMapLinks(shop);
@@ -16155,6 +16236,24 @@ export default function RenewApp() {
             navigatePage('cards', { query: `cardId=${encodeURIComponent(card.id)}` });
           }}
           onOpenPrices={() => navigatePage('prices')}
+        />
+      ) : activePage === 'collectionGuide' ? (
+        <CollectionGuide
+          onOpenCard={(card) => {
+            setCatalogViewState({
+              locale: card?.locale || 'JP',
+              selectedSeries: card?.series || getDefaultRenewSeriesId('JP'),
+              searchKeyword: '',
+              activeRarity: 'ALL',
+              collectionFilter: 'all',
+              catalogSortMode: 'rarity',
+              openSection: getSeriesSectionId(card?.series)
+            });
+            setActivePage('cards');
+            internalNavigationRef.current = true;
+            pushAppHistory(getCatalogCardDetailPath(card, uiLang));
+            setRouteRevision((value) => value + 1);
+          }}
         />
       ) : activePage === 'prices' ? (
         <RenewMarket

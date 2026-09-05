@@ -23,9 +23,11 @@ function paginate(items, query = {}) {
 }
 
 export default async function handler(request, response) {
-  const { locale, series, rarity, q, color, excludeCategory, limit, page, offset } = request.query ?? {};
+  const { locale, series, rarity, q, color, excludeCategory, ids, limit, page, offset } = request.query ?? {};
   const cards = await readCards({ locale, series, rarity, q, color, excludeCategory, limit, page, offset });
-  const filtered = filterCards(cards, { locale, series, rarity, q, color, excludeCategory });
+  const requestedIds = new Set(String(ids || '').split(',').map((id) => id.trim()).filter(Boolean));
+  const filtered = filterCards(cards, { locale, series, rarity, q, color, excludeCategory })
+    .filter((card) => !requestedIds.size || requestedIds.has(card.id));
   const paged = paginate(filtered, { limit, page, offset });
 
   response.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');

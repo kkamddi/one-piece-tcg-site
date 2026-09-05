@@ -517,6 +517,46 @@ const SEO_FIXES = {
     keywords: '원피스카드 도감 사용법, 원피스카드 일련번호, 원피스카드 검색',
     schemaType: 'Article'
   },
+  '/guide/collection': {
+    title: '원피스카드 수집 가이드 - 무엇을 모아야 할까? | Card Pone',
+    description: '망가 카드, 챔피언십, 플래그십, 프로모 중 무엇을 모을지 예산과 희소성, 수집 방식에 따라 비교하고 실제 카드 목록을 확인합니다.',
+    keywords: '원피스카드 뭐 모아야, 원피스카드 수집 추천, 원피스카드 수집 가이드',
+    schemaType: 'Article',
+    editor: 'Card Pone 편집',
+    reviewedAt: '2026-09-03'
+  },
+  '/guide/collection/manga': {
+    title: '원피스카드 망가 카드 수집 가이드 - 시리즈별 목록 | Card Pone',
+    description: '희소한 대표 카드를 중심으로 모으려는 수집가를 위해 OP-01부터 OP-17까지 일본판 망가 카드를 시리즈별로 정리합니다.',
+    keywords: '원피스카드 망가 카드, 망가레어 목록, 원피스카드 수집 추천',
+    schemaType: 'Article',
+    editor: 'Card Pone 편집',
+    reviewedAt: '2026-09-03'
+  },
+  '/guide/collection/championship': {
+    title: '원피스카드 챔피언십 수집 가이드 - 대회 배포 카드 | Card Pone',
+    description: '대회 성적과 배포 이력이 분명한 카드를 모으려는 수집가를 위해 일본판과 한국판 챔피언십 카드를 연도와 대회별로 정리합니다.',
+    keywords: '원피스카드 챔피언십 카드, 대회 한정 카드, 원피스카드 수집 가이드',
+    schemaType: 'Article',
+    editor: 'Card Pone 편집',
+    reviewedAt: '2026-09-03'
+  },
+  '/guide/collection/flagship': {
+    title: '원피스카드 플래그십 수집 가이드 - 연도별 우승·TOP 8 카드 | Card Pone',
+    description: '플래그십 배틀 한정 카드를 연도 단위로 모으려는 수집가를 위해 일본판 우승 카드와 TOP 8 카드를 정리합니다.',
+    keywords: '원피스카드 플래그십, 플래그십 우승 카드, 플래그십 TOP 8',
+    schemaType: 'Article',
+    editor: 'Card Pone 편집',
+    reviewedAt: '2026-09-03'
+  },
+  '/guide/collection/promo': {
+    title: '원피스카드 프로모 수집 가이드 - 잡지 부록·응모 카드 | Card Pone',
+    description: '다양한 배포처와 예산 범위에서 모으려는 수집가를 위해 V JUMP, 최강점프, 주간 소년 점프 부록과 응모 카드를 정리합니다.',
+    keywords: '원피스카드 프로모 카드, 원피스카드 잡지 부록, 원피스카드 응모 카드',
+    schemaType: 'Article',
+    editor: 'Card Pone 편집',
+    reviewedAt: '2026-09-03'
+  },
   '/guide/box-recommendation': {
     title: '원피스카드 박스 추천 가이드 | Card Pone',
     description: '최고가 카드, 안정적인 가격 분포, 유효 히트 수를 기준으로 원피스카드 부스터 박스를 목적별로 비교합니다.',
@@ -892,7 +932,47 @@ const SERVER_PAGE_CONTENT = {
       '카드를 처음 찾는 단계부터 가격 판단, 보관과 실험실 도구 사용까지 필요한 답을 목적별로 나눠 확인할 수 있습니다.',
       '각 가이드는 실제 도감과 시세 화면으로 이어지며 카드 상태, 언어판, 최근 거래 기록과 계산 결과의 범위를 구분해 안내합니다.'
     ],
-    links: ['/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
+    links: ['/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
+  },
+  '/guide/collection': {
+    heading: '원피스카드 수집 가이드: 무엇을 모아야 할까?',
+    paragraphs: [
+      '원피스카드를 처음 모을 때는 인기 카드부터 고르기보다 예산, 완성하고 싶은 범위와 카드를 구하는 방식을 먼저 정하는 편이 좋습니다.',
+      '망가 카드는 시리즈의 대표 희소 카드, 챔피언십과 플래그십은 대회 배포 카드, 프로모는 잡지 부록과 응모·특전 카드를 중심으로 실제 도감 목록을 비교합니다.'
+    ],
+    links: ['/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo', '/cards', '/prices']
+  },
+  '/guide/collection/manga': {
+    heading: '원피스카드 망가 카드 수집 가이드',
+    paragraphs: [
+      '망가 카드는 각 부스터를 대표하는 희소한 패러렐을 중심으로 소수의 핵심 카드를 모으고 싶은 경우 확인하기 좋은 수집 방향입니다.',
+      'OP-01부터 OP-17까지 일본판 망가 카드의 카드번호와 이미지를 시리즈별로 비교하고 각 카드의 도감 상세로 이동할 수 있습니다.'
+    ],
+    links: ['/guide/collection', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo', '/cards/jp', '/prices/cards']
+  },
+  '/guide/collection/championship': {
+    heading: '원피스카드 챔피언십 카드 수집 가이드',
+    paragraphs: [
+      '챔피언십 카드는 지역 대회, 결승과 월드 파이널처럼 배포 대회와 성적 이력이 분명한 한정 카드를 모으고 싶은 경우에 맞습니다.',
+      '일본판과 한국판 카드를 연도와 대회별로 나누고 Best 16, Best 8, 결승 및 참가상 등 확인된 배포 기준을 함께 표시합니다.'
+    ],
+    links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/flagship', '/guide/collection/promo', '/cards', '/prices/cards']
+  },
+  '/guide/collection/flagship': {
+    heading: '원피스카드 플래그십 카드 수집 가이드',
+    paragraphs: [
+      '플래그십 카드는 매년 이어지는 우승 카드와 TOP 8 카드의 짝을 기준으로 대회 한정 컬렉션을 완성하고 싶은 경우에 맞습니다.',
+      '일본판 플래그십 배틀 카드를 2023년부터 연도별로 묶고, 각 카드 아래에 배포 기간과 우승·TOP 8 구분을 표시합니다.'
+    ],
+    links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/promo', '/cards/jp', '/prices/cards']
+  },
+  '/guide/collection/promo': {
+    heading: '원피스카드 프로모 카드 수집 가이드',
+    paragraphs: [
+      '프로모 카드는 잡지 부록, 전원 응모, 매거진과 극장판 특전처럼 배포처가 다양해 관심 있는 캐릭터나 출처부터 범위를 정하기 좋습니다.',
+      'V JUMP, 최강점프와 주간 소년 점프의 부록·응모 카드를 비롯한 일본판 프로모를 배포처별로 나누어 비교합니다.'
+    ],
+    links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/cards/jp', '/prices/cards']
   },
   '/faq': {
     heading: '원피스카드 자주 묻는 질문',
@@ -1294,6 +1374,35 @@ const SERVER_PAGE_DETAILS = {
       heading: '도구를 사용할 때',
       paragraphs: [
         '가상 카드깡, 덱 빌더와 수익률 계산 결과는 실제 구매 결과나 수익을 보장하지 않습니다. 각 도구의 사용 가이드에서 입력 기준과 결과에 포함되지 않는 항목을 먼저 확인할 수 있습니다.'
+      ]
+    }
+  ],
+  '/guide/collection': [
+    {
+      heading: '대표 희소 카드를 중심으로 모을 때',
+      paragraphs: [
+        '한 시리즈를 대표하는 소수의 카드를 목표로 한다면 망가 카드 가이드에서 부스터별 목록을 먼저 비교할 수 있습니다. 카드 수는 적지만 일반적으로 다른 수집 방향보다 필요한 예산이 커질 수 있습니다.'
+      ]
+    },
+    {
+      heading: '대회 한정 카드를 연도별로 모을 때',
+      paragraphs: [
+        '배포 대회와 성적 이력을 중요하게 본다면 챔피언십 또는 플래그십 가이드가 적합합니다. 챔피언십은 대회 종류가 다양하고, 플래그십은 우승·TOP 8 카드의 연도별 흐름을 비교하기 쉽습니다.'
+      ]
+    },
+    {
+      heading: '캐릭터와 배포처를 기준으로 모을 때',
+      paragraphs: [
+        '좋아하는 캐릭터나 잡지·특전 출처부터 시작하려면 프로모 카드 가이드가 적합합니다. 부록, 응모와 특전처럼 발행 형태가 다양하므로 먼저 수집 범위를 좁히는 것이 좋습니다.'
+      ]
+    },
+    {
+      heading: '수집 범위를 정하는 순서',
+      items: [
+        '한 달 또는 한 해에 사용할 예산 상한을 먼저 정합니다.',
+        '캐릭터, 시리즈, 대회와 배포처 중 완성 기준 하나를 선택합니다.',
+        '실제 카드 목록과 최근 참고 시세를 확인한 뒤 목표 수량을 정합니다.',
+        '가격은 시점과 카드 상태에 따라 달라지므로 수집 목록과 구매 판단을 구분합니다.'
       ]
     }
   ],
