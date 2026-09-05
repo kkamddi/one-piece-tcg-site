@@ -38,15 +38,16 @@ jobs:
           REQUESTED_MAX_PAGES: ${{ github.event.inputs.max_pages || '5' }}
         run: |
           case "${D1_BUDGET_PROFILE:-critical}" in
-            normal) pages="$REQUESTED_MAX_PAGES"; days=3 ;;
-            conserve) pages=2; days=2 ;;
-            critical|protect|*) pages=1; days=1 ;;
+            normal) pages="$REQUESTED_MAX_PAGES"; recovery_pages=20; days=3 ;;
+            conserve) pages=2; recovery_pages=10; days=2 ;;
+            critical|protect|*) pages=1; recovery_pages=1; days=1 ;;
           esac
           echo "TRADING_HISTORY_MAX_PAGES=$pages" >> "$GITHUB_ENV"
+          echo "TRADING_HISTORY_RECOVERY_MAX_PAGES=$recovery_pages" >> "$GITHUB_ENV"
           echo "BACKFILL_RECENT_RAW_DAYS=$days" >> "$GITHUB_ENV"
           echo "BACKFILL_DAILY_DAYS=$days" >> "$GITHUB_ENV"
           echo "MARKET_INDEX_REBUILD_WINDOW_DAYS=$days" >> "$GITHUB_ENV"
-          echo "D1 ${D1_BUDGET_PROFILE} profile: index history pages=$pages days=$days"
+          echo "D1 ${D1_BUDGET_PROFILE} profile: index history pages=$pages recovery_pages=$recovery_pages days=$days"
 
       - name: Resolve index component cards
         run: |

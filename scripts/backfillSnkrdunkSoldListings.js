@@ -849,6 +849,7 @@ async function backfillTradingHistoryItem(item, options) {
     code: item.code || '',
     historySource: 'trading-histories',
     pagesFetched: 0,
+    recoveryPagesFetched: 0,
     listingsSeen: 0,
     soldSeen: 0,
     dailyRowsPrepared: 0,
@@ -865,9 +866,11 @@ async function backfillTradingHistoryItem(item, options) {
   const dailyBuckets = new Map();
   const recentHistory = [];
 
-  for (let page = 1; page <= options.tradingHistoryMaxPages; page += 1) {
+  const pageLimit = Math.max(options.tradingHistoryMaxPages, options.tradingHistoryRecoveryMaxPages || 0);
+  for (let page = 1; page <= pageLimit; page += 1) {
     const rows = await fetchTradingHistoriesPage(item.apparelId, page, options.tradingHistoryPerPage);
     result.pagesFetched += 1;
+    if (page > options.tradingHistoryMaxPages) result.recoveryPagesFetched += 1;
     result.listingsSeen += rows.length;
     result.soldSeen += rows.length;
 
@@ -898,11 +901,12 @@ async function backfillTradingHistoryItem(item, options) {
       result.dailyWindowComplete = true;
       break;
     }
-    if (page === options.tradingHistoryMaxPages) result.capped = true;
+    if (page === pageLimit) result.capped = true;
     if (options.delayMs) await sleep(options.delayMs);
   }
 
-  if (options.aggregateMode) {
+  // Never replace a complete daily aggregate with a page-capped partial sample.
+  if (options.aggregateMode && (!options.requireCompleteDailyWindow || result.dailyWindowComplete || options.dryRun)) {
     await finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, options);
   }
 
@@ -1017,6 +1021,11 @@ async function main() {
     DEFAULT_TRADING_HISTORY_MAX_PAGES,
     500,
   );
+  const tradingHistoryRecoveryMaxPages = positiveInt(
+    process.env.TRADING_HISTORY_RECOVERY_MAX_PAGES,
+    tradingHistoryMaxPages,
+    500,
+  );
   const startIndex = Math.max(0, Number(process.env.BACKFILL_START_INDEX || 0) || 0);
   const cardLimit = Math.max(0, Number(process.env.BACKFILL_CARD_LIMIT || 0) || 0);
   const progressPath = String(process.env.BACKFILL_PROGRESS_PATH || '').trim();
@@ -1036,6 +1045,7 @@ async function main() {
     requestedAll,
     perPage,
     tradingHistoryMaxPages,
+    tradingHistoryRecoveryMaxPages,
     tradingHistoryPerPage,
     historyChunkSize,
     dailyDays,
@@ -1086,6 +1096,8 @@ async function main() {
         replaceDailyWindow,
         useTradingHistories,
         tradingHistoryMaxPages,
+        tradingHistoryRecoveryMaxPages,
+        requireCompleteDailyWindow,
         tradingHistoryPerPage,
         dailyCutoffDate: dailyCutoff,
         recentRawCutoffDate: recentRawCutoff,

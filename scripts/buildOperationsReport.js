@@ -12,8 +12,8 @@ const WORKFLOW_LABELS = {
   'Daily market trading history': '거래 이력',
   'PSA10 index history refresh': 'PSA10 이력',
   'Market index refresh': '인덱스',
-  'SNKRDUNK box products sync': '상품 목록',
-  'Deploy production': '운영 배포'
+  'SNKRDUNK catalog sync': '상품 목록',
+  'Production deploy': '운영 배포'
 };
 
 const WORKFLOW_FRESHNESS_HOURS = {
@@ -21,9 +21,9 @@ const WORKFLOW_FRESHNESS_HOURS = {
   // after more than two expected cycles have been missed.
   'Market price collector': { warning: 18, critical: 30 },
   'Daily market trading history': { warning: 30, critical: 48 },
-  'PSA10 index history refresh': { warning: 8, critical: 12 },
+  'PSA10 index history refresh': { warning: 30, critical: 48 },
   'Market index refresh': { warning: 30, critical: 48 },
-  'SNKRDUNK box products sync': { warning: 30, critical: 48 }
+  'SNKRDUNK catalog sync': { warning: 30, critical: 48 }
 };
 
 const FAILURE_CONCLUSIONS = new Set([

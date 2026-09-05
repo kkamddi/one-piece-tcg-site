@@ -241,7 +241,7 @@ function parsePriceAmountJpy(trade, usdToJpy) {
 
 let supportsListingUidDedupe = true;
 
-async function deleteExistingListingUidTrade({ source, apparelId, condition, listingUid }) {
+async function deleteExistingListingUidTrade({ source, apparelId, condition, listingUid, tradeDateText, priceJpy }) {
   if (!listingUid || !supportsListingUidDedupe) return;
   try {
     await runD1(`
@@ -251,7 +251,8 @@ async function deleteExistingListingUidTrade({ source, apparelId, condition, lis
         AND condition_key = ?
         AND raw_payload_json IS NOT NULL
         AND json_extract(raw_payload_json, '$.listingUid') = ?
-    `, [source, apparelId, condition, listingUid]);
+        AND (trade_date_text IS NOT ? OR price_amount_jpy IS NOT ?)
+    `, [source, apparelId, condition, listingUid, tradeDateText, priceJpy]);
   } catch {
     supportsListingUidDedupe = false;
   }
@@ -515,6 +516,8 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
         apparelId: item.apparelId,
         condition,
         listingUid,
+        tradeDateText: trade?.dateText || trade?.date || day,
+        priceJpy,
       });
 
       const insertResult = await runD1(`
@@ -538,7 +541,8 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
         rawPayload,
       ]);
 
-      await runD1(`
+      const insertedRows = Number(insertResult?.meta?.changes ?? insertResult?.changes ?? 1);
+      if (insertedRows === 0) await runD1(`
         UPDATE market_recent_trades
         SET trade_date = ?, last_seen_at = ?, raw_payload_json = ?
         WHERE source = ?
@@ -546,6 +550,7 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
           AND condition_key = ?
           AND trade_date_text = ?
           AND price_amount_jpy = ?
+          AND (trade_date IS NOT ? OR raw_payload_json IS NOT ?)
       `, [
         day,
         now,
@@ -555,9 +560,10 @@ async function ingestHistoryPayload(body, { updateDailyPoints = true } = {}) {
         condition,
         trade?.dateText || trade?.date || day,
         priceJpy,
+        day,
+        rawPayload,
       ]);
 
-      const insertedRows = Number(insertResult?.meta?.changes ?? insertResult?.changes ?? 1);
       if (insertedRows > 0) tradesStored += 1;
       touched.set(`${item.source}|${item.apparelId}|${condition}|${day}`, {
         source: item.source,
