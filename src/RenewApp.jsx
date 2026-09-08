@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
+import { Capacitor } from '@capacitor/core';
 import { fetchAdminStats, fetchPopularSearches, trackPopularSearch, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, signInWithIdentifier } from './api/auth';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
@@ -40,7 +41,9 @@ import './renew.css';
 const LOGO_SRC = '/optcg-logo-light.png';
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
-const SNKRDUNK_MARKET_URL = 'https://snkrdunk.com/en/invitation/AGJ872';
+const SNKRDUNK_MARKET_URL = Capacitor.getPlatform() === 'android'
+  ? 'https://snkrdunk.com/en/'
+  : 'https://snkrdunk.com/en/invitation/AGJ872';
 const resolvedBoxMarketItems = boxMarketItems.map((item) => {
   const snapshot = boxMarketPrices.items?.[String(item.apparelId)];
   if (!snapshot) return item;
@@ -2736,6 +2739,20 @@ function getGoogleMapsSearchUrl({ name = '', address = '' } = {}) {
 function getLocalizedCurrencyText(value, uiLang) {
   return isJapaneseUi(uiLang) ? formatYen(value) : formatUsdWonFromYen(value);
 }
+
+function formatMarketPrimaryPrice(value, uiLang) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return '-';
+  return uiLang === 'JP' ? formatYen(amount) : uiLang === 'EN' ? formatUsd(amount / MARKET_USD_TO_JPY) : formatWonFromYen(amount);
+}
+
+function RenewMarketMoney({ value, uiLang }) {
+  const amount = Number(value);
+  return <span className="renew-market-money">
+    <strong>{formatMarketPrimaryPrice(amount, uiLang)}</strong>
+    {Number.isFinite(amount) && amount > 0 && uiLang !== 'JP' ? <small>{formatYen(amount)}</small> : null}
+  </span>;
+}
 const PAGE_PATHS = {
   home: '/',
   adminAnalytics: '/admin/analytics',
@@ -4261,6 +4278,9 @@ function RenewNotificationMenu({ notifications, onSelect, onMarkAll }) {
 
 function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}, isAdmin = false, onClose }) {
   useBodyScrollLock();
+  const pushDeniedMessage = Capacitor.getPlatform() === 'android'
+    ? '알림 권한이 차단되어 있습니다. Android 설정 > 애플리케이션 > Card Pone > 알림에서 허용한 뒤 다시 열어 주세요.'
+    : '브라우저에서 알림 권한이 차단되어 있습니다. 사이트 설정에서 알림을 허용한 뒤 다시 열어 주세요.';
   const [rules, setRules] = useState([]);
   const [conditionKey, setConditionKey] = useState(normalizeMarketConditionKey(defaultCondition));
   const [triggerType, setTriggerType] = useState('price');
@@ -4319,7 +4339,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
       const code = error?.message || '';
       if (code === 'push_denied' || code === 'push_not_granted') {
         setPushStatus('denied');
-        setMessage('알림 권한이 거절되어 시세 알림을 등록할 수 없습니다. 브라우저 설정에서 알림을 허용해 주세요.');
+        setMessage(pushDeniedMessage);
       } else if (code === 'push_unsupported') {
         setPushStatus('unsupported');
       } else {
@@ -4464,7 +4484,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
             <strong>{pushStatus === 'enabled' ? '푸시 알림 사용 중' : '기기 알림 권한'}</strong>
             {pushStatus === 'enabled' ? <p>조건 충족 시 앱 알림함과 이 기기의 알림 배너로 알려드립니다.</p> : null}
             {pushStatus === 'ready' ? <p>알림을 등록하려면 먼저 이 기기에서 알림 수신을 허용해야 합니다.</p> : null}
-            {pushStatus === 'denied' ? <p>브라우저에서 알림 권한이 차단되어 있습니다. 사이트 설정에서 알림을 허용한 뒤 다시 열어 주세요.</p> : null}
+            {pushStatus === 'denied' ? <p>{pushDeniedMessage}</p> : null}
             {pushStatus === 'unsupported' ? <p>이 환경에서는 웹 푸시를 사용할 수 없습니다. iPhone과 iPad는 Card Pone을 홈 화면에 추가한 뒤 설치된 앱에서 다시 열어 주세요.</p> : null}
             {pushStatus === 'unconfigured' ? <p>푸시 알림 서버 설정을 준비하고 있습니다.</p> : null}
             {pushStatus === 'unavailable' ? <p>푸시 알림 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.</p> : null}
@@ -4723,6 +4743,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
 
 function RenewSuppliesModal({ onClose }) {
   useBodyScrollLock();
+  if (Capacitor.getPlatform() === 'android') return null;
   return (
     <div className="renew-modal-backdrop" onClick={onClose} data-nosnippet>
       <div className="renew-info-modal renew-supplies-modal" onClick={(event) => event.stopPropagation()}>
@@ -4896,6 +4917,7 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
 }
 
 function RenewHomePromoBanner({ uiLang }) {
+  if (Capacitor.getPlatform() === 'android') return null;
   return (
     <section className="renew-home-promo" aria-label={getLocaleText(uiLang, '광고 문의', 'Advertising inquiry', '広告お問い合わせ')}>
       <div className="renew-home-promo-viewport">
@@ -4914,6 +4936,7 @@ function RenewHomePromoBanner({ uiLang }) {
 }
 
 function RenewAdInquiry({ uiLang, placement = 'inline' }) {
+  if (Capacitor.getPlatform() === 'android') return null;
   return (
     <section
       className={`renew-ad-inquiry is-${placement}`}
@@ -6322,7 +6345,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
 }
 
 function RenewPartnerAdSection({ uiLang, placement = 'home' }) {
-  if (!PARTNER_SHOPS_VISIBLE) return null;
+  if (!PARTNER_SHOPS_VISIBLE || Capacitor.getPlatform() === 'android') return null;
   const isEn = uiLang === 'EN';
   const getActionPresentation = (action) => {
     const actionKey = `${action?.labelEn || ''} ${action?.href || ''}`.toLowerCase();
@@ -6468,18 +6491,25 @@ function RenewHomeMarketIndex({ onOpen }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(HOME_MARKET_INDEX_OPTIONS.map(async (option) => {
-      const response = await fetch(`/api/market-index?type=${option.key}&condition=${MARKET_INDEX_CONDITION}&range=7d`);
-      return [option.key, response.ok ? await response.json() : null];
-    }))
-      .then((entries) => {
-        if (!cancelled) setPayloads(Object.fromEntries(entries));
-      })
-      .catch(() => {
-        if (!cancelled) setPayloads({});
-      });
+    let requestId = 0;
+    function loadIndexes() {
+      const currentRequest = ++requestId;
+      Promise.all(HOME_MARKET_INDEX_OPTIONS.map(async (option) => {
+        const response = await fetch(`/api/market-index?type=${option.key}&condition=${MARKET_INDEX_CONDITION}&range=7d`);
+        return [option.key, response.ok ? await response.json() : null];
+      }))
+        .then((entries) => {
+          if (!cancelled && currentRequest === requestId) setPayloads(Object.fromEntries(entries));
+        })
+        .catch(() => {
+          if (!cancelled && currentRequest === requestId) setPayloads({});
+        });
+    }
+    loadIndexes();
+    window.addEventListener('online', loadIndexes);
     return () => {
       cancelled = true;
+      window.removeEventListener('online', loadIndexes);
     };
   }, []);
 
@@ -6849,6 +6879,7 @@ function PortfolioValueImage({ item, src, resolveImage, onError }) {
 }
 
 function CoupangPartnerBanners() {
+  if (Capacitor.getPlatform() === 'android') return null;
   return (
     <section id="card-supplies" className="renew-partner-banners" aria-label="카드 보관용품 추천">
       <div className="renew-partner-head">
@@ -7188,10 +7219,11 @@ function RenewCalendar({ uiLang }) {
 function RenewNews({ uiLang, onOpenCalendar }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
+  const isAndroid = Capacitor.getPlatform() === 'android';
   const savedViewState = getAppHistoryState().newsViewState || {};
   const initialParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const initialPath = typeof window !== 'undefined' ? getAppPath(window.location.pathname) : '/news';
-  const isCardStorageGuide = initialPath === '/guide/card-storage';
+  const isCardStorageGuide = initialPath === '/guide/card-storage' || (isAndroid && initialPath.startsWith('/news/supplies'));
   const isShopBuyingGuide = initialPath === '/guide/shops';
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
@@ -7210,6 +7242,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const initialLocale = (initialParams.get('locale') || (isJp ? 'JP' : 'KR')).toUpperCase();
   const [newsFilter, setNewsFilter] = useState(() => {
     const candidate = savedViewState.newsFilter || initialSection;
+    if (isAndroid && candidate === 'supplies') return 'guide';
     return NEWS_FILTERS.some((item) => item.id === candidate) ? candidate : 'all';
   });
   const [noticeLocale, setNoticeLocale] = useState(() => ['KR', 'JP'].includes(savedViewState.noticeLocale) ? savedViewState.noticeLocale : (initialLocale === 'JP' ? 'JP' : 'KR'));
@@ -7229,7 +7262,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const showOverview = !isJp && newsFilter === 'all';
   const showNotice = isJp || newsFilter === 'notice';
   const showGuide = !isJp && newsFilter === 'guide';
-  const showSupplies = !isJp && newsFilter === 'supplies';
+  const showSupplies = !isAndroid && !isJp && newsFilter === 'supplies';
   const showTopSection = showNotice || visibleLinkGroups.length > 0;
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
 
@@ -7243,7 +7276,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   return (
     <main className="renew-main renew-news-main">
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
-        {NEWS_FILTERS.map((item) => (
+        {NEWS_FILTERS.filter((item) => !isAndroid || item.id !== 'supplies').map((item) => (
           <button
             key={item.id}
             type="button"
@@ -7277,12 +7310,12 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             <small>{NEWS_LINK_GROUPS[0]?.links?.[0]?.label || '진행 중인 예약과 응모 정보'}</small>
             <b aria-hidden="true">›</b>
           </button>
-          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('supplies')}>
+          {!isAndroid ? <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('supplies')}>
             <span>SUPPLIES</span>
             <strong>카드용품</strong>
             <small>슬리브, 탑로더, 케이스와 보관함</small>
             <b aria-hidden="true">›</b>
-          </button>
+          </button> : null}
         </section>
       ) : null}
 
@@ -7409,8 +7442,8 @@ function RenewNews({ uiLang, onOpenCalendar }) {
           <div className="renew-news-supply-grid">
             {supplyItems.map((item) => (
               <a key={`${item.title}-${item.href}`} className="renew-news-supply-card" href={item.href} target="_blank" rel="nofollow sponsored noreferrer">
-                <span className={`renew-news-supply-image ${item.embedSrc ? 'has-embed' : ''}`}>
-                  {item.embedSrc ? (
+                <span className={`renew-news-supply-image ${item.embedSrc && Capacitor.getPlatform() !== 'android' ? 'has-embed' : ''}`}>
+                  {item.embedSrc && Capacitor.getPlatform() !== 'android' ? (
                     <iframe
                       src={item.embedSrc}
                       title={`${item.title} 미리보기`}
@@ -8148,21 +8181,21 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
           ))}
         </div>
       </section>
-      <div className="renew-card-storage-cta">
+      {!(Capacitor.getPlatform() === 'android' && cta.href === '/news/supplies') ? <div className="renew-card-storage-cta">
         <div>
           <span>{cta.eyebrow}</span>
           <strong>{cta.title}</strong>
           <p>{cta.description}</p>
         </div>
         <a href={cta.href}>{cta.label}</a>
-      </div>
+      </div> : null}
       <section className="renew-editorial-guide-related" aria-labelledby={`${guideKey}-related-heading`}>
         <div>
           <span>NEXT</span>
           <h2 id={`${guideKey}-related-heading`}>함께 확인할 가이드</h2>
         </div>
         <nav>
-          {details.related.map((href) => {
+          {details.related.filter((href) => Capacitor.getPlatform() !== 'android' || href !== '/news/supplies').map((href) => {
             const [title, description] = GUIDE_RELATED_LABELS[href] || [href, '관련 내용을 확인합니다.'];
             return <a key={href} href={href}><strong>{title}</strong><small>{description}</small><b aria-hidden="true">›</b></a>;
           })}
@@ -12321,9 +12354,9 @@ function RenewMarketChart({ points = [], uiLang, range }) {
           );
         })}
         <line className="renew-chart-boundary" x1={padX} y1={maxLabelY} x2={width - padX} y2={maxLabelY} />
-        <line className="renew-chart-boundary" x1={padX} y1={minLabelY} x2={width - padX} y2={minLabelY} />
-        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{getLocalizedCurrencyText(maxBoundaryPrice, uiLang)}</text>
-        <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{getLocalizedCurrencyText(minBoundaryPrice, uiLang)}</text>
+        {maxBoundaryPrice !== minBoundaryPrice ? <line className="renew-chart-boundary" x1={padX} y1={minLabelY} x2={width - padX} y2={minLabelY} /> : null}
+        <text className="renew-chart-boundary-label is-max" x={padX + 4} y={Math.max(22, maxLabelY - 8)}>{formatMarketPrimaryPrice(maxBoundaryPrice, uiLang)}</text>
+        {maxBoundaryPrice !== minBoundaryPrice ? <text className="renew-chart-boundary-label is-min" x={padX + 4} y={Math.min(height - 14, minLabelY + 22)}>{formatMarketPrimaryPrice(minBoundaryPrice, uiLang)}</text> : null}
         {!hasSinglePoint ? <path d={area} className="renew-chart-area" /> : null}
         {!hasSinglePoint ? <path d={path} className="renew-chart-line" /> : null}
         {axisLabels.map((item) => (
@@ -12375,9 +12408,9 @@ function RenewMarketChart({ points = [], uiLang, range }) {
               cy={active.y}
               r={activePointRadius}
             />
-            <rect x={tipX} y={tipY} width={tipWidth} height={tipHeight} rx="10" />
+            <rect x={tipX} y={tipY} width={tipWidth} height={tipHeight} rx="6" />
             <text className="renew-chart-tip-date" x={tipX + 14} y={tipY + 24}>{formatMarketDate(active.timestamp)}</text>
-            <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{getLocalizedCurrencyText(active.price, uiLang)}</text>
+            <text className="renew-chart-tip-price" x={tipX + 14} y={tipY + 46}>{formatMarketPrimaryPrice(active.price, uiLang)}</text>
           </g>
         ) : null}
       </svg>
@@ -13472,7 +13505,12 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
   });
   const recentSalesVisible = recentSalesInRange.length ? recentSalesInRange : recentSales;
-  const currentPrice = selectedLatest?.price ? getLocalizedCurrencyText(selectedLatest.price, uiLang) : getMarketCandidatePriceText(selected, t('checkPrice'), uiLang);
+  const currentPriceJpy = Number(selectedLatest?.price || (normalizedCondition === 'a' ? selected?.displayPriceJpy || selected?.latestPriceJpy || Number(selected?.minPrice || 0) * MARKET_USD_TO_JPY : 0));
+  const validRecentSales = recentSalesVisible.filter((sale) => Number.isFinite(Number(sale.price)) && Number(sale.price) > 0)
+    .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+  const latestSale = validRecentSales[0];
+  const dailyPoints = aggregateMarketDailyChartPoints(chartPoints);
+  const dailyPrices = dailyPoints.map((point) => point.price);
   const latestSourceUrl = selectedLatest?.sourceUrl || '';
   const psaSourceUrl = normalizedCondition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
     ? latestSourceUrl
@@ -13483,7 +13521,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
   return (
     <main className="renew-subpage">
-      <section className="renew-panel renew-market">
+      <section className={`renew-panel renew-market${selected ? ' has-price-detail' : ''}`}>
         <form className="renew-market-search" onSubmit={(event) => { event.preventDefault(); searchMarket(code); }}>
           <a className="renew-market-snkr-link" href={SNKRDUNK_MARKET_URL} target="_blank" rel="noreferrer" aria-label="SNKRDUNK 바로가기">
             <span>SNKR</span>
@@ -13499,7 +13537,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
-        <RenewAdInquiry uiLang={uiLang} />
+        {!selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
 
         {loading ? <div className="renew-empty">{t('marketLoading')}</div> : null}
         {message ? <div className="renew-empty">{message}</div> : null}
@@ -13577,7 +13615,10 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                 <small className="renew-market-selected-meta">{getMarketMetaLine(selected)}</small>
                 <p>{selected.setName}</p>
               </div>
-              <strong className="renew-market-price"><small>{currentPriceLabel}</small><span>{currentPrice}</span></strong>
+              <div className="renew-market-price">
+                <small>{normalizedCondition === 'a' && !selectedLatest?.price ? getLocaleText(uiLang, '검색 시세 · Single', 'Search price · Single', '検索価格・Single') : `${currentPriceLabel} · ${normalizedCondition === 'a' ? 'Single' : 'PSA10'}`}</small>
+                {loading ? <span>{t('marketLoading')}</span> : <RenewMarketMoney value={currentPriceJpy} uiLang={uiLang} />}
+              </div>
               <div className="renew-market-actions">
                 {canMapInitialCard ? (
                   <button type="button" onClick={(event) => mapCandidateToInitialCard(event, selected)}>
@@ -13623,6 +13664,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                       key={item.key}
                       type="button"
                       className={normalizedCondition === item.key ? 'is-active' : ''}
+                      aria-pressed={normalizedCondition === item.key}
                       onClick={() => setCondition(item.key)}
                     >
                       {item.key === 'a' ? t('aGrade') : item.label}
@@ -13631,27 +13673,40 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                 </div>
                 <div className="renew-chip-group">
                   {MARKET_DETAIL_RANGES.map((item) => (
-                    <button key={item.key} type="button" className={chartRange === item.key ? 'is-active' : ''} onClick={() => setRange(item.key)}>
+                    <button key={item.key} type="button" className={chartRange === item.key ? 'is-active' : ''} aria-pressed={chartRange === item.key} onClick={() => setRange(item.key)}>
                       {item.label}
                     </button>
                   ))}
                 </div>
               </div>
+              <dl className="renew-market-snapshot">
+                <div><dt>{getLocaleText(uiLang, '최근 가격 기록', 'Latest price record', '直近の価格記録')}</dt><dd><RenewMarketMoney value={latestSale?.price} uiLang={uiLang} /></dd><small>{latestSale ? formatMarketSaleDate(latestSale) : getLocaleText(uiLang, '기록 없음', 'No records', '記録なし')}</small></div>
+                <div><dt>{getLocaleText(uiLang, '기간 최저 · 일별 중앙값', 'Period low · daily median', '期間最安・日別中央値')}</dt><dd>{formatMarketPrimaryPrice(dailyPrices.length ? Math.min(...dailyPrices) : 0, uiLang)}</dd></div>
+                <div><dt>{getLocaleText(uiLang, '기간 최고 · 일별 중앙값', 'Period high · daily median', '期間最高・日別中央値')}</dt><dd>{formatMarketPrimaryPrice(dailyPrices.length ? Math.max(...dailyPrices) : 0, uiLang)}</dd></div>
+                <div><dt>{getLocaleText(uiLang, '기간 내 기록일', 'Recorded days', '期間内の記録日')}</dt><dd>{dailyPoints.length}<small>{getLocaleText(uiLang, '일', ' days', '日')}</small></dd><small>{MARKET_DETAIL_RANGES.find((item) => item.key === chartRange)?.label}</small></div>
+              </dl>
+              <div className="renew-market-history-layout">
+              <section className="renew-market-trend">
+              <h3>{getLocaleText(uiLang, '가격 추이', 'Price history', '価格推移')}<small>{getLocaleText(uiLang, '일별 중앙값', 'Daily median', '日別中央値')}</small></h3>
               <RenewMarketChart points={chartPoints} uiLang={uiLang} range={chartRange} />
+              </section>
               <div className="renew-market-recent">
                 <h3>{t('recentSales')}</h3>
-                {recentSalesVisible.slice(0, 10).map((sale, index) => (
+                <div className="renew-market-sale-head"><span>{getLocaleText(uiLang, '출처', 'Source', '出典')}</span><span>{getLocaleText(uiLang, '날짜', 'Date', '日付')}</span><span>{getLocaleText(uiLang, '가격', 'Price', '価格')}</span></div>
+                {validRecentSales.slice(0, 10).map((sale, index) => (
                   <div key={`${sale.date}-${sale.price}-${index}`} className="renew-market-sale">
                     <span>{getMarketSaleSourceLabel(sale, normalizedCondition === 'a' ? 'Single' : normalizedCondition.toUpperCase())}</span>
                     <small>{formatMarketSaleDate(sale)}</small>
-                    <strong>{getLocalizedCurrencyText(sale.price, uiLang)}</strong>
+                    <RenewMarketMoney value={sale.price} uiLang={uiLang} />
                   </div>
                 ))}
-                {!recentSalesVisible.length ? <div className="renew-empty">{t('noRecentSales')}</div> : null}
+                {!validRecentSales.length ? <div className="renew-empty">{t('noRecentSales')}</div> : null}
+              </div>
               </div>
             </div>
           </div>
         ) : null}
+        {selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
       </section>
       {priceAlertOpen && selected ? (
         <RenewPriceAlertModal
@@ -13953,6 +14008,7 @@ function normalizeDeckSearchText(value = '') {
 }
 
 function RenewLeaderInsightsModal({ card, region, authUser, uiLang, onClose, onRequireLogin }) {
+  const reviewsEnabled = Capacitor.getPlatform() !== 'android';
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [rating, setRating] = useState(5);
@@ -14057,7 +14113,7 @@ function RenewLeaderInsightsModal({ card, region, authUser, uiLang, onClose, onR
             {card.effect ? <p>{card.effect}</p> : null}
           </div>
         </div>
-        <div className="renew-leader-review-form">
+        {reviewsEnabled ? <div className="renew-leader-review-form">
           <div className="renew-leader-rating-head">
             <strong>{getLocaleText(uiLang, '리더 만족도', 'Leader satisfaction', 'リーダー満足度')}</strong>
             <span>{rating} · {ratingLabels[rating]}</span>
@@ -14111,8 +14167,8 @@ function RenewLeaderInsightsModal({ card, region, authUser, uiLang, onClose, onR
             )}
           </div>
           {notice ? <p role="status">{notice}</p> : null}
-        </div>
-        <div className="renew-leader-review-list">
+        </div> : null}
+        {reviewsEnabled ? <div className="renew-leader-review-list">
           <h3>{getLocaleText(uiLang, '리더 평가', 'Leader reviews', 'リーダー評価')}</h3>
           {loading ? <p>{getLocaleText(uiLang, '불러오는 중', 'Loading', '読み込み中')}</p> : null}
           {!loading && !(overview?.reviews || []).length ? (
@@ -14124,7 +14180,7 @@ function RenewLeaderInsightsModal({ card, region, authUser, uiLang, onClose, onR
               <p>{item.content}</p>
             </article>
           ))}
-        </div>
+        </div> : null}
       </section>
     </div>,
     document.body

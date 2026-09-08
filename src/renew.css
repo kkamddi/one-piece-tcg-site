@@ -1,5 +1,7 @@
 @import url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css');
 .renew-app {
+  --renew-page-width: 1440px;
+  --renew-page-gutter: clamp(18px, 4vw, 48px);
   position: relative;
   width: 100%;
   max-width: 100%;
@@ -3461,8 +3463,34 @@
 }
 
 .renew-route-back-wrap {
-  width: 100%;
-  padding: 18px clamp(18px, 4vw, 48px) 14px;
+  width: min(var(--renew-page-width), 100%);
+  margin-inline: auto;
+  padding: 18px var(--renew-page-gutter) 14px;
+}
+
+.renew-route-back-wrap:has(+ .renew-collection-guide),
+.renew-route-back-wrap:has(+ .renew-series-guide) {
+  width: min(1180px, calc(100% - 40px));
+  padding-inline: 0;
+}
+
+.renew-route-back-wrap:has(+ .renew-card-detail-page) {
+  width: min(920px, calc(100% - 36px));
+  padding-inline: 0;
+}
+
+.renew-route-back-wrap:has(+ .renew-static-info-main) {
+  width: min(980px, calc(100% - 44px));
+  padding-inline: 0;
+}
+
+.renew-route-back-wrap:has(+ .renew-partner-seo-main) {
+  max-width: 1240px;
+}
+
+.renew-route-back-wrap:not(.is-mobile-only) + main,
+.renew-route-back-wrap + .renew-collection-guide > .renew-collection-guide-head {
+  padding-top: 0;
 }
 
 .renew-route-back-button {
@@ -3502,6 +3530,16 @@
 @media (min-width: 901px) {
   .renew-route-back-wrap.is-mobile-only {
     display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .renew-route-back-wrap:has(+ .renew-static-info-main) {
+    width: calc(100% - 28px);
+  }
+
+  .renew-route-back-wrap.is-mobile-only + main {
+    padding-top: 0;
   }
 }
 
@@ -11105,6 +11143,10 @@
 }
 
 @media (max-width: 820px) {
+  .renew-route-back-wrap:has(+ .renew-series-guide) {
+    width: min(100% - 24px, 680px);
+  }
+
   .renew-series-guide {
     width: min(100% - 24px, 680px);
     padding-top: 16px;
@@ -11557,6 +11599,10 @@
 }
 
 @media (max-width: 620px) {
+  .renew-route-back-wrap:has(+ .renew-collection-guide) {
+    width: min(100% - 24px, 560px);
+  }
+
   .renew-collection-guide {
     width: min(100% - 24px, 560px);
     padding-top: 12px;
@@ -12190,9 +12236,9 @@
 }
 
 .renew-subpage {
-  width: min(1440px, 100%);
+  width: min(var(--renew-page-width), 100%);
   margin: 0 auto;
-  padding: 44px clamp(18px, 4vw, 48px) 72px;
+  padding: 44px var(--renew-page-gutter) 72px;
 }
 
 .renew-lab-page {
@@ -22723,14 +22769,20 @@ button.renew-deck-entry:focus-visible {
 }
 
 @media (max-width: 640px) {
-  .renew-route-back-wrap {
-    padding: 10px 12px 12px;
-  }
-
   .renew-route-back-button {
     min-height: 28px;
     padding: 4px 0;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 560px) {
+  .renew-route-back-wrap {
+    padding: 10px 12px 12px;
+  }
+
+  .renew-route-back-wrap:has(+ .renew-card-detail-page) {
+    width: calc(100% - 20px);
   }
 }
 
@@ -23547,5 +23599,303 @@ button.renew-deck-entry:focus-visible {
   .renew-editorial-guide-faq,
   .renew-editorial-guide-related {
     margin: 20px 16px 0;
+  }
+}
+
+/* Price detail uses unframed sections and a shared content baseline. */
+.renew-panel.renew-market.has-price-detail {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.has-price-detail .renew-market-detail {
+  margin-top: 24px;
+  gap: 24px;
+}
+
+.has-price-detail .renew-market-card {
+  grid-template-columns: 104px minmax(0, 1fr) minmax(230px, 0.65fr);
+  padding: 0 0 24px;
+  border: 0;
+  border-bottom: 1px solid #e2e4e7;
+  border-radius: 0;
+  background: transparent;
+}
+
+.has-price-detail .renew-market-card img {
+  width: 104px;
+  max-height: 146px;
+  object-fit: contain;
+}
+
+.has-price-detail .renew-market-card h2 {
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.has-price-detail .renew-market-card p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.has-price-detail .renew-market-price {
+  border-left: 0;
+  padding: 0;
+  text-align: right;
+  white-space: normal;
+  letter-spacing: 0;
+}
+
+.renew-market-money {
+  display: grid;
+  gap: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.renew-market-money > strong {
+  font-size: inherit;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.renew-market-money > small {
+  color: #69717b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.has-price-detail .renew-market-price .renew-market-money > strong {
+  font-size: 30px;
+}
+
+.has-price-detail .renew-market-controls {
+  margin-bottom: 18px;
+}
+
+.renew-market-snapshot {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  padding: 18px 0;
+  margin: 0 0 24px;
+  border-block: 1px solid #e2e4e7;
+}
+
+.renew-market-snapshot dt,
+.renew-market-snapshot small {
+  color: #69717b;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.renew-market-snapshot dd {
+  margin: 7px 0 3px;
+  font-size: 21px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.renew-market-snapshot dd > small {
+  margin-left: 4px;
+}
+
+.renew-market-history-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.renew-market-trend h3,
+.has-price-detail .renew-market-recent h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.renew-market-trend h3 small {
+  color: #69717b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.has-price-detail .renew-market-chart-box,
+.has-price-detail .renew-chart-placeholder {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.has-price-detail .renew-market-chart-box svg {
+  height: 310px;
+}
+
+.has-price-detail .renew-market-chart-box text {
+  letter-spacing: 0;
+}
+
+.has-price-detail .renew-market-recent {
+  display: block;
+  margin-top: 0;
+}
+
+.has-price-detail .renew-market-sale,
+.renew-market-sale-head {
+  display: grid;
+  grid-template-columns: 52px 72px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid #e2e4e7;
+  border-radius: 0;
+  background: transparent;
+  font-size: 13px;
+}
+
+.renew-market-sale-head {
+  color: #69717b;
+  font-size: 11px;
+  padding-top: 0;
+}
+
+.renew-market-sale-head > :last-child,
+.has-price-detail .renew-market-sale > .renew-market-money {
+  text-align: right;
+}
+
+.has-price-detail .renew-market-sale span,
+.has-price-detail .renew-market-sale strong {
+  letter-spacing: 0;
+}
+
+.renew-market-single-day {
+  min-height: 180px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 12px;
+  border-block: 1px solid #e2e4e7;
+}
+
+.renew-market-single-day > div {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-market-single-day > .renew-market-money {
+  text-align: right;
+  font-size: 22px;
+}
+
+.renew-market-single-day > span:last-child {
+  grid-column: 1 / -1;
+  color: #69717b;
+  font-size: 12px;
+}
+
+.renew-app.is-dark .has-price-detail .renew-market-card,
+.renew-app.is-dark .renew-market-snapshot,
+.renew-app.is-dark .has-price-detail .renew-market-sale,
+.renew-app.is-dark .renew-market-sale-head,
+.renew-app.is-dark .renew-market-single-day {
+  border-color: #3b4149;
+  background: transparent;
+}
+
+.renew-app.is-dark .renew-market-money > small,
+.renew-app.is-dark .renew-market-snapshot dt,
+.renew-app.is-dark .renew-market-snapshot small,
+.renew-app.is-dark .renew-market-trend h3 small,
+.renew-app.is-dark .renew-market-sale-head,
+.renew-app.is-dark .renew-market-single-day > span:last-child {
+  color: #b5bdc7;
+}
+
+@media (max-width: 1000px) {
+  .renew-market-history-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .renew-market-snapshot {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .has-price-detail .renew-market-card {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 10px 16px;
+  }
+
+  .has-price-detail .renew-market-card img {
+    width: 88px;
+    grid-row: 1 / 3;
+  }
+
+  .has-price-detail .renew-market-card > .renew-market-price {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+  }
+
+  .has-price-detail .renew-market-actions {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .renew-app {
+    --renew-page-gutter: 12px;
+  }
+
+  .renew-route-back-wrap:has(+ .renew-subpage) {
+    padding-inline: var(--renew-page-gutter);
+  }
+
+  .has-price-detail .renew-market-detail {
+    margin-top: 18px;
+  }
+
+  .has-price-detail .renew-market-card h2 {
+    display: block;
+    overflow: visible;
+    font-size: 19px;
+  }
+
+  .has-price-detail .renew-market-card p {
+    white-space: normal;
+  }
+
+  .has-price-detail .renew-market-price .renew-market-money > strong {
+    font-size: 24px;
+  }
+
+  .renew-market-snapshot {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+
+  .renew-market-snapshot dd {
+    font-size: 19px;
+  }
+
+  .has-price-detail .renew-market-actions button,
+  .has-price-detail .renew-market-actions a {
+    white-space: normal;
+    line-height: 1.35;
+    padding: 8px;
+  }
+
+  .has-price-detail .renew-market-chart-box svg {
+    height: 260px;
   }
 }
