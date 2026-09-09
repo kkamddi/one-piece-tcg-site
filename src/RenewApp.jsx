@@ -32,6 +32,7 @@ import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
 import CenteringLab from './CenteringLab';
+import CardScanner from './CardScanner';
 import CollectionGuide from './CollectionGuide';
 import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuide } from './PortfolioCalculator';
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
@@ -13108,6 +13109,8 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const [mappingBusyId, setMappingBusyId] = useState(null);
   const [mappingMessage, setMappingMessage] = useState('');
   const [candidatePanelCollapsed, setCandidatePanelCollapsed] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  useBodyScrollLock(scannerOpen);
   const [priceAlertOpen, setPriceAlertOpen] = useState(false);
   const [portfolioEditorOpen, setPortfolioEditorOpen] = useState(false);
   const marketDetailRef = useRef(null);
@@ -13461,9 +13464,9 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   }
 
   useEffect(() => {
-    onBackHandlerChange?.(selected ? returnFromMarketDetail : null);
+    onBackHandlerChange?.(scannerOpen ? () => { setScannerOpen(false); return true; } : selected ? returnFromMarketDetail : null);
     return () => onBackHandlerChange?.(null);
-  }, [selected, candidates.length, onBackHandlerChange, uiLang]);
+  }, [selected, candidates.length, scannerOpen, onBackHandlerChange, uiLang]);
 
   async function mapCandidateToInitialCard(event, item) {
     event?.preventDefault?.();
@@ -13536,6 +13539,9 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           </div>
           <button type="submit">{t('marketSearch')}</button>
         </form>
+
+        <div className="renew-market-scan-entry"><button type="button" disabled={loading} onClick={() => { if (window.matchMedia('(max-width: 767px)').matches) setScannerOpen(true); }}>{getLocaleText(uiLang, '스캔', 'Scan', 'スキャン')}</button></div>
+        {scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
 
         {!selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
 

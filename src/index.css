@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@source not "../public/card-scan";
+@source not "../artifacts/card-image-index-cache";
+@source not "../artifacts/card-scan-index-test";
 
 :root {
   color-scheme: light dark;
