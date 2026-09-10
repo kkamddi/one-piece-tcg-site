@@ -142,6 +142,11 @@ const PAGE_SEO = {
 
 const JAPANESE_ROUTE_PREFIX = '/jp';
 const JAPANESE_SEO = {
+  '/search': {
+    title: 'サイト内検索 | Card Pone',
+    description: 'カード、シリーズ、ガイド、ツール、取扱店舗を検索します。',
+    robots: 'noindex,follow'
+  },
   '/': {
     title: 'ワンピースカードゲームのカード図鑑・相場 | Card Pone',
     description: 'ONE PIECE CARD GAMEの日本版カードを中心に、カード図鑑、SNKRDUNK基準の相場、価格チャート、コレクション管理を確認できる非公式サービスです。',

@@ -15,6 +15,8 @@ const sitemapPaths = [
 ];
 const requiredPaths = [
   '/',
+  '/search',
+  '/jp/search',
   '/cards',
   '/prices',
   '/lab',
