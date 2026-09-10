@@ -1,3 +1,5 @@
+import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
+
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
 const LEGACY_REDIRECTS = {
@@ -518,12 +520,22 @@ const SEO_FIXES = {
     schemaType: 'Article'
   },
   '/guide/collection': {
+    title: '원피스카드 컬렉션 - 망가·챔피언십·플래그십·프로모 | Card Pone',
+    description: '망가 카드, 챔피언십, 플래그십, 프로모의 카드 이미지와 번호를 분류별로 확인합니다.',
+    schemaType: 'CollectionPage'
+  },
+  '/search': {
+    title: '통합 검색 | Card Pone',
+    description: '카드, 시리즈, 가이드, 실험실, 구매처를 검색합니다.',
+    robots: 'noindex,follow'
+  },
+  '/guide/collection/start': {
     title: '원피스카드 수집 가이드 - 무엇을 모아야 할까? | Card Pone',
     description: '망가 카드, 챔피언십, 플래그십, 프로모 중 무엇을 모을지 예산과 희소성, 수집 방식에 따라 비교하고 실제 카드 목록을 확인합니다.',
     keywords: '원피스카드 뭐 모아야, 원피스카드 수집 추천, 원피스카드 수집 가이드',
     schemaType: 'Article',
     editor: 'Card Pone 편집',
-    reviewedAt: '2026-09-03'
+    reviewedAt: COLLECTION_EDITORIAL.reviewedAt
   },
   '/guide/collection/manga': {
     title: '원피스카드 망가 카드 수집 가이드 - 시리즈별 목록 | Card Pone',
@@ -935,11 +947,13 @@ const SERVER_PAGE_CONTENT = {
     links: ['/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
   },
   '/guide/collection': {
-    heading: '원피스카드 수집 가이드: 무엇을 모아야 할까?',
-    paragraphs: [
-      '원피스카드를 처음 모을 때는 인기 카드부터 고르기보다 예산, 완성하고 싶은 범위와 카드를 구하는 방식을 먼저 정하는 편이 좋습니다.',
-      '망가 카드는 시리즈의 대표 희소 카드, 챔피언십과 플래그십은 대회 배포 카드, 프로모는 잡지 부록과 응모·특전 카드를 중심으로 실제 도감 목록을 비교합니다.'
-    ],
+    heading: '원피스카드 망가 카드 가이드',
+    paragraphs: ['망가 카드, 챔피언십, 플래그십, 프로모 카드 목록을 분류별로 확인합니다.'],
+    sections: [],
+    links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
+  },
+  '/guide/collection/start': {
+    ...COLLECTION_EDITORIAL,
     links: ['/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo', '/cards', '/prices']
   },
   '/guide/collection/manga': {
@@ -1764,10 +1778,12 @@ function createServerPageContent(pathname, seo) {
   const detailSections = details.map((section) => {
     const sectionParagraphs = (section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
     const items = (section.items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+    const sources = (section.links || []).map((link) => `<li><a href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a></li>`).join('');
     return `<section>
         <h2>${escapeHtml(section.heading)}</h2>
         ${sectionParagraphs}
         ${items ? `<ul>${items}</ul>` : ''}
+        ${sources ? `<ul>${sources}</ul>` : ''}
       </section>`;
   }).join('');
 

@@ -157,6 +157,7 @@ export default function CardScanner({ uiLang, initialLocale, onClose, onSelect }
     if (!file) return;
     const issue = validateScanFile(file);
     if (issue) { setError(text[issue]); return; }
+    stopCamera();
     const job = ++jobRef.current;
     setMode('preparing'); setError('');
     const url = URL.createObjectURL(file);
@@ -213,27 +214,37 @@ export default function CardScanner({ uiLang, initialLocale, onClose, onSelect }
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; controller.abort(); }, 90000);
     setMode('reading'); setError(''); setCode(''); setCodes([]); setVariants([]); setChosen(null); setManual(false); setProgress({ phase: 'loading', progress: 0 });
-    try {
+    // Prepare artwork in parallel so a slow image engine cannot block number OCR.
+    const preparedImage = (async () => {
+      let session;
       try {
         const { createCardImageSession } = await import('./lib/card-image-match.js');
-        if (job !== jobRef.current) return;
-        const session = createCardImageSession(controller.signal);
+        if (job !== jobRef.current || controller.signal.aborted) return null;
+        session = createCardImageSession(controller.signal);
         imageSessionRef.current = session;
-        await session.prepare(photo);
+        return await session.prepare(photo);
       } catch {
-        imageSessionRef.current?.dispose(); imageSessionRef.current = null;
+        session?.dispose();
+        if (imageSessionRef.current === session) imageSessionRef.current = null;
+        return null;
       }
-      if (job !== jobRef.current) return;
+    })();
+    try {
       const { recognizeCardCodes } = await import('./lib/card-scan-ocr');
       if (job !== jobRef.current) return;
-      const found = await recognizeCardCodes(photo, { signal: controller.signal, onProgress: value => { if (job === jobRef.current) setProgress(value); } }).catch(failure => {
+      let ocrFailure;
+      const found = await recognizeCardCodes(photo, { signal: controller.signal, getFallbackCanvas: () => preparedImage, onProgress: value => { if (job === jobRef.current) setProgress(value); } }).catch(failure => {
+        ocrFailure = failure;
         if (controller.signal.aborted || !imageSessionRef.current) throw failure;
         return [];
       });
       if (job !== jobRef.current) return;
+      await preparedImage;
+      if (job !== jobRef.current) return;
       setCodes(found);
       if (found.length <= 1) await findVariants(found[0] || '', locale, job);
       else { setMode('review'); setManual(true); if (!found.length) setError(text.noCode); }
+      if (ocrFailure && !found.length && !imageSessionRef.current) setError(text.error);
     } catch (failure) {
       if (job !== jobRef.current) return;
       setMode('review'); setError(timedOut ? text.timeout : failure.name === 'AbortError' ? '' : text.error);

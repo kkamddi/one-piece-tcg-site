@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { fetchCardsByIds } from './api/cards';
+import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 import {
   CHAMPIONSHIP_COLLECTION_GROUPS,
   FLAGSHIP_COLLECTION_GROUPS,
@@ -79,7 +80,7 @@ export default function CollectionGuide({ onOpenCard }) {
   const pathSection = typeof window !== 'undefined' ? window.location.pathname.match(/^\/guide\/collection\/([^/]+)\/?$/)?.[1] : '';
   const hashSection = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
   const activeSection = COLLECTION_SECTIONS[pathSection] ? pathSection : COLLECTION_SECTIONS[hashSection] ? hashSection : 'manga';
-  const isCollectionOverview = !pathSection && !COLLECTION_SECTIONS[hashSection];
+  const isCollectionOverview = pathSection === 'start';
   const sectionMeta = isCollectionOverview
     ? { ...COLLECTION_SECTIONS.manga, title: '원피스카드 수집 가이드: 무엇을 모아야 할까?' }
     : COLLECTION_SECTIONS[activeSection];
@@ -88,6 +89,7 @@ export default function CollectionGuide({ onOpenCard }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const cardIds = useMemo(() => {
+    if (isCollectionOverview) return [];
     const groups = activeSection === 'manga'
       ? MANGA_COLLECTION_GROUPS
       : activeSection === 'championship'
@@ -96,7 +98,7 @@ export default function CollectionGuide({ onOpenCard }) {
           ? FLAGSHIP_COLLECTION_GROUPS.JP
           : PROMO_COLLECTION_GROUPS;
     return groups.flatMap((group) => group.cards.map((card) => card.cardId));
-  }, [activeSection]);
+  }, [activeSection, isCollectionOverview]);
 
   useEffect(() => {
     if (!COLLECTION_SECTIONS[hashSection] || pathSection) return;
@@ -105,6 +107,7 @@ export default function CollectionGuide({ onOpenCard }) {
 
   useEffect(() => {
     let cancelled = false;
+    if (isCollectionOverview) { setLoading(false); return; }
     setLoading(true);
     setError(false);
     fetchCardsByIds(cardIds)
@@ -119,7 +122,7 @@ export default function CollectionGuide({ onOpenCard }) {
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [cardIds]);
+  }, [cardIds, isCollectionOverview]);
 
   return (
     <main className="renew-collection-guide">
@@ -127,22 +130,37 @@ export default function CollectionGuide({ onOpenCard }) {
         <span>COLLECTION GUIDE</span>
         <h1>{sectionMeta.title}</h1>
         <dl>
-          <div><dt>현재 범위</dt><dd>{sectionMeta.locale}</dd></div>
-          <div><dt>가이드 수록</dt><dd>{cardIds.length}건</dd></div>
-          <div><dt>기준</dt><dd>2026.08</dd></div>
+          <div><dt>현재 범위</dt><dd>{isCollectionOverview ? '수집 방향' : sectionMeta.locale}</dd></div>
+          <div><dt>{isCollectionOverview ? '비교 분류' : '가이드 수록'}</dt><dd>{isCollectionOverview ? '4가지' : `${cardIds.length}건`}</dd></div>
+          <div><dt>{isCollectionOverview ? '본문 검수' : '기준'}</dt><dd>{isCollectionOverview ? COLLECTION_EDITORIAL.reviewedAt : '2026.08'}</dd></div>
         </dl>
       </header>
 
       <nav className="renew-collection-guide-nav" aria-label="수집 가이드 분류">
+        <a className={isCollectionOverview ? 'is-active' : ''} href="/guide/collection/start">수집 방향 가이드</a>
         {Object.entries(COLLECTION_SECTIONS).map(([section, meta]) => (
-          <a key={section} className={activeSection === section ? 'is-active' : ''} href={`/guide/collection/${section}`}>{meta.label}</a>
+          <a key={section} className={!isCollectionOverview && activeSection === section ? 'is-active' : ''} href={`/guide/collection/${section}`}>{meta.label}</a>
         ))}
       </nav>
 
-      {loading ? <p className="renew-collection-guide-status">도감 카드를 불러오는 중입니다.</p> : null}
-      {error ? <p className="renew-collection-guide-status is-error">도감 카드를 불러오지 못했습니다.</p> : null}
+      {isCollectionOverview ? <article className="renew-collection-editorial" aria-label="수집 방향 선택 기준">
+        <p className="renew-collection-editorial-meta">Card Pone 편집 · 본문 검수 <time dateTime={COLLECTION_EDITORIAL.reviewedAt}>{COLLECTION_EDITORIAL.reviewedAt}</time></p>
+        {COLLECTION_EDITORIAL.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        <nav aria-label="수집 방향 가이드 목차"><ol>
+          {COLLECTION_EDITORIAL.sections.map((section, index) => <li key={section.heading}><a href={`#collecting-${index + 1}`}>{section.heading}</a></li>)}
+        </ol></nav>
+        {COLLECTION_EDITORIAL.sections.map((section, index) => <section id={`collecting-${index + 1}`} key={section.heading}>
+          <h2>{section.heading}</h2>
+          {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {section.items ? <ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul> : null}
+          <ul className="renew-collection-editorial-links">{(section.links || []).map((link) => <li key={link.href}><a href={link.href}>{link.label}</a></li>)}</ul>
+        </section>)}
+      </article> : null}
 
-      {activeSection === 'manga' ? <section id="manga" className="renew-collection-guide-section">
+      {!isCollectionOverview && loading ? <p className="renew-collection-guide-status">도감 카드를 불러오는 중입니다.</p> : null}
+      {!isCollectionOverview && error ? <p className="renew-collection-guide-status is-error">도감 카드를 불러오지 못했습니다.</p> : null}
+
+      {!isCollectionOverview && activeSection === 'manga' ? <section id="manga" className="renew-collection-guide-section">
         <div className="renew-collection-guide-title">
           <div>
             <span>MANGA RARE</span>

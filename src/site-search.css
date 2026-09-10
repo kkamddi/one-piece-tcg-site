@@ -1,0 +1,47 @@
+.site-search-page { width: min(1180px, calc(100% - 32px)); margin: 24px auto 64px; }
+.renew-route-back-wrap:has(+ .site-search-page) { width: min(1180px, calc(100% - 32px)); margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; }
+.site-search-page h1 { font-size: 28px; margin: 0 0 20px; }
+.site-search-input { position: relative; flex: 1; min-width: 0; }
+.site-search-input .renew-search { width: 100%; grid-template-columns: minmax(0, 1fr) auto; }
+.site-search-input input { min-width: 0; width: 100%; }
+.site-search-input .renew-search-submit { flex-shrink: 0; min-width: 60px; font-size: 14px; }
+.site-search-suggestions { position: absolute; z-index: 30; inset: calc(100% + 6px) 0 auto; padding: 4px 0; margin: 0; list-style: none; background: #fff; color: #17191c; border: 1px solid #d9dde1; border-radius: 8px; box-shadow: 0 6px 18px #0001; }
+.site-search-suggestions a { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+.site-search-suggestions li[aria-selected="true"], .site-search-suggestions a:hover { background: #f1f3f5; }
+.site-search-suggestions small { flex-shrink: 0; color: #656e77; }
+.site-search-tabs, .site-search-locales { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.site-search-tabs { padding-bottom: 14px; border-bottom: 1px solid #80808040; }
+.site-search-tabs button, .site-search-locales button { padding: 8px 13px; border-radius: 6px; border: 1px solid #80808040; background: transparent; color: inherit; font-size: 14px; }
+.site-search-tabs button[aria-pressed="true"], .site-search-locales button[aria-pressed="true"] { background: #17191c; color: #fff; }
+.site-search-tabs small { margin-left: 6px; }
+.site-search-section { margin: 28px 0; }
+.site-search-section > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.site-search-section h2 { font-size: 20px; margin: 0; }
+.site-search-section h2 small { font-size: 14px; color: #717780; }
+.site-search-section > header button, .site-search-more { border: 0; background: transparent; color: inherit; text-decoration: underline; padding: 8px; }
+.site-search-cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; }
+.site-search-card { min-width: 0; }
+.site-search-card-image { display: block; aspect-ratio: 5 / 7; margin-bottom: 10px; }
+.site-search-card-image img { width: 100%; height: 100%; object-fit: contain; }
+.site-search-card h3 { font-size: 15px; margin: 6px 0; line-height: 1.5; overflow-wrap: anywhere; }
+.site-search-card p, .site-search-card > small { font-size: 12px; color: #67717c; }
+.site-search-card a, .site-search-rows a, .site-search-empty a { color: inherit; text-underline-offset: 3px; }
+.site-search-card-actions { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; margin-top: 10px; }
+.site-search-rows article { border-bottom: 1px solid #80808040; padding: 16px 0; overflow-wrap: anywhere; }
+.site-search-rows h3 { font-size: 17px; margin: 0 0 6px; }
+.site-search-rows h3 small { margin-left: 12px; font-size: 12px; color: #717780; }
+.site-search-rows p { margin: 0 0 8px; font-size: 14px; }
+.site-search-rows article > a { margin-left: 12px; font-size: 13px; }
+.site-search-empty { padding: 24px 0; }
+.site-search-empty a { margin-right: 18px; }
+.renew-app.is-dark .site-search-suggestions { background: #232629; border-color: #555b62; color: #f5f5f5; }
+.renew-app.is-dark .site-search-suggestions li[aria-selected="true"], .renew-app.is-dark .site-search-suggestions a:hover { background: #34383d; }
+.renew-app.is-dark .site-search-card p, .renew-app.is-dark .site-search-card > small, .renew-app.is-dark .site-search-suggestions small { color: #b5bdc6; }
+@media (max-width: 900px) { .site-search-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .site-search-page { margin-top: 16px; }
+  .site-search-page h1 { font-size: 24px; }
+  .site-search-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 14px; }
+  .site-search-suggestions a { padding: 12px; font-size: 14px; }
+  .site-search-suggestions small { font-size: 11px; }
+}

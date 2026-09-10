@@ -8,7 +8,7 @@ self.onmessage = async ({ data: message }) => {
     const cv = await ready;
     if (message.type === 'prepare') {
       const source = cv.matFromImageData({ data: new Uint8ClampedArray(message.pixels), width: message.width, height: message.height });
-      let normalized;
+      let normalized, ocrImage;
       const rotated = new cv.Mat();
       try {
         normalized = normalizeCardImage(cv, source);
@@ -18,9 +18,10 @@ self.onmessage = async ({ data: message }) => {
           cv.rotate(normalized, rotated, direction);
           signatures.push(imageSignature(cv, rotated));
         }
-        const pixels = new Uint8ClampedArray(normalized.data).buffer;
-        self.postMessage({ id: message.id, result: { width: normalized.cols, height: normalized.rows, pixels, signatures } }, [pixels]);
-      } finally { rotated.delete(); normalized?.delete(); source.delete(); }
+        ocrImage = normalizeCardImage(cv, source, 1080);
+        const pixels = new Uint8ClampedArray(ocrImage.data).buffer;
+        self.postMessage({ id: message.id, result: { width: ocrImage.cols, height: ocrImage.rows, pixels, signatures } }, [pixels]);
+      } finally { rotated.delete(); ocrImage?.delete(); normalized?.delete(); source.delete(); }
     } else if (message.type === 'rank') {
       if (!photoFeatures) throw new Error('photo_not_prepared');
       const results = message.items.map(item => {

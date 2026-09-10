@@ -49,7 +49,7 @@ export function createCardImageSession(signal) {
     dispose,
     async prepare(canvas) {
       const resized = document.createElement('canvas');
-      const scale = Math.min(1, 900 / Math.max(canvas.width, canvas.height));
+      const scale = Math.min(1, 2200 / Math.max(canvas.width, canvas.height));
       resized.width = Math.round(canvas.width * scale); resized.height = Math.round(canvas.height * scale);
       const context = resized.getContext('2d', { willReadFrequently: true });
       context.drawImage(canvas, 0, 0, resized.width, resized.height);

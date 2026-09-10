@@ -60,6 +60,17 @@ test('blank photos never receive verified artwork matches', () => {
   try { assert.deepEqual(matchedKeys(blank), []); } finally { blank.delete(); }
 });
 
+test('OCR rectification retains a high-resolution card with rounded corners and background', async () => {
+  const photo = await sharp({ create: { width: 1100, height: 1400, channels: 4, background: '#d4d7d5' } })
+    .composite([{ input: await readFile(sample), left: 230, top: 190 }]).raw().toBuffer();
+  const mat = cv.matFromImageData({ data: new Uint8ClampedArray(photo), width: 1100, height: 1400 });
+  const normalized = normalizeCardImage(cv, mat, 1080);
+  try {
+    assert.equal(normalized.cols, 1080);
+    assert.equal(normalized.rows, 1512);
+  } finally { normalized.delete(); mat.delete(); }
+});
+
 test('the full image-only shortlist includes the correct card without a card number', async () => {
   const mat = await sampleMat(), normalized = normalizeCardImage(cv, mat);
   try {

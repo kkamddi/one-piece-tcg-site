@@ -44,6 +44,7 @@ const paths = [
   '/guide/card-price',
   '/guide/card-catalog',
   '/guide/collection',
+  '/guide/collection/start',
   '/guide/collection/manga',
   '/guide/collection/championship',
   '/guide/collection/flagship',

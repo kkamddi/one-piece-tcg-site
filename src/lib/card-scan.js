@@ -15,9 +15,9 @@ export function getScanVariants(items, code, locale) {
 export function extractCardCodes(text = '') {
   const normalized = String(text).normalize('NFKC').toUpperCase().replace(/[\u2010-\u2015\u2212]/g, '-');
   const codes = [];
-  const digits = value => value.replace(/[O]/g, '0').replace(/[IL|]/g, '1');
+  const digits = value => value.replace(/O/g, '0').replace(/[IL|]/g, '1').replace(/S/g, '5').replace(/B/g, '8').replace(/Z/g, '2');
   // OCR often joins the adjacent rarity label to the printed card number.
-  const pattern = /(?:^|[^A-Z0-9])((?:PRB|OP|0P|EB|ST)\s*([0-9OIL|]{2})\s*[- ]\s*([0-9OIL|]{3})|P\s*-\s*([0-9OIL|]{3}))(?![0-9])/g;
+  const pattern = /(?:^|[^A-Z0-9])((?:PRB|OP|0P|EB|ST)\s*([0-9OIL|SBZ]{2})\s*[-._:]?\s*([0-9OIL|SBZ]{3})|P\s*[-._:]\s*([0-9OIL|SBZ]{3}))(?![0-9])/g;
   for (const match of normalized.matchAll(pattern)) {
     const code = match[4]
       ? `P-${digits(match[4])}`
@@ -25,6 +25,16 @@ export function extractCardCodes(text = '') {
     if (!codes.includes(code)) codes.push(code);
   }
   return codes;
+}
+
+export function getOcrRegions(width, height) {
+  const full = { x: 0, y: 0, width: 1, height: 1, mode: '11' };
+  // A close-up of the number is not a full card; do not crop its bottom off.
+  if (width / height > 2) return [{ ...full, mode: '7' }, full, { ...full, contrast: true }];
+  const number = { x: .45, y: .84, width: .55, height: .16, mode: '11' };
+  const numberLine = { x: .70, y: .925, width: .30, height: .05, mode: '11', contrast: true };
+  return [numberLine, number, { x: 0, y: .84, width: 1, height: .16, mode: '11' },
+    { ...number, contrast: true }, { x: 0, y: .55, width: 1, height: .45, mode: '11' }, full];
 }
 
 export function validateScanFile(file) {

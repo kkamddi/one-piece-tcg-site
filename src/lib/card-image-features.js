@@ -1,7 +1,7 @@
 export const IMAGE_INDEX_VERSION = 3;
 
 // Keep the same preprocessing in the offline indexer and the browser worker.
-export function normalizeCardImage(cv, rgba) {
+export function normalizeCardImage(cv, rgba, ocrWidth = 0) {
   const owned = [];
   const keep = value => { owned.push(value); return value; };
   try {
@@ -26,8 +26,16 @@ export function normalizeCardImage(cv, rgba) {
       try {
         cv.approxPolyDP(contour, polygon, cv.arcLength(contour, true) * 0.025, true);
         const area = Math.abs(cv.contourArea(polygon));
-        if (polygon.rows !== 4 || area <= bestArea || !cv.isContourConvex(polygon)) continue;
-        const points = Array.from({ length: 4 }, (_, n) => ({ x: polygon.data32S[n * 2], y: polygon.data32S[n * 2 + 1] }));
+        if (area <= bestArea) continue;
+        let points;
+        if (polygon.rows === 4 && cv.isContourConvex(polygon)) {
+          points = Array.from({ length: 4 }, (_, n) => ({ x: polygon.data32S[n * 2], y: polygon.data32S[n * 2 + 1] }));
+        } else if (ocrWidth) {
+          // Rounded card corners need not simplify to exactly four vertices.
+          const rectangle = cv.minAreaRect(contour);
+          if (Math.abs(cv.contourArea(contour)) / (rectangle.size.width * rectangle.size.height) < .88) continue;
+          points = cv.RotatedRect.points(rectangle);
+        } else continue;
         const center = points.reduce((a, p) => ({ x: a.x + p.x / 4, y: a.y + p.y / 4 }), { x: 0, y: 0 });
         points.sort((a, b) => Math.atan2(a.y - center.y, a.x - center.x) - Math.atan2(b.y - center.y, b.x - center.x));
         const start = points.reduce((n, p, j) => p.x + p.y < points[n].x + points[n].y ? j : n, 0);
@@ -43,10 +51,11 @@ export function normalizeCardImage(cv, rgba) {
     }
     const normalized = new cv.Mat();
     if (best) {
-      const src = keep(cv.matFromArray(4, 1, cv.CV_32FC2, best.flatMap(p => [p.x, p.y])));
-      const dst = keep(cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, 359, 0, 359, 503, 0, 503]));
+      const width = ocrWidth || 360, height = Math.round(width * 1.4);
+      const src = keep(cv.matFromArray(4, 1, cv.CV_32FC2, best.flatMap(p => ocrWidth ? [p.x / scale, p.y / scale] : [p.x, p.y])));
+      const dst = keep(cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, width - 1, 0, width - 1, height - 1, 0, height - 1]));
       const transform = keep(cv.getPerspectiveTransform(src, dst));
-      cv.warpPerspective(small, normalized, transform, new cv.Size(360, 504));
+      cv.warpPerspective(ocrWidth ? rgba : small, normalized, transform, new cv.Size(width, height));
     } else {
       // Marketplace thumbnails can contain a small card plus a separate mark close-up.
       const foreground = keep(new cv.Mat());

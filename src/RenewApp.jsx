@@ -33,6 +33,7 @@ import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
 import CenteringLab from './CenteringLab';
 import CardScanner from './CardScanner';
+import SiteSearch, { SiteSearchInput } from './SiteSearch';
 import CollectionGuide from './CollectionGuide';
 import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuide } from './PortfolioCalculator';
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
@@ -40,6 +41,7 @@ import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
+const CARD_SCAN_AVAILABLE = false;
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = Capacitor.getPlatform() === 'android'
@@ -907,7 +909,7 @@ const GUIDE_HUB_COLLECTIONS = [
     title: '수집하고 보관할 때',
     description: '카드 상태를 확인하고 수집 기록을 유지하는 기준입니다.',
     links: [
-      { href: '/guide/collection', title: '수집 방향 정하기', meta: '망가·챔피언십·플래그십·프로모' },
+      { href: '/guide/collection/start', title: '수집 방향 정하기', meta: '망가·챔피언십·플래그십·프로모' },
       { href: '/guide/card-storage', title: '카드 보관 방법', meta: '슬리브·탑로더·바인더' },
       { href: '/guides/centering', title: '센터링 측정 순서', meta: '외곽·내부 테두리·결과 해석' }
     ]
@@ -2756,6 +2758,7 @@ function RenewMarketMoney({ value, uiLang }) {
 }
 const PAGE_PATHS = {
   home: '/',
+  search: '/search',
   adminAnalytics: '/admin/analytics',
   cards: '/cards',
   prices: '/prices',
@@ -3017,6 +3020,12 @@ function getShopRouteState(pathname = typeof window !== 'undefined' ? window.loc
 }
 
 const PAGE_SEO = {
+  search: {
+    title: '통합 검색 | Card Pone',
+    h1: '통합 검색',
+    description: '카드, 시리즈, 가이드, 실험실, 구매처를 검색합니다.',
+    robots: 'noindex,follow'
+  },
   home: {
     title: 'Card Pone - 원피스카드 도감, 시세, 컬렉션 관리',
     h1: '원피스카드 도감·시세·컬렉션 관리',
@@ -3475,6 +3484,11 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     const section = path.split('/').filter(Boolean).at(-1);
     const collectionSeo = {
       collection: {
+        title: '원피스카드 컬렉션 - 망가·챔피언십·플래그십·프로모 | Card Pone',
+        h1: '원피스카드 망가 카드 가이드',
+        description: '망가 카드, 챔피언십, 플래그십, 프로모의 카드 이미지와 번호를 분류별로 확인합니다.'
+      },
+      start: {
         title: '원피스카드 수집 가이드 - 무엇을 모아야 할까? | Card Pone',
         h1: '원피스카드 수집 가이드: 무엇을 모아야 할까?',
         description: '망가 카드, 챔피언십, 플래그십, 프로모 중 무엇을 모을지 예산과 희소성, 수집 방식에 따라 비교하고 실제 카드 목록을 확인합니다.',
@@ -3716,6 +3730,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   const path = getAppPath(pathname);
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
   if (path === '/admin/analytics') return { page: 'home' };
+  if (path === '/search') return { page: 'home' };
   if (path.startsWith('/shops/partners/')) return { page: 'partnerShops' };
   if (path === '/shops/partners') return { page: 'shops' };
   if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
@@ -4808,18 +4823,17 @@ async function resolvePopularSearchItem(query, locale) {
   return { type: 'query', locale, label: query, query, targetId: '' };
 }
 
+const SITE_SEARCH_DOCUMENTS = [
+  ...GUIDE_HUB_COLLECTIONS.flatMap(group => group.links.map(link => ({ ...link, description: link.meta, keywords: [group.title, link.meta] }))),
+  ...GUIDE_QA_GROUPS.map(group => ({ title: group.kind === 'qa' ? '자주 묻는 질문' : '이용 가이드', href: group.kind === 'qa' ? '/faq' : '/guide', description: group.title, keywords: group.items.flatMap(item => [item.question, item.answer]) }))
+];
+
 function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) {
-  const [locale, setLocale] = useState(() => isJapaneseUi(uiLang) ? 'JP' : 'KR');
-  const [keyword, setKeyword] = useState('');
   const [popularItems, setPopularItems] = useState([]);
   const [popularOpen, setPopularOpen] = useState(false);
   const [popularIndex, setPopularIndex] = useState(0);
   const popularRef = useRef(null);
   const t = (key) => getUiText(uiLang, key);
-
-  useEffect(() => {
-    if (isJapaneseUi(uiLang)) setLocale('JP');
-  }, [uiLang]);
 
   useEffect(() => {
     let cancelled = false;
@@ -4858,33 +4872,18 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
     return () => window.clearInterval(timer);
   }, [popularItems.length]);
 
-  function submitSearch(event) {
-    event.preventDefault();
-    const q = keyword.trim();
+  function submitSearch(query) {
+    const q = query.trim();
     if (!q) return;
-    onSubmitSearch?.({ locale, q });
-    resolvePopularSearchItem(q, locale)
-      .then((item) => trackPopularSearch(visitorToken, item))
-      .catch(() => {});
+    onSubmitSearch?.({ q });
+    if (!import.meta.env.DEV) trackPopularSearch(visitorToken, { type: 'query', locale: isJapaneseUi(uiLang) ? 'JP' : 'KR', label: q, query: q, targetId: '' }).catch(() => {});
   }
 
   const currentPopular = popularItems[popularIndex];
 
   return (
     <div className="renew-search-row">
-      <form className="renew-search" onSubmit={submitSearch}>
-        <div className="renew-locale-switch" aria-label="검색 언어">
-          <button type="button" className={locale === 'KR' ? 'is-active' : ''} onClick={() => setLocale('KR')}>{t('searchKr')}</button>
-          <button type="button" className={locale === 'JP' ? 'is-active' : ''} onClick={() => setLocale('JP')}>{t('searchJp')}</button>
-        </div>
-        <input
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          placeholder={t('searchPlaceholder')}
-          aria-label="카드명 또는 일련번호 검색"
-        />
-        <button type="submit" className="renew-search-submit" aria-label="검색">↑</button>
-      </form>
+      <SiteSearchInput onSubmit={submitSearch} uiLang={uiLang} documents={SITE_SEARCH_DOCUMENTS} />
       <div
         ref={popularRef}
         className={`renew-popular-search${popularOpen ? ' is-open' : ''}`}
@@ -4904,7 +4903,7 @@ function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) 
               type="button"
               onClick={() => {
                 setPopularOpen(false);
-                onSelectPopular?.(item);
+                submitSearch(item.type === 'box' ? item.label : item.query || item.label);
               }}
             >
               <b>{index + 1}</b>
@@ -13540,8 +13539,8 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
-        <div className="renew-market-scan-entry"><button type="button" disabled={loading} onClick={() => { if (window.matchMedia('(max-width: 767px)').matches) setScannerOpen(true); }}>{getLocaleText(uiLang, '스캔', 'Scan', 'スキャン')}</button></div>
-        {scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
+        <div className="renew-market-scan-entry"><button type="button" disabled={!CARD_SCAN_AVAILABLE || loading} onClick={() => { if (CARD_SCAN_AVAILABLE && window.matchMedia('(max-width: 767px)').matches) setScannerOpen(true); }}>{CARD_SCAN_AVAILABLE ? getLocaleText(uiLang, '스캔', 'Scan', 'スキャン') : getLocaleText(uiLang, '스캔 점검 중', 'Scan unavailable', 'スキャン調整中')}</button></div>
+        {CARD_SCAN_AVAILABLE && scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
 
         {!selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
 
@@ -16100,6 +16099,10 @@ export default function RenewApp() {
   ].includes(activePage);
 
   function handleRouteBack() {
+    if (window.history.state?.siteSearchDetail && ['cards', 'prices'].includes(activePage)) {
+      window.history.back();
+      return;
+    }
     if (contextualRouteBackRef.current) {
       contextualRouteBackRef.current();
       return;
@@ -16152,13 +16155,7 @@ export default function RenewApp() {
           visitorToken={visitorToken}
           uiLang={uiLang}
           onSubmitSearch={(search) => {
-            setCatalogViewState(null);
-            setCatalogInitialSearch({
-              locale: search.locale || 'KR',
-              q: String(search.q || '').trim(),
-              id: Date.now()
-            });
-            navigatePage('cards');
+            navigatePage('search', { query: new URLSearchParams({ q: search.q }).toString() });
           }}
           onNavigateNews={(query) => navigatePage('news', { query })}
           onOpenIndex={(indexType = 'manga') => {
@@ -16183,6 +16180,27 @@ export default function RenewApp() {
           }}
           onOpenCalendar={(date = '') => navigatePage('calendar', { query: date ? `date=${encodeURIComponent(date)}` : '' })}
         />
+      ) : activePage === 'search' ? (
+        <SiteSearch query={new URLSearchParams(window.location.search).get('q') || ''} uiLang={uiLang} documents={SITE_SEARCH_DOCUMENTS}
+          onOpenCard={(card) => {
+            setCatalogInitialSearch(null);
+            setCatalogViewState({ locale: card.locale, selectedSeries: card.series, searchKeyword: '', activeRarity: 'ALL', collectionFilter: 'all', catalogSortMode: 'rarity' });
+            setActivePage('cards');
+            internalNavigationRef.current = true;
+            pushAppHistory(getCatalogCardDetailPath(card, uiLang), { siteSearchDetail: true });
+            setRouteRevision(value => value + 1);
+          }}
+          onOpenPrice={(card) => {
+            const code = card.baseCardNo || card.cardNo;
+            setMarketInitialCode(code); setMarketInitialCardId(card.id); setMarketInitialApparelId(null);
+            setActivePage('prices'); internalNavigationRef.current = true;
+            pushAppHistory(`${getLocalizedPagePath('prices', uiLang)}?${new URLSearchParams({ code, cardId: card.id })}`, { siteSearchDetail: true });
+            setRouteRevision(value => value + 1);
+          }} onSubmit={(q) => {
+          navigatePage('search', { query: new URLSearchParams({ q }).toString() });
+          setRouteRevision(value => value + 1);
+          if (!import.meta.env.DEV) trackPopularSearch(visitorToken, { type: 'query', locale: isJapaneseUi(uiLang) ? 'JP' : 'KR', label: q, query: q, targetId: '' }).catch(() => {});
+        }} />
       ) : activePage === 'adminAnalytics' ? (
         <RenewAdminAnalytics
           authUser={authUser}
