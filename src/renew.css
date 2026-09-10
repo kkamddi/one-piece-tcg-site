@@ -11245,6 +11245,51 @@
   overflow-wrap: anywhere;
 }
 
+.renew-preorder-section { padding: 8px 0 24px; }
+.renew-preorder-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+.renew-preorder-eyebrow { color: #a13e29; font-size: 11px; font-weight: 800; }
+.renew-preorder-heading h2 { margin: 6px 0 0; font-size: 24px; line-height: 1.35; letter-spacing: 0; }
+.renew-preorder-help { flex-shrink: 0; padding: 8px 0; border: 0; background: transparent; color: inherit; text-decoration: underline; text-underline-offset: 4px; font: inherit; font-size: 13px; cursor: pointer; }
+.renew-preorder-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.renew-preorder-product { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 24px; align-items: stretch; padding: 24px; border: 1px solid #dce0e3; border-radius: 8px; background: #fff; color: #17191c; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+.renew-preorder-product:hover { border-color: #71787d; box-shadow: 0 5px 16px #17191c0d; }
+.renew-preorder-product:focus-visible, .renew-preorder-help:focus-visible { outline: 2px solid #c94d35; outline-offset: 4px; }
+.renew-preorder-visual { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; min-height: 190px; padding: 18px 12px; background: #f2f5f4; border-radius: 4px; }
+.renew-preorder-product:nth-child(2) .renew-preorder-visual { background: #f7f1f3; }
+.renew-preorder-visual img { display: block; width: 100%; height: 34px; object-fit: contain; mix-blend-mode: multiply; }
+.renew-preorder-visual strong { font-size: 32px; font-weight: 850; line-height: 1.1; letter-spacing: 0; }
+.renew-preorder-visual small { font-size: 8px; color: #58616a; text-align: center; }
+/* Crop the empty canvas around the OP-13 box without changing the shared image. */
+.renew-preorder-visual.is-box { position: relative; align-self: center; width: 100%; aspect-ratio: 324 / 527; min-height: 0; padding: 0; overflow: hidden; background: transparent; border-radius: 0; }
+.renew-preorder-visual.is-box img { position: absolute; width: 264.1975%; max-width: none; height: 118.596%; left: -82.0988%; top: -9.298%; object-fit: fill; mix-blend-mode: normal; }
+.renew-preorder-copy { display: flex; flex-direction: column; min-width: 0; gap: 9px; padding: 4px 0; }
+.renew-preorder-copy > small { color: #66717b; font-size: 12px; }
+.renew-preorder-copy > strong { font-size: 21px; line-height: 1.4; letter-spacing: 0; overflow-wrap: anywhere; }
+.renew-preorder-copy > span:not(.renew-preorder-cta) { color: #66717b; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; margin-bottom: 14px; }
+.renew-preorder-cta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: auto; min-height: 46px; padding: 10px 14px; border-radius: 4px; background: #ffd65a; color: #242018; font-size: 14px; font-weight: 800; }
+.renew-preorder-product:hover .renew-preorder-cta { background: #ffcb2e; }
+.renew-preorder-cta > span { font-size: 20px; line-height: 1; }
+.renew-preorder-note { margin: 20px 0 6px; color: #56616c; font-size: 13px; line-height: 1.7; }
+.renew-preorder-disclosure { margin: 0; color: #737b84; font-size: 11px; line-height: 1.7; }
+.renew-app.is-dark .renew-preorder-product { background: #202326; border-color: #42474c; color: #f3f4f5; }
+.renew-app.is-dark .renew-preorder-eyebrow { color: #ffaf96; }
+.renew-app.is-dark .renew-preorder-copy > small, .renew-app.is-dark .renew-preorder-copy > span:not(.renew-preorder-cta), .renew-app.is-dark .renew-preorder-note, .renew-app.is-dark .renew-preorder-disclosure { color: #b7bec5; }
+.renew-app.is-dark .renew-preorder-visual { color: #17191c; }
+@media (max-width: 1050px) {
+  .renew-preorder-product { grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 18px; }
+  .renew-preorder-visual strong { font-size: 26px; }
+  .renew-preorder-copy > strong { font-size: 18px; }
+}
+@media (max-width: 767px) {
+  .renew-preorder-heading { gap: 12px; margin-bottom: 18px; }
+  .renew-preorder-heading h2 { font-size: 20px; }
+  .renew-preorder-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .renew-preorder-product { grid-template-columns: 96px minmax(0, 1fr); gap: 14px; padding: 14px; }
+  .renew-preorder-visual { min-height: 174px; padding: 12px 8px; }
+  .renew-preorder-visual strong { font-size: 24px; }
+  .renew-preorder-cta { font-size: 13px; padding: 10px; }
+}
+
 .renew-collection-editorial section {
   border-top: 1px solid rgba(128, 128, 128, 0.25);
   padding: 24px 0;

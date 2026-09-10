@@ -648,15 +648,34 @@ const SUPPLY_FILTERS = [
 const NEWS_LINK_GROUPS = [
   {
     id: 'preorder',
-    title: '아마존 응모',
+    title: '일본 아마존 응모',
     description: '',
     status: 'AMAZON',
     links: [
       {
-        label: '히로인즈2 응모',
-        subLabel: 'Amazon Japan',
+        label: 'OP-18 신의 지배',
+        productName: '神の支配',
+        subLabel: '부스터 팩 · 일본판',
+        href: 'https://link.amazon/B0jiHr9XR',
+        badge: 'OP-18',
+        imageUrl: 'https://m.media-amazon.com/images/I/51XbrLjTUtL._AC_SX679_.jpg'
+      },
+      {
+        label: '히로인즈 2',
+        productName: 'ONE PIECE Heroines Edition vol.2',
+        subLabel: '엑스트라 부스터 · 일본판',
         href: 'https://link.amazon/B04fyW76r',
-        badge: 'EB-05'
+        badge: 'EB-05',
+        imageUrl: 'https://m.media-amazon.com/images/I/51XbrLjTUtL._AC_SX569_.jpg'
+      },
+      {
+        label: 'OP-13 계승되는 의지',
+        productName: '受け継がれる意志',
+        subLabel: '부스터 팩 · 일본판',
+        href: 'https://link.amazon/B0bBjvpYO',
+        badge: 'OP-13',
+        imageUrl: boxMarketItems.find((item) => item.code === 'OP-13')?.previewImageUrl,
+        boxImage: true
       }
     ]
   }
@@ -1489,7 +1508,7 @@ const GUIDE_QA_GROUPS = [
 ];
 const NEWS_GUIDE_CONTENT = {
   preorder: {
-    title: '아마존 히로인즈2 응모 안내',
+    title: '아마존 구매 초대 안내',
     description: '',
     sections: [
       {
@@ -1497,9 +1516,9 @@ const NEWS_GUIDE_CONTENT = {
         type: 'steps',
         items: [
           '일본 아마존 계정으로 로그인합니다.',
-          '히로인즈2 상품 페이지에 접속합니다.',
-          '상품 페이지에서 Request Invite 버튼을 누릅니다.',
-          '신청이 완료되면 등록된 이메일로 결과를 기다립니다.',
+          '원하는 상품 페이지에 접속해 상품명과 판매자를 확인합니다.',
+          '구매 초대 방식인 경우 Request Invite 또는 招待をリクエストする 버튼을 누릅니다. 일반 예약 판매라면 해당 페이지의 구매 절차를 따릅니다.',
+          '구매 초대를 신청했다면 등록된 이메일로 결과를 기다립니다.',
           '구매 초대에 선정되면 이메일로 안내가 도착합니다.',
           '이메일 안의 링크를 통해 제한 시간 안에 결제하면 됩니다.'
         ]
@@ -1508,8 +1527,8 @@ const NEWS_GUIDE_CONTENT = {
         title: '꼭 알아둘 점',
         highlight: 'Request Invite는 구매 확정이 아닙니다.',
         items: [
-          '버튼을 눌렀다고 바로 결제되거나 주문이 완료되는 것은 아닙니다.',
-          '아마존에서 구매 초대 이메일을 받아야 실제 구매가 가능합니다.',
+          '구매 초대 요청 버튼을 눌렀다고 바로 결제되거나 주문이 완료되는 것은 아닙니다.',
+          '구매 초대 방식의 상품은 아마존에서 초대 이메일을 받은 뒤 구매할 수 있습니다.',
           '구매 초대 이메일은 일정 시간 안에 사용해야 할 수 있으므로 이메일함과 스팸함을 함께 확인하는 것이 좋습니다.',
           '상품 가격, 배송 가능 여부, 배송비, 관세는 시점에 따라 달라질 수 있으니 결제 전 최종 화면을 확인해야 합니다.'
         ]
@@ -7370,47 +7389,51 @@ function RenewNews({ uiLang, onOpenCalendar }) {
           {visibleLinkGroups.length ? (
           <div className={`renew-news-links ${visibleLinkGroups.length === 1 ? 'is-single' : ''}`} aria-label="예약구매">
             {visibleLinkGroups.map((item) => (
-              <section key={item.id} className="renew-news-link-card">
-                <span>{item.status}</span>
-                <div className="renew-news-link-title-row">
+              <section key={item.id} className="renew-preorder-section">
+                <div className="renew-preorder-heading">
+                  <div><span className="renew-preorder-eyebrow">AMAZON JAPAN</span>
                   <h2>{item.title}</h2>
+                  </div>
                   {NEWS_GUIDE_CONTENT[item.id] ? (
                     <button
                       type="button"
-                      className="renew-news-info-button"
+                      className="renew-preorder-help"
                       onClick={() => setGuideTarget(item.id)}
                       aria-label={`${item.title} 이용 안내`}
                     >
-                      i
+                      응모 안내
                     </button>
                   ) : null}
                 </div>
                 {item.description ? <p>{item.description}</p> : null}
                 {Array.isArray(item.links) && item.links.length ? (
-                  <div className="renew-news-link-items">
+                  <div className="renew-preorder-grid">
                     {item.links.map((link) => (
                       <a
                         key={`${item.id}-${link.label}`}
-                        className="renew-news-link-item"
+                        className="renew-preorder-product"
                         href={link.href}
                         target="_blank"
                         rel="nofollow sponsored noreferrer"
+                        aria-label={`${link.label} 아마존에서 확인 (새 탭)`}
                       >
-                        <span className={`renew-news-link-thumb ${link.imageUrl ? '' : 'is-empty'}`} aria-hidden="true">
-                          {link.imageUrl ? (
-                            <img src={link.imageUrl} alt="" loading="lazy" />
-                          ) : (
-                            link.badge || link.label.slice(0, 2)
-                          )}
+                        <span className={`renew-preorder-visual${link.boxImage ? ' is-box' : ''}`} aria-hidden="true">
+                          <img src={link.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }} />
+                          {!link.boxImage ? <strong>{link.badge}</strong> : null}
+                          {!link.boxImage ? <small>ONE PIECE CARD GAME</small> : null}
                         </span>
-                        <span className="renew-news-link-copy">
-                          <strong>{link.label}</strong>
+                        <span className="renew-preorder-copy">
                           <small>{link.subLabel}</small>
+                          <strong>{link.label}</strong>
+                          <span lang="ja">{link.productName}</span>
+                          <span className="renew-preorder-cta">아마존에서 확인 <span aria-hidden="true">↗</span></span>
                         </span>
                       </a>
                     ))}
                   </div>
                 ) : null}
+                <p className="renew-preorder-note">응모는 구매 확정이 아닙니다. 가격·판매자·배송 가능 여부와 예약 상태는 아마존 상품 페이지에서 확인해 주세요.</p>
+                <p className="renew-preorder-disclosure">아마존 제휴 링크가 포함되어 있으며, 링크를 통한 구매 시 수수료를 받을 수 있습니다.</p>
               </section>
             ))}
           </div>
