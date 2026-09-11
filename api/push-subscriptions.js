@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
+import { isRejectedUserToken } from '../lib/auth-errors.js';
 import { getVapidPublicKey, isFirebasePushConfigured, sendPushToUser } from './lib/web-push.js';
 
 const SUBSCRIPTIONS_TABLE = process.env.SUPABASE_USER_PUSH_SUBSCRIPTIONS_TABLE || 'user_push_subscriptions';
@@ -12,6 +13,7 @@ async function getAuthenticatedUser(request) {
   const token = getBearerToken(request);
   if (!token || !supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (isRejectedUserToken(error)) return null;
   if (error) throw error;
   return data?.user || null;
 }

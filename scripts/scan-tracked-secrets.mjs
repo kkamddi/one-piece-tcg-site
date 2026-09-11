@@ -14,8 +14,28 @@ const patterns = [
 const assignmentPattern = /(?:^|[,{;\s])["']?([a-z0-9_]*(?:api[_-]?key|api[_-]?token|access[_-]?token|client[_-]?secret|private[_-]?key|password|webhook[_-]?url))["']?\s*[:=]\s*["']([^"'\r\n]{8,})["']/gim;
 const safeLiteral = /^(?:placeholder|example|your[_-]|process\.env|import\.meta\.env|\$\{\{|<)/i;
 
+function maskCardImageDescriptors(file, source) {
+  if (!/^public\/card-scan\/(?:JP|EN|KR)\/[A-Z0-9-]+\.json$/.test(file.replaceAll('\\', '/'))) return source;
+  try {
+    const index = JSON.parse(source);
+    if (index.version !== 3 || !Array.isArray(index.items)) return source;
+    const descriptors = new Set(index.items.filter((item) => {
+      if (!Array.isArray(item.points) || !item.points.length || item.points.length % 2) return false;
+      if (!item.points.every(Number.isFinite) || typeof item.descriptors !== 'string') return false;
+      const bytes = Buffer.from(item.descriptors, 'base64');
+      return bytes.length === item.points.length / 2 * 32 && bytes.toString('base64') === item.descriptors;
+    }).map((item) => item.descriptors));
+    // ORB descriptors are binary data; keep all metadata and original line positions scannable.
+    return source.replace(/("descriptors"\s*:\s*")([A-Za-z0-9+/]+={0,2})(")/g,
+      (match, prefix, value, suffix) => descriptors.has(value) ? prefix + ' '.repeat(value.length) + suffix : match);
+  } catch {
+    return source;
+  }
+}
+
 function scanSource(file, source, ref = '') {
   if (source.includes('\0')) return [];
+  source = maskCardImageDescriptors(file, source);
   const findings = [];
 
   for (const [kind, pattern] of patterns) {

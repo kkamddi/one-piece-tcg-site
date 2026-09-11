@@ -4,6 +4,14 @@ import { PushNotifications } from '@capacitor/push-notifications';
 
 const NATIVE_TOKEN_KEY = 'card-pone-native-push-token';
 const isNativeApp = Capacitor.isNativePlatform();
+let nativePushQueue = Promise.resolve();
+let nativePushGeneration = 0;
+
+function queueNativePush(task) {
+  const result = nativePushQueue.then(task);
+  nativePushQueue = result.catch(() => {});
+  return result;
+}
 
 async function requestJson(url, options = {}) {
   const { data } = supabase ? await supabase.auth.getSession() : { data: null };
@@ -92,6 +100,7 @@ export async function fetchPushNotificationStatus() {
 }
 
 export async function enablePushNotifications() {
+  const generation = nativePushGeneration;
   const capability = getPushCapability();
   if (!capability.supported) throw new Error('push_unsupported');
   if (isNativeApp) {
@@ -101,9 +110,13 @@ export async function enablePushNotifications() {
     }
     if (permission.receive !== 'granted') throw new Error(permission.receive === 'denied' ? 'push_denied' : 'push_not_granted');
 
-    const token = await registerNativePushToken();
-    await saveNativePushToken(token);
-    return { permission: 'granted', subscribed: true };
+    return queueNativePush(async () => {
+      if (generation !== nativePushGeneration) throw new Error('push_registration_cancelled');
+      const token = await registerNativePushToken();
+      if (generation !== nativePushGeneration) throw new Error('push_registration_cancelled');
+      await saveNativePushToken(token);
+      return { permission: 'granted', subscribed: true };
+    });
   }
   const permission = Notification.permission === 'granted'
     ? 'granted'
@@ -130,9 +143,36 @@ export function sendTestPushNotification() {
 
 export async function syncNativePushRegistration() {
   if (!isNativeApp || !supabase) return { synced: false };
-  const permission = await PushNotifications.checkPermissions();
-  if (permission.receive !== 'granted') return { synced: false };
-  const token = await registerNativePushToken();
-  await saveNativePushToken(token, true);
-  return { synced: true };
+  const generation = nativePushGeneration;
+  return queueNativePush(async () => {
+    if (generation !== nativePushGeneration) return { synced: false };
+    const { data } = await supabase.auth.getSession();
+    if (!data?.session) return { synced: false };
+    const permission = await PushNotifications.checkPermissions();
+    if (permission.receive !== 'granted') return { synced: false };
+    const token = await registerNativePushToken();
+    if (generation !== nativePushGeneration) return { synced: false };
+    await saveNativePushToken(token, true);
+    return { synced: true };
+  });
+}
+
+export async function disableDevicePushNotifications() {
+  if (isNativeApp) {
+    // Finish older saves before deactivating this device, so they cannot re-enable it after logout.
+    nativePushGeneration += 1;
+    return queueNativePush(async () => {
+      const token = window.localStorage.getItem(NATIVE_TOKEN_KEY);
+      if (token) await requestJson('/api/push-subscriptions', { method: 'DELETE', body: { endpoint: `fcm:${token}` } });
+      await PushNotifications.unregister();
+      await PushNotifications.removeAllDeliveredNotifications();
+      window.localStorage.removeItem(NATIVE_TOKEN_KEY);
+    });
+  }
+  if (!('serviceWorker' in navigator)) return;
+  const registration = await navigator.serviceWorker.getRegistration('/');
+  const subscription = await registration?.pushManager?.getSubscription();
+  if (!subscription) return;
+  await requestJson('/api/push-subscriptions', { method: 'DELETE', body: { endpoint: subscription.endpoint } });
+  await subscription.unsubscribe();
 }

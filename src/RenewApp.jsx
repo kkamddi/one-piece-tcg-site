@@ -20,7 +20,7 @@ import { saveMyState } from './api/me';
 import { createMarketplaceListing, deleteMarketplaceListing, deleteMarketplaceVerification, fetchMarketplaceConversations, fetchMarketplaceListings, fetchMarketplaceMessages, fetchMarketplaceMyVerification, fetchMarketplaceNotifications, fetchMarketplaceVerifications, incrementMarketplaceListingView, markAllMarketplaceNotificationsRead, markMarketplaceNotificationRead, sendMarketplaceMessage, startMarketplaceConversation, submitMarketplaceVerification, updateMarketplaceListing, updateMarketplaceListingInterest, updateMarketplaceVerification, uploadMarketplaceImage } from './api/marketplace';
 import { deletePriceAlertRule, fetchPriceAlertRules, savePriceAlertRule } from './api/price-alerts';
 import { deletePortfolioHolding, deletePortfolioPurchase, fetchPortfolio, savePortfolioPurchase } from './api/portfolio';
-import { enablePushNotifications, fetchPushNotificationStatus, getPushCapability, sendTestPushNotification, syncNativePushRegistration } from './api/push-notifications';
+import { disableDevicePushNotifications, enablePushNotifications, fetchPushNotificationStatus, getPushCapability, sendTestPushNotification, syncNativePushRegistration } from './api/push-notifications';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
@@ -16026,8 +16026,15 @@ export default function RenewApp() {
 
   async function handleLogout() {
     if (authUser && supabase) {
-      await supabase.auth.signOut();
-      setAuthUser(null);
+      try {
+        await disableDevicePushNotifications();
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+        if (error) throw error;
+        setAuthUser(null);
+      } catch {
+        window.alert('로그아웃을 완료하지 못했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.');
+        return;
+      }
     }
     setAccountOpen(false);
   }

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import './centering-lab.css';
 
 const CARD_WIDTH_MM = 63;
@@ -531,15 +532,19 @@ function getLineContrast(pixels, width, height, axis, position, start, end) {
 
 function findStrongestEdge(pixels, width, height, axis, from, to, lineStart, lineEnd) {
   let bestPosition = from;
+  let bestEnd = from;
   let bestScore = -1;
   for (let position = Math.round(from); position <= Math.round(to); position += 1) {
     const score = getLineContrast(pixels, width, height, axis, position, lineStart, lineEnd);
     if (score > bestScore) {
       bestScore = score;
       bestPosition = position;
+      bestEnd = position;
+    } else if (score === bestScore && position === bestEnd + 1) {
+      bestEnd = position;
     }
   }
-  return { position: bestPosition, score: bestScore };
+  return { position: (bestPosition + bestEnd) / 2, score: bestScore };
 }
 
 function detectCenteredCardBounds(pixels, width, height) {
@@ -1180,6 +1185,13 @@ function ResultOverlay({ boundaries, frame, report }) {
 
 export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
   const text = COPY[uiLang] || COPY.KR;
+  const permissionDenied = Capacitor.getPlatform() === 'android'
+    ? ({
+      KR: '카메라 권한이 차단되어 있습니다. 휴대폰 설정 > 애플리케이션 > Card Pone > 권한에서 카메라를 허용한 뒤 다시 시도해 주세요.',
+      EN: 'Camera access is blocked. Allow Camera in Settings > Apps > Card Pone > Permissions, then try again.',
+      JP: 'カメラの権限が拒否されています。端末の設定 > アプリ > Card Pone > 権限でカメラを許可してから再試行してください。'
+    }[uiLang] || '휴대폰 설정 > 애플리케이션 > Card Pone > 권한에서 카메라를 허용해 주세요.')
+    : text.permissionDenied;
   const flow = CAMERA_FLOW_COPY[uiLang] || CAMERA_FLOW_COPY.KR;
   const editorText = BOUNDARY_EDITOR_COPY[uiLang] || BOUNDARY_EDITOR_COPY.KR;
   const gradingText = GRADING_REFERENCE_COPY[uiLang] || GRADING_REFERENCE_COPY.KR;
@@ -1424,7 +1436,7 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
     } catch (cameraError) {
       stopCamera();
       const name = String(cameraError?.name || cameraError?.message || '');
-      setError(name.includes('NotAllowed') || name.includes('Permission') ? text.permissionDenied : name.includes('NotFound') || name.includes('unavailable') ? text.cameraUnavailable : text.cameraError);
+      setError(name.includes('NotAllowed') || name.includes('Permission') ? permissionDenied : name.includes('NotFound') || name.includes('unavailable') ? text.cameraUnavailable : text.cameraError);
       setPhase('error');
     }
   }

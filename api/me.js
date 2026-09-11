@@ -1,16 +1,20 @@
 import { getUserAppState, saveUserAppState } from '../lib/user-state-store.js';
 import { supabaseAdmin } from '../lib/supabase-admin.js';
+import { isRejectedUserToken } from '../lib/auth-errors.js';
 
 async function getAuthenticatedUser(request) {
   const authHeader = String(request.headers.authorization ?? '');
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
   if (!token || !supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (isRejectedUserToken(error)) return null;
   if (error) throw error;
   return data?.user ?? null;
 }
 
 export default async function handler(request, response) {
+  response.setHeader?.('Cache-Control', 'no-store, private');
+  response.setHeader?.('Vary', 'Authorization');
   try {
     const user = await getAuthenticatedUser(request);
     if (!user?.id) return response.status(401).json({ error: 'unauthorized' });
