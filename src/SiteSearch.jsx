@@ -35,6 +35,10 @@ export function SiteSearchInput({ initialQuery = '', onSubmit, uiLang = 'KR', do
         value={value} placeholder={text.placeholder} maxLength={100} autoComplete="off"
         onFocus={() => setOpen(true)} onChange={event => { setValue(event.target.value); setOpen(true); setSelected(-1); }}
         onKeyDown={event => {
+          if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) {
+            if (event.key === 'Enter') event.preventDefault();
+            return;
+          }
           if (event.key === 'Escape') { setOpen(false); setSelected(-1); }
           if (['ArrowDown', 'ArrowUp'].includes(event.key) && suggestions.length) { event.preventDefault(); setOpen(true); setSelected(index => Math.max(0, Math.min(suggestions.length - 1, index + (event.key === 'ArrowDown' ? 1 : -1)))); }
           if (event.key === 'Enter' && open && selected >= 0 && suggestions[selected]) { event.preventDefault(); window.location.assign(suggestions[selected].href); }

@@ -244,6 +244,7 @@ export default function PortfolioCalculator({
       return undefined;
     }
     setQuoteLoading(true);
+    setQuote(null);
     setMessage('');
     Promise.resolve(onLoadQuote?.(selected))
       .then((payload) => {
@@ -265,7 +266,7 @@ export default function PortfolioCalculator({
   ), [mode, quote, grade, purchaseDate, onEstimatePrice]);
   const manualPriceJpy = convertToJpy(purchasePrice, currency, rates);
   const purchaseUnitJpy = mode === 'estimate' ? Number(estimate?.price || 0) : manualPriceJpy;
-  const currentUnitJpy = Number(quote?.prices?.[grade] || 0);
+  const currentUnitJpy = quoteLoading ? 0 : Number(quote?.prices?.[grade] || 0);
   const safeQuantity = Math.min(9999, Math.max(1, Math.floor(asPositiveNumber(quantity)) || 1));
   const totalCost = purchaseUnitJpy * safeQuantity;
   const currentValue = currentUnitJpy * safeQuantity;
@@ -347,7 +348,12 @@ export default function PortfolioCalculator({
           {results.length ? (
             <div className="renew-portfolio-calculator-results">
               {results.map((card) => (
-                <button key={card.id} type="button" className={selected?.id === card.id ? 'is-active' : ''} onClick={() => setSelected(card)}>
+                <button key={card.id} type="button" className={selected?.id === card.id ? 'is-active' : ''} onClick={() => {
+                  if (selected?.id === card.id) return;
+                  setQuote(null);
+                  setQuoteLoading(true);
+                  setSelected(card);
+                }}>
                   <img
                     src={card.thumbnailUrl || card.imageUrl || '/card-placeholder.svg'}
                     data-proxy-fallback-src={card.thumbnailProxyUrl || ''}
@@ -431,7 +437,7 @@ export default function PortfolioCalculator({
               </div>
 
               <div className="renew-portfolio-calculator-actions">
-                <button type="button" onClick={() => onOpenDetail?.(selected, quote)} disabled={!quote?.apparelId}>{copy.detail}</button>
+                <button type="button" onClick={() => onOpenDetail?.(selected, quote)} disabled={quoteLoading || !quote?.apparelId}>{copy.detail}</button>
                 <button type="button" className="is-primary" onClick={saveResult} disabled={saving || (authUser && !ready)}>{saving ? copy.saving : authUser ? copy.save : copy.loginSave}</button>
               </div>
               {message ? <p className="renew-portfolio-message" aria-live="polite">{message}</p> : null}

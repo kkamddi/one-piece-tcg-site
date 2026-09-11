@@ -681,11 +681,11 @@ const NEWS_LINK_GROUPS = [
   }
 ];
 const NEWS_FILTERS = [
-  { id: 'all', label: '전체' },
-  { id: 'notice', label: '공지사항' },
-  { id: 'guide', label: '가이드/Q&A' },
-  { id: 'preorder', label: '사전예약' },
-  { id: 'supplies', label: '카드용품' }
+  { id: 'all', label: '전체', href: '/news' },
+  { id: 'notice', label: '공지사항', href: '/news/official' },
+  { id: 'guide', label: '가이드/Q&A', href: '/news/guide' },
+  { id: 'preorder', label: '사전예약', href: '/news/preorder' },
+  { id: 'supplies', label: '카드용품', href: '/news/supplies' }
 ];
 const CARD_STORAGE_GUIDE = {
   title: '원피스카드 보관 방법',
@@ -3003,6 +3003,8 @@ function getBoxRouteCode(pathname = typeof window !== 'undefined' ? window.locat
 function getNewsRouteState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/', search = typeof window !== 'undefined' ? window.location.search : '') {
   const path = getAppPath(pathname);
   const params = new URLSearchParams(search);
+  if (path === '/news/guide') return { section: 'guide', mode: 'guide' };
+  if (path === '/news/faq') return { section: 'guide', mode: 'qa' };
   if (path.startsWith('/guide')) return { section: 'guide', mode: 'guide' };
   if (path.startsWith('/faq')) return { section: 'guide', mode: 'qa' };
   return {
@@ -3216,6 +3218,21 @@ const PAGE_SEO = {
 };
 
 const CLIENT_ROUTE_SEO = {
+  '/news/official': {
+    title: '원피스카드 공식 공지 모음 | Card Pone',
+    h1: '원피스카드 공식 공지',
+    description: '한글판과 일본판 원피스 카드게임 공식 공지를 한곳에서 확인할 수 있습니다.'
+  },
+  '/news/preorder': {
+    title: '원피스카드 사전예약 정보 | Card Pone',
+    h1: '일본 아마존 응모',
+    description: '원피스 카드게임 사전예약, 아마존 응모, 예약구매 바로가기 정보를 정리합니다.'
+  },
+  '/news/supplies': {
+    title: '원피스카드 보관용품 | Card Pone',
+    h1: '원피스카드 보관용품',
+    description: '슬리브, 탑로더, 바인더, 자석케이스 등 카드 보관용품 정보를 확인할 수 있습니다.'
+  },
   '/cards/jp': {
     title: '일본판 원피스카드 도감 | Card Pone',
     h1: '일본판 원피스카드 도감',
@@ -3279,7 +3296,7 @@ const CLIENT_ROUTE_SEO = {
     keywords: '루피 카드 시세, Monkey D Luffy 카드, OPTCG Luffy Index',
     body: '몽키 D. 루피 주요 카드의 가격 흐름을 지수로 확인할 수 있습니다.'
   },
-  '/guide': {
+  '/news/guide': {
     title: '원피스카드 입문 가이드 | Card Pone',
     h1: '원피스카드 입문 가이드',
     description: '원피스카드 수집, 시세 확인, 보관, 구매 방향성을 처음 이용자도 이해하기 쉽게 정리합니다.',
@@ -3314,7 +3331,7 @@ const CLIENT_ROUTE_SEO = {
     keywords: '원피스카드 히트 많은 박스, 원피스카드 박스 추천, 원피스카드 카드깡',
     body: '박스 가격의 일정 비율 이상인 수록 카드 수와 가격 데이터 커버리지를 기준으로 비교합니다.'
   },
-  '/faq': {
+  '/news/faq': {
     title: '원피스카드 Q&A | Card Pone',
     h1: '원피스카드 Q&A',
     description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인에 대한 자주 묻는 질문을 정리합니다.',
@@ -4844,7 +4861,7 @@ async function resolvePopularSearchItem(query, locale) {
 
 const SITE_SEARCH_DOCUMENTS = [
   ...GUIDE_HUB_COLLECTIONS.flatMap(group => group.links.map(link => ({ ...link, description: link.meta, keywords: [group.title, link.meta] }))),
-  ...GUIDE_QA_GROUPS.map(group => ({ title: group.kind === 'qa' ? '자주 묻는 질문' : '이용 가이드', href: group.kind === 'qa' ? '/faq' : '/guide', description: group.title, keywords: group.items.flatMap(item => [item.question, item.answer]) }))
+  ...GUIDE_QA_GROUPS.map(group => ({ title: group.kind === 'qa' ? '자주 묻는 질문' : '이용 가이드', href: group.kind === 'qa' ? '/news/faq' : '/news/guide', description: group.title, keywords: group.items.flatMap(item => [item.question, item.answer]) }))
 ];
 
 function RenewSearch({ onSubmitSearch, onSelectPopular, visitorToken, uiLang }) {
@@ -7235,7 +7252,7 @@ function RenewCalendar({ uiLang }) {
   );
 }
 
-function RenewNews({ uiLang, onOpenCalendar }) {
+function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
   const isAndroid = Capacitor.getPlatform() === 'android';
@@ -7248,7 +7265,7 @@ function RenewNews({ uiLang, onOpenCalendar }) {
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
-  const routeSection = initialPath === '/guide' || initialPath === '/faq'
+  const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
     ? 'guide'
     : initialPath.startsWith('/news/official')
       ? 'notice'
@@ -7257,18 +7274,16 @@ function RenewNews({ uiLang, onOpenCalendar }) {
         : initialPath.startsWith('/news/supplies')
           ? 'supplies'
           : '';
-  const initialSection = initialRouteState.section || routeSection || initialParams.get('section') || 'all';
+  const initialSection = routeSection || initialRouteState.section || initialParams.get('section') || 'all';
   const initialLocale = (initialParams.get('locale') || (isJp ? 'JP' : 'KR')).toUpperCase();
-  const [newsFilter, setNewsFilter] = useState(() => {
-    const candidate = savedViewState.newsFilter || initialSection;
+  const [newsFilter] = useState(() => {
+    const candidate = initialSection;
     if (isAndroid && candidate === 'supplies') return 'guide';
     return NEWS_FILTERS.some((item) => item.id === candidate) ? candidate : 'all';
   });
   const [noticeLocale, setNoticeLocale] = useState(() => ['KR', 'JP'].includes(savedViewState.noticeLocale) ? savedViewState.noticeLocale : (initialLocale === 'JP' ? 'JP' : 'KR'));
   const [supplyFilter, setSupplyFilter] = useState(() => savedViewState.supplyFilter || 'all');
-  const [guideQaMode, setGuideQaMode] = useState(() => ['guide', 'qa'].includes(savedViewState.guideQaMode)
-    ? savedViewState.guideQaMode
-    : (initialRouteState.mode === 'qa' || initialPath === '/faq' || initialParams.get('mode') === 'qa' ? 'qa' : 'guide'));
+  const [guideQaMode] = useState(() => initialRouteState.mode === 'qa' || initialPath === '/faq' || initialParams.get('mode') === 'qa' ? 'qa' : 'guide');
   const [guideTarget, setGuideTarget] = useState(null);
   const officialTopics = OFFICIAL_TOPIC_ITEMS
     .filter((item) => (item.locale || '').toUpperCase() === noticeLocale)
@@ -7292,18 +7307,24 @@ function RenewNews({ uiLang, onOpenCalendar }) {
     if (getPageFromPath(window.location.pathname) !== 'news') return;
     replaceAppHistoryState({ newsViewState: { newsFilter, noticeLocale, supplyFilter, guideQaMode } });
   }, [newsFilter, noticeLocale, supplyFilter, guideQaMode]);
+  function followNewsLink(event, href) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !onNavigate) return;
+    event.preventDefault();
+    onNavigate(href);
+  }
   return (
     <main className="renew-main renew-news-main">
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
         {NEWS_FILTERS.filter((item) => !isAndroid || item.id !== 'supplies').map((item) => (
-          <button
+          <a
             key={item.id}
-            type="button"
+            href={localizeAppPath(item.href, uiLang)}
             className={newsFilter === item.id ? 'is-active' : ''}
-            onClick={() => setNewsFilter(item.id)}
+            aria-current={newsFilter === item.id ? 'page' : undefined}
+            onClick={(event) => followNewsLink(event, item.href)}
           >
             {item.label}
-          </button>
+          </a>
         ))}
       </div> : null}
 
@@ -7311,25 +7332,25 @@ function RenewNews({ uiLang, onOpenCalendar }) {
 
       {showOverview ? (
         <section className="renew-news-hub" aria-label="정보 바로가기">
-          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('notice')}>
+          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/official')}>
             <span>NEWS</span>
             <strong>공식 소식</strong>
             <small>{officialTopics[0]?.titleKo || officialTopics[0]?.title || '최근 공식 공지를 확인하세요.'}</small>
             <b aria-hidden="true">›</b>
           </button>
-          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('guide')}>
+          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/guide')}>
             <span>GUIDE</span>
             <strong>이용 가이드</strong>
             <small>도감, 시세, 보관과 실험실 도구 사용법</small>
             <b aria-hidden="true">›</b>
           </button>
-          <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('preorder')}>
+          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/preorder')}>
             <span>PREORDER</span>
             <strong>사전예약</strong>
             <small>{NEWS_LINK_GROUPS[0]?.links?.[0]?.label || '진행 중인 예약과 응모 정보'}</small>
             <b aria-hidden="true">›</b>
           </button>
-          {!isAndroid ? <button type="button" className="renew-news-hub-card" onClick={() => setNewsFilter('supplies')}>
+          {!isAndroid ? <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/supplies')}>
             <span>SUPPLIES</span>
             <strong>카드용품</strong>
             <small>슬리브, 탑로더, 케이스와 보관함</small>
@@ -7498,8 +7519,8 @@ function RenewNews({ uiLang, onOpenCalendar }) {
             <h2 id="guide-qa-heading">가이드/Q&A</h2>
           </div>
           <div className="renew-news-toggle renew-guide-qa-toggle" role="group" aria-label="가이드 Q&A 선택">
-            <button type="button" className={guideQaMode === 'guide' ? 'is-active' : ''} onClick={() => setGuideQaMode('guide')}>가이드</button>
-            <button type="button" className={guideQaMode === 'qa' ? 'is-active' : ''} onClick={() => setGuideQaMode('qa')}>Q&A</button>
+            <a href={localizeAppPath('/news/guide', uiLang)} className={guideQaMode === 'guide' ? 'is-active' : ''} aria-current={guideQaMode === 'guide' ? 'page' : undefined} onClick={(event) => followNewsLink(event, '/news/guide')}>가이드</a>
+            <a href={localizeAppPath('/news/faq', uiLang)} className={guideQaMode === 'qa' ? 'is-active' : ''} aria-current={guideQaMode === 'qa' ? 'page' : undefined} onClick={(event) => followNewsLink(event, '/news/faq')}>Q&A</a>
           </div>
         </div>
         {guideQaMode === 'guide' ? <RenewGuideHub /> : null}
@@ -15559,17 +15580,17 @@ function RenewShops({ uiLang }) {
           </div>
         ) : null}
         <div className="renew-shop-filters">
-          <select value={type} onChange={(event) => { setType(event.target.value); setSido('전체'); setGungu('전체'); }}>
+          <select aria-label={uiLang === 'EN' ? 'Shop type' : uiLang === 'JP' ? '店舗種別' : '매장 유형'} value={type} onChange={(event) => { setType(event.target.value); setSido('전체'); setGungu('전체'); }}>
             <option value="">{t('allShops')}</option>
             <option value="official">{t('officialShop')}</option>
             <option value="general">{t('searchShop')}</option>
             {PARTNER_SHOPS_VISIBLE ? <option value="partner">{t('partnerShop')}</option> : null}
           </select>
-          <select value={sido} onChange={(event) => { setSido(event.target.value); setGungu('전체'); }}>
+          <select aria-label={uiLang === 'EN' ? 'Region' : uiLang === 'JP' ? '地域' : '지역'} value={sido} onChange={(event) => { setSido(event.target.value); setGungu('전체'); }}>
             <option value="전체">{t('allRegions')}</option>
             {regions.sidos?.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
-          <select value={gungu} onChange={(event) => setGungu(event.target.value)}>
+          <select aria-label={uiLang === 'EN' ? 'District' : uiLang === 'JP' ? '市区郡' : '시군구'} value={gungu} onChange={(event) => setGungu(event.target.value)}>
             <option value="전체">{t('allDistricts')}</option>
             {regions.gungus?.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
@@ -16505,7 +16526,16 @@ export default function RenewApp() {
         <CenteringLab uiLang={uiLang} onOpenGuide={() => navigatePage('centeringGuide')} />
       ) : activePage === 'news' ? (
         <RenewNews
+          key={`${window.location.pathname}${window.location.search}`}
           uiLang={uiLang}
+          onNavigate={(path) => {
+            const nextUrl = localizeAppPath(path, uiLang);
+            if (window.location.pathname + window.location.search === nextUrl) return;
+            internalNavigationRef.current = true;
+            pushAppHistory(nextUrl);
+            setRouteRevision((value) => value + 1);
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          }}
           onOpenCalendar={() => navigatePage('calendar')}
         />
       ) : activePage === 'partnerShops' ? (

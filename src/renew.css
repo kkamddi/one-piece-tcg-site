@@ -7081,7 +7081,7 @@
   padding-left: 0;
 }
 
-.renew-news-filter-tabs button {
+.renew-news-filter-tabs :is(button, a) {
   min-height: 38px;
   padding: 0 16px;
   border: 1px solid rgba(23, 25, 28, 0.12);
@@ -7093,10 +7093,18 @@
   cursor: pointer;
 }
 
-.renew-news-filter-tabs button.is-active {
+.renew-news-filter-tabs :is(button, a).is-active {
   border-color: #17191c;
   background: #17191c;
   color: #fff;
+}
+
+.renew-news-filter-tabs a,
+.renew-news-toggle a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .renew-news-supplies-panel .renew-section-head span {
@@ -7849,7 +7857,7 @@
   gap: 8px;
 }
 
-.renew-news-toggle button,
+.renew-news-toggle :is(button, a),
 .renew-news-supply-tabs button {
   min-height: 36px;
   padding: 0 14px;
@@ -7862,7 +7870,7 @@
   cursor: pointer;
 }
 
-.renew-news-toggle button.is-active,
+.renew-news-toggle :is(button, a).is-active,
 .renew-news-supply-tabs button.is-active {
   border-color: #17191c;
   background: #17191c;
@@ -11333,6 +11341,8 @@
   font-size: 42px;
   line-height: 1.08;
   letter-spacing: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .renew-collection-guide-head dl {
@@ -19779,16 +19789,16 @@ button.renew-deck-entry:focus-visible {
   color: #111827;
 }
 
-.renew-app.is-dark .renew-news-toggle button,
-.renew-app.is-dark .renew-news-filter-tabs button,
+.renew-app.is-dark .renew-news-toggle :is(button, a),
+.renew-app.is-dark .renew-news-filter-tabs :is(button, a),
 .renew-app.is-dark .renew-news-supply-tabs button {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
   color: #f5f2ec;
 }
 
-.renew-app.is-dark .renew-news-toggle button.is-active,
-.renew-app.is-dark .renew-news-filter-tabs button.is-active,
+.renew-app.is-dark .renew-news-toggle :is(button, a).is-active,
+.renew-app.is-dark .renew-news-filter-tabs :is(button, a).is-active,
 .renew-app.is-dark .renew-news-supply-tabs button.is-active {
   border-color: #f5f2ec;
   background: #f5f2ec;
@@ -21271,18 +21281,18 @@ button.renew-deck-entry:focus-visible {
   }
 
   .renew-news-filter-tabs {
-    flex-wrap: nowrap;
-    gap: 7px;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-top: 8px;
     padding-left: 2px;
-    overflow-x: auto;
+    overflow-x: visible;
     padding-bottom: 2px;
   }
 
-  .renew-news-filter-tabs button {
+  .renew-news-filter-tabs :is(button, a) {
     flex: 0 0 auto;
     min-height: 34px;
-    padding: 0 13px;
+    padding: 0 8px;
     font-size: 12px;
   }
 
@@ -21407,7 +21417,7 @@ button.renew-deck-entry:focus-visible {
     padding: 14px 14px 0;
   }
 
-  .renew-news-toggle button,
+  .renew-news-toggle :is(button, a),
   .renew-news-supply-tabs button {
     min-height: 34px;
     padding: 0 12px;
@@ -23636,6 +23646,54 @@ button.renew-deck-entry:focus-visible {
 
   .renew-guide-hub {
     margin: 16px 14px 0;
+  }
+
+  .renew-news-main .renew-news-guide-panel {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-news-guide-panel .renew-section-head {
+    padding: 20px 0 0;
+  }
+
+  .renew-news-guide-panel .renew-guide-hub {
+    margin: 18px 0 0;
+  }
+
+  .renew-news-guide-panel :is(.renew-guide-hub-group, .renew-guide-qa-group) {
+    padding: 20px 0;
+    border: 0;
+    border-top: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .renew-news-guide-panel .renew-guide-hub-group nav,
+  .renew-news-guide-panel .renew-guide-qa-list {
+    gap: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .renew-news-guide-panel .renew-guide-hub-group nav a,
+  .renew-news-guide-panel .renew-guide-qa-item {
+    border: 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .renew-news-guide-panel .renew-guide-hub-group nav a {
+    padding-left: 0;
+  }
+
+  .renew-news-guide-panel .renew-guide-qa-item summary {
+    padding-left: 0;
   }
 
   .renew-guide-hub-intro,

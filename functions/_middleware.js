@@ -3,6 +3,8 @@ import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
 const LEGACY_REDIRECTS = {
+  '/guide': '/news/guide',
+  '/faq': '/news/faq',
   '/jp/prices/boxes': '/jp/prices',
   '/jp/guide': '/jp/news',
   '/cards/series/569008': '/cards/st08',
@@ -11,17 +13,17 @@ const LEGACY_REDIRECTS = {
   '/collection': '/',
   '/guide/buying': '/guide/shops',
   '/guide/catalog': '/guide/card-catalog',
-  '/guide/collecting': '/guide',
+  '/guide/collecting': '/news/guide',
   '/guide/grading': '/guide/card-price',
   '/guide/market-price': '/guide/card-price',
-  '/guide/portfolio': '/guide',
+  '/guide/portfolio': '/news/guide',
   '/guide/storage': '/guide/card-storage',
-  '/faq/booster-box': '/faq',
-  '/faq/market-price': '/faq',
-  '/faq/parallel': '/faq',
-  '/faq/rarity': '/faq',
-  '/faq/start': '/faq',
-  '/faq/storage': '/faq',
+  '/faq/booster-box': '/news/faq',
+  '/faq/market-price': '/news/faq',
+  '/faq/parallel': '/news/faq',
+  '/faq/rarity': '/news/faq',
+  '/faq/start': '/news/faq',
+  '/faq/storage': '/news/faq',
   '/prices/collector-index': '/prices/index/manga',
   '/prices/manga-index': '/prices/index/manga',
   '/prices/waifu-index': '/prices/index/manga',
@@ -392,12 +394,12 @@ const ROUTE_SEO = {
     description: '슬리브, 탑로더, 바인더, 자석케이스 등 카드 보관용품 정보를 확인할 수 있습니다.',
     keywords: '카드 슬리브, 탑로더, 카드 바인더, 카드 보관함'
   },
-  '/guide': {
+  '/news/guide': {
     title: '원피스카드 입문 가이드 | Card Pone',
     description: '원피스카드 수집, 시세 확인, 보관, 구매 방향성을 처음 이용자도 이해하기 쉽게 정리합니다.',
     keywords: '원피스카드 입문, 원피스카드 수집 가이드, 원피스카드 보관'
   },
-  '/faq': {
+  '/news/faq': {
     title: '원피스카드 Q&A | Card Pone',
     description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인에 대한 자주 묻는 질문을 정리합니다.',
     keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 레어도'
@@ -494,7 +496,7 @@ const SEO_FIXES = {
     keywords: '원피스카드 보관용품, 카드 슬리브, 탑로더, 카드 바인더, 자석케이스',
     schemaType: 'CollectionPage'
   },
-  '/guide': {
+  '/news/guide': {
     title: '원피스카드 입문 가이드 | Card Pone',
     description: '원피스카드 수집, 시세 확인, 보관, 구매 방향성을 처음 이용자도 이해하기 쉽게 정리합니다.',
     keywords: '원피스카드 입문, 원피스카드 수집 가이드, 원피스카드 보관, 원피스카드 구매',
@@ -598,7 +600,7 @@ const SEO_FIXES = {
     keywords: '원피스카드 히트 많은 박스, 원피스카드 박스 추천, 원피스카드 카드깡',
     schemaType: 'Article'
   },
-  '/faq': {
+  '/news/faq': {
     title: '원피스카드 Q&A | Card Pone',
     description: '원피스카드 레어도, 패러렐, 박스 봉입률, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
     keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 레어도, 원피스카드 봉입률',
@@ -667,7 +669,7 @@ const SEO_PRIMARY = {
     keywords: '원피스카드 구매처, 원피스카드 매장, 원피스카드 공인점포, 원피스카드 취급점포',
     schemaType: 'CollectionPage'
   },
-  '/guide': {
+  '/news/guide': {
     title: '원피스카드 입문 가이드 | 카드포네',
     description: '원피스카드 수집 방향, 카드 보관 방법, 구매처 이용 방법, 도감과 시세 활용 방법을 입문자도 이해하기 쉽게 정리합니다.',
     keywords: '원피스카드 가이드, 원피스카드 입문, 원피스카드 수집, 원피스카드 보관 방법',
@@ -757,7 +759,7 @@ const SEO_PRIMARY = {
     keywords: '카드포네 제휴 카드샵, 원피스카드 매장, 원피스카드 구매처',
     schemaType: 'CollectionPage'
   },
-  '/faq': {
+  '/news/faq': {
     title: '원피스카드 Q&A | 카드포네',
     description: '원피스카드 언어판, 봉입률, 박스 구매, 시세 확인, 보관 방법에 대한 자주 묻는 질문을 정리합니다.',
     keywords: '원피스카드 Q&A, 원피스카드 FAQ, 원피스카드 질문, 카드포네',
@@ -789,7 +791,7 @@ const SERVER_PAGE_CONTENT = {
       'Card Pone은 한글판과 일본판 원피스카드를 검색하고, 보유 카드와 위시리스트를 관리하며, 카드별 시세 흐름을 확인할 수 있는 수집 도구입니다.',
       '카드 시세는 공개 시장 데이터를 정리해 조건별 최근 거래와 기간별 흐름으로 제공하며, Market Index는 PSA10 거래 데이터가 있는 구성 종목의 개별 지수를 동일 비중 평균해 보여줍니다.'
     ],
-    links: ['/cards', '/prices', '/guide', '/shops']
+    links: ['/cards', '/prices', '/news/guide', '/shops']
   },
   '/cards': {
     heading: '원피스카드 도감',
@@ -813,7 +815,7 @@ const SERVER_PAGE_CONTENT = {
       '질문, 정보, 자유 이야기와 가입인사를 통해 원피스카드 수집 경험을 회원들과 나눌 수 있습니다.',
       '출석과 게시글 좋아요로 적립한 포인트는 회원 등급에 반영되며 이벤트 혜택은 확정된 내용만 별도 공지합니다.'
     ],
-    links: ['/cards', '/prices', '/guide', '/news']
+    links: ['/cards', '/prices', '/news/guide', '/news']
   },
   '/lab': {
     heading: '원피스카드 실험실',
@@ -845,7 +847,7 @@ const SERVER_PAGE_CONTENT = {
       '일본판 원피스카드 도감에 등록된 패러렐과 특수 카드 중 무작위로 구성된 대진에서 더 마음에 드는 카드를 선택할 수 있습니다.',
       '16강, 32강, 64강, 128강을 지원하며 완료된 결과는 공용 랭킹의 우승 비율과 승률에 반영됩니다.'
     ],
-    links: ['/lab', '/cards/jp', '/prices', '/guide']
+    links: ['/lab', '/cards/jp', '/prices', '/news/guide']
   },
   '/lab/decks': {
     heading: '원피스카드 덱 빌더',
@@ -901,7 +903,7 @@ const SERVER_PAGE_CONTENT = {
       '예상 정산금은 판매 예정가와 수량에서 판매 수수료와 판매 배송비를 뺀 금액입니다. 예상 손익은 예상 정산금에서 매입 금액과 매입 부대비용을 뺀 값입니다.',
       '손익분기 판매가는 수수료와 배송비까지 반영했을 때 손익이 0원이 되는 카드 1장당 판매 가격입니다. 실제 거래 결과는 거래처 정책과 배송 조건에 따라 달라질 수 있습니다.'
     ],
-    links: ['/tools/profit-calculator', '/prices', '/guide/card-price', '/faq']
+    links: ['/tools/profit-calculator', '/prices', '/guide/card-price', '/news/faq']
   },
   '/tools/portfolio-calculator': {
     heading: '원피스카드 포트폴리오 수익률 계산기',
@@ -925,7 +927,7 @@ const SERVER_PAGE_CONTENT = {
       '공식 공지, 사전예약, 카드 보관용품과 수집 가이드를 주제별로 확인할 수 있습니다.',
       '외부 공지는 원문으로 연결하고 Card Pone의 도감, 시세, 구매처 기능을 함께 활용할 수 있도록 정리합니다.'
     ],
-    links: ['/news/official', '/news/preorder', '/guide', '/faq']
+    links: ['/news/official', '/news/preorder', '/news/guide', '/news/faq']
   },
   '/calendar': {
     heading: '원피스카드 발매와 이벤트 캘린더',
@@ -943,7 +945,7 @@ const SERVER_PAGE_CONTENT = {
     ],
     links: ['/shops/official', '/guide/shops', '/cards', '/prices']
   },
-  '/guide': {
+  '/news/guide': {
     heading: '원피스카드 입문과 수집 가이드',
     paragraphs: [
       '카드를 처음 찾는 단계부터 가격 판단, 보관과 실험실 도구 사용까지 필요한 답을 목적별로 나눠 확인할 수 있습니다.',
@@ -993,13 +995,13 @@ const SERVER_PAGE_CONTENT = {
     ],
     links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/cards/jp', '/prices/cards']
   },
-  '/faq': {
+  '/news/faq': {
     heading: '원피스카드 자주 묻는 질문',
     paragraphs: [
       '언어판 구분, 카드 검색, 시세 데이터, 보관 방법과 구매처에 관한 자주 묻는 질문을 확인할 수 있습니다.',
       '시세는 실제 거래 시점과 카드 상태에 따라 달라질 수 있으므로 단일 가격보다 최근 거래와 기간별 흐름을 함께 확인해야 합니다.'
     ],
-    links: ['/guide', '/cards', '/prices', '/shops']
+    links: ['/news/guide', '/cards', '/prices', '/shops']
   },
   '/about': {
     heading: '서비스 안내',
@@ -1373,7 +1375,7 @@ const SERVER_PAGE_DETAILS = {
       ]
     }
   ],
-  '/guide': [
+  '/news/guide': [
     {
       heading: '처음 시작할 때',
       items: [
@@ -1425,7 +1427,7 @@ const SERVER_PAGE_DETAILS = {
       ]
     }
   ],
-  '/faq': [
+  '/news/faq': [
     {
       heading: '질문 분류',
       items: [
@@ -1765,7 +1767,7 @@ function createServerPageContent(pathname, seo) {
     heading: seo.heading || seo.title.split('|')[0].trim(),
     paragraphs: seo.paragraphs || [seo.description],
     sections: seo.sections || [],
-    links: seo.links || (isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/guide', '/shops'])
+    links: seo.links || (isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/news/guide', '/shops'])
   };
   const detailMap = isJapanese ? JAPANESE_SERVER_PAGE_DETAILS : SERVER_PAGE_DETAILS;
   const details = content.sections || detailMap[contentKey] || [];
