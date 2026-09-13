@@ -67,22 +67,25 @@ export async function configureNativeAuth() {
   if (launch?.url) await handleNativeAuthUrl(launch.url);
 }
 
-export async function signInWithSocialProvider(provider) {
+export async function signInWithSocialProvider(provider, { link = false } = {}) {
   if (!supabase) throw new Error('인증 설정을 확인할 수 없습니다.');
 
+  if (link) {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    if (!data?.user) throw new Error('session_not_found');
+  }
+  const startAuth = (options) => link
+    ? supabase.auth.linkIdentity({ provider, options })
+    : supabase.auth.signInWithOAuth({ provider, options });
+
   if (!isNativePlatform()) {
-    return supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: WEB_AUTH_REDIRECT }
-    });
+    return startAuth({ redirectTo: WEB_AUTH_REDIRECT });
   }
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: WEB_AUTH_REDIRECT,
-      skipBrowserRedirect: true
-    }
+  const { data, error } = await startAuth({
+    redirectTo: WEB_AUTH_REDIRECT,
+    skipBrowserRedirect: true
   });
   if (error) throw error;
   if (!data?.url) throw new Error('로그인 페이지를 열 수 없습니다.');

@@ -24,7 +24,8 @@ import { disableDevicePushNotifications, enablePushNotifications, fetchPushNotif
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
-import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
+import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
+import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
 import boxMarketItems from './data/box-market-items';
 import boxMarketPrices from './data/box-market-prices.json';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
@@ -5107,22 +5108,26 @@ async function applyPendingSocialConsent(user) {
   }
 }
 
-function RenewAuthModal({ onClose, onSignedIn }) {
+function RenewAuthModal({ onClose, onSignedIn, initialMessage = '' }) {
   useBodyScrollLock();
   const [mode, setMode] = useState('login');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [agreements, setAgreements] = useState({ terms: false, privacy: false });
   const [legalType, setLegalType] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(initialMessage);
   const [loading, setLoading] = useState(false);
   const isSignup = mode === 'signup';
   const requiredAgreed = agreements.terms && agreements.privacy;
 
   useEffect(() => {
+    if (initialMessage) setMessage(initialMessage);
+  }, [initialMessage]);
+
+  useEffect(() => {
     const handleNativeAuth = (event) => {
       if (event.detail?.error) {
-        setMessage(event.detail.error);
+        setMessage(getSocialAuthErrorMessage(event.detail.error));
         return;
       }
       if (event.detail?.user) {
@@ -5181,7 +5186,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       if (error) throw error;
     } catch (error) {
       if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
-      setMessage(error.message);
+      setMessage(getSocialAuthErrorMessage(error));
     }
   }
 
@@ -5200,7 +5205,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       if (error) throw error;
     } catch (error) {
       if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
-      setMessage(error.message);
+      setMessage(getSocialAuthErrorMessage(error));
     }
   }
 
@@ -5219,7 +5224,7 @@ function RenewAuthModal({ onClose, onSignedIn }) {
       if (error) throw error;
     } catch (error) {
       if (isSignup) window.localStorage.removeItem(PENDING_SOCIAL_CONSENT_KEY);
-      setMessage(error.message);
+      setMessage(getSocialAuthErrorMessage(error));
     }
   }
 
@@ -5438,6 +5443,34 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [pointOverview, setPointOverview] = useState(null);
   const [pointLoading, setPointLoading] = useState(false);
+  const [linkingProvider, setLinkingProvider] = useState(null);
+  const linkedProviders = new Set((authUser?.identities || []).map((identity) => identity.provider));
+
+  useEffect(() => {
+    const handleNativeLink = (event) => {
+      if (event.detail?.error) setMessage(getSocialAuthErrorMessage(event.detail.error));
+      if (event.detail?.user) {
+        onUserUpdated(event.detail.user);
+        setMessage('소셜 로그인 연결이 완료되었습니다.');
+      }
+    };
+    window.addEventListener(NATIVE_AUTH_EVENT, handleNativeLink);
+    return () => window.removeEventListener(NATIVE_AUTH_EVENT, handleNativeLink);
+  }, [onUserUpdated]);
+
+  async function linkSocialAccount(nextProvider) {
+    if (linkingProvider) return;
+    setLinkingProvider(nextProvider);
+    setMessage('');
+    try {
+      const { error } = await signInWithSocialProvider(nextProvider, { link: true });
+      if (error) throw error;
+    } catch (error) {
+      setMessage(getSocialAuthErrorMessage(error));
+    } finally {
+      setLinkingProvider(null);
+    }
+  }
 
   useEffect(() => {
     if (!unlocked) return undefined;
@@ -5649,6 +5682,17 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
                 <strong>{providerLabel}</strong>
               </div>
             </div>
+            <section aria-label="소셜 로그인 연결">
+              <h3>소셜 로그인 연결</h3>
+              <div className="renew-account-actions">
+                {[['google', 'Google'], ['custom:naver', '네이버'], ['kakao', '카카오톡']].map(([key, label]) => (
+                  <button key={key} type="button" disabled={Boolean(linkingProvider) || linkedProviders.has(key)} onClick={() => linkSocialAccount(key)}>
+                    {label} {linkedProviders.has(key) ? '연결됨' : linkingProvider === key ? '연결 중...' : '연결'}
+                  </button>
+                ))}
+              </div>
+              <p className="renew-account-help">현재 계정에 로그인 방식을 추가합니다. 다른 계정의 데이터는 합쳐지지 않습니다.</p>
+            </section>
             <div className="renew-account-actions">
               <button type="button" onClick={() => setPasswordOpen(true)} disabled={isSocialAccount}>비밀번호 변경</button>
               <button type="button" onClick={onLogout}>로그아웃</button>
@@ -15705,7 +15749,8 @@ export default function RenewApp() {
   const [authUser, setAuthUser] = useState(null);
   const [authResolved, setAuthResolved] = useState(!supabase);
   const [notifications, setNotifications] = useState([]);
-  const [authOpen, setAuthOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(Boolean(initialAuthCallbackError));
+  const [authErrorMessage, setAuthErrorMessage] = useState(() => initialAuthCallbackError ? getSocialAuthErrorMessage(initialAuthCallbackError) : '');
   const [accountOpen, setAccountOpen] = useState(false);
   const [userState, setUserState] = useState(null);
   const [portfolioHoldings, setPortfolioHoldings] = useState([]);
@@ -15968,8 +16013,17 @@ export default function RenewApp() {
       return undefined;
     }
     let mounted = true;
+    if (initialAuthCallbackError) {
+      window.history.replaceState(window.history.state, '', clearAuthCallbackError(window.location.href));
+    }
+    const showAuthError = (error) => {
+      if (!mounted) return;
+      setAuthErrorMessage(getSocialAuthErrorMessage(error));
+      setAuthOpen(true);
+    };
     supabase.auth.getSession()
-      .then(async ({ data }) => {
+      .then(async ({ data, error }) => {
+        if (error) showAuthError(error);
         let user = data.session?.user || null;
         if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
           const { data: freshData } = await supabase.auth.getUser();
@@ -15977,7 +16031,8 @@ export default function RenewApp() {
         }
         if (mounted) setAuthUser(user);
       })
-      .catch(() => {
+      .catch((error) => {
+        showAuthError(error);
         if (mounted) setAuthUser(null);
       })
       .finally(() => {
@@ -16631,7 +16686,7 @@ export default function RenewApp() {
           ↑
         </button>
       ) : null}
-      {authOpen ? <RenewAuthModal onClose={() => setAuthOpen(false)} onSignedIn={setAuthUser} /> : null}
+      {authOpen ? <RenewAuthModal initialMessage={authErrorMessage} onClose={() => { setAuthOpen(false); setAuthErrorMessage(''); }} onSignedIn={setAuthUser} /> : null}
       {needsSocialConsent ? (
         <RenewSocialConsentModal
           authUser={authUser}

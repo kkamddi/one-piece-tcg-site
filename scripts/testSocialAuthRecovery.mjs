@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
 import { onRequest } from '../functions/_middleware.js';
 import { onRequestGet } from '../functions/naver-userinfo.js';
 import { readAuthCallbackError, clearAuthCallbackError, getSocialAuthErrorMessage } from '../src/lib/auth-errors.js';
@@ -71,4 +73,39 @@ test('Naver rejects invalid provider responses and network failures', async (t) 
   t.mock.restoreAll();
   t.mock.method(globalThis, 'fetch', async () => { throw new Error('offline'); });
   assert.equal((await onRequestGet({ request })).status, 502);
+});
+
+test('social linking requires a verified session and normal login stays OAuth sign-in', async (t) => {
+  const calls = [];
+  const auth = {
+    getUser: async () => ({ data: { user: { id: 'existing-user' } }, error: null }),
+    signInWithOAuth: async (options) => { calls.push(['signIn', options]); return { error: null }; },
+    linkIdentity: async (options) => { calls.push(['link', options]); return { error: null }; }
+  };
+  globalThis.__cardPoneAuthTest = { auth };
+  t.after(() => { delete globalThis.__cardPoneAuthTest; });
+  const compiled = await build({
+    entryPoints: [fileURLToPath(new URL('../src/lib/native-auth.js', import.meta.url))],
+    bundle: true, write: false, format: 'esm', platform: 'node',
+    plugins: [{
+      name: 'mock-auth-dependencies',
+      setup(builder) {
+        builder.onResolve({ filter: /^(@capacitor\/|\.\/supabase$)/ }, (args) => ({ path: args.path, namespace: 'auth-test' }));
+        builder.onLoad({ filter: /.*/, namespace: 'auth-test' }, () => ({ contents: 'export const supabase = globalThis.__cardPoneAuthTest; export const Capacitor = {isNativePlatform: () => false}; export const App = {}; export const Browser = {};', loader: 'js' }));
+      }
+    }]
+  });
+  const { signInWithSocialProvider } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputFiles[0].text).toString('base64')}`);
+  await signInWithSocialProvider('google');
+  assert.equal(calls[0][0], 'signIn');
+  assert.equal(calls[0][1].options.redirectTo, 'https://www.optcgkorea.com/');
+  await signInWithSocialProvider('google', { link: true });
+  assert.equal(calls[1][0], 'link');
+  assert.equal(calls[1][1].provider, 'google');
+  auth.getUser = async () => ({ data: { user: null }, error: null });
+  await assert.rejects(signInWithSocialProvider('custom:naver', { link: true }), /session_not_found/);
+  assert.equal(calls.length, 2);
+  auth.getUser = async () => ({ data: { user: null }, error: new Error('invalid session') });
+  await assert.rejects(signInWithSocialProvider('google', { link: true }), /invalid session/);
+  assert.equal(calls.length, 2);
 });
