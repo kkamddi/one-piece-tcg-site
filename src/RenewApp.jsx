@@ -4246,7 +4246,12 @@ const STATIC_INFO_PAGES = {
 };
 
 function MobileNavIcon({ type }) {
+  // Additional Lucide icons: see public/licenses/lucide.txt.
   const paths = {
+    trophy: <><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2" /><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2" /><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3" /><path d="M4 22h16" /><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" /><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3" /></>,
+    centering: <><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M7 12h10" /></>,
+    layers: <><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></>,
+    arrowRight: <><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></>,
     home: <><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /></>,
     cards: <><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1 1-1h5a3 3 0 0 1 3 3 3 3 0 0 1 3-3h5a1 1 0 0 1 1 1V5a1 1 0 0 0-1-1h-5a3 3 0 0 0-3 3 3 3 0 0 0-3-3H4a1 1 0 0 0-1 1z" /></>,
     prices: <><path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" /></>,
@@ -4685,7 +4690,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
               />
             ) : null}
           </div>
-          <button type="button" onClick={onToggleTheme} aria-label="테마 전환">
+          <button type="button" onClick={onToggleTheme} aria-label="테마 전환" title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}>
             <MobileNavIcon type={isDark ? 'light' : 'dark'} />
           </button>
           <div className={`renew-account-menu ${accountMenuOpen ? 'is-open' : ''}`}>
@@ -4761,7 +4766,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
             ) : null}
           </div>
           <div className={`renew-notification-shell ${notificationMenuOpen ? 'is-open' : ''}`}>
-            <button type="button" className="renew-mode" onClick={handleNotificationClick} aria-label="알림">
+            <button type="button" className="renew-mode" onClick={handleNotificationClick} aria-label="알림" title="알림">
               <MobileNavIcon type="bell" />
               {unreadCount ? <span className="renew-notification-dot" aria-label={`읽지 않은 알림 ${unreadCount}개`} /> : null}
             </button>
@@ -4773,8 +4778,8 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
               />
             ) : null}
           </div>
-          <button type="button" className="renew-mode" onClick={onToggleTheme} aria-label="테마 전환">
-            {isDark ? '☀' : '☾'}
+          <button type="button" className="renew-mode" onClick={onToggleTheme} aria-label="테마 전환" title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}>
+            <MobileNavIcon type={isDark ? 'light' : 'dark'} />
           </button>
         </div>
       </div>
@@ -6200,7 +6205,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
               <small>SCHEDULE</small>
               <strong>{getLocaleText(uiLang, '이번 주 일정', 'This week', '今週の予定')}</strong>
             </span>
-            <b aria-hidden="true">→</b>
+            <b aria-hidden="true"><MobileNavIcon type="arrowRight" /></b>
           </button>
           <div className="renew-home-calendar-list">
             {upcomingCalendarDays.length ? upcomingCalendarDays.map(([date, events]) => (
@@ -6230,7 +6235,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           <div className="renew-value-head">
             <a className="renew-card-title" href={getLocalizedPagePath('portfolio', uiLang)} onClick={(event) => { event.preventDefault(); onOpenPortfolio(); }}>Portfolio</a>
             <div className="renew-value-head-actions">
-              <a href={getLocalizedPagePath('portfolio', uiLang)} onClick={(event) => { event.preventDefault(); onOpenPortfolio(); }} aria-label={getLocaleText(uiLang, '포트폴리오 열기', 'Open portfolio', 'ポートフォリオを開く')}>→</a>
+              <a href={getLocalizedPagePath('portfolio', uiLang)} onClick={(event) => { event.preventDefault(); onOpenPortfolio(); }} aria-label={getLocaleText(uiLang, '포트폴리오 열기', 'Open portfolio', 'ポートフォリオを開く')} title={getLocaleText(uiLang, '포트폴리오 열기', 'Open portfolio', 'ポートフォリオを開く')}><MobileNavIcon type="arrowRight" /></a>
             </div>
           </div>
           {!authUser ? <div className="renew-portfolio-signin">
@@ -9075,7 +9080,6 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
             </div>
           ))}
         </div>
-        <RenewAdInquiry uiLang={uiLang} placement="sidebar" />
       </aside>
 
       <section className="renew-catalog-main" aria-busy={loading || catalogPending}>
@@ -9112,16 +9116,20 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
         </div>
 
         <div className="renew-filter-line">
-          <div className="renew-chip-group renew-catalog-view-group">
+          <div className="renew-chip-group renew-catalog-view-group" role="group" aria-label={getLocaleText(uiLang, '보기', 'View', '表示')}>
             <span className="renew-chip-group-label">{getLocaleText(uiLang, '보기', 'View', '表示')}</span>
-            <button type="button" className={collectionFilter === 'all' ? 'is-active' : ''} onClick={() => setCollectionFilter('all')}>{t('all')}</button>
-            <button type="button" className={collectionFilter === 'owned' ? 'is-active' : ''} onClick={() => setCollectionFilter('owned')}>{t('owned')}</button>
-            <button type="button" className={collectionFilter === 'wish' ? 'is-active' : ''} onClick={() => setCollectionFilter('wish')}>{t('wishlist')}</button>
+            <div className="renew-catalog-segments">
+              <button type="button" aria-pressed={collectionFilter === 'all'} className={collectionFilter === 'all' ? 'is-active' : ''} onClick={() => setCollectionFilter('all')}>{t('all')}</button>
+              <button type="button" aria-pressed={collectionFilter === 'owned'} className={collectionFilter === 'owned' ? 'is-active' : ''} onClick={() => setCollectionFilter('owned')}>{t('owned')}</button>
+              <button type="button" aria-pressed={collectionFilter === 'wish'} className={collectionFilter === 'wish' ? 'is-active' : ''} onClick={() => setCollectionFilter('wish')}>{t('wishlist')}</button>
+            </div>
           </div>
-          <div className="renew-chip-group renew-catalog-sort-group">
+          <div className="renew-chip-group renew-catalog-sort-group" role="group" aria-label={getLocaleText(uiLang, '정렬', 'Sort', '並び替え')}>
             <span className="renew-chip-group-label">{getLocaleText(uiLang, '정렬', 'Sort', '並び替え')}</span>
-            <button type="button" className={catalogSortMode === 'rarity' ? 'is-active' : ''} onClick={() => setCatalogSortMode('rarity')}>{t('catalogSortRarity')}</button>
-            <button type="button" className={catalogSortMode === 'price' ? 'is-active' : ''} onClick={() => setCatalogSortMode('price')}>{t('catalogSortPrice')}</button>
+            <div className="renew-catalog-segments">
+              <button type="button" aria-pressed={catalogSortMode === 'rarity'} className={catalogSortMode === 'rarity' ? 'is-active' : ''} onClick={() => setCatalogSortMode('rarity')}>{t('catalogSortRarity')}</button>
+              <button type="button" aria-pressed={catalogSortMode === 'price'} className={catalogSortMode === 'price' ? 'is-active' : ''} onClick={() => setCatalogSortMode('price')}>{t('catalogSortPrice')}</button>
+            </div>
           </div>
           <div className="renew-chip-group renew-rarity-chip-group">
             {rarityOptions.map((rarity) => (
@@ -10611,7 +10619,7 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
   const tools = [
     {
       id: 'card-world-cup',
-      icon: 'cards',
+      icon: 'trophy',
       status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
       title: getLocaleText(uiLang, '원피스카드 월드컵', 'Card World Cup', 'カードワールドカップ'),
       description: getLocaleText(uiLang, '무작위 일본판 카드 중 마음에 드는 한 장을 선택합니다.', 'Choose your favorite from randomly selected Japanese cards.', 'ランダムな日本版カードからお気に入りを選びます。'),
@@ -10619,7 +10627,7 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
     },
     {
       id: 'centering',
-      icon: 'lab',
+      icon: 'centering',
       status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
       title: getLocaleText(uiLang, '센터링 측정기', 'Centering Check', 'センタリング測定'),
       description: getLocaleText(uiLang, '카드 인쇄 영역의 좌우·상하 비율을 확인합니다.', 'Check the left/right and top/bottom print balance.', 'カード印刷領域の左右・上下バランスを確認します。'),
@@ -10643,7 +10651,7 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
     },
     {
       id: 'deck-builder',
-      icon: 'cards',
+      icon: 'layers',
       status: getLocaleText(uiLang, '사용 가능', 'Available', '利用可能'),
       title: getLocaleText(uiLang, '덱 빌더', 'Deck Builder', 'デッキビルダー'),
       description: getLocaleText(uiLang, '리더를 선택하고 덱 규칙을 확인하며 카드를 구성합니다.', 'Choose a leader, build a deck, and check its rules.', 'リーダーを選び、ルールを確認しながらデッキを構築します。'),
@@ -10655,13 +10663,13 @@ function RenewLabHome({ uiLang, onOpenCentering, onOpenSimulator, onOpenPortfoli
     <main className="renew-subpage renew-lab-page">
       <section className="renew-lab-grid" aria-label={getLocaleText(uiLang, '실험실 도구', 'Lab tools', 'ラボツール')}>
         {tools.map((tool) => tool.onClick ? (
-          <button key={tool.id} type="button" className="renew-lab-tool is-available" onClick={tool.onClick}>
+          <button key={tool.id} type="button" className="renew-lab-tool is-available" onClick={tool.onClick} aria-label={tool.title} aria-describedby={`lab-tool-${tool.id}-description`}>
             <span className="renew-lab-tool-icon"><MobileNavIcon type={tool.icon} /></span>
             <span className="renew-lab-tool-copy">
               <strong>{tool.title}</strong>
-              <span>{tool.description}</span>
+              <span id={`lab-tool-${tool.id}-description`}>{tool.description}</span>
             </span>
-            <span className="renew-lab-tool-arrow" aria-hidden="true">→</span>
+            <span className="renew-lab-tool-arrow" aria-hidden="true"><MobileNavIcon type="arrowRight" /></span>
           </button>
         ) : (
           <article key={tool.id} className="renew-lab-tool is-coming" aria-label={`${tool.title} ${tool.status}`}>

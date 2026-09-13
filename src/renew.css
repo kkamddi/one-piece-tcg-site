@@ -3809,10 +3809,45 @@
 .renew-catalog-view-group,
 .renew-catalog-sort-group {
   align-items: center;
-  padding: 4px;
-  border: 1px solid rgba(201, 77, 53, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 246, 241, 0.72);
+  flex-wrap: nowrap;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.renew-catalog-segments {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 3px;
+  padding: 3px;
+  border-radius: 8px;
+  background: #f2f3f5;
+}
+
+.renew-chip-group .renew-catalog-segments button {
+  min-width: 64px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.renew-catalog-segments button:focus-visible {
+  outline: 2px solid #697586;
+  outline-offset: 2px;
+}
+
+.renew-catalog-segments button:not(.is-active):hover {
+  color: #17191c;
+  background: #e5e7eb;
 }
 
 .renew-chip-group-label {
@@ -3825,20 +3860,47 @@
   white-space: nowrap;
 }
 
-.renew-catalog-view-group button:not(.is-active),
-.renew-catalog-sort-group button:not(.is-active) {
-  background: rgba(255, 255, 255, 0.9);
+.renew-catalog-view-group .renew-chip-group-label,
+.renew-catalog-sort-group .renew-chip-group-label {
+  padding: 0;
+  color: #727985;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.renew-catalog-segments button:not(.is-active) {
+  color: #535b67;
+  background: transparent;
 }
 
 .renew-app.is-dark .renew-catalog-view-group,
 .renew-app.is-dark .renew-catalog-sort-group {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  background: transparent;
 }
 
-.renew-app.is-dark .renew-catalog-view-group button:not(.is-active),
-.renew-app.is-dark .renew-catalog-sort-group button:not(.is-active) {
-  background: rgba(255, 255, 255, 0.08);
+.renew-app.is-dark .renew-catalog-segments {
+  background: #262b33;
+}
+
+.renew-app.is-dark .renew-catalog-segments button:not(.is-active) {
+  color: #c4cbd4;
+  background: transparent;
+}
+
+.renew-app.is-dark .renew-catalog-segments button:not(.is-active):hover {
+  background: #373e48;
+}
+
+.renew-app.is-dark .renew-chip-group .renew-catalog-segments button.is-active {
+  color: #17191c;
+  background: #f3f4f6;
+  box-shadow: none;
+}
+
+.renew-app.is-dark :is(.renew-catalog-view-group, .renew-catalog-sort-group) .renew-chip-group-label {
+  color: #a8b1be;
 }
 
 .renew-chip-group button {
@@ -12859,13 +12921,13 @@
 
 .renew-lab-tool {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
   align-items: center;
-  gap: 14px;
-  min-height: 138px;
+  gap: 16px;
+  min-height: 108px;
   border: 1px solid rgba(23, 25, 28, 0.12);
   border-radius: 8px;
-  padding: 18px 20px;
+  padding: 22px;
   color: #17191c;
   background: #fff;
   text-align: left;
@@ -12876,12 +12938,13 @@ button.renew-lab-tool {
 }
 
 button.renew-lab-tool.is-available:hover {
-  border-color: rgba(201, 77, 53, 0.52);
-  box-shadow: 0 10px 24px -20px rgba(23, 25, 28, 0.5);
+  border-color: #b9c0ca;
+  background: #fafbfc;
+  box-shadow: none;
 }
 
 button.renew-lab-tool.is-available:focus-visible {
-  outline: 2px solid #c94d35;
+  outline: 2px solid #697586;
   outline-offset: 3px;
 }
 
@@ -12892,23 +12955,28 @@ button.renew-lab-tool.is-available:focus-visible {
 
 .renew-lab-tool-icon {
   display: inline-grid;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  border: 1px solid rgba(23, 25, 28, 0.12);
+  border: 0;
   border-radius: 8px;
-  color: #c94d35;
-  background: #fff6f2;
+  color: #475160;
+  background: #f2f3f5;
 }
 
 .renew-lab-tool-icon svg {
-  width: 21px;
-  height: 21px;
+  width: 22px;
+  height: 22px;
 }
 
 .renew-lab-tool-copy {
   display: grid;
   gap: 5px;
+}
+
+.renew-lab-tool-copy :is(strong, span) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .renew-lab-tool-copy small {
@@ -12924,20 +12992,35 @@ button.renew-lab-tool.is-available:focus-visible {
 }
 
 .renew-lab-tool-copy strong {
-  font-size: 18px;
-  line-height: 1.25;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0;
 }
 
 .renew-lab-tool-copy > span {
   color: #69707c;
   font-size: 13px;
+  font-weight: 400;
   line-height: 1.5;
+  letter-spacing: 0;
 }
 
 .renew-lab-tool-arrow {
-  color: #c94d35;
-  font-size: 22px;
-  font-weight: 700;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: #87909d;
+}
+
+.renew-lab-tool-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.renew-lab-tool:is(:hover, :focus-visible) .renew-lab-tool-arrow {
+  color: currentColor;
 }
 
 .renew-app.is-dark .renew-lab-intro h1,
@@ -12956,8 +13039,13 @@ button.renew-lab-tool.is-available:focus-visible {
 }
 
 .renew-app.is-dark .renew-lab-tool-icon {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(201, 77, 53, 0.14);
+  color: #d0d6df;
+  background: #272d36;
+}
+
+.renew-app.is-dark button.renew-lab-tool.is-available:hover {
+  border-color: #626c7b;
+  background: #1c222b;
 }
 
 .renew-app.is-dark .renew-lab-tool-copy > span {
@@ -12982,7 +13070,7 @@ button.renew-lab-tool.is-available:focus-visible {
   }
 
   .renew-lab-tool {
-    min-height: 126px;
+    min-height: 108px;
     padding: 16px;
   }
 }
@@ -12994,16 +13082,20 @@ button.renew-lab-tool.is-available:focus-visible {
   }
 
   .renew-lab-tool {
+    grid-template-columns: 40px minmax(0, 1fr) 18px;
     gap: 12px;
-    min-height: 108px;
-    padding: 14px;
+    min-height: 96px;
+    padding: 16px;
+  }
+
+  .renew-lab-tool-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .renew-lab-tool-copy > span {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    display: block;
+    overflow: visible;
   }
 
   .renew-lab-context {
@@ -20216,9 +20308,12 @@ button.renew-deck-entry:focus-visible {
 
   .renew-catalog-view-group,
   .renew-catalog-sort-group {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
     width: 100%;
-    padding: 5px;
-    border-radius: 18px;
+    gap: 8px;
+    padding: 0;
+    border-radius: 0;
   }
 
   .renew-chip-group-label {
@@ -20230,6 +20325,13 @@ button.renew-deck-entry:focus-visible {
   .renew-catalog-view-group button,
   .renew-catalog-sort-group button {
     flex: 1 1 0;
+  }
+
+  .renew-chip-group .renew-catalog-segments button {
+    min-width: 0;
+    min-height: 38px;
+    padding-inline: 8px;
+    font-size: 12px;
   }
 
   .renew-chip-group button {
