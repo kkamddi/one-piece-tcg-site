@@ -1439,12 +1439,30 @@ const SERVER_PAGE_DETAILS = {
   ],
   '/privacy': [
     {
+      heading: 'Google 로그인으로 접근하는 정보',
+      paragraphs: ['Card Pone는 Google 로그인을 선택하고 동의한 이용자의 Google 계정 식별자, 이메일 주소, 이름 및 프로필 사진을 Google과 Supabase Auth를 통해 받습니다. 요청 범위는 openid, email, profile에 해당하는 기본 로그인 정보입니다. Google 비밀번호, Gmail 메일 내용, Google Drive 파일, 연락처 또는 캘린더에 접근하지 않습니다.']
+    },
+    {
+      heading: 'Google 정보의 이용과 저장',
+      paragraphs: ['Google에서 받은 정보는 회원 식별, 로그인 상태 유지 및 서비스 내 프로필 제공에 이용합니다. 해당 계정에 이용자가 저장한 보유 카드, 위시리스트, 포트폴리오와 알림 설정을 연결합니다. 계정 및 인증 정보는 Supabase에 저장되며, 로그인 세션 정보는 브라우저 또는 앱에도 저장되어 로그인 유지에 사용됩니다. Google 로그인 정보는 광고 타기팅, 광고주 제공 또는 개인정보 판매 목적으로 사용하지 않습니다. 광고 쿠키의 처리는 아래 광고 관련 설명과 별개입니다.']
+    },
+    {
+      heading: 'Google 정보의 처리와 보호',
+      paragraphs: ['Google은 소셜 로그인을, Supabase는 인증 및 계정 데이터 저장을, Cloudflare는 웹·API 전송과 보안을 위해 필요한 정보를 처리합니다. Card Pone는 HTTPS를 통해 인증 및 계정 데이터를 전송하고 계정 인증과 접근 권한 확인을 적용합니다. Google에서 받은 정보를 공개 데이터로 제공하지 않으며, 이용자가 게시글이나 댓글을 작성할 때 서비스 프로필의 닉네임 등은 해당 공개 활동에 표시될 수 있습니다.']
+    },
+    {
+      heading: 'Google 연결 해제 및 데이터 삭제',
+      paragraphs: ['Google 계정의 서드 파티 연결 관리(https://myaccount.google.com/connections)에서 Card Pone의 접근 권한을 철회할 수 있습니다. Google 연결 해제와 Card Pone 계정 삭제는 별개이며, 연결 해제만으로 기존에 저장된 서비스 데이터가 삭제되지는 않습니다. 계정과 저장 데이터 삭제는 마이페이지의 계정 삭제 기능 또는 optkr26@gmail.com으로 요청할 수 있습니다. Google 계정 정보는 계정 서비스 제공 기간 동안 보관하며, 계정 삭제 시 해당 인증 정보와 연결된 서비스 데이터를 삭제합니다.']
+    },
+    {
       heading: '개인정보 처리 범위',
       items: [
         '로그인과 계정 기능 제공에 필요한 식별 정보와 사용자가 직접 저장한 서비스 데이터를 처리합니다.',
         '포트폴리오, 보유 카드, 위시리스트와 알림 설정은 로그인한 계정에 연결해 저장합니다.',
         '촬영한 센터링 이미지는 측정을 위해 기기 안에서 처리하며 서버에 저장하거나 전송하지 않습니다.',
-        '보관 기간, 이용 목적과 삭제 요청 절차는 개인정보처리방침 본문에서 확인할 수 있습니다.'
+        '개인정보는 서비스 제공 목적이 달성될 때까지 보관하며, 계정 삭제 시 계정 정보와 연결된 서비스 데이터를 삭제합니다. 다만 관련 법령에 따라 보관이 필요한 정보는 해당 기간 동안 분리 보관할 수 있습니다.',
+        '이용자는 마이페이지에서 본인의 정보를 확인·수정하거나 계정을 삭제할 수 있습니다. 별도 열람·정정·삭제 요청과 개인정보 관련 문의는 운영자 Card Pone의 이메일 optkr26@gmail.com으로 접수할 수 있습니다.',
+        '시행일: 2026년 8월 11일. 최종 수정일: 2026년 9월 13일 (Google 로그인 데이터 처리 설명 보완).'
       ]
     },
     {
@@ -1766,7 +1784,7 @@ function createServerPageContent(pathname, seo) {
   const content = contentMap[contentKey] || {
     heading: seo.heading || seo.title.split('|')[0].trim(),
     paragraphs: seo.paragraphs || [seo.description],
-    sections: seo.sections || [],
+    sections: seo.sections,
     links: seo.links || (isJapanese ? ['/jp/cards', '/jp/prices', '/jp/lab', '/jp/news', '/jp/shops'] : ['/cards', '/prices', '/lab', '/news/guide', '/shops'])
   };
   const detailMap = isJapanese ? JAPANESE_SERVER_PAGE_DETAILS : SERVER_PAGE_DETAILS;
