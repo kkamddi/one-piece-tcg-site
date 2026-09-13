@@ -35,6 +35,8 @@ import CenteringLab from './CenteringLab';
 import CardScanner from './CardScanner';
 import SiteSearch, { SiteSearchInput } from './SiteSearch';
 import CollectionGuide from './CollectionGuide';
+import PortfolioDashboard from './PortfolioDashboard';
+import usePortfolioValuation from './usePortfolioValuation';
 import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuide } from './PortfolioCalculator';
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
 import { getCommunityGrade } from '../lib/community-grades.js';
@@ -2777,6 +2779,7 @@ function RenewMarketMoney({ value, uiLang }) {
 }
 const PAGE_PATHS = {
   home: '/',
+  portfolio: '/portfolio',
   search: '/search',
   adminAnalytics: '/admin/analytics',
   cards: '/cards',
@@ -3514,6 +3517,12 @@ function getJapaneseRouteSeo(pathname, page) {
 }
 
 function getClientRouteSeo(page, uiLang = 'KR') {
+  if (page === 'portfolio') return {
+    title: `${getLocaleText(uiLang, '포트폴리오', 'Portfolio', 'ポートフォリオ')} | Card Pone`,
+    h1: getLocaleText(uiLang, '포트폴리오', 'Portfolio', 'ポートフォリオ'),
+    description: getLocaleText(uiLang, '보유 카드와 매입 기록, 평가손익을 확인합니다.', 'Your holdings, purchases and unrealized returns.', '保有カード・購入記録・評価損益を確認します。'),
+    robots: 'noindex,follow'
+  };
   if (typeof window === 'undefined') return null;
   const path = getAppPath(window.location.pathname);
   if (path === '/guide/collection' || path.startsWith('/guide/collection/')) {
@@ -3767,6 +3776,7 @@ function getRouteBackInfo(pathname = '/', search = '') {
   const hasSearch = Boolean(String(search || '').replace(/^\?/, ''));
   if (path === '/admin/analytics') return { page: 'home' };
   if (path === '/search') return { page: 'home' };
+  if (path === '/portfolio') return { page: 'home' };
   if (path.startsWith('/shops/partners/')) return { page: 'partnerShops' };
   if (path === '/shops/partners') return { page: 'shops' };
   if (path === '/' || (['/cards', '/prices', '/community', '/calendar', '/news', '/shops', '/market'].includes(path) && !hasSearch)) return null;
@@ -5691,9 +5701,16 @@ function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle
 
 function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initialDetail = null, onSave, onDeleteLot, onClose, uiLang }) {
   useBodyScrollLock();
+  const dialogRef = useRef(null);
+  useEffect(() => {
+    const previous = document.activeElement;
+    dialogRef.current?.querySelector('button')?.focus();
+    return () => { if (previous?.isConnected) previous.focus(); };
+  }, []);
   const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
   const [grade, setGrade] = useState(normalizeMarketConditionKey(initialGrade));
-  const [mode, setMode] = useState('current');
+  const [mode, setMode] = useState('manual');
+  const [showForm, setShowForm] = useState(() => !findPortfolioHolding(holdings, item, initialGrade)?.purchases?.length);
   const [quantity, setQuantity] = useState(1);
   const [purchaseDate, setPurchaseDate] = useState(getKstDateKey(Date.now()));
   const [currency, setCurrency] = useState(() => isJapaneseUi(uiLang) ? 'JPY' : 'KRW');
@@ -5705,16 +5722,16 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   const [message, setMessage] = useState('');
   const holding = findPortfolioHolding(holdings, item, grade);
   const lots = Array.isArray(holding?.purchases) ? holding.purchases : [];
+  const formatLotCost = (lot) => new Intl.NumberFormat(uiLang === 'JP' ? 'ja-JP' : 'ko-KR', { style: 'currency', currency: lot.originalUnitPrice > 0 ? lot.originalCurrency || 'JPY' : 'JPY', maximumFractionDigits: lot.originalCurrency === 'USD' ? 2 : 0 }).format((lot.originalUnitPrice || lot.unitPriceJpy) * lot.quantity);
   const estimatePoint = mode === 'estimate' ? findPortfolioEstimatePoint(detail, grade, purchaseDate) : null;
   const estimatePriceJpy = Number(estimatePoint?.price || 0) || 0;
   const manualPriceJpy = convertPortfolioUnitPriceToJpy(unitPrice, currency);
-  const currentPriceJpy = Number(getMarketConditionBucket(detail?.latestByCondition, grade)?.price || item?.price || 0) || 0;
+  const currentPriceJpy = Number(getMarketConditionBucket(detail?.latestByCondition, grade)?.price || (normalizeMarketConditionKey(item?.grade || initialGrade) === grade ? item?.price : 0) || 0) || 0;
   const unitPriceJpy = mode === 'current' ? currentPriceJpy : mode === 'manual' ? manualPriceJpy : mode === 'estimate' ? estimatePriceJpy : 0;
-  const projectedPercent = unitPriceJpy > 0 && currentPriceJpy > 0
-    ? ((currentPriceJpy / unitPriceJpy) - 1) * 100
-    : null;
+
   const canSave = !saving
-    && quantity > 0
+    && Number.isInteger(quantity) && quantity > 0 && quantity <= 9999
+    && (mode === 'later' || Boolean(purchaseDate && purchaseDate <= getKstDateKey(Date.now())))
     && (mode === 'later' || (mode === 'current' && currentPriceJpy > 0) || (mode === 'manual' && manualPriceJpy > 0) || (mode === 'estimate' && estimatePriceJpy > 0));
 
   useEffect(() => {
@@ -5744,7 +5761,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 
   function resetForm(nextGrade = grade) {
     setGrade(normalizeMarketConditionKey(nextGrade));
-    setMode('current');
+    setMode('manual');
     setQuantity(1);
     setPurchaseDate(getKstDateKey(Date.now()));
     setCurrency(isJapaneseUi(uiLang) ? 'JPY' : 'KRW');
@@ -5754,6 +5771,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   }
 
   function editLot(lot) {
+    setShowForm(true);
     setEditingLotId(String(lot.id || ''));
     setMode(lot.mode || 'later');
     setQuantity(Math.max(1, Number(lot.quantity || 1) || 1));
@@ -5787,6 +5805,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
     try {
       await onSave?.({ grade, holdingId: holding?.id || '', lot });
       resetForm(grade);
+      setShowForm(false);
       setMessage(text('매입 기록을 저장했습니다.', 'Purchase record saved.', '購入記録を保存しました。'));
     } catch (error) {
       setMessage(error?.message || text('저장하지 못했습니다.', 'Failed to save.', '保存できませんでした。'));
@@ -5795,23 +5814,42 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
     }
   }
 
+  async function removeLot() {
+    if (!editingLotId || saving || !window.confirm(text('이 매입 기록을 삭제할까요?', 'Delete this purchase record?', 'この購入記録を削除しますか？'))) return;
+    setSaving(true);
+    try {
+      await onDeleteLot?.({ holdingId: holding?.id || '', purchaseId: editingLotId });
+      resetForm(grade);
+      setShowForm(false);
+      setMessage(text('매입 기록을 삭제했습니다.', 'Purchase record deleted.', '購入記録を削除しました。'));
+    } catch {
+      setMessage(text('삭제하지 못했습니다. 다시 시도해 주세요.', 'Could not delete. Please retry.', '削除できませんでした。再試行してください。'));
+    } finally { setSaving(false); }
+  }
+
   const modal = (
-    <div className="renew-modal-backdrop renew-portfolio-editor-backdrop" onClick={onClose}>
-      <div className="renew-info-modal renew-portfolio-editor" onClick={(event) => event.stopPropagation()}>
+    <div className="renew-modal-backdrop renew-portfolio-editor-backdrop" onClick={() => { if (!saving) onClose(); }}>
+      <div className="renew-info-modal renew-portfolio-editor renew-purchase-manager" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="purchase-manager-title" onKeyDown={(event) => {
+        if (event.key === 'Escape' && !saving) { event.stopPropagation(); onClose(); }
+        if (event.key !== 'Tab') return;
+        const controls = [...event.currentTarget.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),summary')].filter((element) => element.getClientRects().length);
+        const first = controls[0], last = controls.at(-1);
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }} onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
             <small>PORTFOLIO</small>
-            <h2>{text('포트폴리오에 추가', 'Add to Portfolio', 'ポートフォリオに追加')}</h2>
+            <h2 id="purchase-manager-title">{text('매입 관리', 'Manage purchases', '購入管理')}</h2>
           </div>
-          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
+          <button type="button" className="renew-modal-close" disabled={saving} onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
         </div>
 
         <div className="renew-portfolio-editor-card">
-          <img src={item?.previewImageUrl || item?.imageUrl || '/card-placeholder.svg'} alt={item?.name || item?.code} onError={placeholderImage} />
+          <img src={getCardThumbnailSrc({ id: item?.cardId, locale: String(item?.cardId || '').split('::')[0], imageUrl: item?.previewImageUrl || item?.imageUrl })} data-fallback-src={item?.previewImageUrl || item?.imageUrl || ''} alt="" onError={fallbackToOriginalCardImage} />
           <div>
             <strong>{item?.code}</strong>
-            <span>{item?.name || item?.code}</span>
-            <small>{item?.setName || ''}</small>
+            <span title={item?.name}>{getMarketShortName(item)}</span>
           </div>
         </div>
 
@@ -5821,53 +5859,59 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
               key={gradeKey}
               type="button"
               className={grade === gradeKey ? 'is-active' : ''}
-              onClick={() => resetForm(gradeKey)}
+              disabled={saving}
+              aria-pressed={grade === gradeKey}
+              onClick={() => { resetForm(gradeKey); setShowForm(!findPortfolioHolding(holdings, item, gradeKey)?.purchases?.length); }}
             >
               {gradeKey === 'a' ? 'Single' : 'PSA10'}
             </button>
           ))}
         </div>
 
-        {lots.length ? (
+        {!showForm ? (
           <div className="renew-portfolio-lot-history">
             <div className="renew-portfolio-section-title">
               <strong>{text('매입 기록', 'Purchase history', '購入記録')}</strong>
               <span>{lots.length}</span>
+              <button type="button" onClick={() => { resetForm(grade); setShowForm(true); }}>{text('+ 추가 매입', '+ Add purchase', '+ 購入を追加')}</button>
             </div>
             {lots.map((lot) => (
               <div key={lot.id} className="renew-portfolio-lot-row">
                 <button type="button" className="renew-portfolio-lot-edit" onClick={() => editLot(lot)}>
                   <span>{lot.purchaseDate || text('날짜 미등록', 'Date not set', '日付未入力')}</span>
-                  <strong>{lot.quantity}{text('장', ' card(s)', '枚')} · {lot.unitPriceJpy > 0 ? getLocalizedCurrencyText(lot.unitPriceJpy, uiLang) : text('가격 나중에 입력', 'Price later', '価格は後で入力')}</strong>
+                  <strong>{lot.quantity}{text('장', ' card(s)', '枚')} · {lot.unitPriceJpy > 0 ? formatLotCost(lot) : text('가격 나중에 입력', 'Price later', '価格は後で入力')}</strong>
                   <small>{lot.mode === 'estimate' ? text('날짜 시세 추정', 'Date price estimate', '日付相場から推定') : lot.mode === 'manual' ? text('직접 입력', 'Manual', '直接入力') : text('미입력', 'Pending', '未入力')}</small>
                 </button>
-                <button type="button" className="renew-portfolio-lot-delete" onClick={() => onDeleteLot?.({ holdingId: holding?.id || '', purchaseId: lot.id })} aria-label={text('매입 기록 삭제', 'Delete purchase record', '購入記録を削除')}>×</button>
+                <button type="button" className="renew-purchase-edit-link" onClick={() => editLot(lot)}>{text('수정', 'Edit', '編集')}</button>
               </div>
             ))}
           </div>
         ) : null}
 
-        <form className="renew-portfolio-form" onSubmit={submit}>
+        {showForm && <form className="renew-portfolio-form" onSubmit={submit}>
           <div className="renew-portfolio-section-title">
             <strong>{editingLotId ? text('매입 기록 수정', 'Edit record', '購入記録を編集') : (lots.length ? text('추가 매입 기록', 'Add another purchase', '追加の購入記録') : text('매입 정보', 'Purchase information', '購入情報'))}</strong>
-            {editingLotId ? <button type="button" onClick={() => resetForm(grade)}>{text('수정 취소', 'Cancel edit', '編集を取り消す')}</button> : null}
+            {lots.length ? <button type="button" disabled={saving} onClick={() => { resetForm(grade); setShowForm(false); }}>{text('기록 목록', 'Records', '記録一覧')}</button> : null}
           </div>
+          <details className="renew-purchase-options" open={mode !== 'manual' || undefined}>
+            <summary>{text('매입가 입력 방식', 'Cost entry method', '購入価格の入力方法')}</summary>
           <div className="renew-portfolio-mode-tabs">
             {[
-              ['current', text('현재 시세로 추가', 'Use current price', '現在相場で追加')],
               ['manual', text('직접 입력', 'Enter price', '価格を入力')],
+              ['current', text('현재 시세로 추가', 'Use current price', '現在相場で追加')],
               ['estimate', text('날짜로 추정', 'Estimate by date', '日付から推定')],
               ['later', text('나중에 입력', 'Later', '後で入力')]
             ].map(([modeKey, label]) => (
-              <button key={modeKey} type="button" className={mode === modeKey ? 'is-active' : ''} onClick={() => { setMode(modeKey); setMessage(''); }}>{label}</button>
+              <button key={modeKey} type="button" className={mode === modeKey ? 'is-active' : ''} onClick={() => { setMode(modeKey); if (modeKey === 'current') setPurchaseDate(getKstDateKey(Date.now())); setMessage(''); }}>{label}</button>
             ))}
           </div>
 
+          </details>
           <label className="renew-portfolio-quantity">
             <span>{text('수량', 'Quantity', '数量')}</span>
             <div>
               <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label={text('수량 줄이기', 'Decrease quantity', '数量を減らす')}>−</button>
-              <input type="number" min="1" max="9999" value={quantity} onChange={(event) => setQuantity(Math.min(9999, Math.max(1, Number(event.target.value || 1))))} />
+              <input type="number" aria-label={text('수량', 'Quantity', '数量')} inputMode="numeric" step="1" min="1" max="9999" value={quantity} onChange={(event) => setQuantity(Math.min(9999, Math.max(1, Math.round(Number(event.target.value || 1)))))} />
               <button type="button" onClick={() => setQuantity((value) => Math.min(9999, value + 1))} aria-label={text('수량 늘리기', 'Increase quantity', '数量を増やす')}>+</button>
             </div>
           </label>
@@ -5875,7 +5919,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
           {mode !== 'later' ? (
             <label>
               <span>{text('매입 날짜', 'Purchase date', '購入日')}</span>
-              <input type="date" value={purchaseDate} max={getKstDateKey(Date.now())} onChange={(event) => setPurchaseDate(event.target.value)} />
+              <input type="date" required readOnly={mode === 'current'} value={purchaseDate} max={getKstDateKey(Date.now())} onChange={(event) => setPurchaseDate(event.target.value)} />
             </label>
           ) : null}
 
@@ -5891,7 +5935,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
               </label>
               <label>
                 <span>{text('1장당 매입가', 'Price per card', '1枚あたりの購入価格')}</span>
-                <input type="number" min="0" step={currency === 'USD' ? '0.01' : '1'} value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} placeholder="0" />
+                <input type="number" required inputMode="decimal" min={currency === 'USD' ? '0.01' : '1'} step={currency === 'USD' ? '0.01' : '1'} value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} placeholder="0" />
               </label>
             </div>
           ) : null}
@@ -5912,19 +5956,20 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
             </div>
           ) : null}
 
-          {projectedPercent != null ? (
+          {unitPriceJpy > 0 ? (
             <div className="renew-portfolio-preview">
-              <span>{text('현재 시세 기준 예상 수익률', 'Estimated return at current price', '現在相場に基づく予想収益率')}</span>
-              <strong className={projectedPercent > 0 ? 'is-up' : projectedPercent < 0 ? 'is-down' : ''}>{formatSignedPortfolioPercent(projectedPercent)}</strong>
+              <span>{text('총 매입금액', 'Total purchase cost', '購入総額')}</span>
+              <strong>{new Intl.NumberFormat(uiLang === 'JP' ? 'ja-JP' : 'ko-KR', { style: 'currency', currency: mode === 'manual' ? currency : 'JPY', maximumFractionDigits: mode === 'manual' && currency === 'USD' ? 2 : 0 }).format((mode === 'manual' ? Number(unitPrice) : unitPriceJpy) * quantity)}</strong>
             </div>
           ) : null}
 
-          {message ? <p className="renew-portfolio-message" aria-live="polite">{message}</p> : null}
           <div className="renew-portfolio-form-actions">
-            <button type="button" onClick={onClose}>{text('닫기', 'Close', '閉じる')}</button>
+            <button type="button" disabled={saving} onClick={() => { if (lots.length) { resetForm(grade); setShowForm(false); } else onClose(); }}>{text('취소', 'Cancel', 'キャンセル')}</button>
             <button type="submit" disabled={!canSave}>{saving ? text('저장 중...', 'Saving...', '保存中...') : editingLotId ? text('수정 저장', 'Save changes', '変更を保存') : text('추가', 'Add', '追加')}</button>
           </div>
-        </form>
+          {editingLotId && <button type="button" disabled={saving} className="renew-purchase-delete" onClick={removeLot}>{text('이 기록 삭제', 'Delete this record', 'この記録を削除')}</button>}
+        </form>}
+        {message ? <p className="renew-portfolio-message" aria-live="polite">{message}</p> : null}
       </div>
     </div>
   );
@@ -5932,12 +5977,29 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, uiLang }) {
+function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPortfolioHoldings, stateLoading, portfolioError, onRetry, onRequireLogin, onOpenPrices, uiLang }) {
+  const model = usePortfolioValuation(portfolioHoldings);
+  const [editor, setEditor] = useState(null);
+  const t = (ko, en, jp) => getLocaleText(uiLang, ko, en, jp);
+  const applyHoldings = (payload) => setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
+  return <>
+    <PortfolioDashboard model={model} loading={!authResolved || stateLoading || model.loading} error={portfolioError} signedIn={Boolean(authUser)}
+      onLogin={onRequireLogin} onRetry={() => { if (portfolioError) onRetry(); else model.refresh(); }} onAdd={() => onOpenPrices()}
+      onEdit={setEditor} onRemove={async (id) => applyHoldings(await deletePortfolioHolding(id))} onOpenPrices={onOpenPrices}
+      money={isJapaneseUi(uiLang) ? formatYen : formatWonFromYen} displayName={getMarketShortName}
+      imageSrc={(card) => getCardThumbnailSrc({ id: card.cardId, locale: String(card.cardId || '').split('::')[0], imageUrl: card.previewImageUrl })} onImageError={fallbackToOriginalCardImage} t={t} />
+    {editor && <RenewPortfolioEditorModal item={editor} initialGrade={editor.grade} holdings={portfolioHoldings} uiLang={uiLang}
+      onSave={async ({ grade, lot }) => applyHoldings(await savePortfolioPurchase({ holding: { ...editor, grade: normalizeMarketConditionKey(grade) }, purchase: lot }))}
+      onDeleteLot={async ({ purchaseId }) => applyHoldings(await deletePortfolioPurchase(purchaseId))}
+      onClose={() => setEditor(null)} />}
+  </>;
+}
+
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, onOpenPortfolio, onRequireLogin, portfolioError, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
-  const [marketTotalJpy, setMarketTotalJpy] = useState(null);
-  const [marketCards, setMarketCards] = useState([]);
-  const [valueModalGrade, setValueModalGrade] = useState(null);
-  const [portfolioEditorItem, setPortfolioEditorItem] = useState(null);
+  const portfolio = usePortfolioValuation(portfolioHoldings);
+  const marketCards = portfolio.cards;
+  const marketTotalJpy = portfolio.totalJpy;
   const [renewalNoticeOpen, setRenewalNoticeOpen] = useState(false);
   const [renewalNoticeChecked, setRenewalNoticeChecked] = useState(false);
   const [partnerNewsOpen, setPartnerNewsOpen] = useState(false);
@@ -5955,10 +6017,8 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const psa10Count = marketCards.length
     ? marketCards.filter((item) => item.grade === 'psa10').reduce((sum, item) => sum + item.quantity, 0)
     : valuationEntries.filter(([, item]) => item.grade === 'psa10').reduce((sum, [, item]) => sum + getPortfolioQuantity(item.purchases), 0);
-  const portfolioCostJpy = marketCards.reduce((sum, item) => sum + item.costJpy, 0);
-  const portfolioCurrentForCostJpy = marketCards.reduce((sum, item) => sum + item.price * item.pricedQuantity, 0);
-  const portfolioProfitJpy = portfolioCurrentForCostJpy - portfolioCostJpy;
-  const portfolioReturnPercent = portfolioCostJpy > 0 ? (portfolioProfitJpy / portfolioCostJpy) * 100 : null;
+  const portfolioProfitJpy = portfolio.profitJpy;
+  const portfolioReturnPercent = portfolio.returnPercent;
   const costCards = marketCards.filter((item) => item.costJpy > 0);
   const upcomingCalendarEvents = useMemo(() => {
     const today = getCalendarTodayKey();
@@ -6024,74 +6084,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const entries = valuationEntries
-      .filter(([, item]) => Number(item?.apparelId) > 0);
-    if (!entries.length) {
-      setMarketTotalJpy(null);
-      setMarketCards([]);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const apparelIds = [...new Set(entries.map(([, item]) => Number(item.apparelId)).filter((value) => value > 0))];
-    const apparelIdChunks = [];
-    for (let index = 0; index < apparelIds.length; index += 200) apparelIdChunks.push(apparelIds.slice(index, index + 200));
-    Promise.all(apparelIdChunks.map((chunk) => {
-      const params = new URLSearchParams({ summary: 'portfolio', apparelIds: chunk.join(',') });
-      return fetch(`/api/market?${params.toString()}`)
-        .then((response) => response.ok ? response.json() : null)
-        .catch(() => null);
-    })).then((summaries) => ({ items: summaries.flatMap((summary) => Array.isArray(summary?.items) ? summary.items : []) }))
-      .then((summary) => {
-        if (cancelled) return;
-        const latestByApparelId = new Map(
-          (Array.isArray(summary?.items) ? summary.items : [])
-            .filter((item) => item?.apparelId)
-            .map((item) => [String(item.apparelId), item])
-        );
-        const items = entries.map(([key, item]) => {
-          const grade = normalizeMarketConditionKey(item.grade || 'a');
-          const latest = latestByApparelId.get(String(item.apparelId));
-          const livePrice = Number(grade === 'psa10' ? latest?.psa10PriceJpy : latest?.aPriceJpy) || 0;
-          const price = livePrice;
-          const lots = Array.isArray(item.purchases) ? item.purchases : [];
-          const quantity = getPortfolioQuantity(lots);
-          const pricedQuantity = getPortfolioPricedQuantity(lots);
-          const costJpy = getPortfolioCostJpy(lots);
-          const returnPercent = costJpy > 0 && price > 0 && pricedQuantity > 0
-            ? (((price * pricedQuantity) - costJpy) / costJpy) * 100
-            : null;
-          return {
-            key,
-            id: item.id,
-            grade,
-            price,
-            quantity,
-            pricedQuantity,
-            costJpy,
-            returnPercent,
-            lots,
-            code: item.code,
-            apparelId: item.apparelId,
-            cardId: item.cardId || '',
-            name: item.name || item.code,
-            setName: item.setName || '',
-            sourceUrl: item.sourceUrl || '',
-            previewImageUrl: item.previewImageUrl || item.imageUrl || '/card-placeholder.svg'
-          };
-        });
-         setMarketCards(items);
-         setMarketTotalJpy(items.reduce((sum, item) => sum + item.price * item.quantity, 0));
-       });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [portfolioHoldings]);
-
-  useEffect(() => {
     const ownedSet = new Set(Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds : []);
     const entries = ['KR', 'JP'].map((locale) => {
       const countData = seriesCardCounts[locale] || { total: 0, series: {} };
@@ -6122,13 +6114,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
     setProgressData(Object.fromEntries(entries));
   }, [userState]);
 
-  const modalCards = valueModalGrade ? marketCards : [];
   const t = (key) => getUiText(uiLang, key);
-  const portfolioTotalParts = authUser
-    ? (isJp
-      ? [formatYen(totalJpy)]
-      : formatUsdWonFromYen(totalJpy).replace(/^US\s+/, '').split(' / '))
-    : [t('portfolioLoginRequired')];
   const homeNewsLinks = useMemo(() => {
     if (!isJp) return getHomeNewsLinks();
     return OFFICIAL_TOPIC_ITEMS
@@ -6180,32 +6166,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
     setPartnerNewsOpen(false);
   }
 
-  async function saveHomePortfolioLot({ grade, lot }) {
-    if (!portfolioEditorItem) return;
-    const payload = await savePortfolioPurchase({
-      holding: {
-        ...portfolioEditorItem,
-        grade: normalizeMarketConditionKey(grade)
-      },
-      purchase: lot
-    });
-    setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
-  }
-
-  async function deleteHomePortfolioLot({ purchaseId }) {
-    const payload = await deletePortfolioPurchase(purchaseId);
-    setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
-  }
-
-  async function removeValuationCard(holdingId) {
-    if (!authUser) {
-      window.alert(t('loginRequired'));
-      return;
-    }
-    const payload = await deletePortfolioHolding(holdingId);
-    setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
-  }
-
   return (
     <main className="renew-home">
       <h1 className="renew-sr-only">{PAGE_SEO.home.h1}</h1>
@@ -6249,22 +6209,23 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           </div>
         </article>
 
-        <article className="renew-float-card renew-value">
+        <article className="renew-float-card renew-value renew-portfolio-summary">
           <div className="renew-value-head">
-            <div className="renew-card-title">Portfolio</div>
+            <a className="renew-card-title" href={getLocalizedPagePath('portfolio', uiLang)} onClick={(event) => { event.preventDefault(); onOpenPortfolio(); }}>Portfolio</a>
             <div className="renew-value-head-actions">
-              {authUser ? <button type="button" onClick={() => setValueModalGrade('all')}>{getLocaleText(uiLang, '전체 보기', 'View all', 'すべて見る')}</button> : null}
+              <a href={getLocalizedPagePath('portfolio', uiLang)} onClick={(event) => { event.preventDefault(); onOpenPortfolio(); }} aria-label={getLocaleText(uiLang, '포트폴리오 열기', 'Open portfolio', 'ポートフォリオを開く')}>→</a>
             </div>
           </div>
-          <div className="renew-value-total">
-            {portfolioTotalParts.map((part, index) => (
-              <span key={`${part}-${index}`}>
-                {index > 0 ? <i aria-hidden="true">/</i> : null}
-                {part}
-              </span>
-            ))}
-          </div>
-          {authUser ? (
+          {!authUser ? <div className="renew-portfolio-signin">
+            <strong>{getLocaleText(uiLang, '내 카드의 가치를 한곳에서', 'Your card assets, together', 'カードの資産をひとつに')}</strong>
+            <button type="button" onClick={onRequireLogin}>{getLocaleText(uiLang, '로그인', 'Sign in', 'ログイン')}</button>
+          </div> : stateLoading || portfolio.loading ? <p role="status">{getLocaleText(uiLang, '자산을 불러오는 중...', 'Loading assets...', '資産を読み込み中...')}</p>
+            : portfolioError ? <p role="alert">{getLocaleText(uiLang, '보유 내역을 불러오지 못했습니다.', 'Unable to load holdings.', '保有記録を読み込めませんでした。')}</p>
+            : <>
+          <a className="renew-portfolio-total-link" href={getLocalizedPagePath('portfolio', uiLang)} onClick={(event) => { event.preventDefault(); onOpenPortfolio(); }}>
+            <small>{getLocaleText(uiLang, portfolio.missingQuotes ? '확인된 평가액' : '총 평가액', portfolio.missingQuotes ? 'Known market value' : 'Market value', portfolio.missingQuotes ? '確認済み評価額' : '総評価額')}</small>
+            <strong>{isJp ? formatYen(totalJpy) : formatWonFromYen(totalJpy)}</strong>
+          </a>
             <div className="renew-value-performance">
               <div>
                 <span>{getLocaleText(uiLang, '총 평가손익', 'Total return', '評価損益')}</span>
@@ -6280,17 +6241,17 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
                 {getLocaleText(uiLang, '원가 반영', 'Cost coverage', '購入価格入力済み')} {costCards.length} / {marketCards.length}
               </p>
             </div>
-          ) : null}
           <div className="renew-value-grid">
-            <button type="button" onClick={() => setValueModalGrade('a')}>
+            <button type="button" onClick={onOpenPortfolio}>
               <span>Single</span>
               <strong>{aCount}</strong>
             </button>
-            <button type="button" onClick={() => setValueModalGrade('psa10')}>
+            <button type="button" onClick={onOpenPortfolio}>
               <span>PSA10</span>
               <strong>{psa10Count}</strong>
             </button>
           </div>
+          </>}
           {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
         </article>
 
@@ -6330,7 +6291,8 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
                                   onError={fallbackToOriginalCardImage}
                                 />
                                 <span>
-                                  <strong>{item.code || item.name}</strong>
+                                  <strong title={item.name || item.code}>{getMarketShortName(item)}</strong>
+                                  <small>{item.code}</small>
                                   <small>{isJp ? formatYen(item.priceJpy) : formatWonFromYen(item.priceJpy)} · {item.tradeCount}{getLocaleText(uiLang, '건', ' trades', '件')}</small>
                                 </span>
                                 <em>{item.changePercent > 0 ? '+' : ''}{item.changePercent.toFixed(2)}%</em>
@@ -6350,31 +6312,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           <p className="renew-home-movers-note">{getLocaleText(uiLang, '오늘과 전일 모두 거래된 카드의 일별 중앙값 기준', 'Daily median for cards traded on both days', '当日・前日とも取引があるカードの日次中央値')}</p>
         </article>
       </section>
-      {valueModalGrade ? (
-        <RenewValueModal
-          initialGrade={valueModalGrade}
-          cards={modalCards}
-          onClose={() => setValueModalGrade(null)}
-          onRemove={removeValuationCard}
-          onEdit={setPortfolioEditorItem}
-          uiLang={uiLang}
-          onOpenPrices={() => {
-            setValueModalGrade(null);
-            onOpenPrices?.();
-          }}
-        />
-      ) : null}
-      {portfolioEditorItem ? (
-        <RenewPortfolioEditorModal
-          item={portfolioEditorItem}
-          initialGrade={portfolioEditorItem.grade}
-          holdings={portfolioHoldings}
-          onSave={saveHomePortfolioLot}
-          onDeleteLot={deleteHomePortfolioLot}
-          onClose={() => setPortfolioEditorItem(null)}
-          uiLang={uiLang}
-        />
-      ) : null}
       {renewalNoticeOpen && !isJp ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
       {PARTNER_NEWS_POPUP_ENABLED && partnerNewsOpen && latestPartnerNews ? (
         <PartnerShopNewsModal news={latestPartnerNews} uiLang={uiLang} onClose={closePartnerNews} />
@@ -15676,6 +15613,8 @@ export default function RenewApp() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [userState, setUserState] = useState(null);
   const [portfolioHoldings, setPortfolioHoldings] = useState([]);
+  const [portfolioError, setPortfolioError] = useState(false);
+  const [portfolioReload, setPortfolioReload] = useState(0);
   const [stateLoading, setStateLoading] = useState(false);
   const [onlineVisitors, setOnlineVisitors] = useState(0);
   const [onlinePageCounts, setOnlinePageCounts] = useState({});
@@ -15999,16 +15938,18 @@ export default function RenewApp() {
     if (!authUser) {
       setUserState(null);
       setPortfolioHoldings([]);
+      setPortfolioError(false);
       setStateLoading(false);
       return undefined;
     }
     setStateLoading(true);
+    setPortfolioError(false);
     (async () => {
       try {
         const portfolio = await fetchPortfolio();
         if (!cancelled) setPortfolioHoldings(Array.isArray(portfolio?.holdings) ? portfolio.holdings : []);
       } catch {
-        if (!cancelled) setPortfolioHoldings([]);
+        if (!cancelled) { setPortfolioHoldings([]); setPortfolioError(true); }
       }
       try {
         const state = await fetchMyState();
@@ -16022,7 +15963,7 @@ export default function RenewApp() {
     return () => {
       cancelled = true;
     };
-  }, [authUser]);
+  }, [authUser, portfolioReload]);
 
   async function handleAuthClick(action = 'login') {
     if (action === 'mypage' && authUser) {
@@ -16215,6 +16156,9 @@ export default function RenewApp() {
           portfolioHoldings={portfolioHoldings}
           setPortfolioHoldings={setPortfolioHoldings}
           stateLoading={stateLoading}
+          portfolioError={portfolioError}
+          onOpenPortfolio={() => navigatePage('portfolio')}
+          onRequireLogin={() => setAuthOpen(true)}
           visitorToken={visitorToken}
           uiLang={uiLang}
           onSubmitSearch={(search) => {
@@ -16243,6 +16187,19 @@ export default function RenewApp() {
           }}
           onOpenCalendar={(date = '') => navigatePage('calendar', { query: date ? `date=${encodeURIComponent(date)}` : '' })}
         />
+      ) : activePage === 'portfolio' ? (
+        <RenewPortfolioPage authUser={authUser} authResolved={authResolved} portfolioHoldings={portfolioHoldings} setPortfolioHoldings={setPortfolioHoldings}
+          stateLoading={stateLoading} portfolioError={portfolioError} onRetry={() => setPortfolioReload((value) => value + 1)}
+          onRequireLogin={() => setAuthOpen(true)} uiLang={uiLang} onOpenPrices={(item) => {
+            setMarketInitialCode(item?.code || '');
+            setMarketInitialApparelId(item?.apparelId || null);
+            setMarketInitialCardId(item?.cardId || '');
+            const query = new URLSearchParams();
+            if (item?.code) query.set('code', item.code);
+            if (item?.apparelId) query.set('apparelId', String(item.apparelId));
+            if (item?.cardId) query.set('cardId', item.cardId);
+            navigatePage('prices', { query: query.toString() });
+          }} />
       ) : activePage === 'search' ? (
         <SiteSearch query={new URLSearchParams(window.location.search).get('q') || ''} uiLang={uiLang} documents={SITE_SEARCH_DOCUMENTS}
           onOpenCard={(card) => {

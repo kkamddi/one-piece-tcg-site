@@ -7130,9 +7130,9 @@
 
 .renew-news-guide-panel .renew-section-head h2 {
   color: #17191c;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .renew-news-guide-panel .renew-section-head {
@@ -7169,7 +7169,7 @@
   color: #17191c;
   font-size: 17px;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   line-height: 1.35;
 }
 
@@ -23666,6 +23666,87 @@ button.renew-deck-entry:focus-visible {
   }
 }
 
+/* Keep guide discovery unframed in both themes and at every breakpoint. */
+.renew-app .renew-news-main .renew-news-guide-panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.renew-news-guide-panel .renew-section-head {
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.renew-news-guide-panel .renew-guide-hub {
+  margin: 20px 0 0;
+}
+
+.renew-news-guide-panel :is(.renew-guide-hub-grid, .renew-guide-qa-grid) {
+  align-items: start;
+  gap: 28px 48px;
+}
+
+.renew-news-guide-panel .renew-guide-qa-grid {
+  margin-top: 20px;
+  padding: 0;
+}
+
+.renew-app .renew-news-guide-panel :is(.renew-guide-hub-group, .renew-guide-qa-group) {
+  min-width: 0;
+  padding: 20px 0 0;
+  border: 0;
+  border-top: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 0;
+  background: transparent;
+}
+
+.renew-app .renew-news-guide-panel .renew-guide-hub-group nav,
+.renew-app .renew-news-guide-panel .renew-guide-qa-list {
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.renew-app .renew-news-guide-panel .renew-guide-hub-group nav a,
+.renew-app .renew-news-guide-panel .renew-guide-qa-item {
+  border: 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  border-radius: 0;
+  background: transparent;
+}
+
+.renew-news-guide-panel .renew-guide-hub-group nav a {
+  padding-left: 0;
+}
+
+.renew-news-guide-panel .renew-guide-qa-item summary {
+  min-height: 48px;
+  padding-left: 0;
+  font-size: 14px;
+}
+
+.renew-news-guide-panel .renew-guide-qa-answer {
+  padding-left: 0;
+  font-size: 14px;
+}
+
+.renew-news-guide-panel :is(.renew-guide-hub-group nav a, .renew-guide-qa-item summary):focus-visible {
+  outline: 2px solid #c94d35;
+  outline-offset: -2px;
+}
+
+@media (hover: hover) {
+  .renew-app .renew-news-guide-panel .renew-guide-hub-group nav a:hover,
+  .renew-news-guide-panel .renew-guide-qa-item summary:hover {
+    background: rgba(128, 128, 128, 0.08);
+  }
+}
+
 @media (max-width: 720px) {
   .renew-box-guide-hub,
   .renew-box-guide-grid {
@@ -23699,54 +23780,6 @@ button.renew-deck-entry:focus-visible {
 
   .renew-guide-hub {
     margin: 16px 14px 0;
-  }
-
-  .renew-news-main .renew-news-guide-panel {
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .renew-news-guide-panel .renew-section-head {
-    padding: 20px 0 0;
-  }
-
-  .renew-news-guide-panel .renew-guide-hub {
-    margin: 18px 0 0;
-  }
-
-  .renew-news-guide-panel :is(.renew-guide-hub-group, .renew-guide-qa-group) {
-    padding: 20px 0;
-    border: 0;
-    border-top: 1px solid rgba(128, 128, 128, 0.25);
-    border-radius: 0;
-    background: transparent;
-  }
-
-  .renew-news-guide-panel .renew-guide-hub-group nav,
-  .renew-news-guide-panel .renew-guide-qa-list {
-    gap: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-  }
-
-  .renew-news-guide-panel .renew-guide-hub-group nav a,
-  .renew-news-guide-panel .renew-guide-qa-item {
-    border: 0;
-    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: 0;
-    background: transparent;
-  }
-
-  .renew-news-guide-panel .renew-guide-hub-group nav a {
-    padding-left: 0;
-  }
-
-  .renew-news-guide-panel .renew-guide-qa-item summary {
-    padding-left: 0;
   }
 
   .renew-guide-hub-intro,
