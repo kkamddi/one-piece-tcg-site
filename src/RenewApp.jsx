@@ -5200,18 +5200,6 @@ function RenewAuthModal({ onClose, onSignedIn }) {
           <button type="button" className="renew-modal-close" onClick={onClose} aria-label="닫기">×</button>
         </div>
         <form className="renew-login-form" onSubmit={submitLogin}>
-          <div className="renew-auth-provider-grid">
-            <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig} aria-label="카카오톡으로 계속하기">
-              카카오톡
-            </button>
-            <button type="button" className="renew-google" onClick={loginWithGoogle} disabled={!hasSupabaseAuthConfig} aria-label="Google로 계속하기">
-              Google
-            </button>
-            <button type="button" className="renew-naver" onClick={loginWithNaver} disabled={!hasSupabaseAuthConfig} aria-label="네이버로 계속하기">
-              네이버
-            </button>
-          </div>
-          {!isSignup ? <div className="renew-divider"><span>기존 계정 로그인</span></div> : null}
           {!isSignup ? (
             <label>
               <span>아이디 또는 이메일</span>
@@ -5253,6 +5241,30 @@ function RenewAuthModal({ onClose, onSignedIn }) {
           >
             {loading ? '처리 중...' : '로그인'}
           </button> : null}
+          {!isSignup ? <div className="renew-divider"><span>또는</span></div> : null}
+          <div className="renew-auth-provider-grid">
+            <button type="button" className="renew-google" onClick={loginWithGoogle} disabled={!hasSupabaseAuthConfig} aria-label="Google로 계속하기">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.87h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.89-1.74 2.98-4.31 2.98-7.35Z" />
+                <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.42l-3.24-2.51c-.9.6-2.04.97-3.38.97-2.61 0-4.82-1.76-5.61-4.12H3.05v2.59A10 10 0 0 0 12 22Z" />
+                <path fill="#FBBC05" d="M6.39 13.92a6 6 0 0 1 0-3.84V7.49H3.05a10 10 0 0 0 0 9.02l3.34-2.59Z" />
+                <path fill="#EA4335" d="M12 5.96c1.47 0 2.79.51 3.82 1.51l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.95 5.49l3.34 2.59C7.18 7.72 9.39 5.96 12 5.96Z" />
+              </svg>
+              <span>Google로 계속하기</span>
+            </button>
+            <button type="button" className="renew-naver" onClick={loginWithNaver} disabled={!hasSupabaseAuthConfig} aria-label="네이버로 계속하기">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M3 3h6.1L14.9 12V3H21v18h-6.1L9.1 12v9H3Z" />
+              </svg>
+              <span>네이버로 계속하기</span>
+            </button>
+            <button type="button" className="renew-kakao" onClick={loginWithKakao} disabled={!hasSupabaseAuthConfig} aria-label="카카오톡으로 계속하기">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M12 3C6.48 3 2 6.47 2 10.75c0 2.78 1.9 5.22 4.76 6.59l-1.21 4.43c-.1.38.33.68.66.46l5.3-3.5.49.02c5.52 0 10-3.47 10-7.75S17.52 3 12 3Z" />
+              </svg>
+              <span>카카오로 계속하기</span>
+            </button>
+          </div>
           <p className="renew-auth-mode-switch">
             {isSignup ? '이미 계정이 있으신가요?' : '계정이 없으신가요?'}
             <button type="button" onClick={() => changeMode(isSignup ? 'login' : 'signup')}>
