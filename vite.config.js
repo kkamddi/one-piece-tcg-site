@@ -21,7 +21,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     proxy: {
-      '^/api/(portfolio|market)(\\?|$)': {
+      '^/api/(portfolio|market|market-index)(\\?|$)': {
         target: 'https://www.optcgkorea.com',
         changeOrigin: true
       },

@@ -16025,7 +16025,7 @@ button.renew-lab-tool.is-available:focus-visible {
 .renew-market-home-tabs {
   display: inline-flex;
   gap: 6px;
-  margin-top: 18px;
+  margin: 0 0 20px;
   padding: 4px;
   border-radius: 999px;
   background: rgba(23, 25, 28, 0.06);
@@ -20514,7 +20514,7 @@ button.renew-deck-entry:focus-visible {
   }
 
   .renew-market-home-tabs {
-    margin-top: 14px;
+    margin: 0 0 16px;
   }
 
   .renew-market-home-tabs button {
@@ -23666,6 +23666,204 @@ button.renew-deck-entry:focus-visible {
   }
 }
 
+.renew-app.is-dark .renew-market .renew-chip-group button { background: #242d30; color: #dde5e1; border-color: #45504b; }
+.renew-app.is-dark .renew-market .renew-chip-group button.is-active { background: #edf5f0; color: #17231d; border-color: #edf5f0; }
+
+.renew-box-market.renew-index-overview,
+.renew-app.is-dark .renew-box-market.renew-index-overview { border: 0; border-radius: 0; padding: 0; background: transparent; gap: 20px; }
+.renew-index-overview .renew-index-head { align-items: start; flex-wrap: wrap; }
+.renew-index-overview .renew-index-head h2 { font-size: 22px; line-height: 1.4; }
+.renew-index-overview :is(h2, strong, b, span, em, i, button) { letter-spacing: 0; }
+.renew-index-overview .renew-index-summary {
+  grid-template-columns: minmax(160px, 1fr) minmax(0, 2fr);
+  gap: 4px 24px;
+  padding: 18px 0;
+  border: 0;
+  border-block: 1px solid #e2e4e7;
+  border-radius: 0;
+  background: transparent;
+}
+.renew-index-overview .renew-index-summary > strong { grid-column: 1; grid-row: 1; font-size: 36px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.renew-index-overview .renew-index-summary > span { grid-column: 1; grid-row: 2; font-size: 12px; }
+.renew-index-overview .renew-index-summary > div { grid-column: 2; grid-row: 1 / 3; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.renew-index-overview .renew-index-summary em { padding: 0; border-radius: 0; background: transparent; font-size: 13px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.renew-index-overview .renew-index-chart { border: 0; border-radius: 0; background: transparent; }
+.renew-index-overview .renew-index-disclosure { justify-self: stretch; justify-content: space-between; border: 0; border-block: 1px solid #e2e4e7; border-radius: 0; background: transparent; padding: 14px 0; font-size: 16px; }
+.renew-index-overview .renew-index-disclosure b { background: transparent; color: inherit; }
+.renew-index-overview .renew-index-meta { flex-wrap: wrap; font-size: 12px; font-weight: 500; }
+.renew-index-overview .renew-index-components { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.renew-index-overview .renew-index-component { display: grid; grid-template-columns: 44px minmax(0, 1fr) 150px; align-items: center; gap: 16px; border: 0; border-bottom: 1px solid #e2e4e7; border-radius: 0; padding: 14px 0; background: transparent; }
+.renew-index-overview .renew-index-component:hover { background: rgba(43, 133, 117, 0.04); }
+.renew-index-overview .renew-index-component img { width: 44px; height: 62px; object-fit: contain; }
+.renew-index-overview .renew-index-component img[data-product-photo="true"] { object-fit: cover; }
+.renew-index-overview .renew-index-component-identity { min-width: 0; }
+.renew-index-overview .renew-index-component-identity > * { overflow-wrap: anywhere; }
+.renew-index-overview .renew-index-component-identity strong { font-size: 14px; line-height: 1.4; }
+.renew-index-overview .renew-index-component-metrics { display: grid; grid-template-columns: 1fr 1fr; margin: 0; gap: 12px; text-align: right; }
+.renew-index-overview .renew-index-component-metrics :is(em, i) { font-variant-numeric: tabular-nums; white-space: normal; overflow-wrap: anywhere; }
+.renew-index-overview .is-up { color: #c94d35; }
+.renew-index-overview .is-down { color: #2563eb; }
+.renew-index-overview .renew-index-component-metrics i.is-up { color: #c94d35; }
+.renew-index-overview .renew-index-component-metrics i.is-down { color: #2563eb; }
+.renew-index-list-head { display: flex; justify-content: space-between; color: #69717b; font-size: 12px; margin-bottom: -20px; }
+.renew-index-status { min-height: 320px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; color: #69717b; }
+.renew-index-status button { border: 1px solid #c9cecb; border-radius: 8px; padding: 8px 12px; background: transparent; color: inherit; }
+.renew-index-overview :is(button, a):focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
+.renew-app.is-dark .renew-index-overview :is(.renew-index-summary, .renew-index-disclosure, .renew-index-component) { border-color: #3b4149; background: transparent; }
+.renew-app.is-dark .renew-index-overview :is(.renew-index-chart, .renew-index-summary em) { background: transparent; }
+.renew-app.is-dark .renew-index-overview :is(.renew-index-list-head, .renew-index-status) { color: #b5bdc7; }
+.renew-app.is-dark .renew-index-overview :is(.renew-index-boundary, .renew-index-date) { fill: #b5bdc7; }
+.renew-app.is-dark .renew-index-overview .is-up { color: #ff947d; }
+.renew-app.is-dark .renew-index-overview .is-down { color: #77a6ff; }
+@media (max-width: 720px) {
+  .renew-index-overview .renew-index-head { flex-direction: column; gap: 14px; }
+  .renew-index-overview .renew-index-head h2 { font-size: 20px; }
+  .renew-index-overview .renew-index-head .renew-chip-group { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; gap: 6px; }
+  .renew-index-overview .renew-index-head .renew-chip-group button { min-width: 0; padding-inline: 10px; }
+  .renew-index-overview .renew-index-summary { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .renew-index-overview .renew-index-summary > div { grid-column: 1; grid-row: 3; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 8px; }
+  .renew-index-overview .renew-index-component { grid-template-columns: 40px minmax(0, 1fr) 80px; gap: 12px; }
+  .renew-index-overview .renew-index-component img { width: 40px; height: 56px; }
+  .renew-index-overview .renew-index-component-metrics { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+
+.renew-box-market.renew-card-gallery,
+.renew-app.is-dark .renew-box-market.renew-card-gallery {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+.renew-card-gallery .renew-box-market-head { margin-bottom: 18px; }
+.renew-card-gallery .renew-market-card-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.renew-card-gallery .renew-market-card-preview {
+  grid-template-rows: 220px 1fr;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  align-content: stretch;
+}
+.renew-card-gallery .renew-market-card-preview:focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
+.renew-card-gallery .renew-market-card-preview-thumb { display: flex; height: 220px; overflow: hidden; border-radius: 0; aspect-ratio: auto; }
+.renew-card-gallery .renew-market-card-preview-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.renew-card-gallery .renew-market-card-preview-thumb img[data-product-photo="true"] { object-fit: cover; }
+.renew-card-gallery .renew-card-gallery-info { display: flex; flex-direction: column; gap: 8px; }
+.renew-card-gallery .renew-card-gallery-info strong { display: block; min-height: 0; font-size: 15px; line-height: 1.4; }
+.renew-card-gallery .renew-card-gallery-info span,
+.renew-card-gallery .renew-card-gallery-info small { display: block; white-space: normal; font-size: 12px; line-height: 1.5; }
+.renew-card-gallery .renew-card-gallery-info > * { overflow-wrap: anywhere; letter-spacing: 0; }
+.renew-card-gallery .renew-card-gallery-info .renew-card-gallery-variant { color: #287364; font-weight: 800; }
+.renew-app.is-dark .renew-card-gallery .renew-card-gallery-variant { color: #91d2b9; }
+.renew-card-gallery .renew-card-gallery-info b { margin-top: auto; padding-top: 6px; font-size: 16px; line-height: 1.4; }
+@media (max-width: 1000px) {
+  .renew-card-gallery .renew-market-card-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .renew-card-gallery .renew-market-card-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .renew-card-gallery .renew-market-card-preview { grid-template-rows: 170px 1fr; padding: 12px; gap: 12px; }
+  .renew-card-gallery .renew-market-card-preview-thumb { height: 170px; }
+  .renew-card-gallery .renew-card-gallery-info strong { font-size: 14px; }
+  .renew-card-gallery .renew-card-gallery-info b { font-size: 15px; }
+}
+@media (max-width: 360px) {
+  .renew-card-gallery .renew-market-card-preview { grid-template-rows: 140px 1fr; }
+  .renew-card-gallery .renew-market-card-preview-thumb { height: 140px; }
+}
+
+.renew-box-market.renew-box-gallery,
+.renew-app.is-dark .renew-box-market.renew-box-gallery {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+.renew-box-gallery .renew-box-market-head { margin-bottom: 18px; }
+.renew-box-gallery .renew-box-market-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.renew-box-gallery .renew-box-market-card {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 220px 1fr;
+  align-items: stretch;
+  gap: 16px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 8px;
+}
+.renew-box-gallery .renew-box-market-card:focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
+.renew-box-gallery .renew-box-thumb { width: 100%; height: 220px; aspect-ratio: auto; }
+.renew-box-gallery .renew-box-thumb img { transform: none; object-fit: contain; }
+.renew-box-gallery .renew-box-gallery-info { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.renew-box-gallery .renew-box-gallery-info small { display: block; margin: 0; font-size: 12px; overflow-wrap: anywhere; letter-spacing: 0; }
+.renew-box-gallery .renew-box-gallery-info strong { display: block; font-size: 15px; line-height: 1.4; font-weight: 900; overflow-wrap: anywhere; letter-spacing: 0; }
+.renew-box-gallery .renew-box-gallery-info b { margin: auto 0 0; padding-top: 6px; font-size: 16px; line-height: 1.4; letter-spacing: 0; }
+@media (max-width: 1000px) {
+  .renew-box-gallery .renew-box-market-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .renew-box-gallery .renew-box-market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .renew-box-gallery .renew-box-market-card { grid-template-rows: 170px 1fr; padding: 12px; gap: 12px; }
+  .renew-box-gallery .renew-box-thumb { height: 170px; }
+  .renew-box-gallery .renew-box-gallery-info strong { font-size: 14px; }
+  .renew-box-gallery .renew-box-gallery-info b { font-size: 15px; }
+}
+@media (max-width: 360px) {
+  .renew-box-gallery .renew-box-market-card { grid-template-rows: 140px 1fr; }
+  .renew-box-gallery .renew-box-thumb { height: 140px; }
+}
+
+.renew-market-version-gallery.renew-market-candidates {
+  --version-line: #e0e4e2;
+  --version-surface: #ffffff;
+  --version-text: #202523;
+  --version-muted: #636f69;
+}
+.renew-app.is-dark .renew-market-version-gallery {
+  --version-line: #3d4843;
+  --version-surface: #1a211e;
+  --version-text: #f1f5f3;
+  --version-muted: #b3c0b9;
+}
+.renew-market-version-gallery > h2 { display: flex; gap: 10px; align-items: baseline; margin: 0 0 18px; color: var(--version-text); font-size: 18px; letter-spacing: 0; }
+.renew-market-version-gallery > h2 small { font-size: 13px; color: var(--version-muted); }
+.renew-market-version-gallery.renew-market-candidates > div { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.renew-market-version-gallery.renew-market-candidates button {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 220px 1fr;
+  align-items: start;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--version-line);
+  border-radius: 8px;
+  background: var(--version-surface);
+  color: var(--version-text);
+}
+.renew-market-version-gallery.renew-market-candidates button:is(:hover,.is-active) { border-color: #468469; }
+.renew-market-version-gallery.renew-market-candidates button:focus-visible { outline: 2px solid #468469; outline-offset: 3px; }
+.renew-market-version-gallery.renew-market-candidates button img { width: 100%; height: 220px; max-width: 100%; transform: none; object-fit: contain; grid-column: 1; }
+.renew-market-version-gallery.renew-market-candidates button img[data-product-photo="true"] { object-fit: cover; }
+.renew-market-version-gallery .renew-market-candidate-body { grid-column: 1; height: 100%; display: flex; flex-direction: column; gap: 7px; }
+.renew-market-version-gallery.renew-market-candidates .renew-market-candidate-body > span { display: block; -webkit-line-clamp: unset; white-space: normal; font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; letter-spacing: 0; }
+.renew-market-version-gallery.renew-market-candidates small { font-size: 11px; color: var(--version-muted); line-height: 1.5; overflow-wrap: anywhere; white-space: normal; overflow: visible; text-overflow: clip; }
+.renew-market-version-gallery .renew-market-version-label { color: #287357; font-size: 13px; line-height: 1.5; }
+.renew-app.is-dark .renew-market-version-gallery .renew-market-version-label { color: #9adabc; }
+.renew-market-version-gallery .renew-market-candidate-set { -webkit-line-clamp: unset; }
+.renew-market-version-gallery .renew-market-candidate-bottom { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--version-line); }
+.renew-market-version-gallery .renew-market-candidate-bottom b { color: var(--version-text); font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+@media (max-width: 1000px) {
+  .renew-market-version-gallery.renew-market-candidates > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .renew-market-version-gallery.renew-market-candidates > div { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .renew-market-version-gallery.renew-market-candidates button { grid-template-rows: 170px 1fr; padding: 12px; gap: 12px; }
+  .renew-market-version-gallery.renew-market-candidates button img { height: 170px; }
+  .renew-market-version-gallery.renew-market-candidates .renew-market-candidate-body > span { font-size: 13px; }
+  .renew-market-version-gallery .renew-market-candidate-bottom b { font-size: 12px; }
+}
+@media (max-width: 360px) {
+  .renew-market-version-gallery.renew-market-candidates button { grid-template-rows: 140px 1fr; padding: 9px; }
+  .renew-market-version-gallery.renew-market-candidates button img { height: 140px; }
+}
+
 /* Keep guide discovery unframed in both themes and at every breakpoint. */
 .renew-app .renew-news-main .renew-news-guide-panel {
   padding: 0;
@@ -23829,7 +24027,7 @@ button.renew-deck-entry:focus-visible {
 }
 
 .has-price-detail .renew-market-card {
-  grid-template-columns: 104px minmax(0, 1fr) minmax(230px, 0.65fr);
+  grid-template-columns: 128px minmax(0, 1fr) minmax(230px, 0.65fr);
   padding: 0 0 24px;
   border: 0;
   border-bottom: 1px solid #e2e4e7;
@@ -23838,10 +24036,19 @@ button.renew-deck-entry:focus-visible {
 }
 
 .has-price-detail .renew-market-card img {
-  width: 104px;
-  max-height: 146px;
+  width: 128px;
+  height: 180px;
+  max-height: none;
   object-fit: contain;
 }
+.has-price-detail .renew-market-card img[data-product-photo="true"] { object-fit: cover; }
+.has-price-detail .renew-market-identity { min-width: 0; }
+.has-price-detail .renew-market-identity > * { overflow-wrap: anywhere; letter-spacing: 0; }
+.renew-market-detail-variant { display: block; margin-bottom: 6px; color: #287364; font-size: 13px; font-weight: 800; }
+.renew-app.is-dark .renew-market-detail-variant { color: #91d2b9; }
+.has-price-detail .renew-market-actions .renew-alert-button { order: 0; background: transparent; color: inherit; border: 1px solid #c9cecb; }
+.has-price-detail .renew-market-actions .renew-portfolio-add-button { order: 1; }
+.has-price-detail .renew-market-actions :is(button, a):focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
 
 .has-price-detail .renew-market-card h2 {
   font-size: 24px;
@@ -23889,10 +24096,10 @@ button.renew-deck-entry:focus-visible {
 
 .renew-market-snapshot {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   padding: 18px 0;
-  margin: 0 0 24px;
+  margin: 16px 0 0;
   border-block: 1px solid #e2e4e7;
 }
 
@@ -23906,7 +24113,7 @@ button.renew-deck-entry:focus-visible {
 
 .renew-market-snapshot dd {
   margin: 7px 0 3px;
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1.4;
@@ -23922,6 +24129,9 @@ button.renew-deck-entry:focus-visible {
   gap: 28px;
   align-items: start;
 }
+.renew-market-trend { min-width: 0; }
+.renew-market-snapshot > div { min-width: 0; }
+.renew-market-snapshot dd { overflow-wrap: anywhere; }
 
 .renew-market-trend h3,
 .has-price-detail .renew-market-recent h3 {
@@ -24016,6 +24226,8 @@ button.renew-deck-entry:focus-visible {
 }
 
 .renew-app.is-dark .has-price-detail .renew-market-card,
+.renew-app.is-dark .has-price-detail .renew-market-price,
+.renew-app.is-dark .has-price-detail .renew-market-chart-box,
 .renew-app.is-dark .renew-market-snapshot,
 .renew-app.is-dark .has-price-detail .renew-market-sale,
 .renew-app.is-dark .renew-market-sale-head,
@@ -24043,12 +24255,13 @@ button.renew-deck-entry:focus-visible {
   }
 
   .has-price-detail .renew-market-card {
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 96px minmax(0, 1fr);
     gap: 10px 16px;
   }
 
   .has-price-detail .renew-market-card img {
-    width: 88px;
+    width: 96px;
+    height: 134px;
     grid-row: 1 / 3;
   }
 
@@ -24106,6 +24319,16 @@ button.renew-deck-entry:focus-visible {
     line-height: 1.35;
     padding: 8px;
   }
+
+  .has-price-detail .renew-market-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .has-price-detail .renew-market-actions .renew-portfolio-add-button { grid-column: 1 / -1; }
+  .has-price-detail .renew-market-actions :is(button, a) { min-height: 42px; min-width: 0; }
+  .has-price-detail .renew-market-controls { gap: 12px; align-items: center; }
 
   .has-price-detail .renew-market-chart-box svg {
     height: 260px;

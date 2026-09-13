@@ -1,7 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './portfolio.css';
 
-export default function PortfolioDashboard({ model, loading, error, signedIn, onLogin, onRetry, onAdd, onEdit, onRemove, onOpenPrices, money, displayName, imageSrc, onImageError, t }) {
+export function PortfolioCardImage({ card, imageSrc, resolveImages }) {
+  const initialSource = imageSrc(card);
+  const [sources, setSources] = useState([]);
+  const [index, setIndex] = useState(0);
+  const [productPhoto, setProductPhoto] = useState(false);
+  const [needsFallback, setNeedsFallback] = useState(false);
+  useEffect(() => {
+    const initial = [...new Set([initialSource, card.previewImageUrl, card.imageUrl].filter((src) => src && !/placeholder|no[-_]?image/i.test(src)))];
+    setSources(initial);
+    setIndex(0);
+    setProductPhoto(false);
+    setNeedsFallback(!initial.length);
+  }, [initialSource, card.cardId, card.apparelId, card.previewImageUrl, card.imageUrl]);
+  useEffect(() => {
+    if (!needsFallback) return undefined;
+    let cancelled = false;
+    resolveImages(card).then((extra) => {
+      if (!cancelled) setSources((current) => [...new Set([...current, ...extra])]);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [needsFallback, card.cardId, card.apparelId, resolveImages]);
+  const src = sources[index] || '/card-placeholder.svg';
+  return <img src={src} alt="" loading="lazy" data-product-photo={productPhoto}
+    onLoad={(event) => setProductPhoto(event.currentTarget.currentSrc.includes('cdn.snkrdunk.com/upload_bg_removed/'))}
+    onError={() => { if (sources[index]) { setProductPhoto(false); setIndex((value) => value + 1); if (index === sources.length - 1) setNeedsFallback(true); } }} />;
+}
+
+export default function PortfolioDashboard({ model, loading, error, signedIn, onLogin, onRetry, onAdd, onEdit, onRemove, onOpenPrices, money, displayName, imageSrc, resolveImages, t }) {
   const [tab, setTab] = useState('holdings');
   const [grade, setGrade] = useState('all');
   const [query, setQuery] = useState('');
@@ -46,7 +73,6 @@ export default function PortfolioDashboard({ model, loading, error, signedIn, on
             <span>{model.missingQuotes ? t('확인된 평가액', 'Known market value', '確認済み評価額') : t('총 평가액', 'Market value', '総評価額')}</span>
             <strong>{money(model.totalJpy)}</strong>
             <p className={signClass(model.profitJpy)}>{signedMoney(model.profitJpy)} <b>{percent(model.returnPercent)}</b></p>
-            <small>{t('시세와 매입가가 모두 있는 수량의 평가손익', 'Unrealized return on units with both cost and price', '相場・購入価格がある数量の評価損益')}</small>
             <dl className="portfolio-metrics">
               <div><dt>{t('등록 매입금액', 'Recorded cost', '登録購入額')}</dt><dd>{model.costJpy ? money(model.costJpy) : '-'}</dd></div>
               <div><dt>{t('보유 카드', 'Cards held', '保有カード')}</dt><dd>{model.quantity.toLocaleString()} <small>{t('장', 'cards', '枚')}</small></dd></div>
@@ -57,7 +83,6 @@ export default function PortfolioDashboard({ model, loading, error, signedIn, on
             <h2>{t('자산 구성', 'Allocation', '資産構成')}</h2>
             <div className="portfolio-allocation-bar" aria-hidden="true">{allocation.map((item) => <span key={item.key} className={`grade-${item.key}`} style={{ width: `${model.totalJpy ? item.value / model.totalJpy * 100 : 0}%` }} />)}</div>
             {allocation.map((item) => <div className="portfolio-allocation-row" key={item.key}><span><i className={`grade-${item.key}`} />{item.label}</span><strong>{money(item.value)}</strong><small>{model.totalJpy ? (item.value / model.totalJpy * 100).toFixed(1) : '0'}%</small></div>)}
-            <p>{t('현재 확인된 시세 기준 · 수수료 미포함', 'Available market prices · fees excluded', '確認済み相場基準・手数料を除く')}</p>
           </aside>
         </section>
         {(model.error || model.missingQuotes > 0) && <p className="portfolio-notice" role="status">{t(`시세 미확인 ${model.missingQuotes}종은 평가액·손익에서 제외했습니다.`, `${model.missingQuotes} unpriced holdings are excluded from value and return.`, `相場未確認${model.missingQuotes}種は評価額・損益から除外しています。`)} <button type="button" onClick={onRetry}>{t('다시 조회', 'Retry prices', '再取得')}</button></p>}
@@ -76,7 +101,7 @@ export default function PortfolioDashboard({ model, loading, error, signedIn, on
           {tab === 'holdings' ? <div className="portfolio-table" role="table" aria-label={t('보유 자산', 'Holdings', '保有資産')}>
             <div className="portfolio-table-head" role="row">{[t('자산', 'Asset', '資産'), t('수량 / 평균 매입가', 'Qty / Avg. cost', '数量 / 平均購入価格'), t('평가액 / 현재 단가', 'Value / Unit price', '評価額 / 現在単価'), t('평가손익', 'Return', '評価損益'), t('관리', 'Manage', '管理')].map((label) => <span role="columnheader" key={label}>{label}</span>)}</div>
             {cards.map((card) => <div className="portfolio-asset-row" role="row" key={card.id}>
-<div role="cell" className="portfolio-card-cell"><button type="button" className="portfolio-card-link" onClick={() => onOpenPrices(card)}><img src={imageSrc(card)} data-fallback-src={card.previewImageUrl} alt="" loading="lazy" onError={onImageError} /><span><small>{card.code} · {card.grade === 'a' ? 'Single' : 'PSA10'}</small><strong>{displayName(card)}</strong><small>{card.setName}</small></span></button></div>
+<div role="cell" className="portfolio-card-cell"><button type="button" className="portfolio-card-link" onClick={() => onOpenPrices(card)}><PortfolioCardImage card={card} imageSrc={imageSrc} resolveImages={resolveImages} /><span><small>{card.code} · {card.grade === 'a' ? 'Single' : 'PSA10'}</small><strong>{displayName(card)}</strong><small>{card.setName}</small></span></button></div>
               <div role="cell" className="portfolio-cost-cell"><strong>{card.quantity}{t('장', ' units', '枚')}</strong><small>{card.pricedQuantity ? `${money(card.costJpy / card.pricedQuantity)}${card.estimated ? t(' (추정)', ' (est.)', ' (推定)') : ''}` : t('매입가 미등록', 'Cost not set', '購入価格未登録')}</small>{card.pricedQuantity > 0 && card.pricedQuantity < card.quantity && <small>{t(`${card.pricedQuantity}장만 원가 등록`, `Cost on ${card.pricedQuantity} units`, `${card.pricedQuantity}枚のみ価格登録`)}</small>}</div>
               <div role="cell" className="portfolio-value-cell"><strong>{card.valueJpy == null ? '-' : money(card.valueJpy)}</strong><small>{card.price == null ? t('시세 미확인', 'Price unavailable', '相場未確認') : `${t('단가', 'Unit', '単価')} ${money(card.price)}`}</small></div>
               <div role="cell" className={`portfolio-profit-cell ${signClass(card.profitJpy)}`}><strong>{signedMoney(card.profitJpy)}</strong><small>{percent(card.returnPercent)}</small></div>

@@ -35,8 +35,9 @@ import CenteringLab from './CenteringLab';
 import CardScanner from './CardScanner';
 import SiteSearch, { SiteSearchInput } from './SiteSearch';
 import CollectionGuide from './CollectionGuide';
-import PortfolioDashboard from './PortfolioDashboard';
+import PortfolioDashboard, { PortfolioCardImage } from './PortfolioDashboard';
 import usePortfolioValuation from './usePortfolioValuation';
+import { getMarketVariantLabel } from './market-variant-label';
 import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuide } from './PortfolioCalculator';
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
 import { getCommunityGrade } from '../lib/community-grades.js';
@@ -5977,6 +5978,22 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
+export async function resolvePortfolioImages(card) {
+  const sources = [];
+  if (card.apparelId) {
+    const link = await findApprovedCardMarketLinkByApparelId(card.apparelId).catch(() => null);
+    if (link?.cardId) sources.push(getCardThumbnailSrc({ id: link.cardId, locale: String(link.cardId).split('::')[0] }));
+    const { default: items } = await import('./data/market-cards.js');
+    const item = items.find((entry) => String(entry.apparelId) === String(card.apparelId));
+    if (item?.previewImageUrl) sources.push(item.previewImageUrl);
+    if (!item?.previewImageUrl) {
+      const detail = await fetchMarketPrice({ apparelId: card.apparelId, code: card.code, summary: true }).catch(() => null);
+      if (String(detail?.item?.apparelId) === String(card.apparelId)) sources.push(detail.item.previewImageUrl);
+    }
+  }
+  return sources.filter(Boolean);
+}
+
 function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPortfolioHoldings, stateLoading, portfolioError, onRetry, onRequireLogin, onOpenPrices, uiLang }) {
   const model = usePortfolioValuation(portfolioHoldings);
   const [editor, setEditor] = useState(null);
@@ -5987,7 +6004,7 @@ function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPort
       onLogin={onRequireLogin} onRetry={() => { if (portfolioError) onRetry(); else model.refresh(); }} onAdd={() => onOpenPrices()}
       onEdit={setEditor} onRemove={async (id) => applyHoldings(await deletePortfolioHolding(id))} onOpenPrices={onOpenPrices}
       money={isJapaneseUi(uiLang) ? formatYen : formatWonFromYen} displayName={getMarketShortName}
-      imageSrc={(card) => getCardThumbnailSrc({ id: card.cardId, locale: String(card.cardId || '').split('::')[0], imageUrl: card.previewImageUrl })} onImageError={fallbackToOriginalCardImage} t={t} />
+      imageSrc={(card) => getCardThumbnailSrc({ id: card.cardId, locale: String(card.cardId || '').match(/^([A-Z]+)::/)?.[1] || card.locale || 'JP', imageUrl: card.previewImageUrl })} resolveImages={resolvePortfolioImages} t={t} />
     {editor && <RenewPortfolioEditorModal item={editor} initialGrade={editor.grade} holdings={portfolioHoldings} uiLang={uiLang}
       onSave={async ({ grade, lot }) => applyHoldings(await savePortfolioPurchase({ holding: { ...editor, grade: normalizeMarketConditionKey(grade) }, purchase: lot }))}
       onDeleteLot={async ({ purchaseId }) => applyHoldings(await deletePortfolioPurchase(purchaseId))}
@@ -12437,7 +12454,16 @@ function formatIndexAxisDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text.slice(2) : text;
 }
 
-function RenewIndexChart({ points = [] }) {
+function RenewIndexChart({ points = [], title = 'OPTCG Index' }) {
+  const chartRef = useRef(null);
+  const [width, setWidth] = useState(920);
+  const hasPoints = points.length > 0;
+  useEffect(() => {
+    if (!chartRef.current) return undefined;
+    const observer = new ResizeObserver(([entry]) => setWidth(Math.max(280, Math.round(entry.contentRect.width))));
+    observer.observe(chartRef.current);
+    return () => observer.disconnect();
+  }, [hasPoints]);
   const orderedPoints = points
     .map((point) => ({ ...point, value: Number(point.value || 0) }))
     .filter((point) => point.date && point.value > 0)
@@ -12445,7 +12471,6 @@ function RenewIndexChart({ points = [] }) {
   if (!orderedPoints.length) {
     return <div className="renew-chart-placeholder"><span>지수 데이터 준비 중</span></div>;
   }
-  const width = 920;
   const height = 320;
   const padX = 44;
   const padTop = 28;
@@ -12475,8 +12500,8 @@ function RenewIndexChart({ points = [] }) {
       return true;
     });
   return (
-    <div className="renew-index-chart">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="OPTCG Manga Index chart" preserveAspectRatio="none">
+    <div className="renew-index-chart" ref={chartRef}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title} chart`} preserveAspectRatio="none">
         <defs>
           <linearGradient id="renew-index-fill" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="#c94d35" stopOpacity="0.24" />
@@ -12551,6 +12576,8 @@ function isMarketIndexPath(path) {
 }
 
 function RenewMarketIndex({ onOpenComponent } = {}) {
+  const [error, setError] = useState('');
+  const [requestRevision, setRequestRevision] = useState(0);
   const savedViewState = typeof window !== 'undefined' && window.history.state?.marketIndexViewState
     ? window.history.state.marketIndexViewState
     : {};
@@ -12592,13 +12619,14 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     let cancelled = false;
     setPayload(null);
     setLoading(true);
+    setError('');
     fetch(`/api/market-index?type=${encodeURIComponent(indexType)}&condition=${MARKET_INDEX_CONDITION}&range=${range}`)
-      .then((response) => (response.ok ? response.json() : null))
+      .then((response) => { if (!response.ok) throw new Error('Index request failed'); return response.json(); })
       .then((data) => {
         if (!cancelled) setPayload(data);
       })
       .catch(() => {
-        if (!cancelled) setPayload(null);
+        if (!cancelled) { setPayload(null); setError('지수를 불러오지 못했습니다.'); }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -12606,7 +12634,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [indexType, range]);
+  }, [indexType, range, requestRevision]);
 
   useEffect(() => {
     if (loading || !payload || restoredScrollRef.current || !Number.isFinite(Number(savedViewState.scrollY))) return undefined;
@@ -12634,13 +12662,13 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
   const componentPageCount = Math.max(1, Math.ceil(sortedComponents.length / MARKET_INDEX_COMPONENTS_PER_PAGE));
   const visibleComponents = sortedComponents.slice((componentPage - 1) * MARKET_INDEX_COMPONENTS_PER_PAGE, componentPage * MARKET_INDEX_COMPONENTS_PER_PAGE);
   return (
-    <section className="renew-box-market renew-index-market">
+    <section className="renew-box-market renew-index-market renew-index-overview" aria-busy={loading}>
       <div className="renew-index-head">
         <div>
           <span>Index / PSA10</span>
           <h2>{selectedIndex.title}</h2>
         </div>
-        <div className="renew-chip-group">
+        <div className="renew-chip-group" role="group" aria-label="지수 조회 기간">
           <button type="button" className={range === '1d' ? 'is-active' : ''} onClick={() => { setRange('1d'); setComponentPage(1); }}>1D</button>
           <button type="button" className={range === '7d' ? 'is-active' : ''} onClick={() => { setRange('7d'); setComponentPage(1); }}>7D</button>
           <button type="button" className={range === '1m' ? 'is-active' : ''} onClick={() => { setRange('1m'); setComponentPage(1); }}>1M</button>
@@ -12648,16 +12676,13 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
           <button type="button" className={range === '1y' ? 'is-active' : ''} onClick={() => { setRange('1y'); setComponentPage(1); }}>1Y</button>
         </div>
       </div>
-      <div className="renew-index-sector-head">
-        <span>Sector Index</span>
-        <em>Manga, Luffy</em>
-      </div>
-      <div className="renew-index-tabs" aria-label="Market sector index type">
+      <div className="renew-index-tabs" role="group" aria-label="Market sector index type">
         {MARKET_INDEX_OPTIONS.map((option) => (
           <button
             key={option.key}
             type="button"
             className={indexType === option.key ? 'is-active' : ''}
+            aria-pressed={indexType === option.key}
             onClick={() => {
               setIndexType(option.key);
               setDetailsOpen(false);
@@ -12673,12 +12698,14 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
         <span>Base 100 · {payload?.index?.baseDate || '-'}</span>
         <div>
           <em className={indexChangeClass(payload?.change?.d1)}>1D {formatIndexDailyChange(payload?.change?.d1)}</em>
-          <em className={Number(payload?.change?.d7) >= 0 ? 'is-up' : 'is-down'}>7D {formatIndexChange(payload?.change?.d7)}</em>
-          <em className={Number(payload?.change?.m1) >= 0 ? 'is-up' : 'is-down'}>1M {formatIndexChange(payload?.change?.m1)}</em>
-          <em className={Number(payload?.change?.m6) >= 0 ? 'is-up' : 'is-down'}>6M {formatIndexChange(payload?.change?.m6)}</em>
+          <em className={indexChangeClass(payload?.change?.d7)}>7D {formatIndexChange(payload?.change?.d7)}</em>
+          <em className={indexChangeClass(payload?.change?.m1)}>1M {formatIndexChange(payload?.change?.m1)}</em>
+          <em className={indexChangeClass(payload?.change?.m6)}>6M {formatIndexChange(payload?.change?.m6)}</em>
         </div>
       </div>
-      <RenewIndexChart points={payload?.points || []} />
+      {error ? <div className="renew-index-status" role="alert"><span>{error}</span><button type="button" onClick={() => setRequestRevision((value) => value + 1)}>다시 조회</button></div>
+        : loading ? <div className="renew-index-status" role="status">지수를 불러오는 중...</div>
+        : <RenewIndexChart points={payload?.points || []} title={selectedIndex.title} />}
       <button
         type="button"
         className="renew-index-disclosure"
@@ -12691,7 +12718,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
       {detailsOpen ? (
         <>
           <div className="renew-index-meta">
-            <span>{payload?.activeComponentCount || 0}/{payload?.componentCount || 33} cards reflected</span>
+            <span>반영 카드 {payload?.activeComponentCount ?? 0}/{payload?.componentCount ?? '-'}</span>
             <span>PSA10 SNKRDUNK 일별 중앙값 기준</span>
           </div>
           <div className="renew-index-component-sort" aria-label="Index component sort">
@@ -12726,6 +12753,7 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
               하락률
             </button>
           </div>
+          <div className="renew-index-list-head"><span>구성 카드</span><span>지수 / 1D 변동률</span></div>
           <div className="renew-index-components">
             {visibleComponents.map((item) => (
               <a
@@ -12752,9 +12780,12 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
                   window.location.assign(getMarketIndexComponentHref(item));
                 }}
               >
-                <b>{item.code}</b>
-                <strong>{item.name}</strong>
-                <span>{item.note} · #{item.apparelId}</span>
+                <PortfolioCardImage card={item} imageSrc={(card) => getCardThumbnailSrc({ id: card.cardId, locale: String(card.cardId || '').match(/^([A-Z]+)::/)?.[1] || 'JP' })} resolveImages={resolvePortfolioImages} />
+                <div className="renew-index-component-identity">
+                  <b>{item.code}</b>
+                  <strong>{item.nameKo || item.name}</strong>
+                  <span>{item.note}</span>
+                </div>
                 <div className="renew-index-component-metrics">
                   <em>{formatIndexValue(item.currentIndex)}</em>
                   <i className={indexChangeClass(item.change?.d1)}>1D {formatIndexDailyChange(item.change?.d1)}</i>
@@ -12829,7 +12860,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
     : sortedBoxes.slice((currentBoxPage - 1) * BOX_MARKET_PAGE_SIZE, currentBoxPage * BOX_MARKET_PAGE_SIZE);
 
   return (
-    <section className="renew-box-market">
+    <section className="renew-box-market renew-box-gallery">
       <div className="renew-box-market-head">
         <div className="renew-chip-group">
           <button type="button" className={sortMode === 'latest' ? 'is-active' : ''} onClick={() => setSortMode('latest')}>{t('boxSortLatest')}</button>
@@ -12839,16 +12870,13 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
       </div>
       <div className="renew-box-market-grid">
         {pagedBoxes.map((box) => (
-          <a key={box.apparelId} className="renew-box-market-card" href={box.sourceUrl} target="_blank" rel="noreferrer">
+          <a key={box.apparelId} className="renew-box-market-card" href={box.sourceUrl} target="_blank" rel="noreferrer" title={box.name}>
             <div className="renew-box-thumb">
-              {box.previewImageUrl ? <img src={box.previewImageUrl} alt={box.name} onError={placeholderImage} /> : <span>{box.code}</span>}
+              {box.previewImageUrl ? <img src={box.previewImageUrl} alt={box.name} loading="lazy" onError={placeholderImage} /> : <span>{box.code}</span>}
             </div>
-            <div>
+            <div className="renew-box-gallery-info">
+              {BOX_SHORT_TITLES[box.code] ? <small>{box.code}</small> : null}
               <strong>{box.name}</strong>
-              <span className="renew-box-mobile-title">
-                <em>{box.code}</em>
-                <span>{BOX_SHORT_TITLES[box.code] || box.name}</span>
-              </span>
               <b>{formatBoxMarketPrice(box) || t('checkPrice')}</b>
             </div>
           </a>
@@ -13047,7 +13075,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   }, [items, sortMode]);
 
   return (
-    <section className="renew-box-market renew-card-market">
+    <section className="renew-box-market renew-card-market renew-card-gallery">
       <div className="renew-box-market-head">
         <div className="renew-chip-group">
           <button type="button" className={sortMode === 'focus' ? 'is-active' : ''} onClick={() => setSortMode('focus')}>{t('marketCardSortFocus')}</button>
@@ -13058,11 +13086,13 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
         {visibleItems.map((item) => (
           <a key={`${item.apparelId}-${item.code}`} className="renew-market-card-preview" href={item.sourceUrl} target="_blank" rel="noreferrer">
             <div className="renew-market-card-preview-thumb">
-              <img src={item.previewImageUrl || '/card-placeholder.svg'} alt={item.name} onError={placeholderImage} />
+              <img src={getCardThumbnailSrc({ id: item.cardId, locale: item.locale, imageUrl: item.previewImageUrl })} data-fallback-src={item.previewImageUrl || ''} alt={item.name} loading="lazy" onLoad={(event) => { const img = event.currentTarget; img.dataset.productPhoto = String(img.currentSrc.includes('cdn.snkrdunk.com/upload_bg_removed/')); }} onError={fallbackToOriginalCardImage} />
             </div>
-            <div>
+            <div className="renew-card-gallery-info">
               <small>{item.locale} / {item.code}</small>
-              <strong title={item.name}>{getMarketDisplayName(item)}</strong>
+              <strong title={item.name}>{getMarketShortName(item)}</strong>
+              {getMarketVariantLabel(item, uiLang) ? <span className="renew-card-gallery-variant">{getMarketVariantLabel(item, uiLang)}</span> : null}
+              <small>{getMarketMetaLine(item)}</small>
               <span>{item.setName}</span>
               <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : t('checkPrice')}</b>
             </div>
@@ -13078,7 +13108,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const savedViewState = getAppHistoryState().marketViewState || {};
   const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
   const [code, setCode] = useState(initialCode || '');
-  const [marketProductLocale, setMarketProductLocale] = useState('JP');
+  const [marketProductLocale, setMarketProductLocale] = useState(() => savedViewState.marketProductLocale === 'EN' ? 'EN' : 'JP');
   const [homeTab, setHomeTab] = useState(() => {
     if (savedHomeTab) return savedHomeTab;
     if (typeof window === 'undefined') return 'box';
@@ -13108,6 +13138,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const marketDetailRef = useRef(null);
   const marketCandidateRef = useRef(null);
   const marketCandidateScrollYRef = useRef(0);
+  const marketSearchRequestRef = useRef(0);
 
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'prices') return;
@@ -13115,6 +13146,8 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   }, [homeTab, marketProductLocale]);
 
   const resetMarketHomeFromLocation = useCallback(() => {
+    marketSearchRequestRef.current += 1;
+    setLoading(false);
     setCode('');
     setCandidates([]);
     setSelected(null);
@@ -13130,27 +13163,31 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   }, [savedHomeTab]);
 
   useEffect(() => {
+    let cancelled = false;
+    const cancel = () => { cancelled = true; marketSearchRequestRef.current += 1; };
     if (initialCode) {
       setCode(initialCode);
       if (initialApparelId) {
         loadMarketCards()
           .then((items) => {
+            if (cancelled) return;
             const item = items.find((candidate) => String(candidate.apparelId) === String(initialApparelId));
             const itemLocale = String(item?.locale || 'JP').toUpperCase();
             setMarketProductLocale(itemLocale);
             searchMarket(initialCode, initialApparelId, itemLocale);
           })
           .catch(() => {
-            searchMarket(initialCode, initialApparelId);
+            if (!cancelled) searchMarket(initialCode, initialApparelId);
           });
-        return;
+        return cancel;
       }
       searchMarket(initialCode);
-      return;
+      return cancel;
     }
     if (initialApparelId) {
       loadMarketCards()
         .then((items) => {
+          if (cancelled) return;
           const item = items.find((candidate) => String(candidate.apparelId) === String(initialApparelId));
           if (!item?.code) return;
           const itemLocale = String(item.locale || 'JP').toUpperCase();
@@ -13159,9 +13196,10 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           searchMarket(item.code, initialApparelId, itemLocale);
         })
         .catch(() => {});
-      return;
+      return cancel;
     }
     resetMarketHomeFromLocation();
+    return cancel;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode, initialApparelId, routeRevision]);
 
@@ -13200,6 +13238,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     const rawQuery = String(nextCode || '').trim();
     const normalized = normalizeCode(rawQuery);
     if (!normalized) return;
+    const requestId = ++marketSearchRequestRef.current;
     setLoading(true);
     setMessage('');
     setCandidates([]);
@@ -13323,6 +13362,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
       const directItem = targetApparelId
         ? hydratedResult.find((item) => String(item.apparelId) === String(targetApparelId))
         : null;
+      if (requestId !== marketSearchRequestRef.current) return;
       setCandidates(directItem ? [] : hydratedResult);
       setSelected(directItem || (hydratedResult.length === 1 ? hydratedResult[0] : null));
       setCandidatePanelCollapsed(Boolean(directItem || hydratedResult.length === 1));
@@ -13330,7 +13370,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
       if (!hydratedResult.length) setMessage(t('marketNoCandidates'));
       if (targetApparelId && hydratedResult.length && !directItem) setMessage(t('marketFallback'));
     } finally {
-      setLoading(false);
+      if (requestId === marketSearchRequestRef.current) setLoading(false);
     }
   }
 
@@ -13418,6 +13458,9 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
   function selectMarketCandidate(item) {
     marketCandidateScrollYRef.current = window.scrollY || 0;
+    const params = new URLSearchParams({ code: item.code, apparelId: String(item.apparelId) });
+    if (initialCardId) params.set('cardId', initialCardId);
+    replaceAppHistoryState({}, `${getLocalizedPagePath('prices', uiLang)}?${params}`);
     setSelected(item);
     setCandidatePanelCollapsed(true);
     window.setTimeout(() => {
@@ -13426,6 +13469,11 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   }
 
   function returnToMarketCandidates() {
+    const params = new URLSearchParams({ code });
+    if (initialCardId) params.set('cardId', initialCardId);
+    replaceAppHistoryState({}, `${getLocalizedPagePath('prices', uiLang)}?${params}`);
+    setSelected(null);
+    setMarketDetail(null);
     setCandidatePanelCollapsed(false);
     window.setTimeout(() => {
       if (marketCandidateScrollYRef.current > 0) {
@@ -13514,10 +13562,35 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const showMarketHome = !code.trim() && !selected && !candidates.length;
   const canMapInitialCard = authUser?.app_metadata?.role === 'admin' && Boolean(initialCardId);
 
+  function openMarketTab(tab) {
+    const path = tab === 'index' ? '/prices/index' : tab === 'card' ? '/prices/cards' : '/prices/boxes';
+    pushAppHistory(localizeAppPath(path, uiLang), { marketViewState: { homeTab: tab, marketProductLocale } });
+    resetMarketHomeFromLocation();
+    setHomeTab(tab);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }
+
+  function submitMarketSearch(event) {
+    event.preventDefault();
+    if (!code.trim()) return;
+    const nextUrl = `${getLocalizedPagePath('prices', uiLang)}?${new URLSearchParams({ code: code.trim() })}`;
+    if (`${window.location.pathname}${window.location.search}` === nextUrl) {
+      searchMarket(code);
+      return;
+    }
+    pushAppHistory(nextUrl, { marketViewState: { homeTab: 'card', marketProductLocale } });
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }
+
   return (
     <main className="renew-subpage">
       <section className={`renew-panel renew-market${selected ? ' has-price-detail' : ''}`}>
-        <form className="renew-market-search" onSubmit={(event) => { event.preventDefault(); searchMarket(code); }}>
+        <div className="renew-market-home-tabs" role="group" aria-label="Market categories">
+          <button type="button" className={showMarketHome && homeTab === 'box' ? 'is-active' : ''} onClick={() => openMarketTab('box')}>{t('marketHomeBoxTab')}</button>
+          <button type="button" className={!showMarketHome || homeTab === 'card' ? 'is-active' : ''} onClick={() => openMarketTab('card')}>{t('marketHomeCardTab')}</button>
+          {MARKET_INDEX_PUBLIC_ENABLED ? <button type="button" className={showMarketHome && homeTab === 'index' ? 'is-active' : ''} onClick={() => openMarketTab('index')}>Index</button> : null}
+        </div>
+        <form className="renew-market-search" onSubmit={submitMarketSearch}>
           <a className="renew-market-snkr-link" href={SNKRDUNK_MARKET_URL} target="_blank" rel="noreferrer" aria-label="SNKRDUNK 바로가기">
             <span>SNKR</span>
             <span>{t('snkrShortcut')}</span>
@@ -13542,11 +13615,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
         {showMarketHome ? (
           <>
-            <div className="renew-market-home-tabs">
-              <button type="button" className={homeTab === 'box' ? 'is-active' : ''} onClick={() => setHomeTab('box')}>{t('marketHomeBoxTab')}</button>
-              <button type="button" className={homeTab === 'card' ? 'is-active' : ''} onClick={() => setHomeTab('card')}>{t('marketHomeCardTab')}</button>
-              {MARKET_INDEX_PUBLIC_ENABLED ? <button type="button" className={homeTab === 'index' ? 'is-active' : ''} onClick={() => setHomeTab('index')}>Index</button> : null}
-            </div>
             {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : MARKET_INDEX_PUBLIC_ENABLED ? <RenewMarketIndex onOpenComponent={openMarketIndexComponent} /> : <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} />}
           </>
         ) : null}
@@ -13556,28 +13624,29 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
             <div>
               <small>{t('selectedVariant')}</small>
               <strong>{selected.code} · {getMarketShortName(selected)}</strong>
-              <span>{getMarketMetaLine(selected)}</span>
+              <span>{[getMarketVariantLabel(selected, uiLang), getMarketMetaLine(selected)].filter(Boolean).join(' · ')}</span>
             </div>
             <button type="button" onClick={returnToMarketCandidates}>{t('reselectVariant')}</button>
           </div>
         ) : null}
 
         {candidates.length > 1 && !candidatePanelCollapsed ? (
-          <div className="renew-market-candidates" ref={marketCandidateRef}>
-            <b>{t('variantSelect')}</b>
+          <div className="renew-market-candidates renew-market-version-gallery" ref={marketCandidateRef}>
+            <h2>{t('variantSelect')} <small>{candidates.length}</small></h2>
             {mappingMessage ? <small className="renew-market-mapping-message">{mappingMessage}</small> : null}
             <div>
               {candidates.map((item) => (
-                <button key={`${item.apparelId}-${item.locale}`} type="button" className={selected?.apparelId === item.apparelId ? 'is-active' : ''} onClick={() => selectMarketCandidate(item)}>
-                  <img src={item.previewImageUrl || '/card-placeholder.svg'} alt={item.name} onError={placeholderImage} />
+                <button key={`${item.apparelId}-${item.locale}`} type="button" className={selected?.apparelId === item.apparelId ? 'is-active' : ''} aria-pressed={selected?.apparelId === item.apparelId} title={item.name} onClick={() => selectMarketCandidate(item)}>
+                  <img src={getCardThumbnailSrc({ id: item.cardId, locale: item.locale || String(item.cardId || '').split('::')[0], imageUrl: item.previewImageUrl })} data-fallback-src={item.previewImageUrl || ''} alt={item.name} loading="lazy" onLoad={(event) => { const img = event.currentTarget; img.dataset.productPhoto = String(img.currentSrc.includes('cdn.snkrdunk.com/upload_bg_removed/')); }} onError={fallbackToOriginalCardImage} />
                   <div className="renew-market-candidate-body">
                     <small className="renew-market-candidate-code">{item.code}</small>
                           <span title={item.name}>{getMarketShortName(item)}</span>
+                          {getMarketVariantLabel(item, uiLang) ? <strong className="renew-market-version-label">{getMarketVariantLabel(item, uiLang)}</strong> : null}
                           <small>{getMarketMetaLine(item)}</small>
                           <small className="renew-market-candidate-set">{item.setName}</small>
                           <div className="renew-market-candidate-bottom">
                             <b>{getMarketCandidatePriceText(item, t('checkPrice'), uiLang)}</b>
-                            <small className="renew-market-candidate-id">#{item.apparelId}</small>
+                            {canMapInitialCard ? <small className="renew-market-candidate-id">#{item.apparelId}</small> : null}
                           </div>
                           {canMapInitialCard ? (
                             <span className="renew-market-map-row">
@@ -13606,10 +13675,11 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
         {selected ? (
           <div className="renew-market-detail" ref={marketDetailRef}>
             <div className="renew-market-card">
-              <img src={selected.previewImageUrl || '/card-placeholder.svg'} alt={selected.name} onError={placeholderImage} />
-              <div>
+              <img key={selected.apparelId} src={getCardThumbnailSrc({ id: selected.cardId, locale: selected.locale, imageUrl: selected.previewImageUrl })} data-fallback-src={selected.previewImageUrl || ''} alt={selected.name} onLoad={(event) => { const img = event.currentTarget; img.dataset.productPhoto = String(img.currentSrc.includes('cdn.snkrdunk.com/upload_bg_removed/')); }} onError={fallbackToOriginalCardImage} />
+              <div className="renew-market-identity">
                 <b>{selected.code}</b>
                 <h2 title={selected.name}>{getMarketShortName(selected)}</h2>
+                {getMarketVariantLabel(selected, uiLang) ? <span className="renew-market-detail-variant">{getMarketVariantLabel(selected, uiLang)}</span> : null}
                 <small className="renew-market-selected-meta">{getMarketMetaLine(selected)}</small>
                 <p>{selected.setName}</p>
               </div>
@@ -13656,7 +13726,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
             <div className="renew-market-chart">
               <div className="renew-market-controls">
-                <div className="renew-chip-group">
+                <div className="renew-chip-group" role="group" aria-label={getLocaleText(uiLang, '카드 등급', 'Card condition', 'カード状態')}>
                   {marketConditionOptions.map((item) => (
                     <button
                       key={item.key}
@@ -13669,7 +13739,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                     </button>
                   ))}
                 </div>
-                <div className="renew-chip-group">
+                <div className="renew-chip-group" role="group" aria-label={getLocaleText(uiLang, '조회 기간', 'Price period', '表示期間')}>
                   {MARKET_DETAIL_RANGES.map((item) => (
                     <button key={item.key} type="button" className={chartRange === item.key ? 'is-active' : ''} aria-pressed={chartRange === item.key} onClick={() => setRange(item.key)}>
                       {item.label}
@@ -13677,16 +13747,16 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                   ))}
                 </div>
               </div>
+              <div className="renew-market-history-layout">
+              <section className="renew-market-trend">
+              <h3>{getLocaleText(uiLang, '가격 추이', 'Price history', '価格推移')}<small>{getLocaleText(uiLang, '일별 중앙값', 'Daily median', '日別中央値')}</small></h3>
+              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={chartRange} />
               <dl className="renew-market-snapshot">
                 <div><dt>{getLocaleText(uiLang, '최근 가격 기록', 'Latest price record', '直近の価格記録')}</dt><dd><RenewMarketMoney value={latestSale?.price} uiLang={uiLang} /></dd><small>{latestSale ? formatMarketSaleDate(latestSale) : getLocaleText(uiLang, '기록 없음', 'No records', '記録なし')}</small></div>
                 <div><dt>{getLocaleText(uiLang, '기간 최저 · 일별 중앙값', 'Period low · daily median', '期間最安・日別中央値')}</dt><dd>{formatMarketPrimaryPrice(dailyPrices.length ? Math.min(...dailyPrices) : 0, uiLang)}</dd></div>
                 <div><dt>{getLocaleText(uiLang, '기간 최고 · 일별 중앙값', 'Period high · daily median', '期間最高・日別中央値')}</dt><dd>{formatMarketPrimaryPrice(dailyPrices.length ? Math.max(...dailyPrices) : 0, uiLang)}</dd></div>
                 <div><dt>{getLocaleText(uiLang, '기간 내 기록일', 'Recorded days', '期間内の記録日')}</dt><dd>{dailyPoints.length}<small>{getLocaleText(uiLang, '일', ' days', '日')}</small></dd><small>{MARKET_DETAIL_RANGES.find((item) => item.key === chartRange)?.label}</small></div>
               </dl>
-              <div className="renew-market-history-layout">
-              <section className="renew-market-trend">
-              <h3>{getLocaleText(uiLang, '가격 추이', 'Price history', '価格推移')}<small>{getLocaleText(uiLang, '일별 중앙값', 'Daily median', '日別中央値')}</small></h3>
-              <RenewMarketChart points={chartPoints} uiLang={uiLang} range={chartRange} />
               </section>
               <div className="renew-market-recent">
                 <h3>{t('recentSales')}</h3>
