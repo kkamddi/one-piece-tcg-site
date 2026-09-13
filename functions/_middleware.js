@@ -2285,6 +2285,7 @@ export function applySeo(html, pathname, seo) {
 
 function shouldSkip(pathname) {
   if (pathname.startsWith('/api/')) return true;
+  if (pathname === '/naver-userinfo') return true;
   if (pathname === '/robots.txt' || pathname === '/sitemap.xml' || pathname === '/rss.xml' || pathname === '/ads.txt') return true;
   return /\.[a-z0-9]{2,8}$/i.test(pathname);
 }

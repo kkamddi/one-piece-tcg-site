@@ -35,7 +35,6 @@ export async function onRequestGet({ request }) {
   }
 
   const email = String(profile.email || '').trim().toLowerCase();
-  if (!email) return jsonResponse({ error: 'naver_email_required' }, 422);
 
   const id = String(profile.id);
   const name = String(profile.name || profile.nickname || '').trim();
@@ -45,7 +44,7 @@ export async function onRequestGet({ request }) {
   return jsonResponse({
     sub: id,
     id,
-    naver_email: email,
+    ...(email ? { naver_email: email } : {}),
     name,
     nickname,
     preferred_username: nickname,
