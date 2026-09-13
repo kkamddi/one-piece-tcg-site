@@ -786,12 +786,12 @@ const JAPANESE_SITE_NAVIGATION_ITEMS = [
 
 const SERVER_PAGE_CONTENT = {
   '/': {
-    heading: '원피스카드 도감과 시세를 한곳에서',
+    heading: 'Card Pone - 원피스카드 도감과 시세를 한곳에서',
     paragraphs: [
       'Card Pone은 한글판과 일본판 원피스카드를 검색하고, 보유 카드와 위시리스트를 관리하며, 카드별 시세 흐름을 확인할 수 있는 수집 도구입니다.',
       '카드 시세는 공개 시장 데이터를 정리해 조건별 최근 거래와 기간별 흐름으로 제공하며, Market Index는 PSA10 거래 데이터가 있는 구성 종목의 개별 지수를 동일 비중 평균해 보여줍니다.'
     ],
-    links: ['/cards', '/prices', '/news/guide', '/shops']
+    links: ['/cards', '/prices', '/news/guide', '/shops', '/about', '/privacy', '/terms']
   },
   '/cards': {
     heading: '원피스카드 도감',
