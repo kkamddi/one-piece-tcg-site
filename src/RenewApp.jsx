@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { Capacitor } from '@capacitor/core';
 import { fetchAdminStats, fetchPopularSearches, trackPopularSearch, trackVisit } from './api/admin';
 import { checkAuthAvailability, deleteMyAccount, signInWithIdentifier } from './api/auth';
-import { fetchCardById, fetchCards, searchCards } from './api/cards';
+import { fetchCardById, fetchCards, fetchCardsByIds, searchCards } from './api/cards';
+import { CATALOG_LINEUPS, buildCatalogLineups, getLineupCardIds } from './catalog-lineups';
 import { fetchCardWorldCupRanking, submitCardWorldCupResult } from './api/card-world-cup';
 import { checkInCommunityAttendance, fetchCommunityPointOverview } from './api/community';
 import {
@@ -2964,6 +2965,12 @@ function getRouteSeoPage(pathname = '/') {
 
 function getCatalogRouteViewState(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   const path = getAppPath(pathname);
+  if (path === '/cards' && typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    if (CATALOG_LINEUPS.some(({ id }) => id === params.get('lineup'))) {
+      return { selectedLineup: params.get('lineup'), locale: params.get('locale') === 'KR' ? 'KR' : 'JP', selectedSeries: ALL_SERIES_ID };
+    }
+  }
   const cardRouteId = getCatalogCardRouteId(pathname);
   if (cardRouteId) return { locale: cardRouteId.startsWith('KR::') ? 'KR' : 'JP' };
   if (path === '/cards/jp') return { locale: 'JP' };
@@ -8590,6 +8597,10 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
   const initialLocale = hasInitialSearch ? (initialSearch?.locale || 'JP') : (routeCardLocale || initialViewState?.locale || 'JP');
   const [locale, setLocale] = useState(initialLocale);
   const [selectedSeries, setSelectedSeries] = useState(() => hasInitialSearch ? getDefaultRenewSeriesId(initialLocale) : (initialViewState?.selectedSeries || getDefaultRenewSeriesId(initialLocale)));
+  const [selectedLineup, setSelectedLineup] = useState(hasInitialSearch ? '' : (initialViewState?.selectedLineup || ''));
+  const [lineupsOpen, setLineupsOpen] = useState(Boolean(initialViewState?.selectedLineup));
+  const [lineupGroups] = useState(() => buildCatalogLineups());
+  const [cardLoadError, setCardLoadError] = useState(false);
   const [openSection, setOpenSection] = useState(() => hasInitialSearch ? '' : (initialViewState?.openSection || ''));
   const [searchKeyword, setSearchKeyword] = useState(hasInitialSearch ? initialSearch.q : (initialViewState?.searchKeyword || ''));
   const [debouncedSearchKeyword, setDebouncedSearchKeyword] = useState(searchKeyword);
@@ -8633,6 +8644,9 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
   }, [isAllSeriesMode, sections, selectedSeries]);
   const ownedSet = useMemo(() => new Set(Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds : []), [userState]);
   const wishSet = useMemo(() => new Set(Array.isArray(userState?.wishlistCardIds) ? userState.wishlistCardIds : []), [userState]);
+  const lineupIds = useMemo(() => new Set(getLineupCardIds(lineupGroups, selectedLineup, locale)), [lineupGroups, selectedLineup, locale]);
+  const activeLineup = CATALOG_LINEUPS.find(({ id }) => id === selectedLineup);
+  const lineupLabel = (entry) => getLocaleText(uiLang, ...entry.labels);
 
   useEffect(() => {
     let cancelled = false;
@@ -8677,7 +8691,9 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
         setCatalogMarketPriceByCardId(nextMap);
       })
       .catch(() => {
-        if (!cancelled) setCatalogMarketPriceByCardId(new Map());
+        if (!cancelled) {
+          setCatalogMarketPriceByCardId(new Map());
+        }
       });
     return () => {
       cancelled = true;
@@ -8696,6 +8712,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     const q = initialSearch?.q?.trim();
     if (!q) return;
     const nextLocale = initialSearch.locale || 'JP';
+    setSelectedLineup('');
     setLocale(nextLocale);
     setSearchKeyword(q);
     setSelectedSeries(getDefaultRenewSeriesId(nextLocale));
@@ -8709,6 +8726,8 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     if (!initialViewState || hasInitialSearch) return;
     if (initialViewState.locale) setLocale(initialViewState.locale);
     if (initialViewState.selectedSeries) setSelectedSeries(initialViewState.selectedSeries);
+    setSelectedLineup(initialViewState.selectedLineup || '');
+    if (initialViewState.selectedLineup) setLineupsOpen(true);
     setSearchKeyword(initialViewState.searchKeyword || '');
     setActiveRarity(initialViewState.activeRarity || 'ALL');
     setCollectionFilter(initialViewState.collectionFilter || 'all');
@@ -8718,7 +8737,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
 
   useEffect(() => {
     setExpandedDeferredRarities(new Set());
-  }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter]);
+  }, [locale, selectedSeries, selectedLineup, searchKeyword, activeRarity, collectionFilter]);
 
   useEffect(() => {
     const timerId = window.setTimeout(() => setDebouncedSearchKeyword(searchKeyword), 180);
@@ -8734,18 +8753,20 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     onViewStateChange?.({
       locale,
       selectedSeries,
+      selectedLineup,
       searchKeyword,
       activeRarity,
       collectionFilter,
       catalogSortMode,
       openSection
     });
-  }, [locale, selectedSeries, searchKeyword, activeRarity, collectionFilter, catalogSortMode, openSection, onViewStateChange]);
+  }, [locale, selectedSeries, selectedLineup, searchKeyword, activeRarity, collectionFilter, catalogSortMode, openSection, onViewStateChange]);
 
   useEffect(() => {
     let cancelled = false;
     async function loadCards() {
       setLoading(true);
+      setCardLoadError(false);
       try {
         const keyword = debouncedSearchKeyword.trim();
         const collectionIds = collectionFilter === 'owned'
@@ -8755,6 +8776,8 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
             : [];
         const result = keyword
           ? await searchCards(keyword, locale)
+          : selectedLineup
+            ? await fetchCardsByIds([...lineupIds])
             : collectionFilter === 'all'
               ? await fetchCards(isAllSeriesMode ? { locale } : { locale, series: selectedSeries })
             : collectionIds.length
@@ -8765,6 +8788,8 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
             setCards(Array.isArray(result) ? result : []);
           });
         }
+      } catch {
+        if (!cancelled) { setCards([]); setCardLoadError(true); }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -8773,7 +8798,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     return () => {
       cancelled = true;
     };
-  }, [locale, selectedSeries, debouncedSearchKeyword, collectionFilter, userState]);
+  }, [locale, selectedSeries, selectedLineup, lineupIds, debouncedSearchKeyword, collectionFilter, userState]);
 
   const getCatalogPriceRank = useCallback((card) => {
     const price = catalogMarketPriceByCardId.get(card.id);
@@ -8788,7 +8813,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
         : collectionFilter === 'wish'
           ? wishSet.has(card.id)
           : true;
-      return rarityOk && collectionOk;
+      return rarityOk && collectionOk && (!selectedLineup || lineupIds.has(card.id));
     });
     if (catalogSortMode !== 'price') return filtered;
     return [...filtered].sort((a, b) => {
@@ -8796,7 +8821,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
       if (priceDiff) return priceDiff;
       return String(a.cardNo || '').localeCompare(String(b.cardNo || ''), 'en', { numeric: true });
     });
-  }, [cards, activeRarity, collectionFilter, ownedSet, wishSet, catalogSortMode, getCatalogPriceRank]);
+  }, [cards, activeRarity, collectionFilter, ownedSet, wishSet, catalogSortMode, getCatalogPriceRank, selectedLineup, lineupIds]);
 
   const rarityOptions = useMemo(() => ['ALL', ...getOrderedRarities(cards)], [cards]);
   const mobileRarityOptions = ['ALL', 'SP', 'SEC', 'L', 'SR', 'R', 'UC', 'C'];
@@ -8978,6 +9003,7 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
   }, [selectedCard, uiLang]);
 
   const selectCatalogSeries = (series, options = {}) => {
+    setSelectedLineup('');
     setSelectedSeries(series.id);
     setSearchKeyword('');
     setActiveRarity('ALL');
@@ -8997,6 +9023,23 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
     setOpenSection('');
     setActiveRarity('ALL');
     setRarityPanelOpen(false);
+    if (selectedLineup) pushAppHistory(`${localizeAppPath('/cards', uiLang)}?lineup=${selectedLineup}&locale=${nextLocale}`);
+  };
+
+  const selectLineup = (id) => {
+    setSelectedLineup(id);
+    setSelectedSeries(ALL_SERIES_ID);
+    setOpenSection('');
+    setSearchKeyword('');
+    setActiveRarity('ALL');
+    setCollectionFilter('all');
+    pushAppHistory(`${localizeAppPath('/cards', uiLang)}?lineup=${id}&locale=${locale}`);
+  };
+
+  const clearLineup = () => {
+    if (selectedLineup) pushAppHistory(localizeAppPath('/cards', uiLang));
+    setSelectedLineup('');
+    setLineupsOpen(false);
   };
 
   const selectedCardView = selectedCard?.name ? (
@@ -9081,8 +9124,9 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
               <button
                 key={chip.label}
                 type="button"
-                className={(!chip.id && isAllSeriesMode && !openSection) || (!!chip.id && (openSection === chip.id || (!openSection && selectedSeriesSectionId === chip.id))) ? 'is-active' : ''}
+                className={!selectedLineup && ((!chip.id && isAllSeriesMode && !openSection) || (!!chip.id && (openSection === chip.id || (!openSection && selectedSeriesSectionId === chip.id)))) ? 'is-active' : ''}
                 onClick={() => {
+                  clearLineup();
                   setOpenSection(chip.id);
                   if (!chip.id) setSelectedSeries(ALL_SERIES_ID);
                   setSearchKeyword('');
@@ -9093,6 +9137,10 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
                 {chip.label}
               </button>
             ))}
+            <span className="renew-category-divider" aria-hidden="true" />
+            <button type="button" className={lineupsOpen || selectedLineup ? 'is-active' : ''} aria-expanded={lineupsOpen} aria-controls="catalog-lineup-list" onClick={() => { setLineupsOpen((open) => !open); setOpenSection(''); }}>
+              {getLocaleText(uiLang, '수집 라인업', 'Lineups', 'コレクション')}
+            </button>
           </div>
           {activeMobileSection ? (
             <div className="renew-mobile-series-list">
@@ -9114,12 +9162,12 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
           ) : null}
         </div>
         <div className="renew-catalog-desktop-categories">
-          <button type="button" className={`renew-category-row ${isAllSeriesMode ? 'is-open' : ''}`} onClick={() => { setSelectedSeries(ALL_SERIES_ID); setOpenSection(''); setSearchKeyword(''); setCollectionFilter('all'); setActiveRarity('ALL'); }}>
+          <button type="button" className={`renew-category-row ${!selectedLineup && isAllSeriesMode ? 'is-open' : ''}`} onClick={() => { clearLineup(); setSelectedSeries(ALL_SERIES_ID); setOpenSection(''); setSearchKeyword(''); setCollectionFilter('all'); setActiveRarity('ALL'); }}>
             {t('all')} <strong>+</strong>
           </button>
           {sections.filter((section) => section.id !== 'all').map((section) => (
             <div key={section.id} className="renew-category-block">
-              <button type="button" className={`renew-category-row ${openSection === section.id ? 'is-open' : ''}`} onClick={() => setOpenSection(openSection === section.id ? '' : section.id)}>
+              <button type="button" className={`renew-category-row ${openSection === section.id ? 'is-open' : ''}`} onClick={() => { setOpenSection(openSection === section.id ? '' : section.id); setLineupsOpen(false); }}>
                 {section.label} <strong>{openSection === section.id ? '-' : '+'}</strong>
               </button>
               {openSection === section.id ? (
@@ -9141,6 +9189,21 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
               ) : null}
             </div>
           ))}
+        </div>
+        <div className="renew-catalog-lineups">
+          <button className={`renew-category-row renew-lineup-heading ${lineupsOpen ? 'is-open' : ''}`} type="button" aria-expanded={lineupsOpen} aria-controls="catalog-lineup-list" onClick={() => { setLineupsOpen((open) => !open); setOpenSection(''); }}>
+            <span>{getLocaleText(uiLang, '수집 라인업', 'Collection lineups', 'コレクション')}</span>
+            <strong aria-hidden="true">{lineupsOpen ? '-' : '+'}</strong>
+          </button>
+          {lineupsOpen ? <div id="catalog-lineup-list" className="renew-lineup-list">
+            {CATALOG_LINEUPS.map((entry) => {
+              const count = getLineupCardIds(lineupGroups, entry.id, locale).length;
+              return <button type="button" key={entry.id} className={selectedLineup === entry.id ? 'is-active' : ''} aria-pressed={selectedLineup === entry.id} disabled={!count} onClick={() => selectLineup(entry.id)}>
+                <span>{lineupLabel(entry)}</span>
+                <small>{count || getLocaleText(uiLang, '미수록', 'Not listed', '未掲載')}</small>
+              </button>;
+            })}
+          </div> : null}
         </div>
       </aside>
 
@@ -9202,16 +9265,17 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
 
         <div className="renew-catalog-title">
           <div>
-            <h2>{searchKeyword.trim() ? t('searchResults') : isAllSeriesMode ? t('all') : currentSeries?.koName}</h2>
-            <p>{locale}-{searchKeyword.trim() ? 'SEARCH' : isAllSeriesMode ? 'ALL' : getBaseSeriesId(currentSeries)} {visibleCards.length}{t('cardsUnit')}</p>
+            <h2>{activeLineup ? lineupLabel(activeLineup) : searchKeyword.trim() ? t('searchResults') : isAllSeriesMode ? t('all') : currentSeries?.koName}</h2>
+            <p>{activeLineup ? `${locale} · ` : `${locale}-${searchKeyword.trim() ? 'SEARCH' : isAllSeriesMode ? 'ALL' : getBaseSeriesId(currentSeries)} `}{visibleCards.length}{t('cardsUnit')}</p>
           </div>
-          {!searchKeyword.trim() && !isAllSeriesMode && currentSeries?.id ? (
+          {activeLineup && authUser ? <span className="renew-lineup-progress">{getLocaleText(uiLang, '보유', 'Owned', '所持')} {[...lineupIds].filter((id) => ownedSet.has(id)).length} / {lineupIds.size}</span> : null}
+          {!selectedLineup && !searchKeyword.trim() && !isAllSeriesMode && currentSeries?.id ? (
             <button type="button" className="renew-series-guide-link" onClick={() => onOpenSeriesGuide?.(currentSeries)}>시리즈 가이드</button>
           ) : null}
         </div>
 
         {loading ? <div className="renew-empty">{t('loading')}</div> : null}
-        {!loading && !visibleCards.length ? <div className="renew-empty">{t('noResults')}</div> : null}
+        {!loading && !visibleCards.length ? <div className="renew-empty">{cardLoadError ? getLocaleText(uiLang, '카드를 불러오지 못했습니다. 다시 시도해 주세요.', 'Could not load cards. Please try again.', 'カードを読み込めませんでした。再度お試しください。') : t('noResults')}</div> : null}
         {!loading ? groupedCards.map((group, groupIndex) => {
           const shouldLimitGroup = catalogSortMode !== 'price' && activeRarity === 'ALL' && collectionFilter === 'all' && (
             isAllSeriesMode || DEFERRED_RARITIES.has(group.rarity)
