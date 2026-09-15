@@ -48,6 +48,9 @@ jobs:
       - name: Verify social auth routes
         run: node --test scripts/testSocialAuthRecovery.mjs
 
+      - name: Verify Riftbound catalog
+        run: node --test scripts/testRiftboundCatalog.mjs
+
       - name: Build production site
         run: npm run build
 

@@ -47,6 +47,7 @@ import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
 const CARD_SCAN_AVAILABLE = false;
+const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = Capacitor.getPlatform() === 'android'
@@ -4018,7 +4019,8 @@ function applyPageSeo(page, uiLang = 'KR') {
   const seo = getClientRouteSeo(page, uiLang) || PAGE_SEO[page] || PAGE_SEO.home;
   const url = getCanonicalUrl(page);
   const isJapanese = uiLang === 'JP' || (typeof window !== 'undefined' && getPathLocale(window.location.pathname) === 'JP');
-  document.title = seo.title;
+  document.title = page === 'cards' && new URLSearchParams(window.location.search).get('game') === 'riftbound'
+    ? '리프트바운드 도감 | Card Pone' : seo.title;
   document.documentElement.lang = isJapanese ? 'ja' : uiLang === 'EN' ? 'en' : 'ko';
   setHeadMeta('meta[name="description"]', { content: seo.description });
   setHeadMeta('meta[name="keywords"]', { content: seo.keywords || '' });
@@ -16443,6 +16445,8 @@ export default function RenewApp() {
           onlinePageCounts={onlinePageCounts}
         />
       ) : activePage === 'cards' ? (
+        <React.Suspense fallback={<main aria-busy="true">도감을 불러오는 중...</main>}>
+        <CatalogPreviewShell onBackHandlerChange={handleBackHandlerChange}>
         <RenewCatalog
           authUser={authUser}
           userState={userState}
@@ -16505,6 +16509,8 @@ export default function RenewApp() {
           marketListings={MARKETPLACE_ENABLED ? marketListings : []}
           uiLang={uiLang}
         />
+        </CatalogPreviewShell>
+        </React.Suspense>
       ) : activePage === 'seriesGuide' ? (
         <RenewSeriesGuide
           onOpenCatalog={(series) => {

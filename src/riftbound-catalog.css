@@ -1,0 +1,97 @@
+.rb-game-tabs { display: flex; gap: 28px; width: min(1440px, 100%); margin: 0 auto; padding: 0 clamp(18px, 4vw, 48px); }
+.rb-game-tabs a { padding: 13px 0; color: #74777e; text-decoration: none; font-size: 14px; font-weight: 700; border-bottom: 2px solid transparent; }
+.rb-game-tabs a[aria-current] { color: #17191c; border-color: #ed492d; }
+.rb-game-tabs:has(+ .renew-card-detail-page) { display: none; }
+.rb-catalog #rb-detail-title:focus { outline: none; }
+.rb-catalog { --rb-ink: #17191c; --rb-muted: #757b85; --rb-line: #e5e7ea; --rb-surface: #fff; --rb-soft: #f5f6f7; letter-spacing: 0; }
+.renew-app.is-dark .rb-catalog { --rb-ink: #edf0f3; --rb-muted: #a1a7af; --rb-line: #383c43; --rb-surface: #202328; --rb-soft: #292d33; }
+.renew-app.is-dark .rb-game-tabs a[aria-current] { color: #edf0f3; }
+.rb-catalog button { letter-spacing: 0; }
+.rb-catalog .renew-mobile-category-chips button:disabled,
+.rb-catalog .renew-category-row:disabled { opacity: .45; cursor: not-allowed; }
+.rb-open-card { width: 100%; height: 100%; padding: 0; display: flex; align-items: center; justify-content: center; background: transparent; border: 0; cursor: pointer; }
+.rb-code-button { padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.rb-card-caption { min-height: 32px; font-size: 12px; line-height: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rb-preview-label { margin: 8px 0 0; color: var(--rb-muted); font-size: 11px; }
+.rb-source-note { margin: 24px 0 0; font-size: 11px; line-height: 1.8; color: var(--rb-muted); }
+.rb-source-link { margin-left: 8px; font-size: 11px; color: var(--rb-muted); }
+.rb-code { font-size: 10px; color: var(--rb-muted); }
+.rb-storage-error { font-size: 13px; color: #c43723; }
+.rb-image-error { text-align: center; font-size: 11px; color: var(--rb-muted); }
+.rb-detail { width: min(780px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); padding: 38px 28px 28px; border: 1px solid var(--rb-line); border-radius: 8px; background: var(--rb-surface); color: var(--rb-ink); overflow-y: auto; }
+.rb-detail::backdrop { background: #11151c99; }
+.rb-close { position: absolute; top: 6px; right: 8px; width: 36px; height: 36px; font-size: 26px; background: transparent; color: var(--rb-ink); border: 0; cursor: pointer; }
+.rb-detail-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.rb-detail-image { aspect-ratio: 744 / 1039; display: flex; align-items: center; justify-content: center; }
+.rb-detail-image img { width: 100%; height: 100%; object-fit: contain; }
+.rb-detail-info { min-width: 0; }
+.rb-detail h2 { font-size: 22px; margin: 8px 0; line-height: 1.3; overflow-wrap: anywhere; }
+.rb-metadata { font-size: 12px; color: var(--rb-muted); }
+.rb-variant { font-size: 11px; color: #b0452f; }
+.rb-facts { margin: 20px 0; padding: 12px 0; border-top: 1px solid var(--rb-line); border-bottom: 1px solid var(--rb-line); }
+.rb-facts > div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; padding: 6px 0; font-size: 12px; }
+.rb-facts dt { color: var(--rb-muted); }
+.rb-facts dd { margin: 0; }
+.rb-card-text { font-size: 13px; line-height: 1.65; white-space: pre-line; }
+.rb-detail-controls { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; margin-top: 24px; font-size: 12px; }
+.rb-stepper { display: flex; height: 38px; }
+.rb-stepper button, .rb-stepper input { width: 38px; text-align: center; border: 1px solid var(--rb-line); background: var(--rb-surface); color: var(--rb-ink); font-size: 16px; }
+.rb-stepper input { width: 54px; font-size: 14px; appearance: textfield; border-left: 0; border-right: 0; }
+.rb-stepper input::-webkit-inner-spin-button { appearance: none; }
+.rb-stepper button { cursor: pointer; }
+.rb-stepper button:disabled { opacity: .35; cursor: default; }
+.rb-wishlist-command { grid-column: 1 / -1; padding: 12px; border: 1px solid var(--rb-line); border-radius: 6px; color: var(--rb-ink); background: var(--rb-soft); cursor: pointer; }
+.rb-catalog button:focus-visible, .rb-catalog a:focus-visible, .rb-game-tabs a:focus-visible { outline: 2px solid #e84a31; outline-offset: 3px; }
+
+@media (max-width: 560px) {
+  .rb-detail { padding: 42px 20px 22px; }
+  .rb-detail-layout { grid-template-columns: 1fr; gap: 20px; }
+  .rb-detail-image { width: 70%; margin: 0 auto; max-height: 330px; }
+  .rb-detail h2 { font-size: 20px; }
+}
+.rb-catalog .renew-series-item,
+.rb-catalog .renew-mobile-series-list .renew-series-item {
+  grid-template-columns: 82px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  border-radius: 8px;
+  min-height: 100px;
+  align-content: center;
+}
+
+.rb-catalog .renew-series-item > span:not(.renew-series-thumb) {
+  grid-column: 2;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.rb-catalog .renew-series-thumb {
+  width: 82px;
+  height: 82px;
+  grid-row: 1 / 3;
+}
+
+.rb-catalog .renew-series-list { padding-left: 0; }
+
+.rb-catalog .renew-mobile-series-list {
+  grid-auto-flow: column;
+  grid-auto-columns: 156px;
+  grid-template-columns: none;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.rb-catalog .renew-mobile-series-list .renew-series-item {
+  grid-template-columns: 52px minmax(0, 1fr);
+  min-height: 100px;
+  column-gap: 8px;
+}
+
+.rb-catalog .renew-mobile-series-list .renew-series-thumb {
+  width: 52px;
+  height: 72px;
+}
+
+.rb-catalog .renew-series-item.rb-series-text-only { grid-template-columns: minmax(0, 1fr); }
+.rb-catalog .renew-series-item.rb-series-text-only > span,
+.rb-catalog .renew-series-item.rb-series-text-only > b { grid-column: 1; }
