@@ -49,10 +49,17 @@ jobs:
         run: node --test scripts/testSocialAuthRecovery.mjs
 
       - name: Verify Riftbound catalog
-        run: node --test scripts/testRiftboundCatalog.mjs
+        run: node --test scripts/testRiftboundCatalog.mjs scripts/testRiftboundD1.mjs
 
       - name: Build production site
         run: npm run build
+
+      - name: Verify Riftbound D1 catalog before publication
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          RIFTBOUND_D1_DATABASE_ID: da59fbad-d4bb-4f4a-88cc-37b0a698646a
+        run: node scripts/syncRiftboundD1.mjs
 
       - name: Re-verify synchronized main before deploy
         shell: bash

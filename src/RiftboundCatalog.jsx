@@ -1,18 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import englishSnapshot from './data/riftbound-preview.json';
-import chineseSnapshot from './data/riftbound-preview-cn.json';
-import koreanSnapshot from './data/riftbound-preview-kr.json';
-import { RIFTBOUND_SET_PRODUCTS, getRiftboundSetName } from './data/riftbound-set-products';
+import { getRiftboundSetName } from './data/riftbound-set-products';
+import { loadRiftboundCatalog } from './api/riftbound';
 import { collectionSummary, filterRiftboundCards, getRiftboundCategories, RIFTBOUND_STORAGE_KEY, RIFTBOUND_EDITIONS, normalizeRiftboundLocale, sanitizeCollection } from './riftbound-catalog';
 import './riftbound-catalog.css';
 
 const variants = { base: '기본', alternate: '얼터너트 아트', overnumber: '오버넘버', signature: '시그니처', special: '특별 인쇄', promo: '프로모' };
-const snapshots = {
-  EN: englishSnapshot,
-  CN: chineseSnapshot,
-  KR: koreanSnapshot
-};
-const cardIds = new Set(Object.values(snapshots).flatMap((snapshot) => snapshot.cards.map((card) => card.id)));
+const emptySnapshots = Object.fromEntries(['KR', 'EN', 'CN'].map((locale) => [locale, { locale, cards: [], sets: [], products: {} }]));
 const getRarities = (snapshot) => [...new Map(snapshot.cards.map((card) => [card.rarity, card.rarityLabel])).entries()];
 const PAGE_SIZE = 8;
 // Keep public browsing independent of the unfinished account collection storage.
@@ -21,12 +14,11 @@ const COLLECTION_ENABLED = false;
 function readFilters() {
   const params = new URLSearchParams(window.location.search);
   const locale = normalizeRiftboundLocale(params.get('locale'));
-  const snapshot = snapshots[locale];
   return {
     locale,
     query: params.get('q') || '',
-    set: snapshot.sets.some((set) => set.id === params.get('set')) ? params.get('set') : '',
-    rarity: getRarities(snapshot).some(([id]) => id === params.get('rarity')) ? params.get('rarity') : '',
+    set: /^[A-Z0-9]{2,8}$/.test(params.get('set') || '') ? params.get('set') : '',
+    rarity: /^[a-z]{1,20}$/.test(params.get('rarity') || '') ? params.get('rarity') : '',
     view: COLLECTION_ENABLED && ['owned', 'wishlist'].includes(params.get('view')) ? params.get('view') : 'all'
   };
 }
@@ -37,9 +29,8 @@ function CardImage({ card, eager = false }) {
     : <img src={card.image} alt={card.name} style={card.imagePresentation === 'centered-card' ? { objectFit: 'cover', aspectRatio: '5 / 7' } : undefined} loading={eager ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)} />;
 }
 
-function SetImage({ set, locale }) {
+function SetImage({ set, locale, product }) {
   const [failed, setFailed] = useState(false);
-  const product = RIFTBOUND_SET_PRODUCTS[locale]?.[set.id];
   return <span className="renew-series-thumb">
     {product && !failed ? <img src={product.image} alt={`${getRiftboundSetName(set, locale)} ${locale} 박스`} loading="lazy" decoding="async" onError={() => setFailed(true)} />
       : <span className="renew-series-thumb-label">{set.id}</span>}
@@ -86,7 +77,11 @@ function CardDetail({ card, snapshot, entry, onChange }) {
 
 function RiftboundCatalog({ onBackHandlerChange }) {
   const [filters, setFilters] = useState(readFilters);
-  const snapshot = snapshots[filters.locale];
+  const [snapshots, setSnapshots] = useState({});
+  const [loadError, setLoadError] = useState('');
+  const [retry, setRetry] = useState(0);
+  const snapshot = snapshots[filters.locale] || emptySnapshots[filters.locale];
+  const cardIds = useMemo(() => new Set(snapshot.cards.map((card) => card.id)), [snapshot]);
   const categories = useMemo(() => getRiftboundCategories(snapshot.sets), [snapshot]);
   const [openCategory, setOpenCategory] = useState(() => categories.find((category) => category.sets.some((set) => set.id === filters.set))?.id || '');
   const activeCategory = categories.find((category) => category.id === openCategory);
@@ -115,11 +110,29 @@ function RiftboundCatalog({ onBackHandlerChange }) {
     })).filter((group) => group.cards.length), [visibleCards, sortMode, rarities]);
 
   useEffect(() => {
+    if (snapshots[filters.locale]) return;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    let active = true;
+    setLoadError('');
+    loadRiftboundCatalog(filters.locale, { signal: controller.signal }).then((data) => {
+      if (active) setSnapshots((current) => ({ ...current, [data.locale]: data }));
+    }).catch(() => {
+      if (active) setLoadError('카드를 불러오지 못했습니다.');
+    }).finally(() => clearTimeout(timeout));
+    return () => { active = false; clearTimeout(timeout); controller.abort(); };
+  }, [filters.locale, snapshots, retry]);
+
+  useEffect(() => {
+    if (filters.set) setOpenCategory(categories.find((category) => category.sets.some((set) => set.id === filters.set))?.id || '');
+  }, [categories, filters.set]);
+
+  useEffect(() => {
     const restore = () => {
       const cardId = new URLSearchParams(window.location.search).get('card') || '';
       const restored = readFilters();
       setFilters(restored);
-      setOpenCategory(getRiftboundCategories(snapshots[restored.locale].sets).find((category) => category.sets.some((set) => set.id === restored.set))?.id || '');
+      setOpenCategory('');
       setSelectedId(cardId);
       if (!cardId) requestAnimationFrame(() => {
         window.scrollTo(0, window.history.state?.cardPoneScrollY || 0);
@@ -150,7 +163,7 @@ function RiftboundCatalog({ onBackHandlerChange }) {
     if (!selectedId) return;
     window.scrollTo(0, 0);
     document.getElementById('rb-detail-title')?.focus({ preventScroll: true });
-  }, [selectedId]);
+  }, [selectedId, selected]);
 
   function updateFilters(patch) {
     const next = { ...filters, ...patch };
@@ -197,12 +210,16 @@ function RiftboundCatalog({ onBackHandlerChange }) {
 
   function renderSets(category, mobile = false) {
     return <div id={`rb-${mobile ? 'mobile' : 'desktop'}-${category.id}`} className={mobile ? 'renew-mobile-series-list' : 'renew-series-list'}>
-      {category.sets.map((set) => <a key={set.id} className={`renew-series-item ${RIFTBOUND_SET_PRODUCTS[filters.locale]?.[set.id] ? '' : 'rb-series-text-only'} ${filters.set === set.id ? 'is-active' : ''}`} aria-current={filters.set === set.id ? 'true' : undefined} href={`?game=riftbound&locale=${filters.locale}&set=${set.id}`} onClick={(event) => { event.preventDefault(); selectSet(set.id); }}>
-        {RIFTBOUND_SET_PRODUCTS[filters.locale]?.[set.id] && <SetImage key={`${filters.locale}:${set.id}`} set={set} locale={filters.locale} />}
+      {category.sets.map((set) => <a key={set.id} className={`renew-series-item ${snapshot.products[set.id] ? '' : 'rb-series-text-only'} ${filters.set === set.id ? 'is-active' : ''}`} aria-current={filters.set === set.id ? 'true' : undefined} href={`?game=riftbound&locale=${filters.locale}&set=${set.id}`} onClick={(event) => { event.preventDefault(); selectSet(set.id); }}>
+        {snapshot.products[set.id] && <SetImage key={`${filters.locale}:${set.id}`} set={set} locale={filters.locale} product={snapshot.products[set.id]} />}
         {set.id !== getRiftboundSetName(set, filters.locale) && <b>{set.id}</b>}<span>{getRiftboundSetName(set, filters.locale)}</span>
       </a>)}
     </div>;
   }
+
+  if (!snapshots[filters.locale]) return <main className="renew-card-detail-page rb-catalog"><section className="renew-card-detail-state" aria-live="polite">
+    {loadError ? <><p role="alert">{loadError}</p><button type="button" onClick={() => setRetry((value) => value + 1)}>다시 시도</button></> : <p role="status">카드 불러오는 중...</p>}
+  </section></main>;
 
   if (selectedId) return <main className="renew-card-detail-page rb-catalog">
     {selected ? <CardDetail key={selected.id} card={selected} snapshot={snapshot} entry={collection[selected.id] || { quantity: 0, wished: false }} onChange={(patch) => changeEntry(selected.id, patch)} />

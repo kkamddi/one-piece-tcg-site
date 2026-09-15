@@ -7,6 +7,7 @@ const RATE_LIMITS = {
   communityIndex: 60,
   communityId: 60,
   cardsIndex: 180,
+  riftbound: 180,
   cardsSearch: 180,
   cardsId: 240,
   shopsIndex: 120,
@@ -194,6 +195,7 @@ function routeApi(pathParts) {
   if (first === 'community' && !second) return { key: 'communityIndex' };
   if (first === 'community' && second) return { key: 'communityId', params: { id: second } };
   if (first === 'cards' && !second) return { key: 'cardsIndex' };
+  if (first === 'riftbound' && !second) return { key: 'riftbound' };
   if (first === 'cards' && second === 'search') return { key: 'cardsSearch' };
   if (first === 'cards' && second) return { key: 'cardsId', params: { id: second } };
   if (first === 'shops' && !second) return { key: 'shopsIndex' };
@@ -226,6 +228,7 @@ function getPublicCacheTtl(request, route, url) {
   if (route.key === 'marketIndex') return 3600;
   if (route.key === 'boxMarket') return 900;
   if (route.key === 'psa10Market') return 600;
+  if (route.key === 'riftbound') return 300;
   if (['cardsIndex', 'cardsSearch'].includes(route.key)) return 3600;
   if (route.key === 'cardsId') return 900;
   if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 21600;
@@ -242,6 +245,7 @@ async function loadHandler(key) {
   if (key === 'communityIndex') return (await import('../../api/community/index.js')).default;
   if (key === 'communityId') return (await import('../../api/community/[id].js')).default;
   if (key === 'cardsIndex') return (await import('../../api/cards/index.js')).default;
+  if (key === 'riftbound') return (await import('../../api/riftbound.js')).default;
   if (key === 'cardsSearch') return (await import('../../api/cards/search.js')).default;
   if (key === 'cardsId') return (await import('../../api/cards/[id].js')).default;
   if (key === 'shopsIndex') return (await import('../../api/shops/index.js')).default;
@@ -329,7 +333,7 @@ export async function onRequest(context) {
   const { response, finalize } = createResponseShim();
   try {
     const handler = await loadHandler(route.key);
-    const result = await handler(request, response);
+    const result = await handler(request, response, context.env);
     const finalResponse = result instanceof Response ? result : finalize();
     if (!edgeCache || !cacheRequest || !finalResponse.ok) return finalResponse;
 
