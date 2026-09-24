@@ -77,15 +77,19 @@ function parseCatalogListingCount(value) {
   return match ? Number(match[0]) : 0;
 }
 
-function catalogCardCode(item) {
-  const titleMatch = String(item?.name || '').match(/\[([^\]]+)\]/);
+export function catalogCardCode(item) {
+  const titleMatch = [...String(item?.name || '').matchAll(/\[([^\]]+)\]/g)]
+    .find(match => /^(?:OP|EB|ST|PRB|P|DON|CS|OPC)-?\d/i.test(match[1]));
   const fromTitle = normalizeCatalogText(titleMatch?.[1]);
   const fromProductNumber = normalizeCatalogText(item?.productNumber).replace(/^OPC-TCG-/i, '');
   return fromTitle || fromProductNumber;
 }
 
-function isJapaneseCatalogProduct(item) {
-  return !/\[(EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/i.test(String(item?.name || ''));
+export function catalogProductLocale(item) {
+  const languages = [...String(item?.name || '').matchAll(/\[(JP|EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/gi)]
+    .map(match => match[1].toUpperCase());
+  if (!languages.length) return 'JP';
+  return languages.every(locale => locale === languages[0]) && ['JP', 'EN'].includes(languages[0]) ? languages[0] : null;
 }
 
 function isDiscoverableCatalogCard(item) {
@@ -103,7 +107,7 @@ function toDiscoveredMarketCard(item) {
   return {
     source: 'snkrdunk',
     code: catalogCardCode(item),
-    locale: 'JP',
+    locale: catalogProductLocale(item),
     apparelId,
     name: normalizeCatalogText(item.name),
     setName: parseCatalogSetName(item.name),
@@ -723,7 +727,7 @@ async function discoverNewMarketCards() {
     if (items.length < DISCOVERY_PAGE_SIZE) break;
   }
   const candidates = uniqueByApparelId(fetched
-    .filter(isJapaneseCatalogProduct)
+    .filter(item => catalogProductLocale(item))
     .filter(isDiscoverableCatalogCard)
     .map(toDiscoveredMarketCard));
   const additions = candidates.filter((item) => !knownIds.has(Number(item.apparelId)));
@@ -752,6 +756,10 @@ export default async function handler(request, response) {
   }
 
   const mode = String(request.query?.mode || request.query?.action || '').toLowerCase();
+  if (mode === 'recognition-catalog') {
+    return response.status(200).json({ items: uniqueByApparelId([...marketCards, ...(await fetchDiscoveredMarketCards())])
+      .filter(item => ['JP', 'EN'].includes(item.locale)) });
+  }
   if (mode === 'invalidate-public-cache') {
     const invalidated = await Promise.all([
       invalidateR2Json('public-data/market-latest-v1.json'),

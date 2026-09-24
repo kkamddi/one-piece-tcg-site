@@ -38,10 +38,12 @@ on:
         required: false
         default: "1"
   schedule:
-    # Two complete JP market refreshes per day.
-    # Persist listing-floor history only during the 00:17 UTC run.
+    # Two refreshes per locale per day, subject to the D1 budget profile.
+    # Persist listing-floor history during the first daily run of each locale.
     - cron: "17 0 * * *"
     - cron: "17 12 * * *"
+    - cron: "17 6 * * *"
+    - cron: "17 18 * * *"
 
 concurrency:
   group: market-price-collector
@@ -62,7 +64,7 @@ jobs:
           cloudflare_account_id: ed82677cb22fd8679792f6cff73a00d6
 
   discover:
-    name: Discover newly listed JP cards
+    name: Discover newly listed JP and EN cards
     needs: budget
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -125,7 +127,7 @@ jobs:
         env:
           COLLECTOR_URL: https://www.optcgkorea.com/api/market-collector
           COLLECTOR_TOKEN: ${{ secrets.MARKET_COLLECTOR_TOKEN }}
-          COLLECTOR_SCOPE: ${{ github.event.inputs.scope || 'all-jp' }}
+          COLLECTOR_SCOPE: ${{ github.event.inputs.scope || ((github.event.schedule == '17 6 * * *' || github.event.schedule == '17 18 * * *') && 'all-en' || 'all-jp') }}
           COLLECTOR_MAX_PAGES: ${{ github.event.inputs.max_pages || '120' }}
           COLLECTOR_START_OFFSET: ${{ github.event.inputs.start_offset || '0' }}
           SHARD_ID: ${{ matrix.shard_id }}
@@ -170,10 +172,10 @@ jobs:
 
           # Manual focused/resume runs keep their explicit range. Recurring full scans
           # rotate smaller ranges as D1 approaches the free-tier limit.
-          if [ "$use_shards" = "true" ] && [ "$COLLECTOR_SCOPE" = "all-jp" ] && [ -z "$APPAREL_IDS" ]; then
+          if [ "$use_shards" = "true" ] && { [ "$COLLECTOR_SCOPE" = "all-jp" ] || [ "$COLLECTOR_SCOPE" = "all-en" ]; } && [ -z "$APPAREL_IDS" ]; then
             utc_day=$((10#$(date -u +%s) / 86400))
             schedule_phase=0
-            if [ "$SCHEDULE_EXPRESSION" = "17 12 * * *" ]; then
+            if [ "$SCHEDULE_EXPRESSION" = "17 12 * * *" ] || [ "$SCHEDULE_EXPRESSION" = "17 18 * * *" ]; then
               schedule_phase=1
             fi
             case "${D1_BUDGET_PROFILE:-critical}" in
@@ -224,7 +226,7 @@ jobs:
           done_flag=0
           expected_total=0
           persist_listing_snapshots=0
-          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$SCHEDULE_EXPRESSION" = "17 0 * * *" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && { [ "$SCHEDULE_EXPRESSION" = "17 0 * * *" ] || [ "$SCHEDULE_EXPRESSION" = "17 6 * * *" ]; }; then
             persist_listing_snapshots=1
           fi
           strict_fixed_range=false
@@ -415,7 +417,7 @@ jobs:
             echo "Telegram secrets are not configured; skipping notification."
             exit 0
           fi
-          message="New SNKRDUNK JP cards added: ${ADDED}
+          message="New SNKRDUNK JP/EN cards added: ${ADDED}
           Apparel IDs: ${ADDED_IDS}
           Run: ${RUN_URL}"
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \

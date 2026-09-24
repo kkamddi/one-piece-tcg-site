@@ -3,12 +3,13 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import sharp from 'sharp';
 import cvModule from '@techstark/opencv-js';
-import catalog from '../src/data/market-cards.js';
+import baseCatalog from '../src/data/market-cards.js';
 import { IMAGE_INDEX_VERSION, normalizeCardImage, imageSignature, extractImageFeatures } from '../src/lib/card-image-features.js';
 import { normalizeScanCode } from '../src/lib/card-scan.js';
 
 const cv = await cvModule;
 const args = new URLSearchParams(process.argv.slice(2).map(arg => arg.replace(/^--/, '')).join('&'));
+const catalog = args.has('catalog') ? JSON.parse(await readFile(args.get('catalog'), 'utf8')) : baseCatalog;
 const root = path.resolve(args.get('out') || 'public/card-scan');
 const cache = path.resolve('artifacts/card-image-index-cache');
 const codes = new Set((args.get('codes') || '').split(',').filter(Boolean));
@@ -20,10 +21,24 @@ await mkdir(root, { recursive: true });
 const results = [], failures = [];
 let cursor = 0, done = 0;
 const keyOf = item => `${item.locale}-${item.apparelId}`;
+const existingSignatures = new Map();
+for (const locale of ['JP', 'EN']) {
+  try {
+    const index = JSON.parse(await readFile(path.join(root, `index-${locale}.json`), 'utf8'));
+    if (index.version === IMAGE_INDEX_VERSION) for (const item of index.items) existingSignatures.set(item.key, item.signature);
+  } catch {}
+}
 async function processItem(item) {
   const revision = createHash('sha256').update(`${IMAGE_INDEX_VERSION}:${item.previewImageUrl}`).digest('hex').slice(0, 16);
   const cached = path.join(cache, `${keyOf(item)}-${revision}.json`);
   try { return { ...JSON.parse(await readFile(cached, 'utf8')), code: item.code }; } catch {}
+  if (existingSignatures.has(keyOf(item))) {
+    try {
+      const group = JSON.parse(await readFile(path.join(root, item.locale, `${item.code}.json`), 'utf8'));
+      const previous = group.items.find(entry => entry.key === keyOf(item) && entry.revision === revision);
+      if (group.version === IMAGE_INDEX_VERSION && previous) return { ...previous, signature: existingSignatures.get(keyOf(item)) };
+    } catch {}
+  }
   const url = new URL(item.previewImageUrl);
   if (url.hostname !== 'cdn.snkrdunk.com') throw new Error('unsupported_image_host');
   let bytes;
