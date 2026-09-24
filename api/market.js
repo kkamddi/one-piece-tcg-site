@@ -2,6 +2,7 @@ import { supabaseAdmin } from '../lib/supabase-admin.js';
 import { marketDateTimeLabelFromTimestamp } from '../lib/market-trade-date.js';
 import { readThroughR2Json } from '../lib/r2-json-cache.js';
 import priceChartingMarketLinks from '../src/data/pricecharting-market-links.js';
+import { readTradeQuotes } from '../lib/market-trade-quotes.js';
 
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
@@ -1423,6 +1424,14 @@ async function findStoredMarketCandidates({ apparelId, code }) {
 async function localFallback(params) {
   const { default: marketCards } = await import('../src/data/market-cards.js');
   const summaryMode = String(params.get('summary') || '').toLowerCase();
+  if (summaryMode === 'trade-latest') {
+    if (!shouldReadD1Market()) return { error: 'trade_quotes_unavailable' };
+    const rawIds = params.get('apparelIds');
+    const ids = [...new Set(String(rawIds || '').split(',').map(Number).filter(id => Number.isSafeInteger(id) && id > 0))];
+    if (rawIds !== null && (!ids.length || ids.length > 250)) return { error: 'invalid_apparel_ids' };
+    return ids.length ? readTradeQuotes(queryD1, ids)
+      : readThroughR2Json('public-data/market-trade-quotes-v1.json', 10 * 60 * 1000, () => readTradeQuotes(queryD1));
+  }
   if (summaryMode === 'movers') return readDailyMarketMovers();
   if (summaryMode === 'latest' || summaryMode === 'portfolio') {
     const requestedApparelIds = summaryMode === 'portfolio'
