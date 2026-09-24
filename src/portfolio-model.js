@@ -14,6 +14,7 @@ export function buildPortfolio(holdings = [], quotes = []) {
     const profitJpy = price != null && pricedQuantity > 0 ? price * pricedQuantity - costJpy : null;
     return {
       ...holding, key: holding.id, grade, lots, quantity, pricedQuantity, costJpy, price,
+      priceDate: (grade === 'psa10' ? quote?.psa10TradeDate : quote?.aTradeDate) || null,
       valueJpy: price == null ? null : price * quantity,
       profitJpy,
       returnPercent: profitJpy == null || !costJpy ? null : profitJpy / costJpy * 100,

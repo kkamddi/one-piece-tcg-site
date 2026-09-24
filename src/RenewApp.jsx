@@ -2198,6 +2198,20 @@ function getMarketRangeChartPoints(conditionSeries = {}, range = '7d') {
   return conditionSeries?.[range] || (range === '1y' ? conditionSeries?.all : []) || [];
 }
 
+function getLatestMarketDailyPoint(conditionSeries = {}) {
+  const points = ['all', '1y', '1m', '7d'].map(key => conditionSeries?.[key])
+    .find(value => Array.isArray(value) && value.length) || [];
+  return aggregateMarketDailyChartPoints(points).at(-1) || null;
+}
+
+function getTradeQuotePoint(detail, condition) {
+  const key = condition === 'psa10' ? 'psa10' : 'a';
+  const price = Number(detail?.tradeQuote?.[`${key}PriceJpy`]);
+  const date = detail?.tradeQuote?.[`${key}TradeDate`];
+  if (!Number.isFinite(price) || price <= 0 || !date) return null;
+  return { price, timestamp: Date.parse(`${date}T12:00:00+09:00`) };
+}
+
 function medianMarketNumber(values = []) {
   const sorted = values
     .map((value) => Number(value))
@@ -2305,6 +2319,13 @@ async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
+  if (!summary && apparelId) {
+    const quoteResponse = await fetch(`/api/market?summary=trade-latest&apparelIds=${encodeURIComponent(apparelId)}`);
+    if (!quoteResponse.ok) throw new Error('trade_quote_unavailable');
+    const quotes = await quoteResponse.json();
+    if (quotes?.basis !== 'snkrdunk_latest_trade_day_median') throw new Error('trade_quote_invalid');
+    payload.tradeQuote = quotes.items.find(item => Number(item.apparelId) === Number(apparelId)) || null;
+  }
   return payload;
 }
 
@@ -2367,8 +2388,8 @@ async function loadPortfolioCalculatorQuote(card) {
     apparelId: Number(link.apparelId),
     detail: merged,
     prices: {
-      a: Number(getMarketConditionBucket(merged?.latestByCondition, 'a')?.price || 0),
-      psa10: Number(getMarketConditionBucket(merged?.latestByCondition, 'psa10')?.price || 0)
+      a: getTradeQuotePoint(detail, 'a')?.price || 0,
+      psa10: getTradeQuotePoint(detail, 'psa10')?.price || 0
     },
     sourceUrl: detail?.sourceUrl || ''
   };
@@ -5803,7 +5824,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   const estimatePoint = mode === 'estimate' ? findPortfolioEstimatePoint(detail, grade, purchaseDate) : null;
   const estimatePriceJpy = Number(estimatePoint?.price || 0) || 0;
   const manualPriceJpy = convertPortfolioUnitPriceToJpy(unitPrice, currency);
-  const currentPriceJpy = Number(getMarketConditionBucket(detail?.latestByCondition, grade)?.price || (normalizeMarketConditionKey(item?.grade || initialGrade) === grade ? item?.price : 0) || 0) || 0;
+  const currentPriceJpy = getTradeQuotePoint(detail, grade)?.price || 0;
   const unitPriceJpy = mode === 'current' ? currentPriceJpy : mode === 'manual' ? manualPriceJpy : mode === 'estimate' ? estimatePriceJpy : 0;
 
   const canSave = !saving
@@ -13180,6 +13201,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   const savedViewState = getAppHistoryState().cardMarketViewState || {};
   const [sortMode, setSortMode] = useState(() => ['focus', 'high'].includes(savedViewState.sortMode) ? savedViewState.sortMode : 'focus');
   const [items, setItems] = useState([]);
+  const [quoteError, setQuoteError] = useState(false);
 
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'prices') return;
@@ -13188,13 +13210,22 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
 
   useEffect(() => {
     let cancelled = false;
-    import('./data/market-cards.js')
-      .then((mod) => {
+    setItems([]);
+    setQuoteError(false);
+    Promise.all([import('./data/market-cards.js'), fetch('/api/market?summary=trade-latest').then(async response => {
+      if (!response.ok) throw new Error('quote_unavailable');
+      const payload = await response.json();
+      if (payload?.basis !== 'snkrdunk_latest_trade_day_median' || !Array.isArray(payload.items)) throw new Error('quote_invalid');
+      return payload.items;
+    })])
+      .then(([mod, quotes]) => {
         if (!cancelled && Array.isArray(mod.default)) {
-          setItems(mod.default.filter((item) => String(item?.locale || '').toUpperCase() === marketLocale && item?.apparelId));
+          const byId = new Map(quotes.map(quote => [Number(quote.apparelId), quote]));
+          setItems(mod.default.filter((item) => String(item?.locale || '').toUpperCase() === marketLocale && item?.apparelId)
+            .map(item => ({ ...item, minPrice: Number(byId.get(Number(item.apparelId))?.aPriceJpy || 0) / MARKET_USD_TO_JPY, tradeDate: byId.get(Number(item.apparelId))?.aTradeDate })));
         }
       })
-      .catch(() => {});
+      .catch(() => { if (!cancelled) setQuoteError(true); });
     return () => {
       cancelled = true;
     };
@@ -13212,6 +13243,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
 
   return (
     <section className="renew-box-market renew-card-market renew-card-gallery">
+      {quoteError && <p role="status">{getLocaleText(uiLang, '거래 시세를 불러오지 못했습니다.', 'Trade prices are unavailable.', '取引相場を取得できませんでした。')}</p>}
       <div className="renew-box-market-head">
         <div className="renew-chip-group">
           <button type="button" className={sortMode === 'focus' ? 'is-active' : ''} onClick={() => setSortMode('focus')}>{t('marketCardSortFocus')}</button>
@@ -13230,7 +13262,8 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
               {getMarketVariantLabel(item, uiLang) ? <span className="renew-card-gallery-variant">{getMarketVariantLabel(item, uiLang)}</span> : null}
               <small>{getMarketMetaLine(item)}</small>
               <span>{item.setName}</span>
-              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : t('checkPrice')}</b>
+              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</b>
+              {item.tradeDate && <small>{getLocaleText(uiLang, '거래일 중앙값', 'Trading day median', '取引日中央値')} · {item.tradeDate}</small>}
             </div>
           </a>
         ))}
@@ -13423,7 +13456,14 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           // The D1 catalog fallback is optional; keep static search behavior on failure.
         }
       }
-      const combinedResult = uniqueMarketItems([...expandedResult, ...discoveredItems]);
+      const quoteResponse = await fetch('/api/market?summary=trade-latest');
+      if (!quoteResponse.ok) throw new Error('trade_quote_unavailable');
+      const quotePayload = await quoteResponse.json();
+      if (quotePayload?.basis !== 'snkrdunk_latest_trade_day_median') throw new Error('trade_quote_invalid');
+      const tradeQuotes = new Map(quotePayload.items.map(item => [Number(item.apparelId), item]));
+      const combinedResult = uniqueMarketItems([...expandedResult, ...discoveredItems]).map(item => ({
+        ...item, minPrice: 0, latestPriceJpy: 0, displayPriceJpy: Number(tradeQuotes.get(Number(item.apparelId))?.aPriceJpy || 0)
+      }));
       const discoveredApparelIds = new Set(discoveredItems.map((item) => String(item.apparelId)));
       const shouldSortCandidatesByPrice = !targetApparelId && !exactCodeResult.length;
       const result = combinedResult
@@ -13461,7 +13501,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           try {
             const summary = await fetchMarketPrice({ code: item.code, apparelId: item.apparelId, summary: true });
             const summarySeriesA = getMarketConditionBucket(summary?.series, 'a') || {};
-            const latestPrice = Number(getMarketConditionBucket(summary?.latestByCondition, 'a')?.price || 0);
             const hasSeries = Boolean(
               summarySeriesA['1y']?.length
               || summarySeriesA.all?.length
@@ -13471,7 +13510,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
             );
             return {
               ...item,
-              displayPriceJpy: latestPrice > 0 ? latestPrice : item.displayPriceJpy,
+              displayPriceJpy: item.displayPriceJpy,
               hasMarketHistory: hasSeries
             };
           } catch {
@@ -13684,7 +13723,8 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
     return timestamp && Date.now() - timestamp <= RECENT_SALES_VISIBLE_MS;
   });
   const recentSalesVisible = recentSalesInRange.length ? recentSalesInRange : recentSales;
-  const currentPriceJpy = Number(selectedLatest?.price || (normalizedCondition === 'a' ? selected?.displayPriceJpy || selected?.latestPriceJpy || Number(selected?.minPrice || 0) * MARKET_USD_TO_JPY : 0));
+  const latestDailyPoint = getTradeQuotePoint(marketDetail, normalizedCondition);
+  const currentPriceJpy = latestDailyPoint?.price || 0;
   const validRecentSales = recentSalesVisible.filter((sale) => Number.isFinite(Number(sale.price)) && Number(sale.price) > 0)
     .sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
   const latestSale = validRecentSales[0];
@@ -13694,7 +13734,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const psaSourceUrl = normalizedCondition === 'psa10' && latestSourceUrl && !/snkrdunk\.com/i.test(latestSourceUrl)
     ? latestSourceUrl
     : recentSales.find((sale) => sale?.sourceUrl && !/snkrdunk\.com/i.test(sale.sourceUrl))?.sourceUrl || '';
-  const currentPriceLabel = normalizedCondition === 'psa10' ? t('psa10IntegratedPrice') : t('snkrLowestPrice');
+  const currentPriceLabel = getLocaleText(uiLang, '최근 거래일 중앙값', 'Latest trading day median', '直近取引日の中央値');
   const showMarketHome = !code.trim() && !selected && !candidates.length;
   const canMapInitialCard = authUser?.app_metadata?.role === 'admin' && Boolean(initialCardId);
 
@@ -13820,8 +13860,9 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
                 <p>{selected.setName}</p>
               </div>
               <div className="renew-market-price">
-                <small>{normalizedCondition === 'a' && !selectedLatest?.price ? getLocaleText(uiLang, '검색 시세 · Single', 'Search price · Single', '検索価格・Single') : `${currentPriceLabel} · ${normalizedCondition === 'a' ? 'Single' : 'PSA10'}`}</small>
+                <small>{`${currentPriceLabel} · ${normalizedCondition === 'a' ? 'Single' : 'PSA10'}`}</small>
                 {loading ? <span>{t('marketLoading')}</span> : <RenewMarketMoney value={currentPriceJpy} uiLang={uiLang} />}
+                {!loading && <small>{latestDailyPoint ? formatMarketSaleDate(latestDailyPoint) : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</small>}
               </div>
               <div className="renew-market-actions">
                 {canMapInitialCard ? (

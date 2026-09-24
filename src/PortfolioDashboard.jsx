@@ -70,8 +70,9 @@ export default function PortfolioDashboard({ model, loading, error, signedIn, on
       : <>
         <section className="portfolio-overview" aria-label={t('자산 요약', 'Asset summary', '資産概要')}>
           <div className="portfolio-balance">
-            <span>{model.missingQuotes ? t('확인된 평가액', 'Known market value', '確認済み評価額') : t('총 평가액', 'Market value', '総評価額')}</span>
+            <span>{model.missingQuotes ? t('확인된 평가액', 'Known market value', '確認済み評価額') : t('총 평가액', 'Market value', '総評価額')} · {t('최근 거래일 중앙값', 'Latest trading day median', '直近取引日の中央値')}</span>
             <strong>{money(model.totalJpy)}</strong>
+            {import.meta.env.DEV && model.previousTotalJpy != null && <small>{t('기존 기준', 'Previous basis', '従来の基準')} {money(model.previousTotalJpy)} → {t('거래 기준', 'Trade basis', '取引基準')} {money(model.totalJpy)}</small>}
             <p className={signClass(model.profitJpy)}>{signedMoney(model.profitJpy)} <b>{percent(model.returnPercent)}</b></p>
             <dl className="portfolio-metrics">
               <div><dt>{t('등록 매입금액', 'Recorded cost', '登録購入額')}</dt><dd>{model.costJpy ? money(model.costJpy) : '-'}</dd></div>
@@ -103,7 +104,7 @@ export default function PortfolioDashboard({ model, loading, error, signedIn, on
             {cards.map((card) => <div className="portfolio-asset-row" role="row" key={card.id}>
 <div role="cell" className="portfolio-card-cell"><button type="button" className="portfolio-card-link" onClick={() => onOpenPrices(card)}><PortfolioCardImage card={card} imageSrc={imageSrc} resolveImages={resolveImages} /><span><small>{card.code} · {card.grade === 'a' ? 'Single' : 'PSA10'}</small><strong>{displayName(card)}</strong><small>{card.setName}</small></span></button></div>
               <div role="cell" className="portfolio-cost-cell"><strong>{card.quantity}{t('장', ' units', '枚')}</strong><small>{card.pricedQuantity ? `${money(card.costJpy / card.pricedQuantity)}${card.estimated ? t(' (추정)', ' (est.)', ' (推定)') : ''}` : t('매입가 미등록', 'Cost not set', '購入価格未登録')}</small>{card.pricedQuantity > 0 && card.pricedQuantity < card.quantity && <small>{t(`${card.pricedQuantity}장만 원가 등록`, `Cost on ${card.pricedQuantity} units`, `${card.pricedQuantity}枚のみ価格登録`)}</small>}</div>
-              <div role="cell" className="portfolio-value-cell"><strong>{card.valueJpy == null ? '-' : money(card.valueJpy)}</strong><small>{card.price == null ? t('시세 미확인', 'Price unavailable', '相場未確認') : `${t('단가', 'Unit', '単価')} ${money(card.price)}`}</small></div>
+              <div role="cell" className="portfolio-value-cell"><strong>{card.valueJpy == null ? '-' : money(card.valueJpy)}</strong><small>{card.price == null ? t('거래 기록 없음', 'No trade records', '取引記録なし') : `${t('단가', 'Unit', '単価')} ${money(card.price)}`}</small>{card.priceDate && <small>{card.priceDate}</small>}</div>
               <div role="cell" className={`portfolio-profit-cell ${signClass(card.profitJpy)}`}><strong>{signedMoney(card.profitJpy)}</strong><small>{percent(card.returnPercent)}</small></div>
               <div role="cell" className="portfolio-row-actions"><button type="button" onClick={() => onEdit(card)}>{t('매입 관리', 'Edit purchases', '購入管理')}</button><button type="button" className="portfolio-icon" disabled={Boolean(removing)} onClick={() => remove(card)} aria-label={t(`${card.code} 삭제`, `Remove ${card.code}`, `${card.code}を削除`)} title={t('자산 삭제', 'Remove asset', '資産削除')}>×</button></div>
             </div>)}
