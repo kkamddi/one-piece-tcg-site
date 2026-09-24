@@ -26,28 +26,23 @@ jobs:
         with:
           node-version: 22
 
-      - id: budget
-        uses: ./.github/actions/d1-budget
-        with:
-          cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          cloudflare_account_id: ed82677cb22fd8679792f6cff73a00d6
-
-      - name: Apply adaptive index refresh range
+      - name: Apply paid-plan index refresh range
         env:
-          D1_BUDGET_PROFILE: ${{ steps.budget.outputs.profile }}
           REQUESTED_MAX_PAGES: ${{ github.event.inputs.max_pages || '5' }}
         run: |
-          case "${D1_BUDGET_PROFILE:-critical}" in
-            normal) pages="$REQUESTED_MAX_PAGES"; recovery_pages=20; days=3 ;;
-            conserve) pages=2; recovery_pages=10; days=2 ;;
-            critical|protect|*) pages=1; recovery_pages=1; days=1 ;;
-          esac
+          if ! [[ "$REQUESTED_MAX_PAGES" =~ ^[0-9]{1,3}$ ]] || (( 10#$REQUESTED_MAX_PAGES < 1 || 10#$REQUESTED_MAX_PAGES > 100 )); then
+            echo "max_pages must be an integer between 1 and 100."
+            exit 1
+          fi
+          pages=$((10#$REQUESTED_MAX_PAGES))
+          recovery_pages=100
+          days=3
           echo "TRADING_HISTORY_MAX_PAGES=$pages" >> "$GITHUB_ENV"
           echo "TRADING_HISTORY_RECOVERY_MAX_PAGES=$recovery_pages" >> "$GITHUB_ENV"
           echo "BACKFILL_RECENT_RAW_DAYS=$days" >> "$GITHUB_ENV"
           echo "BACKFILL_DAILY_DAYS=$days" >> "$GITHUB_ENV"
           echo "MARKET_INDEX_REBUILD_WINDOW_DAYS=$days" >> "$GITHUB_ENV"
-          echo "D1 ${D1_BUDGET_PROFILE} profile: index history pages=$pages recovery_pages=$recovery_pages days=$days"
+          echo "Paid-plan index history: pages=$pages recovery_pages=$recovery_pages days=$days; stop at the date cutoff."
 
       - name: Resolve index component cards
         run: |
