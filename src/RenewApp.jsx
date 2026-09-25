@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { Capacitor } from '@capacitor/core';
 import { fetchAdminStats, fetchPopularSearches, trackPopularSearch, trackVisit } from './api/admin';
@@ -15856,6 +15856,15 @@ export default function RenewApp() {
   const [authUser, setAuthUser] = useState(null);
   const [authResolved, setAuthResolved] = useState(!supabase);
   const [notifications, setNotifications] = useState([]);
+  const notificationSessionRef = useRef(null);
+  useLayoutEffect(() => {
+    const session = { userId: authUser?.id || null, request: 0 };
+    notificationSessionRef.current = session;
+    setNotifications([]);
+    return () => {
+      if (notificationSessionRef.current === session) notificationSessionRef.current = null;
+    };
+  }, [authUser?.id]);
   const [authOpen, setAuthOpen] = useState(Boolean(initialAuthCallbackError));
   const [authErrorMessage, setAuthErrorMessage] = useState(() => initialAuthCallbackError ? getSocialAuthErrorMessage(initialAuthCallbackError) : '');
   const [accountOpen, setAccountOpen] = useState(false);
@@ -15922,11 +15931,17 @@ export default function RenewApp() {
     setHasContextualRouteBack(Boolean(contextualRouteBackRef.current));
   }, []);
   const refreshNotifications = useCallback(async () => {
-    if (!authUser?.id) {
-      setNotifications([]);
-      return;
+    const session = notificationSessionRef.current;
+    if (!authUser?.id || session?.userId !== authUser.id) return;
+    const request = ++session.request;
+    let payload;
+    try {
+      payload = await fetchMarketplaceNotifications();
+    } catch (error) {
+      if (notificationSessionRef.current === session && request === session.request) setNotifications([]);
+      throw error;
     }
-    const payload = await fetchMarketplaceNotifications();
+    if (notificationSessionRef.current !== session || request !== session.request) return;
     setNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
   }, [authUser?.id]);
 
@@ -16176,16 +16191,12 @@ export default function RenewApp() {
       setNotifications([]);
       return undefined;
     }
-    let cancelled = false;
-    const load = () => refreshNotifications().catch(() => {
-      if (!cancelled) setNotifications([]);
-    });
+    const load = () => refreshNotifications().catch(() => {});
     load();
     const timer = window.setInterval(load, 60_000);
     const handleFocus = () => load();
     window.addEventListener('focus', handleFocus);
     return () => {
-      cancelled = true;
       window.clearInterval(timer);
       window.removeEventListener('focus', handleFocus);
     };
