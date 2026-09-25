@@ -42,3 +42,11 @@ AAB 2FF0072CE1F3CEDA19BC088A7C4BF3E5DE3D65BE6C6B624951309F64518B3774
 - A website deployment does not update installed Android UI code. Distribute the newly built app separately after the remaining Play release gates are satisfied.
 
 Supabase error classification reference: https://supabase.com/docs/guides/auth/debugging/error-codes
+
+## Post-Release Local Notes
+
+- Production commit: `ba146108f2e5bed7c85a1097abab8d73b80da8e0`. Production deploy run `34596662940` and Secret scan run `34596662969` succeeded.
+- Live `/api/me` and `/api/push-subscriptions` both returned 401 for absent and synthetic-invalid tokens, with `Cache-Control: no-store, private`. `/news/guide`, `/news/faq`, and `/lab` returned 200.
+- Final APK photo-input flow was repeated after the edge fix. The synthetic 60:40 / 50:50 fixture, using automatic outer bounds and manually dragged inner edges, displayed 61.8:38.2 / 47.5:52.5. This is functional interaction evidence with residual selection/sampling error, not exact calibration or physical-card accuracy approval.
+- Original fine/coarse location, camera, and notification permission grants were verified restored. No account mutation or live test notification occurred.
+- These post-release observations were recorded locally after the production commit; no second deployment was triggered for this documentation-only addition.

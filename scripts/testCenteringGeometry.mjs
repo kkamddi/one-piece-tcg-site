@@ -7,7 +7,8 @@ import { parse } from '@babel/parser';
 const source = await readFile(new URL('../src/CenteringLab.jsx', import.meta.url), 'utf8');
 const ast = parse(source, { sourceType: 'module', plugins: ['jsx'] });
 const names = ['clamp', 'median', 'getLineContrast', 'findStrongestEdge', 'polygonArea', 'pointDistance', 'denormalizeCornerPoints', 'getOutlineValidation',
-  'getAxisRatio', 'getWorseAxisRatio', 'getCenteringReport', 'boundariesToFrame', 'frameToBoundaries'];
+  'getAxisRatio', 'getWorseAxisRatio', 'getCenteringReport', 'boundariesToFrame', 'frameToBoundaries',
+  'getLumaData', 'detectBoundary', 'analyzeCapturedCanvas'];
 const context = vm.createContext({});
 for (const name of names) {
   const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === name);
@@ -56,4 +57,32 @@ test('equal-contrast edge plateaus use their center rather than biasing both bor
   assert.equal(left.position, 79.5);
   assert.equal(right.position, 119.5);
   assert.equal((left.position + right.position) / 2, 99.5);
+});
+
+function analyzeSyntheticCard({ left = 19, right = 302, top = 22, bottom = 418, blank = false } = {}) {
+  const width = 315, height = 440;
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const value = !blank && x >= left && x < right && y >= top && y < bottom ? 30 : 240;
+      data.set([value, value, value, 255], (y * width + x) * 4);
+    }
+  }
+  context.document = { createElement: () => ({ getContext: () => ({
+    drawImage() {}, getImageData: () => ({ width, height, data })
+  }) }) };
+  return context.analyzeCapturedCanvas({});
+}
+
+test('captured image analysis uses detected asymmetric borders, not a fixed 50:50 guide', () => {
+  const analysis = analyzeSyntheticCard();
+  const report = context.getCenteringReport(analysis.boundaries);
+  assert.ok(Math.abs(report.left - 59.375) < 0.1);
+  assert.ok(Math.abs(report.top - 50) < 0.1);
+  assert.ok(analysis.confidence > 0.8);
+});
+
+test('blank images and an undetected edge cannot receive high detection confidence', () => {
+  assert.equal(analyzeSyntheticCard({ blank: true }).confidence, 0);
+  assert.equal(analyzeSyntheticCard({ left: 0 }).confidence, 0);
 });

@@ -171,7 +171,8 @@ export async function fetchCards(filters = {}) {
   const url = `${API_BASE}${buildQuery({ ...filters, catalog: CARD_CATALOG_REVISION })}`;
   return safeFetchJson(url, async () => {
     const cardsFallback = await loadCardsFallback();
-    const filtered = cardsFallback.filter((card) => matchesCardFilters(card, filters));
+    const filtered = filterFallbackCards(cardsFallback, filters.q || '', filters.locale)
+      .filter((card) => matchesCardFilters(card, filters));
     const limit = Number(filters.limit || 0);
     const page = Math.max(1, Number(filters.page || 1));
     return limit > 0 ? filtered.slice((page - 1) * limit, page * limit) : filtered;

@@ -30,7 +30,7 @@ function prepareRegion(source, region) {
   return canvas;
 }
 
-export async function recognizeCardCodes(canvas, { signal, onProgress = () => {}, getFallbackCanvas = async () => null, onAttempt = () => {} }) {
+export async function recognizeCardCodes(canvas, { signal, onProgress = () => {}, getFallbackCanvas = async () => null, onAttempt = () => {}, workerOptions = {} }) {
   let worker;
   let pass = 0;
   let abort;
@@ -43,6 +43,7 @@ export async function recognizeCardCodes(canvas, { signal, onProgress = () => {}
     if (signal.aborted) throw aborted();
     const pendingWorker = createWorker('eng', 1, {
       workerPath,
+      ...workerOptions,
       errorHandler: () => {},
       logger: message => {
         if (!signal.aborted) onProgress({ phase: message.status === 'recognizing text' ? 'reading' : 'loading', progress: Math.min(99, Math.round((pass + (message.progress || 0)) * 100 / 12)) });

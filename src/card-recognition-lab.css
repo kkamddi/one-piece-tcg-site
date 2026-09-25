@@ -1,0 +1,23 @@
+.recognition-lab{max-width:1100px;margin:0 auto;padding:24px;color:#191b1d;background:#fff;min-height:100vh;font-family:inherit;letter-spacing:0}
+.recognition-lab *{box-sizing:border-box;letter-spacing:0}
+.recognition-head,.recognition-title,.recognition-tools,.recognition-run{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.recognition-head{justify-content:space-between;border-bottom:1px solid #e2e4e7;padding-bottom:18px;font-size:12px;color:#626a73}
+.recognition-head a{font-size:21px;font-weight:800;color:#191b1d;text-decoration:none}.recognition-head a span{color:#e7442b}
+.recognition-title{justify-content:space-between;margin:24px 0}.recognition-title h1{font-size:24px;margin:0;font-weight:750}
+.recognition-lab button,.recognition-lab select,.recognition-lab input:not([type=checkbox]),.recognition-price{font:inherit;border:1px solid #dce0e4;border-radius:6px;background:#fff;color:inherit;padding:9px 12px;min-height:40px}
+.recognition-lab button{cursor:pointer}.recognition-lab button:disabled{opacity:.45;cursor:default}.recognition-lab button:hover:not(:disabled){border-color:#767f88}.recognition-lab :focus-visible{outline:2px solid #d94a32;outline-offset:3px}
+.recognition-lab .is-primary,.recognition-price{background:#191b1d;color:#fff;border-color:#191b1d;text-decoration:none;text-align:center}
+.recognition-workspace{display:grid;grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:36px}.recognition-source,.recognition-results{min-width:0}
+.recognition-upload{min-height:270px;background:#f4f5f6;display:flex;align-items:center;justify-content:center;padding:16px;border:1px solid #e2e4e7;border-radius:6px}
+.recognition-photo{position:relative;max-width:100%;width:fit-content;line-height:0}.recognition-photo img{display:block;max-height:430px;max-width:100%;width:auto;height:auto;user-select:none}.recognition-photo.is-cropping{touch-action:none;cursor:crosshair}
+.recognition-crop{position:absolute;border:2px solid #d94730;background:#e7442b22;pointer-events:none}.recognition-empty{min-height:220px;width:100%}
+.recognition-tools{margin:12px 0}.recognition-tools button[aria-pressed=true]{border-color:#e7442b;background:#fff2ee}
+.recognition-lab fieldset{margin:18px 0;padding:0;border:0;display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px}.recognition-lab legend{margin-bottom:10px;font-size:14px;font-weight:700}.recognition-lab label{display:flex;flex-direction:column;gap:7px;font-size:13px}.recognition-lab select,.recognition-lab input{width:100%;min-width:0}
+.recognition-status{font-size:13px;color:#58626d;min-height:22px}.recognition-error{font-size:13px;color:#a73c28;line-height:1.6}
+.recognition-results h2{font-size:18px;margin:0 0 16px}.recognition-results h2 span{font-size:13px;color:#737c84}.recognition-pending{padding:56px 0;color:#737c84;border-top:1px solid #e2e4e7;text-align:center}
+.recognition-candidates{display:grid;gap:10px;margin-bottom:12px}.recognition-lab .recognition-candidate{display:grid;grid-template-columns:76px minmax(0,1fr);gap:16px;text-align:left;padding:14px;min-height:138px;border-radius:6px}
+.recognition-candidate img{width:76px;height:106px;object-fit:contain;align-self:center}.recognition-candidate-info{display:flex;flex-direction:column;gap:6px;min-width:0}.recognition-candidate-info strong{font-size:14px;line-height:1.45;overflow-wrap:anywhere}.recognition-candidate-info small{font-size:11px;color:#626a73;overflow-wrap:anywhere}.recognition-candidate-info>span{font-size:12px;color:#19665a}
+.recognition-image-missing{width:76px;height:106px;display:grid;place-items:center;background:#f4f5f6;color:#737c84;font-size:11px}
+.recognition-lab .recognition-candidate.is-selected{border-color:#e7442b;background:#fff8f5}.recognition-selection{border-top:1px solid #dde1e4;margin-top:24px;padding-top:20px}.recognition-selection h3{font-size:15px;margin:0 0 12px}.recognition-selection p{font-size:14px;line-height:1.5;overflow-wrap:anywhere}.recognition-selection label{flex-direction:row;align-items:center;margin:16px 0}.recognition-selection input{width:16px;height:16px}.recognition-price{display:inline-block}
+.recognition-guide{border-block:1px solid #e2e4e7;margin-bottom:22px;padding:14px 0;font-size:13px;line-height:1.7}.recognition-guide h2{font-size:16px;margin:0}
+@media(max-width:700px){.recognition-lab{padding:16px}.recognition-workspace{grid-template-columns:minmax(0,1fr);gap:24px}.recognition-photo img{max-height:330px}.recognition-title h1{font-size:21px}.recognition-upload{min-height:220px}.recognition-title{margin:18px 0}}

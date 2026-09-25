@@ -67,7 +67,7 @@ function printFindings(findings, heading) {
 }
 
 if (process.argv.includes('--history')) {
-  const commits = execFileSync('git', ['rev-list', '--all'], { encoding: 'utf8' })
+  const commits = execFileSync('git', ['rev-list', '--all'], { encoding: 'utf8', windowsHide: true })
     .split(/\r?\n/)
     .filter(Boolean);
   const unique = new Map();
@@ -76,7 +76,7 @@ if (process.argv.includes('--history')) {
     const files = execFileSync(
       'git',
       ['diff-tree', '--root', '-m', '--no-commit-id', '--name-only', '-z', '-r', '--diff-filter=AMCR', commit],
-      { encoding: 'utf8' },
+      { encoding: 'utf8', windowsHide: true },
     ).split('\0').filter(Boolean);
 
     for (const file of new Set(files)) {
@@ -85,6 +85,7 @@ if (process.argv.includes('--history')) {
         source = execFileSync('git', ['show', `${commit}:${file}`], {
           encoding: 'utf8',
           maxBuffer: 20 * 1024 * 1024,
+          windowsHide: true,
           stdio: ['ignore', 'pipe', 'ignore'],
         });
       } catch {
@@ -106,7 +107,7 @@ if (process.argv.includes('--history')) {
   process.exit(0);
 }
 
-const tracked = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
+const tracked = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8', windowsHide: true })
   .split('\0')
   .filter(Boolean);
 const findings = [];

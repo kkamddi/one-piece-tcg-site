@@ -1,7 +1,7 @@
-import { IMAGE_INDEX_VERSION, signatureDistance } from './card-image-features.js';
+import { IMAGE_INDEX_VERSION, shortlistImageCodes } from './card-image-features.js';
 
-export function createCardImageSession(signal) {
-  const worker = new Worker(new URL('./card-image-worker.js', import.meta.url), { type: 'module' });
+export function createCardImageSession(signal, { worker: suppliedWorker, readIndex: suppliedReadIndex } = {}) {
+  const worker = suppliedWorker || new Worker(new URL('./card-image-worker.js', import.meta.url), { type: 'module' });
   const pending = new Map();
   let id = 0, stopped = false, signatures = [];
   function dispose() {
@@ -32,6 +32,7 @@ export function createCardImageSession(signal) {
     });
   }
   async function readIndex(file) {
+    if (suppliedReadIndex) return suppliedReadIndex(file);
     const controller = new AbortController();
     const abort = () => controller.abort();
     signal.addEventListener('abort', abort, { once: true });
@@ -65,11 +66,7 @@ export function createCardImageSession(signal) {
       let codes = code ? [code] : [];
       if (!code) {
         const index = await readIndex(`index-${locale}`);
-        const ranked = index.items.map(item => {
-          const signature = Array.from(atob(item.signature), c => c.charCodeAt(0));
-          return { code: item.code, distance: Math.min(...signatures.map(value => signatureDistance(value, signature))) };
-        }).sort((a, b) => a.distance - b.distance);
-        codes = [...new Set(ranked.slice(0, 40).map(item => item.code))].slice(0, 24);
+        codes = shortlistImageCodes(index.items, signatures);
       }
       const references = [];
       let cursor = 0, missing = 0;

@@ -1,0 +1,9 @@
+// Run from android: gradlew -I ../scripts/validateAndroidBundle.gradle validateReleaseBundle
+gradle.projectsEvaluated {
+    def root = gradle.rootProject
+    root.tasks.register('validateReleaseBundle', JavaExec) {
+        classpath = root.buildscript.configurations.classpath
+        mainClass = 'com.android.tools.build.bundletool.BundleToolMain'
+        args 'validate', "--bundle=${root.file('app/build/outputs/bundle/release/app-release.aab')}"
+    }
+}

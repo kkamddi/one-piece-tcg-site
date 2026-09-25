@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { Capacitor } from '@capacitor/core';
 import { fetchAdminStats, fetchPopularSearches, trackPopularSearch, trackVisit } from './api/admin';
@@ -114,6 +114,7 @@ const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-25-lab-tools';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
+const PORTFOLIO_RATES = { krwPerJpy: MARKET_USD_TO_KRW / MARKET_USD_TO_JPY, jpyPerUsd: MARKET_USD_TO_JPY };
 const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
@@ -6092,7 +6093,7 @@ export async function resolvePortfolioImages(card) {
 }
 
 function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPortfolioHoldings, stateLoading, portfolioError, onRetry, onRequireLogin, onOpenPrices, uiLang }) {
-  const model = usePortfolioValuation(portfolioHoldings);
+  const model = usePortfolioValuation(portfolioHoldings, PORTFOLIO_RATES);
   const [editor, setEditor] = useState(null);
   const t = (ko, en, jp) => getLocaleText(uiLang, ko, en, jp);
   const applyHoldings = (payload) => setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
@@ -6111,7 +6112,7 @@ function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPort
 
 function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, onOpenPortfolio, onRequireLogin, portfolioError, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
-  const portfolio = usePortfolioValuation(portfolioHoldings);
+  const portfolio = usePortfolioValuation(portfolioHoldings, PORTFOLIO_RATES);
   const marketCards = portfolio.cards;
   const marketTotalJpy = portfolio.totalJpy;
   const [renewalNoticeOpen, setRenewalNoticeOpen] = useState(false);
@@ -12556,7 +12557,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             r={hitRadius}
             tabIndex="0"
             role="button"
-            aria-label={`${formatMarketDate(point.timestamp)} ${getLocalizedCurrencyText(point.price, uiLang)}`}
+            aria-label={`${formatMarketDate(point.timestamp)} ${formatMarketPrimaryPrice(point.price, uiLang)}`}
             onClick={() => setSelectedIndex(index)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -14727,6 +14728,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     const rule = activeLegalityRules.get(getDeckCardNo(entry.card));
     return rule && Number(entry.count || 0) > Number(rule.max_copies ?? 4);
   });
+  const legalityRulesAvailable = Boolean(activeEnvironment?.id && Array.isArray(deckReferenceData?.legalityRules));
   const categoryCounts = entries.reduce((counts, entry) => {
     const category = String(entry.card.category || entry.card.categoryKo || 'OTHER').toUpperCase();
     const key = category.includes('CHARACTER') || category.includes('캐릭터') ? 'character'
@@ -14752,6 +14754,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
 
   useEffect(() => {
     let cancelled = false;
+    setDeckReferenceData(null);
     fetchDeckLabReference(environment)
       .then((payload) => {
         if (!cancelled) setDeckReferenceData(payload?.configured === false ? null : payload);
@@ -15055,8 +15058,10 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
       valid: Boolean(deckBuilder.leader) && invalidColorEntries.length === 0
     },
     {
-      label: getLocaleText(uiLang, '금지·제한 카드 규칙', 'Banned and restricted cards', '禁止・制限カード'),
-      valid: invalidLegalityEntries.length === 0
+      label: legalityRulesAvailable
+        ? getLocaleText(uiLang, '금지·제한 카드 규칙', 'Banned and restricted cards', '禁止・制限カード')
+        : getLocaleText(uiLang, '금지·제한 규칙 확인 불가', 'Banned/restricted rules unavailable', '禁止・制限ルールを確認できません'),
+      valid: legalityRulesAvailable && invalidLegalityEntries.length === 0
     }
   ];
 
@@ -15856,6 +15861,15 @@ export default function RenewApp() {
   const [authUser, setAuthUser] = useState(null);
   const [authResolved, setAuthResolved] = useState(!supabase);
   const [notifications, setNotifications] = useState([]);
+  const notificationSessionRef = useRef(null);
+  useLayoutEffect(() => {
+    const session = { userId: authUser?.id || null, request: 0 };
+    notificationSessionRef.current = session;
+    setNotifications([]);
+    return () => {
+      if (notificationSessionRef.current === session) notificationSessionRef.current = null;
+    };
+  }, [authUser?.id]);
   const [authOpen, setAuthOpen] = useState(Boolean(initialAuthCallbackError));
   const [authErrorMessage, setAuthErrorMessage] = useState(() => initialAuthCallbackError ? getSocialAuthErrorMessage(initialAuthCallbackError) : '');
   const [accountOpen, setAccountOpen] = useState(false);
@@ -15922,11 +15936,17 @@ export default function RenewApp() {
     setHasContextualRouteBack(Boolean(contextualRouteBackRef.current));
   }, []);
   const refreshNotifications = useCallback(async () => {
-    if (!authUser?.id) {
-      setNotifications([]);
-      return;
+    const session = notificationSessionRef.current;
+    if (!authUser?.id || session?.userId !== authUser.id) return;
+    const request = ++session.request;
+    let payload;
+    try {
+      payload = await fetchMarketplaceNotifications();
+    } catch (error) {
+      if (notificationSessionRef.current === session && request === session.request) setNotifications([]);
+      throw error;
     }
-    const payload = await fetchMarketplaceNotifications();
+    if (notificationSessionRef.current !== session || request !== session.request) return;
     setNotifications(Array.isArray(payload?.notifications) ? payload.notifications : []);
   }, [authUser?.id]);
 
@@ -16176,16 +16196,12 @@ export default function RenewApp() {
       setNotifications([]);
       return undefined;
     }
-    let cancelled = false;
-    const load = () => refreshNotifications().catch(() => {
-      if (!cancelled) setNotifications([]);
-    });
+    const load = () => refreshNotifications().catch(() => {});
     load();
     const timer = window.setInterval(load, 60_000);
     const handleFocus = () => load();
     window.addEventListener('focus', handleFocus);
     return () => {
-      cancelled = true;
       window.clearInterval(timer);
       window.removeEventListener('focus', handleFocus);
     };

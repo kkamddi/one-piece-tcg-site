@@ -454,9 +454,12 @@ export const PROMO_COLLECTION_GROUPS = mapCollectionGroups([
   }
 ]);
 
-const championshipCardCount = Object.values(CHAMPIONSHIP_COLLECTION_GROUPS)
-  .flatMap((groups) => groups)
-  .reduce((total, group) => total + group.cards.length, 0);
+export const CHAMPIONSHIP_CARD_IDS = [...new Set(Object.values(CHAMPIONSHIP_COLLECTION_GROUPS)
+  .flatMap((groups) => groups.flatMap((group) => group.cards.map((card) => card.cardId))))];
+export const CHAMPIONSHIP_CARD_COUNTS = Object.fromEntries(['JP', 'KR'].map((locale) => [
+  locale, CHAMPIONSHIP_CARD_IDS.filter((id) => id.startsWith(`${locale}::`)).length
+]));
+const championshipCardCount = CHAMPIONSHIP_CARD_IDS.length;
 const flagshipCardCount = Object.values(FLAGSHIP_COLLECTION_GROUPS)
   .flatMap((groups) => groups)
   .reduce((total, group) => total + group.cards.length, 0);
