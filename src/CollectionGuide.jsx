@@ -3,6 +3,8 @@ import { fetchCardsByIds } from './api/cards';
 import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 import {
   CHAMPIONSHIP_COLLECTION_GROUPS,
+  CHAMPIONSHIP_CARD_IDS,
+  CHAMPIONSHIP_CARD_COUNTS,
   FLAGSHIP_COLLECTION_GROUPS,
   MANGA_COLLECTION_GROUPS,
   PROMO_COLLECTION_GROUPS
@@ -90,11 +92,10 @@ export default function CollectionGuide({ onOpenCard }) {
   const [error, setError] = useState(false);
   const cardIds = useMemo(() => {
     if (isCollectionOverview) return [];
+    if (activeSection === 'championship') return CHAMPIONSHIP_CARD_IDS;
     const groups = activeSection === 'manga'
       ? MANGA_COLLECTION_GROUPS
-      : activeSection === 'championship'
-        ? Object.values(CHAMPIONSHIP_COLLECTION_GROUPS).flat()
-        : activeSection === 'flagship'
+      : activeSection === 'flagship'
           ? FLAGSHIP_COLLECTION_GROUPS.JP
           : PROMO_COLLECTION_GROUPS;
     return groups.flatMap((group) => group.cards.map((card) => card.cardId));
@@ -131,7 +132,7 @@ export default function CollectionGuide({ onOpenCard }) {
         <h1>{sectionMeta.title}</h1>
         <dl>
           <div><dt>현재 범위</dt><dd>{isCollectionOverview ? '수집 방향' : sectionMeta.locale}</dd></div>
-          <div><dt>{isCollectionOverview ? '비교 분류' : '가이드 수록'}</dt><dd>{isCollectionOverview ? '4가지' : `${cardIds.length}건`}</dd></div>
+          <div><dt>{isCollectionOverview ? '비교 분류' : '가이드 수록'}</dt><dd>{isCollectionOverview ? '4가지' : activeSection === 'championship' ? `JP ${CHAMPIONSHIP_CARD_COUNTS.JP}종 · KR ${CHAMPIONSHIP_CARD_COUNTS.KR}종` : `${cardIds.length}건`}</dd></div>
           <div><dt>{isCollectionOverview ? '본문 검수' : '기준'}</dt><dd>{isCollectionOverview ? COLLECTION_EDITORIAL.reviewedAt : '2026.08'}</dd></div>
         </dl>
       </header>
