@@ -14,7 +14,7 @@ unauthorized. Earlier evidence is in `site-verification-2026-09-26.md`.
 | Sitemap and static generation | Existing generators produced 154 primary URLs, 99 Japanese URLs and 828 HTML pages | Generator writes redirected into the isolated build |
 | Route artifacts | 257 unique sitemap/required paths checked for HTML, title, canonical markup and referenced assets | Portfolio pages also checked for noindex; this is not every interactive flow |
 | Runtime dependencies | `npm audit --omit=dev`: zero reported vulnerabilities | Point-in-time advisory result, not a guarantee of absence |
-| Build tools | Full `npm audit`: seven high and one moderate finding | Security update awaiting permission; no packages installed/updated |
+| Build tools | Initially seven high and one moderate finding; after approved updates, full `npm audit`: zero | See security-update follow-up below |
 | Supabase advisor | Read-only security check completed | Info notices and a leaked-password-protection warning; no policy/config changes |
 | Built UI | Pack simulation rendered ten cards; profit calculation/reset matched expected values | Prices unavailable in isolated preview are not treated as verified |
 | Guest deck | Leader selection, local persistence across reload, four-card maximum and fifth-card rejection checked | No signed-in deck writes or production ranking submissions |
@@ -47,11 +47,7 @@ creates and removes only its validated temporary fixture directory.
 
 ## Findings still requiring action or separate scope
 
-1. Full dependency audit reports `@xmldom/xmldom`, `brace-expansion`, `browserslist`,
-   `nanoid`, `postcss`, `sharp` and `tar` at high severity, and
-   `baseline-browser-mapping` at moderate severity. All are in the development
-   dependency graph for this audit. Review compatible updates, then repeat the
-   entire test/build check after approval. No `npm audit fix` was run.
+1. The dependency findings were resolved after approval; see the follow-up below.
 2. The build warns about large chunks and OpenCV's browser-externalized `fs` and
    `crypto` imports. Successful bundling does not establish acceptable cold-load
    performance or all OpenCV worker paths. Do not suppress warnings as a fix.
@@ -69,3 +65,28 @@ creates and removes only its validated temporary fixture directory.
 No credentials, account identifiers, private user records or local machine paths
 are included in this report. Temporary build outputs are reproducible and are not
 code-backup artifacts. Signing-key backup remains a separate unverified task.
+
+## Approved security-update follow-up
+
+- The owner approved compatible security updates subject to functional validation.
+  Ran `npm audit fix --ignore-scripts --no-fund` without `--force`. Only
+  `package-lock.json` changed; `package.json` ranges and application source were
+  unchanged in this follow-up. Updates include Sharp 0.35.4, PostCSS 8.5.28,
+  nanoid 3.3.19, tar 7.5.22 and the associated compatible dependency updates.
+- Full `npm audit` now reports zero known vulnerabilities across development and
+  runtime dependencies. This is a point-in-time advisory result.
+- Reran all 249 automated tests: all passed, none skipped. A native Sharp PNG
+  creation/metadata round trip also passed with lifecycle install scripts disabled.
+- Fresh isolated Vite production build, all three sitemap/SEO generators, and
+  257 route/artifact checks passed again; 828 static HTML pages were generated.
+  Existing large-chunk and OpenCV browser-externalization warnings remain.
+- In the rebuilt browser, the reference profit example still returned cost 21,000,
+  proceeds 24,000, profit 3,000 and return 14.29%. Guest deck persistence, the
+  unavailable-rules warning, and offline code search were preserved.
+- `npm ls --all` reported two extraneous optional WASM-related packages
+  (`@img/sharp-wasm32`, `@emnapi/runtime`). The native image operation and full
+  tests/build passed; no manual package-directory deletion was performed. This
+  diagnostic is not represented as a completely clean installation tree.
+- No regression was found in the checks performed. This does not certify every
+  external-provider flow or authorize production deployment. No main changes,
+  production deployment, authentication/DB changes or paid service changes ran.
