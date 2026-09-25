@@ -904,8 +904,11 @@ function detectBoundary(luma, width, height, axis, startRatio, endRatio) {
   }
   const baseline = median(scores.map((item) => item.score));
   const best = scores.reduce((current, item) => item.score > current.score ? item : current, scores[0] || { position: start, score: 0 });
+  const bestIndex = scores.indexOf(best);
+  let plateauEnd = bestIndex;
+  while (plateauEnd + 1 < scores.length && scores[plateauEnd + 1].score === best.score) plateauEnd += 1;
   return {
-    position: best.position,
+    position: (best.position + scores[plateauEnd].position + 1) / 2,
     confidence: clamp((best.score - baseline) / Math.max(best.score + 8, 1), 0, 1)
   };
 }
@@ -928,10 +931,15 @@ function analyzeCapturedCanvas(canvas) {
   const right = detectBoundary(luma, sample.width, sample.height, 'x', 0.78, 0.975);
   const top = detectBoundary(luma, sample.width, sample.height, 'y', 0.025, 0.22);
   const bottom = detectBoundary(luma, sample.width, sample.height, 'y', 0.78, 0.975);
-  const boundaries = getRecommendedPrintBoundaries();
+  const boundaries = {
+    left: left.position / sample.width * 100,
+    right: (sample.width - right.position) / sample.width * 100,
+    top: top.position / sample.height * 100,
+    bottom: (sample.height - bottom.position) / sample.height * 100
+  };
   return {
     boundaries,
-    confidence: (left.confidence + right.confidence + top.confidence + bottom.confidence) / 4
+    confidence: Math.min(left.confidence, right.confidence, top.confidence, bottom.confidence)
   };
 }
 
@@ -1493,7 +1501,7 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
       setAutomaticBoundaryFrame(nextBoundaryFrame);
       setIsAdvancedBoundary(false);
       const perspectiveScore = 1 - clamp((Math.max(validation.horizontalPerspective, validation.verticalPerspective) - 1) / 1.2, 0, 1);
-      setConfidence(clamp(0.55 + analysis.confidence * 0.25 + perspectiveScore * 0.2, 0, 1));
+      setConfidence(clamp(analysis.confidence * (0.8 + perspectiveScore * 0.2), 0, 1));
       await sleep(240);
       setPhase('boundary');
     } catch {
