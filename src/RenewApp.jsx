@@ -12556,7 +12556,7 @@ function RenewMarketChart({ points = [], uiLang, range }) {
             r={hitRadius}
             tabIndex="0"
             role="button"
-            aria-label={`${formatMarketDate(point.timestamp)} ${getLocalizedCurrencyText(point.price, uiLang)}`}
+            aria-label={`${formatMarketDate(point.timestamp)} ${formatMarketPrimaryPrice(point.price, uiLang)}`}
             onClick={() => setSelectedIndex(index)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
