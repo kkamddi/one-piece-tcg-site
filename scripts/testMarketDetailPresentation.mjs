@@ -55,7 +55,7 @@ test('one recorded day keeps the chart with a centered median point and no inven
   const hits = nodes.filter(node => node.props?.className === 'renew-chart-hit');
   assert.equal(hits.length, 1);
   assert.equal(hits[0].props.cx, 460);
-  assert.ok(hits[0].props['aria-label'].endsWith(' 200'));
+  assert.equal(hits[0].props['aria-label'], '1700017200000 US $1');
   assert.equal(nodes.filter(node => node.type === 'path').length, 0);
 });
 
