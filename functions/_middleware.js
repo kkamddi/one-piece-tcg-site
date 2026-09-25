@@ -36,6 +36,11 @@ const LEGACY_REDIRECTS = {
 };
 
 const PAGE_SEO = {
+  '/portfolio': {
+    title: '포트폴리오 | Card Pone',
+    description: '로그인 후 내 카드의 보유 수량과 매입 기록, 참고 평가액을 확인합니다.',
+    robots: 'noindex,follow'
+  },
   '/': {
     title: 'Card Pone - 원피스 카드 도감, 시세, 컬렉션 관리',
     description: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세, 컬렉션 관리 서비스입니다.',
