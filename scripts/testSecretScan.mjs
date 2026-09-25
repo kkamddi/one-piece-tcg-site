@@ -15,13 +15,13 @@ test('secret scan excludes only valid image descriptors and still checks metadat
   const descriptor = syntheticKey + 'A'.repeat(128 - syntheticKey.length);
   const item = { points: [1, 2, 3, 4, 5, 6], descriptors: descriptor };
   try {
-    execFileSync('git', ['init', '--quiet', root]);
+    execFileSync('git', ['init', '--quiet', root], { windowsHide: true });
     mkdirSync(dirname(join(root, file)), { recursive: true });
     writeFileSync(join(root, file), '{}');
-    execFileSync('git', ['add', file], { cwd: root });
+    execFileSync('git', ['add', file], { cwd: root, windowsHide: true });
     function scan(data) {
       writeFileSync(join(root, file), JSON.stringify(data));
-      return spawnSync(process.execPath, [scanner], { cwd: root, encoding: 'utf8' });
+      return spawnSync(process.execPath, [scanner], { cwd: root, encoding: 'utf8', windowsHide: true });
     }
     assert.equal(scan({ version: 3, items: [item] }).status, 0);
     for (const data of [
@@ -38,7 +38,7 @@ test('secret scan excludes only valid image descriptors and still checks metadat
     }
     const other = 'fixture.json';
     writeFileSync(join(root, other), JSON.stringify({ version: 3, items: [item] }));
-    execFileSync('git', ['add', other], { cwd: root });
+    execFileSync('git', ['add', other], { cwd: root, windowsHide: true });
     assert.equal(scan({ version: 3, items: [item] }).status, 1);
   } finally {
     assert.equal(dirname(resolve(root)), resolve(tmpdir()));
