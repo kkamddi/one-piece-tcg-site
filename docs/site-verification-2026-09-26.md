@@ -168,6 +168,34 @@ or credential/configuration change was performed.
 - The owner also deferred measured real-photo verification. No implementation,
   account settings, main branch or deployment changed in this follow-up.
 
+## Follow-up: additional non-deployment checks
+
+- Direct production GETs to `/about`, `/data-policy`, `/terms`, `/privacy`,
+  `/shops`, `/news` and `/lab` returned 200 with page-specific titles and main
+  content. This verifies route availability, not legal compliance or every UI.
+- Reproduced a shop-data defect: the Yatap shop has a Gyeonggi/Seongnam address
+  but was classified as Seoul in both the live API and bundled JSON. The live
+  Seoul filter included it, while Gyeonggi excluded it. Corrected only this
+  record's `sido` in `src/data/shops.json`; the API reads this bundled dataset,
+  so no database or API logic change was required. Production is not yet fixed.
+- Added three isolated regression tests for address/region consistency, the
+  actual shop-list handler's inclusion/exclusion, and the region handler's
+  district list. These use the bundled data and real pure filter without loading
+  database adapters or making network requests.
+- Broader targeted tests exposed an obsolete chart assertion that still expected
+  the raw JPY value after the earlier accessibility-currency fix. Updated it to
+  assert the exact aggregated-day timestamp and displayed USD price, retaining
+  checks for the median, centered point and absence of an invented trend.
+- All 22 checks in this run passed: shop regions, market presentation/discovery,
+  grade-specific trade quotes, chart currency, search IME/calculator response
+  races, and home-index offline recovery. This includes some previously run
+  checks; it is not 22 additional unique tests on top of the earlier 79.
+- Observed limitation: the live shop list becomes blank for zero matches without
+  an explicit no-results message. No UI redesign was made. Shop address accuracy
+  beyond the reproduced inconsistent record was not independently verified.
+- Account linking, first-time provider consent, physical/photo/push checks and
+  production deployment remain outside this follow-up's authorized actions.
+
 ## References
 
 - Supabase Auth error codes: https://supabase.com/docs/guides/auth/debugging/error-codes
