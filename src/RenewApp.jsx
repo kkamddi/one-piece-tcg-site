@@ -14728,6 +14728,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
     const rule = activeLegalityRules.get(getDeckCardNo(entry.card));
     return rule && Number(entry.count || 0) > Number(rule.max_copies ?? 4);
   });
+  const legalityRulesAvailable = Boolean(activeEnvironment?.id && Array.isArray(deckReferenceData?.legalityRules));
   const categoryCounts = entries.reduce((counts, entry) => {
     const category = String(entry.card.category || entry.card.categoryKo || 'OTHER').toUpperCase();
     const key = category.includes('CHARACTER') || category.includes('캐릭터') ? 'character'
@@ -14753,6 +14754,7 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
 
   useEffect(() => {
     let cancelled = false;
+    setDeckReferenceData(null);
     fetchDeckLabReference(environment)
       .then((payload) => {
         if (!cancelled) setDeckReferenceData(payload?.configured === false ? null : payload);
@@ -15056,8 +15058,10 @@ function RenewDeck({ authUser, userState, setUserState, stateLoading, uiLang, in
       valid: Boolean(deckBuilder.leader) && invalidColorEntries.length === 0
     },
     {
-      label: getLocaleText(uiLang, '금지·제한 카드 규칙', 'Banned and restricted cards', '禁止・制限カード'),
-      valid: invalidLegalityEntries.length === 0
+      label: legalityRulesAvailable
+        ? getLocaleText(uiLang, '금지·제한 카드 규칙', 'Banned and restricted cards', '禁止・制限カード')
+        : getLocaleText(uiLang, '금지·제한 규칙 확인 불가', 'Banned/restricted rules unavailable', '禁止・制限ルールを確認できません'),
+      valid: legalityRulesAvailable && invalidLegalityEntries.length === 0
     }
   ];
 
