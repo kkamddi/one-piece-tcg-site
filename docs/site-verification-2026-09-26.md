@@ -121,6 +121,31 @@ or credential/configuration change was performed.
   physical-device/push-delivery checks remain outstanding. Archived fixes require
   a separately authorized release before production re-verification.
 
+## Follow-up: social-provider return and session lifecycle
+
+- The earlier Google chooser-only result is superseded by a controlled return
+  attempt: one approved test identity failed with `Multiple accounts with the
+  same email`, corroborated by the Auth callback log. A read-only aggregate found
+  no additional active non-SSO email-collision groups at inspection time. This
+  does not establish that no other accounts have ever experienced login errors.
+  The owner deferred this identity issue; no accounts were linked, merged or
+  deleted, and no authentication configuration was changed.
+- Naver and Kakao each returned successfully to the production site using an
+  existing provider session. Session metadata identified `custom:naver` and
+  `kakao`, respectively. For each, authenticated portfolio and notification GETs
+  returned 200, and a homepage reload preserved the logged-in session.
+- Logout removed each site's stored session and unauthenticated portfolio GETs
+  returned 401. After the final Kakao logout, the notification GET also returned
+  401. The dedicated test tab was left logged out of the site. Provider-wide
+  logout, fresh provider-password entry and first-time consent were not tested.
+- No holdings, account links or auth settings were explicitly changed in these
+  social-login checks. Account identifiers and credentials are omitted here.
+- Naver/Kakao completion is no longer pending for the tested existing sessions.
+  Measured real-card-photo accuracy, deferred physical-device/push checks, and
+  production re-verification after a separately authorized release remain open.
+  This follow-up changes documentation only; the prior 79 targeted test results
+  are unchanged, not a claim of a new test run.
+
 ## References
 
 - Supabase Auth error codes: https://supabase.com/docs/guides/auth/debugging/error-codes
