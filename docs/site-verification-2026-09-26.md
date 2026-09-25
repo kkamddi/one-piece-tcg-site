@@ -92,14 +92,34 @@ or credential/configuration change was performed.
 - Reran the original 68 targeted checks together with these six tests: 74 passed.
   The two follow-up files passed the scoped secret-pattern scan; no account names,
   credentials, personal holding details, or local machine paths were added to them.
-- Found an unresolved currency-display discrepancy: a synthetic KRW 1,000 purchase
+- Found a currency-display discrepancy (subsequently fixed locally below): a synthetic KRW 1,000 purchase
   remains KRW 1,000 in the editor but displays KRW 996 in the asset list after
-  integer-JPY conversion and reconversion. Original data is preserved. A choice of
-  original-currency cost calculation versus explicitly labeled converted values is
-  pending; no financial calculation or database change was made in this follow-up.
+  integer-JPY conversion and reconversion. Original data is preserved. No database
+  change was made.
 - Remaining external evidence: user-assisted social-provider authentication, a
   real-card photo with a measured reference, and any separately approved push/device
   test. These checks must not be reported as fully verified.
+
+## Follow-up: original-currency calculation and Google entry
+
+- With approval to continue the fixes, portfolio display calculations now derive
+  costs from the stored original currency and amount, using the same existing
+  conversion rates as the UI. Intermediate values are not rounded to whole yen.
+  The home summary, asset list, purchase rows and profit calculations share these
+  costs. Original database records and API serialization are unchanged; records
+  without usable original-currency information fall back to their stored JPY cost.
+- Five added regression tests cover KRW round trips, small amounts, mixed USD/JPY
+  purchases, invalid/legacy inputs, and rendering the actual dashboard component.
+  The rendered synthetic purchase shows KRW 1,000, not KRW 996, with consistent
+  cost and profit. This is local component rendering, not a production deployment.
+- All 79 targeted tests passed. No full build, new dependency or DB migration ran.
+- The production Google login button reached Google's account chooser. Account
+  selection, provider consent and return to the site require the user and remain
+  unverified. The dedicated test tab is left on that chooser for user assistance;
+  no provider identity was selected and no account linking was performed.
+- Kakao/Naver provider completion, measured real-photo accuracy, and deferred
+  physical-device/push-delivery checks remain outstanding. Archived fixes require
+  a separately authorized release before production re-verification.
 
 ## References
 

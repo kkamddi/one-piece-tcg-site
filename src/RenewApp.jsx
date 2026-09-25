@@ -114,6 +114,7 @@ const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-25-lab-tools';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
 const MARKET_USD_TO_JPY = 155;
 const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
+const PORTFOLIO_RATES = { krwPerJpy: MARKET_USD_TO_KRW / MARKET_USD_TO_JPY, jpyPerUsd: MARKET_USD_TO_JPY };
 const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
@@ -6092,7 +6093,7 @@ export async function resolvePortfolioImages(card) {
 }
 
 function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPortfolioHoldings, stateLoading, portfolioError, onRetry, onRequireLogin, onOpenPrices, uiLang }) {
-  const model = usePortfolioValuation(portfolioHoldings);
+  const model = usePortfolioValuation(portfolioHoldings, PORTFOLIO_RATES);
   const [editor, setEditor] = useState(null);
   const t = (ko, en, jp) => getLocaleText(uiLang, ko, en, jp);
   const applyHoldings = (payload) => setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
@@ -6111,7 +6112,7 @@ function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPort
 
 function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, onOpenPortfolio, onRequireLogin, portfolioError, uiLang }) {
   const isJp = isJapaneseUi(uiLang);
-  const portfolio = usePortfolioValuation(portfolioHoldings);
+  const portfolio = usePortfolioValuation(portfolioHoldings, PORTFOLIO_RATES);
   const marketCards = portfolio.cards;
   const marketTotalJpy = portfolio.totalJpy;
   const [renewalNoticeOpen, setRenewalNoticeOpen] = useState(false);

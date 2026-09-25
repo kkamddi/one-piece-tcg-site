@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buildPortfolio } from './portfolio-model';
 
-export default function usePortfolioValuation(holdings) {
+export default function usePortfolioValuation(holdings, rates) {
   const [result, setResult] = useState({ holdings: null, quotes: [], error: false });
   const [revision, setRevision] = useState(0);
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function usePortfolioValuation(holdings) {
     return () => controller.abort();
   }, [holdings, revision]);
   const current = result.holdings === holdings;
-  const model = useMemo(() => buildPortfolio(holdings, current ? result.quotes : []), [holdings, current, result.quotes]);
-  const previous = useMemo(() => current && result.previousQuotes ? buildPortfolio(holdings, result.previousQuotes) : null, [holdings, current, result.previousQuotes]);
+  const model = useMemo(() => buildPortfolio(holdings, current ? result.quotes : [], rates), [holdings, current, result.quotes, rates]);
+  const previous = useMemo(() => current && result.previousQuotes ? buildPortfolio(holdings, result.previousQuotes, rates) : null, [holdings, current, result.previousQuotes, rates]);
   return { ...model, previousTotalJpy: previous?.totalJpy ?? null, loading: holdings.length > 0 && !current, error: current && result.error, refresh: () => setRevision((value) => value + 1) };
 }
