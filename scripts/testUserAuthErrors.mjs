@@ -3,7 +3,7 @@ import test from 'node:test';
 import vm from 'node:vm';
 import { build } from 'esbuild';
 
-for (const entry of ['api/me.js', 'api/push-subscriptions.js']) {
+for (const entry of ['api/me.js', 'api/push-subscriptions.js', 'api/portfolio.js']) {
   const compiled = await build({
     entryPoints: [entry], bundle: true, write: false, platform: 'node', format: 'cjs',
     plugins: [{ name: 'isolated-user-api', setup(builder) {

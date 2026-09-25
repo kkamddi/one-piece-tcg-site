@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
 import { getUserAppState, saveUserAppState } from '../lib/user-state-store.js';
+import { isRejectedUserToken } from '../lib/auth-errors.js';
 
 const HOLDINGS_TABLE = process.env.SUPABASE_PORTFOLIO_HOLDINGS_TABLE || 'portfolio_holdings';
 const PURCHASES_TABLE = process.env.SUPABASE_PORTFOLIO_PURCHASES_TABLE || 'portfolio_purchases';
@@ -14,6 +15,7 @@ async function getAuthenticatedUser(request) {
   const token = getBearerToken(request);
   if (!token || !supabaseAdmin) return null;
   const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (isRejectedUserToken(error)) return null;
   if (error) throw error;
   return data?.user || null;
 }
