@@ -47,16 +47,59 @@ or credential/configuration change was performed.
 
 ## Outstanding verification
 
-- Controlled save/reload/cleanup on an approved disposable holding; preserve existing data.
-- A second approved account for live cross-account isolation (mock coverage passes).
+- Save/reload/cleanup and two-account read isolation have since been checked; see the
+  follow-up below. Live cross-account write attacks against existing data were not performed.
 - User-assisted Google/Kakao/Naver provider consent and callback flows. Password login
   does not validate these providers, and account linking is not part of this audit.
 - Explicit scope for one administrator test notification and confirmation on receiving devices.
 - Physical Android/mobile camera, permission/offline recovery and initial-load performance.
-  No Android device was connected; the current browser tool lacks viewport emulation.
+  Deferred by the user. No Android device was connected; the current browser tool lacks
+  viewport emulation. Deferred does not mean passed.
 - Calibrated real-card photo accuracy and manual boundary adjustment on an actual device.
 - Production re-verification requires a separately authorized main release; archived fixes
   do not change the currently deployed service.
+
+## Follow-up: controlled persistence and account isolation
+
+- With explicit approval, added one previously unowned test holding with one manual
+  purchase, reloaded the home document and reopened the portfolio. The quantity,
+  purchase date and original KRW amount persisted. Deleted only that test holding;
+  after another document reload both its holding and purchase were absent. Existing
+  visible holding rows matched the pre-test snapshot. This was a reload test, not a
+  save-then-password-relogin test. The temporary test data is no longer present.
+- Both approved existing accounts successfully logged in. The second account was
+  not newly created, and its existing holdings were not edited.
+- Live authenticated portfolio GET responses were 200 for both accounts. Their
+  authenticated user IDs differed, and their holding and purchase ID sets were
+  disjoint, including holdings with the same card code. IDs and sessions were used
+  only in memory and are not included in this report.
+- In both directions, a read request containing the other account's user ID and
+  holding ID still returned exactly the current account's holdings. This verifies
+  these GET parameters cannot switch the authenticated owner; it is not proof of
+  every database policy or write path.
+- The accounts had different notification lists. After switching from the
+  administrator to the second account, a notification GET with a forged administrator
+  user ID still returned the second account's empty list. The ordinary account menu
+  did not expose administrator statistics. No push notification was sent.
+- Final logout removed portfolio data from the UI. Unauthenticated portfolio and
+  notification requests both returned 401. The dedicated test tab was left logged out.
+- Added six isolated regression tests in `scripts/testPortfolioIsolation.mjs` using
+  the real API handler with an in-memory database. They cover forged-owner reads,
+  foreign holding/purchase deletes, spoofed-owner inserts, foreign purchase updates,
+  and an owner's own update/delete. All pass. These are not live Supabase RLS tests.
+  Current PATCH semantics insert a caller-owned purchase when the supplied purchase
+  ID is not found for that caller; the other account's purchase remains unchanged.
+- Reran the original 68 targeted checks together with these six tests: 74 passed.
+  The two follow-up files passed the scoped secret-pattern scan; no account names,
+  credentials, personal holding details, or local machine paths were added to them.
+- Found an unresolved currency-display discrepancy: a synthetic KRW 1,000 purchase
+  remains KRW 1,000 in the editor but displays KRW 996 in the asset list after
+  integer-JPY conversion and reconversion. Original data is preserved. A choice of
+  original-currency cost calculation versus explicitly labeled converted values is
+  pending; no financial calculation or database change was made in this follow-up.
+- Remaining external evidence: user-assisted social-provider authentication, a
+  real-card photo with a measured reference, and any separately approved push/device
+  test. These checks must not be reported as fully verified.
 
 ## References
 
