@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import sharp from 'sharp';
 import cvModule from '@techstark/opencv-js';
 import { parse } from '@babel/parser';
-import { IMAGE_INDEX_VERSION, normalizeCardImage, extractImageFeatures, compareImageFeatures, imageSignature, signatureDistance } from '../src/lib/card-image-features.js';
+import { IMAGE_INDEX_VERSION, normalizeCardImage, normalizeHolderRegions, shortlistImageCodes, extractImageFeatures, compareImageFeatures, imageSignature, signatureDistance } from '../src/lib/card-image-features.js';
 import { getScanVariants } from '../src/lib/card-scan.js';
 import { createCardImageSession } from '../src/lib/card-image-match.js';
 
@@ -60,6 +60,22 @@ test('blank photos never receive verified artwork matches', () => {
   try { assert.deepEqual(matchedKeys(blank), []); } finally { blank.delete(); }
 });
 
+test('weak frame and watermark matches cannot verify artwork', () => {
+  const points = [], descriptors = [];
+  for (let i = 0; i < normal.points.length; i += 2) {
+    const x = normal.points[i] / normal.width, y = normal.points[i + 1] / normal.height;
+    if (x > .2 && x < .8 && y > .1 && y < .42) continue;
+    points.push(normal.points[i], normal.points[i + 1]);
+    descriptors.push(...normal.descriptors.subarray(i / 2 * 32, (i / 2 + 1) * 32));
+  }
+  const selected = Array.from({ length: Math.min(20, points.length / 2) }, (_, i) => Math.floor(i * (points.length / 2) / 20));
+  const result = compareImageFeatures(cv, normal, { ...normal, points: selected.flatMap(i => points.slice(i * 2, i * 2 + 2)), descriptors: selected.flatMap(i => descriptors.slice(i * 32, i * 32 + 32)) });
+  assert.ok(result.inliers >= 10);
+  assert.equal(result.artworkInliers, 0);
+  assert.equal(result.verified, false);
+  assert.equal(compareImageFeatures(cv, normal, normal).verified, true);
+});
+
 test('OCR rectification retains a high-resolution card with rounded corners and background', async () => {
   const photo = await sharp({ create: { width: 1100, height: 1400, channels: 4, background: '#d4d7d5' } })
     .composite([{ input: await readFile(sample), left: 230, top: 190 }]).raw().toBuffer();
@@ -83,6 +99,24 @@ test('the full image-only shortlist includes the correct card without a card num
 
 test('Unicode catalog hyphens resolve without merging separate versions', () => {
   assert.equal(getScanVariants([{ apparelId: 1, code: 'P\u2010022', locale: 'JP' }], 'P-022', 'JP').length, 1);
+});
+
+test('each crop contributes candidates even when another crop has better absolute scores', () => {
+  const encode = values => Buffer.from(values).toString('base64');
+  const items = Array.from({ length: 80 }, (_, i) => ({ code: `OTHER-${i}`, signature: encode([0, 100, 200, 100]) }));
+  items.push({ code: 'TARGET', signature: encode([180, 90, 20, 60]) });
+  const codes = shortlistImageCodes(items, [[0, 100, 200, 100], [160, 100, 10, 30]]);
+  assert.ok(codes.includes('TARGET'));
+  assert.ok(codes.length <= 64);
+});
+
+test('holder search regions are bounded and blank regions cannot match artwork', () => {
+  const blank = new cv.Mat(847, 562, cv.CV_8UC4, new cv.Scalar(245, 245, 245, 255));
+  const regions = normalizeHolderRegions(cv, blank);
+  try {
+    assert.equal(regions.length, 3);
+    for (const region of regions) assert.equal(compareImageFeatures(cv, normal, extractImageFeatures(cv, region, 600)).verified, false);
+  } finally { regions.forEach(region => region.delete()); blank.delete(); }
 });
 
 test('image worker, session and scanner modules parse', async () => {

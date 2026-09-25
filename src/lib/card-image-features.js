@@ -1,7 +1,43 @@
 export const IMAGE_INDEX_VERSION = 3;
 
+export function normalizeHolderRegions(cv, rgba) {
+  // Extra hypotheses only: transparent holders often have no closed card contour.
+  if (rgba.rows < rgba.cols) return [];
+  const images = [];
+  try {
+    for (const fraction of [.6, .7, .8]) {
+      const height = Math.max(1, Math.round(rgba.rows * fraction));
+      const width = Math.max(1, Math.min(rgba.cols, Math.round(height / 1.4)));
+      const region = rgba.roi(new cv.Rect(Math.round((rgba.cols - width) / 2), Math.round(rgba.rows * .92 - height), width, height));
+      try { images.push(normalizeCardImage(cv, region)); } finally { region.delete(); }
+    }
+    return images;
+  } catch (error) { images.forEach(image => image.delete()); throw error; }
+}
+
+export function shortlistImageCodes(items, signatures) {
+  const references = items.map(item => ({ ...item, decoded: Array.from(atob(item.signature), c => c.charCodeAt(0)) }));
+  const rankings = signatures.map(signature => references.map(item => ({ code: item.code, distance: signatureDistance(signature, item.decoded) })).sort((a, b) => a.distance - b.distance));
+  const codes = new Set();
+  // Do not compare absolute correlation scores across differently cropped regions.
+  for (let rank = 0; rank < 6; rank += 1) for (const ranking of rankings) {
+    if (ranking[rank]) codes.add(ranking[rank].code);
+  }
+  const combined = references.map(item => ({ code: item.code, distance: Math.min(...signatures.map(signature => signatureDistance(signature, item.decoded))) })).sort((a, b) => a.distance - b.distance);
+  for (const item of combined.slice(0, 40)) { if (codes.size >= 64) break; codes.add(item.code); }
+  return [...codes].slice(0, 64);
+}
+
+export function normalizeSlabInterior(cv, rgba) {
+  // A portrait holder has a label above the card; this is only an extra search region.
+  const rect = new cv.Rect(Math.round(rgba.cols * .12), Math.round(rgba.rows * .2), Math.max(1, Math.floor(rgba.cols * .74)), Math.max(1, Math.floor(rgba.rows * .7)));
+  const region = rgba.roi(rect);
+  try { return normalizeCardImage(cv, region); }
+  finally { region.delete(); }
+}
+
 // Keep the same preprocessing in the offline indexer and the browser worker.
-export function normalizeCardImage(cv, rgba, ocrWidth = 0) {
+export function normalizeCardImage(cv, rgba, ocrWidth = 0, innerCard = false) {
   const owned = [];
   const keep = value => { owned.push(value); return value; };
   try {
@@ -17,20 +53,21 @@ export function normalizeCardImage(cv, rgba, ocrWidth = 0) {
     cv.morphologyEx(edges, edges, cv.MORPH_CLOSE, kernel);
     const contours = keep(new cv.MatVector());
     const hierarchy = keep(new cv.Mat());
-    cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    cv.findContours(edges, contours, hierarchy, innerCard ? cv.RETR_LIST : cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
     let best = null;
     let bestArea = small.cols * small.rows * 0.16;
+    let bestRatioError = Infinity;
     for (let i = 0; i < contours.size(); i += 1) {
       const contour = contours.get(i);
       const polygon = new cv.Mat();
       try {
         cv.approxPolyDP(contour, polygon, cv.arcLength(contour, true) * 0.025, true);
         const area = Math.abs(cv.contourArea(polygon));
-        if (area <= bestArea) continue;
+        if (area <= (innerCard ? small.cols * small.rows * .16 : bestArea)) continue;
         let points;
         if (polygon.rows === 4 && cv.isContourConvex(polygon)) {
           points = Array.from({ length: 4 }, (_, n) => ({ x: polygon.data32S[n * 2], y: polygon.data32S[n * 2 + 1] }));
-        } else if (ocrWidth) {
+        } else if (ocrWidth || innerCard) {
           // Rounded card corners need not simplify to exactly four vertices.
           const rectangle = cv.minAreaRect(contour);
           if (Math.abs(cv.contourArea(contour)) / (rectangle.size.width * rectangle.size.height) < .88) continue;
@@ -45,6 +82,11 @@ export function normalizeCardImage(cv, rgba, ocrWidth = 0) {
         const height = (distance(ordered[1], ordered[2]) + distance(ordered[3], ordered[0])) / 2;
         const ratio = Math.min(width, height) / Math.max(width, height);
         if (ratio < 0.48 || ratio > 0.88) continue;
+        if (innerCard) {
+          const ratioError = Math.abs(ratio - 1 / 1.4);
+          if (ratioError > .06 || ratioError > bestRatioError) continue;
+          bestRatioError = ratioError;
+        }
         if (width > height) ordered.push(ordered.shift());
         best = ordered; bestArea = area;
       } finally { contour.delete(); polygon.delete(); }
@@ -158,8 +200,12 @@ export function compareImageFeatures(cv, reference, photo) {
     const inliers = x.length;
     const ratio = inliers / (src.length / 2);
     const coverage = inliers ? (Math.max(...x) - Math.min(...x)) * (Math.max(...y) - Math.min(...y)) / (reference.width * reference.height) : 0;
-    const verified = inliers >= 10 && ratio >= .45 && coverage >= .08;
-    return { score: verified ? inliers * ratio : 0, inliers, verified };
+    // Shared leader frames and the central SAMPLE watermark are not artwork evidence.
+    const artworkInliers = x.filter((value, i) => value > reference.width * .2 && value < reference.width * .8 && y[i] > reference.height * .1 && y[i] < reference.height * .42).length;
+    // Foil glare can hide the upper art; retain strong distributed matches elsewhere.
+    const artworkSupported = artworkInliers >= 3 || (inliers >= 25 && ratio >= .75 && coverage >= .15);
+    const verified = inliers >= 10 && ratio >= .45 && coverage >= .08 && artworkSupported;
+    return { score: verified ? inliers * ratio : 0, inliers, artworkInliers, verified };
   } finally { owned.reverse().forEach(value => value.delete()); }
 }
 
