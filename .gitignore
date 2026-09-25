@@ -7,6 +7,7 @@ supabase/.temp/
 .env
 .env.local
 .env.*.local
+.env.*
 *.log
 tmp/
 data/card-thumbnails/
@@ -24,3 +25,14 @@ prod-*.js
 prod-*.html
 headers-root.txt
 headers-www.txt
+
+# Local verification output, release packages, and signing material.
+artifacts/
+*.zip
+*.apk
+*.aab
+*.jks
+*.keystore
+store/android/screenshots-2026-09-07/
+# Contains a hardcoded API key; keep the live-account helper local.
+scripts/verifyDisposableAndroidAccount.mjs
