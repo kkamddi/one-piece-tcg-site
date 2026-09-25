@@ -146,6 +146,28 @@ or credential/configuration change was performed.
   This follow-up changes documentation only; the prior 79 targeted test results
   are unchanged, not a claim of a new test run.
 
+## Follow-up: public search and market navigation
+
+- On the logged-out production site, a card-code search returned eight matches.
+  The Korean and Japanese filters showed three and five matches respectively.
+  Opening a Korean catalog detail loaded its card image; the detail back button
+  restored the search term and Korean filter.
+- A Japanese result opened market variant selection. Selecting a parallel
+  variant opened its price detail. The 7D view explained the absence of recent
+  trades; switching to 1M rendered a chart. Switching Single to PSA10 changed
+  the grade label, prices and chart data. This checks UI behavior, not independent
+  accuracy of upstream market prices.
+- Reloading the market URL restored the selected card variant. Reloading the
+  search URL restored its query and results. Lowercase card codes with surrounding
+  spaces resolved to the same eight-match result; an unmatched term displayed
+  the no-results message and recovery links. A whitespace-only submission did
+  not replace the preceding results (no new search was submitted).
+- No new blocking defect was reproduced in this sampled flow. The previously
+  archived chart currency-accessibility fix is still awaiting authorized release;
+  this check does not imply all catalog entries, filters or routes were tested.
+- The owner also deferred measured real-photo verification. No implementation,
+  account settings, main branch or deployment changed in this follow-up.
+
 ## References
 
 - Supabase Auth error codes: https://supabase.com/docs/guides/auth/debugging/error-codes
