@@ -151,15 +151,12 @@ function Panel() {
     </header>
     {isExtension && !member && <section className="member-login" aria-labelledby="member-login-title">
       <span className="member-login-icon" aria-hidden="true"><span className="scan-mark" /></span>
-      <p className="member-login-eyebrow">CARD PONE SCAN</p>
       <h1 id="member-login-title">로그인하고<br />카드를 스캔하세요</h1>
-      <p className="member-login-description">Card Pone 회원이라면 누구나<br />카드 인식과 시세 확인을 이용할 수 있어요.</p>
       <button className="member-login-primary" onClick={async () => {
         try { await chrome.runtime.sendMessage({ type: 'card-pone-member-login' }); }
         catch { setError(MEMBER_REQUIRED); }
       }}>Card Pone 로그인 <span aria-hidden="true">↗</span></button>
-      <div className="member-login-recheck"><span>이미 로그인하셨나요?</span><button onClick={checkMember}>연결 확인</button></div>
-      <p className="member-login-hint">이용 중에는 연결된 홈페이지 탭을 열어 두세요.</p>
+      <div className="member-login-recheck"><button onClick={checkMember}>연결 확인</button></div>
     </section>}
     {!isExtension && <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={event => { const image = event.target.files?.[0]; event.target.value = ''; if (image) scan(image); }} />}
     {phase === 'scanning' && <button className="cancel-scan" onClick={() => job.current?.abort()}>취소</button>}
