@@ -34,3 +34,12 @@ References consulted: Supabase getUser documentation and changelog; Chrome scrip
 - Clean submission ZIP prepared locally: `artifacts/card-pone-scan-0.1.16-store.zip`, 86,855,154 bytes, 5,460 entries, one root manifest, no detected environment files, source maps, node_modules or signing-key files.
 - Blocked on user login to the dedicated website tab for the positive membership/logout tests and to the existing publisher account for the store update. No store draft changes, prior-review withdrawal, submission or publication performed.
 - Code and this status are archived; reproducible ZIP/build directories remain local only. Signing-key backup remains unverified.
+
+## Installed membership verification and store draft replacement
+
+- Existing approved website test account successfully signed in: production membership API returned 200 and the installed 0.1.16 panel enabled Scan. Website logout then caused the background membership check to deny access and the reloaded panel disabled Scan. No account credentials or identifiers are recorded here.
+- With explicit user approval, cancelled the pending 0.1.15 review. Portal confirmed cancellation and draft status.
+- Uploaded the prepared 0.1.16 ZIP to the existing item `bmallhfmgjlccnegdjjlmhobcgocphlc`; portal confirmed package version 0.1.16 with storage permission. No duplicate item created.
+- Saved member-only store description, scripting/storage/host permission explanations, authentication-information disclosure and updated login-required test steps.
+- The portal requests test credentials for complete evaluation. Requested approval for a separate ordinary reviewer account; administrator and personal credentials were not shared with reviewers.
+- Current state: 0.1.16 draft, not submitted or published. Re-submission awaits reviewer account authorization/preparation. Automatic publication has not been enabled.
