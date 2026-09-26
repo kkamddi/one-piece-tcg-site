@@ -1,7 +1,9 @@
-import test from 'node:test';
+import test, { beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { fetchPrices } from '../extensions/card-pone/prices.js';
 import { recognitionContact } from '../extensions/card-pone/contact.js';
+beforeEach(() => { globalThis.chrome = { runtime: { id: 'test', sendMessage: async () => ({ member: true, memberId: 'test-member' }) } }; });
+afterEach(() => { delete globalThis.chrome; });
 
 test('price requests omit credentials, referrer and screenshot data', async t => {
   t.mock.method(globalThis, 'fetch', async (url, options) => {

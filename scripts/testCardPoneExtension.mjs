@@ -44,7 +44,7 @@ test('switching during screenshot capture discards the result', async () => {
 test('MV3 limits persistent data access to Card Pone and disallows remote scripts', async () => {
   const manifest = JSON.parse(await readFile(new URL('../extensions/card-pone/manifest.json', import.meta.url)));
   assert.equal(manifest.manifest_version, 3);
-  assert.deepEqual(manifest.permissions, ['activeTab', 'scripting', 'sidePanel']);
+  assert.deepEqual(manifest.permissions, ['activeTab', 'scripting', 'sidePanel', 'storage']);
   assert.deepEqual(manifest.host_permissions, ['https://www.optcgkorea.com/*']);
   assert.ok(!manifest.content_security_policy.extension_pages.includes("'unsafe-eval'"));
   assert.ok(manifest.content_security_policy.sandbox.includes("connect-src 'none'"));

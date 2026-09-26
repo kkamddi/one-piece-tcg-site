@@ -10,6 +10,7 @@ import { fetchPrices, formatPriceWon, JPY_TO_KRW } from './prices.js';
 import { createImageWorker } from './image-worker-bridge.js';
 import { cropPixels } from './capture.js';
 import './panel.css';
+import { requireMember, MEMBER_REQUIRED } from './member.js';
 
 function CardImage({ candidate }) {
   const [index, setIndex] = useState(0);
@@ -47,6 +48,34 @@ function Panel() {
   const job = useRef(null);
   const file = useRef(null);
   const isExtension = Boolean(globalThis.chrome?.runtime?.id);
+  const [member, setMember] = useState(null);
+  const memberRef = useRef(null);
+  const memberCheck = useRef(0);
+  async function checkMember() {
+    const sequence = ++memberCheck.current;
+    try {
+      const next = await requireMember();
+      if (sequence !== memberCheck.current) return null;
+      if (memberRef.current && memberRef.current !== next.memberId) {
+        job.current?.abort(); setResult(null); setConfirmedKey(null); setPhase('idle');
+      }
+      memberRef.current = next.memberId; setMember(next); setError('');
+      return next;
+    } catch {
+      if (sequence !== memberCheck.current) return null;
+      memberRef.current = null; setMember(null); job.current?.abort();
+      setResult(null); setConfirmedKey(null); setPhase('idle'); setError(MEMBER_REQUIRED);
+      return null;
+    }
+  }
+  useEffect(() => {
+    let active = true;
+    const check = () => { if (active) void checkMember(); };
+    check();
+    const timer = setInterval(check, 30000);
+    window.addEventListener('focus', check);
+    return () => { active = false; memberCheck.current++; clearInterval(timer); window.removeEventListener('focus', check); };
+  }, []);
   useEffect(() => () => job.current?.abort(), []);
 
   async function scan(upload) {
@@ -56,6 +85,8 @@ function Panel() {
     setPhase('capture'); setStatus(isExtension ? '카드 영역 선택 중' : '스캔 준비 중');
     let canvas, worker;
     try {
+      const identity = await requireMember();
+      controller.signal.throwIfAborted();
       let source, rect;
       if (isExtension) {
         const currentWindow = await chrome.windows.getCurrent();
@@ -96,6 +127,8 @@ function Panel() {
         onStage: () => setStatus('카드 확인 중')
       });
       controller.signal.throwIfAborted();
+      if ((await requireMember()).memberId !== identity.memberId) throw new Error(MEMBER_REQUIRED);
+      controller.signal.throwIfAborted();
       setResult(found); setPhase('done');
     } catch (failure) {
       if (job.current !== controller) return;
@@ -111,11 +144,20 @@ function Panel() {
   const busy = phase === 'capture' || phase === 'scanning';
   return <main className="scan-panel">
     <header><img src="./logo.png" alt="Card Pone" />
-    <button className="scan-button" disabled={busy} onClick={() => isExtension ? scan() : file.current.click()}>
+    <button className="scan-button" disabled={busy || !member} onClick={() => isExtension ? scan() : file.current.click()}>
       <span className={busy ? 'scan-mark scanning' : 'scan-mark'} aria-hidden="true" />
       {busy ? status : result ? '다시 스캔' : '스캔'}
     </button>
     </header>
+    {isExtension && !member && <section aria-label="회원 로그인">
+      <p>Card Pone 회원 전용입니다. 연결용 홈페이지 탭을 열어 두세요.</p>
+      <p className="price-note">로그인 버튼을 누르면 전용 탭을 열고 로그인 상태를 회원 확인에 사용합니다. 비밀번호는 확장에 저장하지 않습니다.</p>
+      <button className="more" onClick={async () => {
+        try { await chrome.runtime.sendMessage({ type: 'card-pone-member-login' }); }
+        catch { setError(MEMBER_REQUIRED); }
+      }}>Card Pone 로그인</button>
+      <button className="more" onClick={checkMember}>연결 확인</button>
+    </section>}
     {!isExtension && <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={event => { const image = event.target.files?.[0]; event.target.value = ''; if (image) scan(image); }} />}
     {phase === 'scanning' && <button className="cancel-scan" onClick={() => job.current?.abort()}>취소</button>}
     <div role="status" aria-live="polite" className="status">{error || (phase === 'done' && !result?.candidates.length ? (result?.warnings.length ? '분석을 완료하지 못했습니다. 다시 스캔해 주세요.' : '일치하는 카드를 찾지 못했습니다.') : '')}</div>

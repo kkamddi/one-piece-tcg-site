@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Card Pone Scan",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "minimum_chrome_version": "116",
   "description": "Scan a card on the current page and open its matching Card Pone price page.",
-  "permissions": ["activeTab", "scripting", "sidePanel"],
+  "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
   "host_permissions": ["https://www.optcgkorea.com/*"],
   "action": { "default_title": "Card Pone Scan", "default_icon": { "32": "icon32.png", "128": "icon128.png" } },
   "icons": { "32": "icon32.png", "128": "icon128.png" },

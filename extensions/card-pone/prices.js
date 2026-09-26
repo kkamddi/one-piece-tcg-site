@@ -1,3 +1,4 @@
+import { requireMember } from './member.js';
 // Matches RenewApp's MARKET_USD_TO_KRW / MARKET_USD_TO_JPY.
 export const JPY_TO_KRW = 9.4;
 
@@ -17,8 +18,11 @@ export function priceSummary(payload, apparelId) {
 
 export async function fetchPrices(apparelId, signal) {
   if (!Number.isSafeInteger(apparelId) || apparelId <= 0) throw new Error('invalid_product');
+  const member = await requireMember();
   const url = `https://www.optcgkorea.com/api/market?summary=trade-latest&apparelIds=${apparelId}`;
   const response = await fetch(url, { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]), credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'no-cache' });
   if (!response.ok) throw new Error('price_unavailable');
-  return priceSummary(await response.json(), apparelId);
+  const data = priceSummary(await response.json(), apparelId);
+  if ((await requireMember()).memberId !== member.memberId) throw new Error('member_changed');
+  return data;
 }

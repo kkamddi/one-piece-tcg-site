@@ -1,5 +1,17 @@
 # Card Pone Scan (local prototype)
 
+## Membership gate — 0.1.16
+
+All signed-in, non-anonymous Card Pone members are eligible; no paid tier is required. Click the extension's Card Pone login button, sign in in the newly created website tab, then click connection check. Keep that tab open. Existing unrelated tabs are not searched or read.
+
+The extension reads only the current access token from that tab's isolated top frame and sends it to `/api/extension-member`; the server verifies it with Supabase `auth.getUser`. Only the tab ID is kept in `chrome.storage.session`. No password or refresh token is exported, and no access token is persisted or logged. Authentication responses are private/no-store. Anonymous, missing, expired, unavailable and malformed authentication fails closed. Membership is checked before capture, before/after recognition and price requests, on panel focus and every 30 seconds. A changed account discards in-flight results.
+
+Deploy the new site API before distributing this extension; until then membership verification fails closed. Update store authentication-data disclosures and reviewer instructions before submission. No production deployment or store submission is implied by this source update.
+
+Public website APIs/reference files remain public. This gate restricts the official new extension, not old versions, modified source, public data access, or the developer-only loopback preview. Local recognition cannot provide tamper-proof access control. No DB schema, provider configuration, environment variable or paid feature changes are required.
+
+The earlier no-credentials statement below describes versions before 0.1.16; authentication now follows this section. Captured images remain local.
+
 ## Build and Install
 
 Run `node scripts/buildCardPoneExtension.mjs` from the site repository. This builds only the extension, not the website. The first build downloads the English OCR model from the versioned official Tesseract data repository. Dependencies already installed in this repository are reused.
