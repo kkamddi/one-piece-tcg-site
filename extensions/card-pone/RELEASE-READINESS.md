@@ -11,6 +11,13 @@ Updated: 2026-09-26. Version 0.1.17 submitted for review. Not published.
 - ZIP: `artifacts/card-pone-scan-0.1.17-store.zip` (86,855,325 bytes, 5,460 entries, one manifest; no environment/key/source-map/node_modules paths detected). Packaged version and removed-copy checks passed.
 - No new installed toolbar capture end-to-end verification; that limitation remains. No main push or production deployment. Reproducible build artifacts remain local; signing-key backup remains unverified.
 
+### Installed 0.1.17 follow-up
+
+- Rebuilt and reloaded the existing local unpacked extension; runtime manifest reports 0.1.17. Simplified login UI confirmed in its actual panel page.
+- Logged-out panel disables Scan. Login action creates its dedicated website tab. Signed in with the existing ordinary reviewer account; real background membership check returned true and connection confirmation enabled Scan.
+- Credentials were used in memory only, not printed or saved in the repository. No authentication configuration or production changes.
+- Actual toolbar/side-panel capture remains pending a user toolbar click; opening the panel as a tab is not counted as that end-to-end test.
+
 ## Historical submission: 0.1.16 (cancelled and replaced)
 
 - Replaced the pending 0.1.15 review with 0.1.16 in the existing store item, with user authorization. No duplicate item created.
