@@ -1,8 +1,17 @@
 # Card Pone Scan - Submitted for Review
 
-Updated: 2026-09-25. Version 0.1.15 submitted; Chrome Web Store status is pending review. Not published.
+Updated: 2026-09-26. Version 0.1.16 resubmitted for review. Not published.
 
-## Current submission: 0.1.15
+## Current submission: 0.1.16
+
+- Replaced the pending 0.1.15 review with 0.1.16 in the existing store item, with user authorization. No duplicate item created.
+- Membership API deployed and installed-panel login/logout gates verified. Store description, privacy disclosures and confidential reviewer instructions updated for member-only access.
+- Dedicated ordinary reviewer credentials saved privately; production login and membership checks both returned 200. Credentials are not included in this repository.
+- Portal confirmed submission on 2026-09-26. Automatic publication was unchecked; manual publication is required after approval, within the portal's stated 30-day staging window.
+- ZIP: `artifacts/card-pone-scan-0.1.16-store.zip` (86,855,154 bytes, 5,460 entries, one root manifest). Local reproducible artifact only.
+- No new complete toolbar/side-panel capture test for 0.1.16. Detailed evidence and remaining limits: `docs/extension-membership-2026-09-26.md`.
+
+## Historical submission: 0.1.15 (cancelled and replaced)
 
 - Submitted through Aside MCP using publisher `optkr26@gmail.com`, with the user's explicit submission authorization.
 - Store item: `bmallhfmgjlccnegdjjlmhobcgocphlc`. Portal confirmed successful submission and pending review.

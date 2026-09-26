@@ -43,3 +43,12 @@ References consulted: Supabase getUser documentation and changelog; Chrome scrip
 - Saved member-only store description, scripting/storage/host permission explanations, authentication-information disclosure and updated login-required test steps.
 - The portal requests test credentials for complete evaluation. Requested approval for a separate ordinary reviewer account; administrator and personal credentials were not shared with reviewers.
 - Current state: 0.1.16 draft, not submitted or published. Re-submission awaits reviewer account authorization/preparation. Automatic publication has not been enabled.
+
+## Reviewer account and completed resubmission
+
+- With user authorization, created one dedicated ordinary reviewer account. Public signup/provider configuration and database schema were not changed. Administrator/personal credentials were not supplied to reviewers.
+- Verified the new account through the production username/password login endpoint (200), then the production membership endpoint (200, matching member identity).
+- Saved the new credentials only in the Chrome Web Store confidential test-instructions form. Credential values were not printed or stored in source, reports or local credential files; the temporary in-memory handoff completed and closed.
+- Submitted package 0.1.16 for the existing item on 2026-09-26. The portal confirmed successful submission and staging for later publication. Automatic publication was explicitly unchecked before confirmation; approval will require manual publication (portal warns of a 30-day staging expiry).
+- This follow-up changes release-status documentation only, with no website deployment or main push. Earlier installed-panel membership/logout verification and the uncompleted toolbar/side-panel capture test remain as recorded above.
+- Credentials remain in the private store console, not a separate backup. Signing-key backup remains unverified. Reproducible local ZIP/build artifacts are not committed.
