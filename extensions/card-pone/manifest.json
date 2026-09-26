@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Card Pone Scan",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "minimum_chrome_version": "116",
   "description": "Scan a card on the current page and open its matching Card Pone price page.",
   "permissions": ["activeTab", "scripting", "sidePanel", "storage"],

@@ -1,8 +1,17 @@
 # Card Pone Scan - Submitted for Review
 
-Updated: 2026-09-26. Version 0.1.16 resubmitted for review. Not published.
+Updated: 2026-09-26. Version 0.1.17 submitted for review. Not published.
 
-## Current submission: 0.1.16
+## Current submission: 0.1.17
+
+- User authorized replacing the pending review with the simplified login UI. Cancelled 0.1.16 review, uploaded 0.1.17 to the same item, and received submission confirmation.
+- Automatic publication explicitly unchecked. Existing confidential reviewer credentials and test steps retained; values were not displayed or committed.
+- Login presentation only: decorative label and helper paragraphs removed; login and connection-check actions retained. Authentication, permissions and production website unchanged.
+- 34 focused capture/confidence/network/price/reference/link tests passed; extension-only clean release build passed with existing OpenCV externalization and large-chunk warnings.
+- ZIP: `artifacts/card-pone-scan-0.1.17-store.zip` (86,855,325 bytes, 5,460 entries, one manifest; no environment/key/source-map/node_modules paths detected). Packaged version and removed-copy checks passed.
+- No new installed toolbar capture end-to-end verification; that limitation remains. No main push or production deployment. Reproducible build artifacts remain local; signing-key backup remains unverified.
+
+## Historical submission: 0.1.16 (cancelled and replaced)
 
 - Replaced the pending 0.1.15 review with 0.1.16 in the existing store item, with user authorization. No duplicate item created.
 - Membership API deployed and installed-panel login/logout gates verified. Store description, privacy disclosures and confidential reviewer instructions updated for member-only access.
