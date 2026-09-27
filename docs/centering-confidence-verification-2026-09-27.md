@@ -28,3 +28,11 @@
 - No price-alert rule was submitted, and no existing account, portfolio or pricing data was intentionally edited. The browser permission and this device's push subscription were enabled as authorized. No credentials, subscription endpoints or key material were read or recorded.
 - The measured automation viewport was 1360 by 990, with document width 1360. The alert modal bounds were left 420, right 940, top 115, bottom 875. This confirms desktop containment only; the native window's narrow appearance must not be treated as mobile emulation.
 - Actual Web Push receipt is no longer an unverified item for this browser/account. First-time social-provider consent and mobile/device-specific limits above remain unresolved. No application code or production deployment changed in this follow-up.
+
+## Mobile-width browser layout follow-up
+
+- Used a temporary same-origin iframe in an owned task tab to create a genuine child browsing-context viewport, without changing application code or browser settings. This is responsive-layout emulation, not a physical phone or top-level OAuth test.
+- At 390 by 844, the live lab displayed its mobile bottom navigation. Navigating to centering, opening the public guide, and returning to the tool succeeded.
+- Centering entry-screen checks at widths 320, 390 and 430 found document scroll width equal to client width (305, 375 and 415 respectively, after the desktop scrollbar). Camera/upload buttons stayed within the horizontal bounds; both had height 92 and respective widths 116, 151 and 171.
+- The guide also had no horizontal overflow at width 390. The temporary iframe was removed after verification.
+- No new layout defect was reproduced in this scoped check. Upload/result editing on mobile widths, touch gestures, device camera and OS-specific behavior are not covered by these observations.
