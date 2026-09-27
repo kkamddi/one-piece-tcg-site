@@ -1,8 +1,8 @@
 # Card Pone Scan - Release Status
 
-Updated: 2026-09-27. Version 0.1.18 prepared for the authorized production release and store update. Submission confirmation is pending.
+Updated: 2026-09-27. Version 0.1.18 submitted for review. Website production deployment succeeded. Extension not published.
 
-## Candidate: 0.1.18
+## Current submission: 0.1.18
 
 - Full-width, 48px scan action below the logo; 16px button text and adjusted result-heading spacing. No added helper copy.
 - Login opens the website homepage instead of portfolio. Membership checks and permissions are unchanged.
@@ -10,6 +10,9 @@ Updated: 2026-09-27. Version 0.1.18 prepared for the authorized production relea
 - The UI build passed 25 targeted tests. The preceding recognition/member suite passed 65 tests. Local browser preview confirmed the new scan button at 48px high with 16px text.
 - Installed live toolbar capture remains unverified for this candidate. The user's original cropped-photo no-match was not reproduced by local image tests; do not report it as conclusively fixed.
 - User authorized production deployment and updated store submission. Keep automatic store publication disabled; preserve existing confidential reviewer instructions and never commit their values.
+- Final release suite passed 66 tests; the integrated production checkout passed its build and 54 targeted tests. Production workflow succeeded for `05edde1` with unchanged catalog revisions and no database import.
+- Cancelled the pending 0.1.17 review, uploaded the audited 0.1.18 ZIP to the same item, verified version 0.1.18 in the dashboard, and received the submission-complete confirmation. Automatic publication was explicitly unchecked. Existing listing, privacy declarations and confidential reviewer instructions were not edited.
+- Release and deployment evidence: `docs/production-deployment-2026-09-27.md`. New installed-extension capture verification is still incomplete; store submission does not resolve that limitation.
 
 ## Previous submission: 0.1.17
 
