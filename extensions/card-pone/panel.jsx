@@ -143,12 +143,11 @@ function Panel() {
 
   const busy = phase === 'capture' || phase === 'scanning';
   return <main className="scan-panel">
-    <header><img src="./logo.png" alt="Card Pone" />
+    <header><img src="./logo.png" alt="Card Pone" /></header>
     <button className="scan-button" disabled={busy || !member} onClick={() => isExtension ? scan() : file.current.click()}>
       <span className={busy ? 'scan-mark scanning' : 'scan-mark'} aria-hidden="true" />
-      {busy ? status : result ? '다시 스캔' : '스캔'}
+      {busy ? status : result ? '다시 스캔' : '카드 스캔'}
     </button>
-    </header>
     {isExtension && !member && <section className="member-login" aria-labelledby="member-login-title">
       <span className="member-login-icon" aria-hidden="true"><span className="scan-mark" /></span>
       <h1 id="member-login-title">로그인하고<br />카드를 스캔하세요</h1>

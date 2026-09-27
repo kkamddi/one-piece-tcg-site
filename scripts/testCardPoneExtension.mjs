@@ -5,6 +5,19 @@ import { captureCard, cropPixels, captureFailure } from '../extensions/card-pone
 
 const rect = { x: 20, y: 30, width: 100, height: 140, viewportWidth: 1000, viewportHeight: 800 };
 const tab = { id: 7, windowId: 3, url: 'https://example.test/cards' };
+test('scan action sits below the header with a full-width 48px target', async () => {
+  const panel = await readFile('extensions/card-pone/panel.jsx', 'utf8');
+  const css = await readFile('extensions/card-pone/panel.css', 'utf8');
+  assert.ok(panel.indexOf('</header>') < panel.indexOf('className="scan-button"'));
+  assert.match(panel, /busy \? status : result \? '다시 스캔' : '카드 스캔'/);
+  assert.match(panel, /disabled=\{busy \|\| !member\}/);
+  const rule = css.match(/\.scan-button\{([^}]+)\}/)[1];
+  assert.match(rule, /(?:^|;)width:100%;/);
+  assert.match(rule, /min-height:48px;/);
+  assert.match(rule, /font-size:16px;/);
+  assert.doesNotMatch(rule, /max-width:/);
+});
+
 function api({ selection = rect, active = tab, viewport = { width: 1000, height: 800 } } = {}) {
   let calls = 0, screenshots = 0;
   return {
