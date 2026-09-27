@@ -19,3 +19,12 @@
 - The current browser API does not implement viewport resizing. This attempt provides no mobile viewport evidence; earlier mocked runtime checks are not device certification.
 - Real calibrated-photo accuracy, physical devices, first-time social-provider consent, actual push delivery, and full extension toolbar capture are not certified by this check. Previously deferred items remain deferred.
 - Synthetic test content contains no user photo, credentials or private records. No main push, production deployment or force push was performed.
+
+## Subsequent live Web Push verification
+
+- With the owner's explicit authorization, used the approved signed-in test account and the card-specific price-alert modal. The header bell only opens received notifications; it is not the permission-management entry point.
+- Clicked the site's notification-permission action and accepted the browser's native notification prompt through accessibility (no system mouse input). `Notification.permission` became `granted`; the modal then showed push enabled and exposed its administrator test button.
+- Clicked that test button exactly once. The UI reported successful sending. The site's service-worker notification list increased from one connection confirmation to two notifications, including the expected test-notification title. This is browser receipt evidence, not proof of an operating-system banner, physical-device delivery or cross-account logout cleanup.
+- No price-alert rule was submitted, and no existing account, portfolio or pricing data was intentionally edited. The browser permission and this device's push subscription were enabled as authorized. No credentials, subscription endpoints or key material were read or recorded.
+- The measured automation viewport was 1360 by 990, with document width 1360. The alert modal bounds were left 420, right 940, top 115, bottom 875. This confirms desktop containment only; the native window's narrow appearance must not be treated as mobile emulation.
+- Actual Web Push receipt is no longer an unverified item for this browser/account. First-time social-provider consent and mobile/device-specific limits above remain unresolved. No application code or production deployment changed in this follow-up.
