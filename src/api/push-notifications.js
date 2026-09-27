@@ -172,7 +172,10 @@ export async function disableDevicePushNotifications() {
   if (!('serviceWorker' in navigator)) return;
   const registration = await navigator.serviceWorker.getRegistration('/');
   const subscription = await registration?.pushManager?.getSubscription();
-  if (!subscription) return;
-  await requestJson('/api/push-subscriptions', { method: 'DELETE', body: { endpoint: subscription.endpoint } });
-  await subscription.unsubscribe();
+  if (subscription) {
+    await requestJson('/api/push-subscriptions', { method: 'DELETE', body: { endpoint: subscription.endpoint } });
+    await subscription.unsubscribe();
+  }
+  const notifications = await registration?.getNotifications?.();
+  for (const notification of notifications || []) notification.close();
 }
