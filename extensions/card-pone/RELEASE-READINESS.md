@@ -1,8 +1,17 @@
-# Card Pone Scan - Submitted for Review
+# Card Pone Scan - Release Status
 
-Updated: 2026-09-26. Version 0.1.17 submitted for review. Not published.
+Updated: 2026-09-27. Version 0.1.18 prepared for the authorized production release and store update. Submission confirmation is pending.
 
-## Current submission: 0.1.17
+## Candidate: 0.1.18
+
+- Full-width, 48px scan action below the logo; 16px button text and adjusted result-heading spacing. No added helper copy.
+- Login opens the website homepage instead of portfolio. Membership checks and permissions are unchanged.
+- Central-artwork retrieval improves the supplied full-holder photo; geometric verification and the 64-code budget remain unchanged. See `docs/card-recognition-regression-2026-09-27.md` for evidence and limitations.
+- The UI build passed 25 targeted tests. The preceding recognition/member suite passed 65 tests. Local browser preview confirmed the new scan button at 48px high with 16px text.
+- Installed live toolbar capture remains unverified for this candidate. The user's original cropped-photo no-match was not reproduced by local image tests; do not report it as conclusively fixed.
+- User authorized production deployment and updated store submission. Keep automatic store publication disabled; preserve existing confidential reviewer instructions and never commit their values.
+
+## Previous submission: 0.1.17
 
 - User authorized replacing the pending review with the simplified login UI. Cancelled 0.1.16 review, uploaded 0.1.17 to the same item, and received submission confirmation.
 - Automatic publication explicitly unchecked. Existing confidential reviewer credentials and test steps retained; values were not displayed or committed.
