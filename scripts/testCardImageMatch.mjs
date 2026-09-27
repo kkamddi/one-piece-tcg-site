@@ -110,6 +110,20 @@ test('each crop contributes candidates even when another crop has better absolut
   assert.ok(codes.length <= 64);
 });
 
+test('artwork retrieval survives misleading foil borders without expanding the 64-code budget', () => {
+  const central = i => { const x = Math.floor(i / 3) % 8, y = Math.floor(i / 24); return x >= 2 && x < 6 && y >= 2 && y < 7; };
+  const photo = Array.from({ length: 288 }, (_, i) => (i * 37 + 11) % 256);
+  const target = photo.map((value, i) => central(i) ? value : 255 - value);
+  const distractor = photo.map((value, i) => central(i) ? 255 - value : value);
+  const encode = values => Buffer.from(values).toString('base64');
+  assert.ok(signatureDistance(photo, distractor) < signatureDistance(photo, target));
+  const items = Array.from({ length: 80 }, (_, i) => ({ code: `OTHER-${i}`, signature: encode(distractor) }));
+  items.push({ code: 'TARGET', signature: encode(target) });
+  const codes = shortlistImageCodes(items, [photo]);
+  assert.ok(codes.includes('TARGET'));
+  assert.ok(codes.length <= 64);
+});
+
 test('holder search regions are bounded and blank regions cannot match artwork', () => {
   const blank = new cv.Mat(847, 562, cv.CV_8UC4, new cv.Scalar(245, 245, 245, 255));
   const regions = normalizeHolderRegions(cv, blank);
