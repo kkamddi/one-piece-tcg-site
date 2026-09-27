@@ -3,6 +3,9 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { parse } from '@babel/parser';
+import { transformSync } from 'esbuild';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const source = await readFile(new URL('../src/CenteringLab.jsx', import.meta.url), 'utf8');
 const ast = parse(source, { sourceType: 'module', plugins: ['jsx'] });
@@ -85,4 +88,46 @@ test('captured image analysis uses detected asymmetric borders, not a fixed 50:5
 test('blank images and an undetected edge cannot receive high detection confidence', () => {
   assert.equal(analyzeSyntheticCard({ blank: true }).confidence, 0);
   assert.equal(analyzeSyntheticCard({ left: 0 }).confidence, 0);
+});
+
+function findNode(node, predicate) {
+  if (!node || typeof node !== 'object') return null;
+  if (predicate(node)) return node;
+  for (const value of Object.values(node)) {
+    for (const child of Array.isArray(value) ? value : [value]) {
+      const found = findNode(child, predicate);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function hasClass(node, className) {
+  return node?.type === 'JSXElement' && node.openingElement.attributes.some(
+    attr => attr.name?.name === 'className' && attr.value?.value === className
+  );
+}
+
+function renderFragment(node, isReferenceReliable) {
+  assert.ok(node);
+  const { code } = transformSync(`(${source.slice(node.start, node.end)})`, { loader: 'jsx' });
+  return renderToStaticMarkup(vm.runInNewContext(code, {
+    React, isReferenceReliable, report: { score: 99, left: 50.6, right: 49.4, top: 50.5, bottom: 49.5 },
+    text: { score: 'Centering score', reference: 'Centering reference' },
+    graderReferences: { psa10: true }, referenceLabel: 'Check boundaries', uiLang: 'EN'
+  }));
+}
+
+test('uncertain centering results suppress the score instead of displaying 99', () => {
+  const score = findNode(ast, node => hasClass(node, 'centering-score-block'));
+  assert.match(renderFragment(score, false), /<strong>—<\/strong>/);
+  assert.doesNotMatch(renderFragment(score, false), /99|is-top/);
+  assert.match(renderFragment(score, true), /<strong>99<\/strong>/);
+});
+
+test('direction conclusions are rendered only for reliable centering results', () => {
+  const direction = findNode(ast, node => node.type === 'LogicalExpression'
+    && node.operator === '&&' && hasClass(node.right, 'centering-direction-note'));
+  assert.equal(renderFragment(direction, false), '');
+  assert.match(renderFragment(direction, true), /printed area shifts to the right/);
 });
