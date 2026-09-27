@@ -47,3 +47,11 @@
 - The live low-confidence score issue reproduced again, as expected: the previously archived correction is not deployed. This run is not a calibrated accuracy measurement; default outline choices do not establish correct geometry.
 - Fresh local command `node --test scripts/testCenteringGeometry.mjs scripts/testAndroidRuntime.mjs scripts/testAndroidPresentation.mjs`: 20 passed, none failed or skipped.
 - Remaining limits: real pointer/touch dragging, native file chooser/camera, physical-device behavior, calibrated-photo accuracy, and production verification of archived fixes. No new application defect was established by this scoped layout/flow check.
+
+## Pointer-handler simulation
+
+- Added tests that compile the actual `BoundaryEditor` component and invoke its rendered buttons' pointer handlers. React refs, element bounds and pointer capture are simulated; geometric helpers are extracted from the same source rather than reimplemented.
+- Touch and mouse event coordinates at editor widths 247/317/357 move the left edge as expected without mutating the original frame. Moves before a drag or after pointer-up do not update the frame. Pointer cancellation releases capture and stops updates. Advanced corner dragging clamps to the card and preserves the two-percent separation from opposite boundaries.
+- `node --test scripts/testCenteringGeometry.mjs`: 11 passed. No application-code change was needed.
+- Combined scoped run of `testCenteringGeometry`, `testAndroidRuntime`, `testAndroidPresentation`, `testAndroidIntegrations`, `testNotificationIsolation` and `testPortfolioIsolation` under `scripts/`: 56 passed, zero failed/skipped.
+- This verifies handler logic with simulated events, not real browser pointer capture, physical gestures, multi-touch, camera use or calibrated accuracy. First-time provider consent still requires a designated account not already registered with the site; the owner was asked for the provider/account identifier only, not a password.
