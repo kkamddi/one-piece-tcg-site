@@ -16,8 +16,22 @@ export function normalizeHolderRegions(cv, rgba) {
 }
 
 export function shortlistImageCodes(items, signatures) {
-  const references = items.map(item => ({ ...item, decoded: Array.from(atob(item.signature), c => c.charCodeAt(0)) }));
-  const rankings = signatures.map(signature => references.map(item => ({ code: item.code, distance: signatureDistance(signature, item.decoded) })).sort((a, b) => a.distance - b.distance));
+  // The center of the artwork is less affected by foil borders, text and holders.
+  // This only retrieves candidates; ORB + geometry still verifies every match.
+  const artwork = signature => signature.length === 8 * 12 * 3
+    ? signature.filter((_, i) => { const x = Math.floor(i / 3) % 8, y = Math.floor(i / 24); return x >= 2 && x < 6 && y >= 2 && y < 7; })
+    : signature;
+  const references = items.map(item => {
+    const decoded = Array.from(atob(item.signature), c => c.charCodeAt(0));
+    return { ...item, decoded, artwork: artwork(decoded) };
+  });
+  const rankings = signatures.flatMap(signature => {
+    const center = artwork(signature);
+    return [
+      references.map(item => ({ code: item.code, distance: signatureDistance(signature, item.decoded) })).sort((a, b) => a.distance - b.distance),
+      references.map(item => ({ code: item.code, distance: signatureDistance(center, item.artwork) })).sort((a, b) => a.distance - b.distance)
+    ];
+  });
   const codes = new Set();
   // Do not compare absolute correlation scores across differently cropped regions.
   for (let rank = 0; rank < 6; rank += 1) for (const ranking of rankings) {

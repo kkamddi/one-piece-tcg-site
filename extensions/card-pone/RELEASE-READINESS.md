@@ -1,8 +1,42 @@
-# Card Pone Scan - Submitted for Review
+# Card Pone Scan - Release Status
 
-Updated: 2026-09-25. Version 0.1.15 submitted; Chrome Web Store status is pending review. Not published.
+Updated: 2026-09-27. Version 0.1.18 prepared for the authorized production release and store update. Submission confirmation is pending.
 
-## Current submission: 0.1.15
+## Candidate: 0.1.18
+
+- Full-width, 48px scan action below the logo; 16px button text and adjusted result-heading spacing. No added helper copy.
+- Login opens the website homepage instead of portfolio. Membership checks and permissions are unchanged.
+- Central-artwork retrieval improves the supplied full-holder photo; geometric verification and the 64-code budget remain unchanged. See `docs/card-recognition-regression-2026-09-27.md` for evidence and limitations.
+- The UI build passed 25 targeted tests. The preceding recognition/member suite passed 65 tests. Local browser preview confirmed the new scan button at 48px high with 16px text.
+- Installed live toolbar capture remains unverified for this candidate. The user's original cropped-photo no-match was not reproduced by local image tests; do not report it as conclusively fixed.
+- User authorized production deployment and updated store submission. Keep automatic store publication disabled; preserve existing confidential reviewer instructions and never commit their values.
+
+## Previous submission: 0.1.17
+
+- User authorized replacing the pending review with the simplified login UI. Cancelled 0.1.16 review, uploaded 0.1.17 to the same item, and received submission confirmation.
+- Automatic publication explicitly unchecked. Existing confidential reviewer credentials and test steps retained; values were not displayed or committed.
+- Login presentation only: decorative label and helper paragraphs removed; login and connection-check actions retained. Authentication, permissions and production website unchanged.
+- 34 focused capture/confidence/network/price/reference/link tests passed; extension-only clean release build passed with existing OpenCV externalization and large-chunk warnings.
+- ZIP: `artifacts/card-pone-scan-0.1.17-store.zip` (86,855,325 bytes, 5,460 entries, one manifest; no environment/key/source-map/node_modules paths detected). Packaged version and removed-copy checks passed.
+- No new installed toolbar capture end-to-end verification; that limitation remains. No main push or production deployment. Reproducible build artifacts remain local; signing-key backup remains unverified.
+
+### Installed 0.1.17 follow-up
+
+- Rebuilt and reloaded the existing local unpacked extension; runtime manifest reports 0.1.17. Simplified login UI confirmed in its actual panel page.
+- Logged-out panel disables Scan. Login action creates its dedicated website tab. Signed in with the existing ordinary reviewer account; real background membership check returned true and connection confirmation enabled Scan.
+- Credentials were used in memory only, not printed or saved in the repository. No authentication configuration or production changes.
+- Actual toolbar/side-panel capture remains pending a user toolbar click; opening the panel as a tab is not counted as that end-to-end test.
+
+## Historical submission: 0.1.16 (cancelled and replaced)
+
+- Replaced the pending 0.1.15 review with 0.1.16 in the existing store item, with user authorization. No duplicate item created.
+- Membership API deployed and installed-panel login/logout gates verified. Store description, privacy disclosures and confidential reviewer instructions updated for member-only access.
+- Dedicated ordinary reviewer credentials saved privately; production login and membership checks both returned 200. Credentials are not included in this repository.
+- Portal confirmed submission on 2026-09-26. Automatic publication was unchecked; manual publication is required after approval, within the portal's stated 30-day staging window.
+- ZIP: `artifacts/card-pone-scan-0.1.16-store.zip` (86,855,154 bytes, 5,460 entries, one root manifest). Local reproducible artifact only.
+- No new complete toolbar/side-panel capture test for 0.1.16. Detailed evidence and remaining limits: `docs/extension-membership-2026-09-26.md`.
+
+## Historical submission: 0.1.15 (cancelled and replaced)
 
 - Submitted through Aside MCP using publisher `optkr26@gmail.com`, with the user's explicit submission authorization.
 - Store item: `bmallhfmgjlccnegdjjlmhobcgocphlc`. Portal confirmed successful submission and pending review.

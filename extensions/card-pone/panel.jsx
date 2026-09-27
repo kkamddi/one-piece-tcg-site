@@ -143,20 +143,19 @@ function Panel() {
 
   const busy = phase === 'capture' || phase === 'scanning';
   return <main className="scan-panel">
-    <header><img src="./logo.png" alt="Card Pone" />
+    <header><img src="./logo.png" alt="Card Pone" /></header>
     <button className="scan-button" disabled={busy || !member} onClick={() => isExtension ? scan() : file.current.click()}>
       <span className={busy ? 'scan-mark scanning' : 'scan-mark'} aria-hidden="true" />
-      {busy ? status : result ? '다시 스캔' : '스캔'}
+      {busy ? status : result ? '다시 스캔' : '카드 스캔'}
     </button>
-    </header>
-    {isExtension && !member && <section aria-label="회원 로그인">
-      <p>Card Pone 회원 전용입니다. 연결용 홈페이지 탭을 열어 두세요.</p>
-      <p className="price-note">로그인 버튼을 누르면 전용 탭을 열고 로그인 상태를 회원 확인에 사용합니다. 비밀번호는 확장에 저장하지 않습니다.</p>
-      <button className="more" onClick={async () => {
+    {isExtension && !member && <section className="member-login" aria-labelledby="member-login-title">
+      <span className="member-login-icon" aria-hidden="true"><span className="scan-mark" /></span>
+      <h1 id="member-login-title">로그인하고<br />카드를 스캔하세요</h1>
+      <button className="member-login-primary" onClick={async () => {
         try { await chrome.runtime.sendMessage({ type: 'card-pone-member-login' }); }
         catch { setError(MEMBER_REQUIRED); }
-      }}>Card Pone 로그인</button>
-      <button className="more" onClick={checkMember}>연결 확인</button>
+      }}>Card Pone 로그인 <span aria-hidden="true">↗</span></button>
+      <div className="member-login-recheck"><button onClick={checkMember}>연결 확인</button></div>
     </section>}
     {!isExtension && <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={event => { const image = event.target.files?.[0]; event.target.value = ''; if (image) scan(image); }} />}
     {phase === 'scanning' && <button className="cancel-scan" onClick={() => job.current?.abort()}>취소</button>}
