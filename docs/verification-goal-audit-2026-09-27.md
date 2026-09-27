@@ -21,8 +21,17 @@ This is a scoped continuation, not a complete certification. No production deplo
 | Mobile | Fresh mocked native runtime/presentation checks pass. Physical devices remain excluded/deferred by the owner. |
 | Code preservation | Previous fixes and deployment evidence are on the existing archive branch. This audit adds documentation only; unrelated working changes are preserved. |
 
-## Current live-verification blocker
+## Earlier live-verification blocker (resolved)
 
 The designated Aside CLI session reported that its task browser window was no longer available in the original browser mode and requested reopening the task in the intended window. No other browser/profile was used to bypass this condition. The 0.1.18 package exists locally and was submitted for review, but installation in the user's visible Card Pone profile and live toolbar capture remain unconfirmed. Browser attachment must be restored in the designated profile before claiming those checks complete.
 
-The goal remains open pending the applicable live checks or an explicit decision on their remaining scope. Signing-key backup remains a separate unverified task. User photos and reproducible build packages remain local-only.
+The browser attachment was subsequently restored in the designated profile. Installed extension 0.1.18 and its member connection were verified; full toolbar capture remains separate and unverified. This earlier attachment failure is no longer a blocker.
+
+## Updated evidence after the initial audit
+
+- `centering-confidence-verification-2026-09-27.md` records actual Web Push browser receipt, mobile-width upload/outline/result/re-entry flows, and current 20-test centering/native regression results. These supersede the initial missing-receipt and entry-only mobile evidence, but do not certify OS banners, touch input or physical devices.
+- `web-push-logout-verification-2026-09-27.md` records delivered-notification cleanup and 27 passing mocked logout/integration/isolation tests. The fix is preserved in archive commit `d74f330`; it is not deployed.
+- The low-confidence centering display correction is likewise archived, not deployed. Production behavior must not be described as fixed yet.
+- Remaining verification gaps include first-time social-provider consent (no fresh provider identity designated), actual mobile pointer/touch adjustment, and live post-deployment checks of archived fixes. Calibrated-photo accuracy and physical devices remain owner-deferred/excluded; the known Google identity collision was deferred rather than resolved.
+
+The goal remains open pending applicable remaining checks. Signing-key backup remains a separate unverified task. User photos and reproducible build packages remain local-only. No main update or production deployment is authorized by this audit.

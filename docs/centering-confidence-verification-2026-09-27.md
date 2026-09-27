@@ -36,3 +36,14 @@
 - Centering entry-screen checks at widths 320, 390 and 430 found document scroll width equal to client width (305, 375 and 415 respectively, after the desktop scrollbar). Camera/upload buttons stayed within the horizontal bounds; both had height 92 and respective widths 116, 151 and 171.
 - The guide also had no horizontal overflow at width 390. The temporary iframe was removed after verification.
 - No new layout defect was reproduced in this scoped check. Upload/result editing on mobile widths, touch gestures, device camera and OS-specific behavior are not covered by these observations.
+
+## Mobile-width upload and result flow follow-up
+
+- Revalidated the designated browser profile and the approved signed-in test account. Used only the owned task tab and a temporary same-origin iframe.
+- At width 390, supplied a generated 630 by 880 PNG through the actual file input's change event (light background and dark rectangle; no personal image). This tests file decoding and application flow, not the native file chooser.
+- Reached outer-outline editing, used zoom in/out, confirmed the outline, toggled inner-border corner mode and back, applied the recommended position, and confirmed the result.
+- At outer-outline editing, inner-border editing and result stages, widths 320/390/430 had matching document client/scroll widths of 305/375/415. All measured visible main action buttons stayed within horizontal document bounds.
+- From the result, returned to inner-border editing and then to outer-outline editing successfully. Removed the temporary iframe afterward.
+- The live low-confidence score issue reproduced again, as expected: the previously archived correction is not deployed. This run is not a calibrated accuracy measurement; default outline choices do not establish correct geometry.
+- Fresh local command `node --test scripts/testCenteringGeometry.mjs scripts/testAndroidRuntime.mjs scripts/testAndroidPresentation.mjs`: 20 passed, none failed or skipped.
+- Remaining limits: real pointer/touch dragging, native file chooser/camera, physical-device behavior, calibrated-photo accuracy, and production verification of archived fixes. No new application defect was established by this scoped layout/flow check.
