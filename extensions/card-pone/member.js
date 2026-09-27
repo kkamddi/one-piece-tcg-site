@@ -4,7 +4,7 @@ export const MEMBER_REQUIRED = 'Card Pone 로그인 후 연결 확인을 눌러 
 
 // Only the extension-created login tab is accessed, never arbitrary existing tabs.
 export async function openMemberLogin(api) {
-  const tab = await api.tabs.create({ url: `${MEMBER_ORIGIN}/portfolio` });
+  const tab = await api.tabs.create({ url: `${MEMBER_ORIGIN}/` });
   await api.storage.session.set({ [TAB_KEY]: tab.id });
 }
 

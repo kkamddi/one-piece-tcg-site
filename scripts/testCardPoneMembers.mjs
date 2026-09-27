@@ -36,10 +36,10 @@ test('backend failure and unsupported methods fail closed without leaking detail
   }
   assert.equal((await apiResult({ method: 'POST' })).code, 405);
 });
-function browser({ token = 'synthetic-token', url = 'https://www.optcgkorea.com/portfolio', tab = 10 } = {}) {
+function browser({ token = 'synthetic-token', url = 'https://www.optcgkorea.com/', tab = 10 } = {}) {
   return {
     storage: { session: { get: async () => ({ cardPoneMemberTab: tab }), set: async () => {} } },
-    tabs: { get: async id => { assert.equal(id, 10); return { url }; }, create: async ({ url }) => { assert.equal(url, 'https://www.optcgkorea.com/portfolio'); return { id: 10 }; } },
+    tabs: { get: async id => { assert.equal(id, 10); return { url }; }, create: async ({ url }) => { assert.equal(url, 'https://www.optcgkorea.com/'); return { id: 10 }; } },
     scripting: { executeScript: async args => { assert.equal(args.world, 'ISOLATED'); assert.deepEqual(args.target, { tabId: 10, frameIds: [0] }); return [{ frameId: 0, result: token }]; } }
   };
 }
