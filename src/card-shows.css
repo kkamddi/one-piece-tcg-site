@@ -10,6 +10,14 @@
 .card-shows .renew-news-toggle :is(a,button) { min-height: 40px; }
 .card-show-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--show-line); color: inherit; text-decoration: none; }
 .card-show-name { display: grid; min-width: 0; gap: 6px; overflow-wrap: anywhere; }
+.card-show-summary { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.card-show-summary > img { width: 100px; height: 112px; object-fit: contain; flex: 0 0 100px; }
+.card-show-summary > img[hidden], .card-show-poster[hidden] { display: none; }
+.card-show-poster { margin: 24px 0; }
+.card-show-poster img { display: block; max-width: 100%; width: auto; height: auto; max-height: 560px; object-fit: contain; }
+.card-show-poster figcaption { margin-top: 8px; font-size: 12px; }
+.card-show-poster a { color: var(--show-muted); }
+.card-show-schedule-note { padding: 12px 0; border-bottom: 1px solid var(--show-line); font-size: 13px; line-height: 1.6; }
 .card-show-name > span, .card-show-date { color: var(--show-muted); font-size: 13px; line-height: 1.6; }
 .card-show-date { display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .card-show-row-end { display: flex; align-items: center; gap: 18px; }
@@ -30,6 +38,8 @@
 .renew-app.is-dark .card-show-status:is(.is-cancelled,.is-postponed) { color: #ff9a87; }
 @media (hover: hover) { .card-show-row:hover h2, .card-show-calendar:hover { text-decoration: underline; } }
 @media (max-width: 720px) {
+  .card-show-summary { gap: 12px; }
+  .card-show-summary > img { width: 64px; height: 88px; flex-basis: 64px; }
   .card-show-row { gap: 12px; padding: 18px 0; }
   .card-show-row-end { flex-direction: column; gap: 6px; align-items: flex-end; max-width: 80px; }
   .card-show-details > div { grid-template-columns: 88px minmax(0,1fr); }

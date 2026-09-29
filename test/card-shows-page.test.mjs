@@ -8,6 +8,7 @@ import { parse } from '@babel/parser';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { filterShows, reviewedShows, koreaToday, showRoute, safeEventUrl } from '../src/card-shows.js';
+import { cardShowEvents } from '../src/data/card-show-events.js';
 
 const base = { id: 'test', title: 'Test show', titleKo: '시험 행사', date: '2026-10-02', endDate: '2026-10-03',
   locale: 'KR', region: 'capital', venue: '서울 시험 행사장', url: 'https://example.com/',
@@ -20,6 +21,29 @@ const context = { module: { exports: {} }, require: createRequire(import.meta.ur
 vm.runInNewContext(compiled.outputFiles[0].text, context);
 const Component = context.module.exports.default;
 const render = props => renderToStaticMarkup(React.createElement(Component, { events, today: '2026-10-02', ...props }));
+
+test('reviewed official images have attribution; missing or unsafe images leave no placeholder', () => {
+  const pictured = { ...base, posterUrl: 'https://example.com/poster.png', posterSourceUrl: 'https://example.com/', posterVerifiedAt: '2026-09-29' };
+  assert.match(render({ events: [pictured] }), /<img/);
+  assert.match(render({ events: [pictured], search: '?event=test' }), /이미지 출처/);
+  for (const patch of [{ posterUrl: 'javascript:alert(1)' }, { posterUrl: 'https://other.example/poster.png' }, { posterVerifiedAt: '' }]) {
+    assert.doesNotMatch(render({ events: [{ ...pictured, ...patch }] }), /<img|card-show-poster/);
+  }
+  const element = Component({ events: [pictured], today: '2026-10-02' });
+  const walk = node => !node || typeof node !== 'object' ? [] : [node, ...React.Children.toArray(node.props?.children).flatMap(walk)];
+  const image = walk(element).find(node => node.type === 'img');
+  const target = { hidden: false };
+  image.props.onError({ currentTarget: target });
+  assert.equal(target.hidden, true);
+});
+
+test('curated list contains both verified shows and discloses conflicting opening times', () => {
+  assert.equal(filterShows(cardShowEvents, { today: '2026-09-29' }).length, 2);
+  const html = render({ events: cardShowEvents, search: '?event=cardshow-collectible-con-20261002' });
+  assert.match(html, /10:00/);
+  assert.match(html, /11:00/);
+  assert.match(html, /사전등록/);
+});
 
 test('KST day boundary and multi-day events retain ongoing shows until the end date', () => {
   assert.equal(koreaToday(Date.parse('2026-10-01T15:00:00Z')), '2026-10-02');
