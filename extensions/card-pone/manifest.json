@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Card Pone Scan",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "minimum_chrome_version": "116",
-  "description": "Scan a card on the current page and open its matching Card Pone price page.",
+  "description": "웹페이지의 원피스 카드를 스캔하고 카드 정보와 시세를 확인하세요.",
   "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
   "host_permissions": ["https://www.optcgkorea.com/*"],
   "action": { "default_title": "Card Pone Scan", "default_icon": { "32": "icon32.png", "128": "icon128.png" } },
