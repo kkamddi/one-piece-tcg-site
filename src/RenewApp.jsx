@@ -30,6 +30,7 @@ import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-er
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
+import CardShows from './CardShows';
 import boxMarketPrices from './data/box-market-prices.json';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
@@ -691,6 +692,7 @@ const NEWS_LINK_GROUPS = [
 ];
 const NEWS_FILTERS = [
   { id: 'all', label: '전체', href: '/news' },
+  { id: 'cardshows', label: '카드쇼·행사', href: '/news?section=cardshows' },
   { id: 'notice', label: '공지사항', href: '/news/official' },
   { id: 'guide', label: '가이드/Q&A', href: '/news/guide' },
   { id: 'preorder', label: '사전예약', href: '/news/preorder' },
@@ -7333,6 +7335,12 @@ function RenewCalendar({ uiLang }) {
   );
 }
 
+function localizeNewsPath(path, uiLang) {
+  const queryIndex = path.indexOf('?');
+  return localizeAppPath(queryIndex < 0 ? path : path.slice(0, queryIndex), uiLang)
+    + (queryIndex < 0 ? '' : path.slice(queryIndex));
+}
+
 function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
@@ -7375,7 +7383,7 @@ function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
   const visibleLinkGroups = (isJp ? [] : NEWS_LINK_GROUPS)
     .filter((item) => item.id === newsFilter);
   const showOverview = !isJp && newsFilter === 'all';
-  const showNotice = isJp || newsFilter === 'notice';
+  const showNotice = (isJp && newsFilter !== 'cardshows') || newsFilter === 'notice';
   const showGuide = !isJp && newsFilter === 'guide';
   const showSupplies = !isAndroid && !isJp && newsFilter === 'supplies';
   const showTopSection = showNotice || visibleLinkGroups.length > 0;
@@ -7399,7 +7407,7 @@ function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
         {NEWS_FILTERS.filter((item) => !isAndroid || item.id !== 'supplies').map((item) => (
           <a
             key={item.id}
-            href={localizeAppPath(item.href, uiLang)}
+            href={localizeNewsPath(item.href, uiLang)}
             className={newsFilter === item.id ? 'is-active' : ''}
             aria-current={newsFilter === item.id ? 'page' : undefined}
             onClick={(event) => followNewsLink(event, item.href)}
@@ -7411,8 +7419,13 @@ function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
 
       <RenewAdInquiry uiLang={uiLang} />
 
+      {newsFilter === 'cardshows' && <CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} />}
+
       {showOverview ? (
         <section className="renew-news-hub" aria-label="정보 바로가기">
+          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news?section=cardshows')}>
+            <strong>카드쇼·행사</strong><b aria-hidden="true">›</b>
+          </button>
           <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/official')}>
             <span>NEWS</span>
             <strong>공식 소식</strong>
@@ -16822,7 +16835,7 @@ export default function RenewApp() {
           key={`${window.location.pathname}${window.location.search}`}
           uiLang={uiLang}
           onNavigate={(path) => {
-            const nextUrl = localizeAppPath(path, uiLang);
+            const nextUrl = localizeNewsPath(path, uiLang);
             if (window.location.pathname + window.location.search === nextUrl) return;
             internalNavigationRef.current = true;
             pushAppHistory(nextUrl);

@@ -1,0 +1,26 @@
+.card-shows { min-width: 0; color: inherit; }
+.card-shows-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.card-shows h1 { margin: 16px 0; font-size: 26px; }
+.card-shows h2 { margin: 0; font-size: 18px; }
+.card-shows a { color: inherit; text-decoration: none; }
+.card-shows button, .card-show-filters a, .card-show-actions a { display: inline-block; padding: 10px 14px; border: 1px solid #d9dfdc; border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.card-show-filters { margin: 12px 0; flex-wrap: wrap; }
+.card-show-filters a.is-active { background: #173d35; color: #fff; border-color: #173d35; }
+.card-show-row { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(0, 2fr) auto; gap: 20px; padding: 22px 0; border-bottom: 1px solid #d9dfdc; }
+.card-show-date, .card-show-name, .card-show-row-end { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; overflow-wrap: anywhere; }
+.card-show-status { display: inline-block; padding: 4px 8px; border-radius: 6px; background: #edf3f0; color: #173d35; font-size: 13px; }
+.card-show-status.is-cancelled, .card-show-status.is-postponed { background: #fff1e8; color: #8b3014; }
+.card-show-details { margin: 24px 0; }
+.card-show-details > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); padding: 12px 0; border-bottom: 1px solid #d9dfdc; gap: 12px; }
+.card-show-details dt { font-weight: 700; }
+.card-show-details dd { margin: 0; overflow-wrap: anywhere; }
+.card-show-actions { margin-top: 24px; flex-wrap: wrap; gap: 8px; }
+.card-show-back { display: inline-block; padding: 10px 0; }
+.card-show-verified { font-size: 13px; margin-top: 20px; }
+.card-shows a:focus-visible, .card-shows button:focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
+.renew-app.is-dark .card-show-row, .renew-app.is-dark .card-show-details > div, .renew-app.is-dark .card-shows button, .renew-app.is-dark .card-show-filters a, .renew-app.is-dark .card-show-actions a { border-color: #45514b; }
+@media (max-width: 640px) {
+  .card-show-row { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .card-show-row-end { flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .card-show-details > div { grid-template-columns: 95px minmax(0, 1fr); }
+}

@@ -4,7 +4,7 @@
 export const cardShowEvents = [{
   id: 'cardshow-seoul-card-festa-20261114', title: 'Seoul Card Festa 2026',
   titleKo: '제3회 서울카드페스타 2026', date: '2026-11-14', locale: 'KR',
-  venue: '고양 KINTEX 제2전시장 6 Hall A', hours: '10:00–18:00 KST',
+  venue: '고양 KINTEX 제2전시장 6 Hall A', region: 'capital', hours: '10:00–18:00 KST',
   url: 'https://seoulcardfesta.com/', sourceLabel: '서울카드페스타',
   verifiedAt: '2026-09-29', status: 'confirmed'
 }];
