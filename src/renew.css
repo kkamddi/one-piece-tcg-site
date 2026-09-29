@@ -23955,6 +23955,12 @@ button.renew-deck-entry:focus-visible {
 .renew-box-gallery .renew-box-gallery-info small { display: block; margin: 0; font-size: 12px; overflow-wrap: anywhere; letter-spacing: 0; }
 .renew-box-gallery .renew-box-gallery-info strong { display: block; font-size: 15px; line-height: 1.4; font-weight: 900; overflow-wrap: anywhere; letter-spacing: 0; }
 .renew-box-gallery .renew-box-gallery-info b { margin: auto 0 0; padding-top: 6px; font-size: 16px; line-height: 1.4; letter-spacing: 0; }
+.renew-box-gallery article.renew-box-market-card { display: flex; flex-direction: column; }
+.renew-box-gallery article.renew-box-market-card > a { display: flex; flex: 1; flex-direction: column; gap: 16px; color: inherit; text-decoration: none; }
+.renew-box-gallery .renew-box-market-head { flex-wrap: wrap; gap: 12px; }
+.renew-box-portfolio-add { padding: 10px; border: 1px solid currentColor; border-radius: 6px; color: inherit; background: transparent; cursor: pointer; }
+.renew-box-portfolio-add:focus-visible, .renew-box-gallery article > a:focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
+.renew-calendar-event-mark.is-cardshow, .renew-calendar-grid .is-cardshow { border-color: #6b83bd; }
 @media (max-width: 1000px) {
   .renew-box-gallery .renew-box-market-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

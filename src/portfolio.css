@@ -41,6 +41,7 @@
 .portfolio-allocation-bar { display: flex; overflow: hidden; height: 12px; background: var(--pf-surface); margin: 26px 0 22px; border-radius: 2px; }
 .portfolio-page .grade-a { background: #319486; }
 .portfolio-page .grade-psa10 { background: #d6a136; }
+.portfolio-page .grade-box { background: #6b83bd; }
 .portfolio-allocation-row { display: grid; grid-template-columns: 1fr auto 52px; align-items: center; gap: 12px; margin: 17px 0; font-size: 13px; }
 .portfolio-allocation-row > span { display: flex; align-items: center; gap: 8px; }
 .portfolio-allocation-row i { width: 8px; height: 8px; border-radius: 2px; }
