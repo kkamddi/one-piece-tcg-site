@@ -782,6 +782,24 @@
   gap: 10px;
 }
 
+.renew-extension-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 24px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+.renew-extension-banner a { color: inherit; font-weight: 700; }
+.renew-extension-banner button { border: 0; background: transparent; color: inherit; font-size: 24px; cursor: pointer; }
+.renew-app.is-dark .renew-extension-banner { border-color: #374151; }
+@media (max-width: 767px) {
+  .renew-extension-banner { display: none; }
+  .renew-bottom-nav button.renew-mobile-scan { color: #fff; background: #17191c; }
+  .renew-app.is-dark .renew-bottom-nav button.renew-mobile-scan { color: #17191c; background: #fff; }
+}
+
 .renew-mobile-topbar,
 .renew-bottom-nav,
 .renew-back-to-top {

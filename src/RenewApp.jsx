@@ -49,7 +49,8 @@ import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
-const CARD_SCAN_AVAILABLE = false;
+const CARD_SCAN_AVAILABLE = true;
+const EXTENSION_STORE_URL = 'https://chromewebstore.google.com/detail/bmallhfmgjlccnegdjjlmhobcgocphlc';
 const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
@@ -4303,6 +4304,7 @@ const STATIC_INFO_PAGES = {
 function MobileNavIcon({ type }) {
   // Additional Lucide icons: see public/licenses/lucide.txt.
   const paths = {
+    camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z" /><circle cx="12" cy="13" r="4" /></>,
     trophy: <><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2" /><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2" /><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3" /><path d="M4 22h16" /><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" /><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3" /></>,
     centering: <><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M7 12h10" /></>,
     layers: <><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></>,
@@ -4683,12 +4685,16 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
+function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
   const isLabActive = ['lab', 'centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
+  const [extensionBannerOpen, setExtensionBannerOpen] = useState(() => {
+    try { return Date.now() >= Number(localStorage.getItem('card-pone-extension-dismiss-until') || 0); }
+    catch { return true; }
+  });
   useBodyScrollLock(notificationMenuOpen && isLoggedIn);
   const unreadCount = notifications.filter((item) => !item.read_at).length;
   const handleNotificationClick = () => {
@@ -4718,6 +4724,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <img src={LOGO_SRC} alt="Card Pone" />
         </a>
         <div className="renew-mobile-actions">
+          <button type="button" onClick={() => onNavigate('lab')} aria-label="실험실"><MobileNavIcon type="lab" /></button>
           <div className={`renew-mobile-language ${mobileLanguageOpen ? 'is-open' : ''}`}>
             <button type="button" onClick={() => { setAccountMenuOpen(false); setNotificationMenuOpen(false); setMobileLanguageOpen((value) => !value); }} aria-label="언어 변경" aria-expanded={mobileLanguageOpen}>
               {uiLang}
@@ -4783,6 +4790,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </nav>
 
         <div className="renew-actions">
+          <a className="renew-pill" href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '확장 프로그램', 'Extension', '拡張機能')}</a>
           <div className={`renew-account-menu ${accountMenuOpen ? 'is-open' : ''}`}>
             <button type="button" className="renew-pill is-filled renew-account-pill" onClick={handleAccountClick}>
               {isLoggedIn ? displayName : t('login')}
@@ -4847,10 +4855,10 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        <a href={getLocalizedPagePath('lab', uiLang)} className={isLabActive ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('lab'); }} aria-label="실험실">
-          <MobileNavIcon type="lab" />
-          <span>{t('navLab')}</span>
-        </a>
+        <button type="button" className="renew-mobile-scan" onClick={onScan} aria-label="카드 스캔">
+          <MobileNavIcon type="camera" />
+          <span>{getLocaleText(uiLang, '스캔', 'Scan', 'スキャン')}</span>
+        </button>
         <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
@@ -4860,6 +4868,14 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <span>{t('navShops')}</span>
         </a>
       </nav>
+      {activePage === 'home' && extensionBannerOpen ? <div className="renew-extension-banner">
+        <strong>{getLocaleText(uiLang, '카드 사진만 스캔하고 시세를 확인하세요', 'Scan a card photo to check prices', 'カード画像をスキャンして相場を確認')}</strong>
+        <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '크롬 확장 프로그램 설치', 'Install Chrome extension', 'Chrome拡張機能をインストール')} ↗</a>
+        <button type="button" aria-label={getLocaleText(uiLang, '설치 안내 닫기', 'Dismiss install banner', '閉じる')} onClick={() => {
+          setExtensionBannerOpen(false);
+          try { localStorage.setItem('card-pone-extension-dismiss-until', String(Date.now() + 7 * 86400000)); } catch { /* Storage may be disabled. */ }
+        }}>×</button>
+      </div> : null}
     </header>
   );
 }
@@ -13317,7 +13333,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang }) {
+function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang, scannerOpen, setScannerOpen }) {
   const t = (key) => getUiText(uiLang, key);
   const savedViewState = getAppHistoryState().marketViewState || {};
   const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
@@ -13345,7 +13361,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const [mappingBusyId, setMappingBusyId] = useState(null);
   const [mappingMessage, setMappingMessage] = useState('');
   const [candidatePanelCollapsed, setCandidatePanelCollapsed] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false);
   useBodyScrollLock(scannerOpen);
   const [priceAlertOpen, setPriceAlertOpen] = useState(false);
   const [portfolioEditorOpen, setPortfolioEditorOpen] = useState(false);
@@ -15897,6 +15912,8 @@ function RenewShops({ uiLang }) {
 export default function RenewApp() {
   const initialPage = getPageFromPath(window.location.pathname);
   const [activePage, setActivePage] = useState(initialPage);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  useEffect(() => { if (activePage !== 'prices') setScannerOpen(false); }, [activePage]);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem(THEME_STORAGE_KEY) === 'dark';
@@ -16454,6 +16471,7 @@ export default function RenewApp() {
         activePage={activePage}
         onNavigate={navigatePage}
         onMobileNews={openMobileNews}
+        onScan={() => { navigatePage('prices'); setScannerOpen(true); }}
         isDark={isDark}
         onToggleTheme={() => setIsDark((value) => !value)}
         isLoggedIn={Boolean(authUser)}
@@ -16687,6 +16705,8 @@ export default function RenewApp() {
         />
       ) : activePage === 'prices' ? (
         <RenewMarket
+          scannerOpen={scannerOpen}
+          setScannerOpen={setScannerOpen}
           authUser={authUser}
           portfolioHoldings={portfolioHoldings}
           setPortfolioHoldings={setPortfolioHoldings}

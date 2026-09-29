@@ -33,9 +33,11 @@ test('recognizes supported card families without interpreting ordinary numbers',
   assert.deepEqual(extractCardCodes('nothing here 123-456'), []);
 });
 
-test('public scan entry and dialog are disabled during maintenance', async () => {
+test('mobile center scan and market entry open the shared scanner', async () => {
   const source = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
-  assert.match(source, /const CARD_SCAN_AVAILABLE = false;/);
+  assert.match(source, /const CARD_SCAN_AVAILABLE = true;/);
+  assert.match(source, /className="renew-mobile-scan" onClick=\{onScan\}/);
+  assert.match(source, /onScan=\{\(\) => \{ navigatePage\('prices'\); setScannerOpen\(true\); \}\}/);
   assert.match(source, /disabled=\{!CARD_SCAN_AVAILABLE \|\| loading\}/);
   assert.match(source, /CARD_SCAN_AVAILABLE && scannerOpen \? <CardScanner/);
   assert.match(source, /스캔 점검 중/);
@@ -85,13 +87,15 @@ test('camera crop maps a portrait frame into a landscape video without stretchin
   assert.throws(() => getCameraCrop(0, 0, 300, 400, { x: 0, y: 0, width: 200, height: 300 }));
 });
 
-test('scanner and lazy OCR modules parse; scan state belongs to the market screen', async () => {
+test('scanner modules parse; app owns scan state and passes it to market', async () => {
   for (const path of ['../src/CardScanner.jsx', '../src/lib/card-scan-ocr.js']) {
     parse(await readFile(new URL(path, import.meta.url), 'utf8'), { sourceType: 'module', plugins: ['jsx'] });
   }
   const app = parse(await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8'), { sourceType: 'module', plugins: ['jsx'] });
   const market = app.program.body.find(node => node.id?.name === 'RenewMarket');
-  assert.ok(market.body.body.some(node => node.declarations?.some(declaration => declaration.id.elements?.[0]?.name === 'scannerOpen')));
+  assert.ok(market.params[0].properties.some(node => node.key.name === 'scannerOpen'));
+  const root = app.program.body.find(node => node.declaration?.id?.name === 'RenewApp').declaration;
+  assert.ok(root.body.body.some(node => node.declarations?.some(declaration => declaration.id.elements?.[0]?.name === 'scannerOpen')));
 });
 
 async function ocrWithWorker(createWorker) {
