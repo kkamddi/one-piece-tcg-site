@@ -31,11 +31,11 @@ test('unreviewed, foreign and invalid records are never visible, but verified ca
   assert.equal(reviewedShows([{ ...base, reviewRequired: true }, { ...base, status: 'pending' }, { ...base, locale: 'JP' }, { ...base, date: '2026-02-30' }]).length, 0);
   assert.equal(reviewedShows(events).length, 3);
 });
-test('list has meaningful details and unknown fee without a fabricated poster or One Piece tag', () => {
+test('list prioritizes event details and leaves unknown fees to the detail view', () => {
   const html = render({});
   assert.match(html, /카드쇼·행사/);
   assert.match(html, /진행 중/);
-  assert.match(html, /입장료 미확인/);
+  assert.doesNotMatch(html, /입장료 미확인/);
   assert.match(html, /취소/);
   assert.doesNotMatch(html, /<img|>원피스<|past</);
 });
@@ -44,6 +44,7 @@ test('detail preserves filter context and suppresses registration for cancelled/
   assert.match(html, /region=capital/);
   assert.match(html, /공식 안내/);
   assert.match(html, /마지막 확인/);
+  assert.match(html, /입장료 미확인/);
   assert.doesNotMatch(html, /예매·등록/);
   assert.match(render({ search: '?section=cardshows&event=missing' }), /행사를 찾을 수 없습니다/);
   assert.match(render({ search: '?section=cardshows&region=other' }), /확인된 예정 행사가 없습니다/);
@@ -66,6 +67,10 @@ test('internal links are shareable and respect modified clicks; news JSX still c
   assert.equal(calls.length, 1); assert.equal(prevented, true);
   link.props.onClick({ button: 0, ctrlKey: true, preventDefault: () => assert.fail('modified click intercepted') });
   assert.equal(calls.length, 1);
+  const regionSelect = walk(element).find(node => node.type === 'select');
+  regionSelect.props.onChange({ target: { value: 'capital' } });
+  assert.equal(calls.at(-1), '/news?section=cardshows&region=capital');
+  assert.match(render({}), /renew-news-toggle/);
   await transform(await readFile('src/RenewApp.jsx', 'utf8'), { loader: 'jsx' });
 });
 

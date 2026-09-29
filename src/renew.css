@@ -24500,3 +24500,40 @@ button.renew-deck-entry:focus-visible {
     height: 260px;
   }
 }
+
+/* Mobile content has one outer gutter; page sections do not add another frame. */
+@media (max-width: 720px) {
+  .renew-app :is(.renew-home, .renew-news-main, .renew-subpage) {
+    padding-inline: 12px;
+  }
+
+  .renew-app .renew-news-main > .renew-panel,
+  .renew-app .renew-subpage > .renew-panel.renew-market {
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-app .renew-home .renew-float-card {
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-app .renew-home .renew-home-guide-links {
+    width: 100%;
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .renew-news-main .renew-topic-list-compact,
+  .renew-news-main .renew-news-panel > .renew-section-head {
+    padding-inline: 0;
+  }
+}

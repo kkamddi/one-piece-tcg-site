@@ -1,26 +1,36 @@
-.card-shows { min-width: 0; color: inherit; }
-.card-shows-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.card-shows h1 { margin: 16px 0; font-size: 26px; }
-.card-shows h2 { margin: 0; font-size: 18px; }
-.card-shows a { color: inherit; text-decoration: none; }
-.card-shows button, .card-show-filters a, .card-show-actions a { display: inline-block; padding: 10px 14px; border: 1px solid #d9dfdc; border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
-.card-show-filters { margin: 12px 0; flex-wrap: wrap; }
-.card-show-filters a.is-active { background: #173d35; color: #fff; border-color: #173d35; }
-.card-show-row { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(0, 2fr) auto; gap: 20px; padding: 22px 0; border-bottom: 1px solid #d9dfdc; }
-.card-show-date, .card-show-name, .card-show-row-end { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; overflow-wrap: anywhere; }
-.card-show-status { display: inline-block; padding: 4px 8px; border-radius: 6px; background: #edf3f0; color: #173d35; font-size: 13px; }
-.card-show-status.is-cancelled, .card-show-status.is-postponed { background: #fff1e8; color: #8b3014; }
+.renew-app .renew-panel.card-shows { --show-text: #17191c; --show-muted: #66717d; --show-line: rgba(23,25,28,.12); min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--show-text); }
+.renew-app.is-dark .card-shows { --show-text: #f5f6f8; --show-muted: #b5bdc7; --show-line: rgba(255,255,255,.14); }
+.card-shows-heading, .card-show-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.card-shows h1 { margin: 0; font-size: 20px; font-weight: 900; line-height: 1.4; overflow-wrap: anywhere; }
+.card-shows h2 { margin: 0; font-size: 16px; line-height: 1.5; font-weight: 800; }
+.card-show-calendar { border: 0; padding: 10px 0; background: transparent; color: var(--show-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.card-show-toolbar { margin: 20px 0 4px; }
+.card-show-toolbar select { min-height: 40px; max-width: 100%; padding: 8px 28px 8px 10px; border: 1px solid var(--show-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.card-show-toolbar option { background: #fff; color: #17191c; }
+.card-shows .renew-news-toggle :is(a,button) { min-height: 40px; }
+.card-show-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--show-line); color: inherit; text-decoration: none; }
+.card-show-name { display: grid; min-width: 0; gap: 6px; overflow-wrap: anywhere; }
+.card-show-name > span, .card-show-date { color: var(--show-muted); font-size: 13px; line-height: 1.6; }
+.card-show-date { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.card-show-row-end { display: flex; align-items: center; gap: 18px; }
+.card-show-row-end > span:last-child { color: var(--show-muted); font-size: 24px; }
+.card-show-status { font-size: 12px; font-weight: 800; color: var(--show-muted); }
+.card-show-status.is-cancelled, .card-show-status.is-postponed { color: #b4432f; }
+.card-shows > .card-show-status { display: inline-block; margin-top: 12px; }
 .card-show-details { margin: 24px 0; }
-.card-show-details > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); padding: 12px 0; border-bottom: 1px solid #d9dfdc; gap: 12px; }
-.card-show-details dt { font-weight: 700; }
+.card-show-details > div { display: grid; grid-template-columns: 130px minmax(0,1fr); padding: 14px 0; border-bottom: 1px solid var(--show-line); gap: 12px; font-size: 14px; line-height: 1.6; }
+.card-show-details dt { color: var(--show-muted); }
 .card-show-details dd { margin: 0; overflow-wrap: anywhere; }
 .card-show-actions { margin-top: 24px; flex-wrap: wrap; gap: 8px; }
-.card-show-back { display: inline-block; padding: 10px 0; }
-.card-show-verified { font-size: 13px; margin-top: 20px; }
-.card-shows a:focus-visible, .card-shows button:focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
-.renew-app.is-dark .card-show-row, .renew-app.is-dark .card-show-details > div, .renew-app.is-dark .card-shows button, .renew-app.is-dark .card-show-filters a, .renew-app.is-dark .card-show-actions a { border-color: #45514b; }
-@media (max-width: 640px) {
-  .card-show-row { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .card-show-row-end { flex-direction: row; align-items: center; flex-wrap: wrap; }
-  .card-show-details > div { grid-template-columns: 95px minmax(0, 1fr); }
+.card-show-back { margin-bottom: 20px; }
+.card-show-verified { color: var(--show-muted); font-size: 12px; margin-top: 20px; }
+.card-shows :is(a,button,select):focus-visible { outline: 2px solid #c94d35; outline-offset: 3px; }
+.renew-app.is-dark .card-shows .renew-news-toggle a { background: transparent; border-color: var(--show-line); color: var(--show-text); }
+.renew-app.is-dark .card-shows .renew-news-toggle a.is-active { background: #f5f6f8; color: #17191c; }
+.renew-app.is-dark .card-show-status:is(.is-cancelled,.is-postponed) { color: #ff9a87; }
+@media (hover: hover) { .card-show-row:hover h2, .card-show-calendar:hover { text-decoration: underline; } }
+@media (max-width: 720px) {
+  .card-show-row { gap: 12px; padding: 18px 0; }
+  .card-show-row-end { flex-direction: column; gap: 6px; align-items: flex-end; max-width: 80px; }
+  .card-show-details > div { grid-template-columns: 88px minmax(0,1fr); }
 }
