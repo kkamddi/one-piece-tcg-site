@@ -1,0 +1,39 @@
+name: Domestic card-show collector
+
+on:
+  schedule:
+    # Daily 09:43 KST. Schedule is active only after approved default-branch integration.
+    - cron: '43 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: domestic-card-show-collector
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    if: github.ref == 'refs/heads/main' && vars.CARD_SHOW_COLLECTOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test collector without network
+        run: node --test test/card-show-collector.test.mjs
+      - name: Collect official public announcements
+        run: node scripts/collectCardShows.mjs --write-report
+      - name: Keep review report (never auto-publish or deploy)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: domestic-card-show-review-${{ github.run_id }}
+          path: artifacts/card-show-collection/latest.json
+          if-no-files-found: warn
+          retention-days: 7
