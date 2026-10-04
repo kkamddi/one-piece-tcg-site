@@ -8,6 +8,7 @@ import { parse } from '@babel/parser';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { filterShows, reviewedShows, koreaToday, showRoute, safeEventUrl } from '../src/card-shows.js';
+import { cardShowEvents } from '../src/data/card-show-events.js';
 
 const base = { id: 'test', title: 'Test show', titleKo: '시험 행사', date: '2026-10-02', endDate: '2026-10-03',
   locale: 'KR', region: 'capital', venue: '서울 시험 행사장', url: 'https://example.com/',
@@ -21,6 +22,29 @@ vm.runInNewContext(compiled.outputFiles[0].text, context);
 const Component = context.module.exports.default;
 const render = props => renderToStaticMarkup(React.createElement(Component, { events, today: '2026-10-02', ...props }));
 
+test('reviewed official images have attribution; missing or unsafe images leave no placeholder', () => {
+  const pictured = { ...base, posterUrl: 'https://example.com/poster.png', posterSourceUrl: 'https://example.com/', posterVerifiedAt: '2026-09-29' };
+  assert.match(render({ events: [pictured] }), /<img/);
+  assert.match(render({ events: [pictured], search: '?event=test' }), /이미지 출처/);
+  for (const patch of [{ posterUrl: 'javascript:alert(1)' }, { posterUrl: 'https://other.example/poster.png' }, { posterVerifiedAt: '' }]) {
+    assert.doesNotMatch(render({ events: [{ ...pictured, ...patch }] }), /<img|card-show-poster/);
+  }
+  const element = Component({ events: [pictured], today: '2026-10-02' });
+  const walk = node => !node || typeof node !== 'object' ? [] : [node, ...React.Children.toArray(node.props?.children).flatMap(walk)];
+  const image = walk(element).find(node => node.type === 'img');
+  const target = { hidden: false };
+  image.props.onError({ currentTarget: target });
+  assert.equal(target.hidden, true);
+});
+
+test('curated list contains both verified shows and discloses conflicting opening times', () => {
+  assert.equal(filterShows(cardShowEvents, { today: '2026-09-29' }).length, 2);
+  const html = render({ events: cardShowEvents, search: '?event=cardshow-collectible-con-20261002' });
+  assert.match(html, /10:00/);
+  assert.match(html, /11:00/);
+  assert.match(html, /사전등록/);
+});
+
 test('KST day boundary and multi-day events retain ongoing shows until the end date', () => {
   assert.equal(koreaToday(Date.parse('2026-10-01T15:00:00Z')), '2026-10-02');
   assert.deepEqual(filterShows(events, { today: '2026-10-03' }).map(e => e.id), ['test', 'later']);
@@ -31,11 +55,11 @@ test('unreviewed, foreign and invalid records are never visible, but verified ca
   assert.equal(reviewedShows([{ ...base, reviewRequired: true }, { ...base, status: 'pending' }, { ...base, locale: 'JP' }, { ...base, date: '2026-02-30' }]).length, 0);
   assert.equal(reviewedShows(events).length, 3);
 });
-test('list has meaningful details and unknown fee without a fabricated poster or One Piece tag', () => {
+test('list prioritizes event details and leaves unknown fees to the detail view', () => {
   const html = render({});
   assert.match(html, /카드쇼·행사/);
   assert.match(html, /진행 중/);
-  assert.match(html, /입장료 미확인/);
+  assert.doesNotMatch(html, /입장료 미확인/);
   assert.match(html, /취소/);
   assert.doesNotMatch(html, /<img|>원피스<|past</);
 });
@@ -44,6 +68,7 @@ test('detail preserves filter context and suppresses registration for cancelled/
   assert.match(html, /region=capital/);
   assert.match(html, /공식 안내/);
   assert.match(html, /마지막 확인/);
+  assert.match(html, /입장료 미확인/);
   assert.doesNotMatch(html, /예매·등록/);
   assert.match(render({ search: '?section=cardshows&event=missing' }), /행사를 찾을 수 없습니다/);
   assert.match(render({ search: '?section=cardshows&region=other' }), /확인된 예정 행사가 없습니다/);
@@ -66,6 +91,10 @@ test('internal links are shareable and respect modified clicks; news JSX still c
   assert.equal(calls.length, 1); assert.equal(prevented, true);
   link.props.onClick({ button: 0, ctrlKey: true, preventDefault: () => assert.fail('modified click intercepted') });
   assert.equal(calls.length, 1);
+  const regionSelect = walk(element).find(node => node.type === 'select');
+  regionSelect.props.onChange({ target: { value: 'capital' } });
+  assert.equal(calls.at(-1), '/news?section=cardshows&region=capital');
+  assert.match(render({}), /renew-news-toggle/);
   await transform(await readFile('src/RenewApp.jsx', 'utf8'), { loader: 'jsx' });
 });
 

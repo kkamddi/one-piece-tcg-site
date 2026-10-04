@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buildPortfolio } from './portfolio-model';
+import { boxQuote } from './box-portfolio';
+import boxPrices from './data/box-market-prices.json';
 
 export default function usePortfolioValuation(holdings, rates) {
   const [result, setResult] = useState({ holdings: null, quotes: [], error: false });
   const [revision, setRevision] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
-    const ids = [...new Set(holdings.map((item) => Number(item.apparelId)).filter((id) => id > 0))];
+    const ids = [...new Set(holdings.filter(item => item.assetType !== 'box').map((item) => Number(item.apparelId)).filter((id) => id > 0))];
     if (!ids.length) {
       setResult({ holdings, quotes: [], error: false });
       return () => controller.abort();
@@ -40,7 +42,10 @@ export default function usePortfolioValuation(holdings, rates) {
     return () => controller.abort();
   }, [holdings, revision]);
   const current = result.holdings === holdings;
-  const model = useMemo(() => buildPortfolio(holdings, current ? result.quotes : [], rates), [holdings, current, result.quotes, rates]);
+  const model = useMemo(() => buildPortfolio(holdings, [
+    ...(current ? result.quotes : []),
+    ...holdings.filter(item => item.assetType === 'box').map(item => boxQuote(item, boxPrices, rates))
+  ], rates), [holdings, current, result.quotes, rates, revision]);
   const previous = useMemo(() => current && result.previousQuotes ? buildPortfolio(holdings, result.previousQuotes, rates) : null, [holdings, current, result.previousQuotes, rates]);
   return { ...model, previousTotalJpy: previous?.totalJpy ?? null, loading: holdings.length > 0 && !current, error: current && result.error, refresh: () => setRevision((value) => value + 1) };
 }

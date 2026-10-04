@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../lib/supabase-admin.js';
 import { getUserAppState, saveUserAppState } from '../lib/user-state-store.js';
 import { isRejectedUserToken } from '../lib/auth-errors.js';
+import { findSealedBox } from '../src/box-portfolio.js';
 
 const HOLDINGS_TABLE = process.env.SUPABASE_PORTFOLIO_HOLDINGS_TABLE || 'portfolio_holdings';
 const PURCHASES_TABLE = process.env.SUPABASE_PORTFOLIO_PURCHASES_TABLE || 'portfolio_purchases';
@@ -69,6 +70,7 @@ function mapHolding(row, purchases = []) {
   return {
     id: row.id,
     key: row.id,
+    assetType: row.asset_type === 'box' ? 'box' : 'card',
     apparelId: Number(row.apparel_id || 0),
     cardId: row.card_id || '',
     code: row.code || '',
@@ -135,6 +137,7 @@ async function upsertHolding(userId, item, grade) {
     .upsert({
       user_id: userId,
       apparel_id: Number(item.apparelId),
+      ...(item.assetType === 'box' ? { asset_type: 'box' } : {}),
       card_id: safeString(item.cardId, 160) || null,
       code: safeString(item.code, 80).toUpperCase(),
       name: safeString(item.name, 240) || safeString(item.code, 80).toUpperCase(),
@@ -202,11 +205,23 @@ async function migrateLegacyPortfolio(userId) {
 
 async function savePortfolio(request, response, user) {
   const body = request.body || {};
-  const item = body.holding || body.item || {};
+  let item = body.holding || body.item || {};
   const purchase = body.purchase || body.lot || {};
   const apparelId = Number(item.apparelId || 0);
   const code = safeString(item.code, 80).toUpperCase();
   const grade = normalizeGrade(item.grade || body.grade);
+  if (item.assetType && !['card', 'box'].includes(item.assetType)) {
+    return response.status(400).json({ error: 'invalid_asset_type' });
+  }
+  const box = findSealedBox(apparelId);
+  if (item.assetType === 'box') {
+    if (!box || grade !== 'a' || !['manual', 'later'].includes(purchase.mode || 'later')) {
+      return response.status(400).json({ error: 'invalid_box_holding' });
+    }
+    item = { ...box, assetType: 'box', cardId: '', setName: box.code };
+  } else if (box) {
+    return response.status(400).json({ error: 'box_requires_asset_type' });
+  }
   if (!Number.isInteger(apparelId) || apparelId <= 0 || !code) {
     return response.status(400).json({ error: 'invalid_portfolio_holding' });
   }

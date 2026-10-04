@@ -1832,7 +1832,7 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
             <div className="centering-report">
               <div className="centering-score-block">
                 <span>{text.score}</span>
-                <strong>{report.score}</strong>
+                <strong>{isReferenceReliable ? report.score : '—'}</strong>
                 <b className={isReferenceReliable && graderReferences.psa10 ? 'is-top' : ''}>{referenceLabel}</b>
               </div>
               <div className="centering-metrics">
@@ -1870,7 +1870,7 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
                   </div>
                 </div>
               </section>
-              <div className="centering-direction-note">
+              {isReferenceReliable && <div className="centering-direction-note">
                 <b>{text.reference}</b>
                 <p>{Math.abs(report.left - 50) < 0.6
                   ? (uiLang === 'JP' ? '左右の偏りはほとんどありません。' : uiLang === 'EN' ? 'No meaningful horizontal shift was detected.' : '좌우 치우침은 거의 없습니다.')
@@ -1882,7 +1882,7 @@ export default function CenteringLab({ uiLang = 'KR', onOpenGuide }) {
                   : report.top > report.bottom
                     ? (uiLang === 'JP' ? '印刷領域が下側に寄っています。' : uiLang === 'EN' ? 'The printed area shifts downward.' : '인쇄 영역이 아래쪽으로 치우쳐 있습니다.')
                     : (uiLang === 'JP' ? '印刷領域が上側に寄っています。' : uiLang === 'EN' ? 'The printed area shifts upward.' : '인쇄 영역이 위쪽으로 치우쳐 있습니다.')}</p>
-              </div>
+              </div>}
               <p className="centering-disclaimer">{text.notice}</p>
               <a className="centering-official-link" href="https://www.psacard.com/gradingstandards" target="_blank" rel="noreferrer">{text.official} ↗</a>
             </div>

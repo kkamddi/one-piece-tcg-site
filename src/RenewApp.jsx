@@ -28,6 +28,8 @@ import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
 import boxMarketItems from './data/box-market-items';
+import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
+import { confirmedCardShows, cardShowSources } from './data/card-show-events';
 import CardShows from './CardShows';
 import boxMarketPrices from './data/box-market-prices.json';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
@@ -47,7 +49,10 @@ import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
-const CARD_SCAN_AVAILABLE = false;
+const CARD_SCAN_AVAILABLE = true;
+// Box holdings need the asset_type column (docs/portfolio-box-schema-draft.sql) before saves can succeed.
+const BOX_PORTFOLIO_ENABLED = false;
+const EXTENSION_STORE_URL = 'https://chromewebstore.google.com/detail/bmallhfmgjlccnegdjjlmhobcgocphlc';
 const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
@@ -374,7 +379,7 @@ function buildCalendarEvents(boxes = []) {
     }));
   const officialReleaseCodes = new Set(notices.filter((item) => item.kind === 'release' && item.locale === 'JP' && item.productCode).map((item) => item.productCode));
   const fallbackReleases = releases.filter((item) => !item.productCode || !officialReleaseCodes.has(item.productCode));
-  return [...fallbackReleases, ...notices]
+  return [...fallbackReleases, ...notices, ...confirmedCardShows()]
     .filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index)
     .sort((a, b) => a.date.localeCompare(b.date) || CALENDAR_PRIORITY_ORDER[a.priority] - CALENDAR_PRIORITY_ORDER[b.priority] || a.kind.localeCompare(b.kind) || a.title.localeCompare(b.title));
 }
@@ -2047,6 +2052,7 @@ function findPortfolioHolding(holdings, item, grade) {
   const condition = normalizeMarketConditionKey(grade);
   return (Array.isArray(holdings) ? holdings : []).find((holding) => (
     Number(holding?.apparelId || 0) === apparelId
+    && (holding.assetType || 'card') === (item?.assetType || 'card')
     && normalizeMarketConditionKey(holding?.grade) === condition
   )) || null;
 }
@@ -2312,6 +2318,19 @@ function getUserDisplayName(user) {
   return metadata.nickname || metadata.username || user?.email?.split('@')[0] || '계정';
 }
 
+// Returns null instead of throwing so a quote outage never blocks search or detail views.
+async function fetchTradeQuoteItems(apparelId = null) {
+  try {
+    const query = apparelId ? `&apparelIds=${encodeURIComponent(apparelId)}` : '';
+    const response = await fetch(`/api/market?summary=trade-latest${query}`);
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return payload?.basis === 'snkrdunk_latest_trade_day_median' && Array.isArray(payload.items) ? payload.items : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   const params = new URLSearchParams();
   if (code) params.set('code', code);
@@ -2322,12 +2341,10 @@ async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
-  if (!summary && apparelId) {
-    const quoteResponse = await fetch(`/api/market?summary=trade-latest&apparelIds=${encodeURIComponent(apparelId)}`);
-    if (!quoteResponse.ok) throw new Error('trade_quote_unavailable');
-    const quotes = await quoteResponse.json();
-    if (quotes?.basis !== 'snkrdunk_latest_trade_day_median') throw new Error('trade_quote_invalid');
-    payload.tradeQuote = quotes.items.find(item => Number(item.apparelId) === Number(apparelId)) || null;
+  if (payload && !summary && apparelId) {
+    const quotes = await fetchTradeQuoteItems(apparelId);
+    payload.tradeQuoteUnavailable = !quotes;
+    payload.tradeQuote = quotes?.find(item => Number(item.apparelId) === Number(apparelId)) || null;
   }
   return payload;
 }
@@ -4300,6 +4317,7 @@ const STATIC_INFO_PAGES = {
 function MobileNavIcon({ type }) {
   // Additional Lucide icons: see public/licenses/lucide.txt.
   const paths = {
+    camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z" /><circle cx="12" cy="13" r="4" /></>,
     trophy: <><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2" /><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2" /><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3" /><path d="M4 22h16" /><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" /><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3" /></>,
     centering: <><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M7 12h10" /></>,
     layers: <><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></>,
@@ -4680,7 +4698,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
   return typeof document !== 'undefined' ? createPortal(modal, document.body) : modal;
 }
 
-function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
+function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onToggleTheme, isLoggedIn, isAdmin = false, displayName, onAuthClick, uiLang, onUiLangChange, notifications = [], onNotificationSelect, onNotificationsReadAll }) {
   const t = (key) => getUiText(uiLang, key);
   const isLabActive = ['lab', 'centering', 'centeringGuide', 'packSimulator', 'packSimulatorGuide', 'portfolioCalculator', 'portfolioCalculatorGuide', 'deckLab', 'deckBuilder', 'deckGuide'].includes(activePage);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -4715,6 +4733,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <img src={LOGO_SRC} alt="Card Pone" />
         </a>
         <div className="renew-mobile-actions">
+          <button type="button" onClick={() => onNavigate('lab')} aria-label="실험실"><MobileNavIcon type="lab" /></button>
           <div className={`renew-mobile-language ${mobileLanguageOpen ? 'is-open' : ''}`}>
             <button type="button" onClick={() => { setAccountMenuOpen(false); setNotificationMenuOpen(false); setMobileLanguageOpen((value) => !value); }} aria-label="언어 변경" aria-expanded={mobileLanguageOpen}>
               {uiLang}
@@ -4780,6 +4799,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
         </nav>
 
         <div className="renew-actions">
+          <a className="renew-pill" href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '확장 프로그램', 'Extension', '拡張機能')}</a>
           <div className={`renew-account-menu ${accountMenuOpen ? 'is-open' : ''}`}>
             <button type="button" className="renew-pill is-filled renew-account-pill" onClick={handleAccountClick}>
               {isLoggedIn ? displayName : t('login')}
@@ -4844,10 +4864,10 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
           <MobileNavIcon type="prices" />
           <span>{t('navPrices')}</span>
         </a>
-        <a href={getLocalizedPagePath('lab', uiLang)} className={isLabActive ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onNavigate('lab'); }} aria-label="실험실">
-          <MobileNavIcon type="lab" />
-          <span>{t('navLab')}</span>
-        </a>
+        <button type="button" className="renew-mobile-scan" onClick={onScan} aria-label="카드 스캔">
+          <span className="renew-mobile-scan-circle"><MobileNavIcon type="camera" /></span>
+          <span>{getLocaleText(uiLang, '스캔', 'Scan', 'スキャン')}</span>
+        </button>
         <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
@@ -4859,6 +4879,23 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, isDark, onToggleThe
       </nav>
     </header>
   );
+}
+
+function ExtensionInstallBanner({ uiLang }) {
+  const [open, setOpen] = useState(() => {
+    try { return Date.now() >= Number(localStorage.getItem('card-pone-extension-dismiss-until') || 0); }
+    catch { return true; }
+  });
+  if (!open) return null;
+  return <aside className="renew-extension-banner" aria-label={getLocaleText(uiLang, '확장 프로그램 설치', 'Install extension', '拡張機能をインストール')}>
+    <MobileNavIcon type="camera" />
+    <strong>{getLocaleText(uiLang, '카드 사진으로 시세 확인', 'Scan card photos. Check prices.', 'カード画像で相場を確認')}</strong>
+    <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '크롬에 추가', 'Add to Chrome', 'Chromeに追加')} ↗</a>
+    <button type="button" aria-label={getLocaleText(uiLang, '설치 안내 닫기', 'Dismiss install banner', '閉じる')} onClick={() => {
+      setOpen(false);
+      try { localStorage.setItem('card-pone-extension-dismiss-until', String(Date.now() + 7 * 86400000)); } catch { /* Storage may be disabled. */ }
+    }}>×</button>
+  </aside>;
 }
 
 function RenewSuppliesModal({ onClose }) {
@@ -5801,6 +5838,7 @@ function RenewComingSoonModal({ uiLang, onClose, titleKey = 'deckComingSoonTitle
 }
 
 function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initialDetail = null, onSave, onDeleteLot, onClose, uiLang }) {
+  const isBox = item?.assetType === 'box';
   useBodyScrollLock();
   const dialogRef = useRef(null);
   useEffect(() => {
@@ -5841,7 +5879,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 
   useEffect(() => {
     let cancelled = false;
-    if (!['current', 'estimate'].includes(mode) || detail || !item?.apparelId) return undefined;
+    if (isBox || !['current', 'estimate'].includes(mode) || detail || !item?.apparelId) return undefined;
     setDetailLoading(true);
     fetchMarketPrice({ code: item.code, apparelId: item.apparelId })
       .then(async (marketPriceDetail) => {
@@ -5940,7 +5978,6 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
       }} onClick={(event) => event.stopPropagation()}>
         <div className="renew-modal-head">
           <div>
-            <small>PORTFOLIO</small>
             <h2 id="purchase-manager-title">{text('매입 관리', 'Manage purchases', '購入管理')}</h2>
           </div>
           <button type="button" className="renew-modal-close" disabled={saving} onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
@@ -5955,7 +5992,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
         </div>
 
         <div className="renew-portfolio-grade-tabs" aria-label={text('카드 등급', 'Card grade', 'カードグレード')}>
-          {['a', 'psa10'].map((gradeKey) => (
+          {(isBox ? ['a'] : ['a', 'psa10']).map((gradeKey) => (
             <button
               key={gradeKey}
               type="button"
@@ -5964,7 +6001,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
               aria-pressed={grade === gradeKey}
               onClick={() => { resetForm(gradeKey); setShowForm(!findPortfolioHolding(holdings, item, gradeKey)?.purchases?.length); }}
             >
-              {gradeKey === 'a' ? 'Single' : 'PSA10'}
+              {isBox ? text('미개봉 박스', 'Sealed box', '未開封ボックス') : gradeKey === 'a' ? 'Single' : 'PSA10'}
             </button>
           ))}
         </div>
@@ -5980,7 +6017,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
               <div key={lot.id} className="renew-portfolio-lot-row">
                 <button type="button" className="renew-portfolio-lot-edit" onClick={() => editLot(lot)}>
                   <span>{lot.purchaseDate || text('날짜 미등록', 'Date not set', '日付未入力')}</span>
-                  <strong>{lot.quantity}{text('장', ' card(s)', '枚')} · {lot.unitPriceJpy > 0 ? formatLotCost(lot) : text('가격 나중에 입력', 'Price later', '価格は後で入力')}</strong>
+                  <strong>{lot.quantity}{isBox ? text('박스', ' boxes', '箱') : text('장', ' card(s)', '枚')} · {lot.unitPriceJpy > 0 ? formatLotCost(lot) : text('가격 나중에 입력', 'Price later', '価格は後で入力')}</strong>
                   <small>{lot.mode === 'estimate' ? text('날짜 시세 추정', 'Date price estimate', '日付相場から推定') : lot.mode === 'manual' ? text('직접 입력', 'Manual', '直接入力') : text('미입력', 'Pending', '未入力')}</small>
                 </button>
                 <button type="button" className="renew-purchase-edit-link" onClick={() => editLot(lot)}>{text('수정', 'Edit', '編集')}</button>
@@ -6002,7 +6039,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
               ['current', text('현재 시세로 추가', 'Use current price', '現在相場で追加')],
               ['estimate', text('날짜로 추정', 'Estimate by date', '日付から推定')],
               ['later', text('나중에 입력', 'Later', '後で入力')]
-            ].map(([modeKey, label]) => (
+            ].filter(([modeKey]) => !isBox || ['manual', 'later'].includes(modeKey)).map(([modeKey, label]) => (
               <button key={modeKey} type="button" className={mode === modeKey ? 'is-active' : ''} onClick={() => { setMode(modeKey); if (modeKey === 'current') setPurchaseDate(getKstDateKey(Date.now())); setMessage(''); }}>{label}</button>
             ))}
           </div>
@@ -6035,7 +6072,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
                 </select>
               </label>
               <label>
-                <span>{text('1장당 매입가', 'Price per card', '1枚あたりの購入価格')}</span>
+                <span>{isBox ? text('1박스당 매입가', 'Price per box', '1箱あたりの購入価格') : text('1장당 매입가', 'Price per card', '1枚あたりの購入価格')}</span>
                 <input type="number" required inputMode="decimal" min={currency === 'USD' ? '0.01' : '1'} step={currency === 'USD' ? '0.01' : '1'} value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} placeholder="0" />
               </label>
             </div>
@@ -6079,6 +6116,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 }
 
 export async function resolvePortfolioImages(card) {
+  if (card.assetType === 'box') return [findSealedBox(card.apparelId)?.previewImageUrl].filter(Boolean);
   const sources = [];
   if (card.apparelId) {
     const link = await findApprovedCardMarketLinkByApparelId(card.apparelId).catch(() => null);
@@ -6129,8 +6167,8 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const valuationEntries = (Array.isArray(portfolioHoldings) ? portfolioHoldings : []).map((item) => [item.id, item]);
   const totalJpy = marketTotalJpy ?? 0;
   const aCount = marketCards.length
-    ? marketCards.filter((item) => item.grade === 'a').reduce((sum, item) => sum + item.quantity, 0)
-    : valuationEntries.filter(([, item]) => item.grade === 'a').reduce((sum, [, item]) => sum + getPortfolioQuantity(item.purchases), 0);
+    ? marketCards.filter((item) => item.assetType !== 'box' && item.grade === 'a').reduce((sum, item) => sum + item.quantity, 0)
+    : valuationEntries.filter(([, item]) => item.assetType !== 'box' && item.grade === 'a').reduce((sum, [, item]) => sum + getPortfolioQuantity(item.purchases), 0);
   const psa10Count = marketCards.length
     ? marketCards.filter((item) => item.grade === 'psa10').reduce((sum, item) => sum + item.quantity, 0)
     : valuationEntries.filter(([, item]) => item.grade === 'psa10').reduce((sum, [, item]) => sum + getPortfolioQuantity(item.purchases), 0);
@@ -6289,6 +6327,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       <p className="renew-sr-only">{PAGE_SEO.home.body}</p>
       <section className="renew-hero" aria-label="메인 검색">
         <RenewSearch onSubmitSearch={onSubmitSearch} onSelectPopular={onSelectPopular} visitorToken={visitorToken} uiLang={uiLang} />
+        <ExtensionInstallBanner uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
         <RenewHomePromoBanner uiLang={uiLang} />
       </section>
@@ -6367,6 +6406,10 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
               <span>PSA10</span>
               <strong>{psa10Count}</strong>
             </button>
+            {marketCards.some(item => item.assetType === 'box') && <button type="button" onClick={onOpenPortfolio}>
+              <span>{getLocaleText(uiLang, '박스', 'Boxes', 'ボックス')}</span>
+              <strong>{marketCards.filter(item => item.assetType === 'box').reduce((sum, item) => sum + item.quantity, 0)}</strong>
+            </button>}
           </div>
           </>}
           {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
@@ -7042,7 +7085,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
   const isJp = uiLang === 'JP';
   const displayTitle = getCalendarDisplayTitle(event, uiLang);
   const showOriginalTitle = !isEn && !isJp && event.locale === 'JP' && event.titleKo && event.titleKo !== event.title;
-  const kindLabel = event.kind === 'release'
+  const kindLabel = event.kind === 'cardshow' ? (isJp ? 'カードショー' : isEn ? 'Card show' : '카드쇼') : event.kind === 'release'
     ? (isJp ? '発売' : isEn ? 'Release' : '발매')
     : event.kind === 'event'
       ? (event.isSchedule ? (isJp ? 'イベント' : isEn ? 'Event' : '이벤트') : (isJp ? 'イベント告知' : isEn ? 'Event notice' : '이벤트 공지'))
@@ -7065,6 +7108,7 @@ function RenewCalendarEventCard({ event, uiLang }) {
         <strong>{displayTitle}</strong>
         {showOriginalTitle ? <small className="renew-calendar-event-original" lang="ja">{event.title}</small> : null}
         <small className="renew-calendar-event-date">{event.endDate ? `${event.date} - ${event.endDate}` : event.date} · {event.category}</small>
+        {event.kind === 'cardshow' && <small className="renew-calendar-event-date">{event.hours} · {isJp ? '確認日' : isEn ? 'Verified' : '확인일'} {event.verifiedAt}</small>}
       </div>
       {event.url ? <a href={event.url} target={event.url.startsWith('http') ? '_blank' : undefined} rel={event.url.startsWith('http') ? 'noreferrer' : undefined} onClick={() => { if (!event.url.startsWith('http')) rememberCurrentAppView(); }}>{actionLabel}</a> : null}
     </article>
@@ -7085,7 +7129,7 @@ function RenewCalendar({ uiLang }) {
   const [selectedDate, setSelectedDate] = useState(() => validRequestedDate
     || (/^\d{4}-\d{2}-\d{2}$/.test(savedViewState.selectedDate || '') ? savedViewState.selectedDate : todayKey));
   const [localeFilter, setLocaleFilter] = useState(() => ['ALL', 'KR', 'JP'].includes(savedViewState.localeFilter) ? savedViewState.localeFilter : 'ALL');
-  const [kindFilter, setKindFilter] = useState(() => ['all', 'release', 'event', 'notice'].includes(savedViewState.kindFilter) ? savedViewState.kindFilter : 'all');
+  const [kindFilter, setKindFilter] = useState(() => ['all', 'release', 'event', 'notice', 'cardshow'].includes(savedViewState.kindFilter) ? savedViewState.kindFilter : 'all');
   const [boxes, setBoxes] = useState(resolvedBoxMarketItems);
 
   useEffect(() => {
@@ -7162,12 +7206,20 @@ function RenewCalendar({ uiLang }) {
     { key: 'all', label: isJp ? 'すべての日程' : isEn ? 'All schedules' : '전체 일정' },
     { key: 'release', label: isJp ? '発売' : isEn ? 'Releases' : '발매' },
     { key: 'event', label: isJp ? 'イベント' : isEn ? 'Events' : '이벤트' },
+    { key: 'cardshow', label: isJp ? 'カードショー' : isEn ? 'Card shows' : '카드쇼' },
     { key: 'notice', label: isJp ? '公式告知' : isEn ? 'Official notices' : '공식 공지' }
   ];
   const hasActiveFilters = localeFilter !== 'ALL' || kindFilter !== 'all';
 
   return (
     <main className="renew-subpage renew-calendar-main">
+      {kindFilter === 'cardshow' && <section className="renew-panel">
+        {!filteredEvents.length && <p role="status">{isJp ? '確認済みのカードショー日程はありません。' : isEn ? 'No verified card-show dates.' : '공식 일정 확인이 완료된 카드쇼가 없습니다.'}</p>}
+        <nav className="renew-chip-group" aria-label={isJp ? '主催者情報' : isEn ? 'Organizers' : '주최 측 소식'}>
+          {cardShowSources.map(source => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.name} ↗</a>)}
+          {filteredEvents.find(event => event.date >= todayKey) && <button type="button" onClick={() => { const date = filteredEvents.find(event => event.date >= todayKey).date; setMonthKey(date.slice(0, 7)); setSelectedDate(date); }}>{isJp ? '次のカードショー' : isEn ? 'Next card show' : '다음 카드쇼'}</button>}
+        </nav>
+      </section>}
       <section className="renew-panel renew-calendar-panel">
         <header className="renew-calendar-head">
           <div>
@@ -12984,13 +13036,14 @@ function RenewMarketIndex({ onOpenComponent } = {}) {
   );
 }
 
-function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
+function RenewBoxMarket({ uiLang, initialBoxCode = '', onAddBox }) {
   const t = (key) => getUiText(uiLang, key);
   const savedViewState = getAppHistoryState().boxMarketViewState || {};
   const [sortMode, setSortMode] = useState(() => ['latest', 'high', 'low'].includes(savedViewState.sortMode) ? savedViewState.sortMode : 'latest');
   const [boxPage, setBoxPage] = useState(() => Math.max(1, Number(savedViewState.boxPage) || 1));
   const [boxes, setBoxes] = useState(resolvedBoxMarketItems);
   const previousBoxViewRef = useRef({ sortMode, initialBoxCode });
+  const [series, setSeries] = useState('all');
   useEffect(() => {
     if (getPageFromPath(window.location.pathname) !== 'prices') return;
     replaceAppHistoryState({ boxMarketViewState: { sortMode, boxPage } });
@@ -13005,7 +13058,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
     const routeCode = String(initialBoxCode || '').toUpperCase().replace(/-/g, '');
     const sourceBoxes = routeCode
       ? boxes.filter((item) => String(item.code || '').toUpperCase().replace(/-/g, '') === routeCode)
-      : boxes;
+      : boxes.filter(item => series === 'all' || (findSealedBox(item.apparelId) ? boxSeries(item) : 'other') === series);
     const withIndex = sourceBoxes.map((item, index) => ({ ...item, index }));
     if (sortMode === 'high') {
       return withIndex.sort((a, b) => (Number(b.minPrice) || -1) - (Number(a.minPrice) || -1));
@@ -13023,7 +13076,7 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
       if (!releaseA || !releaseB) return releaseA ? -1 : releaseB ? 1 : a.index - b.index;
       return releaseB - releaseA || a.index - b.index;
     });
-  }, [boxes, sortMode, initialBoxCode]);
+  }, [boxes, sortMode, initialBoxCode, series]);
   const totalBoxPages = initialBoxCode ? 1 : Math.max(1, Math.ceil(sortedBoxes.length / BOX_MARKET_PAGE_SIZE));
   const currentBoxPage = Math.min(boxPage, totalBoxPages);
   const pagedBoxes = initialBoxCode
@@ -13033,6 +13086,15 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
   return (
     <section className="renew-box-market renew-box-gallery">
       <div className="renew-box-market-head">
+        <div className="renew-chip-group" role="group" aria-label={getLocaleText(uiLang, '부스터 시리즈', 'Booster series', 'ブースターシリーズ')}>
+          {[
+            ['all', getLocaleText(uiLang, '전체', 'All', 'すべて')],
+            ['OP', getLocaleText(uiLang, '정규 부스터', 'Booster', 'ブースター')],
+            ['EB', getLocaleText(uiLang, '엑스트라 부스터', 'Extra booster', 'エクストラブースター')],
+            ['PRB', getLocaleText(uiLang, '프리미엄 부스터', 'Premium booster', 'プレミアムブースター')],
+            ['other', getLocaleText(uiLang, '기타 제품', 'Other products', 'その他商品')]
+          ].map(([key, label]) => <button type="button" key={key} disabled={Boolean(initialBoxCode)} aria-pressed={series === key} className={series === key ? 'is-active' : ''} onClick={() => { setSeries(key); setBoxPage(1); }}>{label}</button>)}
+        </div>
         <div className="renew-chip-group">
           <button type="button" className={sortMode === 'latest' ? 'is-active' : ''} onClick={() => setSortMode('latest')}>{t('boxSortLatest')}</button>
           <button type="button" className={sortMode === 'high' ? 'is-active' : ''} onClick={() => setSortMode('high')}>{t('boxSortHigh')}</button>
@@ -13041,16 +13103,20 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '' }) {
       </div>
       <div className="renew-box-market-grid">
         {pagedBoxes.map((box) => (
-          <a key={box.apparelId} className="renew-box-market-card" href={box.sourceUrl} target="_blank" rel="noreferrer" title={box.name}>
+          <article key={box.apparelId} className="renew-box-market-card">
+          <a href={box.sourceUrl} target="_blank" rel="noreferrer" title={box.name}>
             <div className="renew-box-thumb">
               {box.previewImageUrl ? <img src={box.previewImageUrl} alt={box.name} loading="lazy" onError={placeholderImage} /> : <span>{box.code}</span>}
             </div>
             <div className="renew-box-gallery-info">
-              {BOX_SHORT_TITLES[box.code] ? <small>{box.code}</small> : null}
+              <small>{box.code}</small>
               <strong>{box.name}</strong>
               <b>{formatBoxMarketPrice(box) || t('checkPrice')}</b>
+              {Number(box.minPrice) > 0 && <small>{getLocaleText(uiLang, '등록 최저가', 'Lowest listing', '出品最安値')} · {boxMarketPrices.updatedAt?.slice(0, 10)}{Date.now() - Date.parse(boxMarketPrices.updatedAt) > BOX_QUOTE_MAX_AGE_MS ? getLocaleText(uiLang, ' · 갱신 필요', ' · Update needed', ' · 更新が必要') : ''}</small>}
             </div>
           </a>
+          {findSealedBox(box.apparelId) && onAddBox && <button type="button" className="renew-box-portfolio-add" onClick={() => onAddBox({ ...box, assetType: 'box' })}>{getLocaleText(uiLang, '+ 보유 박스 추가', '+ Add owned box', '+ 保有ボックスを追加')}</button>}
+          </article>
         ))}
       </div>
       {totalBoxPages > 1 && (
@@ -13226,15 +13292,12 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
     let cancelled = false;
     setItems([]);
     setQuoteError(false);
-    Promise.all([import('./data/market-cards.js'), fetch('/api/market?summary=trade-latest').then(async response => {
-      if (!response.ok) throw new Error('quote_unavailable');
-      const payload = await response.json();
-      if (payload?.basis !== 'snkrdunk_latest_trade_day_median' || !Array.isArray(payload.items)) throw new Error('quote_invalid');
-      return payload.items;
-    })])
+    Promise.all([import('./data/market-cards.js'), fetchTradeQuoteItems()])
       .then(([mod, quotes]) => {
-        if (!cancelled && Array.isArray(mod.default)) {
-          const byId = new Map(quotes.map(quote => [Number(quote.apparelId), quote]));
+        if (cancelled) return;
+        if (!quotes) setQuoteError(true);
+        if (Array.isArray(mod.default)) {
+          const byId = new Map((quotes || []).map(quote => [Number(quote.apparelId), quote]));
           setItems(mod.default.filter((item) => String(item?.locale || '').toUpperCase() === marketLocale && item?.apparelId)
             .map(item => ({ ...item, minPrice: Number(byId.get(Number(item.apparelId))?.aPriceJpy || 0) / MARKET_USD_TO_JPY, tradeDate: byId.get(Number(item.apparelId))?.aTradeDate })));
         }
@@ -13276,7 +13339,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
               {getMarketVariantLabel(item, uiLang) ? <span className="renew-card-gallery-variant">{getMarketVariantLabel(item, uiLang)}</span> : null}
               <small>{getMarketMetaLine(item)}</small>
               <span>{item.setName}</span>
-              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</b>
+              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : quoteError ? t('checkPrice') : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</b>
               {item.tradeDate && <small>{getLocaleText(uiLang, '거래일 중앙값', 'Trading day median', '取引日中央値')} · {item.tradeDate}</small>}
             </div>
           </a>
@@ -13286,7 +13349,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang }) {
+function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang, scannerOpen, setScannerOpen }) {
   const t = (key) => getUiText(uiLang, key);
   const savedViewState = getAppHistoryState().marketViewState || {};
   const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
@@ -13314,10 +13377,11 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
   const [mappingBusyId, setMappingBusyId] = useState(null);
   const [mappingMessage, setMappingMessage] = useState('');
   const [candidatePanelCollapsed, setCandidatePanelCollapsed] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false);
   useBodyScrollLock(scannerOpen);
   const [priceAlertOpen, setPriceAlertOpen] = useState(false);
   const [portfolioEditorOpen, setPortfolioEditorOpen] = useState(false);
+  const [boxPortfolioItem, setBoxPortfolioItem] = useState(null);
+  const addBoxToPortfolio = (box) => { if (!authUser) onRequireLogin?.(); else setBoxPortfolioItem(box); };
   const marketDetailRef = useRef(null);
   const marketCandidateRef = useRef(null);
   const marketCandidateScrollYRef = useRef(0);
@@ -13470,11 +13534,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           // The D1 catalog fallback is optional; keep static search behavior on failure.
         }
       }
-      const quoteResponse = await fetch('/api/market?summary=trade-latest');
-      if (!quoteResponse.ok) throw new Error('trade_quote_unavailable');
-      const quotePayload = await quoteResponse.json();
-      if (quotePayload?.basis !== 'snkrdunk_latest_trade_day_median') throw new Error('trade_quote_invalid');
-      const tradeQuotes = new Map(quotePayload.items.map(item => [Number(item.apparelId), item]));
+      const tradeQuotes = new Map((await fetchTradeQuoteItems() || []).map(item => [Number(item.apparelId), item]));
       const combinedResult = uniqueMarketItems([...expandedResult, ...discoveredItems]).map(item => ({
         ...item, minPrice: 0, latestPriceJpy: 0, displayPriceJpy: Number(tradeQuotes.get(Number(item.apparelId))?.aPriceJpy || 0)
       }));
@@ -13805,7 +13865,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
 
         {showMarketHome ? (
           <>
-            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : MARKET_INDEX_PUBLIC_ENABLED ? <RenewMarketIndex onOpenComponent={openMarketIndexComponent} /> : <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} />}
+            {homeTab === 'box' ? <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} onAddBox={BOX_PORTFOLIO_ENABLED ? addBoxToPortfolio : undefined} /> : homeTab === 'card' ? <RenewCardMarket uiLang={uiLang} marketLocale={marketProductLocale} /> : MARKET_INDEX_PUBLIC_ENABLED ? <RenewMarketIndex onOpenComponent={openMarketIndexComponent} /> : <RenewBoxMarket uiLang={uiLang} initialBoxCode={getBoxRouteCode()} onAddBox={BOX_PORTFOLIO_ENABLED ? addBoxToPortfolio : undefined} />}
           </>
         ) : null}
 
@@ -13876,7 +13936,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
               <div className="renew-market-price">
                 <small>{`${currentPriceLabel} · ${normalizedCondition === 'a' ? 'Single' : 'PSA10'}`}</small>
                 {loading ? <span>{t('marketLoading')}</span> : <RenewMarketMoney value={currentPriceJpy} uiLang={uiLang} />}
-                {!loading && <small>{latestDailyPoint ? formatMarketSaleDate(latestDailyPoint) : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</small>}
+                {!loading && <small>{latestDailyPoint ? formatMarketSaleDate(latestDailyPoint) : marketDetail?.tradeQuoteUnavailable ? getLocaleText(uiLang, '거래 시세를 불러오지 못했습니다.', 'Trade prices are unavailable.', '取引相場を取得できませんでした。') : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</small>}
               </div>
               <div className="renew-market-actions">
                 {canMapInitialCard ? (
@@ -14001,6 +14061,10 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           uiLang={uiLang}
         />
       ) : null}
+      {boxPortfolioItem && <RenewPortfolioEditorModal item={boxPortfolioItem} holdings={portfolioHoldings} uiLang={uiLang}
+        onSave={async ({ lot }) => { const payload = await savePortfolioPurchase({ holding: { ...boxPortfolioItem, grade: 'a' }, purchase: lot }); setPortfolioHoldings(payload.holdings); }}
+        onDeleteLot={async ({ purchaseId }) => { const payload = await deletePortfolioPurchase(purchaseId); setPortfolioHoldings(payload.holdings); }}
+        onClose={() => setBoxPortfolioItem(null)} />}
       <RenewSeoSummary page="prices" titleAs="h1" placement="footer" uiLang={uiLang} />
     </main>
   );
@@ -15860,6 +15924,8 @@ function RenewShops({ uiLang }) {
 export default function RenewApp() {
   const initialPage = getPageFromPath(window.location.pathname);
   const [activePage, setActivePage] = useState(initialPage);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  useEffect(() => { if (activePage !== 'prices') setScannerOpen(false); }, [activePage]);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem(THEME_STORAGE_KEY) === 'dark';
@@ -16417,6 +16483,7 @@ export default function RenewApp() {
         activePage={activePage}
         onNavigate={navigatePage}
         onMobileNews={openMobileNews}
+        onScan={() => { navigatePage('prices'); setScannerOpen(true); }}
         isDark={isDark}
         onToggleTheme={() => setIsDark((value) => !value)}
         isLoggedIn={Boolean(authUser)}
@@ -16459,6 +16526,7 @@ export default function RenewApp() {
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
           onOpenPrices={(item) => {
+            if (item?.assetType === 'box') { window.location.assign(`${isJapaneseUi(uiLang) ? '/jp' : ''}/prices/box/${encodeURIComponent(item.code)}`); return; }
             if (!item) {
               navigatePage('prices');
               return;
@@ -16478,6 +16546,7 @@ export default function RenewApp() {
         <RenewPortfolioPage authUser={authUser} authResolved={authResolved} portfolioHoldings={portfolioHoldings} setPortfolioHoldings={setPortfolioHoldings}
           stateLoading={stateLoading} portfolioError={portfolioError} onRetry={() => setPortfolioReload((value) => value + 1)}
           onRequireLogin={() => setAuthOpen(true)} uiLang={uiLang} onOpenPrices={(item) => {
+            if (item?.assetType === 'box') { window.location.assign(`${isJapaneseUi(uiLang) ? '/jp' : ''}/prices/box/${encodeURIComponent(item.code)}`); return; }
             setMarketInitialCode(item?.code || '');
             setMarketInitialApparelId(item?.apparelId || null);
             setMarketInitialCardId(item?.cardId || '');
@@ -16648,6 +16717,8 @@ export default function RenewApp() {
         />
       ) : activePage === 'prices' ? (
         <RenewMarket
+          scannerOpen={scannerOpen}
+          setScannerOpen={setScannerOpen}
           authUser={authUser}
           portfolioHoldings={portfolioHoldings}
           setPortfolioHoldings={setPortfolioHoldings}

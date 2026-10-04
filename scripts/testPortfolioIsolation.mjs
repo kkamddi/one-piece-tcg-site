@@ -68,6 +68,31 @@ function harness() {
   } };
 }
 
+test('box writes use canonical catalog metadata and stay isolated by authenticated owner', async () => {
+  const h = harness();
+  for (const owner of ['a', 'b']) {
+    const r = await h.request(owner, 'POST', {}, { holding: { apparelId: 136031, code: 'FAKE', name: 'FAKE', assetType: 'box', grade: 'a', user_id: 'other' }, purchase: { mode: 'later', quantity: 2 } });
+    assert.equal(r.code, 200);
+    assert.equal(r.body.holding.assetType, 'box');
+    assert.equal(r.body.holding.code, 'OP-01');
+    assert.equal(r.body.holding.cardId, '');
+    assert.equal(r.body.holdings.filter(item => item.assetType === 'box').length, 1);
+  }
+  assert.equal(h.rows.portfolio_holdings.filter(item => item.asset_type === 'box').length, 2);
+});
+
+test('invalid box types, PSA10 boxes, estimates and non-box products are rejected before writes', async () => {
+  for (const patch of [{ assetType: 'bad' }, { grade: 'psa10' }, { apparelId: 93992 }, { assetType: 'card' }]) {
+    const h = harness();
+    const r = await h.request('a', 'POST', {}, { holding: { apparelId: 136031, code: 'OP-01', assetType: 'box', ...patch }, purchase: { mode: 'later' } });
+    assert.equal(r.code, 400);
+    assert.equal(h.operations.length, 0);
+  }
+  const h = harness();
+  assert.equal((await h.request('a', 'POST', {}, { holding: { apparelId: 136031, code: 'OP-01', assetType: 'box' }, purchase: { mode: 'estimate' } })).code, 400);
+  assert.equal(h.operations.length, 0);
+});
+
 test('GET ignores a forged owner and returns only the authenticated holdings and purchases', async () => {
   const h = harness();
   for (const owner of ['a', 'b']) {

@@ -782,6 +782,33 @@
   gap: 10px;
 }
 
+.renew-extension-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(100%, 920px);
+  box-sizing: border-box;
+  margin: 20px auto 0;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: #17191c;
+  color: #fff;
+  text-align: left;
+  font-size: 18px;
+}
+.renew-extension-banner > svg { width: 28px; height: 28px; flex-shrink: 0; }
+.renew-extension-banner strong { flex: 1; }
+.renew-extension-banner a { padding: 12px 20px; border-radius: 10px; background: #fff; color: #17191c; font-size: 14px; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.renew-extension-banner button { min-width: 36px; min-height: 44px; border: 0; background: transparent; color: inherit; font-size: 24px; cursor: pointer; }
+.renew-app.is-dark .renew-extension-banner { background: #25282d; }
+@media (max-width: 767px) {
+  .renew-extension-banner { display: none; }
+  .renew-bottom-nav button.renew-mobile-scan { position: relative; gap: 5px; color: #17191c; background: transparent; }
+  .renew-bottom-nav button.renew-mobile-scan .renew-mobile-scan-circle { display: grid; place-items: center; width: 54px; height: 54px; max-width: none; margin-top: -24px; border: 4px solid #fff; border-radius: 50%; background: #17191c; color: #fff; box-sizing: content-box; box-shadow: 0 4px 12px #17191c26; }
+  .renew-app.is-dark .renew-bottom-nav button.renew-mobile-scan { color: #fff; }
+  .renew-app.is-dark .renew-bottom-nav button.renew-mobile-scan .renew-mobile-scan-circle { border-color: #17191c; background: #fff; color: #17191c; }
+}
+
 .renew-mobile-topbar,
 .renew-bottom-nav,
 .renew-back-to-top {
@@ -22011,7 +22038,8 @@ button.renew-deck-entry:focus-visible {
   .renew-back-to-top {
     position: fixed;
     z-index: 90;
-    left: 50%;
+    left: auto;
+    right: 16px;
     bottom: calc(88px + env(safe-area-inset-bottom));
     display: inline-flex;
     align-items: center;
@@ -22023,7 +22051,7 @@ button.renew-deck-entry:focus-visible {
     color: #fff;
     background: #17191c;
     box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
-    transform: translateX(-50%);
+    transform: none;
     font-size: 22px;
     font-weight: 900;
   }
@@ -23955,6 +23983,12 @@ button.renew-deck-entry:focus-visible {
 .renew-box-gallery .renew-box-gallery-info small { display: block; margin: 0; font-size: 12px; overflow-wrap: anywhere; letter-spacing: 0; }
 .renew-box-gallery .renew-box-gallery-info strong { display: block; font-size: 15px; line-height: 1.4; font-weight: 900; overflow-wrap: anywhere; letter-spacing: 0; }
 .renew-box-gallery .renew-box-gallery-info b { margin: auto 0 0; padding-top: 6px; font-size: 16px; line-height: 1.4; letter-spacing: 0; }
+.renew-box-gallery article.renew-box-market-card { display: flex; flex-direction: column; }
+.renew-box-gallery article.renew-box-market-card > a { display: flex; flex: 1; flex-direction: column; gap: 16px; color: inherit; text-decoration: none; }
+.renew-box-gallery .renew-box-market-head { flex-wrap: wrap; gap: 12px; }
+.renew-box-portfolio-add { padding: 10px; border: 1px solid currentColor; border-radius: 6px; color: inherit; background: transparent; cursor: pointer; }
+.renew-box-portfolio-add:focus-visible, .renew-box-gallery article > a:focus-visible { outline: 2px solid #2b8575; outline-offset: 3px; }
+.renew-calendar-event-mark.is-cardshow, .renew-calendar-grid .is-cardshow { border-color: #6b83bd; }
 @media (max-width: 1000px) {
   .renew-box-gallery .renew-box-market-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
@@ -24492,5 +24526,42 @@ button.renew-deck-entry:focus-visible {
 
   .has-price-detail .renew-market-chart-box svg {
     height: 260px;
+  }
+}
+
+/* Mobile content has one outer gutter; page sections do not add another frame. */
+@media (max-width: 720px) {
+  .renew-app :is(.renew-home, .renew-news-main, .renew-subpage) {
+    padding-inline: 12px;
+  }
+
+  .renew-app .renew-news-main > .renew-panel,
+  .renew-app .renew-subpage > .renew-panel.renew-market {
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-app .renew-home .renew-float-card {
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .renew-app .renew-home .renew-home-guide-links {
+    width: 100%;
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .renew-news-main .renew-topic-list-compact,
+  .renew-news-main .renew-news-panel > .renew-section-head {
+    padding-inline: 0;
   }
 }

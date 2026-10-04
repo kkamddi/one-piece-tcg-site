@@ -257,3 +257,61 @@ test('web logout uses the existing subscription without requesting permission', 
   assert.equal(JSON.parse(h.calls.requests[0].body).endpoint, 'https://push.example.test/device');
   assert.equal(unsubscribed, true);
 });
+
+test('web logout closes delivered notifications after subscription cleanup', async () => {
+  const h = harness(pushCode, { native: false });
+  const events = [];
+  h.context.navigator.serviceWorker = { async getRegistration() {
+    return {
+      pushManager: { async getSubscription() {
+        return { endpoint: 'https://push.example.test/device', async unsubscribe() {
+          assert.equal(h.calls.requests[0].method, 'DELETE');
+          events.push('unsubscribe');
+        } };
+      } },
+      async getNotifications() {
+        return [1, 2].map(id => ({ close() { events.push(`close-${id}`); } }));
+      }
+    };
+  } };
+  await h.api.disableDevicePushNotifications();
+  assert.deepEqual(events, ['unsubscribe', 'close-1', 'close-2']);
+});
+
+test('web logout clears stale notifications even without a subscription', async () => {
+  const h = harness(pushCode, { native: false });
+  let closed = false;
+  h.context.navigator.serviceWorker = { async getRegistration() {
+    return {
+      pushManager: { async getSubscription() { return null; } },
+      async getNotifications() { return [{ close() { closed = true; } }]; }
+    };
+  } };
+  await h.api.disableDevicePushNotifications();
+  assert.equal(closed, true);
+  assert.equal(h.calls.requests.length, 0);
+});
+
+test('web logout tolerates missing registrations and notification APIs', async () => {
+  for (const registration of [undefined, {}]) {
+    const h = harness(pushCode, { native: false });
+    h.context.navigator.serviceWorker = { async getRegistration() { return registration; } };
+    await h.api.disableDevicePushNotifications();
+    assert.equal(h.calls.requests.length, 0);
+  }
+});
+
+test('web logout preserves deactivation errors without discarding the subscription', async () => {
+  const h = harness(pushCode, { native: false, apiError: true });
+  h.context.navigator.serviceWorker = { async getRegistration() {
+    return {
+      pushManager: { async getSubscription() {
+        return { endpoint: 'https://push.example.test/device', async unsubscribe() {
+          assert.fail('failed deactivation must remain retryable');
+        } };
+      } },
+      async getNotifications() { assert.fail('cleanup must not hide server failure'); }
+    };
+  } };
+  await assert.rejects(h.api.disableDevicePushNotifications(), /test-service-unavailable/);
+});

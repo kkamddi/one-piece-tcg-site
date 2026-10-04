@@ -11,7 +11,7 @@ function purchaseUnitPriceJpy(lot, rates) {
 }
 
 export function buildPortfolio(holdings = [], quotes = [], rates = {}) {
-  const byId = new Map(quotes.map((item) => [String(item.apparelId), item]));
+  const byId = new Map(quotes.map((item) => [`${item.assetType || 'card'}:${item.apparelId}`, item]));
   const cards = holdings.map((holding) => {
     // Derive display/calculation costs without rewriting stored purchase records.
     const lots = Array.isArray(holding.purchases)
@@ -21,14 +21,15 @@ export function buildPortfolio(holdings = [], quotes = [], rates = {}) {
     const quantity = lots.length ? lots.reduce((sum, lot) => sum + quantityOf(lot), 0) : 1;
     const pricedQuantity = pricedLots.reduce((sum, lot) => sum + quantityOf(lot), 0);
     const costJpy = pricedLots.reduce((sum, lot) => sum + Number(lot.unitPriceJpy) * quantityOf(lot), 0);
-    const grade = holding.grade === 'psa10' ? 'psa10' : 'a';
-    const quote = byId.get(String(holding.apparelId));
-    const rawPrice = Number(grade === 'psa10' ? quote?.psa10PriceJpy : quote?.aPriceJpy);
+    const assetType = holding.assetType === 'box' ? 'box' : 'card';
+    const grade = assetType === 'card' && holding.grade === 'psa10' ? 'psa10' : 'a';
+    const quote = byId.get(`${assetType}:${holding.apparelId}`);
+    const rawPrice = Number(assetType === 'box' ? quote?.boxPriceJpy : grade === 'psa10' ? quote?.psa10PriceJpy : quote?.aPriceJpy);
     const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
     const profitJpy = price != null && pricedQuantity > 0 ? price * pricedQuantity - costJpy : null;
     return {
-      ...holding, key: holding.id, grade, lots, quantity, pricedQuantity, costJpy, price,
-      priceDate: (grade === 'psa10' ? quote?.psa10TradeDate : quote?.aTradeDate) || null,
+      ...holding, key: holding.id, assetType, grade, lots, quantity, pricedQuantity, costJpy, price,
+      priceDate: (assetType === 'box' ? quote?.boxPriceDate : grade === 'psa10' ? quote?.psa10TradeDate : quote?.aTradeDate) || null,
       valueJpy: price == null ? null : price * quantity,
       profitJpy,
       returnPercent: profitJpy == null || !costJpy ? null : profitJpy / costJpy * 100,

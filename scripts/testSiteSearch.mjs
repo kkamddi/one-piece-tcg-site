@@ -89,7 +89,7 @@ test('search route is noindex and UI sources parse without changing the scan loc
   const html = applySeo(fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8'), '/search', getPageSeo('/search'));
   assert.match(html, /content="noindex,follow"/);
   for (const name of ['SiteSearch.jsx', 'RenewApp.jsx']) parse(fs.readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8'), { sourceType: 'module', plugins: ['jsx'] });
-  assert.match(fs.readFileSync(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8'), /const CARD_SCAN_AVAILABLE = false/);
+  assert.match(fs.readFileSync(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8'), /const CARD_SCAN_AVAILABLE = true/);
 });
 
 test('search has static entry pages even though it is excluded from sitemaps', () => {

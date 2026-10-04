@@ -33,9 +33,11 @@ test('recognizes supported card families without interpreting ordinary numbers',
   assert.deepEqual(extractCardCodes('nothing here 123-456'), []);
 });
 
-test('public scan entry and dialog are disabled during maintenance', async () => {
+test('mobile center scan and market entry open the shared scanner', async () => {
   const source = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
-  assert.match(source, /const CARD_SCAN_AVAILABLE = false;/);
+  assert.match(source, /const CARD_SCAN_AVAILABLE = true;/);
+  assert.match(source, /className="renew-mobile-scan" onClick=\{onScan\}/);
+  assert.match(source, /onScan=\{\(\) => \{ navigatePage\('prices'\); setScannerOpen\(true\); \}\}/);
   assert.match(source, /disabled=\{!CARD_SCAN_AVAILABLE \|\| loading\}/);
   assert.match(source, /CARD_SCAN_AVAILABLE && scannerOpen \? <CardScanner/);
   assert.match(source, /스캔 점검 중/);
@@ -44,6 +46,14 @@ test('public scan entry and dialog are disabled during maintenance', async () =>
 test('normalizes full-width text, dashes and conservative OCR digit substitutions', () => {
   assert.deepEqual(extractCardCodes('ＯＰ０１－１２０ 0POI-I20 op 01 - 120'), ['OP01-120']);
   assert.deepEqual(extractCardCodes('EB04\u2013061'), ['EB04-061']);
+});
+
+test('raised mobile scan remains separate from the back-to-top control', async () => {
+  const source = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../src/renew.css', import.meta.url), 'utf8');
+  assert.match(source, /className="renew-mobile-scan-circle"><MobileNavIcon type="camera"/);
+  assert.match(css, /\.renew-bottom-nav button\.renew-mobile-scan \.renew-mobile-scan-circle \{[^}]*width: 54px;[^}]*height: 54px;/);
+  assert.match(css, /\.renew-back-to-top \{\s*position: fixed;[^}]*left: auto;\s*right: 16px;/);
 });
 
 test('does not match partial identifiers or silently merge different codes', () => {
@@ -85,13 +95,15 @@ test('camera crop maps a portrait frame into a landscape video without stretchin
   assert.throws(() => getCameraCrop(0, 0, 300, 400, { x: 0, y: 0, width: 200, height: 300 }));
 });
 
-test('scanner and lazy OCR modules parse; scan state belongs to the market screen', async () => {
+test('scanner modules parse; app owns scan state and passes it to market', async () => {
   for (const path of ['../src/CardScanner.jsx', '../src/lib/card-scan-ocr.js']) {
     parse(await readFile(new URL(path, import.meta.url), 'utf8'), { sourceType: 'module', plugins: ['jsx'] });
   }
   const app = parse(await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8'), { sourceType: 'module', plugins: ['jsx'] });
   const market = app.program.body.find(node => node.id?.name === 'RenewMarket');
-  assert.ok(market.body.body.some(node => node.declarations?.some(declaration => declaration.id.elements?.[0]?.name === 'scannerOpen')));
+  assert.ok(market.params[0].properties.some(node => node.key.name === 'scannerOpen'));
+  const root = app.program.body.find(node => node.declaration?.id?.name === 'RenewApp').declaration;
+  assert.ok(root.body.body.some(node => node.declarations?.some(declaration => declaration.id.elements?.[0]?.name === 'scannerOpen')));
 });
 
 async function ocrWithWorker(createWorker) {

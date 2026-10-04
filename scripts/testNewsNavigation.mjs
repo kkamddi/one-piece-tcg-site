@@ -18,7 +18,7 @@ const paths = ['/news', '/news/official', '/news/guide', '/news/preorder', '/new
 
 test('news tabs expose distinct existing route URLs', () => {
   const rows = vm.runInNewContext(expression(filters));
-  assert.deepEqual(Array.from(rows, row => row.href), paths);
+  assert.deepEqual(Array.from(rows, row => row.href), [paths[0], '/news?section=cardshows', ...paths.slice(1)]);
 });
 
 test('the URL selects the news category instead of a stale history filter', () => {

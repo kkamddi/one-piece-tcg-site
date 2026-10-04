@@ -3,12 +3,16 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { parse } from '@babel/parser';
+import { transformSync } from 'esbuild';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const source = await readFile(new URL('../src/CenteringLab.jsx', import.meta.url), 'utf8');
 const ast = parse(source, { sourceType: 'module', plugins: ['jsx'] });
 const names = ['clamp', 'median', 'getLineContrast', 'findStrongestEdge', 'polygonArea', 'pointDistance', 'denormalizeCornerPoints', 'getOutlineValidation',
   'getAxisRatio', 'getWorseAxisRatio', 'getCenteringReport', 'boundariesToFrame', 'frameToBoundaries',
-  'getLumaData', 'detectBoundary', 'analyzeCapturedCanvas'];
+  'getLumaData', 'detectBoundary', 'analyzeCapturedCanvas',
+  'getFramePoints', 'getEdgePosition', 'constrainFrameCorner', 'shiftFrameEdge'];
 const context = vm.createContext({});
 for (const name of names) {
   const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === name);
@@ -85,4 +89,119 @@ test('captured image analysis uses detected asymmetric borders, not a fixed 50:5
 test('blank images and an undetected edge cannot receive high detection confidence', () => {
   assert.equal(analyzeSyntheticCard({ blank: true }).confidence, 0);
   assert.equal(analyzeSyntheticCard({ left: 0 }).confidence, 0);
+});
+
+function findNode(node, predicate) {
+  if (!node || typeof node !== 'object') return null;
+  if (predicate(node)) return node;
+  for (const value of Object.values(node)) {
+    for (const child of Array.isArray(value) ? value : [value]) {
+      const found = findNode(child, predicate);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function hasClass(node, className) {
+  return node?.type === 'JSXElement' && node.openingElement.attributes.some(
+    attr => attr.name?.name === 'className' && attr.value?.value === className
+  );
+}
+
+function renderFragment(node, isReferenceReliable) {
+  assert.ok(node);
+  const { code } = transformSync(`(${source.slice(node.start, node.end)})`, { loader: 'jsx' });
+  return renderToStaticMarkup(vm.runInNewContext(code, {
+    React, isReferenceReliable, report: { score: 99, left: 50.6, right: 49.4, top: 50.5, bottom: 49.5 },
+    text: { score: 'Centering score', reference: 'Centering reference' },
+    graderReferences: { psa10: true }, referenceLabel: 'Check boundaries', uiLang: 'EN'
+  }));
+}
+
+test('uncertain centering results suppress the score instead of displaying 99', () => {
+  const score = findNode(ast, node => hasClass(node, 'centering-score-block'));
+  assert.match(renderFragment(score, false), /<strong>—<\/strong>/);
+  assert.doesNotMatch(renderFragment(score, false), /99|is-top/);
+  assert.match(renderFragment(score, true), /<strong>99<\/strong>/);
+});
+
+test('direction conclusions are rendered only for reliable centering results', () => {
+  const direction = findNode(ast, node => node.type === 'LogicalExpression'
+    && node.operator === '&&' && hasClass(node.right, 'centering-direction-note'));
+  assert.equal(renderFragment(direction, false), '');
+  assert.match(renderFragment(direction, true), /printed area shifts to the right/);
+});
+
+function boundaryEditorHarness(width, advanced = false) {
+  const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'BoundaryEditor');
+  assert.ok(node);
+  const { code } = transformSync(source.slice(node.start, node.end), { loader: 'jsx' });
+  const refs = [];
+  const changes = [];
+  const editorContext = vm.createContext({
+    React, getFramePoints: context.getFramePoints, getEdgePosition: context.getEdgePosition,
+    constrainFrameCorner: context.constrainFrameCorner, shiftFrameEdge: context.shiftFrameEdge,
+    clamp: context.clamp, useRef(value) { const ref = { current: value }; refs.push(ref); return ref; }
+  });
+  vm.runInContext(code, editorContext);
+  const frame = { tl: { x: 5, y: 5 }, tr: { x: 95, y: 5 }, br: { x: 95, y: 95 }, bl: { x: 5, y: 95 } };
+  const tree = editorContext.BoundaryEditor({ frame, advanced, labels: { corner: 'corner', edge: 'edge' },
+    onChange(next) { changes.push(JSON.parse(JSON.stringify(next))); } });
+  refs[0].current = { getBoundingClientRect: () => ({ left: 17, top: 91, width, height: width * 88 / 63 }) };
+  const buttons = React.Children.toArray(tree.props.children).filter(child => child.type === 'button');
+  const captured = new Set();
+  const target = { setPointerCapture(id) { captured.add(id); }, hasPointerCapture(id) { return captured.has(id); },
+    releasePointerCapture(id) { captured.delete(id); } };
+  return { changes, frame, captured,
+    button(label) { const button = buttons.find(b => b.props['aria-label'] === label); assert.ok(button); return button.props; },
+    event(x, y, pointerType = 'touch') { return { clientX: 17 + width * x / 100, clientY: 91 + width * 88 / 63 * y / 100,
+      pointerId: 7, pointerType, currentTarget: target, preventDefault() {} }; }
+  };
+}
+
+test('actual boundary pointer handlers convert mobile coordinates and stop after pointerup', () => {
+  for (const width of [247, 317, 357]) {
+    for (const pointerType of ['touch', 'mouse']) {
+      const h = boundaryEditorHarness(width);
+      const left = h.button('edge left');
+      left.onPointerMove(h.event(7, 50, pointerType));
+      assert.equal(h.changes.length, 0);
+      left.onPointerDown(h.event(5, 50, pointerType));
+      left.onPointerMove(h.event(7, 50, pointerType));
+      assert.ok(Math.abs(h.changes[0].tl.x - 7) < 1e-10);
+      assert.ok(Math.abs(h.changes[0].bl.x - 7) < 1e-10);
+      assert.equal(h.changes[0].tr.x, 95);
+      assert.equal(h.frame.tl.x, 5, 'must not mutate the input frame');
+      left.onPointerUp(h.event(7, 50, pointerType));
+      left.onPointerMove(h.event(9, 50, pointerType));
+      assert.equal(h.changes.length, 1);
+      assert.equal(h.captured.size, 0);
+    }
+  }
+});
+
+test('actual boundary pointer cancellation ends a drag without later updates', () => {
+  const h = boundaryEditorHarness(317);
+  const top = h.button('edge top');
+  top.onPointerDown(h.event(50, 5));
+  top.onPointerMove(h.event(50, 8));
+  assert.ok(Math.abs(h.changes[0].tl.y - 8) < 1e-10);
+  top.onPointerCancel(h.event(50, 8));
+  top.onPointerMove(h.event(50, 20));
+  assert.equal(h.changes.length, 1);
+  assert.equal(h.captured.size, 0);
+});
+
+test('actual corner dragging clamps to the card and prevents crossed boundaries', () => {
+  const h = boundaryEditorHarness(247, true);
+  const corner = h.button('corner tl');
+  corner.onPointerDown(h.event(5, 5));
+  corner.onPointerMove(h.event(-20, -20));
+  assert.deepEqual(h.changes[0].tl, { x: 1, y: 1 });
+  corner.onPointerMove(h.event(120, 120));
+  assert.deepEqual(h.changes[1].tl, { x: 93, y: 93 });
+  assert.deepEqual(h.changes[1].br, h.frame.br);
+  corner.onPointerUp(h.event(120, 120));
+  assert.equal(h.captured.size, 0);
 });

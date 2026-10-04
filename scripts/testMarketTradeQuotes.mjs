@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { readTradeQuotes, TRADE_QUOTE_BASIS } from '../lib/market-trade-quotes.js';
 import { buildPortfolio } from '../src/portfolio-model.js';
 
@@ -24,4 +25,16 @@ test('missing trades remain unvalued and purchase records remain unchanged', () 
   assert.equal(after.costJpy, before.costJpy);
   assert.equal(buildPortfolio(holdings, []).cards[0].profitJpy, null);
   assert.equal(JSON.stringify(holdings), original);
+});
+test('a trade quote outage degrades to null instead of blocking market search or detail', async () => {
+  const source = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /throw new Error\('(trade_)?quote_(unavailable|invalid)'\)/);
+  const body = source.match(/async function fetchTradeQuoteItems[\s\S]*?\r?\n}\r?\n/)[0];
+  const load = (fetch) => new Function('fetch', `${body}; return fetchTradeQuoteItems;`)(fetch);
+  assert.equal(await load(async () => { throw new Error('offline'); })(), null);
+  assert.equal(await load(async () => ({ ok: false }))(), null);
+  assert.equal(await load(async () => ({ ok: true, json: async () => ({ basis: 'other', items: [] }) }))(), null);
+  const items = [{ apparelId: 108050 }];
+  const ok = async (url) => { assert.match(url, /apparelIds=108050$/); return { ok: true, json: async () => ({ basis: TRADE_QUOTE_BASIS, items }) }; };
+  assert.deepEqual(await load(ok)(108050), items);
 });

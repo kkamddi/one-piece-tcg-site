@@ -1,0 +1,8 @@
+# Mobile spacing and card-show alignment — local review
+
+- Card-show UI now reuses the information section's black/white pill controls and shared back-link style. Removed its outer panel, green palette and three-column table-like rows. Region is a compact select; event titles lead each row. Unknown fees remain explicit in details, not repeated in the list.
+- At widths up to 720px, home/news/subpage gutters are 12px. Top-level news and market panels, home dashboard frames and home guide framing no longer add horizontal padding. Controls, dialogs, card images, portfolio layout and desktop common layout are preserved.
+- Seven focused card-show tests pass, including region selection, preserved query parameters, details, link safety and JSX compilation. No full build or full suite was run.
+- Actual designated browser rendering: card-show list at 360/390/430px has no horizontal overflow and a 12px content left gutter. At 390px, home and market have no horizontal overflow; home dashboard and market panel horizontal padding/border are zero. These are same-origin iframe viewport checks, not physical-device tests.
+- Actual card-show detail click was verified through the resulting page. Desktop and 390px light/dark card-show screenshots were visually inspected. Browser screenshot capture timed out; the verified project GUI window was inspected with the native accessibility/screenshot tool instead. No system mouse or login operation was used.
+- No main push or production deployment in this task. Existing production still serves the preceding card-show UI. Authenticated portfolio, every news subsection, every screen size and physical devices were not exhaustively retested.
