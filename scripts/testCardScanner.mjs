@@ -48,6 +48,14 @@ test('normalizes full-width text, dashes and conservative OCR digit substitution
   assert.deepEqual(extractCardCodes('EB04\u2013061'), ['EB04-061']);
 });
 
+test('raised mobile scan remains separate from the back-to-top control', async () => {
+  const source = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../src/renew.css', import.meta.url), 'utf8');
+  assert.match(source, /className="renew-mobile-scan-circle"><MobileNavIcon type="camera"/);
+  assert.match(css, /\.renew-bottom-nav button\.renew-mobile-scan \.renew-mobile-scan-circle \{[^}]*width: 54px;[^}]*height: 54px;/);
+  assert.match(css, /\.renew-back-to-top \{\s*position: fixed;[^}]*left: auto;\s*right: 16px;/);
+});
+
 test('does not match partial identifiers or silently merge different codes', () => {
   assert.deepEqual(extractCardCodes('XOP01-120 OP01-1200 P-12'), []);
   assert.deepEqual(extractCardCodes('OPO1-120ED OP01-120SEC OP02-013SR'), ['OP01-120', 'OP02-013']);

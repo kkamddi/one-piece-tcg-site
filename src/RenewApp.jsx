@@ -4691,10 +4691,6 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
-  const [extensionBannerOpen, setExtensionBannerOpen] = useState(() => {
-    try { return Date.now() >= Number(localStorage.getItem('card-pone-extension-dismiss-until') || 0); }
-    catch { return true; }
-  });
   useBodyScrollLock(notificationMenuOpen && isLoggedIn);
   const unreadCount = notifications.filter((item) => !item.read_at).length;
   const handleNotificationClick = () => {
@@ -4856,7 +4852,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
           <span>{t('navPrices')}</span>
         </a>
         <button type="button" className="renew-mobile-scan" onClick={onScan} aria-label="카드 스캔">
-          <MobileNavIcon type="camera" />
+          <span className="renew-mobile-scan-circle"><MobileNavIcon type="camera" /></span>
           <span>{getLocaleText(uiLang, '스캔', 'Scan', 'スキャン')}</span>
         </button>
         <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
@@ -4868,16 +4864,25 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
           <span>{t('navShops')}</span>
         </a>
       </nav>
-      {activePage === 'home' && extensionBannerOpen ? <div className="renew-extension-banner">
-        <strong>{getLocaleText(uiLang, '카드 사진만 스캔하고 시세를 확인하세요', 'Scan a card photo to check prices', 'カード画像をスキャンして相場を確認')}</strong>
-        <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '크롬 확장 프로그램 설치', 'Install Chrome extension', 'Chrome拡張機能をインストール')} ↗</a>
-        <button type="button" aria-label={getLocaleText(uiLang, '설치 안내 닫기', 'Dismiss install banner', '閉じる')} onClick={() => {
-          setExtensionBannerOpen(false);
-          try { localStorage.setItem('card-pone-extension-dismiss-until', String(Date.now() + 7 * 86400000)); } catch { /* Storage may be disabled. */ }
-        }}>×</button>
-      </div> : null}
     </header>
   );
+}
+
+function ExtensionInstallBanner({ uiLang }) {
+  const [open, setOpen] = useState(() => {
+    try { return Date.now() >= Number(localStorage.getItem('card-pone-extension-dismiss-until') || 0); }
+    catch { return true; }
+  });
+  if (!open) return null;
+  return <aside className="renew-extension-banner" aria-label={getLocaleText(uiLang, '확장 프로그램 설치', 'Install extension', '拡張機能をインストール')}>
+    <MobileNavIcon type="camera" />
+    <strong>{getLocaleText(uiLang, '카드 사진으로 시세 확인', 'Scan card photos. Check prices.', 'カード画像で相場を確認')}</strong>
+    <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '크롬에 추가', 'Add to Chrome', 'Chromeに追加')} ↗</a>
+    <button type="button" aria-label={getLocaleText(uiLang, '설치 안내 닫기', 'Dismiss install banner', '閉じる')} onClick={() => {
+      setOpen(false);
+      try { localStorage.setItem('card-pone-extension-dismiss-until', String(Date.now() + 7 * 86400000)); } catch { /* Storage may be disabled. */ }
+    }}>×</button>
+  </aside>;
 }
 
 function RenewSuppliesModal({ onClose }) {
@@ -6309,6 +6314,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       <p className="renew-sr-only">{PAGE_SEO.home.body}</p>
       <section className="renew-hero" aria-label="메인 검색">
         <RenewSearch onSubmitSearch={onSubmitSearch} onSelectPopular={onSelectPopular} visitorToken={visitorToken} uiLang={uiLang} />
+        <ExtensionInstallBanner uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
         <RenewHomePromoBanner uiLang={uiLang} />
       </section>
