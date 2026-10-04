@@ -46,7 +46,9 @@ function ScanPrices({ apparelId, uiLang }) {
 
 function CandidateImage({ candidate }) {
   const [index, setIndex] = useState(0);
-  return <img src={candidate.images[index] || '/card-placeholder.svg'} alt={candidate.name || candidate.code} loading="lazy" referrerPolicy="no-referrer" onError={() => setIndex(value => value < candidate.images.length ? value + 1 : value)} />;
+  const src = candidate.images[index] || '/card-placeholder.svg';
+  // SNKRDUNK product photos pad the card with white space; fill the frame like the rest of the site.
+  return <span className="card-scan-candidate-image"><img src={src} data-product-photo={String(src.includes('cdn.snkrdunk.com/upload_bg_removed/'))} alt={candidate.name || candidate.code} loading="lazy" referrerPolicy="no-referrer" onError={() => setIndex(value => value < candidate.images.length ? value + 1 : value)} /></span>;
 }
 
 export default function CardScanner({ uiLang, initialLocale, onClose, onSelect, onOpenCatalog }) {

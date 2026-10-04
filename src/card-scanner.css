@@ -53,7 +53,10 @@
 .card-scan-result-heading h3 small { font-size: 14px; font-weight: 600; }
 .card-scan-candidates { display: grid; gap: 0; margin: 16px 0; }
 .card-scan-candidate { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-bottom: 1px solid #e2e5e8; }
-.card-scan-candidate > img { width: 96px; aspect-ratio: 63 / 88; object-fit: contain; background: #f5f6f7; border-radius: 4px; }
+.card-scan-candidate-image { display: block; width: 96px; aspect-ratio: 63 / 88; overflow: hidden; background: #f5f6f7; border-radius: 4px; }
+.card-scan-candidate-image img { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* The card fills 84% of the photo height; scale it to the frame edge. */
+.card-scan-candidate-image img[data-product-photo="true"] { object-fit: cover; transform: scale(1.19); }
 .card-scan-candidate > div { display: grid; align-content: start; gap: 6px; min-width: 0; }
 .card-scan-candidate-code { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: 700; color: #69737d; }
 .card-scan-candidate-code span { padding: 1px 6px; border: 1px solid #d9dde2; border-radius: 4px; font-size: 11px; }
@@ -69,6 +72,6 @@
 .card-scan-dialog .card-scan-more { width: 100%; margin-bottom: 12px; }
 .renew-app.is-dark .card-scan-result-heading small, .renew-app.is-dark .card-scan-candidate-code, .renew-app.is-dark .card-scan-candidate > div > small, .renew-app.is-dark .card-scan-prices dt, .renew-app.is-dark .card-scan-prices small, .renew-app.is-dark .card-scan-price-note { color: #b1bac4; }
 .renew-app.is-dark .card-scan-candidate { border-color: #3a4048; }
-.renew-app.is-dark .card-scan-candidate > img { background: #16191d; }
+.renew-app.is-dark .card-scan-candidate-image { background: #16191d; }
 .renew-app.is-dark .card-scan-candidate-code span { border-color: #4b535d; }
 .renew-app.is-dark .card-scan-warning { color: #e8c178; }
