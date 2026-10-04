@@ -6327,7 +6327,6 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       <p className="renew-sr-only">{PAGE_SEO.home.body}</p>
       <section className="renew-hero" aria-label="메인 검색">
         <RenewSearch onSubmitSearch={onSubmitSearch} onSelectPopular={onSelectPopular} visitorToken={visitorToken} uiLang={uiLang} />
-        <ExtensionInstallBanner uiLang={uiLang} />
         <RenewOfficialLinks uiLang={uiLang} />
         <RenewHomePromoBanner uiLang={uiLang} />
       </section>
