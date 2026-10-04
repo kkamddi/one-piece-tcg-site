@@ -2316,6 +2316,19 @@ function getUserDisplayName(user) {
   return metadata.nickname || metadata.username || user?.email?.split('@')[0] || '계정';
 }
 
+// Returns null instead of throwing so a quote outage never blocks search or detail views.
+async function fetchTradeQuoteItems(apparelId = null) {
+  try {
+    const query = apparelId ? `&apparelIds=${encodeURIComponent(apparelId)}` : '';
+    const response = await fetch(`/api/market?summary=trade-latest${query}`);
+    if (!response.ok) return null;
+    const payload = await response.json();
+    return payload?.basis === 'snkrdunk_latest_trade_day_median' && Array.isArray(payload.items) ? payload.items : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   const params = new URLSearchParams();
   if (code) params.set('code', code);
@@ -2326,12 +2339,10 @@ async function fetchMarketPrice({ code, apparelId, summary = false } = {}) {
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) throw new Error(payload?.error || `API ${response.status}`);
-  if (!summary && apparelId) {
-    const quoteResponse = await fetch(`/api/market?summary=trade-latest&apparelIds=${encodeURIComponent(apparelId)}`);
-    if (!quoteResponse.ok) throw new Error('trade_quote_unavailable');
-    const quotes = await quoteResponse.json();
-    if (quotes?.basis !== 'snkrdunk_latest_trade_day_median') throw new Error('trade_quote_invalid');
-    payload.tradeQuote = quotes.items.find(item => Number(item.apparelId) === Number(apparelId)) || null;
+  if (payload && !summary && apparelId) {
+    const quotes = await fetchTradeQuoteItems(apparelId);
+    payload.tradeQuoteUnavailable = !quotes;
+    payload.tradeQuote = quotes?.find(item => Number(item.apparelId) === Number(apparelId)) || null;
   }
   return payload;
 }
@@ -13279,15 +13290,12 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
     let cancelled = false;
     setItems([]);
     setQuoteError(false);
-    Promise.all([import('./data/market-cards.js'), fetch('/api/market?summary=trade-latest').then(async response => {
-      if (!response.ok) throw new Error('quote_unavailable');
-      const payload = await response.json();
-      if (payload?.basis !== 'snkrdunk_latest_trade_day_median' || !Array.isArray(payload.items)) throw new Error('quote_invalid');
-      return payload.items;
-    })])
+    Promise.all([import('./data/market-cards.js'), fetchTradeQuoteItems()])
       .then(([mod, quotes]) => {
-        if (!cancelled && Array.isArray(mod.default)) {
-          const byId = new Map(quotes.map(quote => [Number(quote.apparelId), quote]));
+        if (cancelled) return;
+        if (!quotes) setQuoteError(true);
+        if (Array.isArray(mod.default)) {
+          const byId = new Map((quotes || []).map(quote => [Number(quote.apparelId), quote]));
           setItems(mod.default.filter((item) => String(item?.locale || '').toUpperCase() === marketLocale && item?.apparelId)
             .map(item => ({ ...item, minPrice: Number(byId.get(Number(item.apparelId))?.aPriceJpy || 0) / MARKET_USD_TO_JPY, tradeDate: byId.get(Number(item.apparelId))?.aTradeDate })));
         }
@@ -13329,7 +13337,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
               {getMarketVariantLabel(item, uiLang) ? <span className="renew-card-gallery-variant">{getMarketVariantLabel(item, uiLang)}</span> : null}
               <small>{getMarketMetaLine(item)}</small>
               <span>{item.setName}</span>
-              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</b>
+              <b>{item.minPrice ? formatUsdWonFromUsd(item.minPrice) : quoteError ? t('checkPrice') : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</b>
               {item.tradeDate && <small>{getLocaleText(uiLang, '거래일 중앙값', 'Trading day median', '取引日中央値')} · {item.tradeDate}</small>}
             </div>
           </a>
@@ -13524,11 +13532,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           // The D1 catalog fallback is optional; keep static search behavior on failure.
         }
       }
-      const quoteResponse = await fetch('/api/market?summary=trade-latest');
-      if (!quoteResponse.ok) throw new Error('trade_quote_unavailable');
-      const quotePayload = await quoteResponse.json();
-      if (quotePayload?.basis !== 'snkrdunk_latest_trade_day_median') throw new Error('trade_quote_invalid');
-      const tradeQuotes = new Map(quotePayload.items.map(item => [Number(item.apparelId), item]));
+      const tradeQuotes = new Map((await fetchTradeQuoteItems() || []).map(item => [Number(item.apparelId), item]));
       const combinedResult = uniqueMarketItems([...expandedResult, ...discoveredItems]).map(item => ({
         ...item, minPrice: 0, latestPriceJpy: 0, displayPriceJpy: Number(tradeQuotes.get(Number(item.apparelId))?.aPriceJpy || 0)
       }));
@@ -13930,7 +13934,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
               <div className="renew-market-price">
                 <small>{`${currentPriceLabel} · ${normalizedCondition === 'a' ? 'Single' : 'PSA10'}`}</small>
                 {loading ? <span>{t('marketLoading')}</span> : <RenewMarketMoney value={currentPriceJpy} uiLang={uiLang} />}
-                {!loading && <small>{latestDailyPoint ? formatMarketSaleDate(latestDailyPoint) : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</small>}
+                {!loading && <small>{latestDailyPoint ? formatMarketSaleDate(latestDailyPoint) : marketDetail?.tradeQuoteUnavailable ? getLocaleText(uiLang, '거래 시세를 불러오지 못했습니다.', 'Trade prices are unavailable.', '取引相場を取得できませんでした。') : getLocaleText(uiLang, '거래 기록 없음', 'No trade records', '取引記録なし')}</small>}
               </div>
               <div className="renew-market-actions">
                 {canMapInitialCard ? (
