@@ -23,7 +23,22 @@ test('mobile scan starts the camera and analyzes captures automatically; price r
   assert.match(source, /void openCamera\(\)/);
   assert.match(source, /void readPhoto\(photo\)/);
   assert.match(source, /onSelect\(chosen, variants\)/);
-  assert.doesNotMatch(source, /setChosen\(variants\[0\]\)/);
+  assert.match(source, /canShowCandidatePrice\(result, candidate, confirmedKey\)/);
+  assert.match(source, /links\?\.price && showPrice \? <ScanPrices/);
+});
+
+test('mobile scan shares the extension recognition, links and price rules', async () => {
+  const source = await readFile(new URL('../src/CardScanner.jsx', import.meta.url), 'utf8');
+  assert.match(source, /recognizeForLab\(photo, \{ signal: controller\.signal, locale: 'auto', code: typedCode \}\)/);
+  assert.match(source, /from '\.\.\/extensions\/card-pone\/result-links\.js'/);
+  assert.match(source, /from '\.\.\/extensions\/card-pone\/result-confidence\.js'/);
+  assert.match(source, /from '\.\.\/extensions\/card-pone\/prices\.js'/);
+  assert.match(source, /!candidate\.artwork \? <p className="card-scan-warning">/);
+  assert.match(source, /fetch\(`\/api\/market\?summary=trade-latest&apparelIds=\$\{apparelId\}`/);
+  assert.doesNotMatch(source, /requireMember|fetchPrices/);
+  const app = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
+  assert.match(app, /onOpenCatalog=\{\(card\) => \{ setScannerOpen\(false\); onOpenCatalogCard\?\.\(card\); \}\}/);
+  assert.match(app, /onOpenCatalogCard=\{\(card\) => \{/);
 });
 
 test('recognizes supported card families without interpreting ordinary numbers', () => {

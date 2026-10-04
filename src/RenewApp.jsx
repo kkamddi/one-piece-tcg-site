@@ -13358,7 +13358,7 @@ function RenewCardMarket({ uiLang, marketLocale = 'JP' }) {
   );
 }
 
-function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang, scannerOpen, setScannerOpen }) {
+function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initialCode, initialApparelId, initialCardId, routeRevision, onRequireLogin, onBackHandlerChange, uiLang, scannerOpen, setScannerOpen, onOpenCatalogCard }) {
   const t = (key) => getUiText(uiLang, key);
   const savedViewState = getAppHistoryState().marketViewState || {};
   const savedHomeTab = ['box', 'card', 'index'].includes(savedViewState.homeTab) ? savedViewState.homeTab : '';
@@ -13864,7 +13864,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
-        {CARD_SCAN_AVAILABLE && scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
+        {CARD_SCAN_AVAILABLE && scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onOpenCatalog={(card) => { setScannerOpen(false); onOpenCatalogCard?.(card); }} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
 
         {!selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
 
@@ -16737,6 +16737,11 @@ export default function RenewApp() {
           onRequireLogin={() => handleAuthClick('login')}
           onBackHandlerChange={handleBackHandlerChange}
           uiLang={uiLang}
+          onOpenCatalogCard={(card) => {
+            setCatalogViewState(null);
+            setCatalogInitialSearch({ locale: card.locale, q: card.code, id: Date.now() });
+            navigatePage('cards', card.id ? { query: `cardId=${encodeURIComponent(card.id)}` } : undefined);
+          }}
         />
       ) : activePage === 'marketplace' ? (
         MARKETPLACE_ENABLED ? (

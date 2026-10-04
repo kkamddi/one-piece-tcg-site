@@ -25,9 +25,6 @@
 .card-scan-confirm > input { width: 100%; min-width: 0; height: 44px; padding: 8px 12px; font: inherit; font-size: 16px; background: transparent; color: inherit; border: 1px solid #c5cbd2; border-radius: 6px; }
 .card-scan-confirm fieldset { min-width: 0; border: 0; padding: 0; margin: 0 0 6px; }
 .card-scan-confirm legend { margin-bottom: 8px; }
-.card-scan-locale { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.card-scan-code-options { display: flex; flex-wrap: wrap; gap: 12px; }
-.card-scan-code-options label { display: flex; align-items: center; gap: 6px; }
 .card-scan-error { color: #b32822; font-size: 13px; line-height: 1.6; margin: 12px 0; overflow-wrap: anywhere; }
 .card-scan-progress { display: grid; justify-items: center; gap: 16px; margin-block: 30px; }
 .card-scan-progress progress { width: 100%; accent-color: #d6422e; }
@@ -39,20 +36,8 @@
 .card-scan-result-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
 .card-scan-result-heading small { color: #69737d; }
 .card-scan-result-heading h3 { font-size: 22px; margin: 6px 0 0; }
-.card-scan-variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; margin: 24px 0; }
-.card-scan-dialog .card-scan-variants > button { min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 0 0 14px; border: 0; border-bottom: 1px solid #e2e5e8; border-radius: 0; background: transparent; text-align: left; }
-.card-scan-variants img { width: 100%; aspect-ratio: 63 / 88; object-fit: contain; background: #f5f6f7; }
-.card-scan-variants span { font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
-.card-scan-variants small { font-size: 11px; color: #69737d; overflow-wrap: anywhere; }
-.card-scan-variants .card-scan-image-match { color: #087552; font-weight: 700; }
 .card-scan-match-status { font-size: 13px; color: #8b5a16; margin: 16px 0 0; }
-.renew-app.is-dark .card-scan-image-match { color: #7fddba; }
 .renew-app.is-dark .card-scan-match-status { color: #e8c178; }
-.card-scan-chosen > img { display: block; width: 100%; height: min(54dvh, 440px); object-fit: contain; background: #f5f6f7; }
-.card-scan-chosen h3 { font-size: 17px; line-height: 1.5; overflow-wrap: anywhere; margin: 20px 0 6px; }
-.card-scan-chosen p { color: #69737d; line-height: 1.5; overflow-wrap: anywhere; }
-.card-scan-decision { display: grid; gap: 6px; padding-block: 16px; }
-.card-scan-decision .card-scan-primary { min-height: 48px; }
 @keyframes card-scan-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .card-scan-spinner { animation: none; } }
 .card-scan-guide h3 { font-size: 17px; margin: 14px 0; }
@@ -65,5 +50,25 @@
 .renew-app.is-dark .card-scan-error { color: #ffa29b; }
 .renew-app.is-dark .card-scan-shutter { border-color: #eef0f3; }
 .renew-app.is-dark .card-scan-shutter span { background: #eef0f3; }
-.renew-app.is-dark .card-scan-variants img, .renew-app.is-dark .card-scan-chosen > img { background: #16191d; }
-.renew-app.is-dark .card-scan-variants small, .renew-app.is-dark .card-scan-chosen p, .renew-app.is-dark .card-scan-result-heading small { color: #b1bac4; }
+.card-scan-result-heading h3 small { font-size: 14px; font-weight: 600; }
+.card-scan-candidates { display: grid; gap: 0; margin: 16px 0; }
+.card-scan-candidate { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-bottom: 1px solid #e2e5e8; }
+.card-scan-candidate > img { width: 96px; aspect-ratio: 63 / 88; object-fit: contain; background: #f5f6f7; border-radius: 4px; }
+.card-scan-candidate > div { display: grid; align-content: start; gap: 6px; min-width: 0; }
+.card-scan-candidate-code { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: 700; color: #69737d; }
+.card-scan-candidate-code span { padding: 1px 6px; border: 1px solid #d9dde2; border-radius: 4px; font-size: 11px; }
+.card-scan-candidate h4 { margin: 0; font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+.card-scan-candidate > div > small { font-size: 12px; color: #69737d; overflow-wrap: anywhere; }
+.card-scan-warning { margin: 0; font-size: 12px; font-weight: 600; color: #8b5a16; }
+.card-scan-prices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 4px 0 0; }
+.card-scan-prices dt { font-size: 11px; font-weight: 700; color: #69737d; }
+.card-scan-prices dd { margin: 2px 0; font-size: 16px; font-weight: 700; }
+.card-scan-prices small, .card-scan-price-note { font-size: 11px; color: #69737d; }
+.card-scan-price-note { margin: 4px 0 0; }
+.card-scan-candidate-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+.card-scan-dialog .card-scan-more { width: 100%; margin-bottom: 12px; }
+.renew-app.is-dark .card-scan-result-heading small, .renew-app.is-dark .card-scan-candidate-code, .renew-app.is-dark .card-scan-candidate > div > small, .renew-app.is-dark .card-scan-prices dt, .renew-app.is-dark .card-scan-prices small, .renew-app.is-dark .card-scan-price-note { color: #b1bac4; }
+.renew-app.is-dark .card-scan-candidate { border-color: #3a4048; }
+.renew-app.is-dark .card-scan-candidate > img { background: #16191d; }
+.renew-app.is-dark .card-scan-candidate-code span { border-color: #4b535d; }
+.renew-app.is-dark .card-scan-warning { color: #e8c178; }
