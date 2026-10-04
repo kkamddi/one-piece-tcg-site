@@ -24,8 +24,6 @@ test('mobile scan starts the camera and analyzes captures automatically; price r
   assert.match(source, /void readPhoto\(photo\)/);
   assert.match(source, /onSelect\(chosen, variants\)/);
   assert.doesNotMatch(source, /setChosen\(variants\[0\]\)/);
-  const css = await readFile(new URL('../src/card-scanner.css', import.meta.url), 'utf8');
-  assert.match(css, /\.renew-market-scan-entry \{ display: none;/);
 });
 
 test('recognizes supported card families without interpreting ordinary numbers', () => {
@@ -33,14 +31,13 @@ test('recognizes supported card families without interpreting ordinary numbers',
   assert.deepEqual(extractCardCodes('nothing here 123-456'), []);
 });
 
-test('mobile center scan and market entry open the shared scanner', async () => {
+test('the mobile center scan is the only scan entry and opens the shared scanner', async () => {
   const source = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
   assert.match(source, /const CARD_SCAN_AVAILABLE = true;/);
   assert.match(source, /className="renew-mobile-scan" onClick=\{onScan\}/);
   assert.match(source, /onScan=\{\(\) => \{ navigatePage\('prices'\); setScannerOpen\(true\); \}\}/);
-  assert.match(source, /disabled=\{!CARD_SCAN_AVAILABLE \|\| loading\}/);
   assert.match(source, /CARD_SCAN_AVAILABLE && scannerOpen \? <CardScanner/);
-  assert.match(source, /스캔 점검 중/);
+  assert.doesNotMatch(source, /renew-market-scan-entry/);
 });
 
 test('normalizes full-width text, dashes and conservative OCR digit substitutions', () => {

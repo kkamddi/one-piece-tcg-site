@@ -103,7 +103,7 @@ test('real box gallery renders filters and adds only a selected sealed box', asy
     : [element, ...React.Children.toArray(element.props?.children).flatMap(all)];
   let elements = all(render());
   assert.equal(elements.filter(item => item.props?.className === 'renew-box-portfolio-add').length, sealedBoxes.length);
-  elements.find(item => item.type === 'button' && item.props.children === '엑스트라 부스터').props.onClick();
+  elements.find(item => item.type === 'button' && item.props.children === '엑스트라').props.onClick();
   elements = all(render());
   const additions = elements.filter(item => item.props?.className === 'renew-box-portfolio-add');
   assert.equal(additions.length, sealedBoxes.filter(item => boxSeries(item) === 'EB').length);

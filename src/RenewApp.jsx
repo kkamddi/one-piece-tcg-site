@@ -4733,7 +4733,6 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
           <img src={LOGO_SRC} alt="Card Pone" />
         </a>
         <div className="renew-mobile-actions">
-          <button type="button" onClick={() => onNavigate('lab')} aria-label="실험실"><MobileNavIcon type="lab" /></button>
           <div className={`renew-mobile-language ${mobileLanguageOpen ? 'is-open' : ''}`}>
             <button type="button" onClick={() => { setAccountMenuOpen(false); setNotificationMenuOpen(false); setMobileLanguageOpen((value) => !value); }} aria-label="언어 변경" aria-expanded={mobileLanguageOpen}>
               {uiLang}
@@ -4868,7 +4867,7 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
           <span className="renew-mobile-scan-circle"><MobileNavIcon type="camera" /></span>
           <span>{getLocaleText(uiLang, '스캔', 'Scan', 'スキャン')}</span>
         </button>
-        <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
+        <a href={getLocalizedPagePath('news', uiLang)} className={activePage === 'news' || isLabActive ? 'is-active' : ''} onClick={(event) => { event.preventDefault(); onMobileNews(); }} aria-label="정보">
           <MobileNavIcon type="news" />
           <span>{t('navNews')}</span>
         </a>
@@ -7375,7 +7374,7 @@ function localizeNewsPath(path, uiLang) {
     + (queryIndex < 0 ? '' : path.slice(queryIndex));
 }
 
-function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
+function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const t = (key) => getUiText(uiLang, key);
   const isJp = isJapaneseUi(uiLang);
   const isAndroid = Capacitor.getPlatform() === 'android';
@@ -7435,6 +7434,14 @@ function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
     event.preventDefault();
     onNavigate(href);
   }
+  // Mobile reaches the lab from here; desktop keeps it in the top navigation.
+  const labHubCard = (
+    <button type="button" className="renew-news-hub-card is-mobile-only" onClick={onOpenLab}>
+      <strong>{getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}</strong>
+      <small>{getLocaleText(uiLang, '센터링 측정, 팩 시뮬레이터, 덱 빌더', 'Centering, pack simulator, deck builder', 'センタリング測定・パック開封・デッキビルダー')}</small>
+      <b aria-hidden="true">›</b>
+    </button>
+  );
   return (
     <main className="renew-main renew-news-main">
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
@@ -7455,8 +7462,11 @@ function RenewNews({ uiLang, onOpenCalendar, onNavigate }) {
 
       {newsFilter === 'cardshows' && <CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} />}
 
+      {isJp && newsFilter === 'all' ? <section className="renew-news-hub is-mobile-only" aria-label={getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}>{labHubCard}</section> : null}
+
       {showOverview ? (
         <section className="renew-news-hub" aria-label="정보 바로가기">
+          {labHubCard}
           <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news?section=cardshows')}>
             <strong>카드쇼·행사</strong><b aria-hidden="true">›</b>
           </button>
@@ -13085,16 +13095,16 @@ function RenewBoxMarket({ uiLang, initialBoxCode = '', onAddBox }) {
   return (
     <section className="renew-box-market renew-box-gallery">
       <div className="renew-box-market-head">
-        <div className="renew-chip-group" role="group" aria-label={getLocaleText(uiLang, '부스터 시리즈', 'Booster series', 'ブースターシリーズ')}>
+        <div className="renew-box-series-tabs" role="group" aria-label={getLocaleText(uiLang, '부스터 시리즈', 'Booster series', 'ブースターシリーズ')}>
           {[
             ['all', getLocaleText(uiLang, '전체', 'All', 'すべて')],
-            ['OP', getLocaleText(uiLang, '정규 부스터', 'Booster', 'ブースター')],
-            ['EB', getLocaleText(uiLang, '엑스트라 부스터', 'Extra booster', 'エクストラブースター')],
-            ['PRB', getLocaleText(uiLang, '프리미엄 부스터', 'Premium booster', 'プレミアムブースター')],
-            ['other', getLocaleText(uiLang, '기타 제품', 'Other products', 'その他商品')]
+            ['OP', getLocaleText(uiLang, '정규', 'Booster', '通常')],
+            ['EB', getLocaleText(uiLang, '엑스트라', 'Extra', 'エクストラ')],
+            ['PRB', getLocaleText(uiLang, '프리미엄', 'Premium', 'プレミアム')],
+            ['other', getLocaleText(uiLang, '기타', 'Other', 'その他')]
           ].map(([key, label]) => <button type="button" key={key} disabled={Boolean(initialBoxCode)} aria-pressed={series === key} className={series === key ? 'is-active' : ''} onClick={() => { setSeries(key); setBoxPage(1); }}>{label}</button>)}
         </div>
-        <div className="renew-chip-group">
+        <div className="renew-box-sort" role="group" aria-label={getLocaleText(uiLang, '정렬', 'Sort', '並び替え')}>
           <button type="button" className={sortMode === 'latest' ? 'is-active' : ''} onClick={() => setSortMode('latest')}>{t('boxSortLatest')}</button>
           <button type="button" className={sortMode === 'high' ? 'is-active' : ''} onClick={() => setSortMode('high')}>{t('boxSortHigh')}</button>
           <button type="button" className={sortMode === 'low' ? 'is-active' : ''} onClick={() => setSortMode('low')}>{t('boxSortLow')}</button>
@@ -13854,7 +13864,6 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
-        <div className="renew-market-scan-entry"><button type="button" disabled={!CARD_SCAN_AVAILABLE || loading} onClick={() => { if (CARD_SCAN_AVAILABLE && window.matchMedia('(max-width: 767px)').matches) setScannerOpen(true); }}>{CARD_SCAN_AVAILABLE ? getLocaleText(uiLang, '스캔', 'Scan', 'スキャン') : getLocaleText(uiLang, '스캔 점검 중', 'Scan unavailable', 'スキャン調整中')}</button></div>
         {CARD_SCAN_AVAILABLE && scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
 
         {!selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
@@ -16874,6 +16883,7 @@ export default function RenewApp() {
             window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
           }}
           onOpenCalendar={() => navigatePage('calendar')}
+          onOpenLab={() => navigatePage('lab')}
         />
       ) : activePage === 'partnerShops' ? (
         isJapaneseUi(uiLang) ? <RenewJapaneseShops /> : <RenewPartnerShopSeoPage uiLang={uiLang} />

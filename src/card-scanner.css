@@ -1,5 +1,3 @@
-.renew-market-scan-entry { display: none; }
-.renew-market-scan-entry button { min-height: 40px; padding: 8px 20px; border: 1px solid #c5cbd2; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 .renew-modal-backdrop.card-scan-backdrop { padding: 0; align-items: stretch; backdrop-filter: none; touch-action: pan-y pinch-zoom; }
 .card-scan-dialog { width: 100%; height: 100dvh; max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; padding: max(16px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)); border-radius: 0; background: #fff; color: #17191c; font-size: 14px; letter-spacing: 0; }
 .card-scan-dialog * { box-sizing: border-box; letter-spacing: 0; }
@@ -69,6 +67,3 @@
 .renew-app.is-dark .card-scan-shutter span { background: #eef0f3; }
 .renew-app.is-dark .card-scan-variants img, .renew-app.is-dark .card-scan-chosen > img { background: #16191d; }
 .renew-app.is-dark .card-scan-variants small, .renew-app.is-dark .card-scan-chosen p, .renew-app.is-dark .card-scan-result-heading small { color: #b1bac4; }
-@media (max-width: 767px) {
-  .renew-market-scan-entry { display: flex; justify-content: flex-end; margin-top: 8px; }
-}
