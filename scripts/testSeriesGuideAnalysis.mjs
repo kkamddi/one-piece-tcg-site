@@ -53,3 +53,31 @@ test('the guide page and its pre-rendered HTML use the same section builder', as
   assert.match(seo, /getSeriesGuideSections\(analysis, getSeriesTopListings\(series, marketItems\), japanese \? 'JP' : 'KR'\)/);
   assert.doesNotMatch(app, /이 시리즈에서 바로 확인할 것/);
 });
+
+test('box facts count JP hit cards and spread listings from the main product only', async () => {
+  const { analyzeBoxSeries, getBoxGuideSections } = await import('../src/lib/series-guide-analysis.js');
+  const cards = [
+    { id: 'JP::OP09-118', locale: 'JP', series: 'JP-OP09', rarity: 'SEC' },
+    { id: 'JP::OP09-118_p1', locale: 'JP', series: 'JP-OP09', rarity: 'SEC' },
+    { id: 'JP::OP09-004_p1', locale: 'JP', series: 'JP-OP09', rarity: 'SR' },
+    { id: 'JP::OP09-010', locale: 'JP', series: 'JP-OP09', rarity: 'R' },
+    { id: 'KR::OP09-118', locale: 'KR', series: 'KR-OP09', rarity: 'SEC' }
+  ];
+  const market = Array.from({ length: 12 }, (_, index) => ({ code: `OP09-${String(index).padStart(3, '0')}`, locale: 'JP', setName: 'Booster Pack "Emperors In The New World"', name: index === 0 ? 'Luffy SEC-SP (Comic Parallel)' : 'Card', minPrice: [800, 150, 30, 5][index % 4] }));
+  market.push({ code: 'OP09-001', locale: 'JP', setName: 'Premium Booster', name: 'Reprint', minPrice: 9999 });
+  const box = analyzeBoxSeries('OP09', cards, market);
+  assert.deepEqual({ secret: box.secret, special: box.special, parallel: box.parallel, comic: box.comic, priced: box.priced }, { secret: 1, special: 0, parallel: 2, comic: 1, priced: 12 });
+  assert.deepEqual(box.buckets.map((bucket) => bucket[2]), [3, 3, 3, 3]);
+  const sections = getBoxGuideSections(box);
+  assert.deepEqual(sections.map((section) => section.heading), ['히트 카드 구성', 'SNKRDUNK 등록가 분포']);
+  assert.equal(sections[1].items.at(-1), '중앙값: US $90 / ₩131,130');
+  assert.equal(getBoxGuideSections({ ...box, priced: 2 }).length, 1);
+});
+
+test('the box guide and its pre-rendered HTML use the same section builder', async () => {
+  const app = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
+  const seo = await readFile(new URL('./boxRecommendationSeo.js', import.meta.url), 'utf8');
+  assert.match(app, /getBoxGuideSections\(analyzeBoxSeries\(detailSeriesId, cards, marketCards\)\)/);
+  assert.match(seo, /getBoxGuideSections\(analyzeBoxSeries\(seriesId, cardsData, marketItems\)\)/);
+  assert.doesNotMatch(seo, /heading: '확인 순서'/);
+});

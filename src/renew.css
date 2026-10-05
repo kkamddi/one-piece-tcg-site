@@ -10393,6 +10393,7 @@
 }
 
 .renew-box-series-metrics,
+.renew-box-series-composition,
 .renew-box-series-insight,
 .renew-box-series-hits,
 .renew-box-series-reading {
@@ -10401,6 +10402,7 @@
 }
 
 .renew-box-series-metrics h2,
+.renew-box-series-composition h2,
 .renew-box-series-insight h2,
 .renew-box-series-section-head h2,
 .renew-box-series-reading h2 {

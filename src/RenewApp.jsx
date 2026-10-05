@@ -27,7 +27,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
-import { analyzeSeriesCards, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
+import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
@@ -7988,6 +7988,7 @@ function RenewBoxRecommendationGuide() {
       setState({
         loading: false,
         detailItem,
+        composition: detailSeriesId ? getBoxGuideSections(analyzeBoxSeries(detailSeriesId, cards, marketCards)) : [],
         updatedAt: summary?.generatedAt || summary?.updatedAt || boxMarketPrices?.updatedAt || '',
         categories: activeCategory ? [{
           ...activeCategory,
@@ -8103,6 +8104,21 @@ function RenewBoxRecommendationGuide() {
               </div>
               <p>유효 히트는 현재 박스 가격의 35% 이상인 Single 카드입니다. 봉입률을 적용한 기대값은 아닙니다.</p>
             </section>
+            {state.composition?.length ? (
+              <section className="renew-box-series-composition" aria-labelledby="box-series-composition-heading">
+                <h2 id="box-series-composition-heading">박스 구성 데이터</h2>
+                {/* Same sections as the pre-rendered guide HTML (scripts/boxRecommendationSeo.js). */}
+                <div className="renew-series-guide-points renew-series-guide-analysis">
+                  {state.composition.map((section) => (
+                    <article key={section.heading}>
+                      <b>{section.heading}</b>
+                      {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                      <ul>{section.items.map((entry) => <li key={entry}>{entry}</li>)}</ul>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             {priceInsight ? (
               <section className="renew-box-series-insight" aria-labelledby="box-series-insight-heading">
                 <div className="renew-box-series-section-head">

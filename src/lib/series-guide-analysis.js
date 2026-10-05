@@ -112,12 +112,44 @@ export function getSeriesTopListings(series, marketItems = [], limit = 5) {
   candidates.forEach((item) => { add(setCounts, setKey(item.setName)); add(setNames, item.setName); });
   const mainKey = sortedEntries(setCounts)[0]?.[0];
   const mainSet = sortedEntries(setNames).find(([name]) => setKey(name) === mainKey)?.[0];
-  const items = candidates
-    .filter((item) => setKey(item.setName) === mainKey && Number(item.minPrice) > 0)
+  const productItems = candidates.filter((item) => setKey(item.setName) === mainKey);
+  const items = productItems
+    .filter((item) => Number(item.minPrice) > 0)
     .sort((left, right) => Number(right.minPrice) - Number(left.minPrice))
     .slice(0, limit)
     .map((item) => ({ code: item.code, name: item.name, apparelId: item.apparelId, minPrice: Number(item.minPrice) }));
-  return { locale, setName: mainSet || '', items };
+  return { locale, setName: mainSet || '', items, productItems };
+}
+
+const LISTING_BUCKETS = [[500, Infinity], [100, 500], [20, 100], [0, 20]];
+
+// Box guide facts: the hit cards in a JP booster and how its SNKRDUNK listings are spread.
+export function analyzeBoxSeries(seriesId, cards = [], marketItems = []) {
+  const hits = cards.filter((card) => {
+    if (card.locale !== 'JP' || String(card.series || '').replace(/^JP-/, '') !== seriesId) return false;
+    return /_p\d*$/i.test(card.id || '') || ['SEC', 'SP'].includes(String(card.rarity || '').toUpperCase());
+  });
+  const isParallel = (card) => /_p\d*$/i.test(card.id || '');
+  const product = getSeriesTopListings({ baseSeriesId: seriesId, locale: 'JP' }, marketItems, 0);
+  const prices = product.productItems.map((item) => Number(item.minPrice)).filter((price) => price > 0).sort((left, right) => left - right);
+  const middle = Math.floor(prices.length / 2);
+  // Korean names read better on the Korean guide; fall back to the JP catalog name.
+  const koreanName = new Map(cards.filter((card) => card.locale === 'KR').map((card) => [card.cardNo, card.name]));
+  const secretCards = hits.filter((card) => !isParallel(card) && String(card.rarity).toUpperCase() === 'SEC');
+  const comicItems = product.productItems.filter((item) => /comic parallel/i.test(item.name || ''));
+  return {
+    secret: secretCards.length,
+    secretCards: secretCards.map((card) => ({ cardNo: card.cardNo, name: koreanName.get(card.cardNo) || card.name })),
+    comicNames: [...new Set(comicItems.map((item) => String(item.name).split(/s*[([]/)[0].trim()).filter(Boolean))],
+    special: hits.filter((card) => !isParallel(card) && String(card.rarity).toUpperCase() === 'SP').length,
+    parallel: hits.filter(isParallel).length,
+    comic: comicItems.length,
+    setName: product.setName,
+    listed: product.productItems.length,
+    priced: prices.length,
+    median: prices.length ? (prices.length % 2 ? prices[middle] : (prices[middle - 1] + prices[middle]) / 2) : 0,
+    buckets: LISTING_BUCKETS.map(([low, high]) => [low, high, prices.filter((price) => price >= low && price < high).length])
+  };
 }
 
 const formatCount = (value) => Number(value).toLocaleString('en-US');
@@ -168,6 +200,36 @@ export function getSeriesGuideSections(analysis, listings, lang = 'KR') {
         ? `${edition}SNKRDUNK「${listings.setName}」の出品最安値順です。出品価格のため実際の取引価格とは異なる場合があります。`
         : `${edition} SNKRDUNK '${listings.setName}' 상품의 등록 최저가 순입니다. 판매 등록가라 실제 거래가와 다를 수 있습니다.`],
       items: listings.items.map((item) => `${item.name} — US $${formatCount(item.minPrice)} / ₩${formatCount(Math.round(item.minPrice * SERIES_GUIDE_USD_TO_KRW))}`)
+    });
+  }
+  return sections;
+}
+
+const formatUsdKrw = (usd) => `US $${formatCount(Math.round(usd * 100) / 100)} / ₩${formatCount(Math.round(usd * SERIES_GUIDE_USD_TO_KRW))}`;
+
+// Section text for both the React box guide and its pre-rendered HTML.
+export function getBoxGuideSections(box) {
+  const sections = [];
+  if (box.secret || box.special || box.parallel) {
+    sections.push({
+      heading: '히트 카드 구성',
+      items: [
+        `일본판 도감 기준 SEC ${box.secret}종 · SP ${box.special}종 · 패러렐 ${box.parallel}종`,
+        box.secretCards?.length ? `SEC: ${box.secretCards.map((card) => `${card.cardNo} ${card.name}`).join(' · ')}` : '',
+        box.comic ? `SNKRDUNK 상품 기준 코믹(망가) 패러렐 ${box.comic}종: ${box.comicNames.join(' · ')}` : ''
+      ].filter(Boolean)
+    });
+  }
+  // Too few listings (e.g. premium boosters reusing old card numbers) say nothing about the box.
+  if (box.priced >= 10) {
+    const label = ([low, high]) => (high === Infinity ? `US $${low} 이상` : low === 0 ? `US $${high} 미만` : `US $${low}~${high}`);
+    sections.push({
+      heading: 'SNKRDUNK 등록가 분포',
+      paragraphs: [`'${box.setName}' 상품으로 등록된 카드 ${box.listed}종 중 가격이 있는 ${box.priced}종의 등록 최저가 분포입니다. 판매 등록가라 실제 거래가와 다를 수 있습니다.`],
+      items: [
+        ...box.buckets.map(([low, high, count]) => `${label([low, high])}: ${count}종`),
+        `중앙값: ${formatUsdKrw(box.median)}`
+      ]
     });
   }
   return sections;
