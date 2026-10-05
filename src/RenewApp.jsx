@@ -28,6 +28,7 @@ import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
 import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
+import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
@@ -811,57 +812,19 @@ const SHOP_BUYING_GUIDE = {
     '네이버지도 또는 카카오맵으로 이동 경로 확인하기'
   ]
 };
+// Same article as the pre-rendered HTML (functions/_middleware.js).
 const CARD_PRICE_GUIDE = {
-  title: '원피스카드 시세 보는 방법',
-  intro: '원피스카드 시세는 같은 일련번호라도 일반 카드, 패러렐, 프로모, 언어, 그레이딩 상태에 따라 가격이 달라집니다. Card Pone 시세 페이지에서는 카드별 가격, 박스 가격, 최근 거래 기록, 기간별 그래프를 한곳에서 확인할 수 있습니다.',
-  sections: [
-    {
-      title: '시세 검색 기본 구조',
-      items: [
-        '일련번호를 입력하면 같은 번호를 가진 카드 후보를 확인할 수 있습니다.',
-        '같은 일련번호 안에서도 일반, 패러렐, 망가, 수배서, 프로모 버전을 구분해 선택할 수 있습니다.',
-        '카드 도감에서 시세 보기로 이동하면 매핑된 상품은 바로 상세 시세로 연결됩니다.'
-      ]
-    },
-    {
-      title: 'A등급과 PSA10 구분',
-      items: [
-        'A등급은 주로 일반 실물 카드 기준의 거래 흐름을 확인하는 용도로 사용합니다.',
-        'PSA10은 그레이딩 완료 카드 기준의 가격 흐름을 확인하는 용도로 구분합니다.',
-        '같은 카드라도 A등급과 PSA10은 시장 가격과 거래 빈도가 다를 수 있습니다.'
-      ]
-    },
-    {
-      title: '최근 거래 기록과 그래프',
-      items: [
-        '최근 가격 기록은 실제 거래 또는 수집된 시세 기록을 기준으로 표시합니다.',
-        '7D, 1M, 1Y 기간을 바꿔 가격 흐름을 비교할 수 있습니다.',
-        '거래가 적은 카드는 특정 기간에 그래프가 비어 있거나 변동 폭이 크게 보일 수 있습니다.'
-      ]
-    },
-    {
-      title: '박스 가격과 싱글카드 가격',
-      items: [
-        '박스 탭에서는 부스터 박스와 팩 상품 가격을 확인할 수 있습니다.',
-        '카드 탭에서는 싱글카드 주요 상품을 가격 기준으로 확인할 수 있습니다.',
-        '시세는 수집 시점과 외부 플랫폼 상태에 따라 변동될 수 있습니다.'
-      ]
-    },
-    {
-      title: '시세를 볼 때 주의할 점',
-      items: [
-        '가격이 높다고 항상 실제 거래가 활발한 것은 아닙니다.',
-        '최근 거래 수, 카드 상태, 언어, 버전, 그레이딩 여부를 함께 확인해야 합니다.',
-        '구매와 판매 결정은 여러 플랫폼의 가격과 실제 매물 상태를 함께 비교하는 것이 좋습니다.'
-      ]
-    }
-  ],
-  checklist: [
-    '일련번호와 카드 버전을 함께 확인하기',
-    'A등급과 PSA10 가격을 구분해서 보기',
-    '최근 거래 기록과 그래프를 같이 확인하기',
-    '거래량이 적은 카드는 가격 변동을 보수적으로 판단하기'
-  ]
+  title: CARD_PRICE_EDITORIAL.heading,
+  intro: CARD_PRICE_EDITORIAL.paragraphs[0],
+  introParagraphs: CARD_PRICE_EDITORIAL.paragraphs.slice(1),
+  reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt,
+  sections: CARD_PRICE_EDITORIAL.sections.map((section) => ({
+    title: section.heading,
+    paragraphs: section.paragraphs || [],
+    items: section.items || [],
+    links: section.links || []
+  })),
+  checklist: CARD_PRICE_EDITORIAL.checklist
 };
 const CARD_CATALOG_GUIDE = {
   title: '원피스카드 도감 사용법',
@@ -3780,11 +3743,11 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   }
   if (path === '/guide/card-price') {
     return {
-      title: '원피스카드 시세 보는 방법 | 카드 가격, 박스 가격, 거래 기록 | Card Pone',
-      h1: '원피스카드 시세 보는 방법',
-      description: '원피스카드 시세를 일련번호, 카드 버전, A등급, PSA10, 최근 거래 기록과 기간별 그래프로 확인하는 방법을 정리했습니다.',
-      keywords: '원피스카드 시세, 원피스카드 가격, 원피스카드 박스 시세, 원피스카드 PSA10, 원피스카드 거래 가격',
-      body: '원피스카드 카드별 시세와 박스 가격, 최근 거래 기록, 기간별 그래프를 확인하는 방법을 정리한 가이드입니다.'
+      title: '원피스카드 시세 보는 법 - Single·PSA10과 최근 거래일 | Card Pone',
+      h1: CARD_PRICE_EDITORIAL.heading,
+      description: 'Single과 PSA10, 최근 거래일 중앙값의 뜻과 등록가와 거래가의 차이를 SNKRDUNK 카드 상품 1,924개 집계로 설명합니다.',
+      keywords: '원피스카드 시세 보는 법, 원피스카드 가격 확인, PSA10 시세, 원피스카드 PSA10 배수, 스니덩크 시세',
+      body: CARD_PRICE_EDITORIAL.paragraphs[0]
     };
   }
   if (path === '/guide/card-catalog') {
@@ -8330,15 +8293,17 @@ function RenewGuideHub() {
 
 function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
   const details = GUIDE_ARTICLE_DETAILS[guideKey];
+  const reviewedAt = guide.reviewedAt || GUIDE_REVIEWED_AT;
   return (
     <section className="renew-panel renew-news-panel renew-card-storage-guide renew-editorial-guide" aria-labelledby={headingId}>
       <header className="renew-editorial-guide-head">
         <a href="/guide" onClick={() => rememberCurrentAppView()}>가이드/Q&amp;A</a>
         <h1 id={headingId}>{guide.title}</h1>
         <p>{guide.intro}</p>
+        {(guide.introParagraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
         <div className="renew-guide-editorial-meta" aria-label="콘텐츠 검수 정보">
           <span>Card Pone 데이터 편집</span>
-          <time dateTime={GUIDE_REVIEWED_AT}>검수 {GUIDE_REVIEWED_AT.replaceAll('-', '.')}</time>
+          <time dateTime={reviewedAt}>검수 {reviewedAt.replaceAll('-', '.')}</time>
         </div>
       </header>
       <nav className="renew-editorial-guide-toc" aria-label="이 글에서 확인할 내용">
@@ -8353,11 +8318,17 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
         {guide.sections.map((section, index) => (
           <article key={section.title} id={`${guideKey}-section-${index + 1}`} className="renew-card-storage-section">
             <h3>{section.title}</h3>
-            <ul>
-              {section.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {section.items.length ? (
+              <ul>
+                {section.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
+            {section.links?.length ? (
+              <p className="renew-editorial-guide-links">{section.links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</p>
+            ) : null}
           </article>
         ))}
       </div>

@@ -7738,6 +7738,27 @@
   line-height: 1.7;
 }
 
+.renew-card-storage-section > p {
+  margin: 0 0 10px;
+  color: #4b5563;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.75;
+}
+
+.renew-editorial-guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 0;
+}
+
+.renew-editorial-guide-links a {
+  color: #c94d35;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .renew-card-storage-section li::before,
 .renew-card-storage-checklist li::before {
   content: "-";
@@ -19954,6 +19975,7 @@ button.renew-deck-entry:focus-visible {
 .renew-app.is-dark .renew-guide-qa-answer,
 .renew-app.is-dark .renew-guide-feature-link small,
 .renew-app.is-dark .renew-card-storage-intro,
+.renew-app.is-dark .renew-card-storage-section > p,
 .renew-app.is-dark .renew-card-storage-section li,
 .renew-app.is-dark .renew-card-storage-checklist li,
 .renew-app.is-dark .renew-card-storage-cta p {

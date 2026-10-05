@@ -1,4 +1,5 @@
 import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
+import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
@@ -520,10 +521,12 @@ const SEO_FIXES = {
     schemaType: 'Article'
   },
   '/guide/card-price': {
-    title: '원피스카드 시세 보는 법 | Card Pone',
-    description: '원피스카드 시세를 일련번호, 카드 버전, A등급, PSA10, 최근 거래 기록과 기간별 그래프로 확인하는 방법을 정리했습니다.',
-    keywords: '원피스카드 시세 보는 법, 원피스카드 가격 확인, PSA10 시세, 원피스카드 그래프',
-    schemaType: 'Article'
+    title: '원피스카드 시세 보는 법 - Single·PSA10과 최근 거래일 | Card Pone',
+    description: 'Single과 PSA10, 최근 거래일 중앙값의 뜻과 등록가와 거래가의 차이를 SNKRDUNK 카드 상품 1,924개 집계로 설명합니다.',
+    keywords: '원피스카드 시세 보는 법, 원피스카드 가격 확인, PSA10 시세, 원피스카드 PSA10 배수, 스니덩크 시세',
+    schemaType: 'Article',
+    editor: 'Card Pone 데이터 편집',
+    reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt
   },
   '/guide/card-catalog': {
     title: '원피스카드 도감 사용법 - 일련번호와 카드명 검색 | Card Pone',
@@ -964,6 +967,12 @@ const SERVER_PAGE_CONTENT = {
     sections: [],
     links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
   },
+  '/guide/card-price': {
+    heading: CARD_PRICE_EDITORIAL.heading,
+    paragraphs: CARD_PRICE_EDITORIAL.paragraphs,
+    sections: [...CARD_PRICE_EDITORIAL.sections, { heading: '시세 확인 체크리스트', items: CARD_PRICE_EDITORIAL.checklist }],
+    links: ['/prices', '/prices/cards', '/guide/box-recommendation', '/data-policy']
+  },
   '/guide/collection/start': {
     ...COLLECTION_EDITORIAL,
     links: ['/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo', '/cards', '/prices']
@@ -1157,23 +1166,6 @@ const SERVER_PAGE_DETAILS = {
       heading: '보유 카드 관리',
       paragraphs: [
         '로그인 후 카드 상세에서 보유중 또는 위시리스트를 선택할 수 있습니다. 같은 카드번호라도 이미지와 언어판이 다르면 별도 카드로 저장됩니다.'
-      ]
-    }
-  ],
-  '/guide/card-price': [
-    {
-      heading: '시세를 비교하는 순서',
-      items: [
-        '카드번호와 이미지를 확인해 같은 버전의 상품인지 먼저 확인합니다.',
-        'Single과 PSA10을 섞지 않고 원하는 상태의 거래만 선택합니다.',
-        '최근 거래일과 거래 건수를 확인한 뒤 7일·1개월·1년 흐름을 비교합니다.',
-        '거래가 드문 카드는 마지막 거래가 오래됐을 수 있으므로 현재 판매 희망가와 동일하게 보지 않습니다.'
-      ]
-    },
-    {
-      heading: '원화 환산과 참고 범위',
-      paragraphs: [
-        '원화 표시는 수집 시점의 환율을 적용한 참고값입니다. 실제 결제 금액에는 환율 변동, 플랫폼 수수료, 배송비와 관세가 추가될 수 있습니다.'
       ]
     }
   ],
