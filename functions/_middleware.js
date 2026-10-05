@@ -2310,16 +2310,6 @@ function isAppOnlyPath(pathname) {
   return APP_ONLY_PATHS.has(normalized);
 }
 
-// Admin and prototype screens reuse the home HTML; keep them out of search results.
-export async function withNoIndex(response) {
-  const headers = new Headers(response.headers);
-  headers.set('X-Robots-Tag', 'noindex, nofollow');
-  if (!String(headers.get('Content-Type') || '').includes('text/html')) return new Response(response.body, { status: response.status, headers });
-  const html = (await response.text()).replace(/<meta name="robots" content="[^"]*"\s*\/?>/i, '<meta name="robots" content="noindex,nofollow" />');
-  headers.delete('Content-Length');
-  return new Response(html, { status: response.status, headers });
-}
-
 function renderNotFoundPage() {
   return `<!doctype html>
 <html lang="ko">
@@ -2429,7 +2419,7 @@ export async function onRequest(context) {
 
   const seo = getPageSeo(url.pathname);
   if (!seo) {
-    if (isAppOnlyPath(url.pathname)) return withNoIndex(await context.next());
+    if (isAppOnlyPath(url.pathname)) return context.next();
     const headers = new Headers({
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=60',

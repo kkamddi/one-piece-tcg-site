@@ -10,6 +10,13 @@
   Cache-Control: public, max-age=3600, must-revalidate
   X-Robots-Tag: all
 
+# Admin and prototype screens reuse the app shell; keep them out of search.
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+/stats-prototype
+  X-Robots-Tag: noindex, nofollow
+
 /cards/series/*
   X-Robots-Tag: noindex, follow
 
