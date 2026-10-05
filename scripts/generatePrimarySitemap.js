@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getSeriesGuideEntries, seriesGuideSourcePaths } from './seriesGuideSeo.js';
 import { getBoxRecommendationEntries, boxRecommendationSourcePaths } from './boxRecommendationSeo.js';
+import { getMarketReportEntries } from './marketReportSeo.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputPath = path.join(rootDir, 'public', 'sitemap.xml');
@@ -76,8 +77,9 @@ function escapeXml(value) {
 
 const seriesGuidePaths = getSeriesGuideEntries().map((entry) => entry.pathname);
 const boxRecommendationPaths = getBoxRecommendationEntries().map((entry) => entry.pathname);
+const marketReportPaths = getMarketReportEntries().map((entry) => entry.pathname);
 // The box recommendation entries repeat the hub paths listed above, so keep each URL once.
-const entries = [...new Set([...paths, ...seriesGuidePaths, ...boxRecommendationPaths])].map((urlPath) => {
+const entries = [...new Set([...paths, ...seriesGuidePaths, ...boxRecommendationPaths, ...marketReportPaths])].map((urlPath) => {
   const priority = urlPath === '/' ? '1.0' : urlPath.split('/').filter(Boolean).length === 1 ? '0.9' : '0.8';
   return [
     '  <url>',

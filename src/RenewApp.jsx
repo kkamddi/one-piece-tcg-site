@@ -35,6 +35,8 @@ import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
+import { getMarketReportEditorial } from '../lib/market-report.js';
+import MARKET_REPORT_INDEX from './data/market-reports/index.json';
 import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, boxQuote, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
@@ -64,6 +66,8 @@ const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
 const CardShows = React.lazy(() => import('./CardShows'));
 const CenteringLab = React.lazy(() => import('./CenteringLab'));
 const CardScanner = React.lazy(() => import('./CardScanner'));
+const MARKET_REPORT_PATH = '/guide/market-report';
+const MARKET_REPORT_FILES = import.meta.glob('./data/market-reports/2*.json');
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = Capacitor.getPlatform() === 'android'
@@ -756,7 +760,8 @@ const GUIDE_HUB_COLLECTIONS = [
     links: [
       { href: '/guide/card-price', title: '카드 시세 읽기', meta: 'Single·PSA10·최근 거래' },
       { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' },
-      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' }
+      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' },
+      ...(MARKET_REPORT_INDEX.length ? [{ href: '/guide/market-report', title: '주간 시세 리포트', meta: '매주 상승·하락·거래량' }] : [])
     ]
   },
   {
@@ -822,9 +827,19 @@ const GUIDE_ARTICLE_DETAILS = {
       ['수치는 언제 바뀌나요?', '본문은 2026년 10월 5일 데이터 기준입니다. 새 부스터 발매나 시세 변화에 따라 달라지므로 각 부스터의 박스 가이드에서 최신 값을 함께 확인하세요.']
     ],
     related: ['/guide/box-recommendation', '/guide/card-price', '/guide/collection/manga']
+  },
+  marketReport: {
+    checklistTitle: '리포트를 볼 때 확인할 점',
+    faq: [
+      ['리포트는 언제 올라오나요?', '매주 월요일에 지난주(월~일) SNKRDUNK 거래를 자동으로 집계해 올립니다.'],
+      ['주간 가격은 어떻게 계산하나요?', '하루 거래가 중앙값을 그날 거래 건수로 가중 평균했습니다. 거래가 적은 카드는 몇 건만으로도 크게 움직일 수 있습니다.'],
+      ['등록가와 무엇이 다른가요?', '카드는 실제로 팔린 가격 기준이고, 박스만 거래가 대신 등록 최저가를 씁니다.']
+    ],
+    related: ['/guide/card-price', '/guide/booster-comparison', '/guide/box-recommendation']
   }
 };
 const GUIDE_RELATED_LABELS = {
+  '/guide/market-report': ['주간 시세 리포트', '매주 PSA10·Single 상승·하락 카드를 정리합니다.'],
   '/guide/booster-comparison': ['부스터별 히트 카드 비교', 'OP01~OP16 망가·SP·고가 카드 분포를 비교합니다.'],
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
@@ -3310,6 +3325,16 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       description: 'Single과 PSA10, 최근 거래일 중앙값의 뜻과 등록가와 거래가의 차이를 SNKRDUNK 카드 상품 1,924개 집계로 설명합니다.',
       keywords: '원피스카드 시세 보는 법, 원피스카드 가격 확인, PSA10 시세, 원피스카드 PSA10 배수, 스니덩크 시세',
       body: CARD_PRICE_EDITORIAL.paragraphs[0]
+    };
+  }
+  if (path === MARKET_REPORT_PATH || path.startsWith(`${MARKET_REPORT_PATH}/`)) {
+    const entry = MARKET_REPORT_INDEX.find((item) => `${MARKET_REPORT_PATH}/${item.id}` === path);
+    return {
+      title: entry ? `${entry.title} | Card Pone` : '원피스카드 주간 시세 리포트 - PSA10·Single 상승·하락 카드 | Card Pone',
+      h1: entry?.title || '원피스카드 주간 시세 리포트',
+      description: '매주 SNKRDUNK 실제 거래로 원피스카드 PSA10·Single 시세의 상승·하락 카드, 거래가 많은 카드와 시리즈, 박스 최저가를 정리합니다.',
+      keywords: '원피스카드 시세, 원피스카드 주간 시세, 원피스카드 PSA10 시세, 원피스카드 가격 변동',
+      body: '매주 월요일 지난주 SNKRDUNK 거래를 집계한 원피스카드 시세 리포트입니다.'
     };
   }
   if (path === '/guide/booster-comparison') {
@@ -6967,6 +6992,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
   const isBoosterComparisonGuide = initialPath === '/guide/booster-comparison';
+  const isMarketReport = initialPath === MARKET_REPORT_PATH || initialPath.startsWith(`${MARKET_REPORT_PATH}/`);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
@@ -7284,7 +7310,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isBoxRecommendationGuide && !isMarketReport ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7325,6 +7351,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
       {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
       {isBoosterComparisonGuide ? <RenewBoosterComparisonGuide /> : null}
+      {isMarketReport ? <RenewMarketReport path={initialPath} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewAdInquiry uiLang={uiLang} />
@@ -7987,7 +8014,7 @@ function EditorialSectionBody({ section }) {
   );
 }
 
-function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
+function RenewEditorialGuide({ guide, guideKey, headingId, cta, children }) {
   const details = GUIDE_ARTICLE_DETAILS[guideKey];
   const reviewedAt = guide.reviewedAt || GUIDE_REVIEWED_AT;
   return (
@@ -8019,6 +8046,7 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
           </article>
         ))}
       </div>
+      {children}
       <div className="renew-card-storage-checklist">
         <h3>{details.checklistTitle}</h3>
         <ul>
@@ -8072,6 +8100,85 @@ function RenewShopBuyingGuide() {
 
 function RenewCardPriceGuide() {
   return <RenewEditorialGuide guide={CARD_PRICE_GUIDE} guideKey="price" headingId="card-price-guide-heading" cta={{ eyebrow: '카드 시세', title: '카드 시세를 직접 확인하려면', description: '카드번호 또는 이름으로 같은 카드의 버전별 가격과 최근 거래를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+}
+
+// Weekly market reports are generated data (scripts/generateWeeklyMarketReport.mjs); each report loads only on its page.
+function RenewMarketReport({ path }) {
+  const requestedId = path.startsWith(`${MARKET_REPORT_PATH}/`) ? path.slice(MARKET_REPORT_PATH.length + 1) : '';
+  const entry = requestedId ? MARKET_REPORT_INDEX.find((item) => item.id === requestedId) : MARKET_REPORT_INDEX[0];
+  const [loaded, setLoaded] = useState({ id: '', report: null, failed: false });
+  useEffect(() => {
+    if (!entry) return undefined;
+    let cancelled = false;
+    const load = MARKET_REPORT_FILES[`./data/market-reports/${entry.id}.json`];
+    if (!load) {
+      setLoaded({ id: entry.id, report: null, failed: true });
+      return undefined;
+    }
+    load()
+      .then((module) => { if (!cancelled) setLoaded({ id: entry.id, report: module.default, failed: false }); })
+      .catch(() => { if (!cancelled) setLoaded({ id: entry.id, report: null, failed: true }); });
+    return () => { cancelled = true; };
+  }, [entry?.id]);
+
+  if (!entry) {
+    return (
+      <section className="renew-panel renew-news-panel renew-editorial-guide">
+        <p className="renew-empty">{MARKET_REPORT_INDEX.length ? '해당 주의 리포트를 찾을 수 없습니다.' : '첫 주간 시세 리포트를 준비하고 있습니다.'}</p>
+      </section>
+    );
+  }
+  const report = loaded.id === entry.id ? loaded.report : null;
+  if (!report) {
+    return (
+      <section className="renew-panel renew-news-panel renew-editorial-guide" aria-busy={!loaded.failed}>
+        <p className="renew-empty">{loaded.failed && loaded.id === entry.id ? '리포트를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' : '리포트를 불러오는 중...'}</p>
+      </section>
+    );
+  }
+  const editorial = getMarketReportEditorial(report);
+  const archive = (
+    <nav className="renew-market-report-archive" aria-label="지난 리포트">
+      <h3>지난 리포트</h3>
+      {MARKET_REPORT_INDEX.map((item) => (
+        <a key={item.id} href={`${MARKET_REPORT_PATH}/${item.id}`} aria-current={item.id === entry.id && requestedId ? 'page' : undefined}>
+          <strong>{item.title}</strong>
+          <b aria-hidden="true">›</b>
+        </a>
+      ))}
+    </nav>
+  );
+
+  if (!requestedId) {
+    const highlights = editorial.sections.find((section) => section.items)?.items || [];
+    return (
+      <section className="renew-panel renew-news-panel renew-card-storage-guide renew-editorial-guide" aria-labelledby="market-report-hub-heading">
+        <header className="renew-editorial-guide-head">
+          <a href="/guide" onClick={() => rememberCurrentAppView()}>가이드/Q&amp;A</a>
+          <h1 id="market-report-hub-heading">원피스카드 주간 시세 리포트</h1>
+          <p>매주 월요일, 지난 한 주 동안 SNKRDUNK에서 실제로 거래된 원피스카드 시세를 집계해 정리합니다.</p>
+        </header>
+        <div className="renew-market-report-latest">
+          <span>최신 리포트</span>
+          <h2>{entry.title}</h2>
+          <EditorialStats stats={editorial.summary} label="최신 리포트 핵심 숫자" />
+          <ul>{highlights.map((item) => <li key={item}>{item}</li>)}</ul>
+          <a className="renew-market-report-open" href={`${MARKET_REPORT_PATH}/${entry.id}`}>리포트 전체 보기 <span aria-hidden="true">›</span></a>
+        </div>
+        {archive}
+      </section>
+    );
+  }
+  return (
+    <RenewEditorialGuide
+      guide={toEditorialGuide(editorial)}
+      guideKey="marketReport"
+      headingId="market-report-heading"
+      cta={{ eyebrow: '시세', title: '카드별 최근 거래를 확인하려면', description: '리포트의 카드는 시세 화면에서 Single·PSA10 최근 거래와 차트를 볼 수 있습니다.', href: '/prices', label: '시세 보기' }}
+    >
+      {archive}
+    </RenewEditorialGuide>
+  );
 }
 
 function RenewBoosterComparisonGuide() {

@@ -25291,3 +25291,99 @@ button.renew-deck-entry:focus-visible {
 .renew-app.is-dark .renew-box-picker-note {
   color: rgba(245, 242, 236, 0.66);
 }
+
+/* Weekly market report hub and archive. */
+.renew-market-report-latest {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 20px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.renew-market-report-latest > span {
+  color: #c94d35;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.renew-market-report-latest h2 {
+  margin: 0;
+  color: #17191c;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-market-report-latest ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: #3d434d;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.renew-market-report-open {
+  justify-self: start;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #17191c;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.renew-market-report-archive {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.renew-market-report-archive h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.renew-market-report-archive a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 12px;
+  background: #fff;
+  color: #17191c;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.renew-market-report-archive a[aria-current="page"] {
+  border-color: rgba(201, 77, 53, 0.5);
+}
+
+.renew-app.is-dark .renew-market-report-latest,
+.renew-app.is-dark .renew-market-report-archive a {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.82);
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-market-report-latest h2 {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-market-report-latest ul {
+  color: rgba(245, 242, 236, 0.8);
+}
+
+.renew-app.is-dark .renew-market-report-open {
+  background: #f5f2ec;
+  color: #17191c;
+}

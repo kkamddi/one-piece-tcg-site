@@ -1,0 +1,65 @@
+name: Weekly market report
+on:
+  workflow_dispatch:
+    inputs:
+      today:
+        description: 'KST date to report from (YYYY-MM-DD); the last full Monday-Sunday week before it is used'
+        required: false
+  schedule:
+    # Mondays 12:00 KST, after the daily history collection has finished Sunday's trades.
+    - cron: '0 3 * * 1'
+permissions:
+  contents: write
+concurrency:
+  group: market-weekly-report
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      changed: ${{ steps.publish.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Query last week's trades
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          REPORT_TODAY: ${{ github.event.inputs.today }}
+        shell: bash
+        run: |
+          mkdir -p tmp
+          if [ -n "$REPORT_TODAY" ] && ! [[ "$REPORT_TODAY" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "today must be YYYY-MM-DD"; exit 1
+          fi
+          node scripts/generateWeeklyMarketReport.mjs --sql ${REPORT_TODAY:+--today "$REPORT_TODAY"} > tmp/market-report.sql
+          npx --yes wrangler@4 d1 execute optcgkorea-public-shadow --remote --json --command "$(cat tmp/market-report.sql)" > tmp/market-report-rows.json
+      - name: Write report
+        env:
+          REPORT_TODAY: ${{ github.event.inputs.today }}
+        shell: bash
+        run: node scripts/generateWeeklyMarketReport.mjs --input tmp/market-report-rows.json ${REPORT_TODAY:+--today "$REPORT_TODAY"}
+      - name: Publish report data only
+        id: publish
+        shell: bash
+        run: |
+          git add src/data/market-reports
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: publish weekly market report'
+          git push origin HEAD:main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+  deploy:
+    needs: report
+    if: needs.report.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy-production.yml
+    secrets: inherit
