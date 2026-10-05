@@ -1813,7 +1813,7 @@ function createServerPageContent(pathname, seo) {
     .join('');
   const paragraphs = content.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
   const editorialMeta = seo.editor || seo.reviewedAt
-    ? `<p class="server-page-meta">${escapeHtml([seo.editor, seo.reviewedAt ? `최종 검수 ${seo.reviewedAt}` : ''].filter(Boolean).join(' · '))}</p>`
+    ? `<p class="server-page-meta">${escapeHtml([seo.editor, seo.reviewedAt ? `${isJapanese ? '最終確認' : '최종 검수'} ${seo.reviewedAt}` : ''].filter(Boolean).join(' · '))}</p>`
     : '';
   const detailSections = details.map((section) => {
     const sectionParagraphs = (section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');

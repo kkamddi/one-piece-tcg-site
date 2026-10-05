@@ -2453,8 +2453,17 @@ function rememberCurrentAppView(patch = {}) {
   replaceAppHistoryState({ cardPoneScrollY: getCurrentAppScrollY(), ...patch });
 }
 
+// Auto ads stay on screen across SPA navigation, so ad-free screens (index.html) get a full load instead.
+function shouldReloadForAdFreeScreen(url) {
+  return Boolean(window.__cardPoneAdsLoaded && window.__cardPoneAdFreePath?.(new URL(url, window.location.href).pathname));
+}
+
 function pushAppHistory(url, state = {}) {
   if (typeof window === 'undefined') return;
+  if (shouldReloadForAdFreeScreen(url)) {
+    window.location.assign(url);
+    return;
+  }
   rememberCurrentAppView();
   window.history.pushState({ cardPoneInternal: true, ...state }, '', url);
 }
@@ -7080,7 +7089,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
             {preorderLinks.length ? (
               <section className="renew-news-card renew-news-preorder-mini" aria-labelledby="news-preorder-heading">
                 <div className="renew-news-home-head">
-                  <h2 id="news-preorder-heading">진행 중인 사전예약</h2>
+                  <h2 id="news-preorder-heading">아마존 예약·응모</h2>
                   <button type="button" onClick={() => onNavigate('/news/preorder')}>전체 보기 <span aria-hidden="true">›</span></button>
                 </div>
                 <div className="renew-news-preorder-mini-list">
@@ -15751,6 +15760,10 @@ export default function RenewApp() {
 
   useEffect(() => {
     const handlePopState = (event) => {
+      if (shouldReloadForAdFreeScreen(window.location.href)) {
+        window.location.reload();
+        return;
+      }
       setRouteRevision((value) => value + 1);
       internalNavigationRef.current = Boolean(event.state?.cardPoneInternal);
       const routeLocale = getPathLocale(window.location.pathname);

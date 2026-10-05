@@ -76,7 +76,8 @@ function escapeXml(value) {
 
 const seriesGuidePaths = getSeriesGuideEntries().map((entry) => entry.pathname);
 const boxRecommendationPaths = getBoxRecommendationEntries().map((entry) => entry.pathname);
-const entries = [...paths, ...seriesGuidePaths, ...boxRecommendationPaths].map((urlPath) => {
+// The box recommendation entries repeat the hub paths listed above, so keep each URL once.
+const entries = [...new Set([...paths, ...seriesGuidePaths, ...boxRecommendationPaths])].map((urlPath) => {
   const priority = urlPath === '/' ? '1.0' : urlPath.split('/').filter(Boolean).length === 1 ? '0.9' : '0.8';
   return [
     '  <url>',
