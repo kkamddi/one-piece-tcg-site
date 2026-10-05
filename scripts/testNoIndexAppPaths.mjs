@@ -11,3 +11,12 @@ test('admin and prototype screens are served with a noindex header', async () =>
   assert.match(headers, /^\/admin\/\*\n {2}X-Robots-Tag: noindex, nofollow$/m);
   assert.match(headers, /^\/stats-prototype\n {2}X-Robots-Tag: noindex, nofollow$/m);
 });
+
+test('card detail pages are noindexed while the catalog lists stay indexable', async () => {
+  const headers = (await readFile(new URL('../public/_headers', import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
+  assert.match(headers, /^\/cards\/kr\/\*\n {2}X-Robots-Tag: noindex, follow$/m);
+  assert.match(headers, /^\/cards\/jp\/\*\n {2}X-Robots-Tag: noindex, follow$/m);
+  assert.doesNotMatch(headers, /^\/cards\/(kr|jp)\n/m);
+  const redirects = (await readFile(new URL('../public/_redirects', import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
+  assert.match(redirects, /^\/shops\/partners\/\* \/shops 301$/m);
+});

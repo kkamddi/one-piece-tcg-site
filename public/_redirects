@@ -50,4 +50,4 @@
 /jp/prices/product/* /jp/prices 200
 /jp/prices/box/* /jp/prices 200
 /shops/partners /shops 301
-/shops/partners/* /shops 200
+/shops/partners/* /shops 301

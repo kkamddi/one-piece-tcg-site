@@ -23,6 +23,13 @@
 /cards/series/*
   X-Robots-Tag: noindex, follow
 
+# Card detail pages share one generic HTML shell and draw almost no search clicks.
+/cards/kr/*
+  X-Robots-Tag: noindex, follow
+
+/cards/jp/*
+  X-Robots-Tag: noindex, follow
+
 /prices/card/*
   X-Robots-Tag: noindex, follow
 
