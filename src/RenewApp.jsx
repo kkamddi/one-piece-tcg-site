@@ -34,6 +34,7 @@ import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editoria
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
+import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
@@ -709,63 +710,7 @@ const NEWS_FILTERS = [
   { id: 'preorder', label: '사전예약', href: '/news/preorder' },
   { id: 'supplies', label: '카드용품', href: '/news/supplies' }
 ];
-const CARD_STORAGE_GUIDE = {
-  title: '원피스카드 보관 방법',
-  intro: '원피스카드는 습기, 빛, 압력, 마찰에 약합니다. 기본 보관 순서를 정해두면 일반 카드부터 고가 카드까지 상태를 안정적으로 유지할 수 있습니다.',
-  sections: [
-    {
-      title: '카드가 손상되는 주요 원인',
-      items: [
-        '습기와 온도 변화로 인한 휨',
-        '직사광선과 강한 조명으로 인한 색 바램',
-        '카드끼리 직접 닿으면서 생기는 표면 스크래치',
-        '무거운 물건에 눌리거나 비스듬히 보관되어 생기는 모서리 손상'
-      ]
-    },
-    {
-      title: '기본 보관 순서',
-      items: [
-        '개봉 직후 카드 표면을 손으로 문지르지 않습니다.',
-        '먼저 소프트 슬리브에 넣어 표면 마찰을 줄입니다.',
-        '자주 꺼내보는 카드는 탑로더나 바인더에 넣습니다.',
-        '고가 카드나 그레이딩 후보 카드는 카드세이버 또는 자석케이스로 따로 분리합니다.'
-      ]
-    },
-    {
-      title: '슬리브, 탑로더, 카드세이버 차이',
-      items: [
-        '슬리브는 가장 기본적인 표면 보호용입니다.',
-        '탑로더는 카드가 휘거나 눌리는 것을 줄이는 단단한 보관용입니다.',
-        '카드세이버는 PSA/BGS 등 그레이딩 제출용으로 자주 사용됩니다.',
-        '자석케이스는 전시용이나 고가 카드 단독 보관에 적합합니다.'
-      ]
-    },
-    {
-      title: '바인더 보관 시 주의점',
-      items: [
-        '카드를 슬리브에 넣은 뒤 바인더 포켓에 넣는 것이 안전합니다.',
-        '바인더를 과하게 채우면 카드가 눌릴 수 있습니다.',
-        '바인더는 세워두기보다 눕혀두는 편이 카드 휨을 줄이기 좋습니다.',
-        '습기가 많은 장소와 직사광선이 닿는 책장은 피하는 것이 좋습니다.'
-      ]
-    },
-    {
-      title: '고가 카드 보관 팁',
-      items: [
-        '망가, SP, 프로모, 우승 카드처럼 고가 카드는 일반 보관함과 분리합니다.',
-        '슬리브 + 카드세이버 또는 슬리브 + 자석케이스 조합을 사용합니다.',
-        '시세 확인용으로 자주 꺼내보는 카드는 별도 케이스에 보관합니다.',
-        '장기 보관 시 실리카겔과 함께 밀폐 보관함을 사용하는 것도 방법입니다.'
-      ]
-    }
-  ],
-  checklist: [
-    '카드는 슬리브 없이 겹쳐두지 않기',
-    '습기 많은 방, 창가, 차량 내부에 보관하지 않기',
-    '고가 카드는 일반 카드와 분리 보관하기',
-    '그레이딩 후보 카드는 표면 접촉을 최소화하기'
-  ]
-};
+const CARD_STORAGE_GUIDE = toEditorialGuide(CARD_STORAGE_EDITORIAL);
 // Shared articles (lib/*-editorial.js) are also pre-rendered by functions/_middleware.js.
 function toEditorialGuide(editorial) {
   return {
@@ -3324,11 +3269,11 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   }
   if (path === '/guide/card-storage') {
     return {
-      title: '원피스카드 보관 방법 | 슬리브, 탑로더, 바인더 보관 가이드 | Card Pone',
-      h1: '원피스카드 보관 방법',
-      description: '원피스카드 보관 방법을 슬리브, 탑로더, 카드세이버, 자석케이스, 바인더 기준으로 정리했습니다. 습기, 빛, 압력, 스크래치로부터 카드를 보호하는 방법을 확인하세요.',
-      keywords: '원피스카드 보관 방법, 원피스카드 슬리브, 원피스카드 탑로더, 카드세이버, 카드 바인더, 카드 보관용품',
-      body: '원피스카드를 장기 보관할 때 필요한 슬리브, 탑로더, 카드세이버, 바인더 사용 방법과 주의점을 정리한 가이드입니다.'
+      title: '원피스카드 보관 방법 - 카드 가치별 슬리브·탑로더·바인더 | Card Pone',
+      h1: CARD_STORAGE_EDITORIAL.heading,
+      description: '카드 가치에 따라 보호 수준을 나누는 원피스카드 보관 방법과 슬리브·탑로더·카드세이버·자석 케이스·바인더 비교, 장기 보관 환경을 정리했습니다.',
+      keywords: '원피스카드 보관 방법, 원피스카드 슬리브, 원피스카드 탑로더, 카드세이버, 카드 바인더, 카드 보관',
+      body: CARD_STORAGE_EDITORIAL.paragraphs[0]
     };
   }
   if (path === '/guide/shops') {
@@ -7827,6 +7772,7 @@ function RenewBoxRecommendationGuide() {
       <footer className="renew-box-guide-note">
         <strong>계산 기준</strong>
         <p>{BOX_GUIDE_COPY.methodNote}</p>
+        <ul className="renew-box-guide-method">{activeCategory.method.map((line) => <li key={line}>{line}</li>)}</ul>
         {state.updatedAt ? <time dateTime={state.updatedAt}>데이터 기준 {new Date(state.updatedAt).toLocaleString('ko-KR')}</time> : null}
       </footer>
     </section>

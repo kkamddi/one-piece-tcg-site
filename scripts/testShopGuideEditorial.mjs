@@ -27,7 +27,7 @@ test('store counts in the article match src/data/shops.json (refresh the article
 test('every shared-article guide is built by a declared toEditorialGuide (a missing helper blanks the whole app)', async () => {
   const app = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
   assert.equal((app.match(/^function toEditorialGuide\(editorial\) \{/gm) || []).length, 1);
-  for (const name of ['SHOP_BUYING_GUIDE', 'CARD_PRICE_GUIDE', 'CARD_CATALOG_GUIDE', 'BOOSTER_COMPARISON_GUIDE']) {
+  for (const name of ['CARD_STORAGE_GUIDE', 'SHOP_BUYING_GUIDE', 'CARD_PRICE_GUIDE', 'CARD_CATALOG_GUIDE', 'BOOSTER_COMPARISON_GUIDE']) {
     assert.ok(app.includes(`\nconst ${name} = toEditorialGuide(`), name);
   }
 });

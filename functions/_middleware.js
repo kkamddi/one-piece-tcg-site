@@ -4,6 +4,7 @@ import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
+import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS, PROMO_COLLECTION_GROUPS } from '../src/data/collection-guide.js';
 
 // Card lists and questions the pages show, printed as text for the pre-rendered HTML.
@@ -521,10 +522,12 @@ const SEO_FIXES = {
     schemaType: 'Article'
   },
   '/guide/card-storage': {
-    title: '원피스카드 보관 방법 - 슬리브, 탑로더, 바인더 | Card Pone',
-    description: '원피스카드 보관 방법을 슬리브, 탑로더, 카드 세이버, 자석케이스, 바인더 기준으로 정리했습니다.',
-    keywords: '원피스카드 보관 방법, 카드 보관, 카드 슬리브, 탑로더, 바인더',
-    schemaType: 'Article'
+    title: '원피스카드 보관 방법 - 카드 가치별 슬리브·탑로더·바인더 | Card Pone',
+    description: '카드 가치에 따라 보호 수준을 나누는 원피스카드 보관 방법과 슬리브·탑로더·카드세이버·자석 케이스·바인더 비교, 장기 보관 환경을 정리했습니다.',
+    keywords: '원피스카드 보관 방법, 원피스카드 슬리브, 원피스카드 탑로더, 카드세이버, 카드 바인더, 카드 보관',
+    schemaType: 'Article',
+    editor: 'Card Pone 데이터 편집',
+    reviewedAt: CARD_STORAGE_EDITORIAL.reviewedAt
   },
   '/guide/shops': {
     title: '원피스카드 사는 곳 - 공인점포·취급점포와 지역별 매장 | Card Pone',
@@ -992,6 +995,12 @@ const SERVER_PAGE_CONTENT = {
     sections: [],
     links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
   },
+  '/guide/card-storage': {
+    heading: CARD_STORAGE_EDITORIAL.heading,
+    paragraphs: CARD_STORAGE_EDITORIAL.paragraphs,
+    sections: [{ heading: '핵심 숫자', stats: CARD_STORAGE_EDITORIAL.summary }, ...CARD_STORAGE_EDITORIAL.sections, { heading: '장기 보관 체크리스트', items: CARD_STORAGE_EDITORIAL.checklist }],
+    links: ['/guides/centering', '/guide/card-price', '/guide/collection', '/cards']
+  },
   '/guide/shops': {
     heading: SHOP_GUIDE_EDITORIAL.heading,
     paragraphs: SHOP_GUIDE_EDITORIAL.paragraphs,
@@ -1197,17 +1206,6 @@ const SERVER_PAGE_DETAILS = {
         '리더 색상에 맞게 필터링된 카드에서 메인 덱 50장을 구성합니다.',
         '같은 카드번호의 최대 투입 매수와 금지·제한 카드 경고를 확인합니다.',
         '저장한 덱은 다시 불러와 카드 매수를 수정하거나 다른 버전으로 비교할 수 있습니다.'
-      ]
-    }
-  ],
-  '/guide/card-storage': [
-    {
-      heading: '보관 단계',
-      items: [
-        '카드를 만지기 전에 손의 수분과 먼지를 제거하고 카드에 맞는 소프트 슬리브를 사용합니다.',
-        '가치가 높은 카드는 슬리브 후 탑로더나 카드세이버에 넣어 휨과 눌림을 줄입니다.',
-        '바인더는 링이 카드에 닿지 않고 옆으로 넣는 포켓 구조인지 확인합니다.',
-        '직사광선, 높은 습도와 급격한 온도 변화를 피하고 세워서 보관합니다.'
       ]
     }
   ],

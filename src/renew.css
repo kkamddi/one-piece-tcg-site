@@ -24778,3 +24778,15 @@ button.renew-deck-entry:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+.renew-box-guide-method {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #656b75;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.renew-app.is-dark .renew-box-guide-method {
+  color: #b1bac4;
+}

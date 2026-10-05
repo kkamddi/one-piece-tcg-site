@@ -56,7 +56,6 @@ const paths = [
   '/guide/box-recommendation/more-hits',
   '/shops',
   '/shops/official',
-  '/shops/partners',
   '/lab',
   '/lab/centering',
   '/lab/pack-simulator',
