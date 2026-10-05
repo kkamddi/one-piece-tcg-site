@@ -124,26 +124,32 @@ export function getSeriesTopListings(series, marketItems = [], limit = 5) {
 const LISTING_BUCKETS = [[500, Infinity], [100, 500], [20, 100], [0, 20]];
 
 // Box guide facts: the hit cards in a JP booster and how its SNKRDUNK listings are spread.
-export function analyzeBoxSeries(seriesId, cards = [], marketItems = []) {
+export function analyzeBoxSeries(seriesId, cards = [], marketItems = [], mangaGroups = []) {
+  const isParallel = (card) => /_p\d*$/i.test(card.id || '');
+  // The JP catalog labels SP cards "SPカード", so match the prefix.
+  const isSpecial = (card) => /^SP/i.test(String(card.rarity || ''));
   const hits = cards.filter((card) => {
     if (card.locale !== 'JP' || String(card.series || '').replace(/^JP-/, '') !== seriesId) return false;
-    return /_p\d*$/i.test(card.id || '') || ['SEC', 'SP'].includes(String(card.rarity || '').toUpperCase());
+    return isParallel(card) || isSpecial(card) || String(card.rarity || '').toUpperCase() === 'SEC';
   });
-  const isParallel = (card) => /_p\d*$/i.test(card.id || '');
+  // Manga rares come from the curated collection list; SNKRDUNK product names miss several sets.
+  const manga = mangaGroups.find((group) => String(group.set || '').replace('-', '') === seriesId)?.cards || [];
   const product = getSeriesTopListings({ baseSeriesId: seriesId, locale: 'JP' }, marketItems, 0);
   const prices = product.productItems.map((item) => Number(item.minPrice)).filter((price) => price > 0).sort((left, right) => left - right);
   const middle = Math.floor(prices.length / 2);
   // Korean names read better on the Korean guide; fall back to the JP catalog name.
   const koreanName = new Map(cards.filter((card) => card.locale === 'KR').map((card) => [card.cardNo, card.name]));
-  const secretCards = hits.filter((card) => !isParallel(card) && String(card.rarity).toUpperCase() === 'SEC');
-  const comicItems = product.productItems.filter((item) => /comic parallel/i.test(item.name || ''));
+  // Premium boosters list some reprinted SECs twice under one card number.
+  const secretCards = [...new Map(hits
+    .filter((card) => !isParallel(card) && String(card.rarity).toUpperCase() === 'SEC')
+    .map((card) => [card.cardNo, card])).values()];
   return {
     secret: secretCards.length,
     secretCards: secretCards.map((card) => ({ cardNo: card.cardNo, name: koreanName.get(card.cardNo) || card.name })),
-    comicNames: [...new Set(comicItems.map((item) => String(item.name).split(/s*[([]/)[0].trim()).filter(Boolean))],
-    special: hits.filter((card) => !isParallel(card) && String(card.rarity).toUpperCase() === 'SP').length,
-    parallel: hits.filter(isParallel).length,
-    comic: comicItems.length,
+    special: hits.filter(isSpecial).length,
+    parallel: hits.filter((card) => isParallel(card) && !isSpecial(card)).length,
+    manga: manga.length,
+    mangaNames: manga.map((card) => (card.variant ? `${card.nameKo} (${card.variant})` : card.nameKo)),
     setName: product.setName,
     listed: product.productItems.length,
     priced: prices.length,
@@ -216,7 +222,7 @@ export function getBoxGuideSections(box) {
       items: [
         `일본판 도감 기준 SEC ${box.secret}종 · SP ${box.special}종 · 패러렐 ${box.parallel}종`,
         box.secretCards?.length ? `SEC: ${box.secretCards.map((card) => `${card.cardNo} ${card.name}`).join(' · ')}` : '',
-        box.comic ? `SNKRDUNK 상품 기준 코믹(망가) 패러렐 ${box.comic}종: ${box.comicNames.join(' · ')}` : ''
+        box.manga ? `망가 레어 ${box.manga}종: ${box.mangaNames.join(' · ')}` : ''
       ].filter(Boolean)
     });
   }

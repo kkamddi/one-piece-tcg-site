@@ -14,6 +14,7 @@ export const SEARCH_PAGES = [
   { title: '포트폴리오 계산기', href: '/tools/portfolio-calculator', keywords: ['포트폴리오', '계산기', '보유 카드'], description: '카드 수집 포트폴리오 계산' },
   { title: '정보 · 공식 소식', href: '/news', keywords: ['소식', '정보', '공지', '뉴스', '이벤트'], description: '사이트 가이드와 공식 소식' },
   { title: '발매 일정', href: '/calendar', keywords: ['발매', '출시', '일정', '캘린더'], description: '카드 상품 발매 일정 확인' },
+  { title: '부스터별 히트 카드 비교', href: '/guide/booster-comparison', keywords: ['부스터', '박스', '비교', '망가', 'SP', '고가'], description: 'OP01~OP16 망가·SP·고가 카드 분포 비교' },
   { title: '도감 사용 가이드', href: '/guide/card-catalog', keywords: ['도감', '검색', '카드번호', '일련번호'], description: '카드 검색과 수집 목록 사용 방법' }
 ].map(item => ({ ...item, type: 'guides', id: item.href }));
 

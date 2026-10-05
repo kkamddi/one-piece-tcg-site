@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import boxMarketItems from '../src/data/box-market-items.js';
 import marketItems from '../src/data/market-cards.js';
 import { analyzeBoxSeries, getBoxGuideSections } from '../src/lib/series-guide-analysis.js';
+import { MANGA_COLLECTION_GROUPS } from '../src/data/collection-guide.js';
 
 const cardsData = JSON.parse(fs.readFileSync(new URL('../src/data/cards.json', import.meta.url), 'utf8'));
 const contentReviewedAt = '2026-08-25';
@@ -47,7 +48,7 @@ export function getBoxRecommendationEntries() {
           '박스 현재가와 가격이 연결된 수록 카드의 Single 시세를 함께 비교해 최고가 카드, 상위 3장 합계, 가격 중앙값과 유효 히트를 확인합니다.'
         ],
         sections: [
-          ...getBoxGuideSections(analyzeBoxSeries(seriesId, cardsData, marketItems)),
+          ...getBoxGuideSections(analyzeBoxSeries(seriesId, cardsData, marketItems, MANGA_COLLECTION_GROUPS)),
           {
             heading: '결과를 볼 때 주의할 점',
             paragraphs: ['봉입률과 미확인 카드 가격은 임의로 추정하지 않습니다. 따라서 추천 순위는 개봉 기대수익이나 수익 보장이 아니라 현재 확인 가능한 가격 분포를 비교하는 자료입니다.']

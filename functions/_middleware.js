@@ -1,6 +1,7 @@
 import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
+import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
@@ -529,6 +530,14 @@ const SEO_FIXES = {
     editor: 'Card Pone 데이터 편집',
     reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt
   },
+  '/guide/booster-comparison': {
+    title: '원피스카드 부스터별 히트 카드 비교 - OP01~OP16 망가·SP·고가 카드 | Card Pone',
+    description: '일본판 OP01~OP16과 EB01~EB04의 SEC·SP·패러렐·망가 레어 구성과 SNKRDUNK 등록가 분포를 부스터별로 비교합니다.',
+    keywords: '원피스카드 부스터 비교, 원피스카드 박스 추천, 원피스카드 망가 레어, 원피스카드 고가 카드, 원피스카드 SP 카드',
+    schemaType: 'Article',
+    editor: 'Card Pone 데이터 편집',
+    reviewedAt: BOOSTER_COMPARISON_EDITORIAL.reviewedAt
+  },
   '/guide/card-catalog': {
     title: '원피스카드 도감 사용법 - 같은 번호의 다른 버전 구별 | Card Pone',
     description: '카드번호 읽는 법과 패러렐·코믹 패러렐·재록·프로모 구별법을 일본판 도감 2,773개 번호와 SNKRDUNK 상품 집계로 설명합니다.',
@@ -969,6 +978,12 @@ const SERVER_PAGE_CONTENT = {
     paragraphs: ['망가 카드, 챔피언십, 플래그십, 프로모 카드 목록을 분류별로 확인합니다.'],
     sections: [],
     links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
+  },
+  '/guide/booster-comparison': {
+    heading: BOOSTER_COMPARISON_EDITORIAL.heading,
+    paragraphs: BOOSTER_COMPARISON_EDITORIAL.paragraphs,
+    sections: [...BOOSTER_COMPARISON_EDITORIAL.sections, { heading: '부스터 비교 체크리스트', items: BOOSTER_COMPARISON_EDITORIAL.checklist }],
+    links: ['/guide/box-recommendation', '/prices/boxes', '/guide/collection/manga', '/guide/card-price']
   },
   '/guide/card-catalog': {
     heading: CARD_CATALOG_EDITORIAL.heading,

@@ -30,6 +30,8 @@ import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-er
 import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
+import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
+import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
@@ -841,6 +843,20 @@ const CARD_CATALOG_GUIDE = {
   })),
   checklist: CARD_CATALOG_EDITORIAL.checklist
 };
+// Same article as the pre-rendered HTML (functions/_middleware.js).
+const BOOSTER_COMPARISON_GUIDE = {
+  title: BOOSTER_COMPARISON_EDITORIAL.heading,
+  intro: BOOSTER_COMPARISON_EDITORIAL.paragraphs[0],
+  introParagraphs: BOOSTER_COMPARISON_EDITORIAL.paragraphs.slice(1),
+  reviewedAt: BOOSTER_COMPARISON_EDITORIAL.reviewedAt,
+  sections: BOOSTER_COMPARISON_EDITORIAL.sections.map((section) => ({
+    title: section.heading,
+    paragraphs: section.paragraphs || [],
+    items: section.items || [],
+    links: section.links || []
+  })),
+  checklist: BOOSTER_COMPARISON_EDITORIAL.checklist
+};
 const GUIDE_REVIEWED_AT = '2026-08-25';
 const GUIDE_HUB_COLLECTIONS = [
   {
@@ -860,7 +876,8 @@ const GUIDE_HUB_COLLECTIONS = [
     description: '카드와 박스 가격을 같은 기준으로 비교하는 방법입니다.',
     links: [
       { href: '/guide/card-price', title: '카드 시세 읽기', meta: 'Single·PSA10·최근 거래' },
-      { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' }
+      { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' },
+      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' }
     ]
   },
   {
@@ -918,9 +935,18 @@ const GUIDE_ARTICLE_DETAILS = {
       ['한글판과 일본판 카드가 같이 검색되나요?', '언어판은 별도로 관리합니다. 먼저 한글판 또는 일본판을 선택한 뒤 카드번호나 이름을 검색해야 같은 환경의 결과를 정확히 볼 수 있습니다.']
     ],
     related: ['/cards', '/guide/card-price', '/guide/card-storage']
+  },
+  booster: {
+    checklistTitle: '부스터 비교 체크리스트',
+    faq: [
+      ['이 비교로 어떤 박스를 사야 할지 정할 수 있나요?', '현재 확인할 수 있는 구성과 등록가 분포를 비교하는 자료입니다. 봉입률을 반영한 기대값이 아니므로 구매 결정은 박스 가격, 실제 거래 시세와 함께 판단해야 합니다.'],
+      ['수치는 언제 바뀌나요?', '본문은 2026년 10월 5일 데이터 기준입니다. 새 부스터 발매나 시세 변화에 따라 달라지므로 각 부스터의 박스 가이드에서 최신 값을 함께 확인하세요.']
+    ],
+    related: ['/guide/box-recommendation', '/guide/card-price', '/guide/collection/manga']
   }
 };
 const GUIDE_RELATED_LABELS = {
+  '/guide/booster-comparison': ['부스터별 히트 카드 비교', 'OP01~OP16 망가·SP·고가 카드 분포를 비교합니다.'],
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
   '/guide/card-storage': ['카드 보관 방법', '슬리브부터 장기 보관까지 순서대로 확인합니다.'],
@@ -3711,6 +3737,15 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       description: 'Single과 PSA10, 최근 거래일 중앙값의 뜻과 등록가와 거래가의 차이를 SNKRDUNK 카드 상품 1,924개 집계로 설명합니다.',
       keywords: '원피스카드 시세 보는 법, 원피스카드 가격 확인, PSA10 시세, 원피스카드 PSA10 배수, 스니덩크 시세',
       body: CARD_PRICE_EDITORIAL.paragraphs[0]
+    };
+  }
+  if (path === '/guide/booster-comparison') {
+    return {
+      title: '원피스카드 부스터별 히트 카드 비교 - OP01~OP16 망가·SP·고가 카드 | Card Pone',
+      h1: BOOSTER_COMPARISON_EDITORIAL.heading,
+      description: '일본판 OP01~OP16과 EB01~EB04의 SEC·SP·패러렐·망가 레어 구성과 SNKRDUNK 등록가 분포를 부스터별로 비교합니다.',
+      keywords: '원피스카드 부스터 비교, 원피스카드 박스 추천, 원피스카드 망가 레어, 원피스카드 고가 카드, 원피스카드 SP 카드',
+      body: BOOSTER_COMPARISON_EDITORIAL.paragraphs[0]
     };
   }
   if (path === '/guide/card-catalog') {
@@ -7312,6 +7347,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isShopBuyingGuide = initialPath === '/guide/shops';
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
+  const isBoosterComparisonGuide = initialPath === '/guide/booster-comparison';
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
@@ -7577,7 +7613,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7617,6 +7653,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isShopBuyingGuide ? <RenewShopBuyingGuide /> : null}
       {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
       {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
+      {isBoosterComparisonGuide ? <RenewBoosterComparisonGuide /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewSeoSummary page="news" titleAs="h1" placement="footer" uiLang={uiLang} />
@@ -7914,7 +7951,7 @@ function RenewBoxRecommendationGuide() {
       setState({
         loading: false,
         detailItem,
-        composition: detailSeriesId ? getBoxGuideSections(analyzeBoxSeries(detailSeriesId, cards, marketCards)) : [],
+        composition: detailSeriesId ? getBoxGuideSections(analyzeBoxSeries(detailSeriesId, cards, marketCards, MANGA_COLLECTION_GROUPS)) : [],
         updatedAt: summary?.generatedAt || summary?.updatedAt || boxMarketPrices?.updatedAt || '',
         categories: activeCategory ? [{
           ...activeCategory,
@@ -8348,6 +8385,10 @@ function RenewShopBuyingGuide() {
 
 function RenewCardPriceGuide() {
   return <RenewEditorialGuide guide={CARD_PRICE_GUIDE} guideKey="price" headingId="card-price-guide-heading" cta={{ eyebrow: '카드 시세', title: '카드 시세를 직접 확인하려면', description: '카드번호 또는 이름으로 같은 카드의 버전별 가격과 최근 거래를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+}
+
+function RenewBoosterComparisonGuide() {
+  return <RenewEditorialGuide guide={BOOSTER_COMPARISON_GUIDE} guideKey="booster" headingId="booster-comparison-guide-heading" cta={{ eyebrow: '박스 가이드', title: '부스터별 최신 값을 보려면', description: '각 부스터의 박스 현재가, 최고가 카드와 히트 카드 구성을 최신 데이터로 확인합니다.', href: '/guide/box-recommendation', label: '박스 가이드 보기' }} />;
 }
 
 function RenewCardCatalogGuide() {
