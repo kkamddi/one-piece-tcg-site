@@ -33,3 +33,10 @@ test('boxes can be added at the current lowest listing', () => {
   assert.match(app, /const currentPriceJpy = isBox \? Math\.round\(boxCurrentQuote\?\.boxPriceJpy \|\| 0\)/);
   assert.match(app, /referenceSource: mode === 'current' \? \(isBox \? 'listing' : 'current_market'\)/);
 });
+
+test('new card and box purchases default to the current market price', () => {
+  const editor = app.match(/function RenewPortfolioEditorModal\([\s\S]*?\n\}/)[0];
+  assert.match(editor, /const \[mode, setMode\] = useState\('current'\);/);
+  assert.match(editor, /function resetForm[\s\S]*?setMode\('current'\);/);
+  assert.ok(editor.indexOf("['current', text(") < editor.indexOf("['manual', text("), 'current price tab comes first');
+});

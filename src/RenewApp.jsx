@@ -5381,7 +5381,8 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   }, []);
   const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
   const [grade, setGrade] = useState(normalizeMarketConditionKey(initialGrade));
-  const [mode, setMode] = useState('manual');
+  // New purchases start at the current market price; entering a price or deferring it stays one tap away.
+  const [mode, setMode] = useState('current');
   const [showForm, setShowForm] = useState(() => !findPortfolioHolding(holdings, item, initialGrade)?.purchases?.length);
   const [quantity, setQuantity] = useState(1);
   const [purchaseDate, setPurchaseDate] = useState(getKstDateKey(Date.now()));
@@ -5435,7 +5436,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 
   function resetForm(nextGrade = grade) {
     setGrade(normalizeMarketConditionKey(nextGrade));
-    setMode('manual');
+    setMode('current');
     setQuantity(1);
     setPurchaseDate(getKstDateKey(Date.now()));
     setCurrency(isJapaneseUi(uiLang) ? 'JPY' : 'KRW');
@@ -5570,8 +5571,8 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
             <summary>{text('매입가 입력 방식', 'Cost entry method', '購入価格の入力方法')}</summary>
           <div className="renew-portfolio-mode-tabs">
             {[
-              ['manual', text('직접 입력', 'Enter price', '価格を入力')],
               ['current', text('현재 시세로 추가', 'Use current price', '現在相場で追加')],
+              ['manual', text('직접 입력', 'Enter price', '価格を入力')],
               ['estimate', text('날짜로 추정', 'Estimate by date', '日付から推定')],
               ['later', text('나중에 입력', 'Later', '後で入力')]
             ].filter(([modeKey]) => !isBox || ['current', 'manual', 'later'].includes(modeKey)).map(([modeKey, label]) => (
