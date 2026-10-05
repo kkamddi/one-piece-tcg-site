@@ -815,48 +815,21 @@ const SHOP_BUYING_GUIDE = {
     '네이버지도 또는 카카오맵으로 이동 경로 확인하기'
   ]
 };
-// Same article as the pre-rendered HTML (functions/_middleware.js).
-const CARD_PRICE_GUIDE = {
-  title: CARD_PRICE_EDITORIAL.heading,
-  intro: CARD_PRICE_EDITORIAL.paragraphs[0],
-  introParagraphs: CARD_PRICE_EDITORIAL.paragraphs.slice(1),
-  reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt,
-  sections: CARD_PRICE_EDITORIAL.sections.map((section) => ({
-    title: section.heading,
-    paragraphs: section.paragraphs || [],
-    items: section.items || [],
-    links: section.links || []
-  })),
-  checklist: CARD_PRICE_EDITORIAL.checklist
-};
-// Same article as the pre-rendered HTML (functions/_middleware.js).
-const CARD_CATALOG_GUIDE = {
-  title: CARD_CATALOG_EDITORIAL.heading,
-  intro: CARD_CATALOG_EDITORIAL.paragraphs[0],
-  introParagraphs: CARD_CATALOG_EDITORIAL.paragraphs.slice(1),
-  reviewedAt: CARD_CATALOG_EDITORIAL.reviewedAt,
-  sections: CARD_CATALOG_EDITORIAL.sections.map((section) => ({
-    title: section.heading,
-    paragraphs: section.paragraphs || [],
-    items: section.items || [],
-    links: section.links || []
-  })),
-  checklist: CARD_CATALOG_EDITORIAL.checklist
-};
-// Same article as the pre-rendered HTML (functions/_middleware.js).
-const BOOSTER_COMPARISON_GUIDE = {
-  title: BOOSTER_COMPARISON_EDITORIAL.heading,
-  intro: BOOSTER_COMPARISON_EDITORIAL.paragraphs[0],
-  introParagraphs: BOOSTER_COMPARISON_EDITORIAL.paragraphs.slice(1),
-  reviewedAt: BOOSTER_COMPARISON_EDITORIAL.reviewedAt,
-  sections: BOOSTER_COMPARISON_EDITORIAL.sections.map((section) => ({
-    title: section.heading,
-    paragraphs: section.paragraphs || [],
-    items: section.items || [],
-    links: section.links || []
-  })),
-  checklist: BOOSTER_COMPARISON_EDITORIAL.checklist
-};
+// Shared articles (lib/*-editorial.js) are also pre-rendered by functions/_middleware.js.
+function toEditorialGuide(editorial) {
+  return {
+    title: editorial.heading,
+    intro: editorial.paragraphs[0],
+    introParagraphs: editorial.paragraphs.slice(1),
+    reviewedAt: editorial.reviewedAt,
+    summary: editorial.summary || [],
+    sections: editorial.sections.map((section) => ({ ...section, title: section.heading, paragraphs: section.paragraphs || [], items: section.items || [], links: section.links || [] })),
+    checklist: editorial.checklist
+  };
+}
+const CARD_PRICE_GUIDE = toEditorialGuide(CARD_PRICE_EDITORIAL);
+const CARD_CATALOG_GUIDE = toEditorialGuide(CARD_CATALOG_EDITORIAL);
+const BOOSTER_COMPARISON_GUIDE = toEditorialGuide(BOOSTER_COMPARISON_EDITORIAL);
 const GUIDE_REVIEWED_AT = '2026-08-25';
 const GUIDE_HUB_COLLECTIONS = [
   {
@@ -8291,6 +8264,37 @@ function RenewGuideHub() {
   );
 }
 
+// Reuses the box guide's stat row and distribution bar styles.
+function EditorialStats({ stats, label }) {
+  return <dl className="renew-box-series-insight-stats renew-editorial-stats" aria-label={label}>{stats.map((stat) => <div key={stat.label}><dt>{stat.label}</dt><dd>{stat.value}</dd></div>)}</dl>;
+}
+
+function EditorialBars({ bars, label }) {
+  const maximum = Math.max(...bars.map((bar) => bar.value), 0) || 1;
+  return (
+    <div className="renew-box-series-distribution renew-editorial-bars" aria-label={label}>
+      {bars.map((bar) => (
+        <div key={bar.label}>
+          <span>{bar.label}</span>
+          <i><b style={{ width: `${Math.max(3, (bar.value / maximum) * 100)}%` }} /></i>
+          <strong>{bar.display}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EditorialTable({ table, label }) {
+  return (
+    <div className={`renew-editorial-table${table.numeric ? " is-numeric" : ""}`} role="region" aria-label={label} tabIndex={0}>
+      <table>
+        <thead><tr>{table.columns.map((column) => <th key={column} scope="col">{column}</th>)}</tr></thead>
+        <tbody>{table.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => (index ? <td key={index}>{cell}</td> : <th key={index} scope="row">{cell}</th>))}</tr>)}</tbody>
+      </table>
+    </div>
+  );
+}
+
 function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
   const details = GUIDE_ARTICLE_DETAILS[guideKey];
   const reviewedAt = guide.reviewedAt || GUIDE_REVIEWED_AT;
@@ -8306,6 +8310,7 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
           <time dateTime={reviewedAt}>검수 {reviewedAt.replaceAll('-', '.')}</time>
         </div>
       </header>
+      {guide.summary?.length ? <EditorialStats stats={guide.summary} label="핵심 숫자" /> : null}
       <nav className="renew-editorial-guide-toc" aria-label="이 글에서 확인할 내용">
         <strong>이 글에서 확인할 내용</strong>
         <ol>
@@ -8316,9 +8321,19 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
       </nav>
       <div className="renew-card-storage-grid">
         {guide.sections.map((section, index) => (
-          <article key={section.title} id={`${guideKey}-section-${index + 1}`} className="renew-card-storage-section">
+          <article key={section.title} id={`${guideKey}-section-${index + 1}`} className={`renew-card-storage-section${section.table || section.wide ? ' is-wide' : ''}`}>
             <h3>{section.title}</h3>
             {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {section.stats?.length ? <EditorialStats stats={section.stats} label={section.title} /> : null}
+            {section.bars?.length ? <EditorialBars bars={section.bars} label={section.title} /> : null}
+            {section.table ? <EditorialTable table={section.table} label={section.title} /> : null}
+            {section.images?.length ? (
+              <div className="renew-editorial-figures">
+                {section.images.map((image) => (
+                  <figure key={image.src}><img src={image.src} alt={image.alt} loading="lazy" onError={placeholderImage} /><figcaption>{image.caption}</figcaption></figure>
+                ))}
+              </div>
+            ) : null}
             {section.items.length ? (
               <ul>
                 {section.items.map((item) => (

@@ -982,19 +982,19 @@ const SERVER_PAGE_CONTENT = {
   '/guide/booster-comparison': {
     heading: BOOSTER_COMPARISON_EDITORIAL.heading,
     paragraphs: BOOSTER_COMPARISON_EDITORIAL.paragraphs,
-    sections: [...BOOSTER_COMPARISON_EDITORIAL.sections, { heading: '부스터 비교 체크리스트', items: BOOSTER_COMPARISON_EDITORIAL.checklist }],
+    sections: [...(BOOSTER_COMPARISON_EDITORIAL.summary ? [{ heading: '핵심 숫자', stats: BOOSTER_COMPARISON_EDITORIAL.summary }] : []), ...BOOSTER_COMPARISON_EDITORIAL.sections, { heading: '부스터 비교 체크리스트', items: BOOSTER_COMPARISON_EDITORIAL.checklist }],
     links: ['/guide/box-recommendation', '/prices/boxes', '/guide/collection/manga', '/guide/card-price']
   },
   '/guide/card-catalog': {
     heading: CARD_CATALOG_EDITORIAL.heading,
     paragraphs: CARD_CATALOG_EDITORIAL.paragraphs,
-    sections: [...CARD_CATALOG_EDITORIAL.sections, { heading: '도감 사용 체크리스트', items: CARD_CATALOG_EDITORIAL.checklist }],
+    sections: [...(CARD_CATALOG_EDITORIAL.summary ? [{ heading: '핵심 숫자', stats: CARD_CATALOG_EDITORIAL.summary }] : []), ...CARD_CATALOG_EDITORIAL.sections, { heading: '도감 사용 체크리스트', items: CARD_CATALOG_EDITORIAL.checklist }],
     links: ['/cards/jp', '/cards/kr', '/prices', '/guide/card-price']
   },
   '/guide/card-price': {
     heading: CARD_PRICE_EDITORIAL.heading,
     paragraphs: CARD_PRICE_EDITORIAL.paragraphs,
-    sections: [...CARD_PRICE_EDITORIAL.sections, { heading: '시세 확인 체크리스트', items: CARD_PRICE_EDITORIAL.checklist }],
+    sections: [...(CARD_PRICE_EDITORIAL.summary ? [{ heading: '핵심 숫자', stats: CARD_PRICE_EDITORIAL.summary }] : []), ...CARD_PRICE_EDITORIAL.sections, { heading: '시세 확인 체크리스트', items: CARD_PRICE_EDITORIAL.checklist }],
     links: ['/prices', '/prices/cards', '/guide/box-recommendation', '/data-policy']
   },
   '/guide/collection/start': {
@@ -1808,9 +1808,20 @@ function createServerPageContent(pathname, seo) {
     const sectionParagraphs = (section.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
     const items = (section.items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('');
     const sources = (section.links || []).map((link) => `<li><a href="${escapeHtml(link.href)}">${escapeHtml(link.label)}</a></li>`).join('');
+    // Editorial visuals render as plain text equivalents of what the page shows.
+    const stats = (section.stats || []).map((stat) => `<li>${escapeHtml(stat.label)}: ${escapeHtml(stat.value)}</li>`).join('');
+    const bars = (section.bars || []).map((bar) => `<li>${escapeHtml(bar.label)}: ${escapeHtml(bar.display)}</li>`).join('');
+    const table = section.table
+      ? `<table><thead><tr>${section.table.columns.map((column) => `<th>${escapeHtml(column)}</th>`).join('')}</tr></thead><tbody>${section.table.rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table>`
+      : '';
+    const figures = (section.images || []).map((image) => `<figure><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy"><figcaption>${escapeHtml(image.caption)}</figcaption></figure>`).join('');
     return `<section>
         <h2>${escapeHtml(section.heading)}</h2>
         ${sectionParagraphs}
+        ${stats ? `<ul>${stats}</ul>` : ''}
+        ${bars ? `<ul>${bars}</ul>` : ''}
+        ${table}
+        ${figures}
         ${items ? `<ul>${items}</ul>` : ''}
         ${sources ? `<ul>${sources}</ul>` : ''}
       </section>`;
