@@ -24759,3 +24759,22 @@ button.renew-deck-entry:focus-visible {
     margin: 16px 0 0;
   }
 }
+
+/* Series and box guide analysis cards hold charts, so use two columns. */
+.renew-series-guide-analysis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.renew-series-guide-analysis article.is-wide {
+  grid-column: 1 / -1;
+}
+
+.renew-series-guide-analysis .renew-editorial-figures {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .renew-series-guide-analysis {
+    grid-template-columns: 1fr;
+  }
+}

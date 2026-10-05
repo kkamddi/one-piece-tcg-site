@@ -160,52 +160,59 @@ export function analyzeBoxSeries(seriesId, cards = [], marketItems = [], mangaGr
 
 const formatCount = (value) => Number(value).toLocaleString('en-US');
 
-// Section text for both the React guide and the pre-rendered HTML.
+
+// Sections for both the React guides and the pre-rendered HTML. Figures are
+// structured (stats, bars, tables) so the page can chart them and the HTML
+// can print the same values as text.
 export function getSeriesGuideSections(analysis, listings, lang = 'KR') {
   const jp = lang === 'JP';
   const labels = SERIES_GUIDE_LABELS[jp ? 'JP' : 'KR'];
   const unit = jp ? '枚' : '장';
-  const sep = jp ? '・' : ' · ';
   const colorText = (keys) => keys.map((key) => labels.colors[key]).join(jp ? '' : '·') || '-';
-  const join = (entries, label) => entries.map(([key, count]) => `${label(key)} ${formatCount(count)}${unit}`).join(sep);
+  const bar = (label, count) => ({ label, value: count, display: `${formatCount(count)}${unit}` });
   const sections = [];
 
   if (analysis.leaders.length) {
     sections.push({
       heading: jp ? `リーダー ${analysis.leaders.length}種` : `리더 ${analysis.leaders.length}종`,
+      leaders: analysis.leaders.map((leader) => ({ cardNo: leader.cardNo, name: leader.name, colors: colorText(leader.colors) })),
       items: analysis.leaders.map((leader) => `${leader.cardNo} ${leader.name} (${colorText(leader.colors)})`)
     });
   }
   sections.push({
     heading: jp ? 'カード種類と色' : '카드 종류와 색상',
-    items: [
-      `${jp ? '種類' : '종류'}: ${join(analysis.categories, (key) => labels.categories[key] || key)}`,
-      analysis.colors.length ? `${jp ? '色（リーダー除く・多色は各色に計上）' : '색상(리더 제외, 다색은 각 색에 포함)'}: ${join(analysis.colors, (key) => labels.colors[key])}` : ''
-    ].filter(Boolean)
+    stats: analysis.categories.map(([key, count]) => ({ label: labels.categories[key] || key, value: `${formatCount(count)}${unit}` })),
+    ...(analysis.colors.length ? {
+      paragraphs: [jp ? '色はリーダーを除き、多色カードは各色に数えています。' : '색상은 리더를 빼고, 다색 카드는 각 색에 포함해 셌습니다.'],
+      bars: analysis.colors.map(([key, count]) => bar(labels.colors[key], count))
+    } : {})
   });
   if (analysis.costCurve.length) {
     sections.push({
       heading: jp ? 'キャラのコストとカウンター' : '캐릭터 코스트와 카운터',
-      items: [
-        `${jp ? 'コスト別' : '코스트별'}: ${join(analysis.costCurve, (cost) => (jp ? `${cost}コスト` : `${cost}코`))}`,
-        `${jp ? 'カウンター' : '카운터'}: ${join(analysis.counters, (value) => (value ? `+${value}` : (jp ? 'なし' : '없음')))}`
-      ]
+      stats: analysis.counters.map(([value, count]) => ({ label: `${jp ? 'カウンター' : '카운터'} ${value ? `+${value}` : (jp ? 'なし' : '없음')}`, value: `${formatCount(count)}${unit}` })),
+      bars: analysis.costCurve.map(([cost, count]) => bar(jp ? `${cost}コスト` : `${cost}코스트`, count))
     });
   }
   if (analysis.traits.length) {
-    sections.push({ heading: jp ? '主な特徴' : '주요 특징', items: analysis.traits.map(([trait, count]) => `${trait} ${formatCount(count)}${unit}`) });
+    sections.push({ heading: jp ? '主な特徴' : '주요 특징', bars: analysis.traits.map(([trait, count]) => bar(trait, count)) });
   }
   if (analysis.keywords.length) {
-    sections.push({ heading: jp ? '効果キーワード' : '효과 키워드', items: [join(analysis.keywords, (key) => labels.keywords[key])] });
+    sections.push({ heading: jp ? '効果キーワード' : '효과 키워드', bars: analysis.keywords.map(([key, count]) => bar(labels.keywords[key], count)) });
   }
   if (listings?.items?.length) {
     const edition = listings.locale === 'EN' ? (jp ? '英語版' : '영문판') : (jp ? '日本版' : '일본판');
     sections.push({
       heading: jp ? `高額カード TOP ${listings.items.length}` : `고가 카드 TOP ${listings.items.length}`,
+      wide: true,
       paragraphs: [jp
         ? `${edition}SNKRDUNK「${listings.setName}」の出品最安値順です。出品価格のため実際の取引価格とは異なる場合があります。`
         : `${edition} SNKRDUNK '${listings.setName}' 상품의 등록 최저가 순입니다. 판매 등록가라 실제 거래가와 다를 수 있습니다.`],
-      items: listings.items.map((item) => `${item.name} — US $${formatCount(item.minPrice)} / ₩${formatCount(Math.round(item.minPrice * SERIES_GUIDE_USD_TO_KRW))}`)
+      table: {
+        numeric: true,
+        columns: jp ? ['カード', '出品最安値', 'ウォン換算'] : ['카드', '등록 최저가', '원화'],
+        rows: listings.items.map((item) => [item.name, `US $${formatCount(item.minPrice)}`, `₩${formatCount(Math.round(item.minPrice * SERIES_GUIDE_USD_TO_KRW))}`])
+      }
     });
   }
   return sections;
@@ -213,16 +220,21 @@ export function getSeriesGuideSections(analysis, listings, lang = 'KR') {
 
 const formatUsdKrw = (usd) => `US $${formatCount(Math.round(usd * 100) / 100)} / ₩${formatCount(Math.round(usd * SERIES_GUIDE_USD_TO_KRW))}`;
 
-// Section text for both the React box guide and its pre-rendered HTML.
 export function getBoxGuideSections(box) {
   const sections = [];
   if (box.secret || box.special || box.parallel) {
     sections.push({
       heading: '히트 카드 구성',
+      paragraphs: ['일본판 도감 기준입니다. 망가 레어는 Card Pone 망가 카드 목록 기준입니다.'],
+      stats: [
+        { label: 'SEC', value: `${box.secret}종` },
+        { label: 'SP', value: `${box.special}종` },
+        { label: '패러렐', value: `${box.parallel}종` },
+        { label: '망가 레어', value: `${box.manga || 0}종` }
+      ],
       items: [
-        `일본판 도감 기준 SEC ${box.secret}종 · SP ${box.special}종 · 패러렐 ${box.parallel}종`,
         box.secretCards?.length ? `SEC: ${box.secretCards.map((card) => `${card.cardNo} ${card.name}`).join(' · ')}` : '',
-        box.manga ? `망가 레어 ${box.manga}종: ${box.mangaNames.join(' · ')}` : ''
+        box.manga ? `망가 레어: ${box.mangaNames.join(' · ')}` : ''
       ].filter(Boolean)
     });
   }
@@ -232,10 +244,8 @@ export function getBoxGuideSections(box) {
     sections.push({
       heading: 'SNKRDUNK 등록가 분포',
       paragraphs: [`'${box.setName}' 상품으로 등록된 카드 ${box.listed}종 중 가격이 있는 ${box.priced}종의 등록 최저가 분포입니다. 판매 등록가라 실제 거래가와 다를 수 있습니다.`],
-      items: [
-        ...box.buckets.map(([low, high, count]) => `${label([low, high])}: ${count}종`),
-        `중앙값: ${formatUsdKrw(box.median)}`
-      ]
+      bars: box.buckets.map(([low, high, count]) => ({ label: label([low, high]), value: count, display: `${count}종` })),
+      stats: [{ label: '등록가 중앙값', value: formatUsdKrw(box.median) }]
     });
   }
   return sections;

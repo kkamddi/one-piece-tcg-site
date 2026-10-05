@@ -8046,10 +8046,9 @@ function RenewBoxRecommendationGuide() {
                 {/* Same sections as the pre-rendered guide HTML (scripts/boxRecommendationSeo.js). */}
                 <div className="renew-series-guide-points renew-series-guide-analysis">
                   {state.composition.map((section) => (
-                    <article key={section.heading}>
+                    <article key={section.heading} className={section.wide || section.table ? 'is-wide' : undefined}>
                       <b>{section.heading}</b>
-                      {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-                      <ul>{section.items.map((entry) => <li key={entry}>{entry}</li>)}</ul>
+                      <EditorialSectionBody section={section} />
                     </article>
                   ))}
                 </div>
@@ -8295,6 +8294,30 @@ function EditorialTable({ table, label }) {
   );
 }
 
+// One section layout for editorial guides, series guides and box guides.
+function EditorialSectionBody({ section }) {
+  const label = section.heading || section.title;
+  return (
+    <>
+      {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+      {section.stats?.length ? <EditorialStats stats={section.stats} label={label} /> : null}
+      {section.bars?.length ? <EditorialBars bars={section.bars} label={label} /> : null}
+      {section.table ? <EditorialTable table={section.table} label={label} /> : null}
+      {section.images?.length ? (
+        <div className="renew-editorial-figures">
+          {section.images.map((image) => (
+            <figure key={image.src + image.caption}><img src={image.src} alt={image.alt} loading="lazy" onError={placeholderImage} /><figcaption>{image.caption}</figcaption></figure>
+          ))}
+        </div>
+      ) : null}
+      {section.items?.length ? <ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul> : null}
+      {section.links?.length ? (
+        <p className="renew-editorial-guide-links">{section.links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</p>
+      ) : null}
+    </>
+  );
+}
+
 function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
   const details = GUIDE_ARTICLE_DETAILS[guideKey];
   const reviewedAt = guide.reviewedAt || GUIDE_REVIEWED_AT;
@@ -8323,27 +8346,7 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
         {guide.sections.map((section, index) => (
           <article key={section.title} id={`${guideKey}-section-${index + 1}`} className={`renew-card-storage-section${section.table || section.wide ? ' is-wide' : ''}`}>
             <h3>{section.title}</h3>
-            {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            {section.stats?.length ? <EditorialStats stats={section.stats} label={section.title} /> : null}
-            {section.bars?.length ? <EditorialBars bars={section.bars} label={section.title} /> : null}
-            {section.table ? <EditorialTable table={section.table} label={section.title} /> : null}
-            {section.images?.length ? (
-              <div className="renew-editorial-figures">
-                {section.images.map((image) => (
-                  <figure key={image.src}><img src={image.src} alt={image.alt} loading="lazy" onError={placeholderImage} /><figcaption>{image.caption}</figcaption></figure>
-                ))}
-              </div>
-            ) : null}
-            {section.items.length ? (
-              <ul>
-                {section.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            ) : null}
-            {section.links?.length ? (
-              <p className="renew-editorial-guide-links">{section.links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}</p>
-            ) : null}
+            <EditorialSectionBody section={section} />
           </article>
         ))}
       </div>
@@ -8660,10 +8663,18 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
           </div>
           <div className="renew-series-guide-points renew-series-guide-analysis">
             {guideSections.map((section) => (
-              <article key={section.heading}>
+              <article key={section.heading} className={section.wide || section.table || section.leaders ? 'is-wide' : undefined}>
                 <b>{section.heading}</b>
-                {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-                <ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul>
+                <EditorialSectionBody
+                  section={section.leaders ? {
+                    ...section,
+                    items: [],
+                    images: section.leaders.map((leader) => {
+                      const card = cards.find((entry) => String(entry.cardNo || '').replace(/_p\d+$/i, '') === leader.cardNo && !/_p\d+$/i.test(entry.id || ''));
+                      return { src: card ? getCardThumbnailSrc(card) : '/card-placeholder.svg', alt: leader.name, caption: `${leader.name} (${leader.colors})` };
+                    })
+                  } : section}
+                />
               </article>
             ))}
           </div>

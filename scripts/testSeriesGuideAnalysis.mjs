@@ -42,7 +42,7 @@ test('sections label prices as listings and skip empty data', () => {
   const sections = getSeriesGuideSections(analysis, { locale: 'JP', setName: 'Start Deck', items: [{ name: 'Card', minPrice: 10 }] }, 'KR');
   assert.deepEqual(sections.map((section) => section.heading), ['리더 1종', '카드 종류와 색상', '고가 카드 TOP 1']);
   assert.match(sections.at(-1).paragraphs[0], /등록 최저가/);
-  assert.equal(sections.at(-1).items[0], 'Card — US $10 / ₩14,570');
+  assert.deepEqual(sections.at(-1).table.rows[0], ['Card', 'US $10', '₩14,570']);
   assert.equal(getSeriesGuideSections(analysis, { items: [] }, 'JP').length, 2);
 });
 
@@ -73,9 +73,10 @@ test('box facts count JP hit cards and spread listings from the main product onl
   assert.deepEqual(box.buckets.map((bucket) => bucket[2]), [3, 3, 3, 3]);
   const sections = getBoxGuideSections(box);
   assert.deepEqual(sections.map((section) => section.heading), ['히트 카드 구성', 'SNKRDUNK 등록가 분포']);
-  assert.equal(sections[0].items[0], '일본판 도감 기준 SEC 1종 · SP 1종 · 패러렐 2종');
-  assert.equal(sections[0].items.at(-1), '망가 레어 2종: 버기 · 루피 (SEC)');
-  assert.equal(sections[1].items.at(-1), '중앙값: US $90 / ₩131,130');
+  assert.deepEqual(sections[0].stats.map((stat) => stat.value), ['1종', '1종', '2종', '2종']);
+  assert.equal(sections[0].items.at(-1), '망가 레어: 버기 · 루피 (SEC)');
+  assert.equal(sections[1].stats[0].value, 'US $90 / ₩131,130');
+  assert.deepEqual(sections[1].bars.map((bar) => bar.value), [3, 3, 3, 3]);
   assert.equal(getBoxGuideSections({ ...box, priced: 2 }).length, 1);
 });
 
