@@ -1,14 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { analyzeSeriesCards, getSeriesGuideSections, getSeriesTopListings } from '../src/lib/series-guide-analysis.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const seriesPath = path.join(rootDir, 'src', 'data', 'series.json');
 const countsPath = path.join(rootDir, 'src', 'data', 'series-card-counts.json');
 const cardsPath = path.join(rootDir, 'src', 'data', 'cards.json');
+const marketPath = path.join(rootDir, 'src', 'data', 'market-cards.js');
 const seriesData = JSON.parse(fs.readFileSync(seriesPath, 'utf8'));
 const seriesCardCounts = JSON.parse(fs.readFileSync(countsPath, 'utf8'));
 const cardsData = JSON.parse(fs.readFileSync(cardsPath, 'utf8'));
+const { default: marketItems } = await import(pathToFileURL(marketPath).href);
 const contentReviewedAt = '2026-08-25';
 
 const rarityOrder = ['L', 'SEC', 'SR', 'SP', 'R', 'UC', 'C', 'P', 'DON!!'];
@@ -75,7 +78,7 @@ function getLocaleLabel(locale, japanese = false) {
   return locale === 'JP' ? '일본판' : locale === 'EN' ? '영문판' : '한글판';
 }
 
-function createSeo(series, cardCount, cardSummary, japanese = false) {
+function createSeo(series, cardCount, cardSummary, dataSections, japanese = false) {
   const locale = series.locale || 'JP';
   const code = getSeriesCode(series);
   const name = (japanese ? series.enName : series.koName) || series.enName || series.koName || code;
@@ -115,14 +118,7 @@ function createSeo(series, cardCount, cardSummary, japanese = false) {
           heading: '収録カード例',
           items: cardExamples
         },
-        {
-          heading: '確認できる情報',
-          items: ['シリーズの基本情報と登録枚数', '収録カードの画像、カード番号、レアリティ', '対応カードのSingle・PSA10参考相場への導線']
-        },
-        {
-          heading: '見る順番',
-          items: ['まずリーダーとSEC・SRの構成を確認', '同じカード番号の追加イラストを別バージョンとして確認', '必要なカードを図鑑から相場ページへ移動して確認']
-        },
+        ...dataSections,
         {
           heading: '情報の扱い',
           paragraphs: ['未確認の封入率や体感確率は確定情報として掲載せず、実際に登録されたカード図鑑データを優先します。']
@@ -153,14 +149,7 @@ function createSeo(series, cardCount, cardSummary, japanese = false) {
         heading: '수록 카드 예시',
         items: cardExamples
       },
-      {
-        heading: '이 페이지에서 확인할 수 있는 정보',
-        items: ['시리즈의 언어, 상품 분류와 도감 등록 수', '수록 카드의 이미지, 카드번호와 레어도', '시세가 연결된 카드의 Single·PSA10 참고 가격']
-      },
-      {
-        heading: '확인 순서',
-        items: ['먼저 리더와 SEC·SR 구성을 확인', '같은 카드번호의 추가 일러스트를 별도 버전으로 비교', '필요한 카드를 도감에서 열어 연결된 시세 확인']
-      },
+      ...dataSections,
       {
         heading: '정보 표시 기준',
         paragraphs: ['확인되지 않은 봉입률이나 체감 확률은 확정 정보처럼 표시하지 않으며, 실제 도감에 등록된 카드 데이터를 우선합니다.']
@@ -179,9 +168,11 @@ export function getSeriesGuideEntries({ japanese = false } = {}) {
       if (!slug || cardCount < 1) return null;
       const basePath = `/guides/series/${slug}`;
       const cardSummary = getSeriesCardSummary(series);
+      const analysis = analyzeSeriesCards(cardsData.filter((card) => card.series === series.id));
+      const dataSections = getSeriesGuideSections(analysis, getSeriesTopListings(series, marketItems), japanese ? 'JP' : 'KR');
       return {
         pathname: japanese ? `/jp${basePath}` : basePath,
-        seo: createSeo(series, cardCount, cardSummary, japanese),
+        seo: createSeo(series, cardCount, cardSummary, dataSections, japanese),
         catalogSlugs: [...new Set([
           normalizeSeriesSlug(series.id),
           normalizeSeriesSlug(series.baseSeriesId)
@@ -191,4 +182,4 @@ export function getSeriesGuideEntries({ japanese = false } = {}) {
     .filter(Boolean);
 }
 
-export const seriesGuideSourcePaths = [seriesPath, countsPath, cardsPath];
+export const seriesGuideSourcePaths = [seriesPath, countsPath, cardsPath, marketPath];

@@ -27,6 +27,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
+import { analyzeSeriesCards, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
@@ -8554,6 +8555,21 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
   ), []);
   const productImageUrl = getSeriesBoxPreviewUrl(series, boxImageByCode);
   const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series?.id] || 0);
+  const [marketItems, setMarketItems] = useState([]);
+  // Same sections as the pre-rendered guide HTML (scripts/seriesGuideSeo.js).
+  const guideSections = useMemo(() => (
+    series && cards.length ? getSeriesGuideSections(analyzeSeriesCards(cards), getSeriesTopListings(series, marketItems), 'KR') : []
+  ), [series, cards, marketItems]);
+
+  useEffect(() => {
+    let cancelled = false;
+    import('./data/market-cards.js')
+      .then((module) => { if (!cancelled) setMarketItems(Array.isArray(module.default) ? module.default : []); })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -8567,7 +8583,7 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
     setLoading(true);
     fetchCards({ locale, series: series.id })
       .then((items) => {
-        if (!cancelled) setCards(Array.isArray(items) ? items.slice(0, 8) : []);
+        if (!cancelled) setCards(Array.isArray(items) ? items : []);
       })
       .catch(() => {
         if (!cancelled) setCards([]);
@@ -8628,19 +8644,25 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
         <article><span>시리즈</span><strong>{seriesCode}</strong></article>
       </section>
 
-      <section className="renew-series-guide-section renew-panel">
-        <div className="renew-series-guide-section-head">
-          <div>
-            <span>CHECK POINT</span>
-            <h2>이 시리즈에서 바로 확인할 것</h2>
+      {guideSections.length ? (
+        <section className="renew-series-guide-section renew-panel">
+          <div className="renew-series-guide-section-head">
+            <div>
+              <span>시리즈 분석</span>
+              <h2>{seriesCode} 수록 카드 구성</h2>
+            </div>
           </div>
-        </div>
-        <div className="renew-series-guide-points">
-          <article><b>수록 카드</b><p>카드번호, 레어도와 이미지를 기존 {localeLabel} 도감 데이터로 확인합니다.</p></article>
-          <article><b>카드별 시세</b><p>시세가 연결된 카드는 도감 상세에서 Single과 PSA10 가격으로 이어집니다.</p></article>
-          <article><b>봉입 정보</b><p>공식적으로 확인되지 않은 카톤 봉입률은 임의로 단정하지 않습니다.</p></article>
-        </div>
-      </section>
+          <div className="renew-series-guide-points renew-series-guide-analysis">
+            {guideSections.map((section) => (
+              <article key={section.heading}>
+                <b>{section.heading}</b>
+                {(section.paragraphs || []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                <ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="renew-series-guide-section renew-panel">
         <div className="renew-series-guide-section-head">
@@ -8654,7 +8676,7 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
         {!loading && !cards.length ? <div className="renew-empty">수록 카드 데이터를 불러오지 못했습니다.</div> : null}
         {!loading && cards.length ? (
           <div className="renew-series-guide-card-grid">
-            {cards.map((card) => (
+            {cards.slice(0, 8).map((card) => (
               <button key={card.id} type="button" onClick={() => onOpenCard?.(series, card)}>
                 <span className="renew-series-guide-card-image">
                   <img
