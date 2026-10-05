@@ -16032,9 +16032,10 @@ export default function RenewApp() {
     };
   }, [authUser?.id, refreshNotifications]);
 
+  // Keyed on the user id: session refreshes hand back new authUser objects for the same user.
   useEffect(() => {
     let cancelled = false;
-    if (!authUser) {
+    if (!authUser?.id) {
       setUserState(null);
       setPortfolioHoldings([]);
       setPortfolioError(false);
@@ -16043,26 +16044,18 @@ export default function RenewApp() {
     }
     setStateLoading(true);
     setPortfolioError(false);
-    (async () => {
-      try {
-        const portfolio = await fetchPortfolio();
-        if (!cancelled) setPortfolioHoldings(Array.isArray(portfolio?.holdings) ? portfolio.holdings : []);
-      } catch {
-        if (!cancelled) { setPortfolioHoldings([]); setPortfolioError(true); }
-      }
-      try {
-        const state = await fetchMyState();
-        if (!cancelled) setUserState(state || null);
-      } catch {
-        if (!cancelled) setUserState(null);
-      } finally {
-        if (!cancelled) setStateLoading(false);
-      }
-    })();
+    Promise.all([
+      fetchPortfolio()
+        .then((portfolio) => { if (!cancelled) setPortfolioHoldings(Array.isArray(portfolio?.holdings) ? portfolio.holdings : []); })
+        .catch(() => { if (!cancelled) { setPortfolioHoldings([]); setPortfolioError(true); } }),
+      fetchMyState()
+        .then((state) => { if (!cancelled) setUserState(state || null); })
+        .catch(() => { if (!cancelled) setUserState(null); })
+    ]).finally(() => { if (!cancelled) setStateLoading(false); });
     return () => {
       cancelled = true;
     };
-  }, [authUser, portfolioReload]);
+  }, [authUser?.id, portfolioReload]);
 
   async function handleAuthClick(action = 'login') {
     if (action === 'mypage' && authUser) {

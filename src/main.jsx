@@ -7,6 +7,20 @@ import './index.css';
 
 configureNativeRuntime();
 
+// A tab opened before a deploy still asks for the previous build's chunks, which no longer exist.
+// Reload once per page so it picks up the new build instead of failing (e.g. the catalog fallback data).
+window.addEventListener('vite:preloadError', (event) => {
+  const key = 'card-pone:chunk-reload';
+  try {
+    if (window.sessionStorage.getItem(key) === window.location.pathname) return;
+    window.sessionStorage.setItem(key, window.location.pathname);
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 const RecognitionLab = import.meta.env.DEV ? React.lazy(() => import('./CardRecognitionLab.jsx')) : null;
 const localRecognition = import.meta.env.DEV && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname) && window.location.pathname === '/dev/card-recognition';
 const RootApp = localRecognition ? RecognitionLab : new URLSearchParams(window.location.search).has('legacy') ? App : RenewApp;
