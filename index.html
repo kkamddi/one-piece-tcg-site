@@ -211,7 +211,14 @@
       })();
     </script>
     <script>
-      if (!navigator.userAgent.includes('CardPoneAndroid/')) {
+      // AdSense policy: no Google-served ads on screens without publisher content.
+      // Skip noindex pages, app screens and card detail shells (noindexed via _headers).
+      const adsPath = window.location.pathname.replace(/^\/jp(?=\/|$)/, '') || '/';
+      const adsRobots = document.querySelector('meta[name="robots"]')?.content || '';
+      const adsAppScreen = /^\/(portfolio|search|admin|stats-prototype|lab\/card-world-cup)(\/|$)/.test(adsPath)
+        || /^\/cards\/(kr|jp)\/./.test(adsPath)
+        || /^\/prices\/(card|product|box)\//.test(adsPath);
+      if (!navigator.userAgent.includes('CardPoneAndroid/') && !/noindex/i.test(adsRobots) && !adsAppScreen) {
         const adsScript = document.createElement('script');
         adsScript.async = true;
         adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1064116148043091';
