@@ -1,4 +1,6 @@
-import shopsFallback from '../data/shops.json';
+// The bundled shop list is only an offline fallback, so load it on demand.
+let shopsFallbackPromise;
+const loadShopsFallback = () => (shopsFallbackPromise ??= import('../data/shops.json').then((module) => module.default));
 
 const API_BASE = '/api/shops';
 
@@ -24,7 +26,7 @@ async function safeFetchJson(url, fallback) {
     return await response.json();
   } catch (error) {
     console.warn(`Falling back for ${url}`, error);
-    return typeof fallback === 'function' ? fallback() : fallback;
+    return typeof fallback === 'function' ? await fallback() : fallback;
   }
 }
 
@@ -47,7 +49,8 @@ function dedupeShops(shops = []) {
 
 export async function fetchShops(filters = {}) {
   const url = `${API_BASE}${buildQuery(filters)}`;
-  const shops = await safeFetchJson(url, () => {
+  const shops = await safeFetchJson(url, async () => {
+    const shopsFallback = await loadShopsFallback();
     const keyword = filters.q?.trim().toLowerCase();
     return shopsFallback.filter((shop) => {
       const matchesType = !filters.type || shop.sourceType === filters.type;
@@ -67,7 +70,8 @@ export async function fetchShops(filters = {}) {
 
 export async function fetchShopRegions(type, sido = '') {
   const url = `${API_BASE}/regions${buildQuery({ type, sido })}`;
-  return safeFetchJson(url, () => {
+  return safeFetchJson(url, async () => {
+    const shopsFallback = await loadShopsFallback();
     const typed = shopsFallback.filter((shop) => !type || shop.sourceType === type);
     const sidos = [...new Set(typed.map((shop) => shop.sido).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
     const gungus = !sido || sido === '전체'

@@ -39,14 +39,11 @@ import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, boxQuote, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
-import CardShows from './CardShows';
 import boxMarketPrices from './data/box-market-prices.json';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import topicsData from './data/topics.json';
-import CenteringLab from './CenteringLab';
-import CardScanner from './CardScanner';
 import SiteSearch, { SiteSearchInput } from './SiteSearch';
 import CollectionGuide from './CollectionGuide';
 import PortfolioDashboard, { PortfolioCardImage } from './PortfolioDashboard';
@@ -63,6 +60,10 @@ const CARD_SCAN_AVAILABLE = true;
 const BOX_PORTFOLIO_ENABLED = true;
 const EXTENSION_STORE_URL = 'https://chromewebstore.google.com/detail/bmallhfmgjlccnegdjjlmhobcgocphlc';
 const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
+// Screens opened on demand load their own chunks instead of growing the first download.
+const CardShows = React.lazy(() => import('./CardShows'));
+const CenteringLab = React.lazy(() => import('./CenteringLab'));
+const CardScanner = React.lazy(() => import('./CardScanner'));
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = Capacitor.getPlatform() === 'android'
@@ -7102,7 +7103,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
         ))}
       </div> : null}
 
-      {newsFilter === 'cardshows' && <CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} />}
+      {newsFilter === 'cardshows' && <React.Suspense fallback={<div className="renew-empty" aria-busy="true" />}><CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} /></React.Suspense>}
 
       {isJp && newsFilter === 'all' ? <section className="renew-news-hub is-mobile-only" aria-label={getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}>{labHubCard}</section> : null}
 
@@ -13597,7 +13598,7 @@ function RenewMarket({ authUser, portfolioHoldings, setPortfolioHoldings, initia
           <button type="submit">{t('marketSearch')}</button>
         </form>
 
-        {CARD_SCAN_AVAILABLE && scannerOpen ? <CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onOpenCatalog={(card) => { setScannerOpen(false); onOpenCatalogCard?.(card); }} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /> : null}
+        {CARD_SCAN_AVAILABLE && scannerOpen ? <React.Suspense fallback={null}><CardScanner uiLang={uiLang} initialLocale={marketProductLocale} onClose={() => setScannerOpen(false)} onOpenCatalog={(card) => { setScannerOpen(false); onOpenCatalogCard?.(card); }} onSelect={(item, matches) => { setScannerOpen(false); setCode(item.code); setMarketProductLocale(item.locale); setHomeTab('card'); setCandidates(matches); selectMarketCandidate(item); }} /></React.Suspense> : null}
 
         {!selected ? <RenewAdInquiry uiLang={uiLang} /> : null}
 
@@ -16605,7 +16606,7 @@ export default function RenewApp() {
           onOpenGuide={() => navigatePage('packSimulatorGuide')}
         />
       ) : activePage === 'centering' ? (
-        <CenteringLab uiLang={uiLang} onOpenGuide={() => navigatePage('centeringGuide')} />
+        <React.Suspense fallback={<main className="renew-main" aria-busy="true" />}><CenteringLab uiLang={uiLang} onOpenGuide={() => navigatePage('centeringGuide')} /></React.Suspense>
       ) : activePage === 'news' ? (
         <RenewNews
           key={`${window.location.pathname}${window.location.search}`}

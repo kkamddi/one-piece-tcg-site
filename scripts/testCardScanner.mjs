@@ -51,7 +51,8 @@ test('the mobile center scan is the only scan entry and opens the shared scanner
   assert.match(source, /const CARD_SCAN_AVAILABLE = true;/);
   assert.match(source, /className="renew-mobile-scan" onClick=\{onScan\}/);
   assert.match(source, /onScan=\{\(\) => \{ navigatePage\('prices'\); setScannerOpen\(true\); \}\}/);
-  assert.match(source, /CARD_SCAN_AVAILABLE && scannerOpen \? <CardScanner/);
+  assert.match(source, /CARD_SCAN_AVAILABLE && scannerOpen \? <React\.Suspense fallback=\{null\}><CardScanner/);
+  assert.match(source, /const CardScanner = React\.lazy\(\(\) => import\('\.\/CardScanner'\)\);/);
   assert.doesNotMatch(source, /renew-market-scan-entry/);
 });
 

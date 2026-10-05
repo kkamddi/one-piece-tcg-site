@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
 import RenewApp from './RenewApp';
 import { configureNativeRuntime } from './lib/native-runtime';
 import './index.css';
@@ -21,6 +20,8 @@ window.addEventListener('vite:preloadError', (event) => {
   window.location.reload();
 });
 
+// The legacy app only serves ?legacy, so it stays out of the main bundle.
+const App = React.lazy(() => import('./App'));
 const RecognitionLab = import.meta.env.DEV ? React.lazy(() => import('./CardRecognitionLab.jsx')) : null;
 const localRecognition = import.meta.env.DEV && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname) && window.location.pathname === '/dev/card-recognition';
 const RootApp = localRecognition ? RecognitionLab : new URLSearchParams(window.location.search).has('legacy') ? App : RenewApp;
