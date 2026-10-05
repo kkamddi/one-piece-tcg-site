@@ -8,7 +8,7 @@ import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES, getBoxCategorySections, 
 const seriesData = JSON.parse(fs.readFileSync(new URL('../src/data/series.json', import.meta.url), 'utf8'));
 
 const cardsData = JSON.parse(fs.readFileSync(new URL('../src/data/cards.json', import.meta.url), 'utf8'));
-const contentReviewedAt = '2026-08-25';
+const contentReviewedAt = '2026-10-05';
 
 function getSeriesId(code = '') {
   const normalized = String(code).toUpperCase();

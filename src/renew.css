@@ -24790,3 +24790,324 @@ button.renew-deck-entry:focus-visible {
 .renew-app.is-dark .renew-box-guide-method {
   color: #b1bac4;
 }
+
+/* Info tab overview: schedule strip, notice + preorder, shortcuts. */
+.renew-news-home {
+  display: grid;
+  gap: 14px;
+}
+
+.renew-news-home-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.renew-news-home-head h2 {
+  margin: 0;
+  color: #17191c;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-home-head button {
+  flex: none;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: #687180;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.renew-news-home-head button:hover {
+  color: #c94d35;
+}
+
+.renew-news-schedule {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px 18px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.renew-news-schedule-list {
+  display: grid;
+  grid-auto-columns: minmax(168px, 1fr);
+  grid-auto-flow: column;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+
+.renew-news-schedule-card {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 124px;
+  padding: 14px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 14px;
+  background: #fff;
+  color: #17191c;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.renew-news-schedule-card:hover {
+  border-color: rgba(201, 77, 53, 0.48);
+  transform: translateY(-2px);
+}
+
+.renew-news-schedule-card time {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.renew-news-schedule-card time strong {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.renew-news-schedule-card time small {
+  color: #687180;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.renew-news-schedule-kind {
+  justify-self: start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(23, 25, 28, 0.06);
+  color: #4c5360;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.renew-news-schedule-card.is-release .renew-news-schedule-kind {
+  background: rgba(201, 77, 53, 0.1);
+  color: #c94d35;
+}
+
+.renew-news-schedule-card.is-cardshow .renew-news-schedule-kind {
+  background: rgba(30, 120, 210, 0.1);
+  color: #1e6fc2;
+}
+
+.renew-news-schedule-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.renew-news-home-empty {
+  margin: 0;
+  color: #687180;
+  font-size: 14px;
+}
+
+.renew-news-home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.renew-news-preorder-mini {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px 18px;
+}
+
+.renew-news-preorder-mini-list {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-news-preorder-mini-list a {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 8px;
+  border: 1px solid rgba(23, 25, 28, 0.08);
+  border-radius: 12px;
+  background: #fff;
+  color: #17191c;
+  text-decoration: none;
+}
+
+.renew-news-preorder-mini-list a:hover {
+  border-color: rgba(201, 77, 53, 0.48);
+}
+
+.renew-news-preorder-mini-list img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: #f3f3f1;
+  object-fit: contain;
+}
+
+.renew-news-preorder-mini-list span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.renew-news-preorder-mini-list small {
+  color: #687180;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.renew-news-preorder-mini-list strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-news-preorder-mini-list b {
+  color: #687180;
+  font-size: 15px;
+}
+
+.renew-news-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.renew-news-shortcuts button {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #17191c;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.renew-news-shortcuts button:hover {
+  border-color: rgba(201, 77, 53, 0.48);
+  transform: translateY(-2px);
+}
+
+.renew-news-shortcuts button > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(201, 77, 53, 0.1);
+  color: #c94d35;
+}
+
+.renew-news-shortcuts button > span svg {
+  width: 22px;
+  height: 22px;
+}
+
+.renew-news-shortcuts strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .renew-news-home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .renew-news-schedule,
+  .renew-news-preorder-mini {
+    padding: 14px 14px 16px;
+    border-radius: 16px;
+  }
+
+  .renew-news-schedule-list {
+    grid-auto-columns: 46%;
+  }
+
+  .renew-news-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .renew-news-shortcuts button {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .renew-news-shortcuts button > span {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.renew-app.is-dark .renew-news-home-head h2,
+.renew-app.is-dark .renew-news-schedule-card,
+.renew-app.is-dark .renew-news-preorder-mini-list a,
+.renew-app.is-dark .renew-news-shortcuts button {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-news-schedule,
+.renew-app.is-dark .renew-news-shortcuts button {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.82);
+}
+
+.renew-app.is-dark .renew-news-schedule-card,
+.renew-app.is-dark .renew-news-preorder-mini-list a {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.renew-app.is-dark .renew-news-home-head button,
+.renew-app.is-dark .renew-news-schedule-card time small,
+.renew-app.is-dark .renew-news-preorder-mini-list small,
+.renew-app.is-dark .renew-news-preorder-mini-list b,
+.renew-app.is-dark .renew-news-home-empty {
+  color: rgba(245, 242, 236, 0.66);
+}
+
+.renew-app.is-dark .renew-news-schedule-kind {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(245, 242, 236, 0.8);
+}
+
+.renew-app.is-dark .renew-news-schedule-card.is-release .renew-news-schedule-kind,
+.renew-app.is-dark .renew-news-shortcuts button > span {
+  background: rgba(255, 175, 150, 0.14);
+  color: #ffaf96;
+}
+
+.renew-app.is-dark .renew-news-schedule-card.is-cardshow .renew-news-schedule-kind {
+  background: rgba(120, 180, 255, 0.14);
+  color: #8fc2ff;
+}

@@ -704,11 +704,11 @@ const NEWS_LINK_GROUPS = [
 ];
 const NEWS_FILTERS = [
   { id: 'all', label: '전체', href: '/news' },
-  { id: 'cardshows', label: '카드쇼·행사', href: '/news?section=cardshows' },
-  { id: 'notice', label: '공지사항', href: '/news/official' },
-  { id: 'guide', label: '가이드/Q&A', href: '/news/guide' },
-  { id: 'preorder', label: '사전예약', href: '/news/preorder' },
-  { id: 'supplies', label: '카드용품', href: '/news/supplies' }
+  { id: 'cardshows', label: '카드쇼', href: '/news?section=cardshows' },
+  { id: 'notice', label: '공지', href: '/news/official' },
+  { id: 'guide', label: '가이드', href: '/news/guide' },
+  { id: 'preorder', label: '예약', href: '/news/preorder' },
+  { id: 'supplies', label: '용품', href: '/news/supplies' }
 ];
 const CARD_STORAGE_GUIDE = toEditorialGuide(CARD_STORAGE_EDITORIAL);
 // Shared articles (lib/*-editorial.js) are also pre-rendered by functions/_middleware.js.
@@ -6939,6 +6939,24 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const showSupplies = !isAndroid && !isJp && newsFilter === 'supplies';
   const showTopSection = showNotice || visibleLinkGroups.length > 0;
   const visibleGuideQaGroups = GUIDE_QA_GROUPS.filter((group) => group.kind === guideQaMode);
+  const upcomingEvents = useMemo(() => {
+    if (!showOverview) return [];
+    const today = getCalendarTodayKey();
+    const spanDays = (event) => (Date.parse(event.endDate || event.date) - Date.parse(event.date)) / 86400000;
+    // Month-long leagues would crowd out dated releases and card shows, so they only fill an empty strip.
+    const events = buildCalendarEvents(resolvedBoxMarketItems).filter((event) => (event.endDate || event.date) >= today);
+    const dated = events.filter((event) => event.date >= today || spanDays(event) <= 7);
+    return (dated.length ? dated : events).slice(0, 8);
+  }, [showOverview]);
+  const preorderLinks = (NEWS_LINK_GROUPS.find((group) => group.id === 'preorder')?.links || []).slice(0, 3);
+  const newsShortcuts = [
+    { id: 'guide', icon: 'cards', label: '가이드·Q&A', onClick: () => onNavigate('/news/guide') },
+    isAndroid
+      ? { id: 'notice', icon: 'bell', label: '공지사항', onClick: () => onNavigate('/news/official') }
+      : { id: 'supplies', icon: 'supplies', label: '카드용품', onClick: () => onNavigate('/news/supplies') },
+    { id: 'lab', icon: 'lab', label: '실험실', onClick: onOpenLab },
+    { id: 'cardshows', icon: 'calendar', label: '카드쇼', onClick: () => onNavigate('/news?section=cardshows') }
+  ];
 
   useEffect(() => {
     if (isJp) setNoticeLocale('JP');
@@ -6960,6 +6978,51 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       <b aria-hidden="true">›</b>
     </button>
   );
+  const noticeCard = (
+    <section className="renew-news-card renew-news-notice-card" aria-labelledby="official-news-heading">
+      <div className="renew-news-card-head">
+        <div>
+          <span>OFFICIAL NEWS</span>
+          <h2 id="official-news-heading">{isJp ? '公式ニュース' : '공지사항'}</h2>
+        </div>
+        {!isJp ? <div className="renew-news-toggle" role="group" aria-label="공지 언어 선택">
+          <button type="button" className={noticeLocale === 'KR' ? 'is-active' : ''} onClick={() => setNoticeLocale('KR')}>한글판</button>
+          <button type="button" className={noticeLocale === 'JP' ? 'is-active' : ''} onClick={() => setNoticeLocale('JP')}>일본판</button>
+        </div> : null}
+      </div>
+      <div className="renew-topic-list renew-topic-list-compact">
+        {officialTopics.map((item) => (
+          <article key={item.id} className="renew-topic-card">
+            <a className={`renew-topic-thumb${item.imageUrl ? '' : ' is-empty'}`} href={item.url} target="_blank" rel="noreferrer" aria-label={item.title}>
+              <span>{item.locale}</span>
+              {item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt=""
+                  loading="lazy"
+                  onError={(event) => {
+                    event.currentTarget.parentElement?.classList.add('is-empty');
+                    event.currentTarget.remove();
+                  }}
+                />
+              ) : null}
+            </a>
+            <div className="renew-topic-body">
+              <div className="renew-topic-meta">
+                <span>{isJp ? '公式' : TOPIC_SOURCE_LABEL[item.source] || item.locale || '공식'}</span>
+                <span>{item.category}</span>
+                <time dateTime={item.date}>{item.date}</time>
+              </div>
+              <h2>{uiLang === 'KR' && item.titleKo ? item.titleKo : item.title}</h2>
+              <a href={item.url} target="_blank" rel="noreferrer">
+                {isJp ? '公式サイトで見る' : uiLang === 'EN' ? 'View original' : '원문 보기'}
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
   return (
     <main className="renew-main renew-news-main">
       {!isJp ? <div className="renew-news-filter-tabs" role="group" aria-label="뉴스 분류">
@@ -6976,92 +7039,81 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
         ))}
       </div> : null}
 
-      <RenewAdInquiry uiLang={uiLang} />
-
       {newsFilter === 'cardshows' && <CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} />}
 
       {isJp && newsFilter === 'all' ? <section className="renew-news-hub is-mobile-only" aria-label={getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}>{labHubCard}</section> : null}
 
       {showOverview ? (
-        <section className="renew-news-hub" aria-label="정보 바로가기">
-          {labHubCard}
-          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news?section=cardshows')}>
-            <strong>카드쇼·행사</strong><b aria-hidden="true">›</b>
-          </button>
-          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/official')}>
-            <span>NEWS</span>
-            <strong>공식 소식</strong>
-            <small>{officialTopics[0]?.titleKo || officialTopics[0]?.title || '최근 공식 공지를 확인하세요.'}</small>
-            <b aria-hidden="true">›</b>
-          </button>
-          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/guide')}>
-            <span>GUIDE</span>
-            <strong>이용 가이드</strong>
-            <small>도감, 시세, 보관과 실험실 도구 사용법</small>
-            <b aria-hidden="true">›</b>
-          </button>
-          <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/preorder')}>
-            <span>PREORDER</span>
-            <strong>사전예약</strong>
-            <small>{NEWS_LINK_GROUPS[0]?.links?.[0]?.label || '진행 중인 예약과 응모 정보'}</small>
-            <b aria-hidden="true">›</b>
-          </button>
-          {!isAndroid ? <button type="button" className="renew-news-hub-card" onClick={() => onNavigate('/news/supplies')}>
-            <span>SUPPLIES</span>
-            <strong>카드용품</strong>
-            <small>슬리브, 탑로더, 케이스와 보관함</small>
-            <b aria-hidden="true">›</b>
-          </button> : null}
-        </section>
+        <div className="renew-news-home">
+          <section className="renew-news-home-block renew-news-schedule" aria-labelledby="news-schedule-heading">
+            <div className="renew-news-home-head">
+              <h2 id="news-schedule-heading">가까운 일정</h2>
+              <button type="button" onClick={() => onOpenCalendar()}>전체 일정 <span aria-hidden="true">›</span></button>
+            </div>
+            {upcomingEvents.length ? (
+              <div className="renew-news-schedule-list">
+                {upcomingEvents.map((event) => {
+                  const weekday = ['일', '월', '화', '수', '목', '금', '토'][new Date(`${event.date}T00:00:00`).getDay()];
+                  const isCardShow = event.kind === 'cardshow';
+                  return (
+                    <button
+                      key={event.id}
+                      type="button"
+                      className={`renew-news-schedule-card is-${event.kind}`}
+                      onClick={() => (isCardShow ? onNavigate('/news?section=cardshows') : onOpenCalendar(event.date))}
+                    >
+                      <time dateTime={event.date}>
+                        <strong>{event.date.slice(5).replace('-', '.')}{event.endDate && event.endDate !== event.date ? `–${event.endDate.slice(0, 7) === event.date.slice(0, 7) ? event.endDate.slice(8) : event.endDate.slice(5).replace('-', '.')}` : ''}</strong>
+                        <small>{weekday}</small>
+                      </time>
+                      <span className="renew-news-schedule-kind">{event.kind === 'release' ? '발매' : isCardShow ? '카드쇼' : '공식 일정'} · {event.locale}</span>
+                      <span className="renew-news-schedule-title">{getCalendarDisplayTitle(event, uiLang)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : <p className="renew-news-home-empty">예정된 일정이 없습니다.</p>}
+          </section>
+
+          <div className="renew-news-home-grid">
+            {noticeCard}
+            {preorderLinks.length ? (
+              <section className="renew-news-card renew-news-preorder-mini" aria-labelledby="news-preorder-heading">
+                <div className="renew-news-home-head">
+                  <h2 id="news-preorder-heading">진행 중인 사전예약</h2>
+                  <button type="button" onClick={() => onNavigate('/news/preorder')}>전체 보기 <span aria-hidden="true">›</span></button>
+                </div>
+                <div className="renew-news-preorder-mini-list">
+                  {preorderLinks.map((link) => (
+                    <a key={link.label} href={link.href} target="_blank" rel="nofollow sponsored noreferrer" aria-label={`${link.label} 아마존에서 확인 (새 탭)`}>
+                      <img src={link.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }} />
+                      <span>
+                        <small>{link.subLabel}</small>
+                        <strong>{link.label}</strong>
+                      </span>
+                      <b aria-hidden="true">↗</b>
+                    </a>
+                  ))}
+                </div>
+                <p className="renew-preorder-disclosure">아마존 제휴 링크가 포함되어 있으며, 링크를 통한 구매 시 수수료를 받을 수 있습니다.</p>
+              </section>
+            ) : null}
+          </div>
+
+          <nav className="renew-news-shortcuts" aria-label="정보 바로가기">
+            {newsShortcuts.map((item) => (
+              <button key={item.id} type="button" onClick={item.onClick}>
+                <span aria-hidden="true"><MobileNavIcon type={item.icon} /></span>
+                <strong>{item.label}</strong>
+              </button>
+            ))}
+          </nav>
+        </div>
       ) : null}
 
       {showTopSection ? (
         <div className={`renew-news-overview ${newsFilter !== 'all' ? 'is-filtered' : ''}`}>
-          {showNotice ? (
-          <section className="renew-news-card renew-news-notice-card" aria-labelledby="official-news-heading">
-            <div className="renew-news-card-head">
-              <div>
-                <span>OFFICIAL NEWS</span>
-                <h2 id="official-news-heading">{isJp ? '公式ニュース' : '공지사항'}</h2>
-              </div>
-              {!isJp ? <div className="renew-news-toggle" role="group" aria-label="공지 언어 선택">
-                <button type="button" className={noticeLocale === 'KR' ? 'is-active' : ''} onClick={() => setNoticeLocale('KR')}>한글판</button>
-                <button type="button" className={noticeLocale === 'JP' ? 'is-active' : ''} onClick={() => setNoticeLocale('JP')}>일본판</button>
-              </div> : null}
-            </div>
-            <div className="renew-topic-list renew-topic-list-compact">
-              {officialTopics.map((item) => (
-                <article key={item.id} className="renew-topic-card">
-                  <a className={`renew-topic-thumb${item.imageUrl ? '' : ' is-empty'}`} href={item.url} target="_blank" rel="noreferrer" aria-label={item.title}>
-                    <span>{item.locale}</span>
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt=""
-                        loading="lazy"
-                        onError={(event) => {
-                          event.currentTarget.parentElement?.classList.add('is-empty');
-                          event.currentTarget.remove();
-                        }}
-                      />
-                    ) : null}
-                  </a>
-                  <div className="renew-topic-body">
-                    <div className="renew-topic-meta">
-                      <span>{isJp ? '公式' : TOPIC_SOURCE_LABEL[item.source] || item.locale || '공식'}</span>
-                      <span>{item.category}</span>
-                      <time dateTime={item.date}>{item.date}</time>
-                    </div>
-                    <h2>{uiLang === 'KR' && item.titleKo ? item.titleKo : item.title}</h2>
-                    <a href={item.url} target="_blank" rel="noreferrer">
-                      {isJp ? '公式サイトで見る' : uiLang === 'EN' ? 'View original' : '원문 보기'}
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-          ) : null}
+          {showNotice ? noticeCard : null}
 
           {visibleLinkGroups.length ? (
           <div className={`renew-news-links ${visibleLinkGroups.length === 1 ? 'is-single' : ''}`} aria-label="예약구매">
@@ -7211,6 +7263,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isBoosterComparisonGuide ? <RenewBoosterComparisonGuide /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
+      <RenewAdInquiry uiLang={uiLang} />
       <RenewSeoSummary page="news" titleAs="h1" placement="footer" uiLang={uiLang} />
       {guideTarget ? (
         <RenewNewsGuideModal
@@ -16483,7 +16536,7 @@ export default function RenewApp() {
             setRouteRevision((value) => value + 1);
             window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
           }}
-          onOpenCalendar={() => navigatePage('calendar')}
+          onOpenCalendar={(date) => navigatePage('calendar', { query: typeof date === 'string' && date ? `date=${encodeURIComponent(date)}` : '' })}
           onOpenLab={() => navigatePage('lab')}
         />
       ) : activePage === 'partnerShops' ? (
