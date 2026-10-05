@@ -2,6 +2,7 @@ import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
+import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
@@ -517,10 +518,12 @@ const SEO_FIXES = {
     schemaType: 'Article'
   },
   '/guide/shops': {
-    title: '원피스카드 파는 곳 - 공인점포와 취급점포 찾기 | Card Pone',
-    description: '원피스카드 파는 곳을 공식 홈페이지 기준 공인점포와 취급점포로 정리하고 지역별 검색과 내 주변순 정렬 방법을 안내합니다.',
-    keywords: '원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 매장, 원피스카드 공인점포',
-    schemaType: 'Article'
+    title: '원피스카드 사는 곳 - 공인점포·취급점포와 지역별 매장 | Card Pone',
+    description: '공식 홈페이지 기준 원피스카드 공인점포 54곳과 취급점포 26곳의 지역별 분포, 내 주변 매장 찾는 방법을 정리했습니다.',
+    keywords: '원피스카드 사는 곳, 원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 공인점포, 원피스카드 매장',
+    schemaType: 'Article',
+    editor: 'Card Pone 데이터 편집',
+    reviewedAt: SHOP_GUIDE_EDITORIAL.reviewedAt
   },
   '/guide/card-price': {
     title: '원피스카드 시세 보는 법 - Single·PSA10과 최근 거래일 | Card Pone',
@@ -979,6 +982,12 @@ const SERVER_PAGE_CONTENT = {
     sections: [],
     links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
   },
+  '/guide/shops': {
+    heading: SHOP_GUIDE_EDITORIAL.heading,
+    paragraphs: SHOP_GUIDE_EDITORIAL.paragraphs,
+    sections: [{ heading: '핵심 숫자', stats: SHOP_GUIDE_EDITORIAL.summary }, ...SHOP_GUIDE_EDITORIAL.sections, { heading: '구매 전 체크리스트', items: SHOP_GUIDE_EDITORIAL.checklist }],
+    links: ['/shops', '/shops/official', '/calendar', '/guide/box-recommendation']
+  },
   '/guide/booster-comparison': {
     heading: BOOSTER_COMPARISON_EDITORIAL.heading,
     paragraphs: BOOSTER_COMPARISON_EDITORIAL.paragraphs,
@@ -1184,17 +1193,6 @@ const SERVER_PAGE_DETAILS = {
         '가치가 높은 카드는 슬리브 후 탑로더나 카드세이버에 넣어 휨과 눌림을 줄입니다.',
         '바인더는 링이 카드에 닿지 않고 옆으로 넣는 포켓 구조인지 확인합니다.',
         '직사광선, 높은 습도와 급격한 온도 변화를 피하고 세워서 보관합니다.'
-      ]
-    }
-  ],
-  '/guide/shops': [
-    {
-      heading: '구매처 확인 순서',
-      items: [
-        '공식 홈페이지에서 공인점포와 취급점포 여부를 먼저 확인합니다.',
-        '구매처 페이지에서 지역과 시군구를 선택하고 내 주변순으로 방문 가능한 매장을 찾습니다.',
-        '영업시간, 휴무일과 상품 재고는 방문 전에 매장 지도 또는 공식 채널에서 다시 확인합니다.',
-        '제휴 카드샵 표시는 Card Pone에 상세 정보 제공에 동의한 매장을 구분하기 위한 항목입니다.'
       ]
     }
   ],

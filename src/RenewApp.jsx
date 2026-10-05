@@ -31,6 +31,7 @@ import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGui
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
+import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
@@ -763,58 +764,6 @@ const CARD_STORAGE_GUIDE = {
     '그레이딩 후보 카드는 표면 접촉을 최소화하기'
   ]
 };
-const SHOP_BUYING_GUIDE = {
-  title: '원피스카드 사는 방법',
-  intro: '원피스카드를 처음 구매할 때는 공인점포와 취급점포를 먼저 확인하는 것이 좋습니다. Card Pone 구매처 페이지에서는 공식 홈페이지 기준의 매장 정보를 지역별로 정리하고, 내 위치 기준 가까운 매장부터 확인할 수 있습니다.',
-  sections: [
-    {
-      title: '공인점포와 취급점포 확인',
-      items: [
-        '공인점포와 취급점포는 공식 홈페이지 기준 매장 정보를 바탕으로 정리합니다.',
-        '매장별 취급 여부와 재고는 시점에 따라 달라질 수 있으므로 방문 전 확인이 필요합니다.',
-        '대회, 신상품 예약, 프로모션 카드 배포 여부는 매장마다 다를 수 있습니다.'
-      ]
-    },
-    {
-      title: '지역별 구매처 찾기',
-      items: [
-        '서울, 경기, 부산 등 지역 필터로 원하는 지역의 매장을 좁혀 볼 수 있습니다.',
-        '지역을 선택하면 해당 지역의 시군구 기준으로 한 번 더 필터링할 수 있습니다.',
-        '매장명 검색을 함께 사용하면 특정 매장을 빠르게 찾을 수 있습니다.'
-      ]
-    },
-    {
-      title: '내 주변 매장 찾기',
-      items: [
-        '위치 권한을 허용하면 현재 위치에서 가까운 구매처 순서로 정렬할 수 있습니다.',
-        '매장별 예상 거리를 함께 확인할 수 있어 방문 우선순위를 정하기 좋습니다.',
-        '위치 정보는 가까운 매장 정렬에만 사용하며, 브라우저 권한 설정에서 언제든 변경할 수 있습니다.'
-      ]
-    },
-    {
-      title: '지도 바로가기 활용',
-      items: [
-        '각 매장 카드에서 네이버지도와 카카오맵 바로가기를 제공합니다.',
-        '길찾기, 영업시간, 전화번호 등 세부 정보는 지도 앱에서 최종 확인하는 것이 안전합니다.',
-        '좌표가 없는 매장은 매장명 검색 링크로 연결합니다.'
-      ]
-    },
-    {
-      title: '구매 전 체크할 점',
-      items: [
-        '신상품 발매일과 예약 가능 여부를 먼저 확인합니다.',
-        '박스, 팩, 싱글카드 취급 범위가 매장마다 다를 수 있습니다.',
-        '방문 전 재고와 결제 방식, 이벤트 참여 조건을 확인하면 불필요한 이동을 줄일 수 있습니다.'
-      ]
-    }
-  ],
-  checklist: [
-    '가까운 구매처 순서로 먼저 확인하기',
-    '공인점포와 취급점포 구분하기',
-    '방문 전 매장 재고와 영업시간 확인하기',
-    '네이버지도 또는 카카오맵으로 이동 경로 확인하기'
-  ]
-};
 // Shared articles (lib/*-editorial.js) are also pre-rendered by functions/_middleware.js.
 function toEditorialGuide(editorial) {
   return {
@@ -827,6 +776,7 @@ function toEditorialGuide(editorial) {
     checklist: editorial.checklist
   };
 }
+const SHOP_BUYING_GUIDE = toEditorialGuide(SHOP_GUIDE_EDITORIAL);
 const CARD_PRICE_GUIDE = toEditorialGuide(CARD_PRICE_EDITORIAL);
 const CARD_CATALOG_GUIDE = toEditorialGuide(CARD_CATALOG_EDITORIAL);
 const BOOSTER_COMPARISON_GUIDE = toEditorialGuide(BOOSTER_COMPARISON_EDITORIAL);
@@ -3696,11 +3646,11 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   }
   if (path === '/guide/shops') {
     return {
-      title: '원피스카드 사는 방법 | 공인점포, 취급점포, 구매처 찾기 | Card Pone',
-      h1: '원피스카드 사는 방법',
-      description: '원피스카드 파는 곳을 공식 홈페이지 기준 공인점포와 취급점포로 정리했습니다. 지역별 검색, 내 주변순 정렬, 네이버지도와 카카오맵 바로가기를 확인하세요.',
-      keywords: '원피스카드 사는 방법, 원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 공인점포, 원피스카드 취급점포',
-      body: '원피스카드 구매처를 지역별로 찾고 가까운 매장 순서로 확인할 수 있는 구매 가이드입니다.'
+      title: '원피스카드 사는 곳 - 공인점포·취급점포와 지역별 매장 | Card Pone',
+      h1: SHOP_GUIDE_EDITORIAL.heading,
+      description: '공식 홈페이지 기준 원피스카드 공인점포 54곳과 취급점포 26곳의 지역별 분포, 내 주변 매장 찾는 방법을 정리했습니다.',
+      keywords: '원피스카드 사는 곳, 원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 공인점포, 원피스카드 매장',
+      body: SHOP_GUIDE_EDITORIAL.paragraphs[0]
     };
   }
   if (path === '/guide/card-price') {
