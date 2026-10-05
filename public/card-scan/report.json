@@ -1,8 +1,8 @@
 {
   "version": 3,
   "scope": "all",
-  "targetCount": 9807,
-  "indexedCount": 9767,
+  "targetCount": 9842,
+  "indexedCount": 9802,
   "excluded": [
     {
       "key": "JP-891289",
@@ -15,7 +15,7 @@
   ],
   "failures": [
     {
-      "key": "JP-365645",
+      "key": "JP-365646",
       "message": "card_region_not_found"
     },
     {
@@ -23,11 +23,11 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-365646",
+      "key": "JP-365647",
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-365647",
+      "key": "JP-365645",
       "message": "card_region_not_found"
     },
     {
@@ -91,11 +91,11 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-250565",
+      "key": "JP-250564",
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-250564",
+      "key": "JP-250565",
       "message": "card_region_not_found"
     },
     {
@@ -159,15 +159,15 @@
       "message": "HTTP_404"
     },
     {
+      "key": "EN-221704",
+      "message": "HTTP_404"
+    },
+    {
       "key": "JP-871044",
       "message": "card_region_not_found"
     },
     {
       "key": "EN-221706",
-      "message": "HTTP_404"
-    },
-    {
-      "key": "EN-221704",
       "message": "HTTP_404"
     },
     {
