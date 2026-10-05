@@ -37,7 +37,7 @@ import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
-import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
+import { findSealedBox, boxSeries, boxQuote, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
 import CardShows from './CardShows';
 import boxMarketPrices from './data/box-market-prices.json';
@@ -5398,7 +5398,9 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
   const estimatePoint = mode === 'estimate' ? findPortfolioEstimatePoint(detail, grade, purchaseDate) : null;
   const estimatePriceJpy = Number(estimatePoint?.price || 0) || 0;
   const manualPriceJpy = convertPortfolioUnitPriceToJpy(unitPrice, currency);
-  const currentPriceJpy = getTradeQuotePoint(detail, grade)?.price || 0;
+  // Boxes have no trade quote; their current price is the same lowest listing the portfolio values them at.
+  const boxCurrentQuote = isBox ? boxQuote(item, boxMarketPrices, PORTFOLIO_RATES) : null;
+  const currentPriceJpy = isBox ? Math.round(boxCurrentQuote?.boxPriceJpy || 0) : getTradeQuotePoint(detail, grade)?.price || 0;
   const unitPriceJpy = mode === 'current' ? currentPriceJpy : mode === 'manual' ? manualPriceJpy : mode === 'estimate' ? estimatePriceJpy : 0;
 
   const canSave = !saving
@@ -5469,8 +5471,8 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
       originalCurrency: mode === 'manual' ? currency : 'JPY',
       originalUnitPrice: mode === 'current' ? currentPriceJpy : mode === 'manual' ? Number(unitPrice || 0) : estimatePriceJpy,
       unitPriceJpy,
-      referenceDate: mode === 'current' ? getKstDateKey(Date.now()) : mode === 'estimate' ? estimatePoint?.dateKey || '' : '',
-      referenceSource: mode === 'current' ? 'current_market' : mode === 'estimate' ? estimatePoint?.referenceSource || '' : '',
+      referenceDate: mode === 'current' ? (isBox ? boxCurrentQuote?.boxPriceDate || '' : getKstDateKey(Date.now())) : mode === 'estimate' ? estimatePoint?.dateKey || '' : '',
+      referenceSource: mode === 'current' ? (isBox ? 'listing' : 'current_market') : mode === 'estimate' ? estimatePoint?.referenceSource || '' : '',
       createdAt: existingLot?.createdAt || now,
       updatedAt: now
     };
@@ -5572,7 +5574,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
               ['current', text('현재 시세로 추가', 'Use current price', '現在相場で追加')],
               ['estimate', text('날짜로 추정', 'Estimate by date', '日付から推定')],
               ['later', text('나중에 입력', 'Later', '後で入力')]
-            ].filter(([modeKey]) => !isBox || ['manual', 'later'].includes(modeKey)).map(([modeKey, label]) => (
+            ].filter(([modeKey]) => !isBox || ['current', 'manual', 'later'].includes(modeKey)).map(([modeKey, label]) => (
               <button key={modeKey} type="button" className={mode === modeKey ? 'is-active' : ''} onClick={() => { setMode(modeKey); if (modeKey === 'current') setPurchaseDate(getKstDateKey(Date.now())); setMessage(''); }}>{label}</button>
             ))}
           </div>
@@ -5621,7 +5623,7 @@ function RenewPortfolioEditorModal({ item, initialGrade = 'a', holdings, initial
 
           {mode === 'current' ? (
             <div className={`renew-portfolio-estimate ${currentPriceJpy > 0 ? 'has-price' : ''}`}>
-              <small>{grade === 'a' ? 'Single' : 'PSA10'} {text('현재 시세', 'current price', '現在相場')}</small>
+              <small>{isBox ? text('박스 등록 최저가', 'Box lowest listing', 'ボックス出品最安値') : `${grade === 'a' ? 'Single' : 'PSA10'} ${text('현재 시세', 'current price', '現在相場')}`}</small>
               <strong>{detailLoading ? text('불러오는 중...', 'Loading...', '読み込み中...') : currentPriceJpy > 0 ? getLocalizedCurrencyText(currentPriceJpy, uiLang) : text('현재 시세가 없습니다.', 'Current price is unavailable.', '現在相場がありません。')}</strong>
               <span>{text('오늘 날짜의 매입가로 저장됩니다.', 'Saved as today\'s purchase price.', '本日の購入価格として保存されます。')}</span>
             </div>

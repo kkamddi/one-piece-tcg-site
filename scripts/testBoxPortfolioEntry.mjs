@@ -27,3 +27,9 @@ test('box holdings are enabled and every entry point opens the shared purchase e
   assert.match(app, /setEditor\(\{ \.\.\.box, assetType: 'box', grade: 'a' \}\)/);
   assert.match(app, /onAddBox=\{BOX_PORTFOLIO_ENABLED \? addBoxToPortfolio : undefined\}/);
 });
+
+test('boxes can be added at the current lowest listing', () => {
+  assert.match(app, /\.filter\(\(\[modeKey\]\) => !isBox \|\| \['current', 'manual', 'later'\]\.includes\(modeKey\)\)/);
+  assert.match(app, /const currentPriceJpy = isBox \? Math\.round\(boxCurrentQuote\?\.boxPriceJpy \|\| 0\)/);
+  assert.match(app, /referenceSource: mode === 'current' \? \(isBox \? 'listing' : 'current_market'\)/);
+});
