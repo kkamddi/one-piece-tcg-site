@@ -49,7 +49,10 @@ test('sections label prices as listings and skip empty data', () => {
 test('the guide page and its pre-rendered HTML use the same section builder', async () => {
   const app = await readFile(new URL('../src/RenewApp.jsx', import.meta.url), 'utf8');
   const seo = await readFile(new URL('./seriesGuideSeo.js', import.meta.url), 'utf8');
-  assert.match(app, /getSeriesGuideSections\(analyzeSeriesCards\(cards\), getSeriesTopListings\(series, marketItems\), 'KR'\)/);
+  assert.match(app, /getSeriesGuideSections\(analyzeSeriesCards\(cards\), getSeriesTopListings\(series, marketItems\), isJp \? 'JP' : 'KR'\)/);
+  // /jp series guides render Japanese text, matching their Japanese pre-rendered HTML.
+  assert.match(app, /const isJp = getPathLocale\(window\.location\.pathname\) === 'JP';/);
+  assert.match(app, /tx\('수록 카드 전체 보기', '収録カードをすべて見る'\)/);
   assert.match(seo, /getSeriesGuideSections\(analysis, getSeriesTopListings\(series, marketItems\), japanese \? 'JP' : 'KR'\)/);
   assert.doesNotMatch(app, /이 시리즈에서 바로 확인할 것/);
 });

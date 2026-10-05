@@ -8503,8 +8503,12 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
   const series = findSeriesByRouteSlug(guideSlug);
   const locale = series?.locale || 'JP';
   const seriesCode = getBaseSeriesId(series);
-  const seriesName = series?.koName || series?.enName || seriesCode;
-  const localeLabel = locale === 'KR' ? '한글판' : locale === 'EN' ? '영문판' : '일본판';
+  // /jp guides render in Japanese to match their pre-rendered HTML (scripts/seriesGuideSeo.js).
+  const isJp = getPathLocale(window.location.pathname) === 'JP';
+  const tx = (kr, jp) => (isJp ? jp : kr);
+  const seriesName = (isJp ? series?.enName || series?.koName : series?.koName || series?.enName) || seriesCode;
+  const localeLabel = locale === 'KR' ? tx('한글판', '韓国版') : locale === 'EN' ? tx('영문판', '英語版') : tx('일본판', '日本版');
+  const kindLabel = (isJp ? series?.kindEn || series?.kindKo : series?.kindKo || series?.kindEn) || '-';
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const boxImageByCode = useMemo(() => new Map(
@@ -8517,8 +8521,8 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
   const [marketItems, setMarketItems] = useState([]);
   // Same sections as the pre-rendered guide HTML (scripts/seriesGuideSeo.js).
   const guideSections = useMemo(() => (
-    series && cards.length ? getSeriesGuideSections(analyzeSeriesCards(cards), getSeriesTopListings(series, marketItems), 'KR') : []
-  ), [series, cards, marketItems]);
+    series && cards.length ? getSeriesGuideSections(analyzeSeriesCards(cards), getSeriesTopListings(series, marketItems), isJp ? 'JP' : 'KR') : []
+  ), [series, cards, marketItems, isJp]);
 
   useEffect(() => {
     let cancelled = false;
@@ -8558,7 +8562,7 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
   if (!series) {
     return (
       <main className="renew-series-guide">
-        <div className="renew-empty renew-panel">시리즈 정보를 찾을 수 없습니다.</div>
+        <div className="renew-empty renew-panel">{tx('시리즈 정보를 찾을 수 없습니다.', 'シリーズ情報が見つかりません。')}</div>
       </main>
     );
   }
@@ -8574,41 +8578,41 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
           <p className="renew-series-guide-code">{seriesCode}</p>
           <h1>{seriesName}</h1>
           {series.enName && series.enName !== seriesName ? <p className="renew-series-guide-en-name">{series.enName}</p> : null}
-          <p>상품 기본 정보와 실제 수록 카드를 한 화면에서 확인하고, 도감과 카드별 시세로 바로 이동하는 시리즈 가이드입니다.</p>
-          <div className="renew-guide-editorial-meta" aria-label="콘텐츠 검수 정보">
-            <span>Card Pone 데이터 편집</span>
-            <time dateTime="2026-10-05">검수 2026.10.05</time>
+          <p>{tx('상품 기본 정보와 실제 수록 카드를 한 화면에서 확인하고, 도감과 카드별 시세로 바로 이동하는 시리즈 가이드입니다.', '商品の基本情報と収録カードを確認し、図鑑やカード別の相場へ移動できるシリーズガイドです。')}</p>
+          <div className="renew-guide-editorial-meta" aria-label={tx('콘텐츠 검수 정보', 'コンテンツ確認情報')}>
+            <span>{tx('Card Pone 데이터 편집', 'Card Pone データ編集')}</span>
+            <time dateTime="2026-10-05">{tx('검수', '確認')} 2026.10.05</time>
           </div>
           <div className="renew-series-guide-actions">
-            <button type="button" onClick={() => onOpenCatalog?.(series)}>수록 카드 전체 보기</button>
-            <button type="button" className="is-secondary" onClick={onOpenPrices}>카드 시세 보기</button>
+            <button type="button" onClick={() => onOpenCatalog?.(series)}>{tx('수록 카드 전체 보기', '収録カードをすべて見る')}</button>
+            <button type="button" className="is-secondary" onClick={onOpenPrices}>{tx('카드 시세 보기', 'カード相場を見る')}</button>
           </div>
         </div>
         <div className="renew-series-guide-product">
           <div className="renew-series-guide-product-image">
             {productImageUrl ? (
-              <img src={productImageUrl} alt={`${seriesName} 상품`} onError={placeholderImage} />
+              <img src={productImageUrl} alt={`${seriesName} ${tx('상품', '商品')}`} onError={placeholderImage} />
             ) : (
               <span className="renew-series-guide-product-fallback">{seriesCode}</span>
             )}
           </div>
-          <small>{productImageUrl ? '상품 이미지는 도감에서 사용 중인 데이터를 재사용합니다.' : '등록된 상품 이미지가 없어 시리즈 코드로 표시합니다.'}</small>
+          <small>{productImageUrl ? tx('상품 이미지는 도감에서 사용 중인 데이터를 재사용합니다.', '商品画像は図鑑のデータを使用しています。') : tx('등록된 상품 이미지가 없어 시리즈 코드로 표시합니다.', '商品画像がないためシリーズコードで表示しています。')}</small>
         </div>
       </section>
 
-      <section className="renew-series-guide-facts" aria-label="상품 기본 정보">
-        <article><span>언어</span><strong>{localeLabel}</strong></article>
-        <article><span>분류</span><strong>{series.kindKo || series.kindEn || '-'}</strong></article>
-        <article><span>도감 등록</span><strong>{cardCount || cards.length}장</strong></article>
-        <article><span>시리즈</span><strong>{seriesCode}</strong></article>
+      <section className="renew-series-guide-facts" aria-label={tx('상품 기본 정보', '商品の基本情報')}>
+        <article><span>{tx('언어', '言語')}</span><strong>{localeLabel}</strong></article>
+        <article><span>{tx('분류', '分類')}</span><strong>{kindLabel}</strong></article>
+        <article><span>{tx('도감 등록', '図鑑登録')}</span><strong>{cardCount || cards.length}{tx('장', '枚')}</strong></article>
+        <article><span>{tx('시리즈', 'シリーズ')}</span><strong>{seriesCode}</strong></article>
       </section>
 
       {guideSections.length ? (
         <section className="renew-series-guide-section renew-panel">
           <div className="renew-series-guide-section-head">
             <div>
-              <span>시리즈 분석</span>
-              <h2>{seriesCode} 수록 카드 구성</h2>
+              <span>{tx('시리즈 분석', 'シリーズ分析')}</span>
+              <h2>{seriesCode} {tx('수록 카드 구성', '収録カード構成')}</h2>
             </div>
           </div>
           <div className="renew-series-guide-points renew-series-guide-analysis">
@@ -8635,12 +8639,12 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
         <div className="renew-series-guide-section-head">
           <div>
             <span>CARD PREVIEW</span>
-            <h2>수록 카드 미리보기</h2>
+            <h2>{tx('수록 카드 미리보기', '収録カードのプレビュー')}</h2>
           </div>
-          <button type="button" onClick={() => onOpenCatalog?.(series)}>전체 보기</button>
+          <button type="button" onClick={() => onOpenCatalog?.(series)}>{tx('전체 보기', 'すべて見る')}</button>
         </div>
-        {loading ? <div className="renew-empty">카드를 불러오는 중입니다.</div> : null}
-        {!loading && !cards.length ? <div className="renew-empty">수록 카드 데이터를 불러오지 못했습니다.</div> : null}
+        {loading ? <div className="renew-empty">{tx('카드를 불러오는 중입니다.', 'カードを読み込んでいます。')}</div> : null}
+        {!loading && !cards.length ? <div className="renew-empty">{tx('수록 카드 데이터를 불러오지 못했습니다.', '収録カードを読み込めませんでした。')}</div> : null}
         {!loading && cards.length ? (
           <div className="renew-series-guide-card-grid">
             {cards.slice(0, 8).map((card) => (
@@ -8665,13 +8669,13 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
       <section className="renew-series-guide-section renew-series-guide-faq renew-panel">
         <div className="renew-series-guide-section-head">
           <div>
-            <span>빠른 안내</span>
-            <h2>처음 보는 사람을 위한 안내</h2>
+            <span>{tx('빠른 안내', 'かんたん案内')}</span>
+            <h2>{tx('처음 보는 사람을 위한 안내', 'はじめての方へ')}</h2>
           </div>
         </div>
-        <details open><summary>{seriesCode}은 어떤 시리즈인가요?</summary><p>{series.kindKo || series.kindEn || '원피스 카드게임 상품'}으로 분류된 {localeLabel} 시리즈입니다. 이 페이지에서는 확인되지 않은 설명보다 실제 도감 수록 카드 확인을 우선합니다.</p></details>
-        <details><summary>카드 가격은 어디에서 확인하나요?</summary><p>수록 카드를 누르면 기존 도감 상세로 이동하며, 시세가 연결된 카드는 시세 화면에서 최근 가격과 거래 이력을 확인할 수 있습니다.</p></details>
-        <details><summary>카톤 봉입률도 확인할 수 있나요?</summary><p>현재는 공식 확인이 가능한 상품 정보만 제공합니다. 확인되지 않은 봉입률이나 체감 확률은 확정 정보처럼 표시하지 않습니다.</p></details>
+        <details open><summary>{tx(`${seriesCode}은 어떤 시리즈인가요?`, `${seriesCode}はどんなシリーズですか？`)}</summary><p>{tx(`${kindLabel === '-' ? '원피스 카드게임 상품' : kindLabel}으로 분류된 ${localeLabel} 시리즈입니다. 이 페이지에서는 확인되지 않은 설명보다 실제 도감 수록 카드 확인을 우선합니다.`, `${kindLabel === '-' ? 'ワンピースカードゲームの商品' : kindLabel}に分類される${localeLabel}のシリーズです。未確認の説明より、図鑑に登録された実際の収録カードを優先して掲載します。`)}</p></details>
+        <details><summary>{tx('카드 가격은 어디에서 확인하나요?', 'カードの価格はどこで確認できますか？')}</summary><p>{tx('수록 카드를 누르면 기존 도감 상세로 이동하며, 시세가 연결된 카드는 시세 화면에서 최근 가격과 거래 이력을 확인할 수 있습니다.', '収録カードを選ぶと図鑑の詳細へ移動し、相場が連携しているカードは相場画面で最近の価格と取引履歴を確認できます。')}</p></details>
+        <details><summary>{tx('카톤 봉입률도 확인할 수 있나요?', 'カートンの封入率も確認できますか？')}</summary><p>{tx('현재는 공식 확인이 가능한 상품 정보만 제공합니다. 확인되지 않은 봉입률이나 체감 확률은 확정 정보처럼 표시하지 않습니다.', '現在は公式に確認できる商品情報のみを掲載しています。未確認の封入率や体感確率は確定情報として表示しません。')}</p></details>
       </section>
     </main>
   );
