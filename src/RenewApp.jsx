@@ -29,6 +29,7 @@ import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
 import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
+import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
@@ -826,57 +827,19 @@ const CARD_PRICE_GUIDE = {
   })),
   checklist: CARD_PRICE_EDITORIAL.checklist
 };
+// Same article as the pre-rendered HTML (functions/_middleware.js).
 const CARD_CATALOG_GUIDE = {
-  title: '원피스카드 도감 사용법',
-  intro: '원피스카드 도감은 한글판과 일본판 카드 정보를 시리즈, 일련번호, 카드명 기준으로 찾을 수 있는 기능입니다. OP, EB, ST, PR 시리즈를 구분하고, 같은 일련번호 안의 패러렐과 프로모 카드도 확인할 수 있습니다.',
-  sections: [
-    {
-      title: '한글판과 일본판 도감',
-      items: [
-        '한글판과 일본판 카드를 별도로 선택해 검색할 수 있습니다.',
-        '일본판에서는 한글 카드명 검색도 함께 지원해 원하는 캐릭터를 더 쉽게 찾을 수 있습니다.',
-        '언어별 발매 시기와 수록 카드가 다를 수 있어 도감 선택 상태를 확인하는 것이 중요합니다.'
-      ]
-    },
-    {
-      title: '시리즈 분류',
-      items: [
-        'OP는 정규 부스터, EB는 엑스트라 부스터, ST는 스타터 덱, PR은 프로모 카드 중심으로 분류합니다.',
-        '카테고리를 선택하면 해당 시리즈 목록을 확인할 수 있습니다.',
-        'ALL에서는 전체 카드를 등급별로 나눠 볼 수 있습니다.'
-      ]
-    },
-    {
-      title: '일련번호 검색',
-      items: [
-        'OP05-119, ST21-014처럼 카드 일련번호를 입력하면 해당 번호의 카드를 찾을 수 있습니다.',
-        '같은 일련번호라도 일반 카드, 패러렐, 재록, 프로모 버전이 함께 존재할 수 있습니다.',
-        '정확한 카드 확인을 위해 이미지, 레어도, 시리즈 정보를 함께 비교하는 것이 좋습니다.'
-      ]
-    },
-    {
-      title: '카드명 검색',
-      items: [
-        '루피, 조로, 나미처럼 카드명이나 캐릭터명으로 검색할 수 있습니다.',
-        '일본판 카드도 한글 이름 기준으로 검색되도록 매핑을 보강하고 있습니다.',
-        '검색 결과가 많을 때는 시리즈와 등급 필터를 함께 사용하면 좋습니다.'
-      ]
-    },
-    {
-      title: '보유카드와 위시리스트',
-      items: [
-        '로그인 후 보유 여부와 위시리스트를 카드별로 관리할 수 있습니다.',
-        '포트폴리오에서는 보유 카드와 평가액을 모아 볼 수 있습니다.',
-        '수집 진행도는 시리즈별로 확인할 수 있어 목표 수집 범위를 정하기 쉽습니다.'
-      ]
-    }
-  ],
-  checklist: [
-    '먼저 한글판과 일본판을 정확히 선택하기',
-    '시리즈와 등급 필터를 함께 사용하기',
-    '같은 일련번호의 다른 버전을 이미지로 비교하기',
-    '도감 상세에서 시세 바로가기를 활용하기'
-  ]
+  title: CARD_CATALOG_EDITORIAL.heading,
+  intro: CARD_CATALOG_EDITORIAL.paragraphs[0],
+  introParagraphs: CARD_CATALOG_EDITORIAL.paragraphs.slice(1),
+  reviewedAt: CARD_CATALOG_EDITORIAL.reviewedAt,
+  sections: CARD_CATALOG_EDITORIAL.sections.map((section) => ({
+    title: section.heading,
+    paragraphs: section.paragraphs || [],
+    items: section.items || [],
+    links: section.links || []
+  })),
+  checklist: CARD_CATALOG_EDITORIAL.checklist
 };
 const GUIDE_REVIEWED_AT = '2026-08-25';
 const GUIDE_HUB_COLLECTIONS = [
@@ -3752,11 +3715,11 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   }
   if (path === '/guide/card-catalog') {
     return {
-      title: '원피스카드 도감 사용법 | 한글판, 일본판, 일련번호 검색 | Card Pone',
-      h1: '원피스카드 도감 사용법',
-      description: '원피스카드 도감에서 한글판과 일본판 카드, OP/EB/ST/PR 시리즈, 일련번호와 카드명 검색을 사용하는 방법을 정리했습니다.',
-      keywords: '원피스카드 도감, 원피스카드 일련번호, 원피스카드 카드번호, 일본판 원피스카드 도감, 한글판 원피스카드 도감',
-      body: '원피스카드 도감에서 시리즈, 일련번호, 카드명, 언어별 카드를 찾는 방법을 정리한 가이드입니다.'
+      title: '원피스카드 도감 사용법 - 같은 번호의 다른 버전 구별 | Card Pone',
+      h1: CARD_CATALOG_EDITORIAL.heading,
+      description: '카드번호 읽는 법과 패러렐·코믹 패러렐·재록·프로모 구별법을 일본판 도감 2,773개 번호와 SNKRDUNK 상품 집계로 설명합니다.',
+      keywords: '원피스카드 도감 사용법, 원피스카드 일련번호, 원피스카드 패러렐 구별, 원피스카드 재록, 원피스카드 코믹 패러렐',
+      body: CARD_CATALOG_EDITORIAL.paragraphs[0]
     };
   }
   if (path.startsWith('/guide/')) {

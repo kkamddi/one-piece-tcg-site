@@ -1,5 +1,6 @@
 import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
+import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
@@ -529,10 +530,12 @@ const SEO_FIXES = {
     reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt
   },
   '/guide/card-catalog': {
-    title: '원피스카드 도감 사용법 - 일련번호와 카드명 검색 | Card Pone',
-    description: '원피스카드 도감에서 한글판과 일본판 카드, OP/EB/ST/PR 시리즈, 일련번호와 카드명 검색을 사용하는 방법을 정리했습니다.',
-    keywords: '원피스카드 도감 사용법, 원피스카드 일련번호, 원피스카드 검색',
-    schemaType: 'Article'
+    title: '원피스카드 도감 사용법 - 같은 번호의 다른 버전 구별 | Card Pone',
+    description: '카드번호 읽는 법과 패러렐·코믹 패러렐·재록·프로모 구별법을 일본판 도감 2,773개 번호와 SNKRDUNK 상품 집계로 설명합니다.',
+    keywords: '원피스카드 도감 사용법, 원피스카드 일련번호, 원피스카드 패러렐 구별, 원피스카드 재록, 원피스카드 코믹 패러렐',
+    schemaType: 'Article',
+    editor: 'Card Pone 데이터 편집',
+    reviewedAt: CARD_CATALOG_EDITORIAL.reviewedAt
   },
   '/guide/collection': {
     title: '원피스카드 컬렉션 - 망가·챔피언십·플래그십·프로모 | Card Pone',
@@ -967,6 +970,12 @@ const SERVER_PAGE_CONTENT = {
     sections: [],
     links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
   },
+  '/guide/card-catalog': {
+    heading: CARD_CATALOG_EDITORIAL.heading,
+    paragraphs: CARD_CATALOG_EDITORIAL.paragraphs,
+    sections: [...CARD_CATALOG_EDITORIAL.sections, { heading: '도감 사용 체크리스트', items: CARD_CATALOG_EDITORIAL.checklist }],
+    links: ['/cards/jp', '/cards/kr', '/prices', '/guide/card-price']
+  },
   '/guide/card-price': {
     heading: CARD_PRICE_EDITORIAL.heading,
     paragraphs: CARD_PRICE_EDITORIAL.paragraphs,
@@ -1149,23 +1158,6 @@ const SERVER_PAGE_DETAILS = {
         '리더 색상에 맞게 필터링된 카드에서 메인 덱 50장을 구성합니다.',
         '같은 카드번호의 최대 투입 매수와 금지·제한 카드 경고를 확인합니다.',
         '저장한 덱은 다시 불러와 카드 매수를 수정하거나 다른 버전으로 비교할 수 있습니다.'
-      ]
-    }
-  ],
-  '/guide/card-catalog': [
-    {
-      heading: '카드를 정확하게 찾는 순서',
-      items: [
-        '카드 하단의 카드번호를 확인하고 하이픈을 포함해 검색합니다.',
-        '같은 번호의 카드가 여러 장이면 이미지, 수록 상품과 패러렐 여부를 비교합니다.',
-        '카드번호를 모르면 캐릭터명으로 검색한 뒤 언어판과 시리즈 필터로 범위를 줄입니다.',
-        '프로모 카드는 정규 부스터와 별도로 PR 또는 프로모 계열에서 확인합니다.'
-      ]
-    },
-    {
-      heading: '보유 카드 관리',
-      paragraphs: [
-        '로그인 후 카드 상세에서 보유중 또는 위시리스트를 선택할 수 있습니다. 같은 카드번호라도 이미지와 언어판이 다르면 별도 카드로 저장됩니다.'
       ]
     }
   ],
