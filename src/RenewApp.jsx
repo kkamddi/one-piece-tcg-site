@@ -32,6 +32,8 @@ import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
+import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
+import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
@@ -1080,322 +1082,7 @@ function getHomeNewsLinks() {
     return item;
   });
 }
-const GUIDE_QA_GROUPS = [
-  {
-    id: 'start',
-    kind: 'guide',
-    title: '처음 이용 가이드',
-    items: [
-      {
-        question: 'Card Pone는 어떤 사이트인가요?',
-        answer: 'Card Pone는 원피스 카드게임 유저를 위한 비공식 카드 도감, 시세 확인, 구매처 검색, 컬렉션 관리 서비스입니다. 한글판과 일본판 카드를 검색하고 보유 카드, 위시리스트, Portfolio를 한 곳에서 관리할 수 있습니다.'
-      },
-      {
-        question: '일련번호 검색과 카드명 검색은 어떻게 다른가요?',
-        answer: '일련번호 검색은 OP05-119, ST21-014처럼 카드 번호를 기준으로 찾는 방식이고, 카드명 검색은 캐릭터명이나 카드명으로 관련 카드를 찾는 방식입니다. 자세한 도감 사용법은 /guide/card-catalog에서 확인할 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'catalog',
-    kind: 'guide',
-    title: '카드 도감 가이드',
-    items: [
-      {
-        question: 'OP, EB, ST, PR은 무엇인가요?',
-        answer: 'OP는 정규 부스터, EB는 엑스트라 부스터, ST는 스타터덱, PR은 프로모 계열입니다. 시리즈와 도감 검색 구조는 /guide/card-catalog에서 더 자세히 정리했습니다.'
-      },
-      {
-        question: '보유중과 위시리스트는 어떻게 사용하나요?',
-        answer: '카드 도감에서 카드 하단의 X/O 버튼을 누르면 보유 상태를 바꿀 수 있고, 하트 버튼을 누르면 위시리스트에 추가하거나 해제할 수 있습니다. 로그인한 계정 기준으로 저장되며, 필터에서 보유중 또는 위시리스트만 따로 볼 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'market',
-    kind: 'guide',
-    title: '시세 가이드',
-    items: [
-      {
-        question: '시세 탭은 어떻게 사용하나요?',
-        answer: '시세 탭에서는 일련번호나 카드명을 검색해 후보를 선택하고 상세 시세를 확인합니다. A등급, PSA10, 거래 기록, 그래프 설명은 /guide/card-price에서 확인할 수 있습니다.'
-      },
-      {
-        question: '시세 정보는 어떻게 봐야 하나요?',
-        answer: '시세 정보는 외부 거래 데이터와 현재 매물 정보를 바탕으로 한 참고 지표입니다. 실제 구매 전에는 원문 페이지, 배송비, 관세, 카드 상태를 함께 확인해야 하며 자세한 내용은 /guide/card-price에 정리했습니다.'
-      }
-    ]
-  },
-  {
-    id: 'portfolio',
-    kind: 'guide',
-    title: 'Portfolio 가이드',
-    items: [
-      {
-        question: 'Portfolio 금액은 어떻게 계산되나요?',
-        answer: 'Portfolio는 사용자가 시세 페이지에서 A등급 또는 PSA10으로 추가한 카드의 가격을 기준으로 합산됩니다. 시세 데이터가 없는 카드는 금액 계산에서 제외될 수 있으며, 가격은 참고용입니다.'
-      },
-      {
-        question: 'Portfolio에 추가한 카드는 어디서 확인하나요?',
-        answer: '메인 화면의 Portfolio 카드에서 A 또는 PSA10을 누르면 해당 등급으로 추가한 카드 목록을 확인할 수 있습니다. 목록 안의 X 버튼으로 Portfolio에서 제거할 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'buying',
-    kind: 'guide',
-    title: '구매/예약 가이드',
-    items: [
-      {
-        question: '공인점포와 취급점포는 무엇이 다른가요?',
-        answer: '공인점포와 취급점포는 공식 홈페이지 기준의 매장 구분입니다. 지역별 검색, 내 주변순 정렬, 지도 바로가기는 /guide/shops에서 확인할 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'collecting-direction',
-    kind: 'guide',
-    title: '수집 방향 - 언어판',
-    items: [
-      {
-        question: '일본판, 한글판, 영문판은 어떤 기준으로 고르면 좋나요?',
-        answer: '일본판은 발매와 거래 흐름이 빠르고 원피스 카드게임 시장의 기준점처럼 보는 유저가 많습니다. 한글판은 국내 접근성이 좋고 상대적으로 부담이 낮아 입문과 플레이 병행에 적합합니다. 영문판은 글로벌 수요가 강하고 가격대가 높은 카드가 많지만 국내 구매 접근성은 낮을 수 있습니다.'
-      },
-      {
-        question: '가치와 가격 흐름을 보고 싶다면 어떤 언어판이 좋나요?',
-        answer: '시세 흐름을 적극적으로 보고 싶다면 거래량과 정보가 많은 일본판을 먼저 확인하는 것이 좋습니다. 영문판은 글로벌 수요가 강한 카드에서 가격이 크게 형성될 수 있고, 한글판은 국내에서 구하기 쉬워 가성비와 실사용 접근성이 좋습니다.'
-      },
-      {
-        question: '한글판의 장점은 무엇인가요?',
-        answer: '한글판은 국내 매장과 커뮤니티에서 접근하기 쉽고, 일본판이나 영문판보다 부담 없는 가격으로 시작할 수 있는 경우가 많습니다. 일본판 발매 흐름을 참고해 앞으로 관심받을 카드나 캐릭터를 미리 살펴볼 수 있다는 점도 장점입니다.'
-      }
-    ]
-  },
-  {
-    id: 'collecting-style',
-    kind: 'guide',
-    title: '수집 방향 - 테마',
-    items: [
-      {
-        question: '처음 수집할 때 어떤 방향을 잡으면 좋나요?',
-        answer: '처음에는 최애 캐릭터 중심, 좋아하는 해적단 중심, 특정 시리즈 완성, 패러렐·프로모 중심처럼 기준을 하나 정하는 것이 좋습니다. 기준 없이 고가 카드만 따라가면 예산이 빠르게 커지고 컬렉션 방향이 흐려질 수 있습니다.'
-      },
-      {
-        question: '캐릭터 중심 수집은 어떤 방식인가요?',
-        answer: '루피, 조로, 나미, 야마토처럼 좋아하는 캐릭터를 정하고 해당 캐릭터의 일반판, 패러렐, 프로모, 스페셜 카드를 모으는 방식입니다. 카드 수가 늘어도 기준이 명확해 컬렉션을 정리하기 쉽습니다.'
-      },
-      {
-        question: '레어도 중심 수집은 어떤 방식인가요?',
-        answer: '패러렐, 리더 패러렐, 코믹 패러렐, SP, 프로모, 대회 배포 카드처럼 희소성이 높은 카드 위주로 모으는 방식입니다. 만족도와 가치 변동 폭이 크지만, 예산과 카드 상태 확인이 중요합니다.'
-      }
-    ]
-  },
-  {
-    id: 'box-purchase-guide',
-    kind: 'guide',
-    title: '구매 가이드 - 박스/카톤',
-    items: [
-      {
-        question: '박스, 팩, 카톤은 어떤 단위인가요?',
-        answer: '일반적인 부스터 기준으로 1카톤은 12박스, 1박스는 24팩, 1팩은 카드 6장 구성으로 보는 경우가 많습니다. 상품과 국가별 구성은 달라질 수 있으므로 구매 전 판매 페이지의 구성 정보를 확인하는 것이 안전합니다.'
-      },
-      {
-        question: '개인 거래 박스를 살 때 무엇을 조심해야 하나요?',
-        answer: '개인 거래에서는 미개봉 여부, 박스 상태, 판매 이력, 가격이 지나치게 낮은 이유를 확인해야 합니다. 특히 카톤에서 고레어 카드를 이미 뽑은 뒤 남은 박스를 판매하는 경우가 있을 수 있어 출처가 불명확한 박스는 신중하게 접근하는 것이 좋습니다.'
-      }
-    ]
-  },
-  {
-    id: 'grading-guide',
-    kind: 'guide',
-    title: '보관/그레이딩 가이드',
-    items: [
-      {
-        question: '그레이딩 완료 카드는 어떤 장점이 있나요?',
-        answer: 'PSA, BGS 같은 감정사를 거친 카드는 등급이 명확해 상태 확인과 거래가 비교적 쉽습니다. 다만 같은 카드라도 감정 등급, 케이스 상태, 감정사 선호도에 따라 가격 차이가 생길 수 있습니다.'
-      },
-      {
-        question: 'raw 카드를 직접 감정 보내는 방식은 어떤가요?',
-        answer: '상태 좋은 카드를 골라 직접 감정 보내는 방식은 수집의 재미가 크지만 난이도도 높습니다. 표면 흠집, 모서리, 센터링, 인쇄 상태를 직접 판단해야 하고, 감정 비용과 대기 기간, 기대 등급보다 낮게 나올 리스크도 고려해야 합니다.'
-      },
-      {
-        question: '가볍게 수집하려면 어떤 보관 방식이 좋나요?',
-        answer: '순수 취미 목적이라면 슬리브와 바인더 중심으로 시작하는 방식이 부담이 적습니다. 고가 카드만 별도로 탑로더나 자석케이스에 보관하고, 일반 카드는 바인더에 테마별로 정리하면 관리가 쉽습니다.'
-      }
-    ]
-  },
-  {
-    id: 'intro-qa',
-    kind: 'qa',
-    title: '입문 Q&A',
-    items: [
-      {
-        question: '원피스 카드게임은 어떤 카드게임인가요?',
-        answer: '원피스 카드게임은 ONE PIECE 작품의 캐릭터와 세계관을 바탕으로 한 1대1 대전형 트레이딩 카드게임입니다. 리더 카드 1장, 메인 덱, DON!! 카드를 사용해 상대 리더의 라이프를 줄이고 승리하는 방식으로 진행됩니다.'
-      },
-      {
-        question: '처음 시작하려면 무엇을 사면 좋나요?',
-        answer: '처음 플레이 목적이라면 스타터덱이 가장 접근하기 쉽습니다. 스타터덱은 바로 게임을 시작할 수 있는 구성으로 판매되며, 부스터팩은 덱 강화나 수집을 위해 추가 카드가 필요할 때 구매하는 상품입니다.'
-      },
-      {
-        question: '부스터팩과 스타터덱은 무엇이 다른가요?',
-        answer: '스타터덱은 정해진 카드 구성으로 시작용 덱을 제공하는 상품이고, 부스터팩은 무작위 카드가 들어 있는 확장팩입니다. 부스터팩은 원하는 카드를 확정으로 얻는 상품이 아니므로 수집과 덱 강화 목적에 맞춰 구매하는 것이 좋습니다.'
-      }
-    ]
-  },
-  {
-    id: 'rarity-qa',
-    kind: 'qa',
-    title: '카드 등급 Q&A',
-    items: [
-      {
-        question: 'C, UC, R, SR, SEC는 무엇인가요?',
-        answer: 'C는 커먼, UC는 언커먼, R은 레어, SR은 슈퍼 레어, SEC는 시크릿 레어를 의미합니다. 일반적으로 오른쪽으로 갈수록 부스터팩에서 보기 어려운 등급으로 취급됩니다.'
-      },
-      {
-        question: 'L 카드는 무엇인가요?',
-        answer: 'L은 리더 카드를 의미합니다. 리더 카드는 게임 시작 시 별도로 놓고 사용하는 카드이며, 리더의 색상과 특성이 덱 구성과 플레이 방식에 영향을 줍니다.'
-      },
-      {
-        question: 'SP 카드는 무엇인가요?',
-        answer: 'SP는 일반적인 기본 등급이라기보다 특별 일러스트나 특별 사양으로 구분되는 카드에 붙는 표기입니다. 같은 캐릭터라도 일반 카드와 SP 카드는 수집 가치와 거래 가격이 다를 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'series-qa',
-    kind: 'qa',
-    title: '시리즈 Q&A',
-    items: [
-      {
-        question: 'OP, EB, ST, PR은 무엇을 뜻하나요?',
-        answer: 'OP는 정규 부스터팩, EB는 엑스트라 부스터, ST는 스타터덱, PR은 프로모 계열입니다. 일련번호와 시리즈 구분은 /guide/card-catalog에서 확인할 수 있습니다.'
-      },
-      {
-        question: 'OP05-119 같은 일련번호는 어떻게 읽나요?',
-        answer: 'OP05-119는 OP-05 계열의 119번 카드를 뜻합니다. 같은 일련번호에도 여러 버전이 있을 수 있으므로 자세한 구조는 /guide/card-catalog에서 확인할 수 있습니다.'
-      },
-      {
-        question: '프로모 카드는 어디서 얻나요?',
-        answer: '프로모 카드는 이벤트, 캠페인, 대회, 잡지 부록, 상품 동봉 등 일반 부스터팩과 다른 경로로 배포되는 카드입니다. 배포 방식과 기간에 따라 입수 난이도와 가격 차이가 커질 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'language-qa',
-    kind: 'qa',
-    title: '언어판 Q&A',
-    items: [
-      {
-        question: '한글판과 일본판은 무엇이 다른가요?',
-        answer: '한글판과 일본판은 카드 텍스트 언어, 발매 일정, 상품 구성, 유통 환경이 다를 수 있습니다. 같은 캐릭터와 일러스트라도 언어판에 따라 수집 수요와 거래 가격이 달라질 수 있습니다.'
-      },
-      {
-        question: '일본판 카드와 한글판 카드를 같은 카드로 봐도 되나요?',
-        answer: '수집 관점에서는 같은 카드명과 일러스트라도 언어판을 별도 버전으로 구분하는 경우가 많습니다. 거래나 컬렉션 관리에서는 언어판, 일련번호, 이미지, 등급을 함께 확인하는 것이 좋습니다.'
-      },
-      {
-        question: '일본판 카드 검색은 일본어만 가능한가요?',
-        answer: '공식 카드명은 일본어 기준이지만, Card Pone에서는 가능한 범위에서 한글 카드명 검색도 함께 지원합니다. 다만 번역명과 표기 차이가 있을 수 있어 일련번호 검색이 가장 정확합니다.'
-      }
-    ]
-  },
-  {
-    id: 'parallel-qa',
-    kind: 'qa',
-    title: '패러렐·프로모 Q&A',
-    items: [
-      {
-        question: '패러렐 카드는 무엇인가요?',
-        answer: '패러렐 카드는 같은 기본 카드와 별도의 일러스트나 사양으로 나온 변형 카드입니다. 효과나 카드명은 같거나 유사해도 일러스트와 희소성 때문에 수집 가치가 다르게 형성될 수 있습니다.'
-      },
-      {
-        question: '리더 패러렐은 무엇인가요?',
-        answer: '리더 패러렐은 리더 카드의 특별 일러스트 버전입니다. 리더 카드는 게임에서 항상 공개되는 핵심 카드라 수집 수요가 높고, 인기 캐릭터의 리더 패러렐은 가격 변동이 큰 편입니다.'
-      },
-      {
-        question: '코믹 패러렐은 무엇인가요?',
-        answer: '코믹 패러렐은 만화 원작 느낌을 강하게 살린 특별 일러스트 계열 카드로 불리는 수집용 명칭입니다. 모든 세트에 존재하는 것은 아니며, 일반 패러렐보다 더 높은 관심을 받는 경우가 많습니다.'
-      }
-    ]
-  },
-  {
-    id: 'storage-qa',
-    kind: 'qa',
-    title: '보관·상태 Q&A',
-    items: [
-      {
-        question: '카드 상태 A등급은 어떤 의미인가요?',
-        answer: 'A등급은 일반적으로 눈에 띄는 큰 하자가 적은 양호한 상태를 뜻하는 거래상 표현입니다. 다만 플랫폼이나 판매자마다 기준이 다를 수 있으므로 모서리, 표면, 찍힘, 휘어짐, 인쇄 상태를 직접 확인해야 합니다.'
-      },
-      {
-        question: '슬리브, 탑로더, 자석케이스는 언제 쓰나요?',
-        answer: '슬리브는 기본 보호, 탑로더는 배송과 단기 보관, 자석케이스는 고가 카드 전시와 장기 보관에 많이 사용합니다. 자세한 보관 기준은 /guide/card-storage에 정리했습니다.'
-      },
-      {
-        question: '카드 휘어짐을 줄이려면 어떻게 해야 하나요?',
-        answer: '습도와 온도 변화, 직사광선, 압력을 피하는 것이 기본입니다. 장기 보관 방법과 용품별 차이는 /guide/card-storage에서 확인할 수 있습니다.'
-      }
-    ]
-  },
-  {
-    id: 'price-qa',
-    kind: 'qa',
-    title: '시세·PSA Q&A',
-    items: [
-      {
-        question: '카드 시세는 왜 계속 변하나요?',
-        answer: '카드 시세는 캐릭터 인기, 대회 환경, 재록 여부, 신상품 발매, 매물 수, 카드 상태, 언어판 수요에 따라 변합니다. 특히 고가 카드와 한정 프로모 카드는 적은 거래량만으로도 가격이 크게 움직일 수 있습니다.'
-      },
-      {
-        question: 'PSA10은 무엇인가요?',
-        answer: 'PSA10은 PSA 감정에서 Gem Mint 10을 받은 최고 등급 상태를 뜻합니다. PSA10 시세와 일반 A등급 시세의 차이는 /guide/card-price에서 확인할 수 있습니다.'
-      },
-      {
-        question: '시세 정보는 실제 거래가와 같나요?',
-        answer: '시세 정보는 거래 판단을 돕는 참고 자료입니다. 실제 거래 가격은 판매처, 배송비, 관세, 환율, 카드 상태에 따라 달라질 수 있으며 자세한 확인 방법은 /guide/card-price에 정리했습니다.'
-      }
-    ]
-  },
-  {
-    id: 'collector-qa',
-    kind: 'qa',
-    title: '수집 Q&A',
-    items: [
-      {
-        question: '일본판, 한글판, 영문판 중 무엇을 모아야 하나요?',
-        answer: '정답은 예산과 목적에 따라 다릅니다. 빠른 시세 흐름과 원조 시장을 보고 싶다면 일본판, 국내 접근성과 가성비를 중시하면 한글판, 글로벌 수요와 고가 카드를 보고 싶다면 영문판을 검토하는 방식이 좋습니다.'
-      },
-      {
-        question: '처음 수집하면 박스보다 싱글 카드가 나은가요?',
-        answer: '원하는 카드가 명확하다면 싱글 카드 구매가 예산 관리에 유리합니다. 박스 개봉은 재미가 크지만 원하는 카드를 확정으로 얻는 방식은 아니므로, 수집 목적과 개봉 재미 중 무엇을 우선할지 먼저 정하는 것이 좋습니다.'
-      },
-      {
-        question: '카톤 구매가 항상 좋은 선택인가요?',
-        answer: '카톤 구매는 개봉 경험과 봉입 기대치를 한 번에 가져갈 수 있지만 비용 부담이 큽니다. 수집 초반에는 필요한 싱글 카드와 소량 박스 구매로 방향을 잡은 뒤, 예산과 목적이 명확해졌을 때 카톤 구매를 검토하는 것이 안전합니다.'
-      }
-    ]
-  },
-  {
-    id: 'box-qa',
-    kind: 'qa',
-    title: '박스·봉입률 Q&A',
-    items: [
-      {
-        question: '1카톤, 1박스, 1팩은 각각 몇 개인가요?',
-        answer: '일반적인 부스터 기준으로 1카톤은 12박스, 1박스는 24팩, 1팩은 카드 6장 구성으로 보는 경우가 많습니다. 다만 상품별 구성은 다를 수 있으므로 판매 페이지의 구성 정보를 함께 확인해야 합니다.'
-      },
-      {
-        question: '봉입률은 어떻게 참고하면 되나요?',
-        answer: '커뮤니티에서는 1카톤 기준 SP 계열, 리더 패러렐 계열, 시크릿 계열의 봉입 경향을 참고하는 경우가 많습니다. 하지만 망가 카드나 갓팩 같은 특수 요소는 확정이 아니며, 봉입률은 구매 판단의 참고 자료로만 보는 것이 좋습니다.'
-      },
-      {
-        question: '서치 박스가 왜 위험한가요?',
-        answer: '서치 박스는 이미 고레어 카드가 나온 뒤 남은 박스일 가능성이 있는 상품을 뜻하는 커뮤니티 표현입니다. 이런 박스는 기대값이 낮을 수 있어, 출처가 불명확하거나 가격이 과하게 저렴한 미개봉 박스는 신중하게 확인해야 합니다.'
-      }
-    ]
-  }
-];
+// GUIDE_QA_GROUPS lives in lib/guide-qa.js (shared with the pre-rendered HTML).
 const NEWS_GUIDE_CONTENT = {
   preorder: {
     title: '아마존 구매 초대 안내',
@@ -7625,38 +7312,7 @@ function getCoefficientOfVariation(values = []) {
   return Math.sqrt(variance) / average;
 }
 
-const BOX_RECOMMENDATION_CATEGORIES = [
-  {
-    id: 'jackpot',
-    path: '/guide/box-recommendation/high-price',
-    eyebrow: 'HIGH CEILING',
-    title: '최고가 카드 노리기',
-    description: '박스 가격과 관계없이 각 시리즈에 수록된 Single 카드의 현재 최고가 순으로 비교합니다.',
-    audience: '최상위 희귀 카드 한 장의 가격을 가장 중요하게 보는 경우',
-    caution: '박스 가격과 봉입률은 순위에 반영하지 않아 개봉 결과의 편차가 클 수 있습니다.',
-    score: 'maximum'
-  },
-  {
-    id: 'stable',
-    path: '/guide/box-recommendation/stable',
-    eyebrow: 'BALANCED',
-    title: '가격과 히트가 균형적인 박스',
-    description: '박스 현재가 대비 카드 가격이 괜찮고, 일부 카드에만 가치가 몰리지 않은 상품을 비교합니다.',
-    audience: '최고가 한 장보다 여러 유효 카드의 가격 분포를 함께 보고 싶은 경우',
-    caution: '카드별 실제 봉입률을 적용한 기대값은 아니므로 수익을 보장하지 않습니다.',
-    score: 'stableScore'
-  },
-  {
-    id: 'hits',
-    path: '/guide/box-recommendation/more-hits',
-    eyebrow: 'MORE HITS',
-    title: '유효 히트가 많은 박스',
-    description: '박스 가격의 35% 이상인 Single 히트 카드가 상대적으로 많이 확인되는 박스를 비교합니다.',
-    audience: '박스 가격 대비 의미 있는 가격의 카드가 여러 장인 시리즈를 찾는 경우',
-    caution: '유효 히트 수는 현재 가격 기준이며 카드 가격이 바뀌면 순위도 달라집니다.',
-    score: 'hitScore'
-  }
-];
+// BOX_RECOMMENDATION_CATEGORIES lives in lib/box-recommendation-editorial.js (shared with the pre-rendered HTML).
 
 function getBoxSeriesPriceInsight(item) {
   const coveragePercent = Math.round(item.coverage * 100);
@@ -7894,8 +7550,8 @@ function RenewBoxRecommendationGuide() {
       <section className="renew-panel renew-news-panel renew-box-guide" aria-labelledby="box-recommendation-heading">
         <header className="renew-box-guide-head">
           <span>카드 박스</span>
-          <h1 id="box-recommendation-heading">원피스카드 박스 구매 가이드</h1>
-          <p>원하는 개봉 방향을 선택하면 해당 기준으로 계산된 박스만 따로 확인할 수 있습니다.</p>
+          <h1 id="box-recommendation-heading">{BOX_GUIDE_COPY.hubHeading}</h1>
+          <p>{BOX_GUIDE_COPY.hubIntro}</p>
         </header>
         <nav className="renew-box-guide-hub" aria-label="박스 구매 가이드 선택">
           {BOX_RECOMMENDATION_CATEGORIES.map((category) => (
@@ -7908,7 +7564,7 @@ function RenewBoxRecommendationGuide() {
           ))}
         </nav>
         <section className="renew-box-guide-reading" aria-labelledby="box-guide-reading-heading">
-          <h2 id="box-guide-reading-heading">어떤 기준을 선택해야 하나요?</h2>
+          <h2 id="box-guide-reading-heading">{BOX_GUIDE_COPY.readingHeading}</h2>
           <div>
             {BOX_RECOMMENDATION_CATEGORIES.map((category) => (
               <article key={`${category.id}-reading`}>
@@ -7917,15 +7573,15 @@ function RenewBoxRecommendationGuide() {
               </article>
             ))}
           </div>
-          <p>추천 결과는 Card Pone에 연결된 박스 현재가와 수록 카드의 최신 Single 시세를 비교합니다. 개봉 확률이나 미확인 카드 가격은 임의로 추정하지 않습니다.</p>
+          <p>{BOX_GUIDE_COPY.readingNote}</p>
         </section>
         <section className="renew-box-guide-series-index" aria-labelledby="box-guide-series-index-heading">
           <header>
             <div>
               <span>시리즈별 분석</span>
-              <h2 id="box-guide-series-index-heading">시리즈별 박스 분석</h2>
+              <h2 id="box-guide-series-index-heading">{BOX_GUIDE_COPY.seriesIndexHeading}</h2>
             </div>
-            <p>출시된 박스의 현재가, 가격이 연결된 주요 카드와 가격 분포를 시리즈별로 확인합니다.</p>
+            <p>{BOX_GUIDE_COPY.seriesIndexIntro}</p>
           </header>
           <div>
             {getBoxGuideSeriesItems().map(({ seriesId, item, series }) => (
@@ -8170,7 +7826,7 @@ function RenewBoxRecommendationGuide() {
       </div>
       <footer className="renew-box-guide-note">
         <strong>계산 기준</strong>
-        <p>미개봉 박스와 패러렐·SEC·SP 카드에 연결된 최신 Single 시세만 사용합니다. 봉입률이 반영된 기대값이나 수익 보장이 아니며, 가격 데이터가 부족한 상품은 추천에서 제외됩니다.</p>
+        <p>{BOX_GUIDE_COPY.methodNote}</p>
         {state.updatedAt ? <time dateTime={state.updatedAt}>데이터 기준 {new Date(state.updatedAt).toLocaleString('ko-KR')}</time> : null}
       </footer>
     </section>
@@ -15935,8 +15591,9 @@ export default function RenewApp() {
     if (typeof window === 'undefined') return 'KR';
     const routeLocale = getPathLocale(window.location.pathname);
     if (routeLocale) return routeLocale;
+    // Japanese has its own /jp URLs; like the popstate handler, unprefixed URLs never open in Japanese.
     const savedLocale = window.localStorage.getItem(UI_LANG_STORAGE_KEY);
-    return ['EN', 'JP'].includes(savedLocale) ? savedLocale : 'KR';
+    return savedLocale === 'EN' ? 'EN' : 'KR';
   });
   const [authUser, setAuthUser] = useState(null);
   const [authResolved, setAuthResolved] = useState(!supabase);

@@ -17,6 +17,9 @@
 /stats-prototype
   X-Robots-Tag: noindex, nofollow
 
+/lab/card-world-cup
+  X-Robots-Tag: noindex, follow
+
 /cards/series/*
   X-Robots-Tag: noindex, follow
 

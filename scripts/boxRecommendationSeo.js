@@ -3,6 +3,9 @@ import boxMarketItems from '../src/data/box-market-items.js';
 import marketItems from '../src/data/market-cards.js';
 import { analyzeBoxSeries, getBoxGuideSections } from '../src/lib/series-guide-analysis.js';
 import { MANGA_COLLECTION_GROUPS } from '../src/data/collection-guide.js';
+import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES, getBoxCategorySections, getBoxHubSections } from '../lib/box-recommendation-editorial.js';
+
+const seriesData = JSON.parse(fs.readFileSync(new URL('../src/data/series.json', import.meta.url), 'utf8'));
 
 const cardsData = JSON.parse(fs.readFileSync(new URL('../src/data/cards.json', import.meta.url), 'utf8'));
 const contentReviewedAt = '2026-08-25';
@@ -24,7 +27,46 @@ export const boxRecommendationSourcePaths = [
   new URL('../src/data/box-market-items.js', import.meta.url)
 ];
 
+const HUB_SEO = {
+  '/guide/box-recommendation': ['원피스카드 박스 추천 가이드 | Card Pone', '최고가 카드, 안정적인 가격 분포, 유효 히트 수를 기준으로 원피스카드 부스터 박스를 목적별로 비교합니다.'],
+  '/guide/box-recommendation/high-price': ['최고가 카드를 노리는 원피스카드 박스 추천 | Card Pone', '박스 현재가 대비 최고가 Single 카드의 가격 비중이 큰 원피스카드 부스터를 비교합니다.'],
+  '/guide/box-recommendation/stable': ['가격 분포가 안정적인 원피스카드 박스 추천 | Card Pone', '매핑된 히트 카드 가격이 일부 카드에만 집중되지 않은 원피스카드 부스터를 비교합니다.'],
+  '/guide/box-recommendation/more-hits': ['히트 카드가 많은 원피스카드 박스 추천 | Card Pone', '박스 가격과 비교해 의미 있는 Single 시세가 확인되는 히트 카드 수가 많은 원피스카드 부스터를 비교합니다.']
+};
+
+// Hub series list in the same order as the page (newest release first).
+function getHubSeriesItems() {
+  const bySeries = new Map();
+  boxMarketItems.forEach((item) => {
+    const seriesId = getSeriesId(item.code);
+    if (!seriesId) return;
+    const previous = bySeries.get(seriesId);
+    if (!previous || String(item.releaseDate || '') > String(previous.releaseDate || '')) bySeries.set(seriesId, item);
+  });
+  return [...bySeries.entries()].map(([seriesId, item]) => {
+    const code = getSeriesCode(seriesId);
+    const series = seriesData.find((entry) => (entry.locale || 'KR') === 'KR' && String(entry.baseSeriesId || '') === seriesId)
+      || seriesData.find((entry) => String(entry.baseSeriesId || '') === seriesId);
+    return { code, title: series?.koName || series?.enName || seriesId, releaseDate: item.releaseDate || '', href: `/guide/box-recommendation/series/${code.toLowerCase()}` };
+  }).sort((a, b) => b.releaseDate.localeCompare(a.releaseDate) || b.code.localeCompare(a.code));
+}
+
+function getBoxHubEntries() {
+  const base = { keywords: '원피스카드 박스 추천, 원피스카드 박스 가격, 원피스카드 히트 카드', schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: contentReviewedAt };
+  return [
+    { pathname: '/guide/box-recommendation', seo: { ...base, title: HUB_SEO['/guide/box-recommendation'][0], description: HUB_SEO['/guide/box-recommendation'][1], heading: BOX_GUIDE_COPY.hubHeading, paragraphs: [BOX_GUIDE_COPY.hubIntro], sections: getBoxHubSections(getHubSeriesItems()), links: BOX_RECOMMENDATION_CATEGORIES.map((category) => category.path) } },
+    ...BOX_RECOMMENDATION_CATEGORIES.map((category) => ({
+      pathname: category.path,
+      seo: { ...base, title: HUB_SEO[category.path][0], description: HUB_SEO[category.path][1], heading: category.title, paragraphs: [category.description], sections: getBoxCategorySections(category), links: ['/guide/box-recommendation', '/guide/booster-comparison', '/prices/boxes'] }
+    }))
+  ];
+}
+
 export function getBoxRecommendationEntries() {
+  return [...getBoxHubEntries(), ...getBoxSeriesEntries()];
+}
+
+function getBoxSeriesEntries() {
   const seen = new Set();
   return boxMarketItems.flatMap((item) => {
     const seriesId = getSeriesId(item.code);

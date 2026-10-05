@@ -3,6 +3,13 @@ import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
+import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
+import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS, PROMO_COLLECTION_GROUPS } from '../src/data/collection-guide.js';
+
+// Card lists and questions the pages show, printed as text for the pre-rendered HTML.
+const collectionCardText = (card) => (card.variant ? `${card.nameKo} (${card.variant})` : card.nameKo);
+const collectionSection = (heading, groups, label) => ({ heading, items: groups.map((group) => `${label(group)}: ${group.cards.map(collectionCardText).join(' · ')}`) });
+const qaSections = (kind) => GUIDE_QA_GROUPS.filter((group) => group.kind === kind).map((group) => ({ heading: group.title, items: group.items.map((item) => `${item.question} ${item.answer}`) }));
 
 const SITE_ORIGIN = 'https://www.optcgkorea.com';
 const MARKET_PREVIEW_COOKIE = 'optcg_market_preview_v4';
@@ -93,7 +100,9 @@ const PAGE_SEO = {
     title: '원피스카드 월드컵 - 인기 카드 이상형 월드컵 | Card Pone',
     description: '일본판 원피스카드의 패러렐과 특수 카드를 16강부터 128강까지 비교하고, 이용자들의 공용 우승 순위와 승률을 확인할 수 있습니다.',
     keywords: '원피스카드 월드컵, 원피스카드 이상형 월드컵, 원피스카드 인기 순위, 원피스카드 패러렐',
-    schemaType: 'WebApplication'
+    schemaType: 'WebApplication',
+    // A game launcher with little text; keep it usable but out of the index.
+    robots: 'noindex,follow'
   },
   '/guides/centering': {
     title: '원피스카드 센터링 측정기 사용 가이드 | Card Pone',
@@ -974,6 +983,7 @@ const SERVER_PAGE_CONTENT = {
       '카드를 처음 찾는 단계부터 가격 판단, 보관과 실험실 도구 사용까지 필요한 답을 목적별로 나눠 확인할 수 있습니다.',
       '각 가이드는 실제 도감과 시세 화면으로 이어지며 카드 상태, 언어판, 최근 거래 기록과 계산 결과의 범위를 구분해 안내합니다.'
     ],
+    sections: qaSections('guide'),
     links: ['/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
   },
   '/guide/collection': {
@@ -1016,6 +1026,7 @@ const SERVER_PAGE_CONTENT = {
       '망가 카드는 각 부스터를 대표하는 희소한 패러렐을 중심으로 소수의 핵심 카드를 모으고 싶은 경우 확인하기 좋은 수집 방향입니다.',
       'OP-01부터 OP-17까지 일본판 망가 카드의 카드번호와 이미지를 시리즈별로 비교하고 각 카드의 도감 상세로 이동할 수 있습니다.'
     ],
+    sections: [collectionSection('시리즈별 망가 카드', MANGA_COLLECTION_GROUPS, (group) => group.set)],
     links: ['/guide/collection', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo', '/cards/jp', '/prices/cards']
   },
   '/guide/collection/championship': {
@@ -1024,6 +1035,7 @@ const SERVER_PAGE_CONTENT = {
       '챔피언십 카드는 지역 대회, 결승과 월드 파이널처럼 배포 대회와 성적 이력이 분명한 한정 카드를 모으고 싶은 경우에 맞습니다.',
       '일본판과 한국판 카드를 연도와 대회별로 나누고 Best 16, Best 8, 결승 및 참가상 등 확인된 배포 기준을 함께 표시합니다.'
     ],
+    sections: [collectionSection('일본판 챔피언십 카드', CHAMPIONSHIP_COLLECTION_GROUPS.JP, (group) => group.label), collectionSection('한국판 챔피언십 카드', CHAMPIONSHIP_COLLECTION_GROUPS.KR, (group) => group.label)],
     links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/flagship', '/guide/collection/promo', '/cards', '/prices/cards']
   },
   '/guide/collection/flagship': {
@@ -1032,6 +1044,7 @@ const SERVER_PAGE_CONTENT = {
       '플래그십 카드는 매년 이어지는 우승 카드와 TOP 8 카드의 짝을 기준으로 대회 한정 컬렉션을 완성하고 싶은 경우에 맞습니다.',
       '일본판 플래그십 배틀 카드를 2023년부터 연도별로 묶고, 각 카드 아래에 배포 기간과 우승·TOP 8 구분을 표시합니다.'
     ],
+    sections: [collectionSection('플래그십 배틀 카드', FLAGSHIP_COLLECTION_GROUPS.JP, (group) => group.label)],
     links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/promo', '/cards/jp', '/prices/cards']
   },
   '/guide/collection/promo': {
@@ -1040,6 +1053,7 @@ const SERVER_PAGE_CONTENT = {
       '프로모 카드는 잡지 부록, 전원 응모, 매거진과 극장판 특전처럼 배포처가 다양해 관심 있는 캐릭터나 출처부터 범위를 정하기 좋습니다.',
       'V JUMP, 최강점프와 주간 소년 점프의 부록·응모 카드를 비롯한 일본판 프로모를 배포처별로 나누어 비교합니다.'
     ],
+    sections: [collectionSection('배포처별 프로모 카드', PROMO_COLLECTION_GROUPS, (group) => group.label)],
     links: ['/guide/collection', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/cards/jp', '/prices/cards']
   },
   '/news/faq': {
@@ -1048,6 +1062,7 @@ const SERVER_PAGE_CONTENT = {
       '언어판 구분, 카드 검색, 시세 데이터, 보관 방법과 구매처에 관한 자주 묻는 질문을 확인할 수 있습니다.',
       '시세는 실제 거래 시점과 카드 상태에 따라 달라질 수 있으므로 단일 가격보다 최근 거래와 기간별 흐름을 함께 확인해야 합니다.'
     ],
+    sections: qaSections('qa'),
     links: ['/news/guide', '/cards', '/prices', '/shops']
   },
   '/about': {
