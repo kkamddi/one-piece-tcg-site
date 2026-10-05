@@ -12,7 +12,7 @@ const seriesData = JSON.parse(fs.readFileSync(seriesPath, 'utf8'));
 const seriesCardCounts = JSON.parse(fs.readFileSync(countsPath, 'utf8'));
 const cardsData = JSON.parse(fs.readFileSync(cardsPath, 'utf8'));
 const { default: marketItems } = await import(pathToFileURL(marketPath).href);
-const contentReviewedAt = '2026-08-25';
+const contentReviewedAt = '2026-10-05';
 
 const rarityOrder = ['L', 'SEC', 'SR', 'SP', 'R', 'UC', 'C', 'P', 'DON!!'];
 

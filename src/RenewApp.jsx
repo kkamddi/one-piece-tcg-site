@@ -8605,7 +8605,7 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
           <p>상품 기본 정보와 실제 수록 카드를 한 화면에서 확인하고, 도감과 카드별 시세로 바로 이동하는 시리즈 가이드입니다.</p>
           <div className="renew-guide-editorial-meta" aria-label="콘텐츠 검수 정보">
             <span>Card Pone 데이터 편집</span>
-            <time dateTime="2026-08-25">검수 2026.08.25</time>
+            <time dateTime="2026-10-05">검수 2026.10.05</time>
           </div>
           <div className="renew-series-guide-actions">
             <button type="button" onClick={() => onOpenCatalog?.(series)}>수록 카드 전체 보기</button>
