@@ -25111,3 +25111,183 @@ button.renew-deck-entry:focus-visible {
   background: rgba(120, 180, 255, 0.14);
   color: #8fc2ff;
 }
+
+/* Series box entry in the JP catalog and the portfolio box picker. */
+.renew-catalog-box {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 10px 14px 10px 10px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.renew-catalog-box img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  background: #f3f3f1;
+  object-fit: contain;
+}
+
+.renew-catalog-box span,
+.renew-box-picker-list button span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.renew-catalog-box small,
+.renew-box-picker-list small {
+  color: #687180;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.renew-catalog-box strong {
+  color: #17191c;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.renew-catalog-box button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #17191c;
+  border-radius: 8px;
+  background: #fff;
+  color: #17191c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.renew-catalog-box button:hover {
+  background: #17191c;
+  color: #fff;
+}
+
+.renew-box-picker-search {
+  box-sizing: border-box;
+  width: calc(100% - 44px);
+  min-height: 44px;
+  margin: 0 22px 12px;
+  padding: 0 14px;
+  border: 1px solid rgba(23, 25, 28, 0.16);
+  border-radius: 10px;
+  background: #fff;
+  color: #17191c;
+  font: inherit;
+  font-size: 14px;
+}
+
+.renew-box-picker-list {
+  display: grid;
+  gap: 8px;
+  max-height: min(56vh, 520px);
+  overflow-y: auto;
+  padding: 0 22px;
+}
+
+.renew-box-picker-list button {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 8px;
+  border: 1px solid rgba(23, 25, 28, 0.1);
+  border-radius: 12px;
+  background: #fff;
+  color: #17191c;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.renew-box-picker-list button:hover {
+  border-color: rgba(201, 77, 53, 0.48);
+}
+
+.renew-box-picker-list img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: #f3f3f1;
+  object-fit: contain;
+}
+
+.renew-box-picker-list strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renew-box-picker-list b {
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.renew-box-picker-empty,
+.renew-box-picker-note {
+  margin: 0;
+  padding: 12px 22px 18px;
+  color: #687180;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .renew-catalog-box {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .renew-catalog-box img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .renew-catalog-box button {
+    grid-column: 1 / -1;
+  }
+
+  .renew-box-picker-search {
+    width: calc(100% - 32px);
+    margin: 0 16px 12px;
+  }
+
+  .renew-box-picker-list {
+    padding: 0 16px;
+  }
+}
+
+.renew-app.is-dark .renew-catalog-box,
+.renew-app.is-dark .renew-box-picker-list button,
+.renew-app.is-dark .renew-box-picker-search {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 21, 29, 0.82);
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-catalog-box strong {
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-catalog-box button {
+  border-color: rgba(245, 242, 236, 0.7);
+  background: transparent;
+  color: #f5f2ec;
+}
+
+.renew-app.is-dark .renew-catalog-box small,
+.renew-app.is-dark .renew-box-picker-list small,
+.renew-app.is-dark .renew-box-picker-empty,
+.renew-app.is-dark .renew-box-picker-note {
+  color: rgba(245, 242, 236, 0.66);
+}

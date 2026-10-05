@@ -21,6 +21,8 @@
 .portfolio-actions { display: flex; gap: 10px; align-items: center; }
 .portfolio-page .portfolio-primary { border: 0; border-radius: 6px; background: var(--pf-text); color: #fff; padding: 12px 18px; min-height: 44px; font-size: 13px; font-weight: 800; }
 .renew-app.is-dark .portfolio-page .portfolio-primary { color: #181a1d; }
+.portfolio-page .portfolio-secondary { border: 1px solid var(--pf-line); border-radius: 6px; background: transparent; color: var(--pf-text); padding: 12px 16px; min-height: 44px; font-size: 13px; font-weight: 800; }
+.portfolio-state-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .portfolio-page .portfolio-icon { flex: 0 0 40px; width: 40px; height: 40px; border: 1px solid var(--pf-line); border-radius: 6px; background: transparent; font-size: 22px; line-height: 1; }
 .portfolio-overview { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 56px; padding: 36px 0; border-bottom: 1px solid var(--pf-line); }
 .portfolio-balance > span { font-size: 14px; color: var(--pf-muted); }
@@ -222,6 +224,7 @@ body:has(.renew-app.is-dark) .renew-purchase-manager .renew-portfolio-mode-tabs 
   .portfolio-heading h1 { font-size: 24px; }
   .portfolio-actions { gap: 6px; }
   .portfolio-page .portfolio-primary { padding: 10px 12px; font-size: 12px; }
+  .portfolio-page .portfolio-secondary { padding: 10px 12px; font-size: 12px; }
   .portfolio-overview { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 26px 0; }
   .portfolio-balance > strong { font-size: 32px; }
   .portfolio-metrics { gap: 12px; }

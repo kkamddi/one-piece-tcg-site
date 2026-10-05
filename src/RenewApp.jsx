@@ -59,8 +59,8 @@ import './renew.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
 const CARD_SCAN_AVAILABLE = true;
-// Box holdings need the asset_type column (docs/portfolio-box-schema-draft.sql) before saves can succeed.
-const BOX_PORTFOLIO_ENABLED = false;
+// Box holdings rely on portfolio_holdings.asset_type (supabase/migrations/20261005180000_portfolio_box_asset_type.sql).
+const BOX_PORTFOLIO_ENABLED = true;
 const EXTENSION_STORE_URL = 'https://chromewebstore.google.com/detail/bmallhfmgjlccnegdjjlmhobcgocphlc';
 const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
@@ -78,6 +78,14 @@ const resolvedBoxMarketItems = boxMarketItems.map((item) => {
     releaseDate: snapshot.releaseDate || item.releaseDate
   };
 });
+// Sealed boxes the portfolio accepts, newest first, shared by the catalog, portfolio and box market entry points.
+const PORTFOLIO_BOXES = resolvedBoxMarketItems
+  .filter((box) => findSealedBox(box.apparelId))
+  .sort((a, b) => String(b.releaseDate || '').localeCompare(String(a.releaseDate || '')));
+function findSeriesSealedBox(series) {
+  const base = String(getBaseSeriesId(series) || '').toUpperCase().replace(/^(KR|JP|EN)-/, '').replace(/-/g, '');
+  return base ? PORTFOLIO_BOXES.find((box) => (String(box.code).match(/(OP|EB|PRB)-(\d{2})$/) || []).slice(1).join('') === base) || null : null;
+}
 const AUTH_CONSENT_VERSION = '2026-07-14';
 const PENDING_SOCIAL_CONSENT_KEY = 'card-pone-pending-social-consent';
 const ALL_SERIES_ID = '__ALL_SERIES__';
@@ -5657,14 +5665,55 @@ export async function resolvePortfolioImages(card) {
   return sources.filter(Boolean);
 }
 
+function RenewBoxPickerModal({ uiLang, onPick, onClose }) {
+  useBodyScrollLock();
+  const text = (kr, en, jp) => getLocaleText(uiLang, kr, en, jp);
+  const [query, setQuery] = useState('');
+  const keyword = query.trim().toUpperCase().replace(/[\s-]/g, '');
+  const boxes = keyword
+    ? PORTFOLIO_BOXES.filter((box) => `${box.code}${BOX_SHORT_TITLES[box.code] || ''}${box.name}`.toUpperCase().replace(/[\s-]/g, '').includes(keyword))
+    : PORTFOLIO_BOXES;
+  return (
+    <div className="renew-modal-backdrop renew-portfolio-editor-backdrop" onClick={onClose}>
+      <div className="renew-info-modal renew-portfolio-editor renew-box-picker" role="dialog" aria-modal="true" aria-labelledby="box-picker-title"
+        onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); onClose(); } }} onClick={(event) => event.stopPropagation()}>
+        <div className="renew-modal-head">
+          <div>
+            <h2 id="box-picker-title">{text('보유 박스 추가', 'Add owned box', '保有ボックスを追加')}</h2>
+          </div>
+          <button type="button" className="renew-modal-close" onClick={onClose} aria-label={text('닫기', 'Close', '閉じる')}>×</button>
+        </div>
+        <input className="renew-box-picker-search" type="search" value={query} autoFocus onChange={(event) => setQuery(event.target.value)}
+          placeholder={text('박스 코드나 이름 (예: OP-09)', 'Box code or name (e.g. OP-09)', 'コードまたは名前 (例: OP-09)')} aria-label={text('박스 검색', 'Search boxes', 'ボックス検索')} />
+        <div className="renew-box-picker-list">
+          {boxes.map((box) => (
+            <button key={box.apparelId} type="button" onClick={() => onPick(box)}>
+              <img src={box.previewImageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }} />
+              <span>
+                <small>{box.code} · {box.releaseDate || ''}</small>
+                <strong>{BOX_SHORT_TITLES[box.code] || box.name}</strong>
+              </span>
+              <b>{formatBoxMarketPrice(box) || '-'}</b>
+            </button>
+          ))}
+          {!boxes.length ? <p className="renew-box-picker-empty">{text('일치하는 박스가 없습니다.', 'No matching boxes.', '一致するボックスがありません。')}</p> : null}
+        </div>
+        <p className="renew-box-picker-note">{text('가격은 일본판 박스의 SNKRDUNK 등록 최저가입니다.', 'Prices are the lowest SNKRDUNK listing for Japanese boxes.', '価格は日本版ボックスのSNKRDUNK出品最安値です。')}</p>
+      </div>
+    </div>
+  );
+}
+
 function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPortfolioHoldings, stateLoading, portfolioError, onRetry, onRequireLogin, onOpenPrices, uiLang }) {
   const model = usePortfolioValuation(portfolioHoldings, PORTFOLIO_RATES);
   const [editor, setEditor] = useState(null);
+  const [boxPickerOpen, setBoxPickerOpen] = useState(false);
   const t = (ko, en, jp) => getLocaleText(uiLang, ko, en, jp);
   const applyHoldings = (payload) => setPortfolioHoldings(Array.isArray(payload?.holdings) ? payload.holdings : []);
   return <>
     <PortfolioDashboard model={model} loading={!authResolved || stateLoading || model.loading} error={portfolioError} signedIn={Boolean(authUser)}
       onLogin={onRequireLogin} onRetry={() => { if (portfolioError) onRetry(); else model.refresh(); }} onAdd={() => onOpenPrices()}
+      onAddBox={BOX_PORTFOLIO_ENABLED ? () => { if (!authUser) onRequireLogin?.(); else setBoxPickerOpen(true); } : undefined}
       onEdit={setEditor} onRemove={async (id) => applyHoldings(await deletePortfolioHolding(id))} onOpenPrices={onOpenPrices}
       money={isJapaneseUi(uiLang) ? formatYen : formatWonFromYen} displayName={getMarketShortName}
       imageSrc={(card) => getCardThumbnailSrc({ id: card.cardId, locale: String(card.cardId || '').match(/^([A-Z]+)::/)?.[1] || card.locale || 'JP', imageUrl: card.previewImageUrl })} resolveImages={resolvePortfolioImages} t={t} />
@@ -5672,6 +5721,8 @@ function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPort
       onSave={async ({ grade, lot }) => applyHoldings(await savePortfolioPurchase({ holding: { ...editor, grade: normalizeMarketConditionKey(grade) }, purchase: lot }))}
       onDeleteLot={async ({ purchaseId }) => applyHoldings(await deletePortfolioPurchase(purchaseId))}
       onClose={() => setEditor(null)} />}
+    {boxPickerOpen && <RenewBoxPickerModal uiLang={uiLang} onClose={() => setBoxPickerOpen(false)}
+      onPick={(box) => { setBoxPickerOpen(false); setEditor({ ...box, assetType: 'box', grade: 'a' }); }} />}
   </>;
 }
 
@@ -8401,6 +8452,8 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
   const wishSet = useMemo(() => new Set(Array.isArray(userState?.wishlistCardIds) ? userState.wishlistCardIds : []), [userState]);
   const lineupIds = useMemo(() => new Set(getLineupCardIds(lineupGroups, selectedLineup, locale)), [lineupGroups, selectedLineup, locale]);
   const activeLineup = CATALOG_LINEUPS.find(({ id }) => id === selectedLineup);
+  // Boxes are Japanese SNKRDUNK products, so only the JP catalog offers the series box.
+  const catalogSeriesBox = BOX_PORTFOLIO_ENABLED && locale === 'JP' && !activeLineup && !searchKeyword.trim() && !isAllSeriesMode ? findSeriesSealedBox(currentSeries) : null;
   const lineupLabel = (entry) => getLocaleText(uiLang, ...entry.labels);
 
   useEffect(() => {
@@ -8693,6 +8746,16 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
       grade: 'a'
     });
     if (!initialCardId) setSelectedCard(null);
+  }
+
+  // Boxes open the same purchase editor as cards so holdings are registered one way everywhere.
+  function openCatalogBoxPortfolio(box) {
+    if (!authUser) {
+      onRequireLogin?.();
+      return;
+    }
+    setPortfolioEditorDetail(null);
+    setPortfolioEditorItem({ ...box, assetType: 'box', grade: 'a' });
   }
 
   async function saveCatalogPortfolioLot({ grade, lot }) {
@@ -9028,6 +9091,16 @@ function RenewCatalog({ authUser, userState, setUserState, portfolioHoldings, se
             <button type="button" className="renew-series-guide-link" onClick={() => onOpenSeriesGuide?.(currentSeries)}>시리즈 가이드</button>
           ) : null}
         </div>
+        {catalogSeriesBox ? (
+          <div className="renew-catalog-box">
+            <img src={catalogSeriesBox.previewImageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.visibility = 'hidden'; }} />
+            <span>
+              <small>{getLocaleText(uiLang, '일본판 박스 · 등록 최저가', 'Japanese box · lowest listing', 'ボックス · 出品最安値')}</small>
+              <strong>{formatBoxMarketPrice(catalogSeriesBox) || getLocaleText(uiLang, '가격 확인 중', 'Price pending', '価格確認中')}</strong>
+            </span>
+            <button type="button" onClick={() => openCatalogBoxPortfolio(catalogSeriesBox)}>{getLocaleText(uiLang, '+ 보유 박스 추가', '+ Add owned box', '+ 保有ボックスを追加')}</button>
+          </div>
+        ) : null}
 
         {loading ? <div className="renew-empty">{t('loading')}</div> : null}
         {!loading && !visibleCards.length ? <div className="renew-empty">{cardLoadError ? getLocaleText(uiLang, '카드를 불러오지 못했습니다. 다시 시도해 주세요.', 'Could not load cards. Please try again.', 'カードを読み込めませんでした。再度お試しください。') : t('noResults')}</div> : null}

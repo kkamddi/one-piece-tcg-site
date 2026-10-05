@@ -28,7 +28,7 @@ export function PortfolioCardImage({ card, imageSrc, resolveImages }) {
     onError={() => { if (sources[index]) { setProductPhoto(false); setIndex((value) => value + 1); if (index === sources.length - 1) setNeedsFallback(true); } }} />;
 }
 
-export default function PortfolioDashboard({ model, loading, error, signedIn, onLogin, onRetry, onAdd, onEdit, onRemove, onOpenPrices, money, displayName, imageSrc, resolveImages, t }) {
+export default function PortfolioDashboard({ model, loading, error, signedIn, onLogin, onRetry, onAdd, onAddBox, onEdit, onRemove, onOpenPrices, money, displayName, imageSrc, resolveImages, t }) {
   const [tab, setTab] = useState('holdings');
   const [grade, setGrade] = useState('all');
   const [query, setQuery] = useState('');
@@ -63,13 +63,14 @@ export default function PortfolioDashboard({ model, loading, error, signedIn, on
       <div><h1>{t('포트폴리오', 'Portfolio', 'ポートフォリオ')}</h1></div>
       {signedIn && <div className="portfolio-actions">
         <button type="button" className="portfolio-icon" onClick={onRetry} disabled={loading} title={t('새로고침', 'Refresh', '更新')} aria-label={t('새로고침', 'Refresh', '更新')}>↻</button>
-        <button type="button" className="portfolio-primary" onClick={onAdd}>{t('+ 자산 추가', '+ Add asset', '+ 資産を追加')}</button>
+        {onAddBox ? <button type="button" className="portfolio-secondary" onClick={onAddBox}>{t('+ 박스 추가', '+ Add box', '+ ボックスを追加')}</button> : null}
+        <button type="button" className="portfolio-primary" onClick={onAdd}>{onAddBox ? t('+ 카드 추가', '+ Add card', '+ カードを追加') : t('+ 자산 추가', '+ Add asset', '+ 資産を追加')}</button>
       </div>}
     </header>
     {loading ? <div className="portfolio-state" role="status">{t('자산을 불러오는 중...', 'Loading your assets...', '資産を読み込み中...')}</div>
       : !signedIn ? <section className="portfolio-state"><h2>{t('카드·박스 포트폴리오', 'Card and box portfolio', 'カード・ボックスポートフォリオ')}</h2><button type="button" className="portfolio-primary" onClick={onLogin}>{t('로그인', 'Sign in', 'ログイン')}</button></section>
       : error ? <section className="portfolio-state" role="alert"><p>{t('보유 내역을 불러오지 못했습니다.', 'Unable to load your holdings.', '保有記録を読み込めませんでした。')}</p><button type="button" onClick={onRetry}>{t('다시 시도', 'Retry', '再試行')}</button></section>
-      : !model.cards.length ? <section className="portfolio-state"><h2>{t('아직 등록된 자산이 없습니다.', 'No assets yet.', '登録された資産はありません。')}</h2><button type="button" className="portfolio-primary" onClick={onAdd}>{t('카드·박스 찾기', 'Find cards and boxes', 'カード・ボックスを探す')}</button></section>
+      : !model.cards.length ? <section className="portfolio-state"><h2>{t('아직 등록된 자산이 없습니다.', 'No assets yet.', '登録された資産はありません。')}</h2><div className="portfolio-state-actions"><button type="button" className="portfolio-primary" onClick={onAdd}>{onAddBox ? t('카드 찾기', 'Find cards', 'カードを探す') : t('카드·박스 찾기', 'Find cards and boxes', 'カード・ボックスを探す')}</button>{onAddBox ? <button type="button" className="portfolio-secondary" onClick={onAddBox}>{t('박스 추가', 'Add box', 'ボックスを追加')}</button> : null}</div></section>
       : <>
         <section className="portfolio-overview" aria-label={t('자산 요약', 'Asset summary', '資産概要')}>
           <div className="portfolio-balance">
