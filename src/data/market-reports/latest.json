@@ -26,16 +26,6 @@
   ],
   "gainers": [
     {
-      "label": "오나미 ST18-002 (프로모)",
-      "code": "ST18-002",
-      "cardId": "",
-      "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250217043428-1.webp?size=m",
-      "apparelId": 526701,
-      "price": 197134,
-      "change": 91.8
-    },
-    {
       "label": "몽키 D. 루피 OP05-119 (기념판)",
       "code": "OP05-119",
       "cardId": "",
@@ -54,6 +44,16 @@
       "apparelId": 135420,
       "price": 19148,
       "change": 44.6
+    },
+    {
+      "label": "롤로노아 조로 OP06-118 (패러렐)",
+      "code": "OP06-118",
+      "cardId": "JP::OP06-118_p1",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20231124040021-0.webp?size=m",
+      "apparelId": 159663,
+      "price": 18811,
+      "change": 34.3
     }
   ],
   "losers": [
