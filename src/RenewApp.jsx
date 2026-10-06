@@ -8166,7 +8166,7 @@ function ReportMoverCards({ items, rate, direction, onOpen }) {
           </span>
           <ReportChange value={item.change} />
           <strong>{item.label}</strong>
-          <small>{formatReportWon(item.price, rate)} <i>지난주 {formatReportWon(item.prevPrice, rate)}</i></small>
+          <small>{formatReportWon(item.price, rate)} <i>지난주 {formatReportWon(item.prevPrice, rate)} · 이번 주 {item.trades}건 거래</i></small>
         </button>
       ))}
     </div>
@@ -8353,7 +8353,7 @@ function RenewMarketReportPage({ onOpenPrices, onNavigateReport }) {
 
       {singleMovers.length ? (
         <section className="market-report-panel">
-          <div className="market-report-panel-head"><h2>Single 상승·하락</h2><small>두 주 모두 2건 이상 거래된 카드</small></div>
+          <div className="market-report-panel-head"><h2>Single 상승·하락</h2><small>두 주 모두 3건 이상 거래된 카드</small></div>
           <ul className="market-report-list">
             {singleMovers.map((item) => (
               <li key={item.apparelId}>

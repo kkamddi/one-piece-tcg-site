@@ -20,7 +20,7 @@ const products = new Map([
 const row = (id, condition, trades, price, prevTrades, prevPrice) => ({
   apparel_id: id, condition_key: condition, trades, price_weight: trades * price, prev_trades: prevTrades, prev_price_weight: prevTrades * prevPrice
 });
-const rows = [row(1, 'psa10', 4, 120000, 3, 100000), row(2, 'psa10', 5, 45000, 2, 50000), row(3, 'psa10', 9, 20000, 1, 10000), row(99, 'psa10', 7, 5000, 7, 5000)];
+const rows = [row(1, 'psa10', 4, 120000, 3, 100000), row(2, 'psa10', 5, 45000, 3, 50000), row(3, 'psa10', 9, 20000, 1, 10000), row(99, 'psa10', 7, 5000, 7, 5000)];
 
 test('weekly prices are trade-weighted and movers need trades in both weeks', () => {
   const report = buildWeeklyMarketReport({ week, rows, products, generatedAt: '2026-10-06T03:00:00Z' });
@@ -57,7 +57,7 @@ test('the home summary stays small and the text view keeps the method note', () 
   const summary = getMarketReportSummary(report);
   assert.deepEqual(Object.keys(summary).sort(), ['gainers', 'id', 'kpis', 'krwPerJpy', 'losers', 'title', 'weekEnd', 'weekStart']);
   assert.equal(summary.kpis.length, 3);
-  assert.equal(getMarketReportKpis(report)[0].change, pct(25, 13));
+  assert.equal(getMarketReportKpis(report)[0].change, pct(25, 14));
   const editorial = getMarketReportEditorial(report);
   assert.equal(editorial.heading, '원피스카드 주간 시세 리포트 (9월 28일~10월 4일)');
   assert.ok(editorial.sections.some((section) => section.heading === 'PSA10 상승 TOP 10' && section.table.rows[0][0] === '샹크스 OP01-120'));

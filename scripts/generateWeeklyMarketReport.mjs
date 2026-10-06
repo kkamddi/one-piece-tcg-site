@@ -39,6 +39,9 @@ for (const card of cards) {
   const code = String(card.cardNo || '').replace(/_p\d+$/i, '');
   if (card.locale === 'KR' && card.name && !krNames.has(code)) krNames.set(code, card.name);
 }
+// Wano disguise names are the official card names; add the crew member readers know them by.
+const DISGUISE_NAMES = { 오나미: '나미', 오로비: '로빈', 상고로: '상디', 쵸파에몬: '쵸파', 우소하치: '우솝', 프라노스케: '프랑키', 본키치: '브룩' };
+const withAlias = (name) => (DISGUISE_NAMES[name] ? `${name}(${DISGUISE_NAMES[name]})` : name);
 const shortName = (name) => String(name || '')
   .replace(/\s*:?\s*Opened\b/gi, '')
   .replace(/\s*\[[^\]]+\]/g, '')
@@ -54,7 +57,7 @@ for (const item of marketCards) {
   const code = (String(item.name || '').match(/\[((?:OP|EB|ST|PRB|P)\d*-\d{3})\]/i)?.[1] || String(item.code || '')).toUpperCase();
   if (!code || products.has(Number(item.apparelId))) continue;
   const variant = getMarketVariantLabel(item, 'KR');
-  const name = krNames.get(code) || shortName(item.name) || code;
+  const name = withAlias(krNames.get(code) || shortName(item.name) || code);
   products.set(Number(item.apparelId), {
     code,
     label: `${name} ${code}${variant ? ` (${variant})` : ''}`,
