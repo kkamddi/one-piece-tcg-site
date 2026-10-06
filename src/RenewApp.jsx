@@ -35,7 +35,7 @@ import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
-import { getMarketReportEditorial } from '../lib/market-report.js';
+import { MARKET_REPORT_PATH, formatReportWon, getMarketReportHighlights, getMarketReportKpis, getMarketReportMethod, reportConditionLabel } from '../lib/market-report.js';
 import MARKET_REPORT_INDEX from './data/market-reports/index.json';
 import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
@@ -66,8 +66,6 @@ const CatalogPreviewShell = React.lazy(() => import('./RiftboundCatalog'));
 const CardShows = React.lazy(() => import('./CardShows'));
 const CenteringLab = React.lazy(() => import('./CenteringLab'));
 const CardScanner = React.lazy(() => import('./CardScanner'));
-const MARKET_REPORT_PATH = '/guide/market-report';
-const MARKET_REPORT_FILES = import.meta.glob('./data/market-reports/2*.json');
 const APP_BUILD_REVISION = '2026-08-22-market-currency-v2';
 const CARD_THUMBNAIL_BASE_URL = (import.meta.env.VITE_CARD_THUMBNAIL_BASE_URL || 'https://cards.optcgkorea.com').replace(/\/+$/, '');
 const SNKRDUNK_MARKET_URL = Capacitor.getPlatform() === 'android'
@@ -760,8 +758,7 @@ const GUIDE_HUB_COLLECTIONS = [
     links: [
       { href: '/guide/card-price', title: '카드 시세 읽기', meta: 'Single·PSA10·최근 거래' },
       { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' },
-      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' },
-      ...(MARKET_REPORT_INDEX.length ? [{ href: '/guide/market-report', title: '주간 시세 리포트', meta: '매주 상승·하락·거래량' }] : [])
+      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' }
     ]
   },
   {
@@ -827,19 +824,9 @@ const GUIDE_ARTICLE_DETAILS = {
       ['수치는 언제 바뀌나요?', '본문은 2026년 10월 5일 데이터 기준입니다. 새 부스터 발매나 시세 변화에 따라 달라지므로 각 부스터의 박스 가이드에서 최신 값을 함께 확인하세요.']
     ],
     related: ['/guide/box-recommendation', '/guide/card-price', '/guide/collection/manga']
-  },
-  marketReport: {
-    checklistTitle: '리포트를 볼 때 확인할 점',
-    faq: [
-      ['리포트는 언제 올라오나요?', '매주 월요일에 지난주(월~일) SNKRDUNK 거래를 자동으로 집계해 올립니다.'],
-      ['주간 가격은 어떻게 계산하나요?', '하루 거래가 중앙값을 그날 거래 건수로 가중 평균했습니다. 거래가 적은 카드는 몇 건만으로도 크게 움직일 수 있습니다.'],
-      ['등록가와 무엇이 다른가요?', '카드는 실제로 팔린 가격 기준이고, 박스만 거래가 대신 등록 최저가를 씁니다.']
-    ],
-    related: ['/guide/card-price', '/guide/booster-comparison', '/guide/box-recommendation']
   }
 };
 const GUIDE_RELATED_LABELS = {
-  '/guide/market-report': ['주간 시세 리포트', '매주 PSA10·Single 상승·하락 카드를 정리합니다.'],
   '/guide/booster-comparison': ['부스터별 히트 카드 비교', 'OP01~OP16 망가·SP·고가 카드 분포를 비교합니다.'],
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
@@ -2377,6 +2364,7 @@ const PAGE_PATHS = {
   portfolioCalculator: '/tools/portfolio-calculator',
   portfolioCalculatorGuide: '/guides/portfolio-calculator',
   calendar: '/calendar',
+  marketReport: '/market-report',
   news: '/news',
   collectionGuide: '/guide/collection',
   shops: '/shops',
@@ -2528,6 +2516,7 @@ function restoreAppScrollPosition(targetY, { onDone, timeoutMs = 3000 } = {}) {
 function getRouteSeoPage(pathname = '/') {
   const path = getAppPath(pathname);
   if (PATH_PAGES[path]) return PATH_PAGES[path];
+  if (path.startsWith(`${MARKET_REPORT_PATH}/`)) return 'marketReport';
   if (path.startsWith('/guide/collection/')) return 'collectionGuide';
   if (path.startsWith('/guides/series/')) return 'seriesGuide';
   if (path.startsWith('/cards')) return 'cards';
@@ -5755,7 +5744,7 @@ function RenewPortfolioPage({ authUser, authResolved, portfolioHoldings, setPort
   </>;
 }
 
-function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, onOpenPortfolio, onRequireLogin, portfolioError, uiLang }) {
+function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHoldings, stateLoading, onSubmitSearch, onSelectPopular, visitorToken, onNavigateNews, onOpenIndex, onOpenPrices, onOpenCalendar, onOpenPortfolio, onRequireLogin, portfolioError, uiLang , onNavigateReport}) {
   const isJp = isJapaneseUi(uiLang);
   const portfolio = usePortfolioValuation(portfolioHoldings, PORTFOLIO_RATES);
   const marketCards = portfolio.cards;
@@ -5767,6 +5756,15 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
   const [progressLocale, setProgressLocale] = useState('KR');
   const [progressData, setProgressData] = useState({ KR: { owned: 0, total: 0, percent: 0, series: [] }, JP: { owned: 0, total: 0, percent: 0, series: [] } });
   const [dailyMovers, setDailyMovers] = useState(null);
+  const [reportSummary, setReportSummary] = useState(null);
+  const showReportCard = !isJp && MARKET_REPORT_INDEX.length > 0;
+  useEffect(() => {
+    const load = MARKET_REPORT_LATEST['./data/market-reports/latest.json'];
+    if (!showReportCard || !load) return undefined;
+    let cancelled = false;
+    load().then((module) => { if (!cancelled) setReportSummary(module.default); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [showReportCard]);
   const [dailyMoversLoading, setDailyMoversLoading] = useState(true);
   const ownedCount = Array.isArray(userState?.ownedCardIds) ? userState.ownedCardIds.length : 0;
   const valuationEntries = (Array.isArray(portfolioHoldings) ? portfolioHoldings : []).map((item) => [item.id, item]);
@@ -5808,6 +5806,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
       }
     };
     const loadDailyMovers = async () => {
+      if (showReportCard) return;
       const cached = readCachedMovers();
       if (cached && !cancelled) setDailyMovers(cached);
 
@@ -6019,7 +6018,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
           {MARKET_INDEX_PUBLIC_ENABLED ? <RenewHomeMarketIndex onOpen={onOpenIndex} /> : null}
         </article>
 
-        <article className="renew-float-card renew-home-movers">
+        {showReportCard && reportSummary ? <RenewHomeMarketReport summary={reportSummary} onOpenPrices={onOpenPrices} onNavigateReport={onNavigateReport} /> : <article className="renew-float-card renew-home-movers">
           <div className="renew-home-movers-head">
             <div>
               <div className="renew-card-title">{getLocaleText(uiLang, '오늘의 시세 움직임', 'Today\'s market moves', '本日の価格変動')}</div>
@@ -6074,7 +6073,7 @@ function RenewHome({ authUser, userState, portfolioHoldings, setPortfolioHolding
             ))}
           </div>
           <p className="renew-home-movers-note">{getLocaleText(uiLang, '오늘과 전일 모두 거래된 카드의 일별 중앙값 기준', 'Daily median for cards traded on both days', '当日・前日とも取引があるカードの日次中央値')}</p>
-        </article>
+        </article>}
       </section>
       {renewalNoticeOpen && !isJp ? <RenewalNoticeModal onClose={() => setRenewalNoticeOpen(false)} /> : null}
       {PARTNER_NEWS_POPUP_ENABLED && partnerNewsOpen && latestPartnerNews ? (
@@ -6992,7 +6991,6 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
   const isBoosterComparisonGuide = initialPath === '/guide/booster-comparison';
-  const isMarketReport = initialPath === MARKET_REPORT_PATH || initialPath.startsWith(`${MARKET_REPORT_PATH}/`);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
@@ -7310,7 +7308,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isBoxRecommendationGuide && !isMarketReport ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7351,7 +7349,6 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
       {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
       {isBoosterComparisonGuide ? <RenewBoosterComparisonGuide /> : null}
-      {isMarketReport ? <RenewMarketReport path={initialPath} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewAdInquiry uiLang={uiLang} />
@@ -8014,7 +8011,7 @@ function EditorialSectionBody({ section }) {
   );
 }
 
-function RenewEditorialGuide({ guide, guideKey, headingId, cta, children }) {
+function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
   const details = GUIDE_ARTICLE_DETAILS[guideKey];
   const reviewedAt = guide.reviewedAt || GUIDE_REVIEWED_AT;
   return (
@@ -8046,7 +8043,6 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta, children }) {
           </article>
         ))}
       </div>
-      {children}
       <div className="renew-card-storage-checklist">
         <h3>{details.checklistTitle}</h3>
         <ul>
@@ -8102,10 +8098,104 @@ function RenewCardPriceGuide() {
   return <RenewEditorialGuide guide={CARD_PRICE_GUIDE} guideKey="price" headingId="card-price-guide-heading" cta={{ eyebrow: '카드 시세', title: '카드 시세를 직접 확인하려면', description: '카드번호 또는 이름으로 같은 카드의 버전별 가격과 최근 거래를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
 }
 
-// Weekly market reports are generated data (scripts/generateWeeklyMarketReport.mjs); each report loads only on its page.
-function RenewMarketReport({ path }) {
+// Weekly market report (scripts/generateWeeklyMarketReport.mjs). Report files load only on their own page;
+// the home card reads the small latest.json summary.
+const MARKET_REPORT_FILES = import.meta.glob('./data/market-reports/2*.json');
+const MARKET_REPORT_LATEST = import.meta.glob('./data/market-reports/latest.json');
+const MARKET_REPORT_WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
+const formatReportPeriod = (report) => `${report.weekStart.replaceAll('-', '.')} – ${report.weekEnd.slice(5).replace('-', '.')}`;
+
+function ReportChange({ value, suffix = '' }) {
+  if (value == null) return <span className="market-report-change is-flat">-</span>;
+  const direction = value > 0 ? 'is-up' : value < 0 ? 'is-down' : 'is-flat';
+  return <span className={`market-report-change ${direction}`}>{value > 0 ? '▲' : value < 0 ? '▼' : ''} {Math.abs(value)}%{suffix}</span>;
+}
+
+function ReportCardImage({ item, className = '' }) {
+  return (
+    <img
+      className={className}
+      src={item.cardId ? getCardThumbnailSrc({ id: item.cardId, locale: item.locale, imageUrl: item.imageUrl }) : item.imageUrl || '/card-placeholder.svg'}
+      data-fallback-src={item.imageUrl || ''}
+      alt=""
+      loading="lazy"
+      onError={fallbackToOriginalCardImage}
+    />
+  );
+}
+
+function ReportDailyChart({ daily }) {
+  const days = MARKET_REPORT_WEEKDAYS.map((label, index) => ({
+    label,
+    prev: (daily[index]?.psa10 || 0) + (daily[index]?.a || 0),
+    current: (daily[index + 7]?.psa10 || 0) + (daily[index + 7]?.a || 0)
+  }));
+  const max = Math.max(...days.flatMap((day) => [day.prev, day.current]), 1);
+  const width = 560;
+  const height = 210;
+  const plot = 160;
+  const slot = width / 7;
+  return (
+    <svg className="market-report-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="요일별 거래량: 이번 주와 지난주 비교">
+      {days.map((day, index) => {
+        const x = index * slot + slot / 2;
+        const prevHeight = (day.prev / max) * plot;
+        const currentHeight = (day.current / max) * plot;
+        return (
+          <g key={day.label}>
+            <rect className="is-prev" x={x - 22} y={180 - prevHeight} width="20" height={prevHeight} rx="4" />
+            <rect className="is-current" x={x + 2} y={180 - currentHeight} width="20" height={currentHeight} rx="4" />
+            <text className="market-report-chart-value" x={x + 12} y={172 - currentHeight} textAnchor="middle">{day.current}</text>
+            <text className="market-report-chart-label" x={x} y="202" textAnchor="middle">{day.label}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function ReportMoverCards({ items, rate, direction, onOpen }) {
+  if (!items.length) return <p className="market-report-empty">비교할 수 있는 거래가 없었습니다.</p>;
+  return (
+    <div className="market-report-cards">
+      {items.map((item, index) => (
+        <button key={`${item.condition}-${item.apparelId}`} type="button" className={`market-report-card is-${direction}`} onClick={() => onOpen?.(item)}>
+          <span className="market-report-card-image">
+            <ReportCardImage item={item} />
+            <b>{index + 1}</b>
+          </span>
+          <ReportChange value={item.change} />
+          <strong>{item.label}</strong>
+          <small>{formatReportWon(item.price, rate)} <i>지난주 {formatReportWon(item.prevPrice, rate)}</i></small>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function RenewMarketReportArchive({ currentId, onNavigateReport }) {
+  return (
+    <nav className="market-report-archive" aria-label="지난 리포트">
+      <h2>지난 리포트</h2>
+      {MARKET_REPORT_INDEX.map((entry) => (
+        <a
+          key={entry.id}
+          href={`${MARKET_REPORT_PATH}/${entry.id}`}
+          aria-current={entry.id === currentId ? 'page' : undefined}
+          onClick={(event) => { event.preventDefault(); onNavigateReport?.(`${MARKET_REPORT_PATH}/${entry.id}`); }}
+        >
+          <strong>{entry.title}</strong>
+          <b aria-hidden="true">›</b>
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+function RenewMarketReportPage({ onOpenPrices, onNavigateReport }) {
+  const path = getAppPath(window.location.pathname);
   const requestedId = path.startsWith(`${MARKET_REPORT_PATH}/`) ? path.slice(MARKET_REPORT_PATH.length + 1) : '';
-  const entry = requestedId ? MARKET_REPORT_INDEX.find((item) => item.id === requestedId) : MARKET_REPORT_INDEX[0];
+  const entry = requestedId ? MARKET_REPORT_INDEX.find((item) => item.id === requestedId) : null;
   const [loaded, setLoaded] = useState({ id: '', report: null, failed: false });
   useEffect(() => {
     if (!entry) return undefined;
@@ -8121,63 +8211,213 @@ function RenewMarketReport({ path }) {
     return () => { cancelled = true; };
   }, [entry?.id]);
 
-  if (!entry) {
+  if (!requestedId) {
     return (
-      <section className="renew-panel renew-news-panel renew-editorial-guide">
-        <p className="renew-empty">{MARKET_REPORT_INDEX.length ? '해당 주의 리포트를 찾을 수 없습니다.' : '첫 주간 시세 리포트를 준비하고 있습니다.'}</p>
-      </section>
+      <main className="renew-main market-report">
+        <header className="market-report-hero">
+          <span className="market-report-eyebrow">WEEKLY MARKET REPORT</span>
+          <h1>원피스카드 주간 시세 리포트</h1>
+          <p>매주 월요일, 지난 한 주 동안 SNKRDUNK에서 실제로 거래된 원피스카드 시세를 정리합니다.</p>
+        </header>
+        {MARKET_REPORT_INDEX.length
+          ? <RenewMarketReportArchive onNavigateReport={onNavigateReport} />
+          : <p className="market-report-empty">첫 주간 시세 리포트를 준비하고 있습니다.</p>}
+      </main>
     );
   }
-  const report = loaded.id === entry.id ? loaded.report : null;
+  const report = entry && loaded.id === entry.id ? loaded.report : null;
   if (!report) {
     return (
-      <section className="renew-panel renew-news-panel renew-editorial-guide" aria-busy={!loaded.failed}>
-        <p className="renew-empty">{loaded.failed && loaded.id === entry.id ? '리포트를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' : '리포트를 불러오는 중...'}</p>
-      </section>
+      <main className="renew-main market-report" aria-busy={Boolean(entry) && !loaded.failed}>
+        <p className="market-report-empty">
+          {!entry ? '해당 주의 리포트를 찾을 수 없습니다.' : loaded.failed && loaded.id === entry.id ? '리포트를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' : '리포트를 불러오는 중...'}
+        </p>
+      </main>
     );
   }
-  const editorial = getMarketReportEditorial(report);
-  const archive = (
-    <nav className="renew-market-report-archive" aria-label="지난 리포트">
-      <h3>지난 리포트</h3>
-      {MARKET_REPORT_INDEX.map((item) => (
-        <a key={item.id} href={`${MARKET_REPORT_PATH}/${item.id}`} aria-current={item.id === entry.id && requestedId ? 'page' : undefined}>
-          <strong>{item.title}</strong>
-          <b aria-hidden="true">›</b>
-        </a>
-      ))}
-    </nav>
-  );
 
-  if (!requestedId) {
-    const highlights = editorial.sections.find((section) => section.items)?.items || [];
-    return (
-      <section className="renew-panel renew-news-panel renew-card-storage-guide renew-editorial-guide" aria-labelledby="market-report-hub-heading">
-        <header className="renew-editorial-guide-head">
-          <a href="/guide" onClick={() => rememberCurrentAppView()}>가이드/Q&amp;A</a>
-          <h1 id="market-report-hub-heading">원피스카드 주간 시세 리포트</h1>
-          <p>매주 월요일, 지난 한 주 동안 SNKRDUNK에서 실제로 거래된 원피스카드 시세를 집계해 정리합니다.</p>
-        </header>
-        <div className="renew-market-report-latest">
-          <span>최신 리포트</span>
-          <h2>{entry.title}</h2>
-          <EditorialStats stats={editorial.summary} label="최신 리포트 핵심 숫자" />
-          <ul>{highlights.map((item) => <li key={item}>{item}</li>)}</ul>
-          <a className="renew-market-report-open" href={`${MARKET_REPORT_PATH}/${entry.id}`}>리포트 전체 보기 <span aria-hidden="true">›</span></a>
-        </div>
-        {archive}
-      </section>
-    );
-  }
+  const rate = report.krwPerJpy;
+  const kpis = getMarketReportKpis(report);
+  const highlights = getMarketReportHighlights(report);
+  const mostTraded = report.mostTraded.psa10.slice(0, 7);
+  const tradeMax = Math.max(...mostTraded.map((item) => item.trades), 1);
+  const seriesMax = Math.max(...report.series.map((entry) => entry.trades), 1);
+  const singleMovers = [...report.movers.a.gainers, ...report.movers.a.losers];
   return (
-    <RenewEditorialGuide
-      guide={toEditorialGuide(editorial)}
-      guideKey="marketReport"
-      headingId="market-report-heading"
-      cta={{ eyebrow: '시세', title: '카드별 최근 거래를 확인하려면', description: '리포트의 카드는 시세 화면에서 Single·PSA10 최근 거래와 차트를 볼 수 있습니다.', href: '/prices', label: '시세 보기' }}
-    >
-      {archive}
-    </RenewEditorialGuide>
+    <main className="renew-main market-report">
+      <header className="market-report-hero">
+        <span className="market-report-eyebrow">WEEKLY MARKET REPORT</span>
+        <h1>원피스카드 주간 시세 리포트</h1>
+        <p className="market-report-period">{formatReportPeriod(report)} · SNKRDUNK 실거래 기준</p>
+      </header>
+
+      <section className="market-report-kpis" aria-label="이번 주 핵심 숫자">
+        {kpis.map((kpi) => (
+          <div key={kpi.key} className="market-report-kpi">
+            <small>{kpi.label}</small>
+            <strong>{kpi.value}</strong>
+            <span>지난주 대비 <ReportChange value={kpi.change} /></span>
+          </div>
+        ))}
+      </section>
+
+      <section className="market-report-panel market-report-points">
+        <h2>이번 주 포인트</h2>
+        {report.notes?.length ? <div className="market-report-note">{report.notes.map((note) => <p key={note}>{note}</p>)}</div> : null}
+        <ul>{highlights.map((item) => <li key={item}>{item}</li>)}</ul>
+      </section>
+
+      <section className="market-report-panel">
+        <div className="market-report-panel-head">
+          <h2>요일별 거래량</h2>
+          <span className="market-report-legend"><i className="is-current" />이번 주 <i className="is-prev" />지난주</span>
+        </div>
+        <ReportDailyChart daily={report.daily} />
+      </section>
+
+      <section className="market-report-panel">
+        <div className="market-report-panel-head"><h2>급등 카드 TOP 5</h2><small>PSA10 · 주간 평균가</small></div>
+        <ReportMoverCards items={report.movers.psa10.gainers.slice(0, 5)} rate={rate} direction="up" onOpen={onOpenPrices} />
+      </section>
+
+      <section className="market-report-panel">
+        <div className="market-report-panel-head"><h2>급락 카드 TOP 5</h2><small>PSA10 · 주간 평균가</small></div>
+        <ReportMoverCards items={report.movers.psa10.losers.slice(0, 5)} rate={rate} direction="down" onOpen={onOpenPrices} />
+      </section>
+
+      <div className="market-report-split">
+        <section className="market-report-panel">
+          <div className="market-report-panel-head"><h2>가장 많이 거래된 카드</h2><small>PSA10</small></div>
+          <ol className="market-report-ranking">
+            {mostTraded.map((item, index) => (
+              <li key={item.apparelId}>
+                <button type="button" onClick={() => onOpenPrices?.(item)}>
+                  <b>{index + 1}</b>
+                  <ReportCardImage item={item} />
+                  <span>
+                    <strong>{item.label}</strong>
+                    <i><em style={{ width: `${Math.max(6, (item.trades / tradeMax) * 100)}%` }} /></i>
+                  </span>
+                  <small>{item.trades}건</small>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="market-report-panel">
+          <div className="market-report-panel-head"><h2>시리즈별 거래량</h2><small>PSA10 + Single</small></div>
+          <div className="market-report-bars">
+            {report.series.map((entry) => (
+              <div key={entry.set}>
+                <span>{entry.set}</span>
+                <i><em style={{ width: `${Math.max(4, (entry.trades / seriesMax) * 100)}%` }} /></i>
+                <strong>{entry.trades}건</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {report.topPrice.length ? (
+        <section className="market-report-panel">
+          <div className="market-report-panel-head"><h2>이번 주 최고가 카드</h2><small>주간 평균가</small></div>
+          <div className="market-report-cards">
+            {report.topPrice.map((item, index) => (
+              <button key={`${item.condition}-${item.apparelId}`} type="button" className="market-report-card is-price" onClick={() => onOpenPrices?.(item)}>
+                <span className="market-report-card-image"><ReportCardImage item={item} /><b>{index + 1}</b></span>
+                <span className="market-report-grade">{reportConditionLabel(item.condition)}</span>
+                <strong>{item.label}</strong>
+                <small>{formatReportWon(item.price, rate)} <i>{item.trades}건 거래</i></small>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {report.boxes.length ? (
+        <section className="market-report-panel">
+          <div className="market-report-panel-head"><h2>박스 등록 최저가</h2><small>일본판 · SNKRDUNK</small></div>
+          <div className="market-report-boxes">
+            {report.boxes.map((box) => (
+              <button key={box.apparelId} type="button" onClick={() => onOpenPrices?.({ ...box, assetType: 'box' })}>
+                <img src={box.imageUrl || '/card-placeholder.svg'} alt="" loading="lazy" />
+                <strong>{box.code.replace(/^OPC-TCG-/, '')}</strong>
+                <small>{formatReportWon(box.price, rate)}</small>
+                {box.change != null ? <ReportChange value={box.change} /> : null}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {singleMovers.length ? (
+        <section className="market-report-panel">
+          <div className="market-report-panel-head"><h2>Single 상승·하락</h2><small>두 주 모두 2건 이상 거래된 카드</small></div>
+          <ul className="market-report-list">
+            {singleMovers.map((item) => (
+              <li key={item.apparelId}>
+                <button type="button" onClick={() => onOpenPrices?.(item)}>
+                  <ReportCardImage item={item} />
+                  <strong>{item.label}</strong>
+                  <small>{formatReportWon(item.price, rate)}</small>
+                  <ReportChange value={item.change} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <footer className="market-report-method">
+        <h2>집계 기준</h2>
+        {getMarketReportMethod(report).map((line) => <p key={line}>{line}</p>)}
+      </footer>
+      <RenewMarketReportArchive currentId={report.id} onNavigateReport={onNavigateReport} />
+    </main>
+  );
+}
+
+function RenewHomeMarketReport({ summary, onOpenPrices, onNavigateReport }) {
+  const href = `${MARKET_REPORT_PATH}/${summary.id}`;
+  const rate = summary.krwPerJpy;
+  return (
+    <article className="renew-float-card renew-home-report">
+      <div className="renew-home-report-head">
+        <div>
+          <div className="renew-card-title">주간 시세 리포트</div>
+          <small>{formatReportPeriod(summary)}</small>
+        </div>
+        <a href={href} onClick={(event) => { event.preventDefault(); onNavigateReport?.(href); }}>자세히 보기 <span aria-hidden="true">›</span></a>
+      </div>
+      <div className="renew-home-report-kpis">
+        {summary.kpis.map((kpi) => (
+          <div key={kpi.key}>
+            <small>{kpi.label}</small>
+            <strong>{kpi.value}</strong>
+            <ReportChange value={kpi.change} />
+          </div>
+        ))}
+      </div>
+      <div className="renew-home-report-movers">
+        {[['gainers', '급등 TOP 3'], ['losers', '급락 TOP 3']].map(([key, label]) => (
+          <section key={key} className={`is-${key}`}>
+            <h3>{label}</h3>
+            {summary[key].map((item, index) => (
+              <button key={item.apparelId} type="button" onClick={() => onOpenPrices?.(item)}>
+                <b>{index + 1}</b>
+                <ReportCardImage item={item} />
+                <span>
+                  <strong>{item.label}</strong>
+                  <small>{formatReportWon(item.price, rate)}</small>
+                </span>
+                <ReportChange value={item.change} />
+              </button>
+            ))}
+          </section>
+        ))}
+      </div>
+    </article>
   );
 }
 
@@ -16240,6 +16480,32 @@ export default function RenewApp() {
     }
   }
 
+  function openMarketItem(item) {
+    if (item?.assetType === 'box') { window.location.assign(`${isJapaneseUi(uiLang) ? '/jp' : ''}/prices/box/${encodeURIComponent(item.code)}`); return; }
+    if (!item) {
+      navigatePage('prices');
+      return;
+    }
+    setMarketInitialCode(item.code || '');
+    setMarketInitialApparelId(item.apparelId || null);
+    setMarketInitialCardId(item.cardId || '');
+    const query = new URLSearchParams();
+    if (item.code) query.set('code', item.code);
+    if (item.apparelId) query.set('apparelId', String(item.apparelId));
+    if (item.cardId) query.set('cardId', item.cardId);
+    navigatePage('prices', { query: query.toString() });
+  }
+
+  function navigateReport(path) {
+    setActivePage('marketReport');
+    if (window.location.pathname !== path) {
+      internalNavigationRef.current = true;
+      pushAppHistory(path);
+    }
+    setRouteRevision((value) => value + 1);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }
+
   function navigatePage(page, options = {}) {
     if (page === 'community') {
       page = 'lab';
@@ -16372,23 +16638,12 @@ export default function RenewApp() {
             setMarketInitialCardId('');
             navigatePage('prices', { query: `tab=index&index=${encodeURIComponent(indexType)}` });
           }}
-          onOpenPrices={(item) => {
-            if (item?.assetType === 'box') { window.location.assign(`${isJapaneseUi(uiLang) ? '/jp' : ''}/prices/box/${encodeURIComponent(item.code)}`); return; }
-            if (!item) {
-              navigatePage('prices');
-              return;
-            }
-            setMarketInitialCode(item.code || '');
-            setMarketInitialApparelId(item.apparelId || null);
-            setMarketInitialCardId(item.cardId || '');
-            const query = new URLSearchParams();
-            if (item.code) query.set('code', item.code);
-            if (item.apparelId) query.set('apparelId', String(item.apparelId));
-            if (item.cardId) query.set('cardId', item.cardId);
-            navigatePage('prices', { query: query.toString() });
-          }}
+          onOpenPrices={openMarketItem}
+          onNavigateReport={navigateReport}
           onOpenCalendar={(date = '') => navigatePage('calendar', { query: date ? `date=${encodeURIComponent(date)}` : '' })}
         />
+      ) : activePage === 'marketReport' ? (
+        <RenewMarketReportPage key={window.location.pathname} onOpenPrices={openMarketItem} onNavigateReport={navigateReport} />
       ) : activePage === 'portfolio' ? (
         <RenewPortfolioPage authUser={authUser} authResolved={authResolved} portfolioHoldings={portfolioHoldings} setPortfolioHoldings={setPortfolioHoldings}
           stateLoading={stateLoading} portfolioError={portfolioError} onRetry={() => setPortfolioReload((value) => value + 1)}

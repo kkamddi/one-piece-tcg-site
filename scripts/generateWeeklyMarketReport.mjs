@@ -1,11 +1,11 @@
 // Weekly market report generator.
 //   node scripts/generateWeeklyMarketReport.mjs --sql [--today YYYY-MM-DD]     print the D1 query for the last full week
-//   node scripts/generateWeeklyMarketReport.mjs --input rows.json [--today …]  write src/data/market-reports/<weekEnd>.json
-// rows.json is the `wrangler d1 execute --json` output of the --sql query.
+//   node scripts/generateWeeklyMarketReport.mjs --input rows.json [--today …]  write src/data/market-reports/<weekEnd>.json, index.json and latest.json
+// rows.json is the `wrangler d1 execute --json` output of the --sql query (product aggregates, then daily totals).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildWeeklyMarketReport, getMarketReportTitle, getReportWeek, kstDateKey, weeklyReportSql } from '../lib/market-report.js';
+import { buildWeeklyMarketReport, getMarketReportSummary, getMarketReportTitle, getReportWeek, kstDateKey, weeklyReportSql } from '../lib/market-report.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const reportsDir = path.join(rootDir, 'src', 'data', 'market-reports');
@@ -22,6 +22,7 @@ const inputPath = argValue('--input');
 if (!inputPath) throw new Error('Pass --sql or --input <rows.json>.');
 const parsed = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
 const rows = Array.isArray(parsed) ? (parsed[0]?.results ?? parsed) : parsed.results || [];
+const dailyRows = Array.isArray(parsed) ? parsed[1]?.results || [] : [];
 if (!rows.length) throw new Error('The D1 query returned no rows; refusing to write an empty report.');
 
 const load = async (relative) => (await import(pathToFileURL(path.join(rootDir, relative)).href)).default;
@@ -30,6 +31,7 @@ const boxItems = await load('src/data/box-market-items.js');
 const { sealedBoxes } = await import(pathToFileURL(path.join(rootDir, 'src', 'box-portfolio.js')).href);
 const { getMarketVariantLabel } = await import(pathToFileURL(path.join(rootDir, 'src', 'market-variant-label.js')).href);
 const cards = JSON.parse(fs.readFileSync(path.join(rootDir, 'src', 'data', 'cards.json'), 'utf8'));
+const marketLinks = await load('src/data/card-market-links.js');
 const boxPrices = JSON.parse(fs.readFileSync(path.join(rootDir, 'src', 'data', 'box-market-prices.json'), 'utf8')).items || {};
 
 const krNames = new Map();
@@ -44,6 +46,8 @@ const shortName = (name) => String(name || '')
   .replace(/\b(SEC-SPC|SEC-SP|SEC-P|SR-SP|SR-P|R-P|L-P|SP|SEC|L|SR|R|UC|C|P)\b.*$/i, '')
   .replace(/\s{2,}/g, ' ')
   .trim();
+// Approved links give the catalog card behind a SNKRDUNK product, which has a cleaner thumbnail.
+const linkedCards = new Map(marketLinks.filter((link) => link.status === 'approved').map((link) => [Number(link.apparelId), link]));
 const products = new Map();
 for (const item of marketCards) {
   // Prize and bundle products carry the printed card number in brackets; prefer it over the SNKRDUNK product code.
@@ -55,7 +59,9 @@ for (const item of marketCards) {
     code,
     label: `${name} ${code}${variant ? ` (${variant})` : ''}`,
     set: /^(OP|EB|ST|PRB)\d+-/.test(code) ? code.split('-')[0] : '프로모·기타',
-    imageUrl: item.previewImageUrl || ''
+    imageUrl: item.previewImageUrl || '',
+    cardId: linkedCards.get(Number(item.apparelId))?.cardId || '',
+    locale: linkedCards.get(Number(item.apparelId))?.locale || item.locale || ''
   });
 }
 
@@ -70,7 +76,7 @@ const boxes = sealedBoxes
   .sort((x, y) => releaseOf(y).localeCompare(releaseOf(x)))
   .slice(0, 8);
 
-const report = buildWeeklyMarketReport({ week, rows, products, boxes, boxPrices, previousBoxSnapshot: previousReport?.boxSnapshot || null });
+const report = buildWeeklyMarketReport({ week, rows, dailyRows, products, boxes, boxPrices, previousBoxSnapshot: previousReport?.boxSnapshot || null });
 const existingPath = path.join(reportsDir, `${report.id}.json`);
 // Re-running a week keeps any editor notes written into the earlier file.
 if (fs.existsSync(existingPath)) report.notes = JSON.parse(fs.readFileSync(existingPath, 'utf8')).notes || [];
@@ -81,4 +87,5 @@ const nextIndex = [
   ...index.filter((entry) => entry.id !== report.id)
 ].sort((x, y) => y.id.localeCompare(x.id));
 fs.writeFileSync(indexPath, `${JSON.stringify(nextIndex, null, 2)}\n`, 'utf8');
+if (report.id === nextIndex[0].id) fs.writeFileSync(path.join(reportsDir, 'latest.json'), `${JSON.stringify(getMarketReportSummary(report), null, 2)}\n`, 'utf8');
 console.log(`[market-report] ${report.id}: PSA10 ${report.totals.psa10.trades} trades, Single ${report.totals.a.trades} trades, ${report.boxes.length} boxes`);
