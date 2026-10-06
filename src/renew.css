@@ -20161,6 +20161,12 @@ button.renew-deck-entry:focus-visible {
     min-height: 0;
   }
 
+  /* Mobile home order: portfolio, weekly report (or daily movers), then schedule. */
+  .renew-dashboard .renew-value { order: 1; }
+  .renew-dashboard .renew-home-movers,
+  .renew-dashboard .renew-home-report { order: 2; }
+  .renew-dashboard .renew-home-calendar { order: 3; }
+
   .renew-float-card {
     position: static;
     width: 100%;
@@ -22252,7 +22258,8 @@ button.renew-deck-entry:focus-visible {
     order: 1;
   }
 
-  .renew-dashboard .renew-home-movers {
+  .renew-dashboard .renew-home-movers,
+  .renew-dashboard .renew-home-report {
     order: 2;
   }
 
