@@ -52,11 +52,11 @@ test('the gap bars match the rarity table and the summary', () => {
   assert.match(article.paragraphs.join(' '), new RegExp(summary.get('두 가격이 모두 있는 일본판 상품')));
 });
 
-test('the top-50 bars add up to 50 and to the stated 43 cards', () => {
+test('the top-50 bars add up to 50 and to the stated 42 cards', () => {
   const bars = article.sections[6].bars;
   assert.equal(bars.reduce((sum, bar) => sum + bar.value, 0), 50);
-  assert.equal(bars.filter((bar) => bar.label !== '그 밖').reduce((sum, bar) => sum + bar.value, 0), 43);
-  assert.match(article.sections[6].paragraphs[0], /43개\(86%\)/);
+  assert.equal(bars.filter((bar) => bar.label !== '그 밖').reduce((sum, bar) => sum + bar.value, 0), 42);
+  assert.match(article.sections[6].paragraphs[0], /42개\(84%\)/);
 });
 
 test('only existing guide paths are linked and the card-price overlap stays a reference', () => {

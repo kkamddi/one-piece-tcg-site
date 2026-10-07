@@ -26185,3 +26185,25 @@ button.renew-deck-entry:focus-visible {
     gap: 10px;
   }
 }
+
+/* Official X reveal images are the card itself (no padding); text tiles stand in until an image exists. */
+.renew-booster-preview-image img.is-official {
+  object-fit: contain;
+  transform: none;
+}
+
+.renew-booster-preview-image.is-text {
+  display: grid;
+  place-items: center;
+  border: 1px dashed #d8dbe0;
+  background: #fafafa;
+  color: #9aa0aa;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.renew-app.is-dark .renew-booster-preview-image.is-text {
+  border-color: #353943;
+  background: #1d2026;
+}

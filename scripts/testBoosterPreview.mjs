@@ -16,7 +16,7 @@ test('SNKRDUNK product names are read into name, rarity and version group', () =
     item(5, 'EB05-055', 'Nami (Kentaro Yabuki) SR-P :Foil Stamped'),
     item(6, 'EB05-057', 'Nojiko R-P')
   ].map(parsePreviewCard).map(card => [card.name, card.rarity, card.group, card.note]), [
-    ['니코 로빈', 'L-SP', '망가', ''],
+    ['니코 로빈', 'L-SP', '슈퍼 리더 패러렐', ''],
     ['스투시', 'SR-SPC', 'SP', ''],
     ['나미', 'SEC-P', 'SEC', ''],
     ['나미', 'L', '리더', ''],
@@ -34,7 +34,7 @@ test('each preview only collects its own set, skips DON!! and lists manga first'
     item(14, 'OP18-001', 'Some Leader L', 'Booster Pack "NEW SET"')
   ];
   assert.deepEqual(getPreviewCards(eb05, market).map(card => card.apparelId), [11, 10]);
-  assert.deepEqual(groupPreviewCards(getPreviewCards(eb05, market)).map(entry => entry.group), ['망가', '패러렐']);
+  assert.deepEqual(groupPreviewCards(getPreviewCards(eb05, market)).map(entry => entry.group), ['슈퍼 리더 패러렐', '패러렐']);
   assert.deepEqual(getPreviewCards(op18, market).map(card => card.apparelId), [14]);
 });
 

@@ -840,7 +840,7 @@ const GUIDE_ARTICLE_DETAILS = {
   character: {
     checklistTitle: '캐릭터 시세 체크리스트',
     faq: [
-      ['같은 캐릭터면 가격이 비슷한가요?', '같은 캐릭터라도 버전에 따라 크게 다릅니다. 같은 번호의 망가 버전은 기본판의 중앙값 82배였으니 카드 번호와 버전(패러렐·SP·망가)을 먼저 확인하세요.'],
+      ['같은 캐릭터면 가격이 비슷한가요?', '같은 캐릭터라도 버전에 따라 크게 다릅니다. 같은 번호의 망가 버전은 기본판의 중앙값 79배였으니 카드 번호와 버전(패러렐·SP·망가)을 먼저 확인하세요.'],
       ['한국판 카드에도 이 시세를 적용할 수 있나요?', '이 글은 SNKRDUNK 일본판 거래만 집계했습니다. 한국판·영어판은 거래처와 가격이 달라 그대로 적용할 수 없습니다.']
     ],
     related: ['/guide/card-price', '/guide/collection/manga', '/guide/psa-grading']
@@ -8555,9 +8555,9 @@ function RenewBoosterPreview({ preview }) {
             <h3>{group} <span>{groupCards.length}</span></h3>
             <ul className="renew-booster-preview-grid">
               {groupCards.map((card) => (
-                <li key={card.apparelId}>
-                  <a href={`/prices/product/${card.apparelId}?code=${encodeURIComponent(card.code)}`}>
-                    <span className="renew-booster-preview-image"><img src={card.image || '/card-placeholder.svg'} alt={`${card.code} ${card.name} ${card.rarity}`} loading="lazy" referrerPolicy="no-referrer" onLoad={fitProductPhoto} /></span>
+                <li key={card.apparelId || `${card.code}-${card.group}-${card.note}`}>
+                  <a href={card.apparelId ? `/prices/product/${card.apparelId}?code=${encodeURIComponent(card.code)}` : card.source || undefined} target={card.apparelId ? undefined : '_blank'} rel={card.apparelId ? undefined : 'noreferrer'}>
+                    <span className={`renew-booster-preview-image${card.image ? '' : ' is-text'}`}>{card.image ? <img src={card.image} alt={`${card.code} ${card.name} ${card.rarity}`} loading="lazy" referrerPolicy="no-referrer" onLoad={card.apparelId ? fitProductPhoto : undefined} className={card.apparelId ? '' : 'is-official'} /> : <span>{card.code}<br />{card.rarity}</span>}</span>
                     <strong>{card.name}</strong>
                     <small>{card.code} · {card.rarity}{card.note ? ` · ${card.note}` : ''}</small>
                     {priceOf(card) ? <b>{formatPreviewYen(priceOf(card))}</b> : null}
