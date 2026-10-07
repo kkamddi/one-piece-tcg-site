@@ -25,7 +25,7 @@ test('SNKRDUNK product names are read into name, rarity and version group', () =
     ['나미', 'L', '리더', ''],
     ['나미', 'SR-P', '특별 일러스트', '야부키 켄타로 일러스트 · 박 버전'],
     ['노지코', 'R-P', '패러렐', ''],
-    ['시라호시', 'SR-SP', '슈퍼 패러렐', ''],
+    ['시라호시', 'SR-SP', '망가', ''],
     ['Rocks D. Xebec', 'SEC-SP', '슈퍼 패러렐', '해적단 슈퍼 패러렐'],
     ['우타', 'SEC-SP', '망가', '']
   ]);
