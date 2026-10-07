@@ -1,0 +1,37 @@
+# Card Pone (카드포네)
+
+> 원피스 카드게임(ONE PIECE CARD GAME) 한국어 정보 사이트입니다. 한글판·일본판 카드 도감, SNKRDUNK 실제 거래 기반 Single·PSA10 시세와 차트, 박스 시세, 포트폴리오, 공식 소식·발매 일정, 구매처, 데이터 가이드를 제공합니다. 시세는 SNKRDUNK 일본판 거래 기준(엔화)이며 한국 원화 표시는 1엔=9.4원 환산입니다. 투자 권유나 가격 보장이 아닙니다.
+
+## 시세·도감
+- [카드 시세](https://www.optcgkorea.com/prices): 카드 이름·번호로 Single·PSA10 최근 거래가, 가격 차트, 거래 내역 검색
+- [박스 시세](https://www.optcgkorea.com/prices/boxes): 부스터 박스 등록 최저가와 추이
+- [주간 시세 리포트](https://www.optcgkorea.com/market-report): 매주 월요일 지난주 PSA10·Single 급등·급락, 거래 많은 카드, 시리즈별 거래량
+- [일본판 도감](https://www.optcgkorea.com/cards/jp): 공식 카드 리스트 기준 일본판 카드와 패러렐 버전
+- [한글판 도감](https://www.optcgkorea.com/cards/kr): 한국판 카드
+
+## 데이터 가이드
+- [시세 읽는 법](https://www.optcgkorea.com/guide/card-price): Single과 PSA10, 최근 거래일, 등록가와 거래가의 차이
+- [캐릭터별 카드 시세](https://www.optcgkorea.com/guide/character-cards): 캐릭터별 고가 카드 순위와 같은 번호의 버전별(기본·패러렐·SP·망가) 가격 차이
+- [PSA 그레이딩 가이드](https://www.optcgkorea.com/guide/psa-grading): 레어도·버전·부스터 시기별 PSA10과 Single 차액, 감정 전 확인할 점
+- [부스터별 히트 카드 비교](https://www.optcgkorea.com/guide/booster-comparison): OP01~OP16·EB01~EB04의 SEC·SP·패러렐·망가 구성과 등록가 분포
+- [도감 사용법](https://www.optcgkorea.com/guide/card-catalog): 카드번호 읽는 법, 패러렐·코믹 패러렐·재록 구별
+- [목적별 박스 비교](https://www.optcgkorea.com/guide/box-recommendation): 박스 현재가와 히트 카드 기준 비교
+- [카드 보관 방법](https://www.optcgkorea.com/guide/card-storage): 카드 가치별 보호 단계와 보관 용품
+- [구매처 가이드](https://www.optcgkorea.com/guide/shops): 공식 공인점포·취급점포 지역 분포와 확인 항목
+
+## 신작·일정
+- [신작·발매 일정](https://www.optcgkorea.com/guide/release-schedule): 공식 발표 기준 일본판·한국판 발매일과 한국판 발매 간격(공식 소식 데이터로 자동 갱신)
+- [EB-05 Heroines Edition vol.2 프리뷰](https://www.optcgkorea.com/guide/preview/eb-05): 공개 카드(공식 X 카드 소개·SNKRDUNK 등록), 레어도 구성, 1탄 EB-03 시세
+- [OP-18 神の支配 프리뷰](https://www.optcgkorea.com/guide/preview/op-18): 공개 카드, 수록 종류, 직전 부스터 OP-17 시세
+- [캘린더](https://www.optcgkorea.com/calendar): 발매일, 공식 이벤트, 카드쇼 일정
+- [공식 소식](https://www.optcgkorea.com/news): 일본·한국 공식 사이트 소식 모음
+
+## 도구
+- [카드 스캔(모바일)](https://www.optcgkorea.com/prices): 카드 사진으로 번호·그림을 비교해 후보와 시세 확인
+- [Card Pone Scan 크롬 확장](https://chromewebstore.google.com/detail/card-pone-scan/bmallhfmgjlccnegdjjlmhobcgocphlc): 웹페이지의 카드 영역을 선택해 시세 확인
+- [FAQ](https://www.optcgkorea.com/news/faq): 자주 묻는 질문
+
+## 데이터 출처
+- 카드 정보: 원피스 카드게임 일본·한국 공식 사이트 카드 리스트와 상품 페이지
+- 시세: SNKRDUNK 일본판 거래(마지막 거래일 중앙값), 매일 동기화
+- 각 가이드 하단에 데이터 기준일과 검수일을 표시합니다.

@@ -38,6 +38,7 @@ import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH, formatPreviewYen, getBoosterPre
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
+import { GUIDE_ARTICLE_FAQ } from '../lib/guide-article-faq.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { MARKET_REPORT_PATH, formatReportWon, getMarketReportHighlights, getMarketReportKpis, getMarketReportMethod, reportConditionLabel } from '../lib/market-report.js';
 import MARKET_REPORT_INDEX from './data/market-reports/index.json';
@@ -799,66 +800,42 @@ const GUIDE_HUB_COLLECTIONS = [
 const GUIDE_ARTICLE_DETAILS = {
   storage: {
     checklistTitle: '장기 보관 체크리스트',
-    faq: [
-      ['슬리브만 씌우면 장기 보관이 가능한가요?', '표면 마찰은 줄일 수 있지만 휨과 압력까지 막지는 못합니다. 장기 보관이나 고가 카드는 탑로더, 카드세이버 또는 단단한 보관함을 함께 사용하는 편이 안전합니다.'],
-      ['실리카겔을 카드와 바로 붙여도 되나요?', '카드와 직접 맞닿지 않도록 보관함 안쪽에 분리해 두고, 포화된 실리카겔은 교체합니다. 습기를 줄이는 보조 수단이지 밀폐와 온도 관리를 대신하지는 않습니다.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.storage,
     related: ['/guide/card-catalog', '/guides/centering', '/news/supplies']
   },
   shops: {
     checklistTitle: '구매 전 체크리스트',
-    faq: [
-      ['공인점포면 항상 원하는 상품을 살 수 있나요?', '공인 여부와 실제 재고는 별개입니다. 신상품 예약, 입고 수량과 판매 방식은 매장마다 다르므로 방문 전에 해당 매장 안내를 확인해야 합니다.'],
-      ['내 주변순 거리는 정확한가요?', '브라우저 위치와 등록된 매장 좌표 사이의 직선거리 기준입니다. 실제 이동 시간과 영업 여부는 연결된 지도에서 다시 확인하는 것이 좋습니다.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.shops,
     related: ['/shops', '/calendar', '/guide/box-recommendation']
   },
   price: {
     checklistTitle: '시세 확인 체크리스트',
-    faq: [
-      ['최근 시세와 최근 거래 가격은 같은 값인가요?', '최근 시세는 현재 확인 가능한 시장 가격이고 최근 거래 기록은 실제로 수집된 거래 이력입니다. 거래가 적은 카드는 두 값의 시점이 다를 수 있습니다.'],
-      ['거래가 없는 날에도 차트가 이어지나요?', '새 거래를 임의로 만들지 않습니다. 선택 기간에 거래가 없으면 데이터가 없다고 표시하며, 마지막 거래 기록은 최근 가격 기록에서 별도로 확인합니다.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.price,
     related: ['/prices', '/guide/box-recommendation', '/data-policy']
   },
   catalog: {
     checklistTitle: '도감 사용 체크리스트',
-    faq: [
-      ['같은 카드번호가 여러 장 나오는 이유는 무엇인가요?', '일반판, 패러렐, 재록, 프로모처럼 카드번호가 같아도 이미지와 수록 상품이 다른 버전이 존재하기 때문입니다. 이미지와 수록 시리즈를 함께 확인해야 합니다.'],
-      ['한글판과 일본판 카드가 같이 검색되나요?', '언어판은 별도로 관리합니다. 먼저 한글판 또는 일본판을 선택한 뒤 카드번호나 이름을 검색해야 같은 환경의 결과를 정확히 볼 수 있습니다.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.catalog,
     related: ['/cards', '/guide/card-price', '/guide/card-storage']
   },
   booster: {
     checklistTitle: '부스터 비교 체크리스트',
-    faq: [
-      ['이 비교로 어떤 박스를 사야 할지 정할 수 있나요?', '현재 확인할 수 있는 구성과 등록가 분포를 비교하는 자료입니다. 봉입률을 반영한 기대값이 아니므로 구매 결정은 박스 가격, 실제 거래 시세와 함께 판단해야 합니다.'],
-      ['수치는 언제 바뀌나요?', '본문은 2026년 10월 5일 데이터 기준입니다. 새 부스터 발매나 시세 변화에 따라 달라지므로 각 부스터의 박스 가이드에서 최신 값을 함께 확인하세요.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.booster,
     related: ['/guide/box-recommendation', '/guide/card-price', '/guide/collection/manga']
   },
   character: {
     checklistTitle: '캐릭터 시세 체크리스트',
-    faq: [
-      ['같은 캐릭터면 가격이 비슷한가요?', '같은 캐릭터라도 버전에 따라 크게 다릅니다. 같은 번호의 망가 버전은 기본판의 중앙값 79배였으니 카드 번호와 버전(패러렐·SP·망가)을 먼저 확인하세요.'],
-      ['한국판 카드에도 이 시세를 적용할 수 있나요?', '이 글은 SNKRDUNK 일본판 거래만 집계했습니다. 한국판·영어판은 거래처와 가격이 달라 그대로 적용할 수 없습니다.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.character,
     related: ['/guide/card-price', '/guide/collection/manga', '/guide/psa-grading']
   },
   psa: {
     checklistTitle: '그레이딩 전 체크리스트',
-    faq: [
-      ['PSA10 배수가 높은 카드부터 감정하면 되나요?', '배수가 높아도 Single이 저가라면 차액은 작습니다. 차액이 감정비·배송비·수수료를 합친 금액보다 충분히 큰지, PSA10 거래 기록이 있는지 먼저 확인하세요.'],
-      ['감정비와 소요 기간은 얼마인가요?', '요금과 기간은 서비스 등급과 시기에 따라 바뀌므로 이 글에 적지 않았습니다. PSA 공식 사이트에서 최신 기준을 확인하세요.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.psa,
     related: ['/guide/card-price', '/guides/centering', '/guide/card-storage']
   },
   release: {
     checklistTitle: '발매 일정 체크리스트',
-    faq: [
-      ['한국판 발매일은 일본판을 보고 미리 알 수 있나요?', '지금까지의 간격은 참고일 뿐이며 다음 발매일을 정해 주지 않습니다. 한국판 날짜는 한국 공식 사이트 발표로 확인하세요.'],
-      ['일정은 언제 바뀌나요?', '공식 사이트의 상품 일정이 바뀌면 데이터 갱신 때 이 페이지의 표도 함께 바뀝니다. 발매 직전에는 공식 상품 페이지에서 한 번 더 확인하세요.']
-    ],
+    faq: GUIDE_ARTICLE_FAQ.release,
     related: ['/guide/booster-comparison', '/guide/box-recommendation', '/guide/shops']
   }
 };
@@ -4481,23 +4458,6 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
       </nav>
     </header>
   );
-}
-
-function ExtensionInstallBanner({ uiLang }) {
-  const [open, setOpen] = useState(() => {
-    try { return Date.now() >= Number(localStorage.getItem('card-pone-extension-dismiss-until') || 0); }
-    catch { return true; }
-  });
-  if (!open) return null;
-  return <aside className="renew-extension-banner" aria-label={getLocaleText(uiLang, '확장 프로그램 설치', 'Install extension', '拡張機能をインストール')}>
-    <MobileNavIcon type="camera" />
-    <strong>{getLocaleText(uiLang, '카드 사진으로 시세 확인', 'Scan card photos. Check prices.', 'カード画像で相場を確認')}</strong>
-    <a href={EXTENSION_STORE_URL} target="_blank" rel="noopener noreferrer">{getLocaleText(uiLang, '크롬에 추가', 'Add to Chrome', 'Chromeに追加')} ↗</a>
-    <button type="button" aria-label={getLocaleText(uiLang, '설치 안내 닫기', 'Dismiss install banner', '閉じる')} onClick={() => {
-      setOpen(false);
-      try { localStorage.setItem('card-pone-extension-dismiss-until', String(Date.now() + 7 * 86400000)); } catch { /* Storage may be disabled. */ }
-    }}>×</button>
-  </aside>;
 }
 
 function RenewSuppliesModal({ onClose }) {

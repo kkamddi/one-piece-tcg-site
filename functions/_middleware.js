@@ -6,6 +6,7 @@ import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
 import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
+import { getGuideFaq } from '../lib/guide-article-faq.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS, PROMO_COLLECTION_GROUPS } from '../src/data/collection-guide.js';
 
@@ -1850,12 +1851,20 @@ function createServerPageContent(pathname, seo) {
         ${sources ? `<ul>${sources}</ul>` : ''}
       </section>`;
   }).join('');
+  const faq = seo.faq || getGuideFaq(normalized);
+  const faqSection = faq?.length
+    ? `<section>
+        <h2>${isJapanese ? 'よくある質問' : '자주 묻는 질문'}</h2>
+        <dl>${faq.map(([question, answer]) => `<dt>${escapeHtml(question)}</dt><dd>${escapeHtml(answer)}</dd>`).join('')}</dl>
+      </section>`
+    : '';
 
   return `<main class="server-page-content">
       <h1>${escapeHtml(content.heading)}</h1>
       ${editorialMeta}
       ${paragraphs}
       ${detailSections}
+      ${faqSection}
       <nav aria-label="${isJapanese ? '関連ページ' : '관련 페이지'}"><ul>${links}</ul></nav>
     </main>`;
 }
@@ -2036,10 +2045,22 @@ function createJsonLd(pathname, seo) {
   };
 
   if (schemaType === 'Article') {
-    pageNode.headline = seo.title;
+    pageNode.headline = seo.heading || seo.title;
     pageNode.author = { '@type': 'Organization', name: seo.editor || 'Card Pone' };
     pageNode.publisher = { '@id': `${SITE_ORIGIN}/#organization` };
+    pageNode.mainEntityOfPage = url;
+    pageNode.image = getSeoImage(seo);
+    if (seo.publishedAt || seo.reviewedAt) pageNode.datePublished = seo.publishedAt || seo.reviewedAt;
   }
+  // Editorial guides keep their questions as a FAQPage next to the article.
+  const guideFaq = schemaType !== 'FAQPage' ? seo.faq || getGuideFaq(normalized) : null;
+  const faqNode = guideFaq?.length ? {
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    url,
+    inLanguage: isJapanese ? 'ja-JP' : 'ko-KR',
+    mainEntity: guideFaq.map(([question, answer]) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } }))
+  } : null;
 
   if (seo.editor) pageNode.editor = { '@type': 'Organization', name: seo.editor };
   if (seo.reviewedAt) pageNode.dateModified = seo.reviewedAt;
@@ -2192,6 +2213,7 @@ function createJsonLd(pathname, seo) {
     '@context': 'https://schema.org',
     '@graph': [
       pageNode,
+      ...(faqNode ? [faqNode] : []),
       {
         '@type': 'Organization',
         '@id': `${SITE_ORIGIN}/#organization`,
@@ -2263,6 +2285,12 @@ function getRobotsDirective(pathname, seo) {
   return 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
 }
 
+// Pages may name their own share image (absolute or site path); everything else uses the site card.
+function getSeoImage(seo) {
+  if (!seo?.image) return `${SITE_ORIGIN}/og-card-pone.jpg`;
+  return /^https?:\/\//.test(seo.image) ? seo.image : `${SITE_ORIGIN}${seo.image}`;
+}
+
 export function applySeo(html, pathname, seo) {
   const hasPrerenderedContent = /<div id="root">\s*<main class="server-page-content">/i.test(html);
   const canonicalUrl = `${SITE_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`;
@@ -2275,7 +2303,7 @@ export function applySeo(html, pathname, seo) {
   const description = escapeHtml(seo.description);
   const keywords = escapeHtml(seo.keywords);
   const url = escapeHtml(canonicalUrl);
-  const image = `${SITE_ORIGIN}/og-card-pone.jpg`;
+  const image = escapeHtml(getSeoImage(seo));
   const robots = getRobotsDirective(pathname, seo);
 
   let nextHtml = html
@@ -2294,6 +2322,7 @@ export function applySeo(html, pathname, seo) {
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:title" content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${title}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:description" content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${description}" />`);
   nextHtml = replaceOrInsertMeta(nextHtml, /<meta name="twitter:image" content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${image}" />`);
+  nextHtml = replaceOrInsertMeta(nextHtml, /<meta property="og:type" content="[^"]*"\s*\/?>/i, `<meta property="og:type" content="${seo.schemaType === 'Article' ? 'article' : 'website'}" />`);
   const japaneseSeo = getJapaneseSeo(`${JAPANESE_ROUTE_PREFIX}${basePath === '/' ? '' : basePath}`);
   const hasJapaneseAlternate = japaneseSeo && japaneseSeo.hasLocalizedContent !== false;
   const hreflangLinks = [

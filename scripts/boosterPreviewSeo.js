@@ -26,6 +26,7 @@ export function getBoosterPreviewEntries(items = market) {
         schemaType: 'Article',
         editor: 'Card Pone 데이터 편집',
         reviewedAt: preview.reviewedAt,
+        image: preview.image,
         heading: preview.title,
         paragraphs: [preview.lead],
         sections,

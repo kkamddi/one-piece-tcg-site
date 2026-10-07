@@ -782,27 +782,7 @@
   gap: 10px;
 }
 
-.renew-extension-banner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: min(100%, 920px);
-  box-sizing: border-box;
-  margin: 20px auto 0;
-  padding: 18px 22px;
-  border-radius: 16px;
-  background: #17191c;
-  color: #fff;
-  text-align: left;
-  font-size: 18px;
-}
-.renew-extension-banner > svg { width: 28px; height: 28px; flex-shrink: 0; }
-.renew-extension-banner strong { flex: 1; }
-.renew-extension-banner a { padding: 12px 20px; border-radius: 10px; background: #fff; color: #17191c; font-size: 14px; font-weight: 800; text-decoration: none; white-space: nowrap; }
-.renew-extension-banner button { min-width: 36px; min-height: 44px; border: 0; background: transparent; color: inherit; font-size: 24px; cursor: pointer; }
-.renew-app.is-dark .renew-extension-banner { background: #25282d; }
 @media (max-width: 767px) {
-  .renew-extension-banner { display: none; }
   .renew-bottom-nav button.renew-mobile-scan { position: relative; gap: 5px; color: #17191c; background: transparent; }
   .renew-bottom-nav button.renew-mobile-scan .renew-mobile-scan-circle { display: grid; place-items: center; width: 54px; height: 54px; max-width: none; margin-top: -24px; border: 4px solid #fff; border-radius: 50%; background: #17191c; color: #fff; box-sizing: content-box; box-shadow: 0 4px 12px #17191c26; }
   .renew-app.is-dark .renew-bottom-nav button.renew-mobile-scan { color: #fff; }
