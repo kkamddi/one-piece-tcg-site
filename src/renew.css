@@ -25943,3 +25943,245 @@ button.renew-deck-entry:focus-visible {
 .renew-app.is-dark .renew-home-report-head a { background: #f5f2ec; color: #17191c; }
 .renew-app.is-dark .renew-home-report .market-report-change.is-up { color: #ff6b5e; }
 .renew-app.is-dark .renew-home-report .market-report-change.is-down { color: #6b9bff; }
+
+/* New booster preview: image-first card gallery */
+.renew-booster-preview {
+  display: grid;
+  gap: 22px;
+  padding-bottom: 24px;
+}
+
+.renew-booster-preview-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+  gap: 20px;
+  align-items: center;
+  padding: 24px 26px 0;
+}
+
+.renew-booster-preview-hero > div > a {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.renew-booster-preview-hero h1 {
+  margin: 0 0 10px;
+  color: #17191c;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.renew-booster-preview-hero p {
+  margin: 0 0 12px;
+  color: #4b5160;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.renew-booster-preview-hero img {
+  width: 100%;
+  height: auto;
+}
+
+.renew-booster-preview-facts {
+  margin: 0 26px;
+}
+
+.renew-booster-preview-section {
+  display: grid;
+  gap: 12px;
+  padding: 0 26px;
+}
+
+.renew-booster-preview-section h2 {
+  margin: 0;
+  color: #17191c;
+  font-size: 20px;
+}
+
+.renew-booster-preview-group {
+  display: grid;
+  gap: 8px;
+}
+
+.renew-booster-preview-group h3 {
+  margin: 6px 0 0;
+  color: #17191c;
+  font-size: 15px;
+}
+
+.renew-booster-preview-group h3 span {
+  color: #c94d35;
+}
+
+.renew-booster-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.renew-booster-preview-grid.is-reference {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.renew-booster-preview-grid a {
+  display: grid;
+  gap: 3px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.renew-booster-preview-image {
+  display: block;
+  aspect-ratio: 5 / 7;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #f4f5f7;
+}
+
+/* SNKRDUNK product photos pad the card with white space; fitProductPhoto sets the exact zoom per photo shape. */
+.renew-booster-preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.19);
+}
+
+.renew-booster-preview-grid strong {
+  margin-top: 4px;
+  color: #17191c;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.renew-booster-preview-grid small {
+  color: #737984;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.renew-booster-preview-grid b {
+  color: #c94d35;
+  font-size: 13px;
+}
+
+.renew-booster-preview-note,
+.renew-booster-preview-empty {
+  margin: 0;
+  color: #737984;
+  font-size: 13px;
+}
+
+.renew-booster-preview-empty {
+  padding: 22px;
+  border: 1px dashed #d8dbe0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.renew-booster-preview-notes {
+  display: grid;
+  gap: 6px;
+  margin: 0 26px;
+  padding: 14px 16px 14px 30px;
+  border-radius: 8px;
+  background: #f6f7f9;
+  color: #4b5160;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.renew-booster-preview-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 26px;
+}
+
+.renew-booster-preview-links a {
+  padding: 8px 12px;
+  border: 1px solid #e4e5e8;
+  border-radius: 999px;
+  color: #17191c;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.renew-app.is-dark .renew-booster-preview-hero h1,
+.renew-app.is-dark .renew-booster-preview-section h2,
+.renew-app.is-dark .renew-booster-preview-group h3,
+.renew-app.is-dark .renew-booster-preview-grid strong,
+.renew-app.is-dark .renew-booster-preview-links a {
+  color: #f3f4f6;
+}
+
+.renew-app.is-dark .renew-booster-preview-hero p,
+.renew-app.is-dark .renew-booster-preview-notes {
+  color: #c7cbd3;
+}
+
+.renew-app.is-dark .renew-booster-preview-image {
+  background: #23262d;
+}
+
+.renew-app.is-dark .renew-booster-preview-notes {
+  background: #1d2026;
+}
+
+.renew-app.is-dark .renew-booster-preview-links a,
+.renew-app.is-dark .renew-booster-preview-empty {
+  border-color: #353943;
+}
+
+@media (max-width: 900px) {
+  .renew-booster-preview-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .renew-booster-preview-hero {
+    grid-template-columns: 1fr;
+    padding: 18px 16px 0;
+  }
+
+  .renew-booster-preview-hero img {
+    order: -1;
+  }
+
+  .renew-booster-preview-facts {
+    margin: 0 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .renew-booster-preview-facts > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .renew-booster-preview-facts > div:nth-child(n + 3) {
+    border-top: 1px solid #e4e5e8;
+  }
+
+  .renew-booster-preview-section,
+  .renew-booster-preview-links {
+    padding: 0 16px;
+  }
+
+  .renew-booster-preview-notes {
+    margin: 0 16px;
+  }
+
+  .renew-booster-preview-grid,
+  .renew-booster-preview-grid.is-reference {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+}

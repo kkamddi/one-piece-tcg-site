@@ -34,7 +34,7 @@ import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editoria
 import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
 import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
 import { buildReleaseScheduleEditorial } from '../lib/release-schedule-editorial.js';
-import { NEW_BOOSTERS_EDITORIAL } from '../lib/new-boosters-editorial.js';
+import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH, formatPreviewYen, getBoosterPreview, getPreviewCards, groupPreviewCards } from '../lib/booster-preview.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
@@ -744,7 +744,6 @@ const CARD_CATALOG_GUIDE = toEditorialGuide(CARD_CATALOG_EDITORIAL);
 const BOOSTER_COMPARISON_GUIDE = toEditorialGuide(BOOSTER_COMPARISON_EDITORIAL);
 const CHARACTER_CARDS_GUIDE = toEditorialGuide(CHARACTER_CARDS_EDITORIAL);
 const PSA_GRADING_GUIDE = toEditorialGuide(PSA_GRADING_EDITORIAL);
-const NEW_BOOSTERS_GUIDE = toEditorialGuide(NEW_BOOSTERS_EDITORIAL);
 // The release schedule is rebuilt from the official topics on every load, so its upcoming list stays current.
 const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsData, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
@@ -758,7 +757,7 @@ const GUIDE_HUB_COLLECTIONS = [
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
       { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
       { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' },
-      { href: '/guide/new-boosters', title: '신작 프리뷰', meta: 'EB-05·OP-18 공개 카드와 구성' }
+      ...BOOSTER_PREVIEWS.map((preview) => ({ href: `${BOOSTER_PREVIEW_PATH}/${preview.slug}`, title: `${preview.code} 프리뷰`, meta: `${preview.facts[0].value} 발매 · 공개 카드` }))
     ]
   },
   {
@@ -854,14 +853,6 @@ const GUIDE_ARTICLE_DETAILS = {
     ],
     related: ['/guide/card-price', '/guides/centering', '/guide/card-storage']
   },
-  newBoosters: {
-    checklistTitle: '발매 전 체크리스트',
-    faq: [
-      ['공개 카드 목록은 공식 리스트인가요?', 'SNKRDUNK에 미리 등록된 상품을 기준으로 정리했습니다. 공식 카드 리스트가 발표되면 이름과 버전을 다시 대조해 갱신합니다.'],
-      ['EB-05 카드도 vol.1처럼 비싸질까요?', '앞선 부스터의 시세는 참고 자료일 뿐 새 부스터의 가격을 알려 주지 않습니다. 발매 후 거래가 쌓인 뒤 카드별 시세에서 확인하세요.']
-    ],
-    related: ['/guide/release-schedule', '/guide/booster-comparison', '/guide/character-cards']
-  },
   release: {
     checklistTitle: '발매 일정 체크리스트',
     faq: [
@@ -876,7 +867,7 @@ const GUIDE_RELATED_LABELS = {
   '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
   '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
   '/guide/release-schedule': ['신작·발매 일정', '일본판·한국판 발매일과 한국 발매 간격을 봅니다.'],
-  '/guide/new-boosters': ['신작 프리뷰', 'EB-05·OP-18 구성과 공개된 카드를 봅니다.'],
+  ...Object.fromEntries(BOOSTER_PREVIEWS.map((preview) => [`${BOOSTER_PREVIEW_PATH}/${preview.slug}`, [`${preview.code} 프리뷰`, preview.lead]])),
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
   '/guide/card-storage': ['카드 보관 방법', '슬리브부터 장기 보관까지 순서대로 확인합니다.'],
@@ -3375,8 +3366,9 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       body: '매주 월요일 지난주 SNKRDUNK 거래를 집계한 원피스카드 시세 리포트입니다.'
     };
   }
-  if (path === '/guide/new-boosters') {
-    return { title: "원피스카드 신작 프리뷰 - EB-05 Heroines Edition vol.2 · OP-18 신의 지배 공개 카드와 구성 | Card Pone", h1: NEW_BOOSTERS_EDITORIAL.heading, description: "EB-05 Heroines Edition vol.2와 OP-18 신의 지배의 발매일·가격·레어도 구성, 공개된 망가·SP 카드와 앞선 EB-03·OP-17의 발매 후 시세를 정리합니다.", keywords: "원피스카드 EB-05, 원피스카드 OP-18, 히로인즈 에디션 vol.2, 신의 지배, 원피스카드 신작, 원피스카드 망가 레어", body: NEW_BOOSTERS_EDITORIAL.paragraphs[0] };
+  if (getBoosterPreview(path)) {
+    const preview = getBoosterPreview(path);
+    return { title: preview.seoTitle, h1: preview.title, description: preview.seoDescription, keywords: preview.seoKeywords, body: preview.lead };
   }
   if (path === '/guide/character-cards') {
     return { title: "원피스카드 캐릭터별 시세 - 루피·샹크스 등 가장 비싼 카드와 버전별 가격 | Card Pone", h1: CHARACTER_CARDS_EDITORIAL.heading, description: "SNKRDUNK 일본판 최근 거래로 캐릭터별 고가 카드와 Single·PSA10 시세, 같은 카드의 패러렐·망가 버전 가격 차이를 정리합니다.", keywords: "원피스카드 캐릭터별 시세, 루피 카드 시세, 샹크스 카드 가격, 원피스카드 비싼 카드, 원피스카드 망가 레어 시세", body: CHARACTER_CARDS_EDITORIAL.paragraphs[0] };
@@ -7056,7 +7048,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isCharacterCardsGuide = initialPath === '/guide/character-cards';
   const isPsaGradingGuide = initialPath === '/guide/psa-grading';
   const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
-  const isNewBoostersGuide = initialPath === '/guide/new-boosters';
+  const boosterPreview = getBoosterPreview(initialPath);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
@@ -7374,7 +7366,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isReleaseScheduleGuide && !isNewBoostersGuide && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isReleaseScheduleGuide && !boosterPreview && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7418,7 +7410,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isCharacterCardsGuide ? <RenewCharacterCardsGuide /> : null}
       {isPsaGradingGuide ? <RenewPsaGradingGuide /> : null}
       {isReleaseScheduleGuide ? <RenewReleaseScheduleGuide /> : null}
-      {isNewBoostersGuide ? <RenewNewBoostersGuide /> : null}
+      {boosterPreview ? <RenewBoosterPreview preview={boosterPreview} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewAdInquiry uiLang={uiLang} />
@@ -8508,8 +8500,110 @@ function RenewReleaseScheduleGuide() {
   return <RenewEditorialGuide guide={guide} guideKey="release" headingId="release-schedule-guide-heading" cta={{ eyebrow: '캘린더', title: '이벤트까지 날짜별로 보려면', description: '발매일과 공식 이벤트, 카드쇼 일정을 달력에서 함께 확인합니다.', href: '/calendar', label: '캘린더 보기' }} />;
 }
 
-function RenewNewBoostersGuide() {
-  return <RenewEditorialGuide guide={NEW_BOOSTERS_GUIDE} guideKey="newBoosters" headingId="new-boosters-guide-heading" cta={{ eyebrow: '캘린더', title: '발매일과 이벤트를 날짜별로 보려면', description: '신작 발매일과 발매 기념 이벤트, 카드쇼 일정을 달력에서 함께 확인합니다.', href: '/calendar', label: '캘린더 보기' }} />;
+// SNKRDUNK photos pad the card: square shots leave it at 80% of the height, landscape ones at 84%.
+const fitProductPhoto = (event) => {
+  const image = event.currentTarget;
+  image.style.transform = `scale(${image.naturalWidth / image.naturalHeight > 1.2 ? 1.19 : 1.25})`;
+};
+
+// Revealed cards come from the daily SNKRDUNK sync, so the gallery grows without editing the page.
+function RenewBoosterPreview({ preview }) {
+  const [cards, setCards] = useState(null);
+  const [prices, setPrices] = useState({});
+  useEffect(() => {
+    let alive = true;
+    import('./data/market-cards.js')
+      .then((module) => { if (alive) setCards(getPreviewCards(preview, Array.isArray(module.default) ? module.default : [])); })
+      .catch(() => { if (alive) setCards([]); });
+    return () => { alive = false; };
+  }, [preview]);
+  useEffect(() => {
+    if (!cards) return undefined;
+    const ids = [...new Set([...cards.map((card) => card.apparelId), ...preview.reference.cards.map((card) => card.apparelId)])];
+    const controller = new AbortController();
+    fetch(`/api/market?summary=trade-latest&apparelIds=${ids.join(',')}`, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => { if (payload?.items) setPrices(Object.fromEntries(payload.items.filter((item) => item.aPriceJpy > 0).map((item) => [item.apparelId, item.aPriceJpy]))); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [cards, preview]);
+  const groups = cards ? groupPreviewCards(cards) : [];
+  const priceOf = (card) => prices[card.apparelId] || card.single || 0;
+  return (
+    <section className="renew-panel renew-news-panel renew-booster-preview" aria-labelledby="booster-preview-heading">
+      <header className="renew-booster-preview-hero">
+        <div>
+          <a href="/guide" onClick={() => rememberCurrentAppView()}>가이드/Q&amp;A</a>
+          <h1 id="booster-preview-heading">{preview.title}</h1>
+          <p>{preview.lead}</p>
+          <div className="renew-guide-editorial-meta" aria-label="콘텐츠 검수 정보">
+            <span>Card Pone 데이터 편집</span>
+            <time dateTime={preview.reviewedAt}>검수 {preview.reviewedAt.replaceAll('-', '.')}</time>
+          </div>
+        </div>
+        <img src={preview.image} alt={`${preview.code} 박스와 팩`} loading="eager" referrerPolicy="no-referrer" />
+      </header>
+      <dl className="renew-box-series-insight-stats renew-booster-preview-facts">
+        {preview.facts.map((fact) => <div key={fact.label}><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}
+      </dl>
+      <section className="renew-booster-preview-section">
+        <h2>공개된 카드 {cards ? `${cards.length}장` : ''}</h2>
+        {cards === null ? <p className="renew-booster-preview-note" role="status">불러오는 중…</p> : null}
+        {cards && !cards.length ? <p className="renew-booster-preview-empty">아직 공개된 카드가 없습니다. 등록되는 대로 여기에 추가됩니다.</p> : null}
+        {groups.map(({ group, cards: groupCards }) => (
+          <div key={group} className="renew-booster-preview-group">
+            <h3>{group} <span>{groupCards.length}</span></h3>
+            <ul className="renew-booster-preview-grid">
+              {groupCards.map((card) => (
+                <li key={card.apparelId}>
+                  <a href={`/prices/product/${card.apparelId}?code=${encodeURIComponent(card.code)}`}>
+                    <span className="renew-booster-preview-image"><img src={card.image || '/card-placeholder.svg'} alt={`${card.code} ${card.name} ${card.rarity}`} loading="lazy" referrerPolicy="no-referrer" onLoad={fitProductPhoto} /></span>
+                    <strong>{card.name}</strong>
+                    <small>{card.code} · {card.rarity}{card.note ? ` · ${card.note}` : ''}</small>
+                    {priceOf(card) ? <b>{formatPreviewYen(priceOf(card))}</b> : null}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+      {preview.composition ? (
+        <section className="renew-booster-preview-section">
+          <h2>레어도 구성</h2>
+          <div className="renew-editorial-table is-numeric">
+            <table>
+              <thead><tr>{preview.composition.columns.map((column) => <th key={column} scope="col">{column}</th>)}</tr></thead>
+              <tbody>{preview.composition.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => (index ? <td key={index}>{cell}</td> : <th key={index} scope="row">{cell}</th>))}</tr>)}</tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+      <section className="renew-booster-preview-section">
+        <h2>{preview.reference.title}</h2>
+        <p className="renew-booster-preview-note">{preview.reference.note}</p>
+        <ul className="renew-booster-preview-grid is-reference">
+          {preview.reference.cards.map((card) => (
+            <li key={card.apparelId}>
+              <a href={`/prices/product/${card.apparelId}`}>
+                <span className="renew-booster-preview-image"><img src={card.image} alt={`${card.label} ${card.version}`} loading="lazy" referrerPolicy="no-referrer" onLoad={fitProductPhoto} /></span>
+                <strong>{card.label}</strong>
+                <small>{card.version}</small>
+                <b>{formatPreviewYen(priceOf(card))}</b>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <ul className="renew-booster-preview-notes">
+        {preview.notes.map((note) => <li key={note}>{note}</li>)}
+      </ul>
+      <nav className="renew-booster-preview-links" aria-label="관련 페이지">
+        <a href={preview.officialUrl} target="_blank" rel="noreferrer">공식 상품 페이지</a>
+        {preview.related.map((href) => <a key={href} href={href}>{GUIDE_RELATED_LABELS[href]?.[0] || href}</a>)}
+      </nav>
+    </section>
+  );
 }
 
 function RenewCardCatalogGuide() {

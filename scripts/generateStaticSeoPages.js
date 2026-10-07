@@ -6,6 +6,7 @@ import { getSeriesGuideEntries } from './seriesGuideSeo.js';
 import { getBoxRecommendationEntries } from './boxRecommendationSeo.js';
 import { getMarketReportEntries } from './marketReportSeo.js';
 import { getReleaseScheduleEntries } from './releaseScheduleSeo.js';
+import { getBoosterPreviewEntries } from './boosterPreviewSeo.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(rootDir, 'dist');
@@ -119,6 +120,7 @@ const seriesGuideSeo = new Map(seriesGuideEntries.map((entry) => [entry.pathname
 const boxRecommendationSeo = new Map(getBoxRecommendationEntries().map((entry) => [entry.pathname, entry.seo]));
 const marketReportSeo = new Map(getMarketReportEntries().map((entry) => [entry.pathname, entry.seo]));
 const releaseScheduleSeo = new Map(getReleaseScheduleEntries().map((entry) => [entry.pathname, entry.seo]));
+const boosterPreviewSeo = new Map(getBoosterPreviewEntries().map((entry) => [entry.pathname, entry.seo]));
 for (const pathname of marketReportSeo.keys()) routePaths.add(pathname);
 for (const entry of seriesGuideEntries) {
   const match = entry.pathname.match(/^(\/jp)?\/guides\/series\/([^/]+)$/);
@@ -136,7 +138,7 @@ for (const sitemapPath of sitemapPaths) {
 
 let generated = 0;
 for (const pathname of routePaths) {
-  const seo = seriesGuideSeo.get(pathname) || boxRecommendationSeo.get(pathname) || marketReportSeo.get(pathname) || releaseScheduleSeo.get(pathname) || getPageSeo(pathname);
+  const seo = seriesGuideSeo.get(pathname) || boxRecommendationSeo.get(pathname) || marketReportSeo.get(pathname) || releaseScheduleSeo.get(pathname) || boosterPreviewSeo.get(pathname) || getPageSeo(pathname);
   if (!seo) continue;
   const outputPath = getOutputPath(pathname);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });

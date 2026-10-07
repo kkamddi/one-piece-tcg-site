@@ -39,7 +39,7 @@ test('portfolio entry does not become a 404 while genuinely unknown routes still
 test('the real static generator emits portfolio HTML using only in-memory filesystem fixtures', () => {
   const writes = new Map();
   const context = vm.createContext({ path, fileURLToPath, applySeo, getPageSeo,
-    getSeriesGuideEntries: () => [], getBoxRecommendationEntries: () => [], getMarketReportEntries: () => [], getReleaseScheduleEntries: () => [],
+    getSeriesGuideEntries: () => [], getBoxRecommendationEntries: () => [], getMarketReportEntries: () => [], getReleaseScheduleEntries: () => [], getBoosterPreviewEntries: () => [],
     console: { log() {} },
     fs: { existsSync: () => true, mkdirSync() {},
       readFileSync: file => file.endsWith('index.html') ? shell : '',

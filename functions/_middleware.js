@@ -4,7 +4,6 @@ import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
 import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
-import { NEW_BOOSTERS_EDITORIAL } from '../lib/new-boosters-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
@@ -555,7 +554,6 @@ const SEO_FIXES = {
     editor: 'Card Pone 데이터 편집',
     reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt
   },
-  '/guide/new-boosters': { ...{"title":"원피스카드 신작 프리뷰 - EB-05 Heroines Edition vol.2 · OP-18 신의 지배 공개 카드와 구성 | Card Pone","description":"EB-05 Heroines Edition vol.2와 OP-18 신의 지배의 발매일·가격·레어도 구성, 공개된 망가·SP 카드와 앞선 EB-03·OP-17의 발매 후 시세를 정리합니다.","keywords":"원피스카드 EB-05, 원피스카드 OP-18, 히로인즈 에디션 vol.2, 신의 지배, 원피스카드 신작, 원피스카드 망가 레어"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: NEW_BOOSTERS_EDITORIAL.reviewedAt },
   '/guide/character-cards': { ...{"title":"원피스카드 캐릭터별 시세 - 루피·샹크스 등 가장 비싼 카드와 버전별 가격 | Card Pone","description":"SNKRDUNK 일본판 최근 거래로 캐릭터별 고가 카드와 Single·PSA10 시세, 같은 카드의 패러렐·망가 버전 가격 차이를 정리합니다.","keywords":"원피스카드 캐릭터별 시세, 루피 카드 시세, 샹크스 카드 가격, 원피스카드 비싼 카드, 원피스카드 망가 레어 시세"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: CHARACTER_CARDS_EDITORIAL.reviewedAt },
   '/guide/psa-grading': { ...{"title":"원피스카드 PSA 그레이딩 가이드 - 레어도·연식별 PSA10 시세 차이 | Card Pone","description":"SNKRDUNK 일본판 실제 거래로 레어도·버전·시리즈 연식별 PSA10과 Single 가격 차이와 그레이딩 전 확인할 점을 정리합니다.","keywords":"원피스카드 PSA, 원피스카드 그레이딩, PSA10 시세, 원피스카드 PSA10 가격 차이, 원피스카드 감정"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: PSA_GRADING_EDITORIAL.reviewedAt },
   '/guide/booster-comparison': {
@@ -1020,7 +1018,6 @@ const SERVER_PAGE_CONTENT = {
     sections: [{ heading: '핵심 숫자', stats: SHOP_GUIDE_EDITORIAL.summary }, ...SHOP_GUIDE_EDITORIAL.sections, { heading: '구매 전 체크리스트', items: SHOP_GUIDE_EDITORIAL.checklist }],
     links: ['/shops', '/shops/official', '/calendar', '/guide/box-recommendation']
   },
-  '/guide/new-boosters': editorialPageContent(NEW_BOOSTERS_EDITORIAL, '발매 전 체크리스트', ['/guide/release-schedule', '/guide/booster-comparison', '/prices/boxes', '/calendar']),
   '/guide/character-cards': editorialPageContent(CHARACTER_CARDS_EDITORIAL, '캐릭터 시세 체크리스트', ['/prices', '/guide/card-price', '/guide/collection/manga', '/market-report']),
   '/guide/psa-grading': editorialPageContent(PSA_GRADING_EDITORIAL, '그레이딩 전 체크리스트', ['/guide/card-price', '/prices', '/guide/card-storage', '/guides/centering']),
   '/guide/booster-comparison': {
