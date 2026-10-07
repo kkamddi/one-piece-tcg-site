@@ -26203,6 +26203,11 @@ button.renew-deck-entry:focus-visible {
   transform: none;
 }
 
+.renew-booster-preview-image img.is-plain {
+  object-fit: contain;
+  transform: none;
+}
+
 .renew-booster-preview-image.is-text {
   display: grid;
   place-items: center;

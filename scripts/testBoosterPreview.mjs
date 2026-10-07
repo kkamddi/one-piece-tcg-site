@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { BOOSTER_PREVIEWS, getBoosterPreview, getPreviewCards, groupPreviewCards, parsePreviewCard } from '../lib/booster-preview.js';
 import { getBoosterPreviewEntries } from './boosterPreviewSeo.js';
 
@@ -53,8 +54,12 @@ test('official X reveals fill in cards SNKRDUNK has not listed, without duplicat
   assert.deepEqual(cards.map(card => [card.code, card.apparelId]), [['EB05-057', 10], ['EB05-056', null]]);
   for (const real of BOOSTER_PREVIEWS) for (const card of real.revealed || []) {
     assert.match(card.code, /^(OP|EB)\d{2}-(\d{3}|\?{3})$/);
-    if (card.image) assert.match(card.image, /^https:\/\/pbs\.twimg\.com\/media\/[\w-]+\?format=jpg&name=small$/);
-    if (card.image) assert.match(card.source, /^https:\/\/x\.com\/ONEPIECE_tcg\/status\/\d+$/);
+    if (card.image?.startsWith('https://pbs.twimg.com/')) {
+      assert.match(card.image, /^https:\/\/pbs\.twimg\.com\/media\/[\w-]+\?format=jpg&name=small$/);
+      assert.match(card.source, /^https:\/\/x\.com\/ONEPIECE_tcg\/status\/\d+$/);
+    } else if (card.image) {
+      assert.ok(existsSync(new URL(`../public${card.image}`, import.meta.url)), card.image);
+    }
   }
 });
 

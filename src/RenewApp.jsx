@@ -8557,7 +8557,7 @@ function RenewBoosterPreview({ preview }) {
               {groupCards.map((card) => (
                 <li key={card.apparelId || `${card.code}-${card.group}-${card.note}`}>
                   <a href={card.apparelId ? `/prices/product/${card.apparelId}?code=${encodeURIComponent(card.code)}` : card.source || undefined} target={card.apparelId ? undefined : '_blank'} rel={card.apparelId ? undefined : 'noreferrer'}>
-                    <span className={`renew-booster-preview-image${card.image ? '' : ' is-text'}`}>{card.image ? <img src={card.image} alt={`${card.code} ${card.name} ${card.rarity}`} loading="lazy" referrerPolicy="no-referrer" onLoad={card.apparelId ? fitProductPhoto : undefined} className={card.apparelId ? '' : 'is-official'} /> : <span>{card.code}<br />{card.rarity}</span>}</span>
+                    <span className={`renew-booster-preview-image${card.image ? '' : ' is-text'}`}>{card.image ? <img src={card.image} alt={`${card.code} ${card.name} ${card.rarity}`} loading="lazy" referrerPolicy="no-referrer" onLoad={card.apparelId ? fitProductPhoto : undefined} className={card.apparelId ? '' : card.image.includes('pbs.twimg.com') ? 'is-official' : 'is-plain'} /> : <span>{card.code}<br />{card.rarity}</span>}</span>
                     <strong>{card.name}</strong>
                     <small>{card.code} · {card.rarity}{card.note ? ` · ${card.note}` : ''}</small>
                     {priceOf(card) ? <b>{formatPreviewYen(priceOf(card))}</b> : null}
