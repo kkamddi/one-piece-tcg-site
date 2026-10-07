@@ -5,7 +5,7 @@ import { BOOSTER_PREVIEWS, getBoosterPreview, getPreviewCards, groupPreviewCards
 import { getBoosterPreviewEntries } from './boosterPreviewSeo.js';
 
 const item = (apparelId, code, name, setName = 'Extra Booster "Heroines Edition Vol.2"') => ({ apparelId, code, locale: 'JP', name: `${name} [${code}](${setName})`, setName, previewImageUrl: `https://img/${apparelId}.webp` });
-const [eb05, op18] = BOOSTER_PREVIEWS;
+const [eb05, op18] = BOOSTER_PREVIEWS.map(preview => ({ ...preview, revealed: [] }));
 
 test('SNKRDUNK product names are read into name, rarity and version group', () => {
   assert.deepEqual([
@@ -14,14 +14,20 @@ test('SNKRDUNK product names are read into name, rarity and version group', () =
     item(3, 'EB05-061', 'Nami SEC-P'),
     item(4, 'OP11-041', 'Nami L'),
     item(5, 'EB05-055', 'Nami (Kentaro Yabuki) SR-P :Foil Stamped'),
-    item(6, 'EB05-057', 'Nojiko R-P')
+    item(6, 'EB05-057', 'Nojiko R-P'),
+    item(7, 'EB05-014', 'Shirahoshi SR-SP (Manga Alt Art)'),
+    item(8, 'OP17-118', 'Rocks D. Xebec SEC-SP (Manga Alt Art) :Pirate Crew Super Parallel'),
+    item(9, 'EB03-061', 'Uta SEC-SP (Comic Parallel)')
   ].map(parsePreviewCard).map(card => [card.name, card.rarity, card.group, card.note]), [
     ['니코 로빈', 'L-SP', '슈퍼 리더 패러렐', ''],
     ['스투시', 'SR-SPC', 'SP', ''],
     ['나미', 'SEC-P', 'SEC', ''],
     ['나미', 'L', '리더', ''],
     ['나미', 'SR-P', '특별 일러스트', '야부키 켄타로 일러스트 · 박 버전'],
-    ['노지코', 'R-P', '패러렐', '']
+    ['노지코', 'R-P', '패러렐', ''],
+    ['시라호시', 'SR-SP', '슈퍼 패러렐', ''],
+    ['Rocks D. Xebec', 'SEC-SP', '슈퍼 패러렐', '해적단 슈퍼 패러렐'],
+    ['우타', 'SEC-SP', '망가', '']
   ]);
 });
 
@@ -36,6 +42,20 @@ test('each preview only collects its own set, skips DON!! and lists manga first'
   assert.deepEqual(getPreviewCards(eb05, market).map(card => card.apparelId), [11, 10]);
   assert.deepEqual(groupPreviewCards(getPreviewCards(eb05, market)).map(entry => entry.group), ['슈퍼 리더 패러렐', '패러렐']);
   assert.deepEqual(getPreviewCards(op18, market).map(card => card.apparelId), [14]);
+});
+
+test('official X reveals fill in cards SNKRDUNK has not listed, without duplicating listed versions', () => {
+  const preview = { ...eb05, revealed: [
+    { code: 'EB05-057', name: '노지코', rarity: 'R-P', group: '패러렐', note: '', image: 'x' },
+    { code: 'EB05-056', name: '니코 올비아', rarity: 'C', group: '기본', note: '', image: 'https://pbs.twimg.com/media/a?format=jpg&name=small', source: 'https://x.com/ONEPIECE_tcg/status/1' }
+  ] };
+  const cards = getPreviewCards(preview, [item(10, 'EB05-057', 'Nojiko R-P')]);
+  assert.deepEqual(cards.map(card => [card.code, card.apparelId]), [['EB05-057', 10], ['EB05-056', null]]);
+  for (const real of BOOSTER_PREVIEWS) for (const card of real.revealed || []) {
+    assert.match(card.code, /^(OP|EB)\d{2}-(\d{3}|\?{3})$/);
+    if (card.image) assert.match(card.image, /^https:\/\/pbs\.twimg\.com\/media\/[\w-]+\?format=jpg&name=small$/);
+    if (card.image) assert.match(card.source, /^https:\/\/x\.com\/ONEPIECE_tcg\/status\/\d+$/);
+  }
 });
 
 test('preview pages are routed, listed, searchable, pre-rendered and in the sitemap', async () => {
