@@ -34,6 +34,7 @@ import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editoria
 import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
 import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
 import { buildReleaseScheduleEditorial } from '../lib/release-schedule-editorial.js';
+import { NEW_BOOSTERS_EDITORIAL } from '../lib/new-boosters-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
@@ -743,6 +744,7 @@ const CARD_CATALOG_GUIDE = toEditorialGuide(CARD_CATALOG_EDITORIAL);
 const BOOSTER_COMPARISON_GUIDE = toEditorialGuide(BOOSTER_COMPARISON_EDITORIAL);
 const CHARACTER_CARDS_GUIDE = toEditorialGuide(CHARACTER_CARDS_EDITORIAL);
 const PSA_GRADING_GUIDE = toEditorialGuide(PSA_GRADING_EDITORIAL);
+const NEW_BOOSTERS_GUIDE = toEditorialGuide(NEW_BOOSTERS_EDITORIAL);
 // The release schedule is rebuilt from the official topics on every load, so its upcoming list stays current.
 const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsData, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
@@ -755,7 +757,8 @@ const GUIDE_HUB_COLLECTIONS = [
     links: [
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
       { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
-      { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' }
+      { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' },
+      { href: '/guide/new-boosters', title: '신작 프리뷰', meta: 'EB-05·OP-18 공개 카드와 구성' }
     ]
   },
   {
@@ -851,6 +854,14 @@ const GUIDE_ARTICLE_DETAILS = {
     ],
     related: ['/guide/card-price', '/guides/centering', '/guide/card-storage']
   },
+  newBoosters: {
+    checklistTitle: '발매 전 체크리스트',
+    faq: [
+      ['공개 카드 목록은 공식 리스트인가요?', 'SNKRDUNK에 미리 등록된 상품을 기준으로 정리했습니다. 공식 카드 리스트가 발표되면 이름과 버전을 다시 대조해 갱신합니다.'],
+      ['EB-05 카드도 vol.1처럼 비싸질까요?', '앞선 부스터의 시세는 참고 자료일 뿐 새 부스터의 가격을 알려 주지 않습니다. 발매 후 거래가 쌓인 뒤 카드별 시세에서 확인하세요.']
+    ],
+    related: ['/guide/release-schedule', '/guide/booster-comparison', '/guide/character-cards']
+  },
   release: {
     checklistTitle: '발매 일정 체크리스트',
     faq: [
@@ -865,6 +876,7 @@ const GUIDE_RELATED_LABELS = {
   '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
   '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
   '/guide/release-schedule': ['신작·발매 일정', '일본판·한국판 발매일과 한국 발매 간격을 봅니다.'],
+  '/guide/new-boosters': ['신작 프리뷰', 'EB-05·OP-18 구성과 공개된 카드를 봅니다.'],
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
   '/guide/card-storage': ['카드 보관 방법', '슬리브부터 장기 보관까지 순서대로 확인합니다.'],
@@ -3362,6 +3374,9 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       keywords: '원피스카드 시세, 원피스카드 주간 시세, 원피스카드 PSA10 시세, 원피스카드 가격 변동',
       body: '매주 월요일 지난주 SNKRDUNK 거래를 집계한 원피스카드 시세 리포트입니다.'
     };
+  }
+  if (path === '/guide/new-boosters') {
+    return { title: "원피스카드 신작 프리뷰 - EB-05 Heroines Edition vol.2 · OP-18 신의 지배 공개 카드와 구성 | Card Pone", h1: NEW_BOOSTERS_EDITORIAL.heading, description: "EB-05 Heroines Edition vol.2와 OP-18 신의 지배의 발매일·가격·레어도 구성, 공개된 망가·SP 카드와 앞선 EB-03·OP-17의 발매 후 시세를 정리합니다.", keywords: "원피스카드 EB-05, 원피스카드 OP-18, 히로인즈 에디션 vol.2, 신의 지배, 원피스카드 신작, 원피스카드 망가 레어", body: NEW_BOOSTERS_EDITORIAL.paragraphs[0] };
   }
   if (path === '/guide/character-cards') {
     return { title: "원피스카드 캐릭터별 시세 - 루피·샹크스 등 가장 비싼 카드와 버전별 가격 | Card Pone", h1: CHARACTER_CARDS_EDITORIAL.heading, description: "SNKRDUNK 일본판 최근 거래로 캐릭터별 고가 카드와 Single·PSA10 시세, 같은 카드의 패러렐·망가 버전 가격 차이를 정리합니다.", keywords: "원피스카드 캐릭터별 시세, 루피 카드 시세, 샹크스 카드 가격, 원피스카드 비싼 카드, 원피스카드 망가 레어 시세", body: CHARACTER_CARDS_EDITORIAL.paragraphs[0] };
@@ -7041,6 +7056,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isCharacterCardsGuide = initialPath === '/guide/character-cards';
   const isPsaGradingGuide = initialPath === '/guide/psa-grading';
   const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
+  const isNewBoostersGuide = initialPath === '/guide/new-boosters';
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
@@ -7358,7 +7374,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isReleaseScheduleGuide && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isReleaseScheduleGuide && !isNewBoostersGuide && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7402,6 +7418,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isCharacterCardsGuide ? <RenewCharacterCardsGuide /> : null}
       {isPsaGradingGuide ? <RenewPsaGradingGuide /> : null}
       {isReleaseScheduleGuide ? <RenewReleaseScheduleGuide /> : null}
+      {isNewBoostersGuide ? <RenewNewBoostersGuide /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewAdInquiry uiLang={uiLang} />
@@ -8489,6 +8506,10 @@ function RenewPsaGradingGuide() {
 function RenewReleaseScheduleGuide() {
   const guide = useMemo(() => toEditorialGuide(getReleaseScheduleEditorial()), []);
   return <RenewEditorialGuide guide={guide} guideKey="release" headingId="release-schedule-guide-heading" cta={{ eyebrow: '캘린더', title: '이벤트까지 날짜별로 보려면', description: '발매일과 공식 이벤트, 카드쇼 일정을 달력에서 함께 확인합니다.', href: '/calendar', label: '캘린더 보기' }} />;
+}
+
+function RenewNewBoostersGuide() {
+  return <RenewEditorialGuide guide={NEW_BOOSTERS_GUIDE} guideKey="newBoosters" headingId="new-boosters-guide-heading" cta={{ eyebrow: '캘린더', title: '발매일과 이벤트를 날짜별로 보려면', description: '신작 발매일과 발매 기념 이벤트, 카드쇼 일정을 달력에서 함께 확인합니다.', href: '/calendar', label: '캘린더 보기' }} />;
 }
 
 function RenewCardCatalogGuide() {

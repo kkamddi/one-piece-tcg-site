@@ -17,6 +17,7 @@ export const SEARCH_PAGES = [
   { title: '부스터별 히트 카드 비교', href: '/guide/booster-comparison', keywords: ['부스터', '박스', '비교', '망가', 'SP', '고가'], description: 'OP01~OP16 망가·SP·고가 카드 분포 비교' },
   { title: '캐릭터별 카드 시세', href: '/guide/character-cards', keywords: ['캐릭터', '루피', '샹크스', '나미', '조로', '비싼 카드', '시세'], description: '캐릭터별 고가 카드와 버전별 가격 차이' },
   { title: 'PSA 그레이딩 가이드', href: '/guide/psa-grading', keywords: ['PSA', 'PSA10', '그레이딩', '감정', '등급'], description: '레어도·연식별 PSA10과 Single 가격 차이' },
+  { title: '신작 프리뷰 EB-05 · OP-18', href: '/guide/new-boosters', keywords: ['신작', 'EB-05', 'EB05', 'OP-18', 'OP18', '히로인즈', 'Heroines', '신의 지배', '프리뷰'], description: 'EB-05·OP-18 구성과 공개된 카드' },
   { title: '신작·발매 일정 가이드', href: '/guide/release-schedule', keywords: ['발매', '신작', '출시', '한국판', '일본판', '부스터'], description: '일본판·한국판 발매일과 한국 발매 간격' },
   { title: '도감 사용 가이드', href: '/guide/card-catalog', keywords: ['도감', '검색', '카드번호', '일련번호'], description: '카드 검색과 수집 목록 사용 방법' }
 ].map(item => ({ ...item, type: 'guides', id: item.href }));

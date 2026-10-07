@@ -48,6 +48,7 @@ const paths = [
   '/guide/character-cards',
   '/guide/psa-grading',
   '/guide/release-schedule',
+  '/guide/new-boosters',
   '/guide/collection',
   '/guide/collection/start',
   '/guide/collection/manga',
