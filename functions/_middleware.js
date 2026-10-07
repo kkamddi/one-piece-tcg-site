@@ -2,10 +2,19 @@ import { COLLECTION_EDITORIAL } from '../lib/collection-editorial.js';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
+import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
+import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS, PROMO_COLLECTION_GROUPS } from '../src/data/collection-guide.js';
+
+const editorialPageContent = (editorial, checklistHeading, links) => ({
+  heading: editorial.heading,
+  paragraphs: editorial.paragraphs,
+  sections: [...(editorial.summary?.length ? [{ heading: '핵심 숫자', stats: editorial.summary }] : []), ...editorial.sections, { heading: checklistHeading, items: editorial.checklist }],
+  links
+});
 
 // Card lists and questions the pages show, printed as text for the pre-rendered HTML.
 const collectionCardText = (card) => (card.variant ? `${card.nameKo} (${card.variant})` : card.nameKo);
@@ -545,6 +554,8 @@ const SEO_FIXES = {
     editor: 'Card Pone 데이터 편집',
     reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt
   },
+  '/guide/character-cards': { ...{"title":"원피스카드 캐릭터별 시세 - 루피·샹크스 등 가장 비싼 카드와 버전별 가격 | Card Pone","description":"SNKRDUNK 일본판 최근 거래로 캐릭터별 고가 카드와 Single·PSA10 시세, 같은 카드의 패러렐·망가 버전 가격 차이를 정리합니다.","keywords":"원피스카드 캐릭터별 시세, 루피 카드 시세, 샹크스 카드 가격, 원피스카드 비싼 카드, 원피스카드 망가 레어 시세"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: CHARACTER_CARDS_EDITORIAL.reviewedAt },
+  '/guide/psa-grading': { ...{"title":"원피스카드 PSA 그레이딩 가이드 - 레어도·연식별 PSA10 시세 차이 | Card Pone","description":"SNKRDUNK 일본판 실제 거래로 레어도·버전·시리즈 연식별 PSA10과 Single 가격 차이와 그레이딩 전 확인할 점을 정리합니다.","keywords":"원피스카드 PSA, 원피스카드 그레이딩, PSA10 시세, 원피스카드 PSA10 가격 차이, 원피스카드 감정"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: PSA_GRADING_EDITORIAL.reviewedAt },
   '/guide/booster-comparison': {
     title: '원피스카드 부스터별 히트 카드 비교 - OP01~OP16 망가·SP·고가 카드 | Card Pone',
     description: '일본판 OP01~OP16과 EB01~EB04의 SEC·SP·패러렐·망가 레어 구성과 SNKRDUNK 등록가 분포를 부스터별로 비교합니다.',
@@ -1007,6 +1018,8 @@ const SERVER_PAGE_CONTENT = {
     sections: [{ heading: '핵심 숫자', stats: SHOP_GUIDE_EDITORIAL.summary }, ...SHOP_GUIDE_EDITORIAL.sections, { heading: '구매 전 체크리스트', items: SHOP_GUIDE_EDITORIAL.checklist }],
     links: ['/shops', '/shops/official', '/calendar', '/guide/box-recommendation']
   },
+  '/guide/character-cards': editorialPageContent(CHARACTER_CARDS_EDITORIAL, '캐릭터 시세 체크리스트', ['/prices', '/guide/card-price', '/guide/collection/manga', '/market-report']),
+  '/guide/psa-grading': editorialPageContent(PSA_GRADING_EDITORIAL, '그레이딩 전 체크리스트', ['/guide/card-price', '/prices', '/guide/card-storage', '/guides/centering']),
   '/guide/booster-comparison': {
     heading: BOOSTER_COMPARISON_EDITORIAL.heading,
     paragraphs: BOOSTER_COMPARISON_EDITORIAL.paragraphs,

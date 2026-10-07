@@ -31,6 +31,9 @@ import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGui
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
+import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
+import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
+import { buildReleaseScheduleEditorial } from '../lib/release-schedule-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
@@ -738,6 +741,10 @@ const SHOP_BUYING_GUIDE = toEditorialGuide(SHOP_GUIDE_EDITORIAL);
 const CARD_PRICE_GUIDE = toEditorialGuide(CARD_PRICE_EDITORIAL);
 const CARD_CATALOG_GUIDE = toEditorialGuide(CARD_CATALOG_EDITORIAL);
 const BOOSTER_COMPARISON_GUIDE = toEditorialGuide(BOOSTER_COMPARISON_EDITORIAL);
+const CHARACTER_CARDS_GUIDE = toEditorialGuide(CHARACTER_CARDS_EDITORIAL);
+const PSA_GRADING_GUIDE = toEditorialGuide(PSA_GRADING_EDITORIAL);
+// The release schedule is rebuilt from the official topics on every load, so its upcoming list stays current.
+const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsData, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
 const GUIDE_HUB_COLLECTIONS = [
   {
@@ -747,7 +754,8 @@ const GUIDE_HUB_COLLECTIONS = [
     description: '카드를 찾고 실제 상품을 구매하는 기본 순서입니다.',
     links: [
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
-      { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' }
+      { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
+      { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' }
     ]
   },
   {
@@ -758,7 +766,9 @@ const GUIDE_HUB_COLLECTIONS = [
     links: [
       { href: '/guide/card-price', title: '카드 시세 읽기', meta: 'Single·PSA10·최근 거래' },
       { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' },
-      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' }
+      { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' },
+      { href: '/guide/character-cards', title: '캐릭터별 카드 시세', meta: '캐릭터별 고가 카드·버전 차이' },
+      { href: '/guide/psa-grading', title: 'PSA 그레이딩 판단', meta: '레어도·연식별 PSA10 차이' }
     ]
   },
   {
@@ -824,10 +834,37 @@ const GUIDE_ARTICLE_DETAILS = {
       ['수치는 언제 바뀌나요?', '본문은 2026년 10월 5일 데이터 기준입니다. 새 부스터 발매나 시세 변화에 따라 달라지므로 각 부스터의 박스 가이드에서 최신 값을 함께 확인하세요.']
     ],
     related: ['/guide/box-recommendation', '/guide/card-price', '/guide/collection/manga']
+  },
+  character: {
+    checklistTitle: '캐릭터 시세 체크리스트',
+    faq: [
+      ['같은 캐릭터면 가격이 비슷한가요?', '같은 캐릭터라도 버전에 따라 크게 다릅니다. 같은 번호의 망가 버전은 기본판의 중앙값 82배였으니 카드 번호와 버전(패러렐·SP·망가)을 먼저 확인하세요.'],
+      ['한국판 카드에도 이 시세를 적용할 수 있나요?', '이 글은 SNKRDUNK 일본판 거래만 집계했습니다. 한국판·영어판은 거래처와 가격이 달라 그대로 적용할 수 없습니다.']
+    ],
+    related: ['/guide/card-price', '/guide/collection/manga', '/guide/psa-grading']
+  },
+  psa: {
+    checklistTitle: '그레이딩 전 체크리스트',
+    faq: [
+      ['PSA10 배수가 높은 카드부터 감정하면 되나요?', '배수가 높아도 Single이 저가라면 차액은 작습니다. 차액이 감정비·배송비·수수료를 합친 금액보다 충분히 큰지, PSA10 거래 기록이 있는지 먼저 확인하세요.'],
+      ['감정비와 소요 기간은 얼마인가요?', '요금과 기간은 서비스 등급과 시기에 따라 바뀌므로 이 글에 적지 않았습니다. PSA 공식 사이트에서 최신 기준을 확인하세요.']
+    ],
+    related: ['/guide/card-price', '/guides/centering', '/guide/card-storage']
+  },
+  release: {
+    checklistTitle: '발매 일정 체크리스트',
+    faq: [
+      ['한국판 발매일은 일본판을 보고 미리 알 수 있나요?', '지금까지의 간격은 참고일 뿐이며 다음 발매일을 정해 주지 않습니다. 한국판 날짜는 한국 공식 사이트 발표로 확인하세요.'],
+      ['일정은 언제 바뀌나요?', '공식 사이트의 상품 일정이 바뀌면 데이터 갱신 때 이 페이지의 표도 함께 바뀝니다. 발매 직전에는 공식 상품 페이지에서 한 번 더 확인하세요.']
+    ],
+    related: ['/guide/booster-comparison', '/guide/box-recommendation', '/guide/shops']
   }
 };
 const GUIDE_RELATED_LABELS = {
   '/guide/booster-comparison': ['부스터별 히트 카드 비교', 'OP01~OP16 망가·SP·고가 카드 분포를 비교합니다.'],
+  '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
+  '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
+  '/guide/release-schedule': ['신작·발매 일정', '일본판·한국판 발매일과 한국 발매 간격을 봅니다.'],
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
   '/guide/card-storage': ['카드 보관 방법', '슬리브부터 장기 보관까지 순서대로 확인합니다.'],
@@ -3325,6 +3362,16 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       keywords: '원피스카드 시세, 원피스카드 주간 시세, 원피스카드 PSA10 시세, 원피스카드 가격 변동',
       body: '매주 월요일 지난주 SNKRDUNK 거래를 집계한 원피스카드 시세 리포트입니다.'
     };
+  }
+  if (path === '/guide/character-cards') {
+    return { title: "원피스카드 캐릭터별 시세 - 루피·샹크스 등 가장 비싼 카드와 버전별 가격 | Card Pone", h1: CHARACTER_CARDS_EDITORIAL.heading, description: "SNKRDUNK 일본판 최근 거래로 캐릭터별 고가 카드와 Single·PSA10 시세, 같은 카드의 패러렐·망가 버전 가격 차이를 정리합니다.", keywords: "원피스카드 캐릭터별 시세, 루피 카드 시세, 샹크스 카드 가격, 원피스카드 비싼 카드, 원피스카드 망가 레어 시세", body: CHARACTER_CARDS_EDITORIAL.paragraphs[0] };
+  }
+  if (path === '/guide/psa-grading') {
+    return { title: "원피스카드 PSA 그레이딩 가이드 - 레어도·연식별 PSA10 시세 차이 | Card Pone", h1: PSA_GRADING_EDITORIAL.heading, description: "SNKRDUNK 일본판 실제 거래로 레어도·버전·시리즈 연식별 PSA10과 Single 가격 차이와 그레이딩 전 확인할 점을 정리합니다.", keywords: "원피스카드 PSA, 원피스카드 그레이딩, PSA10 시세, 원피스카드 PSA10 가격 차이, 원피스카드 감정", body: PSA_GRADING_EDITORIAL.paragraphs[0] };
+  }
+  if (path === '/guide/release-schedule') {
+    const editorial = getReleaseScheduleEditorial();
+    return { title: "원피스카드 신작·발매 일정 - 일본판·한국판 발매일과 한국 발매 간격 | Card Pone", h1: editorial.heading, description: "공식 발표 기준 원피스카드 일본판·한국판 신작 발매일과, 같은 제품의 한국판이 일본판보다 얼마나 늦게 나오는지 정리합니다.", keywords: "원피스카드 발매 일정, 원피스카드 신작, 원피스카드 한국판 발매일, 원피스카드 부스터 발매일, 원피스카드 엑스트라 부스터", body: editorial.paragraphs[0] };
   }
   if (path === '/guide/booster-comparison') {
     return {
@@ -6991,6 +7038,9 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isCardPriceGuide = initialPath === '/guide/card-price';
   const isCardCatalogGuide = initialPath === '/guide/card-catalog';
   const isBoosterComparisonGuide = initialPath === '/guide/booster-comparison';
+  const isCharacterCardsGuide = initialPath === '/guide/character-cards';
+  const isPsaGradingGuide = initialPath === '/guide/psa-grading';
+  const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
   const routeSection = ['/guide', '/faq', '/news/guide', '/news/faq'].includes(initialPath)
@@ -7308,7 +7358,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isReleaseScheduleGuide && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7349,6 +7399,9 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isCardPriceGuide ? <RenewCardPriceGuide /> : null}
       {isCardCatalogGuide ? <RenewCardCatalogGuide /> : null}
       {isBoosterComparisonGuide ? <RenewBoosterComparisonGuide /> : null}
+      {isCharacterCardsGuide ? <RenewCharacterCardsGuide /> : null}
+      {isPsaGradingGuide ? <RenewPsaGradingGuide /> : null}
+      {isReleaseScheduleGuide ? <RenewReleaseScheduleGuide /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
       <RenewAdInquiry uiLang={uiLang} />
@@ -8423,6 +8476,19 @@ function RenewHomeMarketReport({ summary, onOpenPrices, onNavigateReport }) {
 
 function RenewBoosterComparisonGuide() {
   return <RenewEditorialGuide guide={BOOSTER_COMPARISON_GUIDE} guideKey="booster" headingId="booster-comparison-guide-heading" cta={{ eyebrow: '박스 가이드', title: '부스터별 최신 값을 보려면', description: '각 부스터의 박스 현재가, 최고가 카드와 히트 카드 구성을 최신 데이터로 확인합니다.', href: '/guide/box-recommendation', label: '박스 가이드 보기' }} />;
+}
+
+function RenewCharacterCardsGuide() {
+  return <RenewEditorialGuide guide={CHARACTER_CARDS_GUIDE} guideKey="character" headingId="character-cards-guide-heading" cta={{ eyebrow: '카드 시세', title: '다른 카드 시세를 보려면', description: '카드 이름이나 번호로 검색해 Single·PSA10 최근 거래와 가격 차트를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+}
+
+function RenewPsaGradingGuide() {
+  return <RenewEditorialGuide guide={PSA_GRADING_GUIDE} guideKey="psa" headingId="psa-grading-guide-heading" cta={{ eyebrow: '카드 시세', title: '내 카드의 Single·PSA10을 비교하려면', description: '카드별 시세 화면에서 Single과 PSA10 최근 거래가와 거래일을 함께 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+}
+
+function RenewReleaseScheduleGuide() {
+  const guide = useMemo(() => toEditorialGuide(getReleaseScheduleEditorial()), []);
+  return <RenewEditorialGuide guide={guide} guideKey="release" headingId="release-schedule-guide-heading" cta={{ eyebrow: '캘린더', title: '이벤트까지 날짜별로 보려면', description: '발매일과 공식 이벤트, 카드쇼 일정을 달력에서 함께 확인합니다.', href: '/calendar', label: '캘린더 보기' }} />;
 }
 
 function RenewCardCatalogGuide() {

@@ -15,6 +15,9 @@ export const SEARCH_PAGES = [
   { title: '정보 · 공식 소식', href: '/news', keywords: ['소식', '정보', '공지', '뉴스', '이벤트'], description: '사이트 가이드와 공식 소식' },
   { title: '발매 일정', href: '/calendar', keywords: ['발매', '출시', '일정', '캘린더'], description: '카드 상품 발매 일정 확인' },
   { title: '부스터별 히트 카드 비교', href: '/guide/booster-comparison', keywords: ['부스터', '박스', '비교', '망가', 'SP', '고가'], description: 'OP01~OP16 망가·SP·고가 카드 분포 비교' },
+  { title: '캐릭터별 카드 시세', href: '/guide/character-cards', keywords: ['캐릭터', '루피', '샹크스', '나미', '조로', '비싼 카드', '시세'], description: '캐릭터별 고가 카드와 버전별 가격 차이' },
+  { title: 'PSA 그레이딩 가이드', href: '/guide/psa-grading', keywords: ['PSA', 'PSA10', '그레이딩', '감정', '등급'], description: '레어도·연식별 PSA10과 Single 가격 차이' },
+  { title: '신작·발매 일정 가이드', href: '/guide/release-schedule', keywords: ['발매', '신작', '출시', '한국판', '일본판', '부스터'], description: '일본판·한국판 발매일과 한국 발매 간격' },
   { title: '도감 사용 가이드', href: '/guide/card-catalog', keywords: ['도감', '검색', '카드번호', '일련번호'], description: '카드 검색과 수집 목록 사용 방법' }
 ].map(item => ({ ...item, type: 'guides', id: item.href }));
 
