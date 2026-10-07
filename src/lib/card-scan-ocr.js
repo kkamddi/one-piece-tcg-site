@@ -30,10 +30,30 @@ function prepareRegion(source, region) {
   return canvas;
 }
 
+// The site keeps one loaded OCR worker between scans; callers with custom paths (the extension) do not.
+let idleReader = null;
+let reportProgress = () => {};
+const createReader = workerOptions => createWorker('eng', 1, { workerPath, ...workerOptions, errorHandler: () => {}, logger: message => reportProgress(message) });
+
+export function warmCardCodeReader() {
+  if (idleReader) return;
+  const reader = createReader({});
+  reader.catch(() => { if (idleReader === reader) idleReader = null; });
+  idleReader = reader;
+}
+
+export function releaseCardCodeReader() {
+  const reader = idleReader;
+  idleReader = null;
+  reader?.then(worker => worker.terminate()).catch(() => {});
+}
+
 export async function recognizeCardCodes(canvas, { signal, onProgress = () => {}, getFallbackCanvas = async () => null, onAttempt = () => {}, workerOptions = {} }) {
   let worker;
   let pass = 0;
   let abort;
+  let finished = false;
+  const poolable = !Object.keys(workerOptions).length;
   const aborted = () => new DOMException('Scan cancelled', 'AbortError');
   const cancellation = new Promise((_, reject) => {
     abort = () => reject(aborted());
@@ -41,14 +61,12 @@ export async function recognizeCardCodes(canvas, { signal, onProgress = () => {}
   });
   try {
     if (signal.aborted) throw aborted();
-    const pendingWorker = createWorker('eng', 1, {
-      workerPath,
-      ...workerOptions,
-      errorHandler: () => {},
-      logger: message => {
-        if (!signal.aborted) onProgress({ phase: message.status === 'recognizing text' ? 'reading' : 'loading', progress: Math.min(99, Math.round((pass + (message.progress || 0)) * 100 / 12)) });
-      }
-    }).then(created => {
+    reportProgress = message => {
+      if (!signal.aborted) onProgress({ phase: message.status === 'recognizing text' ? 'reading' : 'loading', progress: Math.min(99, Math.round((pass + (message.progress || 0)) * 100 / 12)) });
+    };
+    const reader = poolable && idleReader ? idleReader : createReader(workerOptions);
+    if (reader === idleReader) idleReader = null;
+    const pendingWorker = reader.then(created => {
       if (signal.aborted) {
         void created.terminate();
         throw aborted();
@@ -76,11 +94,15 @@ export async function recognizeCardCodes(canvas, { signal, onProgress = () => {}
       return [];
     }
     const original = await readSource(canvas);
-    if (original.length) return original;
+    if (original.length) { finished = true; return original; }
     const fallback = await Promise.race([getFallbackCanvas(), cancellation]);
-    return fallback && fallback !== canvas ? await readSource(fallback) : [];
+    const codes = fallback && fallback !== canvas ? await readSource(fallback) : [];
+    finished = true;
+    return codes;
   } finally {
     signal.removeEventListener('abort', abort);
-    if (worker) await worker.terminate();
+    reportProgress = () => {};
+    if (worker && finished && poolable && !signal.aborted && !idleReader) idleReader = Promise.resolve(worker);
+    else if (worker) await worker.terminate();
   }
 }

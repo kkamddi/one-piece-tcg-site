@@ -119,10 +119,12 @@ export default function CardScanner({ uiLang, initialLocale, onClose, onSelect, 
     document.addEventListener('visibilitychange', hidden);
     mobile.addEventListener('change', resize);
     void openCamera();
+    void import('./lib/card-recognition-lab.js').then(module => module.warmRecognition());
     return () => {
       jobRef.current += 1;
       controllerRef.current?.abort();
       stopCamera();
+      void import('./lib/card-recognition-lab.js').then(module => module.releaseRecognition());
       document.removeEventListener('keydown', keydown);
       document.removeEventListener('visibilitychange', hidden);
       mobile.removeEventListener('change', resize);

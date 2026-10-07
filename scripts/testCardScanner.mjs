@@ -123,16 +123,22 @@ async function ocrWithWorker(createWorker) {
   const source = await readFile(new URL('../src/lib/card-scan-ocr.js', import.meta.url), 'utf8');
   const ast = parse(source, { sourceType: 'module' });
   const fn = ast.program.body.find(node => node.declaration?.id?.name === 'recognizeCardCodes').declaration;
-  return vm.runInNewContext(`(${source.slice(fn.start, fn.end)})`, {
+  const context = {
     createWorker, workerPath: 'test-worker', extractCardCodes, getOcrRegions, DOMException,
-    prepareRegion: () => ({ width: 100, height: 100 })
-  });
+    prepareRegion: () => ({ width: 100, height: 100 }),
+    idleReader: null, reportProgress: () => {}, createReader: options => createWorker('eng', 1, options)
+  };
+  const scan = vm.runInNewContext(`(${source.slice(fn.start, fn.end)})`, context);
+  scan.context = context;
+  return scan;
 }
 
-test('OCR falls back to the full photo and always terminates its worker', async () => {
+test('OCR falls back to the full photo and keeps the finished site worker for the next scan', async () => {
   let calls = 0;
   let terminated = 0;
+  let created = 0;
   const scan = await ocrWithWorker(async () => ({
+    id: ++created,
     setParameters: async () => {},
     recognize: async () => ({ data: { text: ++calls < 6 ? '5000' : 'OP01-120' } }),
     terminate: async () => { terminated += 1; }
@@ -140,7 +146,23 @@ test('OCR falls back to the full photo and always terminates its worker', async 
   const codes = await scan({}, { signal: new AbortController().signal });
   assert.deepEqual(codes, ['OP01-120']);
   assert.equal(calls, 6);
+  assert.equal(terminated, 0);
+  assert.equal((await scan.context.idleReader).id, 1);
+  calls = 5;
+  assert.deepEqual(await scan({}, { signal: new AbortController().signal }), ['OP01-120']);
+  assert.equal(created, 1);
+});
+
+test('OCR with custom worker paths (the extension) always terminates its worker', async () => {
+  let terminated = 0;
+  const scan = await ocrWithWorker(async () => ({
+    setParameters: async () => {},
+    recognize: async () => ({ data: { text: 'OP01-120' } }),
+    terminate: async () => { terminated += 1; }
+  }));
+  assert.deepEqual(await scan({}, { signal: new AbortController().signal, workerOptions: { corePath: 'ocr/' } }), ['OP01-120']);
   assert.equal(terminated, 1);
+  assert.equal(scan.context.idleReader, null);
 });
 
 test('OCR also reads the rectified card when the original photo has no readable number', async () => {

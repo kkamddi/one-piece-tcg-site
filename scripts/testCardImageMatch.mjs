@@ -6,7 +6,7 @@ import cvModule from '@techstark/opencv-js';
 import { parse } from '@babel/parser';
 import { IMAGE_INDEX_VERSION, normalizeCardImage, normalizeHolderRegions, shortlistImageCodes, extractImageFeatures, compareImageFeatures, imageSignature, signatureDistance } from '../src/lib/card-image-features.js';
 import { getScanVariants } from '../src/lib/card-scan.js';
-import { createCardImageSession } from '../src/lib/card-image-match.js';
+import { createCardImageSession, releaseCardImageEngine } from '../src/lib/card-image-match.js';
 
 const cv = await cvModule;
 const sample = new URL('../artifacts/card-scan-OP01-120.png', import.meta.url);
@@ -168,6 +168,34 @@ test('missing comparison data does not produce a fabricated image match', async 
   global.Worker = class { postMessage() { throw new Error('should_not_compare'); } terminate() {} };
   global.fetch = async () => ({ ok: false });
   const session = createCardImageSession(new AbortController().signal);
-  try { await assert.rejects(session.match('OP01-120', 'JP'), /image_index_unavailable/); }
+  // Successful files stay cached for the visit, so use a code no earlier test loaded.
+  try { await assert.rejects(session.match('OP01-121', 'JP'), /image_index_unavailable/); }
   finally { session.dispose(); global.Worker = previousWorker; global.fetch = previousFetch; }
+});
+
+test('image retrieval can compare the best shortlist slice first and the rest only on request', async () => {
+  const previousWorker = global.Worker, previousFetch = global.fetch;
+  const requests = [];
+  global.Worker = class { postMessage(message) { queueMicrotask(() => this.onmessage({ data: { id: message.id, result: message.items.map(item => ({ key: item.key, code: item.code, verified: item.code === 'SLICE-01', score: 1 })) } })); } terminate() {} };
+  const codes = Array.from({ length: 20 }, (_, i) => `SLICE-${String(i).padStart(2, '0')}`);
+  global.fetch = async url => {
+    requests.push(url);
+    const file = url.replace('/card-scan/', '').replace('.json', '');
+    const items = file === 'index-EN' ? codes.map(code => ({ code, signature: Buffer.from([0, 0, 0]).toString('base64') })) : [{ key: `EN-${file}`, code: file.split('/')[1] }];
+    return { ok: true, json: async () => ({ version: IMAGE_INDEX_VERSION, items }) };
+  };
+  // Earlier tests leave their finished fake engine idle for reuse; start from a new one.
+  releaseCardImageEngine();
+  const session = createCardImageSession(new AbortController().signal);
+  try {
+    const first = await session.match('', 'EN', { to: 4 });
+    assert.equal(requests.filter(url => url.startsWith('/card-scan/EN/')).length, 4);
+    assert.equal(first.remaining, 16);
+    assert.deepEqual(first.matches.map(item => item.code), ['SLICE-01']);
+    const rest = await session.match('', 'EN', { from: 4 });
+    assert.equal(rest.remaining, 0);
+    assert.equal(requests.filter(url => url === '/card-scan/index-EN.json').length, 1);
+    assert.equal(new Set(requests).size, requests.length);
+    assert.deepEqual(await session.match('', 'EN', { from: 40 }), { matches: [], partial: false, remaining: 0 });
+  } finally { session.dispose(); global.Worker = previousWorker; global.fetch = previousFetch; }
 });
