@@ -21,12 +21,12 @@ User-agent: Google-Extended
 Allow: /
 
 User-agent: CCBot
-Disallow: /
-
-User-agent: Bytespider
-Disallow: /
+Allow: /
 
 User-agent: ClaudeBot
+Allow: /
+
+User-agent: Bytespider
 Disallow: /
 
 Sitemap: https://www.optcgkorea.com/sitemap.xml
