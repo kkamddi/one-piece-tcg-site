@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Card Pone Scan",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "minimum_chrome_version": "116",
   "description": "웹페이지의 원피스 카드를 스캔하고 카드 정보와 시세를 확인하세요.",
   "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
