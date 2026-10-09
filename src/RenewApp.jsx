@@ -3331,7 +3331,7 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     return { title: "원피스 카드게임 입문 가이드 - 상품 종류·한글판 vs 일본판·시작 순서 | Card Pone", h1: GETTING_STARTED_EDITORIAL.heading, description: "원피스카드 처음이라면? 덱 구성 규칙, 부스터·스타트 덱·프리미엄 부스터 차이와 가격, 한글판이 일본판보다 약 10개월 늦는 발매 간격, 대전·수집별 시작 순서를 정리했습니다.", keywords: "원피스카드게임, 원피스 카드게임 입문, 원피스카드 시작, 원피스카드 초보, 원피스카드 스타트 덱, 원피스카드 한글판 일본판, 원피스카드 덱 구성, 원피스카드 부스터 종류", body: GETTING_STARTED_EDITORIAL.paragraphs[0] };
   }
   if (path === '/guide/price-ranking') {
-    return { title: "원피스카드 비싼 카드 순위 TOP 30 - 일본판 가격 순위 (2026.10) | Card Pone", h1: PRICE_RANKING_EDITORIAL.heading, description: "원피스카드 가격 순위 TOP 30. SNKRDUNK 일본판 실거래가로 Single·PSA10 비싼 카드 순위를 정리하고 망가·SP·부스터·캐릭터별로 비싼 이유를 나눴습니다. 2026년 10월 9일 기준.", keywords: "원피스 카드 가격 순위, 원피스카드 비싼 카드, 비싼 카드 순위, 원피스카드 최고가, 원피스 카드 시세 순위, 망가 카드 가격, PSA10 가격 순위", body: PRICE_RANKING_EDITORIAL.paragraphs[0] };
+    return { title: "원피스카드 비싼 카드 순위 TOP 30 - 일본판 가격 순위 (2026.10) | Card Pone", h1: PRICE_RANKING_EDITORIAL.heading, description: "원피스카드 가격 순위 TOP 30. SNKRDUNK 일본판 실거래가로 Single·PSA10 비싼 카드 순위와 망가·SP 등 비싼 이유를 정리했습니다. 2026년 10월 9일 기준.", keywords: "원피스 카드 가격 순위, 원피스카드 비싼 카드, 비싼 카드 순위, 원피스카드 최고가, 원피스 카드 시세 순위, 망가 카드 가격, PSA10 가격 순위", body: PRICE_RANKING_EDITORIAL.paragraphs[0] };
   }
   if (path === '/guide/card-types') {
     return { title: "원피스카드 종류·레어도 정리 - 패러렐·SP·망가 시세 차이 | Card Pone", h1: CARD_TYPES_EDITORIAL.heading, description: "원피스카드 리더·캐릭터·이벤트 종류와 C~SEC·패러렐·SP·망가 레어도 구분법, 일본판 SNKRDUNK 거래가로 본 레어도별 시세(SP 중앙값 ¥13,812, 망가 ¥143,004)를 정리했습니다.", keywords: "원피스 카드 종류, 원피스카드 레어도, 원피스카드 힛카드, 원피스카드 패러렐, 원피스카드 SP, 원피스카드 망가, 원피스카드 SEC, 트레저 레어", body: CARD_TYPES_EDITORIAL.paragraphs[0] };

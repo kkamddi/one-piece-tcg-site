@@ -9,11 +9,10 @@ const yen = (value) => Number(String(value).replace(/[¥,]/g, ''));
 const num = (value) => Number(String(value).replace(/[^\d.]/g, ''));
 const fmt = (value) => value.toLocaleString('en-US');
 const section = (prefix) => A.sections.find((s) => s.heading.startsWith(prefix));
-const single = section('2.').table;
-const psa = section('3.').table;
-const versions = section('4.').table;
-const products = section('5.').table;
-const characters = section('6.').bars;
+const single = section('1.').table;
+const psa = section('2.').table;
+const versions = section('3.').table;
+const caveats = section('4.');
 const col = (table, name) => table.columns.indexOf(name);
 
 test('the article has the shared editorial shape', () => {
@@ -25,14 +24,31 @@ test('the article has the shared editorial shape', () => {
   assert.equal(A.summary.length, 4);
   A.summary.forEach((item) => assert.ok(item.value && item.label));
   assert.ok(A.checklist.length >= 3);
+  assert.equal(A.checklist.length, 3);
   A.sections.forEach((s, index) => assert.ok(s.heading.startsWith(`${index + 1}. `), s.heading));
-  assert.ok(A.sections.some((s) => s.bars));
   const images = A.sections.flatMap((s) => s.images || []);
   assert.ok(images.length >= 1 && images.length <= 3);
   images.forEach((image) => {
     assert.match(image.src, /^https:\/\/cards\.optcgkorea\.com\/cards\/JP\/[A-Z0-9-]+_p\d+\.webp$/);
     assert.ok(image.alt && image.caption);
   });
+});
+
+test('each section stays short: a lead, then one table or one short list', () => {
+  assert.equal(A.sections.length, 4);
+  A.paragraphs.forEach((p) => assert.ok(p.length <= 60, p));
+  for (const s of A.sections) {
+    const blocks = [s.table, s.items?.length, s.bars?.length].filter(Boolean).length;
+    assert.equal(blocks, 1, s.heading);
+    assert.ok(s.paragraphs?.length >= 1 && s.paragraphs.length <= 2, s.heading);
+    s.paragraphs.forEach((p) => assert.ok(p.length <= 60, p));
+    (s.items || []).forEach((item) => assert.ok(item.length <= 45, item));
+    assert.ok((s.items || []).length <= 4, s.heading);
+  }
+  A.checklist.forEach((item) => assert.ok(item.length <= 30, item));
+  // Method and caveats appear once, in the last section only.
+  const body = JSON.stringify(A.sections.slice(0, -1));
+  assert.doesNotMatch(body, /프로모|시리얼|30일보다 오래|매입가|한국판/);
 });
 
 test('every table row has one cell per column', () => {
@@ -65,7 +81,6 @@ test('the rankings are complete, ordered and agree with the summary', () => {
   assert.equal(A.summary[1].value, single.rows[29][singlePrice]);
   const mangaRow = versions.rows.find((row) => row[0] === '망가');
   assert.equal(A.summary[2].value, `${mangaRow[col(versions, '상위 50 안')]}개`);
-  assert.equal(A.summary[3].value, `${characters.find((bar) => bar.label === '몽키 D. 루피').value}개`);
 });
 
 test('statements about the top 30 can be recomputed from the table', () => {
@@ -73,36 +88,23 @@ test('statements about the top 30 can be recomputed from the table', () => {
   const manga = single.rows.filter((row) => row[v].includes('망가')).length;
   const sp = single.rows.filter((row) => / SP( |$)/.test(row[v])).length;
   assert.match(text, new RegExp(`TOP 30 중 망가가 ${manga}개\\(${Math.round((manga / 30) * 100)}%\\), SP가 ${sp}개`));
+  assert.ok(single.rows.every((row) => !/^(C|UC|R|SR|SEC|L|리더)$/.test(row[v])), 'no base-rarity card in the top 30');
+  assert.match(section('1.').paragraphs[0], /기본 레어도 카드는 없습니다/);
   const stale = single.rows.filter((row) => (Date.parse('2026-10-09') - Date.parse(`2026-${row[col(single, '거래일')]}`)) / 86400000 > 30).length;
-  assert.ok(section('2.').items.some((item) => item.startsWith(`${stale}개는 마지막 Single 거래가 30일보다 오래됐습니다`)));
+  assert.ok(caveats.items.includes(`TOP 30 중 ${stale}개는 마지막 Single 거래가 30일보다 오래됐습니다.`));
   const luffyPsa = psa.rows.filter((row) => row[1] === '몽키 D. 루피').length;
   assert.match(text, new RegExp(`10개 중 ${luffyPsa}개가 루피 카드`));
   assert.equal(single.rows.filter((row) => row[2] === 'OP05-119').length, 3);
 });
 
-test('version, product and character breakdowns add up', () => {
+test('the version breakdown adds up', () => {
   const inTop50 = col(versions, '상위 50 안');
   assert.equal(versions.rows.reduce((sum, row) => sum + num(row[inTop50]), 0), 50);
-  const total = versions.rows.reduce((sum, row) => sum + num(row[col(versions, '거래 상품')]), 0);
+  const total = versions.rows.reduce((sum, row) => sum + num(row[col(versions, '상품 수')]), 0);
   assert.ok(A.paragraphs[1].includes(`${fmt(total)}개`));
-  assert.ok(section('4.').paragraphs[0].includes(`${fmt(total)}개`));
-  const mangaRow = versions.rows.find((row) => row[0] === '망가');
-  const share = Math.round((num(mangaRow[inTop50]) / num(mangaRow[1])) * 100);
-  assert.ok(text.includes(`${num(mangaRow[1])}개뿐이지만 그중 ${num(mangaRow[inTop50])}개(${share}%)`));
-
-  const productCounts = products.rows.map((row) => num(row[1]));
-  productCounts.forEach((count, i) => {
-    assert.ok(count >= 3);
-    if (i) assert.ok(count <= productCounts[i - 1]);
-  });
-  assert.match(section('5.').paragraphs[0], new RegExp(`3개 이상 나온 상품은 ${products.rows.length}개`));
-
-  characters.forEach((bar, i) => {
-    assert.equal(bar.display, `${bar.value}개`);
-    if (i) assert.ok(bar.value <= characters[i - 1].value);
-  });
-  const top4 = characters.slice(0, 4).reduce((sum, bar) => sum + bar.value, 0);
-  assert.ok(text.includes(`${top4}개(${Math.round((top4 / 50) * 100)}%)`));
+  const secRow = versions.rows.find((row) => row[0] === 'SEC (기본)');
+  assert.equal(secRow[inTop50], '0');
+  assert.match(section('3.').paragraphs[0], /기본 SEC는 없습니다/);
 });
 
 test('images point to real JP catalog cards that are in the Single table', async () => {
@@ -150,11 +152,9 @@ test('numbers match the saved analysis output when it is available', async (t) =
   }
 
   assert.ok(A.paragraphs[1].includes(`${fmt(T.countedSingle)}개`));
-  assert.ok(A.paragraphs[1].includes(`${T.excludedPrizePromo}개`));
-  assert.ok(section('1.').items.some((item) => item.includes(`${T.excludedPrizePromo}개`) && item.includes(`${T.excludedPrizeOverTop30Min}개는 Single이 30위 가격보다 높`)));
+  assert.ok(caveats.items.some((item) => item.includes(`프로모 ${T.excludedPrizePromo}개`) && item.includes(`그중 ${T.excludedPrizeOverTop30Min}개는 30위보다 비쌉니다`)));
   assert.equal(yen(A.summary[1].value), T.top30MinSingle);
-  assert.ok(section('2.').items.some((item) => item.startsWith(`${T.top30Stale30}개는`)));
-  assert.ok(section('7.').items.some((item) => item.includes(`${T.top50Stale30}개(${T.top50Stale30Pct}%)`)));
+  assert.ok(caveats.items.some((item) => item.startsWith(`TOP 30 중 ${T.top30Stale30}개는`)));
   assert.equal(T.psaAlsoInSingleTop30, 10);
   assert.equal(T.top30BaseRarity, 0);
   const g30 = Object.fromEntries(r.top30ByGroup.map((x) => [x.key, x]));
@@ -170,29 +170,15 @@ test('numbers match the saved analysis output when it is available', async (t) =
   });
   assert.equal(Object.keys(r.groupMedians).length, versions.rows.length);
   assert.equal(T.mangaInTop50, num(A.summary[2].value));
-  assert.ok(text.includes(`그중 ${T.mangaInTop50}개(${T.mangaInTop50OfAllPct}%)`));
-  const G = r.groupMedians;
-  assert.ok(text.includes(`망가 ¥${G['망가'].median.toLocaleString('en-US')}, SP ¥${G.SP.median.toLocaleString('en-US')}, 패러렐 ¥${G['패러렐'].median.toLocaleString('en-US')}`));
-  assert.ok(text.includes(`SP ${r.top50SpBreakdown.total}개 중 ${r.top50SpBreakdown.anniversaryGoldSilver}개는 3주년 SP`));
-  assert.ok(text.includes(`${r.top50SpBreakdown.eb02LeaderSp}개는 EB02의 리더 SP`));
-  assert.equal(r.top50SuperParallel.length, 3);
-  assert.ok(text.includes(`(${r.top50ParallelCodes.join('·')})`));
+  assert.equal(r.top50ByCharacter[0].krName, '몽키 D. 루피');
+  assert.equal(num(A.summary[3].value), r.top50ByCharacter[0].count);
 
-  assert.ok(section('5.').paragraphs[0].includes(`${T.top50Products}개 상품`));
-  assert.equal(products.rows.length, T.top50Products3plus);
-  products.rows.forEach((row) => {
-    const p = r.top50ByProduct.find((x) => x.key === row[0].split(' ')[0]);
-    assert.ok(p, row[0]);
-    assert.equal(num(row[1]), p.count, row[0]);
-  });
-  assert.ok(section('5.').items[0].startsWith(`상위 50개 중 ${T.top50OtherPrefixCount}개는`));
-
-  characters.forEach((bar, i) => {
-    assert.equal(bar.label, r.top50ByCharacter[i].krName);
-    assert.equal(bar.value, r.top50ByCharacter[i].count);
-  });
-  assert.ok(r.top50ByCharacter[characters.length].count < characters.at(-1).value, 'bars cover every character with the last shown count');
-  assert.ok(text.includes(`${T.top4CharacterCards}개(${T.top4CharacterPct}%)`));
+  // The four characters named in section 3 are the analysis' top four and add up to the stated share.
+  const top4 = r.top50ByCharacter.slice(0, 4);
+  assert.deepEqual(top4.map((c) => c.krName), ['몽키 D. 루피', '보아 행콕', '샹크스', '포트거스 D. 에이스']);
+  assert.ok(top4[3].count > r.top50ByCharacter[4].count, 'the top four are not tied with the fifth');
+  assert.equal(top4.reduce((sum, c) => sum + c.count, 0), T.top4CharacterCards);
+  assert.ok(section('3.').paragraphs[1].includes(`루피·행콕·샹크스·에이스가 상위 50개 중 ${T.top4CharacterCards}개(${T.top4CharacterPct}%)`));
 });
 
 test('the article makes no investment advice, prediction or fee claim', () => {

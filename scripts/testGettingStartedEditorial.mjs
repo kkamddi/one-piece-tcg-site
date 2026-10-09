@@ -20,7 +20,7 @@ test('the article has the shared editorial shape', () => {
   assert.equal(article.paragraphs.length, 2);
   assert.equal(article.summary.length, 4);
   article.summary.forEach((item) => assert.ok(item.value && item.label));
-  assert.ok(article.checklist.length >= 3);
+  assert.equal(article.checklist.length, 3);
   article.sections.forEach((item, index) => assert.match(item.heading, new RegExp(`^${index + 1}\\. `)));
   assert.ok(article.sections.some((item) => item.table));
   const images = article.sections.flatMap((item) => item.images || []);
@@ -29,6 +29,27 @@ test('the article has the shared editorial shape', () => {
     assert.match(image.src, /^https:\/\/cards\.optcgkorea\.com\/cards\/(JP|KR)\/[A-Z0-9-]+(_p\d+)?\.webp$/);
     assert.ok(image.alt && image.caption);
   });
+});
+
+test('each section is one short lead plus a single table, list or image set', () => {
+  article.paragraphs.forEach((paragraph) => assert.ok(paragraph.length <= 80, paragraph));
+  article.sections.forEach((item) => {
+    assert.equal((item.paragraphs || []).length, 1, `${item.heading}: one lead sentence`);
+    assert.ok(item.paragraphs[0].length <= 60, `${item.heading}: short lead`);
+    const bodies = ['table', 'items', 'images', 'stats'].filter((key) => item[key] && (Array.isArray(item[key]) ? item[key].length : true));
+    assert.equal(bodies.length, 1, `${item.heading}: ${bodies.join(', ')}`);
+    (item.items || []).forEach((entry) => assert.ok(entry.length <= 60, entry));
+    assert.ok((item.items || []).length <= 5, item.heading);
+  });
+  article.checklist.forEach((entry) => assert.ok(entry.length <= 30, entry));
+  const steps = section('5. ').items;
+  article.checklist.forEach((entry) => assert.ok(!steps.some((step) => step.includes(entry.slice(0, 8))), entry));
+});
+
+test('the body does not repeat the FAQ answers', () => {
+  assert.doesNotMatch(text, /리더 1장을 포함한 51장/);
+  assert.doesNotMatch(text, /공식 룰로 바로 대전할 수 있습니다/);
+  assert.doesNotMatch(text, /같은 카드가 언어별로 따로 나오며/);
 });
 
 test('every table row has one cell per column', () => {
@@ -43,7 +64,7 @@ test('every table row has one cell per column', () => {
 test('links point to site guide pages or official sources only', () => {
   const hrefs = article.sections.flatMap((item) => (item.links || []).map((link) => link.href));
   hrefs.forEach((href) => assert.match(href, /^(\/(prices|guide\/[a-z-]+)|https:\/\/www\.onepiece-cardgame\.com\/play-guide\/)$/, href));
-  ['/guide/card-catalog', '/guide/shops', '/guide/release-schedule', '/guide/box-recommendation', '/guide/card-storage', '/guide/card-types', '/guide/price-ranking', '/prices']
+  ['/guide/card-catalog', '/guide/shops', '/guide/release-schedule', '/guide/box-recommendation', '/guide/card-storage', '/guide/card-types', '/guide/card-price', '/guide/price-ranking', '/prices']
     .forEach((href) => assert.ok(hrefs.includes(href), href));
 });
 
@@ -62,7 +83,7 @@ test('numbers match the analysis JSON when it is present', (t) => {
     t.skip('artifacts/content/getting-started-analysis.json not found');
     return;
   }
-  const { official, productCounts, catalog, gap, singlePrices, calendar, latestMainBooster } = analysis;
+  const { official, productCounts, catalog, gap, singlePrices, latestMainBooster } = analysis;
   assert.equal(analysis.refDate, article.dataDate);
 
   // Rules and prices recorded in the analysis.
@@ -71,7 +92,8 @@ test('numbers match the analysis JSON when it is present', (t) => {
   assert.equal(official.rules.maxCopies, 4);
   assert.match(text, new RegExp(`${official.jpBooster.packYen}엔`));
   assert.match(text, new RegExp(`${comma(official.krBooster.packWon)}원`));
-  assert.match(text, new RegExp(`${official.krBooster.packsPerBox}팩`));
+  assert.match(text, new RegExp(`${comma(official.jpDeck.yen)}엔 / ${comma(official.krDeck.won)}원`));
+  assert.match(text, new RegExp(`${official.jpPremium.cardsPerPack}장 \\(${official.jpPremium.packYen}엔\\)`));
 
   // Product table counts.
   const rows = new Map(section('2. ').table.rows.map((row) => [row[0], row]));
@@ -83,42 +105,25 @@ test('numbers match the analysis JSON when it is present', (t) => {
   assert.equal(rows.get('프로모')[3], `도감 ${comma(catalog.promoCards.JP)}장`);
   assert.equal(rows.get('프로모')[4], `도감 ${comma(catalog.promoCards.KR)}장`);
   assert.equal(summaryValue('정규 부스터 발매'), `${productCounts.JP.OP.count}탄 · ${productCounts.KR.OP.count}탄`);
-  const { OP, EB } = catalog.jpCardsPerSet;
-  assert.match(text, new RegExp(`${EB.min}~${EB.max}장`));
-  assert.match(text, new RegExp(`${OP.min}~${OP.max}장`));
-  assert.match(text, new RegExp(`중앙값 ${gap.jpMainIntervalMedianDays}일`));
 
-  // Start dates.
-  assert.equal(calendar.jpFirstBooster.date, '2022-07-22');
-  assert.match(text, /2022년 7월/);
-  assert.equal(calendar.krFirstCardProduct.date, '2024-03-22');
-  assert.match(text, /2024년 3월 22일/);
-
-  // KR vs JP gap (same logic as /guide/release-schedule).
+  // KR vs JP comparison table (same gap logic as /guide/release-schedule).
   assert.equal(summaryValue('한글판이 늦게'), gap.releaseScheduleSummary);
-  assert.match(text, new RegExp(`최근 부스터 ${gap.recentCount}종`));
-  assert.match(text, new RegExp(`중앙값 ${Math.round(gap.recentGapMedianDays)}일`));
-  assert.match(text, new RegExp(`${gap.first.krCode}은 ${gap.first.gapDays}일`));
-  assert.match(text, new RegExp(`${gap.last.krCode}는 ${gap.last.gapDays}일`));
-  assert.match(text, new RegExp(gap.jpOnlyReleasedBoosters.join('·')));
+  assert.match(article.summary.find((item) => item.label.includes('한글판이 늦게')).label, new RegExp(`최근 ${gap.recentCount}종`));
   const compare = new Map(section('3. ').table.rows.map((row) => [row[0], row]));
+  assert.equal(compare.get('발매 시기')[2], `${gap.releaseScheduleSummary} 뒤 (최근 ${gap.recentCount}종 중앙값)`);
   assert.equal(compare.get('최신 정규 부스터')[1], `${latestMainBooster.JP.code} (${latestMainBooster.JP.date})`);
   assert.equal(compare.get('최신 정규 부스터')[2], `${latestMainBooster.KR.code} (${latestMainBooster.KR.date})`);
-  assert.equal(compare.get('다음 신작')[1], `${gap.nextJp.code} (${gap.nextJp.date})`);
-  assert.equal(compare.get('다음 신작')[2], `${gap.nextKr.code} (${gap.nextKr.date})`);
+  assert.equal(compare.get('1팩 가격')[1], `${official.jpBooster.packYen}엔`);
+  assert.equal(compare.get('1팩 가격')[2], `${comma(official.krBooster.packWon)}원`);
+  assert.equal(compare.get('일본판만 있는 부스터')[1], gap.jpOnlyReleasedBoosters.join('·'));
 
   // JP single prices.
   const prices = section('4. ');
-  const stat = (label) => prices.stats.find((item) => item.label === label).value;
-  assert.equal(stat('단품 거래가 중앙값'), `¥${comma(singlePrices.medianJpy)}`);
+  assert.match(prices.paragraphs[0], new RegExp(`${comma(singlePrices.withSingle)}개 기준`));
+  assert.match(prices.paragraphs[0], new RegExp(`중앙값은 ¥${comma(singlePrices.medianJpy)}`));
   assert.equal(summaryValue('단품 거래가 중앙값'), `¥${comma(singlePrices.medianJpy)}`);
-  assert.equal(stat('¥5,000 미만'), `${singlePrices.under5000Pct}%`);
-  assert.equal(stat('¥10,000 이상'), `${singlePrices.atLeast10000Pct}%`);
-  assert.match(prices.paragraphs[0], new RegExp(`${comma(singlePrices.jpCardProducts)}개 중`));
-  assert.match(prices.paragraphs[0], new RegExp(`${comma(singlePrices.withSingle)}개\\(${Math.round((singlePrices.withSingle / singlePrices.jpCardProducts) * 100)}%\\)`));
-  assert.match(article.paragraphs[1], new RegExp(`${comma(singlePrices.withSingle)}개 상품`));
-  assert.match(text, new RegExp(`¥1,000 미만은 ${singlePrices.under1000Pct}%`));
-  assert.match(text, new RegExp(`30일 안인 상품은 ${singlePrices.tradedWithin30DaysPct}%`));
+  assert.ok(prices.items.includes(`¥5,000 미만: ${singlePrices.under5000Pct}%`));
+  assert.ok(prices.items.includes(`¥10,000 이상: ${singlePrices.atLeast10000Pct}%`));
 });
 
 test('the article makes no price promise or investment advice', () => {

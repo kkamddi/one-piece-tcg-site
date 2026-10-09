@@ -60,6 +60,21 @@ test('online buying, list price and selling (매입) sections cover their search
   assert.deepEqual(hrefs(selling), ['/prices', '/guide/card-price', '/guide/psa-grading']);
 });
 
+test('online, list price and selling sections stay short: one lead sentence plus one table or a short list', () => {
+  for (const prefix of ['6.', '7.', '8.']) {
+    const section = SHOP_GUIDE_EDITORIAL.sections.find((item) => item.heading.startsWith(prefix));
+    assert.equal(section.paragraphs.length, 1, `${prefix} has one lead sentence`);
+    assert.ok(Boolean(section.table) !== Boolean(section.items), `${prefix} has either a table or a list, not both`);
+    if (section.items) {
+      assert.ok(section.items.length <= 4, `${prefix} list has at most 4 items`);
+      section.items.forEach((item) => assert.ok(item.length <= 50, `${prefix} one-line item: ${item}`));
+    }
+    const prose = [...section.paragraphs, ...(section.items || [])].join('');
+    assert.ok(prose.length <= 250, `${prefix} prose is ${prose.length} chars`);
+  }
+  assert.ok(SHOP_GUIDE_EDITORIAL.checklist.length <= 6);
+});
+
 test('the shop guide names no private shops and is freshly reviewed', () => {
   const text = JSON.stringify(SHOP_GUIDE_EDITORIAL);
   assert.doesNotMatch(text, /카드성지|더\s?카드룸/);
