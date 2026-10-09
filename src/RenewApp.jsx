@@ -27,7 +27,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
-import { analyzeBoxSeries, analyzeSeriesCards, getBoxGuideSections, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
+import { analyzeBoxSeries, analyzeSeriesCards, getBoosterNumberLabel, getBoxGuideSections, getRandomPackGuideDescription, getRandomPackGuideIntro, getSeriesGuideContext, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
@@ -53,6 +53,7 @@ import boxMarketPrices from './data/box-market-prices.json';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
+import seriesHitCards from './data/series-hit-cards.json';
 import topicsData from './data/topics.json';
 import SiteSearch, { SiteSearchInput } from './SiteSearch';
 import CollectionGuide from './CollectionGuide';
@@ -3161,15 +3162,18 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       const name = (isJapanese ? series.enName : series.koName) || series.enName || series.koName || code;
       const locale = series.locale || 'JP';
       const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series.id] || 0);
-      // Same "13탄" label as scripts/seriesGuideSeo.js so client and pre-rendered titles match.
-      const boosterNumber = /^OP-?0*(\d+)$/i.test(code) ? `${/^OP-?0*(\d+)$/i.exec(code)[1]}탄` : '';
+      // Same "13탄" label and description as scripts/seriesGuideSeo.js so client and pre-rendered SEO match.
+      const boosterNumber = getBoosterNumberLabel(code);
       const hasHitCards = /^(OP|EB|PRB)/i.test(code);
+      const guideContext = getSeriesGuideContext(series, { hitCards: seriesHitCards, topics: topicsData, cardCount });
       if (isJapanese) {
         const localeLabel = locale === 'JP' ? '日本版' : locale === 'EN' ? '英語版' : '韓国版';
         return {
           title: `${code} ${name} カードリスト・シリーズガイド | Card Pone`,
           h1: `${code} ${name} シリーズガイド`,
-          description: `${localeLabel}${code} ${name}の登録カード${cardCount}枚をカード番号、レアリティ、画像から確認できるシリーズガイドです。`,
+          description: guideContext
+            ? getRandomPackGuideDescription(guideContext, { name, cardCount, localeLabel, japanese: true })
+            : `${localeLabel}${code} ${name}の登録カード${cardCount}枚をカード番号、レアリティ、画像から確認できるシリーズガイドです。`,
           keywords: `${code},${name},ワンピースカードゲーム,カードリスト,${localeLabel}`,
           body: `${code}シリーズの基本情報と収録カードをCard Poneのカード図鑑・相場データとあわせて確認できます。`
         };
@@ -3177,7 +3181,9 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       return {
         title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
         h1: `${code} ${name} 시리즈 가이드`,
-        description: `${code} ${name}의 도감 등록 카드 ${cardCount}장${hasHitCards ? '과 힛카드(고가 카드)' : ''}를 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
+        description: guideContext
+          ? getRandomPackGuideDescription(guideContext, { name, cardCount, localeLabel: locale === 'JP' ? '일본판' : locale === 'EN' ? '영문판' : '한글판' })
+          : `${code} ${name}의 도감 등록 카드 ${cardCount}장${hasHitCards ? '과 힛카드(고가 카드)' : ''}를 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
         keywords: `${code}, ${name}, ${boosterNumber ? `원피스카드 ${boosterNumber}, ` : ''}원피스카드 리스트, ${hasHitCards ? '원피스카드 힛카드, ' : ''}원피스카드 도감`,
         body: `${code} 시리즈의 상품 정보와 수록 카드를 Card Pone 도감 및 시세 데이터와 연결해 정리한 가이드입니다.`
       };
@@ -8727,10 +8733,14 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
   const productImageUrl = getSeriesBoxPreviewUrl(series, boxImageByCode);
   const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series?.id] || 0);
   const [marketItems, setMarketItems] = useState([]);
+  // Random-pack boosters (OP / EB / PRB): release, hit-card trades and box price from src/data/series-hit-cards.json.
+  const guideContext = useMemo(() => (
+    series ? getSeriesGuideContext(series, { hitCards: seriesHitCards, topics: topicsData, cardCount }) : null
+  ), [series, cardCount]);
   // Same sections as the pre-rendered guide HTML (scripts/seriesGuideSeo.js).
   const guideSections = useMemo(() => (
-    series && cards.length ? getSeriesGuideSections(analyzeSeriesCards(cards), getSeriesTopListings(series, marketItems), isJp ? 'JP' : 'KR') : []
-  ), [series, cards, marketItems, isJp]);
+    series && (cards.length || guideContext) ? getSeriesGuideSections(analyzeSeriesCards(cards), getSeriesTopListings(series, marketItems), isJp ? 'JP' : 'KR', guideContext) : []
+  ), [series, cards, marketItems, isJp, guideContext]);
 
   useEffect(() => {
     let cancelled = false;
@@ -8786,10 +8796,13 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
           <p className="renew-series-guide-code">{seriesCode}</p>
           <h1>{seriesName}</h1>
           {series.enName && series.enName !== seriesName ? <p className="renew-series-guide-en-name">{series.enName}</p> : null}
-          <p>{tx('상품 기본 정보와 실제 수록 카드를 한 화면에서 확인하고, 도감과 카드별 시세로 바로 이동하는 시리즈 가이드입니다.', '商品の基本情報と収録カードを確認し、図鑑やカード別の相場へ移動できるシリーズガイドです。')}</p>
+          <p>{guideContext
+            ? getRandomPackGuideIntro(guideContext, { name: seriesName, localeLabel, japanese: isJp })
+            : tx('상품 기본 정보와 실제 수록 카드를 한 화면에서 확인하고, 도감과 카드별 시세로 바로 이동하는 시리즈 가이드입니다.', '商品の基本情報と収録カードを確認し、図鑑やカード別の相場へ移動できるシリーズガイドです。')}</p>
           <div className="renew-guide-editorial-meta" aria-label={tx('콘텐츠 검수 정보', 'コンテンツ確認情報')}>
             <span>{tx('Card Pone 데이터 편집', 'Card Pone データ編集')}</span>
-            <time dateTime="2026-10-05">{tx('검수', '確認')} 2026.10.05</time>
+            {/* Same dates as scripts/seriesGuideSeo.js: OP / EB / PRB guides were rewritten on 2026-10-09. */}
+            <time dateTime={guideContext ? '2026-10-09' : '2026-10-05'}>{tx('검수', '確認')} {guideContext ? '2026.10.09' : '2026.10.05'}</time>
           </div>
           <div className="renew-series-guide-actions">
             <button type="button" onClick={() => onOpenCatalog?.(series)}>{tx('수록 카드 전체 보기', '収録カードをすべて見る')}</button>
@@ -8820,7 +8833,7 @@ function RenewSeriesGuide({ onOpenCatalog, onOpenCard, onOpenPrices }) {
           <div className="renew-series-guide-section-head">
             <div>
               <span>{tx('시리즈 분석', 'シリーズ分析')}</span>
-              <h2>{seriesCode} {tx('수록 카드 구성', '収録カード構成')}</h2>
+              <h2>{seriesCode} {guideContext ? tx('발매 정보·힛카드 시세', '発売情報・高額カード相場') : tx('수록 카드 구성', '収録カード構成')}</h2>
             </div>
           </div>
           <div className="renew-series-guide-points renew-series-guide-analysis">

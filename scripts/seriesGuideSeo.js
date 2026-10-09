@@ -1,18 +1,33 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { analyzeSeriesCards, getSeriesGuideSections, getSeriesTopListings } from '../src/lib/series-guide-analysis.js';
+import {
+  analyzeSeriesCards,
+  getBoosterNumberLabel,
+  getKstDateKey,
+  getRandomPackGuideDescription,
+  getRandomPackGuideIntro,
+  getSeriesGuideContext,
+  getSeriesGuideSections,
+  getSeriesTopListings
+} from '../src/lib/series-guide-analysis.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const seriesPath = path.join(rootDir, 'src', 'data', 'series.json');
 const countsPath = path.join(rootDir, 'src', 'data', 'series-card-counts.json');
 const cardsPath = path.join(rootDir, 'src', 'data', 'cards.json');
 const marketPath = path.join(rootDir, 'src', 'data', 'market-cards.js');
+const hitCardsPath = path.join(rootDir, 'src', 'data', 'series-hit-cards.json');
+const topicsPath = path.join(rootDir, 'src', 'data', 'topics.json');
 const seriesData = JSON.parse(fs.readFileSync(seriesPath, 'utf8'));
 const seriesCardCounts = JSON.parse(fs.readFileSync(countsPath, 'utf8'));
 const cardsData = JSON.parse(fs.readFileSync(cardsPath, 'utf8'));
+const seriesHitCards = JSON.parse(fs.readFileSync(hitCardsPath, 'utf8'));
+const topicsData = JSON.parse(fs.readFileSync(topicsPath, 'utf8'));
 const { default: marketItems } = await import(pathToFileURL(marketPath).href);
 const contentReviewedAt = '2026-10-05';
+// OP / EB / PRB guides were rewritten around release, hit-card trades and box price on this date.
+const randomPackReviewedAt = '2026-10-09';
 
 const rarityOrder = ['L', 'SEC', 'SR', 'SP', 'R', 'UC', 'C', 'P', 'DON!!'];
 
@@ -74,14 +89,47 @@ function getSeriesCode(series) {
 }
 
 // Korean searchers call main boosters by number ("13탄"), so the Korean title carries it.
-export function getBoosterNumberLabel(code) {
-  const match = /^OP-?0*(\d+)$/i.exec(String(code || ''));
-  return match ? `${match[1]}탄` : '';
-}
+export { getBoosterNumberLabel };
 
 function getLocaleLabel(locale, japanese = false) {
   if (japanese) return locale === 'JP' ? '日本版' : locale === 'EN' ? '英語版' : '韓国版';
   return locale === 'JP' ? '일본판' : locale === 'EN' ? '영문판' : '한글판';
+}
+
+// Random-pack boosters (OP / EB / PRB): release, hit-card trades and box price first; every section,
+// including the price note, comes from getSeriesGuideSections so the page shows the same blocks.
+function createRandomPackSeo(series, cardCount, dataSections, context, japanese) {
+  const locale = series.locale || 'JP';
+  const code = context.code;
+  const name = (japanese ? series.enName : series.koName) || series.enName || series.koName || code;
+  const localeLabel = getLocaleLabel(locale, japanese);
+  const catalogSlug = normalizeSeriesSlug(series.id || series.baseSeriesId);
+  const shared = {
+    schemaType: 'CollectionPage',
+    reviewedAt: randomPackReviewedAt,
+    description: getRandomPackGuideDescription(context, { name, cardCount, localeLabel, japanese }),
+    paragraphs: [getRandomPackGuideIntro(context, { name, localeLabel, japanese })],
+    sections: dataSections
+  };
+  if (japanese) {
+    return {
+      ...shared,
+      title: `${code} ${name} カードリスト・シリーズガイド | Card Pone`,
+      keywords: `${code},${name},ワンピースカードゲーム,カードリスト,${localeLabel}`,
+      editor: 'Card Pone データ編集',
+      heading: `${code} ${name} シリーズガイド`,
+      links: [`/jp/cards/${catalogSlug}`, '/jp/prices', '/jp/news']
+    };
+  }
+  const boosterNumber = getBoosterNumberLabel(code);
+  return {
+    ...shared,
+    title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·힛카드 | Card Pone`,
+    keywords: `${code}, ${name}, ${boosterNumber ? `원피스카드 ${boosterNumber}, ` : ''}원피스카드 리스트, 원피스카드 힛카드, 원피스카드 도감, ${localeLabel} 원피스카드`,
+    editor: 'Card Pone 데이터 편집',
+    heading: `${code} ${name} 시리즈 가이드`,
+    links: [`/cards/${catalogSlug}`, '/prices', '/guide/card-catalog']
+  };
 }
 
 function createSeo(series, cardCount, cardSummary, dataSections, japanese = false) {
@@ -168,7 +216,7 @@ function createSeo(series, cardCount, cardSummary, dataSections, japanese = fals
   };
 }
 
-export function getSeriesGuideEntries({ japanese = false } = {}) {
+export function getSeriesGuideEntries({ japanese = false, today = getKstDateKey() } = {}) {
   return seriesData
     .map((series) => {
       const locale = series.locale || 'JP';
@@ -178,10 +226,11 @@ export function getSeriesGuideEntries({ japanese = false } = {}) {
       const basePath = `/guides/series/${slug}`;
       const cardSummary = getSeriesCardSummary(series);
       const analysis = analyzeSeriesCards(cardsData.filter((card) => card.series === series.id));
-      const dataSections = getSeriesGuideSections(analysis, getSeriesTopListings(series, marketItems), japanese ? 'JP' : 'KR');
+      const context = getSeriesGuideContext(series, { hitCards: seriesHitCards, topics: topicsData, cardCount, today });
+      const dataSections = getSeriesGuideSections(analysis, getSeriesTopListings(series, marketItems), japanese ? 'JP' : 'KR', context);
       return {
         pathname: japanese ? `/jp${basePath}` : basePath,
-        seo: createSeo(series, cardCount, cardSummary, dataSections, japanese),
+        seo: context ? createRandomPackSeo(series, cardCount, dataSections, context, japanese) : createSeo(series, cardCount, cardSummary, dataSections, japanese),
         catalogSlugs: [...new Set([
           normalizeSeriesSlug(series.id),
           normalizeSeriesSlug(series.baseSeriesId)
@@ -191,4 +240,4 @@ export function getSeriesGuideEntries({ japanese = false } = {}) {
     .filter(Boolean);
 }
 
-export const seriesGuideSourcePaths = [seriesPath, countsPath, cardsPath, marketPath];
+export const seriesGuideSourcePaths = [seriesPath, countsPath, cardsPath, marketPath, hitCardsPath, topicsPath];
