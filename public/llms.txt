@@ -18,9 +18,11 @@
 - [카드 종류·레어도 가이드](https://www.optcgkorea.com/guide/card-types): 카드 종류, C~SEC·패러렐·SP·망가 구분과 레어도별 거래가
 - [부스터별 히트 카드 비교](https://www.optcgkorea.com/guide/booster-comparison): OP01~OP16·EB01~EB04의 SEC·SP·패러렐·망가 구성과 등록가 분포
 - [도감 사용법](https://www.optcgkorea.com/guide/card-catalog): 카드번호 읽는 법, 패러렐·코믹 패러렐·재록 구별
+- [박스 가격 한눈에](https://www.optcgkorea.com/guide/box-prices): 일본판 부스터·엑스트라·프리미엄 부스터 박스의 SNKRDUNK 등록 최저가(달러·원화 환산)와 한글판·일본판 1팩 정가(매일 자동 갱신)
 - [목적별 박스 비교](https://www.optcgkorea.com/guide/box-recommendation): 박스 현재가와 히트 카드 기준 비교
 - [카드 보관 방법](https://www.optcgkorea.com/guide/card-storage): 카드 가치별 보호 단계와 보관 용품
 - [구매처 가이드](https://www.optcgkorea.com/guide/shops): 공식 공인점포·취급점포 지역 분포와 확인 항목
+- 지역별 매장 목록: [서울](https://www.optcgkorea.com/guide/shops/seoul), [경기](https://www.optcgkorea.com/guide/shops/gyeonggi), [부산](https://www.optcgkorea.com/guide/shops/busan), [경남](https://www.optcgkorea.com/guide/shops/gyeongnam) 공식 공인점포·취급점포
 
 ## 신작·일정
 - [신작·발매 일정](https://www.optcgkorea.com/guide/release-schedule): 공식 발표 기준 일본판·한국판 발매일과 한국판 발매 간격(공식 소식 데이터로 자동 갱신)

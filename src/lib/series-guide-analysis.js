@@ -181,6 +181,21 @@ export function isRandomPackSeries(code) {
 }
 
 // Korean booster number used in titles ("13탄").
+// Korean pages name a set in Korean: an alias searchers use, else the Korean edition's official name,
+// else the product kind (JP/EN-only sets have no official Korean name yet).
+const KOREAN_SERIES_ALIASES = { EB03: '원피스 히로인즈 에디션' };
+const seriesCodeKey = (item) => String(item?.baseSeriesId || item?.id || '').toUpperCase().replace(/^(KR|JP|EN)-/, '').replace(/-/g, '');
+export function getKoreanSeriesName(series, allSeries = []) {
+  const code = seriesCodeKey(series);
+  if (KOREAN_SERIES_ALIASES[code]) return KOREAN_SERIES_ALIASES[code];
+  if (series?.locale === 'KR') return series.koName || series.enName || code;
+  const korean = allSeries.find((item) => item.locale === 'KR' && seriesCodeKey(item) === code);
+  if (korean?.koName) return korean.koName;
+  // Keep the Latin subtitle of a JP-only set (e.g. EGGHEAD CRISIS) so English-name searches still match.
+  const latin = String(series?.enName || series?.koName || '').match(/[A-Za-z0-9][A-Za-z0-9 .'&-]*[A-Za-z0-9.]/)?.[0] || '';
+  return [series?.kindKo || '카드 시리즈', latin].filter(Boolean).join(' ');
+}
+
 export function getBoosterNumberLabel(code) {
   const match = /^OP-?0*(\d+)$/i.exec(String(code || ''));
   return match ? `${match[1]}탄` : '';

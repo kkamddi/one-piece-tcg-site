@@ -22,6 +22,11 @@ export const SEARCH_PAGES = [
   { title: '원피스카드 종류·레어도 가이드', href: '/guide/card-types', keywords: ['종류', '레어도', '힛카드', '패러렐', 'SP', '망가', 'SEC', '트레저 레어'], description: '패러렐·SP·망가 구분과 레어도별 시세' },
   { title: 'EB-05 Heroines Edition vol.2 프리뷰', href: '/guide/preview/eb-05', keywords: ['EB-05', 'EB05', '히로인즈', 'Heroines', '신작', '프리뷰', '공개 카드'], description: 'EB-05 공개 카드·망가·SP 모음' },
   { title: 'OP-18 신의 지배 프리뷰', href: '/guide/preview/op-18', keywords: ['OP-18', 'OP18', '신의 지배', '神の支配', '신작', '프리뷰'], description: 'OP-18 발매일·구성·공개 카드' },
+  { title: '원피스카드 박스 가격', href: '/guide/box-prices', keywords: ['박스 가격', '박스 시세', '팩 가격', '카드팩 가격', '정가', '부스터 박스', '박스'], description: '일본판 부스터 박스 등록 최저가와 1팩 정가' },
+  { title: '서울 원피스카드 매장', href: '/guide/shops/seoul', keywords: ['서울', '마포', '강남', '홍대', '용산', '서울 매장'], description: '서울 공식 공인점포·취급점포 목록' },
+  { title: '경기 원피스카드 매장', href: '/guide/shops/gyeonggi', keywords: ['경기', '부천', '성남', '분당', '평택', '수원', '경기 매장'], description: '경기 공식 공인점포·취급점포 목록' },
+  { title: '부산 원피스카드 매장', href: '/guide/shops/busan', keywords: ['부산', '동래', '서면', '부산진', '부산 매장'], description: '부산 공식 공인점포·취급점포 목록' },
+  { title: '경남 원피스카드 매장', href: '/guide/shops/gyeongnam', keywords: ['경남', '창원', '김해', '양산', '진주', '경남 매장'], description: '경남 공식 공인점포·취급점포 목록' },
   { title: '신작·발매 일정 가이드', href: '/guide/release-schedule', keywords: ['발매', '신작', '출시', '한국판', '일본판', '부스터'], description: '일본판·한국판 발매일과 한국 발매 간격' },
   { title: '도감 사용 가이드', href: '/guide/card-catalog', keywords: ['도감', '검색', '카드번호', '일련번호'], description: '카드 검색과 수집 목록 사용 방법' }
 ].map(item => ({ ...item, type: 'guides', id: item.href }));

@@ -27,7 +27,7 @@ import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
 import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
-import { analyzeBoxSeries, analyzeSeriesCards, getBoosterNumberLabel, getBoxGuideSections, getRandomPackGuideDescription, getRandomPackGuideIntro, getSeriesGuideContext, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
+import { analyzeBoxSeries, analyzeSeriesCards, getBoosterNumberLabel, getKoreanSeriesName, getBoxGuideSections, getRandomPackGuideDescription, getRandomPackGuideIntro, getSeriesGuideContext, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
 import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
@@ -37,6 +37,7 @@ import { GETTING_STARTED_EDITORIAL } from '../lib/getting-started-editorial.js';
 import { PRICE_RANKING_EDITORIAL } from '../lib/price-ranking-editorial.js';
 import { CARD_TYPES_EDITORIAL } from '../lib/card-types-editorial.js';
 import { buildReleaseScheduleEditorial } from '../lib/release-schedule-editorial.js';
+import { BOX_PRICES_SEO, buildBoxPricesEditorial } from '../lib/box-prices-editorial.js';
 import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH, formatPreviewYen, getBoosterPreview, getPreviewCards, groupPreviewCards } from '../lib/booster-preview.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
@@ -50,6 +51,8 @@ import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, boxQuote, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
 import boxMarketPrices from './data/box-market-prices.json';
+import officialShopsData from './data/shops.json';
+import { REGION_SHOP_PAGES, buildRegionShopEditorial, getRegionShopFaq, getRegionShopSeo } from '../lib/region-shops-editorial.js';
 import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
@@ -754,6 +757,8 @@ const PRICE_RANKING_GUIDE = toEditorialGuide(PRICE_RANKING_EDITORIAL);
 const CARD_TYPES_GUIDE = toEditorialGuide(CARD_TYPES_EDITORIAL);
 // The release schedule is rebuilt from the official topics on every load, so its upcoming list stays current.
 const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsData, getKstDateKey(Date.now()));
+// The box price table is rebuilt from the bundled daily SNKRDUNK box listing snapshot.
+const getBoxPricesEditorial = () => buildBoxPricesEditorial(boxMarketItems, boxMarketPrices, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
 const GUIDE_HUB_COLLECTIONS = [
   {
@@ -776,6 +781,7 @@ const GUIDE_HUB_COLLECTIONS = [
     description: '카드와 박스 가격을 같은 기준으로 비교하는 방법입니다.',
     links: [
       { href: '/guide/card-price', title: '카드 시세 읽기', meta: 'Single·PSA10·최근 거래' },
+      { href: '/guide/box-prices', title: '박스 가격 한눈에', meta: '일본판 박스 등록 최저가·1팩 정가' },
       { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' },
       { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' },
       { href: '/guide/character-cards', title: '캐릭터별 카드 시세', meta: '캐릭터별 고가 카드·버전 차이' },
@@ -821,7 +827,7 @@ const GUIDE_ARTICLE_DETAILS = {
   price: {
     checklistTitle: '시세 확인 체크리스트',
     faq: GUIDE_ARTICLE_FAQ.price,
-    related: ['/prices', '/guide/box-recommendation', '/data-policy']
+    related: ['/prices', '/guide/price-ranking', '/guide/box-prices']
   },
   catalog: {
     checklistTitle: '도감 사용 체크리스트',
@@ -831,7 +837,7 @@ const GUIDE_ARTICLE_DETAILS = {
   booster: {
     checklistTitle: '부스터 비교 체크리스트',
     faq: GUIDE_ARTICLE_FAQ.booster,
-    related: ['/guide/box-recommendation', '/guide/card-price', '/guide/collection/manga']
+    related: ['/guide/box-recommendation', '/guide/box-prices', '/guide/collection/manga']
   },
   character: {
     checklistTitle: '캐릭터 시세 체크리스트',
@@ -862,6 +868,11 @@ const GUIDE_ARTICLE_DETAILS = {
     checklistTitle: '버전 확인 체크리스트',
     faq: GUIDE_ARTICLE_FAQ.types,
     related: ['/guide/collection/manga', '/guide/price-ranking', '/guide/psa-grading']
+  },
+  boxPrices: {
+    checklistTitle: '박스 가격 체크리스트',
+    faq: GUIDE_ARTICLE_FAQ.boxPrices,
+    related: ['/guide/box-recommendation', '/guide/release-schedule', '/guide/shops']
   }
 };
 const GUIDE_RELATED_LABELS = {
@@ -869,6 +880,8 @@ const GUIDE_RELATED_LABELS = {
   '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
   '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
   '/guide/release-schedule': ['신작·발매 일정', '일본판·한국판 발매일과 한국 발매 간격을 봅니다.'],
+  '/guide/box-prices': ['박스 가격 한눈에', '일본판 박스 등록 최저가와 1팩 정가를 봅니다.'],
+  ...Object.fromEntries(REGION_SHOP_PAGES.map((region) => [`/guide/shops/${region.slug}`, [`${region.label} 원피스카드 매장`, `${region.label}의 공식 공인점포·취급점포 목록을 봅니다.`]])),
   '/guide/getting-started': ['원피스 카드게임 입문', '상품 종류와 한글판·일본판 차이, 시작 순서를 봅니다.'],
   '/guide/price-ranking': ['비싼 카드 순위', '일본판 Single·PSA10 가격 순위와 비싼 이유를 봅니다.'],
   '/guide/card-types': ['카드 종류·레어도', '패러렐·SP·망가 구분과 레어도별 시세를 봅니다.'],
@@ -3159,7 +3172,7 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     if (series) {
       const code = getBaseSeriesId(series);
       const isJapanese = uiLang === 'JP' || getPathLocale(window.location.pathname) === 'JP';
-      const name = (isJapanese ? series.enName : series.koName) || series.enName || series.koName || code;
+      const name = isJapanese ? (series.enName || series.koName || code) : getKoreanSeriesName(series, seriesData);
       const locale = series.locale || 'JP';
       const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series.id] || 0);
       // Same "13탄" label and description as scripts/seriesGuideSeo.js so client and pre-rendered SEO match.
@@ -3179,7 +3192,7 @@ function getClientRouteSeo(page, uiLang = 'KR') {
         };
       }
       return {
-        title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
+        title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''}${locale === 'KR' ? '' : locale === 'EN' ? ' 영문판' : ' 일본판'} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
         h1: `${code} ${name} 시리즈 가이드`,
         description: guideContext
           ? getRandomPackGuideDescription(guideContext, { name, cardCount, localeLabel: locale === 'JP' ? '일본판' : locale === 'EN' ? '영문판' : '한글판' })
@@ -3345,6 +3358,16 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   if (path === '/guide/release-schedule') {
     const editorial = getReleaseScheduleEditorial();
     return { title: "원피스카드 신작·발매 일정 - 일본판·한국판 발매일과 한국 발매 간격 | Card Pone", h1: editorial.heading, description: "공식 발표 기준 원피스카드 일본판·한국판 신작 발매일과, 같은 제품의 한국판이 일본판보다 얼마나 늦게 나오는지 정리합니다.", keywords: "원피스카드 발매 일정, 원피스카드 신작, 원피스카드 한국판 발매일, 원피스카드 부스터 발매일, 원피스카드 엑스트라 부스터", body: editorial.paragraphs[0] };
+  }
+  const regionShop = REGION_SHOP_PAGES.find((region) => path === `/guide/shops/${region.slug}`);
+  if (regionShop) {
+    const seo = getRegionShopSeo(officialShopsData, regionShop.slug);
+    const editorial = buildRegionShopEditorial(officialShopsData, regionShop.slug);
+    return { title: seo.title, h1: editorial.heading, description: seo.description, keywords: seo.keywords, body: editorial.paragraphs[0] };
+  }
+  if (path === '/guide/box-prices') {
+    const editorial = getBoxPricesEditorial();
+    return { title: BOX_PRICES_SEO.title, h1: editorial.heading, description: BOX_PRICES_SEO.description, keywords: BOX_PRICES_SEO.keywords, body: editorial.paragraphs[0] };
   }
   if (path === '/guide/booster-comparison') {
     return {
@@ -7000,6 +7023,8 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isPriceRankingGuide = initialPath === '/guide/price-ranking';
   const isCardTypesGuide = initialPath === '/guide/card-types';
   const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
+  const isBoxPricesGuide = initialPath === '/guide/box-prices';
+  const regionShopSlug = REGION_SHOP_PAGES.find((region) => initialPath === `/guide/shops/${region.slug}`)?.slug || '';
   const boosterPreview = getBoosterPreview(initialPath);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
   const initialRouteState = getNewsRouteState(initialPath, typeof window !== 'undefined' ? window.location.search : '');
@@ -7318,7 +7343,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !boosterPreview && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !isBoxPricesGuide && !regionShopSlug && !boosterPreview && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7365,6 +7390,8 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isPriceRankingGuide ? <RenewPriceRankingGuide /> : null}
       {isCardTypesGuide ? <RenewCardTypesGuide /> : null}
       {isReleaseScheduleGuide ? <RenewReleaseScheduleGuide /> : null}
+      {isBoxPricesGuide ? <RenewBoxPricesGuide /> : null}
+      {regionShopSlug ? <RenewRegionShopGuide slug={regionShopSlug} /> : null}
       {boosterPreview ? <RenewBoosterPreview preview={boosterPreview} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
@@ -8028,8 +8055,8 @@ function EditorialSectionBody({ section }) {
   );
 }
 
-function RenewEditorialGuide({ guide, guideKey, headingId, cta }) {
-  const details = GUIDE_ARTICLE_DETAILS[guideKey];
+function RenewEditorialGuide({ guide, guideKey, headingId, cta, details: detailsOverride }) {
+  const details = detailsOverride || GUIDE_ARTICLE_DETAILS[guideKey];
   const reviewedAt = guide.reviewedAt || GUIDE_REVIEWED_AT;
   return (
     <section className="renew-panel renew-news-panel renew-card-storage-guide renew-editorial-guide" aria-labelledby={headingId}>
@@ -8465,6 +8492,22 @@ function RenewPsaGradingGuide() {
 function RenewReleaseScheduleGuide() {
   const guide = useMemo(() => toEditorialGuide(getReleaseScheduleEditorial()), []);
   return <RenewEditorialGuide guide={guide} guideKey="release" headingId="release-schedule-guide-heading" cta={{ eyebrow: '캘린더', title: '이벤트까지 날짜별로 보려면', description: '발매일과 공식 이벤트, 카드쇼 일정을 달력에서 함께 확인합니다.', href: '/calendar', label: '캘린더 보기' }} />;
+}
+
+// Regional store lists come from the official store list bundled with the app; the FAQ is built from the same data.
+function RenewRegionShopGuide({ slug }) {
+  const guide = useMemo(() => toEditorialGuide(buildRegionShopEditorial(officialShopsData, slug)), [slug]);
+  const details = useMemo(() => ({
+    checklistTitle: '방문 전 체크리스트',
+    faq: getRegionShopFaq(officialShopsData, slug),
+    related: ['/shops', '/guide/shops', ...REGION_SHOP_PAGES.filter((region) => region.slug !== slug).map((region) => `/guide/shops/${region.slug}`)]
+  }), [slug]);
+  return <RenewEditorialGuide guide={guide} guideKey="regionShop" details={details} headingId="region-shop-guide-heading" cta={{ eyebrow: '구매처 찾기', title: '지도와 내 주변순으로 보려면', description: '구매처 찾기에서 매장 위치와 지도 바로가기를 확인합니다.', href: '/shops', label: '구매처 찾기' }} />;
+}
+
+function RenewBoxPricesGuide() {
+  const guide = useMemo(() => toEditorialGuide(getBoxPricesEditorial()), []);
+  return <RenewEditorialGuide guide={guide} guideKey="boxPrices" headingId="box-prices-guide-heading" cta={{ eyebrow: '박스 시세', title: '박스별 가격을 자세히 보려면', description: '박스마다 등록 최저가와 SNKRDUNK 상품 페이지를 함께 확인합니다.', href: '/prices/boxes', label: '박스 시세 보기' }} />;
 }
 
 // SNKRDUNK photos pad the card: square shots leave it at 80% of the height, landscape ones at 84%.

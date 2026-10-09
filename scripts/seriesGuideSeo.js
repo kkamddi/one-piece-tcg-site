@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   analyzeSeriesCards,
   getBoosterNumberLabel,
+  getKoreanSeriesName,
   getKstDateKey,
   getRandomPackGuideDescription,
   getRandomPackGuideIntro,
@@ -101,7 +102,7 @@ function getLocaleLabel(locale, japanese = false) {
 function createRandomPackSeo(series, cardCount, dataSections, context, japanese) {
   const locale = series.locale || 'JP';
   const code = context.code;
-  const name = (japanese ? series.enName : series.koName) || series.enName || series.koName || code;
+  const name = japanese ? (series.enName || series.koName || code) : getKoreanSeriesName(series, seriesData);
   const localeLabel = getLocaleLabel(locale, japanese);
   const catalogSlug = normalizeSeriesSlug(series.id || series.baseSeriesId);
   const shared = {
@@ -124,7 +125,7 @@ function createRandomPackSeo(series, cardCount, dataSections, context, japanese)
   const boosterNumber = getBoosterNumberLabel(code);
   return {
     ...shared,
-    title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·힛카드 | Card Pone`,
+    title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''}${locale === 'KR' ? '' : ` ${localeLabel}`} 카드 리스트·힛카드 | Card Pone`,
     keywords: `${code}, ${name}, ${boosterNumber ? `원피스카드 ${boosterNumber}, ` : ''}원피스카드 리스트, 원피스카드 힛카드, 원피스카드 도감, ${localeLabel} 원피스카드`,
     editor: 'Card Pone 데이터 편집',
     heading: `${code} ${name} 시리즈 가이드`,
@@ -135,7 +136,7 @@ function createRandomPackSeo(series, cardCount, dataSections, context, japanese)
 function createSeo(series, cardCount, cardSummary, dataSections, japanese = false) {
   const locale = series.locale || 'JP';
   const code = getSeriesCode(series);
-  const name = (japanese ? series.enName : series.koName) || series.enName || series.koName || code;
+  const name = japanese ? (series.enName || series.koName || code) : getKoreanSeriesName(series, seriesData);
   const kind = (japanese ? series.kindEn : series.kindKo) || series.kindEn || series.kindKo || (japanese ? 'カードシリーズ' : '카드 시리즈');
   const localeLabel = getLocaleLabel(locale, japanese);
   const raritySummary = cardSummary.rarityEntries
@@ -186,8 +187,8 @@ function createSeo(series, cardCount, cardSummary, dataSections, japanese = fals
   // Only random-pack boosters have hit cards; starter decks keep the plain list title.
   const hasHitCards = /^(OP|EB|PRB)/i.test(code);
   return {
-    title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
-    description: `${localeLabel} ${code} ${name}의 도감 등록 카드 ${cardCount}장${hasHitCards ? '과 힛카드(고가 카드)' : ''}를 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
+    title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''}${locale === 'KR' ? '' : ` ${localeLabel}`} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
+    description: `${localeLabel} ${code} ${name}의 도감 등록 카드 ${cardCount}장${hasHitCards ? '과 힛카드(고가 카드)를' : '을'} 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
     keywords: `${code}, ${name}, ${boosterNumber ? `원피스카드 ${boosterNumber}, ` : ''}원피스카드 리스트, ${hasHitCards ? '원피스카드 힛카드, ' : ''}원피스카드 도감, ${localeLabel} 원피스카드`,
     schemaType: 'CollectionPage',
     editor: 'Card Pone 데이터 편집',
