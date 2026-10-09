@@ -4,6 +4,9 @@ import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
 import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
+import { GETTING_STARTED_EDITORIAL } from '../lib/getting-started-editorial.js';
+import { PRICE_RANKING_EDITORIAL } from '../lib/price-ranking-editorial.js';
+import { CARD_TYPES_EDITORIAL } from '../lib/card-types-editorial.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { getGuideFaq } from '../lib/guide-article-faq.js';
@@ -540,9 +543,9 @@ const SEO_FIXES = {
     reviewedAt: CARD_STORAGE_EDITORIAL.reviewedAt
   },
   '/guide/shops': {
-    title: '원피스카드 사는 곳 - 공인점포·취급점포와 지역별 매장 | Card Pone',
-    description: '공식 홈페이지 기준 원피스카드 공인점포 54곳과 취급점포 26곳의 지역별 분포, 내 주변 매장 찾는 방법을 정리했습니다.',
-    keywords: '원피스카드 사는 곳, 원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 공인점포, 원피스카드 매장',
+    title: '원피스카드 파는 곳·구매 사이트 - 공인점포·매입·정가 정리 | Card Pone',
+    description: '공식 공인점포 54곳·취급점포 26곳의 지역별 분포와 온라인 구매 사이트에서 확인할 점, 카드 팔 때 매입가와 시세 차이, 한글판 1팩 2,000원·1박스 48,000원 정가를 정리했습니다.',
+    keywords: '원피스카드 파는 곳, 원피스카드 사는 곳, 원피스 카드 구매 사이트, 원피스 카드 판매 사이트, 원피스카드 매입, 원피스 카드 정가, 원피스카드 공인점포, 원피스카드 구매처',
     schemaType: 'Article',
     editor: 'Card Pone 데이터 편집',
     reviewedAt: SHOP_GUIDE_EDITORIAL.reviewedAt
@@ -556,6 +559,9 @@ const SEO_FIXES = {
     reviewedAt: CARD_PRICE_EDITORIAL.reviewedAt
   },
   '/guide/character-cards': { ...{"title":"원피스카드 캐릭터별 시세 - 루피·샹크스 등 가장 비싼 카드와 버전별 가격 | Card Pone","description":"SNKRDUNK 일본판 최근 거래로 캐릭터별 고가 카드와 Single·PSA10 시세, 같은 카드의 패러렐·망가 버전 가격 차이를 정리합니다.","keywords":"원피스카드 캐릭터별 시세, 루피 카드 시세, 샹크스 카드 가격, 원피스카드 비싼 카드, 원피스카드 망가 레어 시세"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: CHARACTER_CARDS_EDITORIAL.reviewedAt },
+  '/guide/getting-started': { ...{"title": "원피스 카드게임 입문 가이드 - 상품 종류·한글판 vs 일본판·시작 순서 | Card Pone", "description": "원피스카드 처음이라면? 덱 구성 규칙, 부스터·스타트 덱·프리미엄 부스터 차이와 가격, 한글판이 일본판보다 약 10개월 늦는 발매 간격, 대전·수집별 시작 순서를 정리했습니다.", "keywords": "원피스카드게임, 원피스 카드게임 입문, 원피스카드 시작, 원피스카드 초보, 원피스카드 스타트 덱, 원피스카드 한글판 일본판, 원피스카드 덱 구성, 원피스카드 부스터 종류"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: GETTING_STARTED_EDITORIAL.reviewedAt },
+  '/guide/price-ranking': { ...{"title": "원피스카드 비싼 카드 순위 TOP 30 - 일본판 가격 순위 (2026.10) | Card Pone", "description": "원피스카드 가격 순위 TOP 30. SNKRDUNK 일본판 실거래가로 Single·PSA10 비싼 카드 순위를 정리하고 망가·SP·부스터·캐릭터별로 비싼 이유를 나눴습니다. 2026년 10월 9일 기준.", "keywords": "원피스 카드 가격 순위, 원피스카드 비싼 카드, 비싼 카드 순위, 원피스카드 최고가, 원피스 카드 시세 순위, 망가 카드 가격, PSA10 가격 순위"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: PRICE_RANKING_EDITORIAL.reviewedAt },
+  '/guide/card-types': { ...{"title": "원피스카드 종류·레어도 정리 - 패러렐·SP·망가 시세 차이 | Card Pone", "description": "원피스카드 리더·캐릭터·이벤트 종류와 C~SEC·패러렐·SP·망가 레어도 구분법, 일본판 SNKRDUNK 거래가로 본 레어도별 시세(SP 중앙값 ¥13,812, 망가 ¥143,004)를 정리했습니다.", "keywords": "원피스 카드 종류, 원피스카드 레어도, 원피스카드 힛카드, 원피스카드 패러렐, 원피스카드 SP, 원피스카드 망가, 원피스카드 SEC, 트레저 레어"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: CARD_TYPES_EDITORIAL.reviewedAt },
   '/guide/psa-grading': { ...{"title":"원피스카드 PSA 그레이딩 가이드 - 레어도·연식별 PSA10 시세 차이 | Card Pone","description":"SNKRDUNK 일본판 실제 거래로 레어도·버전·시리즈 연식별 PSA10과 Single 가격 차이와 그레이딩 전 확인할 점을 정리합니다.","keywords":"원피스카드 PSA, 원피스카드 그레이딩, PSA10 시세, 원피스카드 PSA10 가격 차이, 원피스카드 감정"}, schemaType: 'Article', editor: 'Card Pone 데이터 편집', reviewedAt: PSA_GRADING_EDITORIAL.reviewedAt },
   '/guide/booster-comparison': {
     title: '원피스카드 부스터별 히트 카드 비교 - OP01~OP16 망가·SP·고가 카드 | Card Pone',
@@ -1020,6 +1026,9 @@ const SERVER_PAGE_CONTENT = {
     links: ['/shops', '/shops/official', '/calendar', '/guide/box-recommendation']
   },
   '/guide/character-cards': editorialPageContent(CHARACTER_CARDS_EDITORIAL, '캐릭터 시세 체크리스트', ['/prices', '/guide/card-price', '/guide/collection/manga', '/market-report']),
+  '/guide/getting-started': editorialPageContent(GETTING_STARTED_EDITORIAL, '처음 시작할 때 체크리스트', ['/guide/card-catalog', '/guide/shops', '/guide/card-types', '/guide/release-schedule']),
+  '/guide/price-ranking': editorialPageContent(PRICE_RANKING_EDITORIAL, '순위 볼 때 체크리스트', ['/prices', '/guide/card-price', '/guide/character-cards', '/guide/psa-grading']),
+  '/guide/card-types': editorialPageContent(CARD_TYPES_EDITORIAL, '버전 확인 체크리스트', ['/guide/collection/manga', '/guide/price-ranking', '/guide/psa-grading', '/guide/card-catalog']),
   '/guide/psa-grading': editorialPageContent(PSA_GRADING_EDITORIAL, '그레이딩 전 체크리스트', ['/guide/card-price', '/prices', '/guide/card-storage', '/guides/centering']),
   '/guide/booster-comparison': {
     heading: BOOSTER_COMPARISON_EDITORIAL.heading,

@@ -13,6 +13,9 @@
 - [시세 읽는 법](https://www.optcgkorea.com/guide/card-price): Single과 PSA10, 최근 거래일, 등록가와 거래가의 차이
 - [캐릭터별 카드 시세](https://www.optcgkorea.com/guide/character-cards): 캐릭터별 고가 카드 순위와 같은 번호의 버전별(기본·패러렐·SP·망가) 가격 차이
 - [PSA 그레이딩 가이드](https://www.optcgkorea.com/guide/psa-grading): 레어도·버전·부스터 시기별 PSA10과 Single 차액, 감정 전 확인할 점
+- [원피스 카드게임 입문 가이드](https://www.optcgkorea.com/guide/getting-started): 상품 종류(부스터·스타트 덱·엑스트라·프리미엄), 한글판과 일본판 발매 간격, 처음 시작하는 순서
+- [비싼 카드 순위](https://www.optcgkorea.com/guide/price-ranking): SNKRDUNK 일본판 Single TOP 30·PSA10 TOP 10과 망가·SP·부스터·캐릭터별 비중
+- [카드 종류·레어도 가이드](https://www.optcgkorea.com/guide/card-types): 카드 종류, C~SEC·패러렐·SP·망가 구분과 레어도별 거래가
 - [부스터별 히트 카드 비교](https://www.optcgkorea.com/guide/booster-comparison): OP01~OP16·EB01~EB04의 SEC·SP·패러렐·망가 구성과 등록가 분포
 - [도감 사용법](https://www.optcgkorea.com/guide/card-catalog): 카드번호 읽는 법, 패러렐·코믹 패러렐·재록 구별
 - [목적별 박스 비교](https://www.optcgkorea.com/guide/box-recommendation): 박스 현재가와 히트 카드 기준 비교

@@ -40,7 +40,7 @@ test('top listings stay within the main product even when SNKRDUNK spells it dif
 test('sections label prices as listings and skip empty data', () => {
   const analysis = analyzeSeriesCards([{ cardNo: 'ST01-001', name: 'L', category: 'LEADER', colorKo: '적색', type: '', effect: '' }]);
   const sections = getSeriesGuideSections(analysis, { locale: 'JP', setName: 'Start Deck', items: [{ name: 'Card', minPrice: 10 }] }, 'KR');
-  assert.deepEqual(sections.map((section) => section.heading), ['리더 1종', '카드 종류와 색상', '고가 카드 TOP 1']);
+  assert.deepEqual(sections.map((section) => section.heading), ['리더 1종', '카드 종류와 색상', '힛카드(고가 카드) TOP 1']);
   assert.match(sections.at(-1).paragraphs[0], /등록 최저가/);
   assert.deepEqual(sections.at(-1).table.rows[0], ['Card', 'US $10', '₩14,570']);
   assert.equal(getSeriesGuideSections(analysis, { items: [] }, 'JP').length, 2);

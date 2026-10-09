@@ -73,6 +73,12 @@ function getSeriesCode(series) {
   return String(series.baseSeriesId || series.id || '').replace(/^(KR|JP|EN)-/, '');
 }
 
+// Korean searchers call main boosters by number ("13탄"), so the Korean title carries it.
+export function getBoosterNumberLabel(code) {
+  const match = /^OP-?0*(\d+)$/i.exec(String(code || ''));
+  return match ? `${match[1]}탄` : '';
+}
+
 function getLocaleLabel(locale, japanese = false) {
   if (japanese) return locale === 'JP' ? '日本版' : locale === 'EN' ? '英語版' : '韓国版';
   return locale === 'JP' ? '일본판' : locale === 'EN' ? '영문판' : '한글판';
@@ -128,10 +134,13 @@ function createSeo(series, cardCount, cardSummary, dataSections, japanese = fals
     };
   }
 
+  const boosterNumber = getBoosterNumberLabel(code);
+  // Only random-pack boosters have hit cards; starter decks keep the plain list title.
+  const hasHitCards = /^(OP|EB|PRB)/i.test(code);
   return {
-    title: `${code} ${name} 카드 리스트·시리즈 가이드 | Card Pone`,
-    description: `${localeLabel} ${code} ${name}의 도감 등록 카드 ${cardCount}장을 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
-    keywords: `${code}, ${name}, 원피스카드 리스트, 원피스카드 도감, ${localeLabel} 원피스카드`,
+    title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
+    description: `${localeLabel} ${code} ${name}의 도감 등록 카드 ${cardCount}장${hasHitCards ? '과 힛카드(고가 카드)' : ''}를 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
+    keywords: `${code}, ${name}, ${boosterNumber ? `원피스카드 ${boosterNumber}, ` : ''}원피스카드 리스트, ${hasHitCards ? '원피스카드 힛카드, ' : ''}원피스카드 도감, ${localeLabel} 원피스카드`,
     schemaType: 'CollectionPage',
     editor: 'Card Pone 데이터 편집',
     reviewedAt: contentReviewedAt,

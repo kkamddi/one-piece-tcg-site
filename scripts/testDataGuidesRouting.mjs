@@ -10,7 +10,10 @@ test('character, PSA and release guides are routed, listed, searchable and in th
   for (const [path, flag, component, key] of [
     ['/guide/character-cards', 'isCharacterCardsGuide', 'RenewCharacterCardsGuide', 'character'],
     ['/guide/psa-grading', 'isPsaGradingGuide', 'RenewPsaGradingGuide', 'psa'],
-    ['/guide/release-schedule', 'isReleaseScheduleGuide', 'RenewReleaseScheduleGuide', 'release']
+    ['/guide/release-schedule', 'isReleaseScheduleGuide', 'RenewReleaseScheduleGuide', 'release'],
+    ['/guide/getting-started', 'isGettingStartedGuide', 'RenewGettingStartedGuide', 'start'],
+    ['/guide/price-ranking', 'isPriceRankingGuide', 'RenewPriceRankingGuide', 'ranking'],
+    ['/guide/card-types', 'isCardTypesGuide', 'RenewCardTypesGuide', 'types']
   ]) {
     assert.match(app, new RegExp(`const ${flag} = initialPath === '${path}';`));
     assert.match(app, new RegExp(`${flag} \\? <${component} /> : null`));
@@ -24,6 +27,9 @@ test('character, PSA and release guides are routed, listed, searchable and in th
   }
   assert.match(middleware, /'\/guide\/character-cards': editorialPageContent\(CHARACTER_CARDS_EDITORIAL/);
   assert.match(middleware, /'\/guide\/psa-grading': editorialPageContent\(PSA_GRADING_EDITORIAL/);
+  assert.match(middleware, /'\/guide\/getting-started': editorialPageContent\(GETTING_STARTED_EDITORIAL/);
+  assert.match(middleware, /'\/guide\/price-ranking': editorialPageContent\(PRICE_RANKING_EDITORIAL/);
+  assert.match(middleware, /'\/guide\/card-types': editorialPageContent\(CARD_TYPES_EDITORIAL/);
   // The release schedule depends on topics.json, which stays out of the Functions bundle.
   assert.doesNotMatch(middleware, /topics\.json/);
 });

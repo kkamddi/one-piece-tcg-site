@@ -203,7 +203,7 @@ export function getSeriesGuideSections(analysis, listings, lang = 'KR') {
   if (listings?.items?.length) {
     const edition = listings.locale === 'EN' ? (jp ? '英語版' : '영문판') : (jp ? '日本版' : '일본판');
     sections.push({
-      heading: jp ? `高額カード TOP ${listings.items.length}` : `고가 카드 TOP ${listings.items.length}`,
+      heading: jp ? `高額カード TOP ${listings.items.length}` : `힛카드(고가 카드) TOP ${listings.items.length}`,
       wide: true,
       paragraphs: [jp
         ? `${edition}SNKRDUNK「${listings.setName}」の出品最安値順です。出品価格のため実際の取引価格とは異なる場合があります。`

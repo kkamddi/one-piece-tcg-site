@@ -33,6 +33,9 @@ import { CARD_CATALOG_EDITORIAL } from '../lib/card-catalog-editorial.js';
 import { BOOSTER_COMPARISON_EDITORIAL } from '../lib/booster-comparison-editorial.js';
 import { CHARACTER_CARDS_EDITORIAL } from '../lib/character-cards-editorial.js';
 import { PSA_GRADING_EDITORIAL } from '../lib/psa-grading-editorial.js';
+import { GETTING_STARTED_EDITORIAL } from '../lib/getting-started-editorial.js';
+import { PRICE_RANKING_EDITORIAL } from '../lib/price-ranking-editorial.js';
+import { CARD_TYPES_EDITORIAL } from '../lib/card-types-editorial.js';
 import { buildReleaseScheduleEditorial } from '../lib/release-schedule-editorial.js';
 import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH, formatPreviewYen, getBoosterPreview, getPreviewCards, groupPreviewCards } from '../lib/booster-preview.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
@@ -745,6 +748,9 @@ const CARD_CATALOG_GUIDE = toEditorialGuide(CARD_CATALOG_EDITORIAL);
 const BOOSTER_COMPARISON_GUIDE = toEditorialGuide(BOOSTER_COMPARISON_EDITORIAL);
 const CHARACTER_CARDS_GUIDE = toEditorialGuide(CHARACTER_CARDS_EDITORIAL);
 const PSA_GRADING_GUIDE = toEditorialGuide(PSA_GRADING_EDITORIAL);
+const GETTING_STARTED_GUIDE = toEditorialGuide(GETTING_STARTED_EDITORIAL);
+const PRICE_RANKING_GUIDE = toEditorialGuide(PRICE_RANKING_EDITORIAL);
+const CARD_TYPES_GUIDE = toEditorialGuide(CARD_TYPES_EDITORIAL);
 // The release schedule is rebuilt from the official topics on every load, so its upcoming list stays current.
 const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsData, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
@@ -755,6 +761,7 @@ const GUIDE_HUB_COLLECTIONS = [
     title: '처음 시작할 때',
     description: '카드를 찾고 실제 상품을 구매하는 기본 순서입니다.',
     links: [
+      { href: '/guide/getting-started', title: '원피스 카드게임 입문', meta: '상품 종류·한글판과 일본판·시작 순서' },
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
       { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
       { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' },
@@ -771,7 +778,9 @@ const GUIDE_HUB_COLLECTIONS = [
       { href: '/guide/box-recommendation', title: '목적별 박스 비교', meta: '최고가·균형·유효 히트' },
       { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' },
       { href: '/guide/character-cards', title: '캐릭터별 카드 시세', meta: '캐릭터별 고가 카드·버전 차이' },
-      { href: '/guide/psa-grading', title: 'PSA 그레이딩 판단', meta: '레어도·연식별 PSA10 차이' }
+      { href: '/guide/psa-grading', title: 'PSA 그레이딩 판단', meta: '레어도·연식별 PSA10 차이' },
+      { href: '/guide/price-ranking', title: '비싼 카드 순위', meta: 'Single TOP 30·PSA10 TOP 10' },
+      { href: '/guide/card-types', title: '카드 종류·레어도', meta: '패러렐·SP·망가 구분과 시세' }
     ]
   },
   {
@@ -806,7 +815,7 @@ const GUIDE_ARTICLE_DETAILS = {
   shops: {
     checklistTitle: '구매 전 체크리스트',
     faq: GUIDE_ARTICLE_FAQ.shops,
-    related: ['/shops', '/calendar', '/guide/box-recommendation']
+    related: ['/shops', '/prices', '/guide/box-recommendation']
   },
   price: {
     checklistTitle: '시세 확인 체크리스트',
@@ -837,6 +846,21 @@ const GUIDE_ARTICLE_DETAILS = {
     checklistTitle: '발매 일정 체크리스트',
     faq: GUIDE_ARTICLE_FAQ.release,
     related: ['/guide/booster-comparison', '/guide/box-recommendation', '/guide/shops']
+  },
+  start: {
+    checklistTitle: '처음 시작할 때 체크리스트',
+    faq: GUIDE_ARTICLE_FAQ.start,
+    related: ['/guide/card-catalog', '/guide/shops', '/guide/card-types']
+  },
+  ranking: {
+    checklistTitle: '순위 볼 때 체크리스트',
+    faq: GUIDE_ARTICLE_FAQ.ranking,
+    related: ['/prices', '/guide/character-cards', '/guide/psa-grading']
+  },
+  types: {
+    checklistTitle: '버전 확인 체크리스트',
+    faq: GUIDE_ARTICLE_FAQ.types,
+    related: ['/guide/collection/manga', '/guide/price-ranking', '/guide/psa-grading']
   }
 };
 const GUIDE_RELATED_LABELS = {
@@ -844,6 +868,9 @@ const GUIDE_RELATED_LABELS = {
   '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
   '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
   '/guide/release-schedule': ['신작·발매 일정', '일본판·한국판 발매일과 한국 발매 간격을 봅니다.'],
+  '/guide/getting-started': ['원피스 카드게임 입문', '상품 종류와 한글판·일본판 차이, 시작 순서를 봅니다.'],
+  '/guide/price-ranking': ['비싼 카드 순위', '일본판 Single·PSA10 가격 순위와 비싼 이유를 봅니다.'],
+  '/guide/card-types': ['카드 종류·레어도', '패러렐·SP·망가 구분과 레어도별 시세를 봅니다.'],
   ...Object.fromEntries(BOOSTER_PREVIEWS.map((preview) => [`${BOOSTER_PREVIEW_PATH}/${preview.slug}`, [`${preview.code} 프리뷰`, preview.lead]])),
   '/guide/card-catalog': ['도감 사용법', '카드번호와 시리즈로 정확한 버전을 찾습니다.'],
   '/guide/card-price': ['시세 보는 방법', 'Single과 PSA10, 최근 거래를 구분해 확인합니다.'],
@@ -904,47 +931,6 @@ const HOME_SEO_GUIDE_LINKS = [
 
 const PARTNER_AD_ITEMS = [
   {
-    key: 'shop-news',
-    labelKr: 'CARD SHOP',
-    labelEn: 'CARD SHOP',
-    titleKr: '더 카드룸',
-    titleEn: 'The Card Room',
-    bodyKr: '서울 마포구 연남로 3길 40, 2층',
-    bodyEn: '2F, 40, Yeonnam-ro 3-gil, Mapo-gu, Seoul',
-    metaKr: 'Mon-Sun 11:00~22:00',
-    metaEn: 'Mon-Sun 11:00~22:00',
-    sido: '서울',
-    gungu: '마포구',
-    lat: 37.5606213,
-    lng: 126.9205737,
-    imageUrl: '/partners/the-card-room.png',
-    actions: [
-      { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://map.naver.com/p/entry/place/2096216680' },
-      { labelKr: '스마트스토어', labelEn: 'Smart Store', href: 'https://smartstore.naver.com/fogandsunset' },
-      { labelKr: '인스타그램', labelEn: 'Instagram', href: 'https://www.instagram.com/tcr_kr/' }
-    ]
-  },
-  {
-    key: 'card-sungji',
-    labelKr: 'CARD SHOP',
-    labelEn: 'CARD SHOP',
-    titleKr: '카드성지',
-    titleEn: 'Card Sungji',
-    bodyKr: '한강대로 95 지하2층 B212호(용산 래미안)',
-    bodyEn: 'B2 B212, 95 Hangang-daero, Yongsan',
-    metaKr: 'Mon-Sun 14:00~21:00',
-    metaEn: 'Mon-Sun 14:00~21:00',
-    sido: '서울',
-    gungu: '용산구',
-    lat: 37.5290927,
-    lng: 126.9668857,
-    imageUrl: '/partners/card-sungji.png',
-    actions: [
-      { labelKr: '네이버 지도', labelEn: 'Naver Map', href: 'https://naver.me/xQe4VQum' },
-      { labelKr: '인스타그램', labelEn: 'Instagram', href: 'https://www.instagram.com/card_sungji/' }
-    ]
-  },
-  {
     key: 'moa-card-shop',
     labelKr: 'CARD SHOP',
     labelEn: 'CARD SHOP',
@@ -965,21 +951,7 @@ const PARTNER_AD_ITEMS = [
   }
 ];
 
-const PARTNER_SHOP_NEWS = [
-  {
-    id: 'card-sungji-op13-restock-2026-07-07',
-    shopKey: 'card-sungji',
-    type: 'stock',
-    titleKr: '카드성지 OP-13 입고 예정',
-    titleEn: 'Card Sungji OP-13 Coming Soon',
-    bodyKr: '카드성지에 원피스카드 OP-13 관련 매물이 곧 입고될 예정입니다.',
-    bodyEn: 'OP-13 products are expected to arrive at Card Sungji soon.',
-    imageUrl: '/partners/news/card-sungji-op13.png',
-    date: '2026-07-07',
-    status: 'active',
-    priority: 1
-  }
-];
+const PARTNER_SHOP_NEWS = [];
 
 function getPartnerShopRows(uiLang = 'KR') {
   return PARTNER_AD_ITEMS.map((item) => ({
@@ -1002,7 +974,6 @@ function getPartnerShopByKey(key) {
 
 function getPartnerShopSlug(itemOrKey) {
   const key = typeof itemOrKey === 'string' ? itemOrKey : itemOrKey?.key;
-  if (key === 'shop-news') return 'the-card-room';
   return String(key || '').trim();
 }
 
@@ -3190,6 +3161,9 @@ function getClientRouteSeo(page, uiLang = 'KR') {
       const name = (isJapanese ? series.enName : series.koName) || series.enName || series.koName || code;
       const locale = series.locale || 'JP';
       const cardCount = Number(seriesCardCounts?.[locale]?.series?.[series.id] || 0);
+      // Same "13탄" label as scripts/seriesGuideSeo.js so client and pre-rendered titles match.
+      const boosterNumber = /^OP-?0*(\d+)$/i.test(code) ? `${/^OP-?0*(\d+)$/i.exec(code)[1]}탄` : '';
+      const hasHitCards = /^(OP|EB|PRB)/i.test(code);
       if (isJapanese) {
         const localeLabel = locale === 'JP' ? '日本版' : locale === 'EN' ? '英語版' : '韓国版';
         return {
@@ -3201,10 +3175,10 @@ function getClientRouteSeo(page, uiLang = 'KR') {
         };
       }
       return {
-        title: `${code} ${name} 카드 리스트·시리즈 가이드 | Card Pone`,
+        title: `${code} ${name}${boosterNumber ? ` (${boosterNumber})` : ''} 카드 리스트·${hasHitCards ? '힛카드' : '시리즈 가이드'} | Card Pone`,
         h1: `${code} ${name} 시리즈 가이드`,
-        description: `${code} ${name}의 도감 등록 카드 ${cardCount}장을 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
-        keywords: `${code}, ${name}, 원피스카드 리스트, 원피스카드 도감`,
+        description: `${code} ${name}의 도감 등록 카드 ${cardCount}장${hasHitCards ? '과 힛카드(고가 카드)' : ''}를 카드번호, 레어도, 이미지로 확인하는 원피스카드 시리즈 가이드입니다.`,
+        keywords: `${code}, ${name}, ${boosterNumber ? `원피스카드 ${boosterNumber}, ` : ''}원피스카드 리스트, ${hasHitCards ? '원피스카드 힛카드, ' : ''}원피스카드 도감`,
         body: `${code} 시리즈의 상품 정보와 수록 카드를 Card Pone 도감 및 시세 데이터와 연결해 정리한 가이드입니다.`
       };
     }
@@ -3317,10 +3291,10 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   }
   if (path === '/guide/shops') {
     return {
-      title: '원피스카드 사는 곳 - 공인점포·취급점포와 지역별 매장 | Card Pone',
+      title: '원피스카드 파는 곳·구매 사이트 - 공인점포·매입·정가 정리 | Card Pone',
       h1: SHOP_GUIDE_EDITORIAL.heading,
-      description: '공식 홈페이지 기준 원피스카드 공인점포 54곳과 취급점포 26곳의 지역별 분포, 내 주변 매장 찾는 방법을 정리했습니다.',
-      keywords: '원피스카드 사는 곳, 원피스카드 파는 곳, 원피스카드 구매처, 원피스카드 공인점포, 원피스카드 매장',
+      description: '공식 공인점포 54곳·취급점포 26곳의 지역별 분포와 온라인 구매 사이트에서 확인할 점, 카드 팔 때 매입가와 시세 차이, 한글판 1팩 2,000원·1박스 48,000원 정가를 정리했습니다.',
+      keywords: '원피스카드 파는 곳, 원피스카드 사는 곳, 원피스 카드 구매 사이트, 원피스 카드 판매 사이트, 원피스카드 매입, 원피스 카드 정가, 원피스카드 공인점포, 원피스카드 구매처',
       body: SHOP_GUIDE_EDITORIAL.paragraphs[0]
     };
   }
@@ -3352,6 +3326,15 @@ function getClientRouteSeo(page, uiLang = 'KR') {
   }
   if (path === '/guide/psa-grading') {
     return { title: "원피스카드 PSA 그레이딩 가이드 - 레어도·연식별 PSA10 시세 차이 | Card Pone", h1: PSA_GRADING_EDITORIAL.heading, description: "SNKRDUNK 일본판 실제 거래로 레어도·버전·시리즈 연식별 PSA10과 Single 가격 차이와 그레이딩 전 확인할 점을 정리합니다.", keywords: "원피스카드 PSA, 원피스카드 그레이딩, PSA10 시세, 원피스카드 PSA10 가격 차이, 원피스카드 감정", body: PSA_GRADING_EDITORIAL.paragraphs[0] };
+  }
+  if (path === '/guide/getting-started') {
+    return { title: "원피스 카드게임 입문 가이드 - 상품 종류·한글판 vs 일본판·시작 순서 | Card Pone", h1: GETTING_STARTED_EDITORIAL.heading, description: "원피스카드 처음이라면? 덱 구성 규칙, 부스터·스타트 덱·프리미엄 부스터 차이와 가격, 한글판이 일본판보다 약 10개월 늦는 발매 간격, 대전·수집별 시작 순서를 정리했습니다.", keywords: "원피스카드게임, 원피스 카드게임 입문, 원피스카드 시작, 원피스카드 초보, 원피스카드 스타트 덱, 원피스카드 한글판 일본판, 원피스카드 덱 구성, 원피스카드 부스터 종류", body: GETTING_STARTED_EDITORIAL.paragraphs[0] };
+  }
+  if (path === '/guide/price-ranking') {
+    return { title: "원피스카드 비싼 카드 순위 TOP 30 - 일본판 가격 순위 (2026.10) | Card Pone", h1: PRICE_RANKING_EDITORIAL.heading, description: "원피스카드 가격 순위 TOP 30. SNKRDUNK 일본판 실거래가로 Single·PSA10 비싼 카드 순위를 정리하고 망가·SP·부스터·캐릭터별로 비싼 이유를 나눴습니다. 2026년 10월 9일 기준.", keywords: "원피스 카드 가격 순위, 원피스카드 비싼 카드, 비싼 카드 순위, 원피스카드 최고가, 원피스 카드 시세 순위, 망가 카드 가격, PSA10 가격 순위", body: PRICE_RANKING_EDITORIAL.paragraphs[0] };
+  }
+  if (path === '/guide/card-types') {
+    return { title: "원피스카드 종류·레어도 정리 - 패러렐·SP·망가 시세 차이 | Card Pone", h1: CARD_TYPES_EDITORIAL.heading, description: "원피스카드 리더·캐릭터·이벤트 종류와 C~SEC·패러렐·SP·망가 레어도 구분법, 일본판 SNKRDUNK 거래가로 본 레어도별 시세(SP 중앙값 ¥13,812, 망가 ¥143,004)를 정리했습니다.", keywords: "원피스 카드 종류, 원피스카드 레어도, 원피스카드 힛카드, 원피스카드 패러렐, 원피스카드 SP, 원피스카드 망가, 원피스카드 SEC, 트레저 레어", body: CARD_TYPES_EDITORIAL.paragraphs[0] };
   }
   if (path === '/guide/release-schedule') {
     const editorial = getReleaseScheduleEditorial();
@@ -7007,6 +6990,9 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isBoosterComparisonGuide = initialPath === '/guide/booster-comparison';
   const isCharacterCardsGuide = initialPath === '/guide/character-cards';
   const isPsaGradingGuide = initialPath === '/guide/psa-grading';
+  const isGettingStartedGuide = initialPath === '/guide/getting-started';
+  const isPriceRankingGuide = initialPath === '/guide/price-ranking';
+  const isCardTypesGuide = initialPath === '/guide/card-types';
   const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
   const boosterPreview = getBoosterPreview(initialPath);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
@@ -7326,7 +7312,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isReleaseScheduleGuide && !boosterPreview && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !boosterPreview && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7369,6 +7355,9 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isBoosterComparisonGuide ? <RenewBoosterComparisonGuide /> : null}
       {isCharacterCardsGuide ? <RenewCharacterCardsGuide /> : null}
       {isPsaGradingGuide ? <RenewPsaGradingGuide /> : null}
+      {isGettingStartedGuide ? <RenewGettingStartedGuide /> : null}
+      {isPriceRankingGuide ? <RenewPriceRankingGuide /> : null}
+      {isCardTypesGuide ? <RenewCardTypesGuide /> : null}
       {isReleaseScheduleGuide ? <RenewReleaseScheduleGuide /> : null}
       {boosterPreview ? <RenewBoosterPreview preview={boosterPreview} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
@@ -8449,6 +8438,18 @@ function RenewBoosterComparisonGuide() {
 
 function RenewCharacterCardsGuide() {
   return <RenewEditorialGuide guide={CHARACTER_CARDS_GUIDE} guideKey="character" headingId="character-cards-guide-heading" cta={{ eyebrow: '카드 시세', title: '다른 카드 시세를 보려면', description: '카드 이름이나 번호로 검색해 Single·PSA10 최근 거래와 가격 차트를 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+}
+
+function RenewGettingStartedGuide() {
+  return <RenewEditorialGuide guide={GETTING_STARTED_GUIDE} guideKey="start" headingId="getting-started-guide-heading" cta={{ eyebrow: '카드 도감', title: '원하는 카드를 찾아보려면', description: '도감에서 한글판·일본판 카드를 번호와 이름으로 검색합니다.', href: '/cards', label: '도감 보기' }} />;
+}
+
+function RenewPriceRankingGuide() {
+  return <RenewEditorialGuide guide={PRICE_RANKING_GUIDE} guideKey="ranking" headingId="price-ranking-guide-heading" cta={{ eyebrow: '카드 시세', title: '지금 시세를 확인하려면', description: '이 순위는 2026년 10월 9일 기준입니다. 카드별 최신 거래가는 시세 화면에서 확인합니다.', href: '/prices', label: '시세 보기' }} />;
+}
+
+function RenewCardTypesGuide() {
+  return <RenewEditorialGuide guide={CARD_TYPES_GUIDE} guideKey="types" headingId="card-types-guide-heading" cta={{ eyebrow: '카드 도감', title: '버전별 카드를 직접 비교하려면', description: '도감에서 같은 번호의 기본판·패러렐·SP·망가를 함께 확인합니다.', href: '/cards', label: '도감 보기' }} />;
 }
 
 function RenewPsaGradingGuide() {
