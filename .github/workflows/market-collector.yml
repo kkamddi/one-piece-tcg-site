@@ -274,7 +274,7 @@ jobs:
                     invalid_reason="invalid response total: $response_total"
                   elif [ "$next_offset" -lt "$offset" ]; then
                     invalid_reason="collector moved backwards: offset=$offset next_offset=$next_offset"
-                  elif [ "$next_offset" -eq "$offset" ] && { [ "$done_flag" != "1" ] || [ "$response_total" -ne "$offset" ]; }; then
+                  elif [ "$next_offset" -eq "$offset" ] && { [ "$done_flag" != "1" ] || [ "$response_total" -gt "$offset" ]; }; then
                     invalid_reason="collector did not advance: offset=$offset next_offset=$next_offset total=$response_total done=$done_flag"
                   elif [ "$collected_count" -ne $((next_offset - offset)) ]; then
                     invalid_reason="collected count mismatch: offset=$offset next_offset=$next_offset collected=$collected_count"

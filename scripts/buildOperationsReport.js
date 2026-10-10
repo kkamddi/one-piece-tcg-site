@@ -191,7 +191,9 @@ async function checkHttpStatus(url, headers = {}) {
 }
 
 async function checkAdsTxt() {
-  const expectedEntry = 'google.com, pub-5802425633398708, DIRECT, f08c47fec0942fa0';
+  // Compare against the ads.txt we publish so a publisher change never leaves this check behind.
+  const expectedEntry = (await fs.readFile(new URL('../public/ads.txt', import.meta.url), 'utf8'))
+    .split(/\r?\n/).map((line) => line.trim()).find((line) => line.startsWith('google.com,'));
   try {
     const startedAt = Date.now();
     const response = await fetch('https://optcgkorea.com/ads.txt', {
