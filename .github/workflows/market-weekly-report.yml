@@ -6,8 +6,12 @@ on:
         description: 'KST date to report from (YYYY-MM-DD); the last full Monday-Sunday week before it is used'
         required: false
   schedule:
-    # Mondays 12:00 KST, after the daily history collection has finished Sunday's trades.
-    - cron: '0 3 * * 1'
+    # Mondays 12:17 KST, after the daily history collection has finished Sunday's trades.
+    # GitHub drops scheduled runs at busy times (10/12 was skipped), so later runs retry;
+    # each one stops early once that week's report is already on main.
+    - cron: '17 3 * * 1'
+    - cron: '41 8 * * 1'
+    - cron: '29 2 * * 2'
 permissions:
   contents: write
 concurrency:
@@ -23,10 +27,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
+      - name: Skip when this week's report already exists
+        id: existing
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          today=$(TZ=Asia/Seoul date +%F)
+          sunday=$(date -d "$today -$(date -d "$today" +%u) days" +%F)
+          if [ -f "src/data/market-reports/${sunday}.json" ]; then
+            echo "Report ${sunday} is already published."
+            echo 'skip=true' >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-node@v4
+        if: steps.existing.outputs.skip != 'true'
         with:
           node-version: 22
       - name: Query last week's trades
+        if: steps.existing.outputs.skip != 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
@@ -40,12 +57,14 @@ jobs:
           node scripts/generateWeeklyMarketReport.mjs --sql ${REPORT_TODAY:+--today "$REPORT_TODAY"} > tmp/market-report.sql
           npx --yes wrangler@4 d1 execute optcgkorea-public-shadow --remote --json --command "$(cat tmp/market-report.sql)" > tmp/market-report-rows.json
       - name: Write report
+        if: steps.existing.outputs.skip != 'true'
         env:
           REPORT_TODAY: ${{ github.event.inputs.today }}
         shell: bash
         run: node scripts/generateWeeklyMarketReport.mjs --input tmp/market-report-rows.json ${REPORT_TODAY:+--today "$REPORT_TODAY"}
       - name: Publish report data only
         id: publish
+        if: steps.existing.outputs.skip != 'true'
         shell: bash
         run: |
           git add src/data/market-reports

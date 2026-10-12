@@ -214,6 +214,22 @@ async function checkAdsTxt() {
   }
 }
 
+// The weekly report should be on main by Monday afternoon (KST) for the week that ended on Sunday.
+async function checkWeeklyReport() {
+  try {
+    const latest = JSON.parse(await fs.readFile(new URL('../src/data/market-reports/latest.json', import.meta.url), 'utf8'));
+    const todayKst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const ageDays = Math.round((Date.parse(todayKst) - Date.parse(latest.weekEnd)) / 86400000);
+    return {
+      status: ageDays >= 9 ? 'critical' : ageDays >= 8 ? 'warning' : 'normal',
+      weekEnd: latest.weekEnd,
+      ageDays
+    };
+  } catch {
+    return { status: 'unknown', weekEnd: null, ageDays: null };
+  }
+}
+
 async function fetchSupabaseUsage() {
   const token = process.env.SUPABASE_ACCESS_TOKEN;
   const projectUrl = process.env.SUPABASE_URL;
@@ -324,6 +340,7 @@ function buildTelegramMessage(report) {
     '',
     '<b>[데이터 최신성]</b>',
     ...freshness.map((item) => `${item.label}  ${statusLabel(item.status)} · ${formatKst(item.updatedAt)}`),
+    `주간 리포트  ${statusLabel(report.services.weeklyReport.status)} · ${report.services.weeklyReport.weekEnd ? `${report.services.weeklyReport.weekEnd} 주` : '-'}`,
     '',
     '<b>[외부 서비스]</b>',
     `SNKRDUNK 수집  ${statusLabel(report.services.snkrdunk.status)}`,
@@ -359,7 +376,8 @@ function criticalKeyLabel(key) {
     supabase: 'Supabase',
     snkrdunk: 'SNKRDUNK',
     website: '홈페이지',
-    adsTxt: 'Ads.txt'
+    adsTxt: 'Ads.txt',
+    weeklyReport: '주간 리포트'
   }[value] || value;
 }
 
@@ -406,6 +424,7 @@ const d1 = {
   storagePercent: percent(storageBytes, 5 * 1024 * 1024 * 1024)
 };
 
+const weeklyReport = await checkWeeklyReport();
 const [github, website, adsTxt, supabase, supabaseUsage, workers] = await Promise.all([
   fetchGitHubRuns(),
   checkHttpStatus('https://www.optcgkorea.com/'),
@@ -441,6 +460,7 @@ const overallStatus = worstStatus(
   github.status,
   supabase.status,
   snkrdunkStatus,
+  weeklyReport.status,
   ...freshness.map((item) => item.status)
 );
 const reportDate = new Intl.DateTimeFormat('sv-SE', {
@@ -478,7 +498,8 @@ const report = {
       workflows: snkrWorkflows
     },
     website,
-    adsTxt
+    adsTxt,
+    weeklyReport
   },
   dataFreshness: freshness
 };
