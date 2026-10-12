@@ -74,6 +74,7 @@ import PortfolioCalculator, { getPortfolioCalculatorFaq, PortfolioCalculatorGuid
 import ProfitCalculator, { getProfitCalculatorFaq, ProfitCalculatorGuide } from './ProfitCalculator';
 import { getCommunityGrade } from '../lib/community-grades.js';
 import './renew.css';
+import './redesign.css';
 
 const LOGO_SRC = '/optcg-logo-light.png';
 const CARD_SCAN_AVAILABLE = true;
@@ -770,25 +771,22 @@ const GUIDE_REVIEWED_AT = '2026-08-25';
 const GUIDE_HUB_COLLECTIONS = [
   {
     id: 'start',
-    eyebrow: 'START',
     title: '처음 시작할 때',
     description: '카드를 찾고 실제 상품을 구매하는 기본 순서입니다.',
     links: [
-      { href: '/guide/getting-started', title: '원피스 카드게임 입문', meta: '상품 종류·한글판과 일본판·시작 순서' },
+      { href: '/guide/getting-started', title: '원피스 카드게임 입문', meta: '상품 종류·한글판과 일본판·시작 순서', keywords: '한글판 일본판 차이 처음' },
       { href: RULES_PATH, title: '룰 한눈에', meta: '승리 조건·턴 진행·배틀 순서' },
-      { href: GLOSSARY_PATH, title: '용어 사전', meta: '블로커·속공·카운터·두웅!! 뜻' },
+      { href: GLOSSARY_PATH, title: '용어 사전', meta: '블로커·속공·카운터·두웅!! 뜻', keywords: '키워드 효과 트리거 레스트' },
       { href: STARTER_DECKS_PATH, title: '스타트 덱 고르기', meta: '한글판 스타트 덱 종류·색별 정리' },
       { href: COLORS_PATH, title: '색깔별 특징', meta: '6색 카드 수·키워드·효과 비교' },
-      { href: EVENTS_PATH, title: '대회·이벤트 참가', meta: '플래그십 배틀·참가 방법·카드쇼 일정' },
+      { href: EVENTS_PATH, title: '대회·이벤트 참가', meta: '플래그십 배틀·참가 방법·카드쇼 일정', keywords: '챔피언십 교류회 PLAYGO 플레이고' },
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
-      { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
-      { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' },
-      ...BOOSTER_PREVIEWS.map((preview) => ({ href: `${BOOSTER_PREVIEW_PATH}/${preview.slug}`, title: `${preview.code} 프리뷰`, meta: `${preview.facts[0].value} 발매 · 공개 카드` }))
+      { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인', keywords: '정가 매입 온라인 구매 사이트 매장' },
+      { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' }
     ]
   },
   {
     id: 'market',
-    eyebrow: 'MARKET',
     title: '가격을 판단할 때',
     description: '카드와 박스 가격을 같은 기준으로 비교하는 방법입니다.',
     links: [
@@ -798,25 +796,23 @@ const GUIDE_HUB_COLLECTIONS = [
       { href: '/guide/booster-comparison', title: '부스터별 히트 카드 비교', meta: '망가·SP·고가 카드 분포' },
       { href: '/guide/character-cards', title: '캐릭터별 카드 시세', meta: '캐릭터별 고가 카드·버전 차이' },
       { href: '/guide/psa-grading', title: 'PSA 그레이딩 판단', meta: '레어도·연식별 PSA10 차이' },
-      { href: '/guide/price-ranking', title: '비싼 카드 순위', meta: 'Single TOP 30·PSA10 TOP 10' },
-      { href: '/guide/card-types', title: '카드 종류·레어도', meta: '패러렐·SP·망가 구분과 시세' },
+      { href: '/guide/price-ranking', title: '비싼 카드 순위', meta: 'Single TOP 30·PSA10 TOP 10', keywords: '고가 랭킹' },
+      { href: '/guide/card-types', title: '카드 종류·레어도', meta: '패러렐·SP·망가 구분과 시세', keywords: 'SEC SR 레어 패러렐' },
       { href: LEADER_CARDS_PATH, title: '리더 카드 정리', meta: '색별 리더 수·비싼 리더 TOP 10' }
     ]
   },
   {
     id: 'collect',
-    eyebrow: 'COLLECT',
     title: '수집하고 보관할 때',
     description: '카드 상태를 확인하고 수집 기록을 유지하는 기준입니다.',
     links: [
       { href: '/guide/collection/start', title: '수집 방향 정하기', meta: '망가·챔피언십·플래그십·프로모' },
-      { href: '/guide/card-storage', title: '카드 보관 방법', meta: '슬리브·탑로더·바인더' },
+      { href: '/guide/card-storage', title: '카드 보관 방법', meta: '슬리브·탑로더·바인더', keywords: '보관 용품' },
       { href: '/guides/centering', title: '센터링 측정 순서', meta: '외곽·내부 테두리·결과 해석' }
     ]
   },
   {
     id: 'tools',
-    eyebrow: 'TOOLS',
     title: '도구를 활용할 때',
     description: '계산과 시뮬레이션 결과를 올바르게 해석하는 방법입니다.',
     links: [
@@ -4613,7 +4609,8 @@ async function resolvePopularSearchItem(query, locale) {
 }
 
 const SITE_SEARCH_DOCUMENTS = [
-  ...GUIDE_HUB_COLLECTIONS.flatMap(group => group.links.map(link => ({ ...link, description: link.meta, keywords: [group.title, link.meta] }))),
+  ...GUIDE_HUB_COLLECTIONS.flatMap(group => group.links.map(link => ({ ...link, description: link.meta, keywords: [group.title, link.meta, link.keywords].filter(Boolean) }))),
+  ...BOOSTER_PREVIEWS.map((preview) => ({ href: `${BOOSTER_PREVIEW_PATH}/${preview.slug}`, title: `${preview.code} 프리뷰`, description: `${preview.facts[0].value} 발매 · 공개 카드`, keywords: ['신작 프리뷰', preview.code, preview.title] })),
   ...GUIDE_QA_GROUPS.map(group => ({ title: group.kind === 'qa' ? '자주 묻는 질문' : '이용 가이드', href: group.kind === 'qa' ? '/news/faq' : '/news/guide', description: group.title, keywords: group.items.flatMap(item => [item.question, item.answer]) }))
 ];
 
@@ -8046,27 +8043,158 @@ function splitGuideAnswer(answer = '') {
   return (normalized.match(/[^.]+(?:\.|$)/g) || [normalized]).map((line) => line.trim()).filter(Boolean);
 }
 
+const GUIDE_HUB_VISIBLE_LINKS = 5;
+const GUIDE_HUB_POPULAR_PATHS = ['/guide/getting-started', RULES_PATH, '/guide/box-prices', '/guide/price-ranking'];
+const GUIDE_HUB_SET_KINDS = [['OP', '부스터'], ['EB', '엑스트라'], ['PRB', '프리미엄']];
+const normalizeGuideSearch = (value = '') => String(value).toLowerCase().replace(/[\s·\-_.]/g, '');
+
+// Set-specific pages (previews, set guides, box analysis) grow with every release, so they live behind
+// one set picker instead of being appended to the topic lists.
+function getGuideHubSets() {
+  const sets = new Map();
+  seriesData.forEach((series) => {
+    const match = String(series.baseSeriesId || '').match(/^(OP|EB|PRB)(\d{2})$/);
+    if (!match) return;
+    const id = `${match[1]}${match[2]}`;
+    const entry = sets.get(id) || { id, kind: match[1], number: Number(match[2]), code: `${match[1]}-${match[2]}`, links: [] };
+    if (series.locale === 'KR') entry.kr = series;
+    else if (series.locale === 'JP') entry.jp = series;
+    else return;
+    sets.set(id, entry);
+  });
+  BOOSTER_PREVIEWS.forEach((preview) => {
+    const id = preview.code.replace('-', '');
+    const match = id.match(/^(OP|EB|PRB)(\d{2})$/);
+    if (!match) return;
+    const entry = sets.get(id) || { id, kind: match[1], number: Number(match[2]), code: preview.code, links: [] };
+    entry.preview = preview;
+    sets.set(id, entry);
+  });
+  return [...sets.values()].map((entry) => {
+    // Korean name when a Korean edition exists; JP-only sets use their own title without the kind prefix.
+    const name = (entry.kr ? getKoreanSeriesName(entry.kr, seriesData) : String(entry.jp?.koName || '').replace(/^\S+\s+/, ''))
+      || entry.preview?.title.replace(/ 프리뷰$/, '').replace(entry.code, '').trim()
+      || entry.code;
+    const links = [
+      entry.preview ? { href: `${BOOSTER_PREVIEW_PATH}/${entry.preview.slug}`, title: '발매 전 프리뷰', meta: `${entry.preview.facts[0].value} 발매 · 공개 카드` } : null,
+      entry.jp ? { href: getSeriesGuideRoutePath(entry.jp), title: '일본판 세트 가이드', meta: '힛카드 TOP 10·박스 시세·발매 정보' } : null,
+      entry.kr ? { href: getSeriesGuideRoutePath(entry.kr), title: '한글판 세트 가이드', meta: '한글판 수록 카드·레어도 구성' } : null,
+      entry.jp ? { href: getBoxRecommendationSeriesPath(entry.id), title: '박스 분석', meta: '박스 현재가·수록 카드 가격 분포' } : null,
+      entry.jp ? { href: getSeriesRoutePath(entry.jp), title: '도감에서 카드 보기', meta: '수록 카드 전체 목록' } : null
+    ].filter(Boolean);
+    return { ...entry, name, links };
+  }).sort((a, b) => b.number - a.number);
+}
+
+function getGuideHubSearchItems(sets) {
+  const topicItems = GUIDE_HUB_COLLECTIONS.flatMap((collection) => collection.links.map((link) => ({ ...link, group: collection.title })));
+  const setItems = sets.flatMap((set) => set.links.slice(0, 2).map((link) => ({ href: link.href, title: `${set.code} ${link.title}`, meta: set.name, group: '세트별' })));
+  return [...topicItems, ...setItems];
+}
+
+function GuideHubLink({ link }) {
+  return (
+    <a href={link.href} onClick={() => rememberCurrentAppView()}>
+      <strong>{link.title}</strong>
+      <small>{link.meta}</small>
+      <b aria-hidden="true">›</b>
+    </a>
+  );
+}
+
 function RenewGuideHub() {
+  const sets = useMemo(getGuideHubSets, []);
+  const searchItems = useMemo(() => getGuideHubSearchItems(sets), [sets]);
+  const [query, setQuery] = useState('');
+  const [selectedSetId, setSelectedSetId] = useState(() => sets[0]?.id || '');
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const normalizedQuery = normalizeGuideSearch(query);
+  const results = normalizedQuery
+    ? searchItems.filter((item) => normalizeGuideSearch(`${item.title} ${item.meta} ${item.group} ${item.keywords || ''}`).includes(normalizedQuery))
+    : [];
+  const selectedSet = sets.find((set) => set.id === selectedSetId) || sets[0];
+  const popularLinks = GUIDE_HUB_POPULAR_PATHS
+    .map((href) => GUIDE_HUB_COLLECTIONS.flatMap((collection) => collection.links).find((link) => link.href === href))
+    .filter(Boolean);
+
   return (
     <div className="renew-guide-hub" aria-label="원피스카드 가이드 주제">
-      <div className="renew-guide-hub-grid">
-        {GUIDE_HUB_COLLECTIONS.map((collection) => (
-          <section key={collection.id} className="renew-guide-hub-group">
-            <span>{collection.eyebrow}</span>
-            <h3>{collection.title}</h3>
-            <p>{collection.description}</p>
-            <nav aria-label={`${collection.title} 가이드`}>
-              {collection.links.map((link) => (
-                <a key={link.href} href={link.href} onClick={() => rememberCurrentAppView()}>
-                  <strong>{link.title}</strong>
-                  <small>{link.meta}</small>
-                  <b aria-hidden="true">›</b>
-                </a>
-              ))}
-            </nav>
-          </section>
-        ))}
+      <div className="renew-guide-hub-finder">
+        <label className="renew-guide-hub-search">
+          <span className="renew-sr-only">가이드 검색</span>
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="가이드 검색 (예: 용어, 정가, OP-17)" />
+        </label>
+        {!normalizedQuery ? (
+          <nav className="renew-guide-hub-popular" aria-label="자주 찾는 가이드">
+            <span>자주 찾는 가이드</span>
+            {popularLinks.map((link) => <a key={link.href} href={link.href} onClick={() => rememberCurrentAppView()}>{link.title}</a>)}
+          </nav>
+        ) : null}
       </div>
+
+      {normalizedQuery ? (
+        <section className="renew-guide-hub-results" aria-live="polite">
+          <h3>{results.length ? `검색 결과 ${results.length}개` : `‘${query.trim()}’에 맞는 가이드가 없습니다`}</h3>
+          {results.length ? (
+            <nav aria-label="가이드 검색 결과">
+              {results.map((link) => <GuideHubLink key={link.href + link.title} link={{ ...link, meta: `${link.group} · ${link.meta}` }} />)}
+            </nav>
+          ) : <p>다른 단어로 찾거나 검색어를 지우고 주제별 목록을 확인하세요.</p>}
+        </section>
+      ) : (
+        <>
+          {selectedSet ? (
+            <section className="renew-guide-hub-sets" aria-labelledby="guide-hub-sets-heading">
+              <h3 id="guide-hub-sets-heading">세트별 보기</h3>
+              <p>세트를 고르면 그 세트의 프리뷰·세트 가이드·박스 분석을 모아 보여줍니다.</p>
+              {GUIDE_HUB_SET_KINDS.map(([kind, label]) => {
+                const kindSets = sets.filter((set) => set.kind === kind);
+                if (!kindSets.length) return null;
+                return (
+                  <div key={kind} className="renew-guide-hub-set-row" role="group" aria-label={`${label} 세트`}>
+                    <span>{label}</span>
+                    <div>
+                      {kindSets.map((set) => (
+                        <button key={set.id} type="button" className={set.id === selectedSet.id ? 'is-active' : ''} aria-pressed={set.id === selectedSet.id} onClick={() => setSelectedSetId(set.id)}>
+                          {set.code}{set.preview && !set.jp ? <small>발매 전</small> : null}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="renew-guide-hub-set-detail">
+                <strong>{selectedSet.code} · {selectedSet.name}</strong>
+                <nav aria-label={`${selectedSet.code} 가이드`}>
+                  {selectedSet.links.map((link) => <GuideHubLink key={link.href} link={link} />)}
+                </nav>
+              </div>
+            </section>
+          ) : null}
+
+          <div className="renew-guide-hub-grid">
+            {GUIDE_HUB_COLLECTIONS.map((collection) => {
+              const expanded = Boolean(expandedGroups[collection.id]);
+              const foldable = collection.links.length > GUIDE_HUB_VISIBLE_LINKS + 1;
+              const links = foldable && !expanded ? collection.links.slice(0, GUIDE_HUB_VISIBLE_LINKS) : collection.links;
+              return (
+                <section key={collection.id} className="renew-guide-hub-group">
+                  <h3>{collection.title}</h3>
+                  <p>{collection.description}</p>
+                  <nav aria-label={`${collection.title} 가이드`}>
+                    {links.map((link) => <GuideHubLink key={link.href} link={link} />)}
+                  </nav>
+                  {foldable ? (
+                    <button type="button" className="renew-guide-hub-more" aria-expanded={expanded} onClick={() => setExpandedGroups((current) => ({ ...current, [collection.id]: !expanded }))}>
+                      {expanded ? '접기' : `${collection.links.length}개 모두 보기`}
+                    </button>
+                  ) : null}
+                </section>
+              );
+            })}
+          </div>
+        </>
+      )}
       <footer className="renew-guide-hub-meta">
         <span>Card Pone 데이터 편집</span>
         <time dateTime={GUIDE_REVIEWED_AT}>검수 {GUIDE_REVIEWED_AT.replaceAll('-', '.')}</time>
@@ -8096,14 +8224,27 @@ function EditorialBars({ bars, label }) {
   );
 }
 
+// Tables longer than this show the first rows and fold the rest behind a button; every row stays in the page.
+const EDITORIAL_TABLE_FOLD_ROWS = 6;
+
 function EditorialTable({ table, label }) {
+  const foldable = table.rows.length > EDITORIAL_TABLE_FOLD_ROWS + 2;
+  const [expanded, setExpanded] = useState(false);
+  const folded = foldable && !expanded;
   return (
-    <div className={`renew-editorial-table${table.numeric ? " is-numeric" : ""}`} role="region" aria-label={label} tabIndex={0}>
-      <table>
-        <thead><tr>{table.columns.map((column) => <th key={column} scope="col">{column}</th>)}</tr></thead>
-        <tbody>{table.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => (index ? <td key={index}>{cell}</td> : <th key={index} scope="row">{cell}</th>))}</tr>)}</tbody>
-      </table>
-    </div>
+    <>
+      <div className={`renew-editorial-table${table.numeric ? " is-numeric" : ""}${folded ? " is-folded" : ""}`} role="region" aria-label={label} tabIndex={0}>
+        <table>
+          <thead><tr>{table.columns.map((column) => <th key={column} scope="col">{column}</th>)}</tr></thead>
+          <tbody>{table.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => (index ? <td key={index}>{cell}</td> : <th key={index} scope="row">{cell}</th>))}</tr>)}</tbody>
+        </table>
+      </div>
+      {foldable ? (
+        <button type="button" className="renew-editorial-table-more" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>
+          {expanded ? '접기' : `${table.rows.length}개 모두 보기`}
+        </button>
+      ) : null}
+    </>
   );
 }
 
@@ -8129,6 +8270,26 @@ function EditorialSectionBody({ section }) {
       ) : null}
     </>
   );
+}
+
+const GUIDE_RELATED_MIN = 4;
+
+// Hand-picked links come first; the rest are filled from the same hub topic, so a new guide
+// shows up under its neighbours without editing every related list.
+function getGuideRelatedLinks(related = []) {
+  const current = getAppPath(window.location.pathname);
+  const hubLinks = GUIDE_HUB_COLLECTIONS.flatMap((collection) => collection.links);
+  const hrefs = related.filter((href) => href !== current);
+  const topic = GUIDE_HUB_COLLECTIONS.find((collection) => collection.links.some((link) => link.href === current));
+  for (const link of topic?.links || []) {
+    if (hrefs.length >= GUIDE_RELATED_MIN) break;
+    if (link.href !== current && !hrefs.includes(link.href)) hrefs.push(link.href);
+  }
+  return hrefs.map((href) => {
+    const hubLink = hubLinks.find((link) => link.href === href);
+    const [title, description] = GUIDE_RELATED_LABELS[href] || (hubLink ? [hubLink.title, hubLink.meta] : [href, '관련 내용을 확인합니다.']);
+    return { href, title, description };
+  });
 }
 
 function RenewEditorialGuide({ guide, guideKey, headingId, cta, details: detailsOverride }) {
@@ -8196,10 +8357,9 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta, details: details
           <h2 id={`${guideKey}-related-heading`}>함께 확인할 가이드</h2>
         </div>
         <nav>
-          {details.related.filter((href) => Capacitor.getPlatform() !== 'android' || href !== '/news/supplies').map((href) => {
-            const [title, description] = GUIDE_RELATED_LABELS[href] || [href, '관련 내용을 확인합니다.'];
-            return <a key={href} href={href}><strong>{title}</strong><small>{description}</small><b aria-hidden="true">›</b></a>;
-          })}
+          {getGuideRelatedLinks(details.related.filter((href) => Capacitor.getPlatform() !== 'android' || href !== '/news/supplies')).map(({ href, title, description }) => (
+            <a key={href} href={href}><strong>{title}</strong><small>{description}</small><b aria-hidden="true">›</b></a>
+          ))}
         </nav>
       </section>
     </section>

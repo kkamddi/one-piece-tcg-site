@@ -1,0 +1,772 @@
+/*
+  Readability pass (2026-10). Loaded after renew.css and only overrides it, so removing this
+  import restores the previous look. Principles:
+  - one reading column for prose; tables and number strips may run wider
+  - no boxes inside boxes: sections are separated by space and a single rule
+  - sentence-case headings, no tracked all-caps eyebrows
+  - the Pone red is for links and the current state only
+*/
+.renew-app {
+  --rd-ink: #17191c;
+  --rd-body: #3d434b;
+  --rd-muted: #6b727c;
+  --rd-rule: #e6e8eb;
+  --rd-mist: #f5f6f7;
+  --rd-paper: #ffffff;
+  --rd-red: #c4291d;
+  --rd-prose: 720px;
+  --rd-wide: 920px;
+}
+.renew-app.is-dark {
+  --rd-ink: #f3f4f6;
+  --rd-body: #cfd4da;
+  --rd-muted: #9aa3ad;
+  --rd-rule: rgba(255, 255, 255, 0.12);
+  --rd-mist: rgba(255, 255, 255, 0.05);
+  --rd-paper: transparent;
+  --rd-red: #ff7a6b;
+}
+
+/* ---------- Guide article ---------- */
+.renew-app .renew-editorial-guide {
+  padding: 0 0 56px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.renew-app .renew-editorial-guide > * {
+  max-width: var(--rd-wide);
+  margin-left: 0;
+  margin-right: auto;
+}
+.renew-app .renew-editorial-guide-head {
+  max-width: var(--rd-wide);
+  padding: 8px 0 0;
+}
+.renew-app .renew-editorial-guide-head > a {
+  margin-bottom: 14px;
+  color: var(--rd-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.renew-app .renew-editorial-guide-head > a:hover { color: var(--rd-red); }
+.renew-app .renew-editorial-guide-head h1 {
+  max-width: var(--rd-prose);
+  margin: 0 0 14px;
+  color: var(--rd-ink);
+  font-size: clamp(24px, 2.6vw, 31px);
+  font-weight: 800;
+  line-height: 1.32;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+.renew-app .renew-editorial-guide-head > p {
+  max-width: var(--rd-prose);
+  margin: 0 0 6px;
+  color: var(--rd-body);
+  font-size: 16.5px;
+  font-weight: 500;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+.renew-app .renew-editorial-guide-head .renew-guide-editorial-meta {
+  margin-top: 14px;
+  color: var(--rd-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* Key numbers: the one strong element of an article */
+.renew-app .renew-editorial-guide > .renew-editorial-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0;
+  margin-top: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.renew-app .renew-editorial-guide > .renew-editorial-stats > div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  border: 0;
+  border-top: 3px solid var(--rd-ink);
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-editorial-guide > .renew-editorial-stats > div + div { border-left: 1px solid var(--rd-rule); }
+.renew-app .renew-editorial-guide > .renew-editorial-stats dd {
+  margin: 0;
+  color: var(--rd-ink);
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.renew-app .renew-editorial-guide > .renew-editorial-stats dt {
+  color: var(--rd-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+/* Contents: a quiet list, not a box */
+.renew-app .renew-editorial-guide-toc {
+  display: block;
+  margin-top: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-editorial-guide-toc > strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--rd-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+.renew-app .renew-editorial-guide-toc ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.renew-app .renew-editorial-guide-toc a {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 999px;
+  color: var(--rd-body);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.renew-app .renew-editorial-guide-toc a:hover,
+.renew-app .renew-editorial-guide-toc a:focus-visible { border-color: var(--rd-ink); color: var(--rd-ink); }
+
+/* Sections: one column, separated by space and a rule */
+.renew-app .renew-editorial-guide .renew-card-storage-grid {
+  display: block;
+  padding: 8px 0 0;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section {
+  margin: 0;
+  padding: 36px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  scroll-margin-top: 90px;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section + .renew-card-storage-section {
+  margin-top: 36px;
+  border-top: 1px solid var(--rd-rule);
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section h3 {
+  max-width: var(--rd-prose);
+  margin: 0 0 10px;
+  color: var(--rd-ink);
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section > p {
+  max-width: var(--rd-prose);
+  margin: 0 0 16px;
+  color: var(--rd-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section ul {
+  max-width: var(--rd-prose);
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section li {
+  position: relative;
+  margin: 0;
+  padding: 9px 0 9px 18px;
+  border-bottom: 1px solid var(--rd-rule);
+  color: var(--rd-body);
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section li:last-child { border-bottom: 0; }
+.renew-app .renew-editorial-guide .renew-card-storage-section li::before {
+  content: "";
+  position: absolute;
+  top: 19px;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rd-ink);
+}
+.renew-app .renew-editorial-guide .renew-card-storage-section .renew-editorial-stats { margin: 4px 0 12px; }
+.renew-app .renew-editorial-guide .renew-editorial-guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  max-width: var(--rd-prose);
+  margin: 14px 0 0;
+}
+.renew-app .renew-editorial-guide .renew-editorial-guide-links a {
+  color: var(--rd-red);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Tables: quiet header, tabular numbers, long ones fold */
+.renew-app .renew-editorial-guide .renew-editorial-table {
+  margin: 4px 0 4px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 10px;
+  background: var(--rd-paper);
+}
+.renew-app .renew-editorial-guide .renew-editorial-table th,
+.renew-app .renew-editorial-guide .renew-editorial-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--rd-rule);
+  color: var(--rd-body);
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.renew-app .renew-editorial-guide .renew-editorial-table thead th {
+  background: var(--rd-mist);
+  color: var(--rd-muted);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.renew-app .renew-editorial-guide .renew-editorial-table tbody th {
+  color: var(--rd-ink);
+  font-weight: 700;
+}
+.renew-app .renew-editorial-guide .renew-editorial-table.is-folded tbody tr:nth-child(n + 7) { display: none; }
+.renew-app .renew-editorial-table-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 999px;
+  background: var(--rd-paper);
+  color: var(--rd-ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.renew-app .renew-editorial-table-more:hover,
+.renew-app .renew-editorial-table-more:focus-visible { border-color: var(--rd-ink); }
+
+/* Checklist, FAQ, call to action, related */
+.renew-app .renew-editorial-guide .renew-card-storage-checklist {
+  margin-top: 44px;
+  padding: 22px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--rd-mist);
+}
+.renew-app .renew-editorial-guide .renew-card-storage-checklist h3 {
+  margin: 0 0 8px;
+  color: var(--rd-ink);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-checklist li {
+  color: var(--rd-body);
+  font-size: 15px;
+  font-weight: 600;
+}
+.renew-app .renew-editorial-guide-faq,
+.renew-app .renew-editorial-guide-related {
+  margin-top: 44px;
+  padding: 0;
+  border-top: 0;
+}
+.renew-app .renew-editorial-guide-faq h2,
+.renew-app .renew-editorial-guide-related h2 {
+  margin: 0 0 12px;
+  color: var(--rd-ink);
+  font-size: 19px;
+  font-weight: 800;
+}
+.renew-app .renew-editorial-guide-faq > div { gap: 0; border-top: 1px solid var(--rd-rule); }
+.renew-app .renew-editorial-guide-faq details {
+  border: 0;
+  border-bottom: 1px solid var(--rd-rule);
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-editorial-guide-faq summary {
+  padding: 16px 4px;
+  color: var(--rd-ink);
+  font-size: 15.5px;
+  font-weight: 700;
+}
+.renew-app .renew-editorial-guide-faq p {
+  max-width: var(--rd-prose);
+  padding: 0 4px 18px;
+  color: var(--rd-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.75;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 44px;
+  padding: 22px 24px;
+  border: 1px solid var(--rd-ink);
+  border-radius: 12px;
+  background: transparent;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-cta span { display: none; }
+.renew-app .renew-editorial-guide .renew-card-storage-cta strong {
+  color: var(--rd-ink);
+  font-size: 17px;
+  font-weight: 800;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-cta p {
+  margin: 4px 0 0;
+  color: var(--rd-body);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.renew-app .renew-editorial-guide .renew-card-storage-cta > a {
+  flex: none;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: var(--rd-ink);
+  color: var(--rd-paper, #fff);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.renew-app.is-dark .renew-editorial-guide .renew-card-storage-cta > a { color: #17191c; }
+.renew-app .renew-editorial-guide-related > div span { display: none; }
+.renew-app .renew-editorial-guide-related nav {
+  gap: 0;
+  border: 0;
+  border-top: 1px solid var(--rd-rule);
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-editorial-guide-related nav a {
+  padding: 15px 32px 15px 4px;
+  border-bottom: 1px solid var(--rd-rule);
+  background: transparent;
+}
+.renew-app .renew-editorial-guide-related nav strong { color: var(--rd-ink); font-size: 15px; font-weight: 700; }
+.renew-app .renew-editorial-guide-related nav small { color: var(--rd-muted); font-size: 13px; font-weight: 500; }
+
+@media (max-width: 720px) {
+  .renew-app .renew-editorial-guide-head,
+  .renew-app .renew-editorial-guide > .renew-editorial-stats,
+  .renew-app .renew-editorial-guide-toc,
+  .renew-app .renew-editorial-guide .renew-card-storage-grid,
+  .renew-app .renew-editorial-guide-faq,
+  .renew-app .renew-editorial-guide-related { padding-left: 16px; padding-right: 16px; }
+  .renew-app .renew-editorial-guide > .renew-editorial-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .renew-app .renew-editorial-guide > .renew-editorial-stats > div { padding: 14px 12px 14px 0; }
+  .renew-app .renew-editorial-guide > .renew-editorial-stats > div + div { border-left: 0; }
+  .renew-app .renew-editorial-guide .renew-card-storage-cta { flex-direction: column; align-items: flex-start; margin-left: 16px; margin-right: 16px; }
+  .renew-app .renew-editorial-guide .renew-card-storage-checklist { margin-left: 16px; margin-right: 16px; }
+  .renew-app .renew-editorial-guide-related nav { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .renew-app * { scroll-behavior: auto !important; }
+}
+
+/* ---------- Header: between tablet and wide desktop the side columns are too narrow for the actions ---------- */
+@media (min-width: 901px) and (max-width: 1320px) {
+  .renew-app .renew-nav { grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 24px; }
+  .renew-app .renew-logo { width: clamp(160px, 15vw, 210px); }
+  .renew-app .renew-tabs { gap: clamp(10px, 1.2vw, 18px); }
+  .renew-app .renew-actions { gap: 8px; }
+}
+
+/* ---------- Guide hub: group titles carry the meaning, so the all-caps eyebrows go ---------- */
+.renew-app .renew-guide-hub-group > span { display: none; }
+.renew-app .renew-guide-hub-group h3 {
+  margin: 0 0 6px;
+  color: var(--rd-ink);
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.renew-app .renew-guide-hub-group > p {
+  margin: 0 0 10px;
+  color: var(--rd-muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.renew-app .renew-news-guide-panel .renew-guide-hub-group nav a {
+  gap: 2px;
+  padding: 14px 32px 14px 0;
+  border-bottom-color: var(--rd-rule);
+}
+.renew-app .renew-guide-hub-group nav strong { color: var(--rd-ink); font-size: 15.5px; font-weight: 700; }
+.renew-app .renew-guide-hub-group nav small { color: var(--rd-muted); font-size: 13px; font-weight: 500; }
+.renew-app .renew-guide-hub-group nav b { color: var(--rd-muted); font-weight: 500; }
+@media (hover: hover) {
+  .renew-app .renew-news-guide-panel .renew-guide-hub-group nav a:hover { background: transparent; }
+  .renew-app .renew-guide-hub-group nav a:hover strong { color: var(--rd-red); }
+}
+.renew-app .renew-guide-hub-meta { color: var(--rd-muted); font-size: 12.5px; font-weight: 600; }
+
+/* ---------- Home ---------- */
+/* The ad slot is a slim strip until a real banner fills it, so it no longer outweighs the content below. */
+.renew-app .renew-home-promo { margin-top: 18px; }
+.renew-app .renew-home-promo-viewport {
+  border: 0;
+  border-radius: 10px;
+  background: var(--rd-mist);
+  box-shadow: none;
+}
+.renew-app .renew-home-promo-slide,
+.renew-app .renew-home-promo-slide.is-advertising {
+  gap: 16px;
+  min-height: 0;
+  padding: 10px 16px;
+  color: var(--rd-muted);
+  background: transparent;
+}
+.renew-app .renew-home-promo-slide strong { color: var(--rd-muted); font-size: 13px; font-weight: 600; }
+.renew-app .renew-home-promo-slide a {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--rd-body);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--rd-rule);
+  text-underline-offset: 3px;
+}
+.renew-app .renew-home-promo-slide a svg { width: 13px; height: 13px; }
+.renew-app .renew-home-calendar-head small { display: none; }
+.renew-app .renew-ad-inquiry-copy small { display: none; }
+.renew-app .renew-ad-inquiry-copy strong { color: var(--rd-muted); font-size: 13.5px; font-weight: 600; }
+.renew-app .renew-ad-inquiry { padding-top: 10px; padding-bottom: 10px; }
+
+/* ---------- Prices: product names are long English titles, so they get a lighter weight and a 3-line cap ---------- */
+.renew-app .renew-box-gallery .renew-box-gallery-info small { color: var(--rd-muted); font-size: 11.5px; font-weight: 600; }
+.renew-app .renew-box-gallery .renew-box-gallery-info strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  color: var(--rd-ink);
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.renew-app .renew-box-gallery .renew-box-gallery-info b { font-size: 15px; font-weight: 800; }
+
+/* ---------- Cards: the category list and grade groups sit inside panels already, so they lose their own boxes ---------- */
+.renew-app .renew-catalog-side .renew-category-row {
+  min-height: 46px;
+  margin-top: 0;
+  padding: 0 10px 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--rd-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--rd-ink);
+  font-weight: 700;
+}
+.renew-app .renew-catalog-side .renew-category-row.is-open { border-radius: 8px; border-bottom-color: transparent; background: var(--rd-mist); font-weight: 800; }
+.renew-app .renew-catalog-side .renew-category-row:hover { border-color: var(--rd-rule); background: var(--rd-mist); }
+.renew-app .renew-catalog-main .renew-grade-section {
+  border: 0;
+  border-top: 1px solid var(--rd-rule);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.renew-app .renew-catalog-main .renew-grade-section header { border-bottom: 0; padding-left: 2px; padding-right: 2px; }
+.renew-app .renew-catalog-main .renew-grade-section h2 { color: var(--rd-ink); font-size: 19px; font-weight: 800; }
+.renew-app .renew-catalog-main .renew-grade-section header span { color: var(--rd-muted); font-weight: 600; }
+.renew-app .renew-catalog-side .renew-catalog-lineups { border-top: 0; }
+
+/* ---------- Home dashboard: the weekly report spans the full width so the right column is no longer empty ---------- */
+.renew-app .renew-home .renew-dashboard > .renew-home-report {
+  grid-column: 1 / -1;
+  gap: 18px;
+  padding: 24px 0 0;
+  border: 0;
+  border-top: 1px solid var(--rd-rule);
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-home .renew-home-report-head .renew-card-title { color: var(--rd-ink); font-size: 21px; font-weight: 800; }
+.renew-app .renew-home .renew-home-report-head small { color: var(--rd-muted); font-size: 13px; font-weight: 600; }
+/* KPI tiles become one ruled strip, like the guide number strip. */
+.renew-app .renew-home .renew-home-report-kpis { gap: 0; border-top: 3px solid var(--rd-ink); }
+.renew-app .renew-home .renew-home-report-kpis > div {
+  gap: 4px;
+  padding: 14px 16px 14px 0;
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-home .renew-home-report-kpis > div + div { padding-left: 16px; border-left: 1px solid var(--rd-rule); }
+.renew-app .renew-home .renew-home-report-kpis small { color: var(--rd-muted); font-size: 12.5px; font-weight: 600; }
+.renew-app .renew-home .renew-home-report-kpis strong { color: var(--rd-ink); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.renew-app .renew-home .renew-home-report-kpis .market-report-change { font-size: 13px; font-weight: 700; }
+.renew-app .renew-home .renew-home-report-movers { gap: 20px 40px; }
+.renew-app .renew-home .renew-home-report-movers h3 { margin-bottom: 4px; font-size: 14px; font-weight: 800; }
+.renew-app .renew-home .renew-home-report-movers button { padding: 8px 0; border-bottom: 1px solid var(--rd-rule); }
+.renew-app .renew-home .renew-home-report-movers button:last-child { border-bottom: 0; }
+@media (hover: hover) {
+  .renew-app .renew-home .renew-home-report-movers button:hover strong { color: var(--rd-red); }
+}
+@media (max-width: 720px) {
+  .renew-app .renew-home .renew-home-report-kpis > div { padding-right: 10px; }
+  .renew-app .renew-home .renew-home-report-kpis > div + div { padding-left: 10px; }
+  .renew-app .renew-home .renew-home-report-kpis strong { font-size: 19px; }
+  .renew-app .renew-home .renew-home-report-movers { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Prices gallery: products sit on the panel without their own boxes; the image well carries the shape ---------- */
+.renew-app .renew-box-gallery .renew-box-market-grid { align-items: start; gap: 28px 20px; }
+.renew-app .renew-box-gallery .renew-box-market-card,
+.renew-app.is-dark .renew-box-gallery .renew-box-market-card {
+  gap: 10px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.renew-app .renew-box-gallery article.renew-box-market-card > a { gap: 12px; }
+.renew-app .renew-box-gallery .renew-box-thumb {
+  padding: 14px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: var(--rd-mist);
+}
+.renew-app .renew-box-gallery .renew-box-gallery-info { gap: 5px; }
+.renew-app .renew-box-gallery .renew-box-gallery-info b { padding-top: 2px; color: var(--rd-ink); }
+@media (hover: hover) {
+  .renew-app .renew-box-gallery .renew-box-market-card:hover { border: 0; box-shadow: none; transform: none; }
+  .renew-app .renew-box-gallery article.renew-box-market-card > a:hover strong { color: var(--rd-red); }
+}
+.renew-app .renew-box-gallery .renew-box-portfolio-add {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 999px;
+  color: var(--rd-body);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* ---------- Prices, card tab: same treatment, and the seven info lines are tightened into one block ---------- */
+.renew-app .renew-card-gallery .renew-market-card-list { align-items: start; gap: 28px 20px; }
+.renew-app .renew-card-gallery .renew-market-card-preview,
+.renew-app.is-dark .renew-card-gallery .renew-market-card-preview {
+  gap: 12px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.renew-app .renew-card-gallery .renew-market-card-preview-thumb {
+  padding: 14px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: var(--rd-mist);
+}
+.renew-app .renew-card-gallery .renew-card-gallery-info { gap: 3px; }
+.renew-app .renew-card-gallery .renew-card-gallery-info small { color: var(--rd-muted); font-size: 12px; font-weight: 600; }
+.renew-app .renew-card-gallery .renew-card-gallery-info strong { margin: 2px 0 1px; color: var(--rd-ink); font-size: 15px; font-weight: 700; }
+.renew-app .renew-card-gallery .renew-card-gallery-info > span:not(.renew-card-gallery-variant) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  color: var(--rd-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.renew-app .renew-card-gallery .renew-card-gallery-info .renew-card-gallery-variant { font-size: 12px; font-weight: 700; }
+.renew-app .renew-card-gallery .renew-card-gallery-info b { padding-top: 6px; color: var(--rd-ink); font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+@media (hover: hover) {
+  .renew-app .renew-card-gallery .renew-market-card-preview:hover { border: 0; box-shadow: none; transform: none; }
+  .renew-app .renew-card-gallery .renew-market-card-preview:hover strong { color: var(--rd-red); }
+}
+
+/* ---------- Cards: price lines read as label + number instead of two tinted chips per tile ---------- */
+.renew-app .renew-card-tile .renew-card-body { gap: 2px; padding: 10px 10px 10px; }
+.renew-app .renew-card-tile .renew-card-code-link { color: var(--rd-muted); font-size: 12.5px; }
+.renew-app .renew-card-tile .renew-card-price-row { gap: 0; margin-top: 2px; }
+.renew-app .renew-card-tile .renew-card-price-chip,
+.renew-app .renew-card-tile .renew-card-price-chip:first-child,
+.renew-app .renew-card-tile .renew-card-price-chip:nth-child(2) {
+  padding: 6px 0;
+  border-radius: 0;
+  background: transparent;
+}
+.renew-app .renew-card-tile .renew-card-price-chip + .renew-card-price-chip { border-top: 1px solid var(--rd-rule); }
+.renew-app .renew-card-tile .renew-card-price-chip em,
+.renew-app .renew-card-tile .renew-card-price-chip:first-child em,
+.renew-app .renew-card-tile .renew-card-price-chip:nth-child(2) em { color: var(--rd-muted); font-size: 12px; font-weight: 600; }
+.renew-app .renew-card-tile .renew-card-price-chip b,
+.renew-app .renew-card-tile .renew-card-price-chip:first-child b,
+.renew-app .renew-card-tile .renew-card-price-chip:nth-child(2) b { color: var(--rd-ink); font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.renew-app .renew-card-tile .renew-card-actions { margin-top: 6px; }
+.renew-app .renew-card-tile .renew-card-actions button:not(.is-owned):not(.is-wished) {
+  border: 1px solid var(--rd-rule);
+  background: transparent;
+  color: var(--rd-muted);
+  font-weight: 700;
+}
+.renew-app .renew-card-tile .renew-card-actions button:not(.is-owned):not(.is-wished):hover { border-color: var(--rd-ink); color: var(--rd-ink); }
+
+/* Series box price: a quiet band instead of a bordered box inside the panel. */
+.renew-app .renew-catalog-main .renew-catalog-box { border: 0; border-radius: 10px; background: var(--rd-mist); }
+.renew-app .renew-catalog-main .renew-catalog-box img { background: var(--rd-paper); }
+
+/* Rarity chips: smaller so the filter block takes less room above the cards. */
+.renew-app .renew-catalog-main .renew-rarity-chip-group button { min-height: 32px; padding: 0 13px; font-size: 13px; }
+
+/* ---------- Guide hub finder: search, popular guides, set picker, folded topic lists ---------- */
+.renew-app .renew-guide-hub { gap: 32px; }
+.renew-app .renew-guide-hub-finder { display: grid; gap: 12px; }
+.renew-app .renew-guide-hub-search input {
+  box-sizing: border-box;
+  width: min(100%, 560px);
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 999px;
+  background: var(--rd-paper);
+  color: var(--rd-ink);
+  font: inherit;
+  font-size: 15px;
+}
+.renew-app .renew-guide-hub-search input::placeholder { color: var(--rd-muted); }
+.renew-app .renew-guide-hub-search input:focus-visible { outline: 2px solid var(--rd-ink); outline-offset: 1px; }
+.renew-app .renew-guide-hub-popular { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.renew-app .renew-guide-hub-popular span { color: var(--rd-muted); font-size: 13px; font-weight: 600; }
+.renew-app .renew-guide-hub-popular a {
+  color: var(--rd-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--rd-rule);
+  text-underline-offset: 4px;
+}
+.renew-app .renew-guide-hub-popular a:hover { color: var(--rd-red); text-decoration-color: currentColor; }
+
+.renew-app :is(.renew-guide-hub-sets, .renew-guide-hub-results) { padding-top: 20px; border-top: 1px solid var(--rd-rule); }
+.renew-app :is(.renew-guide-hub-sets, .renew-guide-hub-results) h3 { margin: 0 0 6px; color: var(--rd-ink); font-size: 21px; font-weight: 800; letter-spacing: -0.015em; }
+.renew-app :is(.renew-guide-hub-sets, .renew-guide-hub-results) > p { margin: 0 0 14px; color: var(--rd-muted); font-size: 14px; font-weight: 500; line-height: 1.6; }
+.renew-app .renew-guide-hub-set-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: start; gap: 10px; margin-top: 8px; }
+.renew-app .renew-guide-hub-set-row > span { padding-top: 7px; color: var(--rd-muted); font-size: 13px; font-weight: 600; }
+.renew-app .renew-guide-hub-set-row > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.renew-app .renew-guide-hub-set-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rd-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.renew-app .renew-guide-hub-set-row button small { color: var(--rd-red); font-size: 11px; font-weight: 700; }
+.renew-app .renew-guide-hub-set-row button:hover { border-color: var(--rd-ink); }
+.renew-app .renew-guide-hub-set-row button.is-active { border-color: var(--rd-ink); background: var(--rd-ink); color: var(--rd-paper); }
+.renew-app.is-dark .renew-guide-hub-set-row button.is-active { color: #17191c; }
+.renew-app .renew-guide-hub-set-row button.is-active small { color: inherit; }
+.renew-app .renew-guide-hub-set-row button:focus-visible { outline: 2px solid var(--rd-ink); outline-offset: 2px; }
+.renew-app .renew-guide-hub-set-detail { margin-top: 18px; padding: 16px 18px 6px; border-radius: 10px; background: var(--rd-mist); }
+.renew-app .renew-guide-hub-set-detail > strong { display: block; color: var(--rd-ink); font-size: 16px; font-weight: 800; }
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; margin-top: 6px; }
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav a {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 13px 28px 13px 0;
+  border-bottom: 1px solid var(--rd-rule);
+  color: var(--rd-ink);
+  text-decoration: none;
+}
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav strong { font-size: 15px; font-weight: 700; }
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav small { color: var(--rd-muted); font-size: 13px; font-weight: 500; }
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav b { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); color: var(--rd-muted); font-weight: 500; }
+@media (hover: hover) {
+  .renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav a:hover strong { color: var(--rd-red); }
+}
+.renew-app .renew-guide-hub-more {
+  margin-top: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--rd-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rd-ink);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.renew-app .renew-guide-hub-more:hover { border-color: var(--rd-ink); }
+@media (max-width: 720px) {
+  .renew-app .renew-guide-hub-set-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .renew-app .renew-guide-hub-set-row > span { padding-top: 0; }
+  .renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav { grid-template-columns: minmax(0, 1fr); }
+  .renew-app .renew-guide-hub-set-detail { padding: 14px 14px 4px; }
+}
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav a:last-child,
+.renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav a:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+@media (max-width: 720px) {
+  .renew-app :is(.renew-guide-hub-set-detail, .renew-guide-hub-results) nav a:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid var(--rd-rule); }
+}
+@media (max-width: 720px) {
+  .renew-app .renew-guide-hub-set-row > div { flex-wrap: nowrap; margin-right: -16px; padding: 2px 16px 4px 0; overflow-x: auto; scrollbar-width: none; }
+  .renew-app .renew-guide-hub-set-row > div::-webkit-scrollbar { display: none; }
+  .renew-app .renew-guide-hub-set-row button { flex: 0 0 auto; }
+}
