@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { getSeriesGuideEntries, seriesGuideSourcePaths } from './seriesGuideSeo.js';
 import { getBoxRecommendationEntries, boxRecommendationSourcePaths } from './boxRecommendationSeo.js';
 import { getMarketReportEntries } from './marketReportSeo.js';
+import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH } from '../lib/booster-preview.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outputPath = path.join(rootDir, 'public', 'sitemap.xml');
@@ -62,8 +63,6 @@ const paths = [
   '/guide/shops/gyeonggi',
   '/guide/shops/busan',
   '/guide/shops/gyeongnam',
-  '/guide/preview/eb-05',
-  '/guide/preview/op-18',
   '/guide/collection',
   '/guide/collection/start',
   '/guide/collection/manga',
@@ -100,7 +99,8 @@ const boxRecommendationPaths = getBoxRecommendationEntries()
   .map((entry) => entry.pathname);
 const marketReportPaths = getMarketReportEntries().map((entry) => entry.pathname);
 // The box recommendation entries repeat the hub paths listed above, so keep each URL once.
-const entries = [...new Set([...paths, ...seriesGuidePaths, ...boxRecommendationPaths, ...marketReportPaths])].map((urlPath) => {
+const previewPaths = BOOSTER_PREVIEWS.map((preview) => `${BOOSTER_PREVIEW_PATH}/${preview.slug}`);
+const entries = [...new Set([...paths, ...previewPaths, ...seriesGuidePaths, ...boxRecommendationPaths, ...marketReportPaths])].map((urlPath) => {
   const priority = urlPath === '/' ? '1.0' : urlPath.split('/').filter(Boolean).length === 1 ? '0.9' : '0.8';
   return [
     '  <url>',

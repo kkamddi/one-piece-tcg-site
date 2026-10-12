@@ -71,9 +71,12 @@ test('preview pages are routed, listed, searchable, pre-rendered and in the site
   for (const preview of BOOSTER_PREVIEWS) {
     const path = `/guide/preview/${preview.slug}`;
     assert.equal(getBoosterPreview(path), preview);
-    assert.match(sitemap, new RegExp(`'${path}'`));
+    if (preview.autoDrafted) continue;
     assert.match(search, new RegExp(`href: '${path}'`));
   }
+  // Every listed preview, hand-made or published from a draft, reaches the sitemap and site search.
+  assert.match(sitemap, /BOOSTER_PREVIEWS\.map\(\(preview\) => `\$\{BOOSTER_PREVIEW_PATH\}\/\$\{preview\.slug\}`\)/);
+  assert.match(search, /BOOSTER_PREVIEWS\.filter\(preview => preview\.autoDrafted\)/);
   const entries = getBoosterPreviewEntries();
   assert.deepEqual(entries.map(entry => entry.pathname), ['/guide/preview/eb-05', '/guide/preview/op-18']);
   assert.match(entries[0].seo.sections[1].heading, /^공개된 카드 \d+장$/);

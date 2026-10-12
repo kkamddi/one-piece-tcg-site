@@ -10,6 +10,7 @@ import { getGlossaryEntries } from './glossarySeo.js';
 import { getLeaderCardsEntries } from './leaderCardsSeo.js';
 import { getColorsEntries } from './colorsSeo.js';
 import { GUIDE_FAQ_PATHS } from '../lib/guide-article-faq.js';
+import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH } from '../lib/booster-preview.js';
 
 const read = file => readFile(new URL(file, import.meta.url), 'utf8');
 const graph = html => [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].flatMap(m => { const o = JSON.parse(m[1]); return o['@graph'] || [o]; });
@@ -18,8 +19,9 @@ test('llms.txt only links to pages the site publishes', async () => {
   const [llms, sitemap] = await Promise.all([read('../public/llms.txt'), read('./generatePrimarySitemap.js')]);
   const paths = [...llms.matchAll(/\]\(https:\/\/www\.optcgkorea\.com([^)]*)\)/g)].map(m => m[1]);
   assert.ok(paths.length >= 15);
-  // The weekly report hub is added to the sitemap by scripts/marketReportSeo.js.
-  for (const path of paths) assert.ok(sitemap.includes(`'${path}'`) || path === '/market-report', path);
+  // The weekly report hub is added to the sitemap by scripts/marketReportSeo.js; previews come from BOOSTER_PREVIEWS.
+  const previewPaths = new Set(BOOSTER_PREVIEWS.map((preview) => `${BOOSTER_PREVIEW_PATH}/${preview.slug}`));
+  for (const path of paths) assert.ok(sitemap.includes(`'${path}'`) || path === '/market-report' || previewPaths.has(path), path);
 });
 
 const NEW_GUIDE_SEO = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getLeaderCardsEntries(), ...getColorsEntries()].map((entry) => [entry.pathname, entry.seo]));

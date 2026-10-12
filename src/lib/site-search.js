@@ -1,3 +1,5 @@
+import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH } from '../../lib/booster-preview.js';
+
 export const SEARCH_PAGES = [
   { title: '수집 방향 가이드', href: '/guide/collection/start', keywords: ['입문', '초보', '수집 추천', '뭐 모으지', '뭐 모아야', '무엇을 모아야', '수집 방향'], description: '수집 목표와 카드 버전, 구매 전 확인할 기준' },
   { title: '망가 카드 컬렉션', href: '/guide/collection/manga', keywords: ['망가', '만화카드', '만화 카드', '망가레어', '코믹 패러렐', 'manga'], description: '시리즈별 망가 카드 이미지와 카드번호' },
@@ -34,7 +36,14 @@ export const SEARCH_PAGES = [
   { title: '부산 원피스카드 매장', href: '/guide/shops/busan', keywords: ['부산', '동래', '서면', '부산진', '부산 매장'], description: '부산 공식 공인점포·취급점포 목록' },
   { title: '경남 원피스카드 매장', href: '/guide/shops/gyeongnam', keywords: ['경남', '창원', '김해', '양산', '진주', '경남 매장'], description: '경남 공식 공인점포·취급점포 목록' },
   { title: '신작·발매 일정 가이드', href: '/guide/release-schedule', keywords: ['발매', '신작', '출시', '한국판', '일본판', '부스터'], description: '일본판·한국판 발매일과 한국 발매 간격' },
-  { title: '도감 사용 가이드', href: '/guide/card-catalog', keywords: ['도감', '검색', '카드번호', '일련번호'], description: '카드 검색과 수집 목록 사용 방법' }
+  { title: '도감 사용 가이드', href: '/guide/card-catalog', keywords: ['도감', '검색', '카드번호', '일련번호'], description: '카드 검색과 수집 목록 사용 방법' },
+  // Previews published from automatic drafts; the hand-made ones above carry their own keywords.
+  ...BOOSTER_PREVIEWS.filter(preview => preview.autoDrafted).map(preview => ({
+    title: preview.title,
+    href: `${BOOSTER_PREVIEW_PATH}/${preview.slug}`,
+    keywords: [preview.code, preview.code.replace('-', ''), preview.setTitle, '신작', '프리뷰', '공개 카드'].filter(Boolean),
+    description: `${preview.code} 발매일·구성·공개 카드`
+  }))
 ].map(item => ({ ...item, type: 'guides', id: item.href }));
 
 export const normalizeSiteSearch = value => String(value || '').normalize('NFKC').toLowerCase().replace(/[\s\u2010-\u2015\u2212._・·-]+/g, '').trim();

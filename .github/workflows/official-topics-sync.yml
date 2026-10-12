@@ -25,14 +25,35 @@ jobs:
       - name: Sync official topics
         run: node scripts/syncOfficialTopics.js
 
+      # A new JP booster's product page becomes a hidden preview draft for a person to review.
+      - name: Draft previews for new boosters
+        id: preview
+        continue-on-error: true
+        run: node scripts/draftBoosterPreview.mjs
+
       - name: Commit topic updates
         run: |
-          if git diff --quiet -- src/data/topics.json; then
+          if git diff --quiet -- src/data/topics.json src/data/booster-previews.auto.js; then
             echo "No topic updates."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/topics.json
+          git add src/data/topics.json src/data/booster-previews.auto.js
           git commit -m "chore: sync official topics"
           git push
+
+      - name: Notify new preview drafts
+        if: steps.preview.outputs.drafted != ''
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRAFTED: ${{ steps.preview.outputs.drafted }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            exit 0
+          fi
+          TEXT=$(printf '[Card Pone] 신작 프리뷰 초안이 생겼습니다 (사이트에는 아직 안 보임)\n%s\n확인 후 게시하려면 Claude에게 "프리뷰 게시"라고 요청하세요.' "$DRAFTED")
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${TEXT}" > /dev/null

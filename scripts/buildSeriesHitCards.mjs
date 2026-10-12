@@ -167,7 +167,7 @@ export function buildSeriesHitCards({ payload, marketCards, cardMarketLinks, cat
     const box = boxIds.has(id) ? getBoxPrice(boxIds.get(id), trades, boxPrices) : null;
     if (!rows.length && !box) continue;
     sets[id] = {
-      hitCards: rows.slice(0, HIT_CARD_LIMIT).map(({ apparelId, group, ...card }) => card),
+      hitCards: rows.slice(0, HIT_CARD_LIMIT).map(({ group, ...card }) => card),
       counts: {
         manga: rows.filter((row) => row.group === '망가').length,
         sp: rows.filter((row) => row.group === 'SP').length,
