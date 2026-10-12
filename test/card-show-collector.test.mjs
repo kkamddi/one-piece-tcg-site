@@ -99,10 +99,11 @@ test('oversized responses are rejected', async () => {
   assert.ok(report.results.every(item => item.issues.includes('response_too_large')));
 });
 
-test('schedule has no push trigger, repository write permission, publication, or deploy command', async () => {
+test('schedule commits only the generated card show list and deploys through the shared workflow', async () => {
   const workflow = await readFile('.github/workflows/card-show-collector.yml', 'utf8');
   assert.match(workflow, /43 0 \* \* \*/);
-  assert.match(workflow, /contents: read/);
   assert.match(workflow, /CARD_SHOW_COLLECTOR_ENABLED == 'true'/);
-  assert.doesNotMatch(workflow, /\bpush:|contents: write|git push|wrangler|deploy-production/);
+  assert.match(workflow, /git add src\/data\/card-show-events\.auto\.js\n/);
+  assert.match(workflow, /uses: \.\/\.github\/workflows\/deploy-production\.yml/);
+  assert.doesNotMatch(workflow, /\bpush:|wrangler|git add -A|git add \./);
 });

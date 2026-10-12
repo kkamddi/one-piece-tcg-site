@@ -899,7 +899,7 @@ const STATIC_EDITORIAL_GUIDES = {
   [EVENTS_PATH]: {
     key: 'events', editorial: () => buildEventsEditorial(...getEventsArgs()), seo: EVENTS_SEO, faq: () => getEventsFaq(...getEventsArgs()),
     checklistTitle: '참가 전 체크리스트', related: ['/guide/rules', '/guide/collection/flagship', '/guide/shops'],
-    cta: { eyebrow: '매장 찾기', title: '대회가 열리는 매장을 찾으려면', description: '가까운 공인점포와 취급점포를 지역별로 찾습니다.', href: '/shops', label: '구매처 찾기' }
+    cta: { eyebrow: '대회 응모', title: '대회 일정과 응모는 PLAYGO 앱에서', description: '매장별 대회 일정 확인, 사전 응모와 당일 QR 체크인은 반다이남코코리아 PLAYGO 앱에서 합니다.', href: 'https://playgo.bandainamcokorea.co.kr/', label: 'PLAYGO 안내 보기' }
   },
   [RULES_PATH]: {
     key: 'rules', editorial: RULES_EDITORIAL, seo: RULES_SEO, faq: GUIDE_ARTICLE_FAQ.rules,
@@ -8188,7 +8188,7 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta, details: details
           <strong>{cta.title}</strong>
           <p>{cta.description}</p>
         </div>
-        <a href={cta.href}>{cta.label}</a>
+        <a href={cta.href} {...(/^https?:/.test(cta.href) ? { target: '_blank', rel: 'noreferrer' } : {})}>{cta.label}</a>
       </div> : null}
       <section className="renew-editorial-guide-related" aria-labelledby={`${guideKey}-related-heading`}>
         <div>

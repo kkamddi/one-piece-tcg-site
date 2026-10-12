@@ -1,7 +1,10 @@
-// Curated only: require an organizer's dated announcement before adding an event.
+import { autoCardShowEvents } from './card-show-events.auto.js';
+
+// Curated: an organizer's dated announcement, checked by hand. Shows that organizers publish as
+// schema.org Events are added daily in card-show-events.auto.js; a curated entry wins on the same id.
 // Fields: id, title, date (YYYY-MM-DD), endDate, locale, venue, url, sourceLabel,
 // verifiedAt (YYYY-MM-DD), status (confirmed/cancelled). Do not guess a date.
-export const cardShowEvents = [{
+const curatedCardShowEvents = [{
   id: 'cardshow-seoul-card-festa-20261114', title: 'Seoul Card Festa 2026',
   titleKo: '제3회 서울카드페스타 2026', date: '2026-11-14', locale: 'KR',
   venue: '고양 KINTEX 제2전시장 6 Hall A', region: 'capital', hours: '10:00–18:00 KST',
@@ -22,6 +25,10 @@ export const cardShowEvents = [{
   posterUrl: 'https://collectiblecon.xyz/kv/ticket-stage_en.png',
   posterSourceUrl: 'https://collectiblecon.xyz/', posterVerifiedAt: '2026-09-29'
 }];
+export const cardShowEvents = [
+  ...curatedCardShowEvents,
+  ...autoCardShowEvents.filter((show) => !curatedCardShowEvents.some((curated) => curated.id === show.id))
+];
 export const cardShowSources = [
   { name: '서울카드페스타', url: 'https://seoulcardfesta.com/' },
   { name: 'Seoul Collectibles Show', url: 'https://www.seoulcollectiblesshow.com/28' }
