@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 function normalizeAuthApiError(message) {
   const raw = String(message ?? '').trim();
@@ -56,6 +56,7 @@ export function signupWithProfile(payload) {
 export async function signInWithIdentifier(identifier, password) {
   const value = String(identifier ?? '').trim();
   const localEmail = getLocalPreviewEmail(value);
+  const supabase = await getSupabase();
 
   if (localEmail) {
     const { data, error } = await supabase.auth.signInWithPassword({ email: localEmail, password });
@@ -76,6 +77,7 @@ export async function signInWithIdentifier(identifier, password) {
 }
 
 export async function deleteMyAccount() {
+  const supabase = await getSupabase();
   const { data } = supabase ? await supabase.auth.getSession() : { data: null };
   const token = data?.session?.access_token || '';
   if (!token) throw new Error('로그인이 필요합니다.');

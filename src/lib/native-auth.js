@@ -1,7 +1,7 @@
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
-import { supabase } from './supabase';
+import { getSupabase, hasSupabaseAuthConfig } from './supabase';
 
 const WEB_AUTH_REDIRECT = 'https://www.optcgkorea.com/';
 const NATIVE_AUTH_REDIRECT = 'com.optcgkorea.cardpone://auth/callback';
@@ -22,7 +22,8 @@ function getCallbackParams(url) {
 }
 
 async function handleNativeAuthUrl(url) {
-  if (!isNativePlatform() || !supabase || !String(url || '').startsWith(NATIVE_AUTH_REDIRECT)) return false;
+  if (!isNativePlatform() || !hasSupabaseAuthConfig || !String(url || '').startsWith(NATIVE_AUTH_REDIRECT)) return false;
+  const supabase = await getSupabase();
 
   const { query, hash } = getCallbackParams(url);
   const errorMessage = query.get('error_description') || hash.get('error_description') || query.get('error') || hash.get('error');
@@ -68,6 +69,7 @@ export async function configureNativeAuth() {
 }
 
 export async function signInWithSocialProvider(provider, { link = false } = {}) {
+  const supabase = await getSupabase();
   if (!supabase) throw new Error('인증 설정을 확인할 수 없습니다.');
 
   if (link) {

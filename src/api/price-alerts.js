@@ -1,6 +1,7 @@
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 async function requestJson(url, options = {}) {
+  const supabase = await getSupabase();
   const { data } = supabase ? await supabase.auth.getSession() : { data: null };
   const token = data?.session?.access_token || '';
   const response = await fetch(url, {

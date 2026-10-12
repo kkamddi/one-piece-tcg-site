@@ -91,7 +91,7 @@ test('social linking requires a verified session and normal login stays OAuth si
       name: 'mock-auth-dependencies',
       setup(builder) {
         builder.onResolve({ filter: /^(@capacitor\/|\.\/supabase$)/ }, (args) => ({ path: args.path, namespace: 'auth-test' }));
-        builder.onLoad({ filter: /.*/, namespace: 'auth-test' }, () => ({ contents: 'export const supabase = globalThis.__cardPoneAuthTest; export const Capacitor = {isNativePlatform: () => false}; export const App = {}; export const Browser = {};', loader: 'js' }));
+        builder.onLoad({ filter: /.*/, namespace: 'auth-test' }, () => ({ contents: 'export const getSupabase = async () => globalThis.__cardPoneAuthTest; export const hasSupabaseAuthConfig = true; export const Capacitor = {isNativePlatform: () => false}; export const App = {}; export const Browser = {};', loader: 'js' }));
       }
     }]
   });

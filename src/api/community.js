@@ -1,8 +1,9 @@
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 const API_BASE = '/api/community';
 
 async function getAccessToken() {
+  const supabase = await getSupabase();
   if (!supabase) return '';
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? '';

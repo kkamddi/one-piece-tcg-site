@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import RenewApp from './RenewApp';
 import { configureNativeRuntime } from './lib/native-runtime';
+import { getSupabase, hasAuthCallbackInUrl } from './lib/supabase';
 import './index.css';
 
 configureNativeRuntime();
@@ -46,8 +47,18 @@ function BootReadyApp() {
   return <React.Suspense fallback={<p role="status">불러오는 중...</p>}><RootApp /></React.Suspense>;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BootReadyApp />
-  </React.StrictMode>
-);
+function renderApp() {
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <BootReadyApp />
+    </React.StrictMode>
+  );
+}
+
+// Returning from a sign-in redirect: the SDK must take the tokens from the URL before the router rewrites it.
+// Other visits render first and load the SDK afterwards (see lib/supabase.js).
+if (hasAuthCallbackInUrl(window.location.href)) {
+  getSupabase().then((client) => client?.auth.getSession()).catch(() => {}).finally(renderApp);
+} else {
+  renderApp();
+}

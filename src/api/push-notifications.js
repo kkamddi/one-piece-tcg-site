@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { getSupabase, hasSupabaseAuthConfig } from '../lib/supabase';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 
@@ -14,6 +14,7 @@ function queueNativePush(task) {
 }
 
 async function requestJson(url, options = {}) {
+  const supabase = await getSupabase();
   const { data } = supabase ? await supabase.auth.getSession() : { data: null };
   const token = data?.session?.access_token || '';
   const response = await fetch(url, {
@@ -142,11 +143,11 @@ export function sendTestPushNotification() {
 }
 
 export async function syncNativePushRegistration() {
-  if (!isNativeApp || !supabase) return { synced: false };
+  if (!isNativeApp || !hasSupabaseAuthConfig) return { synced: false };
   const generation = nativePushGeneration;
   return queueNativePush(async () => {
     if (generation !== nativePushGeneration) return { synced: false };
-    const { data } = await supabase.auth.getSession();
+    const { data } = await (await getSupabase()).auth.getSession();
     if (!data?.session) return { synced: false };
     const permission = await PushNotifications.checkPermissions();
     if (permission.receive !== 'granted') return { synced: false };

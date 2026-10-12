@@ -4,7 +4,7 @@ import { checkAuthAvailability, signInWithIdentifier, signupWithProfile } from '
 import { fetchMyState, saveMyState } from './api/me';
 import { fetchCardById, fetchCards, searchCards } from './api/cards';
 import { addCommunityComment, createCommunityPost, deleteCommunityPost as deleteCommunityPostRequest, fetchCommunityComments, fetchCommunityPosts, incrementCommunityPostView, toggleCommunityPostLike, updateCommunityPost as updateCommunityPostRequest } from './api/community';
-import { hasSupabaseAuthConfig, supabase } from './lib/supabase';
+import { getSupabase, hasSupabaseAuthConfig } from './lib/supabase';
 import { fetchShopRegions, fetchShops } from './api/shops';
 import seriesData from './data/series.json';
 import shopsData from './data/shops.json';
@@ -555,27 +555,31 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (!supabase) return undefined;
+    if (!hasSupabaseAuthConfig) return undefined;
 
     let alive = true;
+    let listener = null;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    getSupabase().then((supabase) => {
       if (!alive) return;
-      let user = data.session?.user ?? null;
-      if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
-        const { data: freshData } = await supabase.auth.getUser();
-        user = freshData?.user || user;
-      }
-      if (alive) setAuthUser(user);
-    });
+      supabase.auth.getSession().then(async ({ data }) => {
+        if (!alive) return;
+        let user = data.session?.user ?? null;
+        if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
+          const { data: freshData } = await supabase.auth.getUser();
+          user = freshData?.user || user;
+        }
+        if (alive) setAuthUser(user);
+      });
 
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user ?? null);
-    });
+      ({ data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setAuthUser(session?.user ?? null);
+      }));
+    }).catch(() => {});
 
     return () => {
       alive = false;
-      data.subscription.unsubscribe();
+      listener?.subscription.unsubscribe();
     };
   }, []);
 
@@ -1325,6 +1329,7 @@ export default function App() {
 
   async function submitAuth(event) {
     event.preventDefault();
+    const supabase = await getSupabase();
     if (!supabase) {
       setAuthMessage('인증 설정이 아직 연결되지 않았어.');
       return;
@@ -1374,11 +1379,13 @@ export default function App() {
   }
 
   async function logoutAuth() {
+    const supabase = await getSupabase();
     if (!supabase) return;
     await supabase.auth.signOut();
   }
 
   async function loginWithKakao() {
+    const supabase = await getSupabase();
     if (!supabase) {
       setAuthMessage('인증 설정이 아직 연결되지 않았습니다.');
       return;

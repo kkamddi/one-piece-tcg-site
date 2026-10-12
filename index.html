@@ -36,7 +36,13 @@
       (() => {
         const retryKey = 'card-pone:boot-retry';
         document.documentElement.classList.add('card-pone-js-booting');
-        window.__CARD_PONE_BOOT_TIMER__ = window.setTimeout(() => {
+        const bootStartedAt = Date.now();
+        const checkBoot = () => {
+          // On a slow connection the app script may still be downloading; a reload would start it over.
+          if (document.readyState !== 'complete' && Date.now() - bootStartedAt < 30000) {
+            window.__CARD_PONE_BOOT_TIMER__ = window.setTimeout(checkBoot, 5000);
+            return;
+          }
           const url = new URL(window.location.href);
           let alreadyRetried = url.searchParams.has('_app_retry');
           try {
@@ -68,7 +74,8 @@
             retry.addEventListener('click', () => window.location.reload());
             bootContent.append(error, retry);
           }
-        }, 10000);
+        };
+        window.__CARD_PONE_BOOT_TIMER__ = window.setTimeout(checkBoot, 10000);
       })();
     </script>
     <style id="card-pone-server-page-critical">

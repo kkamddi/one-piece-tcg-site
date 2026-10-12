@@ -30,11 +30,12 @@ test('logout cleans push before local signout and never reports success on failu
     const context = {
       authUser: { id: 'example-user' },
       async disableDevicePushNotifications() { calls.push('push'); if (failure === 'push') throw new Error('offline'); },
-      supabase: { auth: { async signOut(options) {
+      hasSupabaseAuthConfig: true,
+      getSupabase: async () => ({ auth: { async signOut(options) {
         assert.equal(options.scope, 'local');
         calls.push('signout');
         return { error: failure === 'signout' ? new Error('offline') : null };
-      } } },
+      } } }),
       setAuthUser() { calls.push('clear-user'); }, setAccountOpen() { calls.push('close'); },
       window: { alert() { calls.push('error'); } }
     };

@@ -25,7 +25,7 @@ import { disableDevicePushNotifications, enablePushNotifications, fetchPushNotif
 import { fetchShopRegions, fetchShops } from './api/shops';
 import { resolveApiUrl } from './lib/native-runtime';
 import { NATIVE_AUTH_EVENT, signInWithSocialProvider } from './lib/native-auth';
-import { hasSupabaseAuthConfig, initialAuthCallbackError, supabase } from './lib/supabase';
+import { getSupabase, hasSupabaseAuthConfig, initialAuthCallbackError } from './lib/supabase';
 import { clearAuthCallbackError, getSocialAuthErrorMessage } from './lib/auth-errors';
 import { analyzeBoxSeries, analyzeSeriesCards, getBoosterNumberLabel, getKoreanSeriesName, getBoxGuideSections, getRandomPackGuideDescription, getRandomPackGuideIntro, getSeriesGuideContext, getSeriesGuideSections, getSeriesTopListings } from './lib/series-guide-analysis';
 import { CARD_PRICE_EDITORIAL } from '../lib/card-price-editorial.js';
@@ -1480,6 +1480,7 @@ function invalidateCardMarketLinks() {
 }
 
 async function saveCardMarketLinkOverride({ cardId, apparelId, note }) {
+  const supabase = await getSupabase();
   const { data } = supabase ? await supabase.auth.getSession() : { data: null };
   const token = data?.session?.access_token || '';
   const response = await fetch('/api/card-market-link-overrides', {
@@ -1498,6 +1499,7 @@ async function saveCardMarketLinkOverride({ cardId, apparelId, note }) {
 }
 
 async function blockCardMarketLinkOverride(cardId) {
+  const supabase = await getSupabase();
   const { data } = supabase ? await supabase.auth.getSession() : { data: null };
   const token = data?.session?.access_token || '';
   const response = await fetch('/api/card-market-link-overrides', {
@@ -4798,6 +4800,7 @@ function savePendingSocialConsent() {
 }
 
 async function applyPendingSocialConsent(user) {
+  const supabase = await getSupabase();
   if (!supabase || !user?.id) return user;
   const rawConsent = window.localStorage.getItem(PENDING_SOCIAL_CONSENT_KEY);
   if (!rawConsent) return user;
@@ -4868,7 +4871,7 @@ function RenewAuthModal({ onClose, onSignedIn, initialMessage = '' }) {
 
   async function submitLogin(event) {
     event.preventDefault();
-    if (!supabase || !hasSupabaseAuthConfig) {
+    if (!hasSupabaseAuthConfig) {
       setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
       return;
     }
@@ -4887,7 +4890,7 @@ function RenewAuthModal({ onClose, onSignedIn, initialMessage = '' }) {
   }
 
   async function loginWithKakao() {
-    if (!supabase || !hasSupabaseAuthConfig) {
+    if (!hasSupabaseAuthConfig) {
       setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
       return;
     }
@@ -4906,7 +4909,7 @@ function RenewAuthModal({ onClose, onSignedIn, initialMessage = '' }) {
   }
 
   async function loginWithGoogle() {
-    if (!supabase || !hasSupabaseAuthConfig) {
+    if (!hasSupabaseAuthConfig) {
       setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
       return;
     }
@@ -4925,7 +4928,7 @@ function RenewAuthModal({ onClose, onSignedIn, initialMessage = '' }) {
   }
 
   async function loginWithNaver() {
-    if (!supabase || !hasSupabaseAuthConfig) {
+    if (!hasSupabaseAuthConfig) {
       setMessage('인증 환경변수가 아직 연결되지 않았습니다.');
       return;
     }
@@ -5046,6 +5049,7 @@ function RenewSocialConsentModal({ authUser, onAccepted, onLogout }) {
   const requiredAgreed = agreements.terms && agreements.privacy;
 
   async function acceptConsent() {
+    const supabase = await getSupabase();
     if (!supabase || !authUser?.id || !requiredAgreed || loading) return;
     setLoading(true);
     setMessage('');
@@ -5214,6 +5218,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
 
   async function unlockAccount(event) {
     event.preventDefault();
+    const supabase = await getSupabase();
     if (!supabase || !email || !currentPassword.trim()) return;
     setLoading(true);
     setMessage('');
@@ -5232,6 +5237,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
   async function saveNickname() {
     const nextNickname = nickname.trim();
     const currentNickname = String(authUser?.user_metadata?.nickname || '').trim();
+    const supabase = await getSupabase();
     if (!supabase || !nextNickname) return;
     if (nextNickname.length < 2 || nextNickname.length > 20) {
       setNicknameNotice({ type: 'error', message: text('닉네임은 2자 이상 20자 이하로 입력해 주세요.', 'Use 2 to 20 characters.', 'ニックネームは2〜20文字で入力してください。') });
@@ -5266,7 +5272,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     setLoading(true);
     setMessage('');
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await (await getSupabase()).auth.updateUser({ password: newPassword });
       if (error) throw error;
       setPasswordOpen(false);
       setNewPassword('');
@@ -5286,7 +5292,7 @@ function RenewAccountModal({ authUser, userState, displayName, uiLang = 'KR', on
     setMessage('');
     try {
       await deleteMyAccount();
-      await supabase?.auth.signOut({ scope: 'local' });
+      await (await getSupabase())?.auth.signOut({ scope: 'local' });
       onUserUpdated(null);
       onClose();
       window.location.assign('/');
@@ -16470,7 +16476,7 @@ export default function RenewApp() {
     return savedLocale === 'EN' ? 'EN' : 'KR';
   });
   const [authUser, setAuthUser] = useState(null);
-  const [authResolved, setAuthResolved] = useState(!supabase);
+  const [authResolved, setAuthResolved] = useState(!hasSupabaseAuthConfig);
   const [notifications, setNotifications] = useState([]);
   const notificationSessionRef = useRef(null);
   useLayoutEffect(() => {
@@ -16699,44 +16705,52 @@ export default function RenewApp() {
   }, [activePage, authResolved, isAdminUser, routeRevision, visitorToken]);
 
   useEffect(() => {
-    if (!supabase || !visitorToken || !authResolved) return undefined;
-
-    const channel = supabase.channel('site-presence-v1', {
-      config: { presence: { key: visitorToken } }
-    });
-    presenceChannelRef.current = channel;
-    const syncOnlineVisitors = () => {
-      const presenceState = channel.presenceState() || {};
-      const pageCounts = {};
-      let visitorCount = 0;
-      Object.values(presenceState).forEach((metas) => {
-        if (!Array.isArray(metas) || !metas.length) return;
-        visitorCount += 1;
-        const sortedMetas = [...metas].sort((a, b) => String(a.onlineAt || '').localeCompare(String(b.onlineAt || '')));
-        const latest = sortedMetas[sortedMetas.length - 1];
-        const page = getAnalyticsVisitPath(latest?.page || '/');
-        pageCounts[page] = (pageCounts[page] || 0) + 1;
+    if (!hasSupabaseAuthConfig || !visitorToken || !authResolved) return undefined;
+    let cancelled = false;
+    let leave = null;
+    getSupabase().then((supabase) => {
+      if (cancelled || !supabase) return;
+      const channel = supabase.channel('site-presence-v1', {
+        config: { presence: { key: visitorToken } }
       });
-      setOnlineVisitors(visitorCount);
-      setOnlinePageCounts(pageCounts);
-    };
-
-    channel
-      .on('presence', { event: 'sync' }, syncOnlineVisitors)
-      .on('presence', { event: 'join' }, syncOnlineVisitors)
-      .on('presence', { event: 'leave' }, syncOnlineVisitors)
-      .subscribe(async (status) => {
-        if (status !== 'SUBSCRIBED' || isAdminUser) return;
-        await channel.track({
-          page: window.location.pathname,
-          onlineAt: new Date().toISOString()
+      presenceChannelRef.current = channel;
+      const syncOnlineVisitors = () => {
+        const presenceState = channel.presenceState() || {};
+        const pageCounts = {};
+        let visitorCount = 0;
+        Object.values(presenceState).forEach((metas) => {
+          if (!Array.isArray(metas) || !metas.length) return;
+          visitorCount += 1;
+          const sortedMetas = [...metas].sort((a, b) => String(a.onlineAt || '').localeCompare(String(b.onlineAt || '')));
+          const latest = sortedMetas[sortedMetas.length - 1];
+          const page = getAnalyticsVisitPath(latest?.page || '/');
+          pageCounts[page] = (pageCounts[page] || 0) + 1;
         });
-      });
+        setOnlineVisitors(visitorCount);
+        setOnlinePageCounts(pageCounts);
+      };
 
+      channel
+        .on('presence', { event: 'sync' }, syncOnlineVisitors)
+        .on('presence', { event: 'join' }, syncOnlineVisitors)
+        .on('presence', { event: 'leave' }, syncOnlineVisitors)
+        .subscribe(async (status) => {
+          if (status !== 'SUBSCRIBED' || isAdminUser) return;
+          await channel.track({
+            page: window.location.pathname,
+            onlineAt: new Date().toISOString()
+          });
+        });
+
+      leave = () => {
+        if (presenceChannelRef.current === channel) presenceChannelRef.current = null;
+        channel.untrack().catch(() => {});
+        supabase.removeChannel(channel);
+      };
+    }).catch(() => {});
     return () => {
-      if (presenceChannelRef.current === channel) presenceChannelRef.current = null;
-      channel.untrack().catch(() => {});
-      supabase.removeChannel(channel);
+      cancelled = true;
+      leave?.();
     };
   }, [authResolved, isAdminUser, visitorToken]);
 
@@ -16750,11 +16764,12 @@ export default function RenewApp() {
   }, [activePage, isAdminUser, routeRevision, visitorToken]);
 
   useEffect(() => {
-    if (!supabase) {
+    if (!hasSupabaseAuthConfig) {
       setAuthResolved(true);
       return undefined;
     }
     let mounted = true;
+    let listener = null;
     if (initialAuthCallbackError) {
       window.history.replaceState(window.history.state, '', clearAuthCallbackError(window.location.href));
     }
@@ -16763,26 +16778,32 @@ export default function RenewApp() {
       setAuthErrorMessage(getSocialAuthErrorMessage(error));
       setAuthOpen(true);
     };
-    supabase.auth.getSession()
-      .then(async ({ data, error }) => {
-        if (error) showAuthError(error);
-        let user = data.session?.user || null;
-        if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
-          const { data: freshData } = await supabase.auth.getUser();
-          user = freshData?.user || user;
-        }
-        if (mounted) setAuthUser(user);
-      })
-      .catch((error) => {
-        showAuthError(error);
-        if (mounted) setAuthUser(null);
-      })
-      .finally(() => {
-        if (mounted) setAuthResolved(true);
-      });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user || null);
-      setAuthResolved(true);
+    getSupabase().then((supabase) => {
+      if (!mounted) return;
+      supabase.auth.getSession()
+        .then(async ({ data, error }) => {
+          if (error) showAuthError(error);
+          let user = data.session?.user || null;
+          if (user?.user_metadata?.username === 'admin' && user?.app_metadata?.role !== 'admin') {
+            const { data: freshData } = await supabase.auth.getUser();
+            user = freshData?.user || user;
+          }
+          if (mounted) setAuthUser(user);
+        })
+        .catch((error) => {
+          showAuthError(error);
+          if (mounted) setAuthUser(null);
+        })
+        .finally(() => {
+          if (mounted) setAuthResolved(true);
+        });
+      ({ data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setAuthUser(session?.user || null);
+        setAuthResolved(true);
+      }));
+    }).catch(() => {
+      // The SDK chunk did not load (offline); the site stays usable signed out.
+      if (mounted) setAuthResolved(true);
     });
     return () => {
       mounted = false;
@@ -16860,10 +16881,10 @@ export default function RenewApp() {
   }
 
   async function handleLogout() {
-    if (authUser && supabase) {
+    if (authUser && hasSupabaseAuthConfig) {
       try {
         await disableDevicePushNotifications();
-        const { error } = await supabase.auth.signOut({ scope: 'local' });
+        const { error } = await (await getSupabase()).auth.signOut({ scope: 'local' });
         if (error) throw error;
         setAuthUser(null);
       } catch {

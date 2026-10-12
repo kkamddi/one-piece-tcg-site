@@ -9,7 +9,7 @@ async function compile(entry) {
     plugins: [{ name: 'isolated-native-services', setup(builder) {
       builder.onResolve({ filter: /^(@capacitor\/|\.\.?\/lib\/supabase$|\.\/supabase$)/ }, ({ path }) => ({ path, namespace: 'mock' }));
       builder.onLoad({ filter: /.*/, namespace: 'mock' }, () => ({
-        contents: 'export const { App, Browser, Capacitor, PushNotifications, supabase } = globalThis.services;', loader: 'js'
+        contents: 'export const { App, Browser, Capacitor, PushNotifications, supabase } = globalThis.services; export const getSupabase = async () => globalThis.services.supabase; export const hasSupabaseAuthConfig = true;', loader: 'js'
       }));
     } }]
   });
