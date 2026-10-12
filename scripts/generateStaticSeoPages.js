@@ -8,6 +8,10 @@ import { getMarketReportEntries } from './marketReportSeo.js';
 import { getReleaseScheduleEntries } from './releaseScheduleSeo.js';
 import { getBoxPricesEntries } from './boxPricesSeo.js';
 import { getRegionShopEntries } from './regionShopsSeo.js';
+import { getRulesEntries } from './rulesSeo.js';
+import { getGlossaryEntries } from './glossarySeo.js';
+import { getStarterDecksEntries } from './starterDecksSeo.js';
+import { getLeaderCardsEntries } from './leaderCardsSeo.js';
 import { getBoosterPreviewEntries } from './boosterPreviewSeo.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -124,8 +128,11 @@ const marketReportSeo = new Map(getMarketReportEntries().map((entry) => [entry.p
 const releaseScheduleSeo = new Map(getReleaseScheduleEntries().map((entry) => [entry.pathname, entry.seo]));
 const boxPricesSeo = new Map(getBoxPricesEntries().map((entry) => [entry.pathname, entry.seo]));
 const regionShopSeo = new Map(getRegionShopEntries().map((entry) => [entry.pathname, entry.seo]));
+const newGuideSeo = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getStarterDecksEntries(), ...getLeaderCardsEntries()].map((entry) => [entry.pathname, entry.seo]));
 const boosterPreviewSeo = new Map(getBoosterPreviewEntries().map((entry) => [entry.pathname, entry.seo]));
 for (const pathname of marketReportSeo.keys()) routePaths.add(pathname);
+// Unreleased box guides stay out of the sitemap but still need their noindex HTML.
+for (const pathname of boxRecommendationSeo.keys()) routePaths.add(pathname);
 for (const entry of seriesGuideEntries) {
   const match = entry.pathname.match(/^(\/jp)?\/guides\/series\/([^/]+)$/);
   if (!match) continue;
@@ -142,7 +149,7 @@ for (const sitemapPath of sitemapPaths) {
 
 let generated = 0;
 for (const pathname of routePaths) {
-  const seo = seriesGuideSeo.get(pathname) || boxRecommendationSeo.get(pathname) || marketReportSeo.get(pathname) || releaseScheduleSeo.get(pathname) || boxPricesSeo.get(pathname) || regionShopSeo.get(pathname) || boosterPreviewSeo.get(pathname) || getPageSeo(pathname);
+  const seo = seriesGuideSeo.get(pathname) || boxRecommendationSeo.get(pathname) || marketReportSeo.get(pathname) || releaseScheduleSeo.get(pathname) || boxPricesSeo.get(pathname) || regionShopSeo.get(pathname) || newGuideSeo.get(pathname) || boosterPreviewSeo.get(pathname) || getPageSeo(pathname);
   if (!seo) continue;
   const outputPath = getOutputPath(pathname);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });

@@ -837,6 +837,16 @@ const JAPANESE_SITE_NAVIGATION_ITEMS = [
   { name: 'ショップ', url: `${SITE_ORIGIN}/jp/shops`, description: '公式ショップと公認店の検索' }
 ];
 
+// Pages whose SEO is built by scripts/*Seo.js at build time, so getPageSeo has no title for them.
+const STATIC_LINK_LABELS = {
+  '/guide/box-prices': '원피스카드 박스 가격 한눈에',
+  '/guide/release-schedule': '원피스카드 한글판·일본판 발매 일정',
+  '/guide/rules': '원피스카드 룰 한눈에',
+  '/guide/glossary': '원피스카드 용어 사전',
+  '/guide/starter-decks': '원피스카드 스타트 덱 정리',
+  '/guide/leader-cards': '원피스카드 리더 카드 정리'
+};
+
 const SERVER_PAGE_CONTENT = {
   '/': {
     heading: 'Card Pone - 원피스카드 도감과 시세를 한곳에서',
@@ -844,7 +854,7 @@ const SERVER_PAGE_CONTENT = {
       'Card Pone은 한글판과 일본판 원피스카드를 검색하고, 보유 카드와 위시리스트를 관리하며, 카드별 시세 흐름을 확인할 수 있는 수집 도구입니다.',
       '카드 시세는 공개 시장 데이터를 정리해 조건별 최근 거래와 기간별 흐름으로 제공하며, Market Index는 PSA10 거래 데이터가 있는 구성 종목의 개별 지수를 동일 비중 평균해 보여줍니다.'
     ],
-    links: ['/cards', '/prices', '/news/guide', '/shops', '/about', '/privacy', '/terms']
+    links: ['/cards', '/prices', '/news/guide', '/guide/getting-started', '/guide/rules', '/guide/price-ranking', '/guide/box-prices', '/guide/card-types', '/guide/shops', '/guide/release-schedule', '/shops', '/about', '/privacy', '/terms']
   },
   '/cards': {
     heading: '원피스카드 도감',
@@ -1005,12 +1015,23 @@ const SERVER_PAGE_CONTENT = {
       '각 가이드는 실제 도감과 시세 화면으로 이어지며 카드 상태, 언어판, 최근 거래 기록과 계산 결과의 범위를 구분해 안내합니다.'
     ],
     sections: qaSections('guide'),
-    links: ['/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
+    links: ['/guide/getting-started', '/guide/rules', '/guide/glossary', '/guide/starter-decks', '/guide/leader-cards', '/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
   },
   '/guide/collection': {
-    heading: '원피스카드 망가 카드 가이드',
-    paragraphs: ['망가 카드, 챔피언십, 플래그십, 프로모 카드 목록을 분류별로 확인합니다.'],
-    sections: [],
+    heading: '원피스카드 수집 가이드 - 망가·챔피언십·플래그십·프로모',
+    paragraphs: [
+      '부스터에서 나오는 일반 카드 말고도 망가 카드, 대회 배포 카드, 프로모 카드처럼 따로 모으는 분류가 있습니다.',
+      '분류마다 카드 번호와 이미지를 목록으로 정리했습니다. 처음이라면 무엇부터 모을지 정하는 시작 가이드부터 보세요.'
+    ],
+    sections: [{
+      heading: '분류별 수록 카드 수',
+      items: [
+        `망가 카드: ${MANGA_COLLECTION_GROUPS.length}개 시리즈, ${MANGA_COLLECTION_GROUPS.reduce((sum, group) => sum + group.cards.length, 0)}장`,
+        `챔피언십 카드: 일본판 ${CHAMPIONSHIP_COLLECTION_GROUPS.JP.reduce((sum, group) => sum + group.cards.length, 0)}장, 한국판 ${CHAMPIONSHIP_COLLECTION_GROUPS.KR.reduce((sum, group) => sum + group.cards.length, 0)}장`,
+        `플래그십 배틀 카드: ${FLAGSHIP_COLLECTION_GROUPS.JP.reduce((sum, group) => sum + group.cards.length, 0)}장`,
+        `프로모 카드: 배포처 ${PROMO_COLLECTION_GROUPS.length}곳, ${PROMO_COLLECTION_GROUPS.reduce((sum, group) => sum + group.cards.length, 0)}장`
+      ]
+    }],
     links: ['/guide/collection/start', '/guide/collection/manga', '/guide/collection/championship', '/guide/collection/flagship', '/guide/collection/promo']
   },
   '/guide/card-storage': {
@@ -1131,6 +1152,18 @@ const SERVER_PAGE_DETAILS = {
       paragraphs: [
         '카드 가격은 카드 상태, 거래 시점, 환율과 거래량에 따라 달라집니다. 단일 가격만 보지 않고 최근 거래일과 기간별 기록을 함께 확인하는 것이 좋습니다.',
         '보유 카드, 위시리스트와 포트폴리오 저장은 로그인 사용자에게 제공하며 도감 검색, 시세 열람과 실험실 도구는 비로그인 상태에서도 이용할 수 있습니다.'
+      ]
+    },
+    {
+      heading: '많이 찾는 가이드',
+      items: [
+        '원피스카드 입문 가이드: 처음 살 상품, 한글판과 일본판 차이, 1팩 정가',
+        '원피스카드 룰 한눈에: 승리 조건, 턴 진행, 배틀 순서',
+        '원피스카드 가격 순위: 일본판 실거래가 기준으로 가장 비싼 카드 순위',
+        '원피스카드 박스 가격: 일본판 부스터 박스 등록 최저가를 한 표로 비교',
+        '원피스카드 카드 종류: 패러렐, SP, 망가 구별법과 레어도별 시세',
+        '원피스카드 파는 곳: 지역별 공식 공인점포와 취급점포 목록',
+        '원피스카드 발매 일정: 한글판과 일본판 발매일과 두 판 사이 간격'
       ]
     }
   ],
@@ -1522,7 +1555,7 @@ const SERVER_PAGE_DETAILS = {
     {
       heading: '오류와 문의',
       paragraphs: [
-        '카드 이미지, 카드번호, 상품 매핑, 가격 기록이나 매장 정보의 오류는 운영자가 원문과 수집 기록을 대조한 뒤 수정합니다. 문의 주소는 사이트 하단의 서비스 안내에서 확인할 수 있습니다.'
+        '카드 이미지, 카드번호, 상품 매핑, 가격 기록이나 매장 정보의 오류는 운영자가 원문과 수집 기록을 대조한 뒤 수정합니다. 카드 정보 오류, 매장 정보 정정과 서비스 문의는 optkr26@gmail.com 으로 보내 주세요.'
       ]
     },
     {
@@ -1530,6 +1563,22 @@ const SERVER_PAGE_DETAILS = {
       paragraphs: [
         '광고 또는 제휴 여부는 도감 수록, 시세 표시, 구매처 검색 결과와 데이터 정정 기준에 영향을 주지 않습니다.',
         '외부 공지는 원문 링크와 날짜를 함께 표시하고, Card Pone의 검색과 비교 도구에 필요한 형태로 정리합니다.'
+      ]
+    },
+    {
+      heading: '데이터 출처와 갱신',
+      items: [
+        '카드 정보·발매 일정·공인점포: 한국·일본 원피스 카드게임 공식 사이트 공개 자료',
+        '카드 시세: SNKRDUNK 일본판 거래 기록, Single과 PSA10을 나눠 하루 여러 번 수집',
+        '박스 가격: SNKRDUNK 일본판 박스 등록 최저가, 매일 갱신',
+        '공식 소식: 공식 사이트 공지를 매일 확인해 원문 링크와 함께 정리'
+      ]
+    },
+    {
+      heading: '가이드 작성 방식',
+      paragraphs: [
+        '가이드는 Card Pone이 모은 도감·시세 데이터를 직접 집계해 작성하고, 글마다 검수일과 데이터 기준일을 표시합니다.',
+        '수치는 데이터가 바뀌면 다시 계산하며, 가격은 과거 거래 기록이라 앞으로의 가격을 보장하지 않습니다.'
       ]
     }
   ],
@@ -1830,7 +1879,7 @@ function createServerPageContent(pathname, seo) {
   const links = content.links
     .map((path) => {
       const item = SITE_NAVIGATION_ITEMS.find((entry) => new URL(entry.url).pathname === path);
-      const label = item?.name || getPageSeo(path)?.title?.split('|')[0]?.trim() || path;
+      const label = item?.name || getPageSeo(path)?.title?.split('|')[0]?.trim() || STATIC_LINK_LABELS[path] || path;
       return `<li><a href="${escapeHtml(path)}">${escapeHtml(label)}</a></li>`;
     })
     .join('');

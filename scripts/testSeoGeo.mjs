@@ -5,6 +5,9 @@ import { applySeo, getPageSeo } from '../functions/_middleware.js';
 import { getBoosterPreviewEntries } from './boosterPreviewSeo.js';
 import { getReleaseScheduleEntries } from './releaseScheduleSeo.js';
 import { getBoxPricesEntries } from './boxPricesSeo.js';
+import { getRulesEntries } from './rulesSeo.js';
+import { getGlossaryEntries } from './glossarySeo.js';
+import { getLeaderCardsEntries } from './leaderCardsSeo.js';
 import { GUIDE_FAQ_PATHS } from '../lib/guide-article-faq.js';
 
 const read = file => readFile(new URL(file, import.meta.url), 'utf8');
@@ -18,13 +21,15 @@ test('llms.txt only links to pages the site publishes', async () => {
   for (const path of paths) assert.ok(sitemap.includes(`'${path}'`) || path === '/market-report', path);
 });
 
+const NEW_GUIDE_SEO = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getLeaderCardsEntries()].map((entry) => [entry.pathname, entry.seo]));
+
 test('editorial guides pre-render their FAQ as text and FAQPage next to the Article', async () => {
   const html = await read('../index.html');
   for (const path of Object.values(GUIDE_FAQ_PATHS)) {
     // The release schedule and box prices are pre-rendered by their own build scripts, not the middleware map.
     const seo = path === '/guide/release-schedule' ? getReleaseScheduleEntries('2026-10-07')[0].seo
       : path === '/guide/box-prices' ? getBoxPricesEntries('2026-10-09')[0].seo
-        : getPageSeo(path);
+        : NEW_GUIDE_SEO.get(path) || getPageSeo(path);
     const out = applySeo(html, path, seo);
     const nodes = graph(out);
     const article = nodes.find(node => node['@type'] === 'Article');

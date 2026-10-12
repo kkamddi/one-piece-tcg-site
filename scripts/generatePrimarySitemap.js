@@ -52,6 +52,10 @@ const paths = [
   '/guide/card-types',
   '/guide/release-schedule',
   '/guide/box-prices',
+  '/guide/rules',
+  '/guide/glossary',
+  '/guide/starter-decks',
+  '/guide/leader-cards',
   '/guide/shops/seoul',
   '/guide/shops/gyeonggi',
   '/guide/shops/busan',
@@ -89,7 +93,9 @@ function escapeXml(value) {
 }
 
 const seriesGuidePaths = getSeriesGuideEntries().map((entry) => entry.pathname);
-const boxRecommendationPaths = getBoxRecommendationEntries().map((entry) => entry.pathname);
+const boxRecommendationPaths = getBoxRecommendationEntries()
+  .filter((entry) => !String(entry.seo.robots || '').includes('noindex'))
+  .map((entry) => entry.pathname);
 const marketReportPaths = getMarketReportEntries().map((entry) => entry.pathname);
 // The box recommendation entries repeat the hub paths listed above, so keep each URL once.
 const entries = [...new Set([...paths, ...seriesGuidePaths, ...boxRecommendationPaths, ...marketReportPaths])].map((urlPath) => {

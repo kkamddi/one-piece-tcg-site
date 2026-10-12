@@ -19,6 +19,10 @@
 - [부스터별 히트 카드 비교](https://www.optcgkorea.com/guide/booster-comparison): OP01~OP16·EB01~EB04의 SEC·SP·패러렐·망가 구성과 등록가 분포
 - [도감 사용법](https://www.optcgkorea.com/guide/card-catalog): 카드번호 읽는 법, 패러렐·코믹 패러렐·재록 구별
 - [박스 가격 한눈에](https://www.optcgkorea.com/guide/box-prices): 일본판 부스터·엑스트라·프리미엄 부스터 박스의 SNKRDUNK 등록 최저가(달러·원화 환산)와 한글판·일본판 1팩 정가(매일 자동 갱신)
+- [룰 한눈에](https://www.optcgkorea.com/guide/rules): 공식 종합 룰 기준 승리 조건, 덱 구성(리더 1·덱 50·두웅!! 10), 턴 5페이즈와 배틀 순서.
+- [용어 사전](https://www.optcgkorea.com/guide/glossary): 블로커·속공·더블 어택·배니시·카운터·트리거 등 한글판 카드 표기와 뜻, 키워드별 한글판 카드 수.
+- [스타트 덱 정리](https://www.optcgkorea.com/guide/starter-decks): 한글판 스타트 덱 목록(리더·색·발매일), 색별 정리와 일본판 전용 덱.
+- [리더 카드 정리](https://www.optcgkorea.com/guide/leader-cards): 일본판 리더 카드의 색별·라이프별 수와 SNKRDUNK 거래가 기준 비싼 리더 TOP 10.
 - [목적별 박스 비교](https://www.optcgkorea.com/guide/box-recommendation): 박스 현재가와 히트 카드 기준 비교
 - [카드 보관 방법](https://www.optcgkorea.com/guide/card-storage): 카드 가치별 보호 단계와 보관 용품
 - [구매처 가이드](https://www.optcgkorea.com/guide/shops): 공식 공인점포·취급점포 지역 분포와 확인 항목

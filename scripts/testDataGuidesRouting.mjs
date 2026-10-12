@@ -71,3 +71,29 @@ test('regional shop guides are routed, pre-rendered, listed in the sitemap and s
   assert.match(app, /!regionShopSlug/);
   assert.match(staticPages, /regionShopSeo\.get\(pathname\)/);
 });
+
+test('rules, glossary, starter deck and leader guides are routed, pre-rendered, listed in the sitemap and searchable', async () => {
+  const [app, sitemap, search, staticPages, starterJson] = await Promise.all([read('../src/RenewApp.jsx'), read('./generatePrimarySitemap.js'), read('../src/lib/site-search.js'), read('./generateStaticSeoPages.js'), read('../src/data/starter-decks-guide.json')]);
+  const { getGuideFaq } = await import('../lib/guide-article-faq.js');
+  const sources = await Promise.all([
+    import('./rulesSeo.js').then((m) => m.getRulesEntries()),
+    import('./glossarySeo.js').then((m) => m.getGlossaryEntries()),
+    import('./starterDecksSeo.js').then((m) => m.getStarterDecksEntries()),
+    import('./leaderCardsSeo.js').then((m) => m.getLeaderCardsEntries())
+  ]);
+  const entries = sources.flat();
+  assert.deepEqual(entries.map((entry) => entry.pathname), ['/guide/rules', '/guide/glossary', '/guide/starter-decks', '/guide/leader-cards']);
+  for (const { pathname, seo } of entries) {
+    assert.match(sitemap, new RegExp(`'${pathname}'`));
+    assert.match(search, new RegExp(`href: '${pathname}'`));
+    assert.equal((seo.faq || getGuideFaq(pathname)).length, 2, pathname);
+    assert.ok(seo.title && seo.description && seo.sections.length >= 3, pathname);
+  }
+  // The app reads the starter deck guide from the build-time JSON instead of the 14MB card list.
+  const starter = JSON.parse(starterJson);
+  assert.equal(starter.faq.length, 2);
+  assert.equal(starter.editorial.heading, entries[2].seo.heading);
+  assert.match(app, /staticEditorialGuide \? <RenewStaticEditorialGuide config=\{staticEditorialGuide\} \/> : null/);
+  assert.match(app, /!staticEditorialGuide/);
+  assert.match(staticPages, /newGuideSeo\.get\(pathname\)/);
+});

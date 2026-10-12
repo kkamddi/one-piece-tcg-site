@@ -38,6 +38,10 @@ import { PRICE_RANKING_EDITORIAL } from '../lib/price-ranking-editorial.js';
 import { CARD_TYPES_EDITORIAL } from '../lib/card-types-editorial.js';
 import { buildReleaseScheduleEditorial } from '../lib/release-schedule-editorial.js';
 import { BOX_PRICES_SEO, buildBoxPricesEditorial } from '../lib/box-prices-editorial.js';
+import { RULES_EDITORIAL, RULES_PATH, RULES_SEO } from '../lib/rules-editorial.js';
+import { GLOSSARY_EDITORIAL, GLOSSARY_PATH, GLOSSARY_SEO } from '../lib/glossary-editorial.js';
+import { LEADER_CARDS_EDITORIAL, LEADER_CARDS_PATH, LEADER_CARDS_SEO } from '../lib/leader-cards-editorial.js';
+import { STARTER_DECKS_PATH } from '../lib/starter-decks-editorial.js';
 import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH, formatPreviewYen, getBoosterPreview, getPreviewCards, groupPreviewCards } from '../lib/booster-preview.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
@@ -57,6 +61,7 @@ import snkrdunkPopularApparelIds from './data/snkrdunk-popular-cards';
 import seriesData from './data/series.json';
 import seriesCardCounts from './data/series-card-counts.json';
 import seriesHitCards from './data/series-hit-cards.json';
+import starterDecksGuide from './data/starter-decks-guide.json';
 import topicsData from './data/topics.json';
 import SiteSearch, { SiteSearchInput } from './SiteSearch';
 import CollectionGuide from './CollectionGuide';
@@ -768,6 +773,9 @@ const GUIDE_HUB_COLLECTIONS = [
     description: '카드를 찾고 실제 상품을 구매하는 기본 순서입니다.',
     links: [
       { href: '/guide/getting-started', title: '원피스 카드게임 입문', meta: '상품 종류·한글판과 일본판·시작 순서' },
+      { href: RULES_PATH, title: '룰 한눈에', meta: '승리 조건·턴 진행·배틀 순서' },
+      { href: GLOSSARY_PATH, title: '용어 사전', meta: '블로커·속공·카운터·두웅!! 뜻' },
+      { href: STARTER_DECKS_PATH, title: '스타트 덱 고르기', meta: '한글판 스타트 덱 종류·색별 정리' },
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
       { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
       { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' },
@@ -787,7 +795,8 @@ const GUIDE_HUB_COLLECTIONS = [
       { href: '/guide/character-cards', title: '캐릭터별 카드 시세', meta: '캐릭터별 고가 카드·버전 차이' },
       { href: '/guide/psa-grading', title: 'PSA 그레이딩 판단', meta: '레어도·연식별 PSA10 차이' },
       { href: '/guide/price-ranking', title: '비싼 카드 순위', meta: 'Single TOP 30·PSA10 TOP 10' },
-      { href: '/guide/card-types', title: '카드 종류·레어도', meta: '패러렐·SP·망가 구분과 시세' }
+      { href: '/guide/card-types', title: '카드 종류·레어도', meta: '패러렐·SP·망가 구분과 시세' },
+      { href: LEADER_CARDS_PATH, title: '리더 카드 정리', meta: '색별 리더 수·비싼 리더 TOP 10' }
     ]
   },
   {
@@ -875,12 +884,39 @@ const GUIDE_ARTICLE_DETAILS = {
     related: ['/guide/box-recommendation', '/guide/release-schedule', '/guide/shops']
   }
 };
+// Guides whose content is fixed at build time: one entry drives routing, client SEO and the article view.
+const STATIC_EDITORIAL_GUIDES = {
+  [RULES_PATH]: {
+    key: 'rules', editorial: RULES_EDITORIAL, seo: RULES_SEO, faq: GUIDE_ARTICLE_FAQ.rules,
+    checklistTitle: '룰 체크리스트', related: ['/guide/getting-started', GLOSSARY_PATH, STARTER_DECKS_PATH],
+    cta: { eyebrow: '덱 만들기', title: '룰을 익혔다면 덱을 짜 보세요', description: '리더 색과 50장 규칙을 확인하며 덱을 구성합니다.', href: '/lab/decks/builder', label: '덱 빌더 열기' }
+  },
+  [GLOSSARY_PATH]: {
+    key: 'glossary', editorial: GLOSSARY_EDITORIAL, seo: GLOSSARY_SEO, faq: GUIDE_ARTICLE_FAQ.glossary,
+    checklistTitle: '용어 체크리스트', related: [RULES_PATH, '/guide/card-types', '/guide/getting-started'],
+    cta: { eyebrow: '카드 찾기', title: '효과문을 직접 확인하려면', description: '도감에서 카드번호나 이름으로 카드 효과를 찾아봅니다.', href: '/cards', label: '도감 열기' }
+  },
+  [STARTER_DECKS_PATH]: {
+    key: 'starterDecks', editorial: starterDecksGuide.editorial, seo: starterDecksGuide.seo, faq: starterDecksGuide.faq,
+    checklistTitle: '스타트 덱 체크리스트', related: ['/guide/getting-started', RULES_PATH, '/guide/shops'],
+    cta: { eyebrow: '구매처 찾기', title: '스타트 덱을 사려면', description: '가까운 공인점포와 취급점포를 지역별로 찾습니다.', href: '/shops', label: '구매처 찾기' }
+  },
+  [LEADER_CARDS_PATH]: {
+    key: 'leaderCards', editorial: LEADER_CARDS_EDITORIAL, seo: LEADER_CARDS_SEO, faq: GUIDE_ARTICLE_FAQ.leaderCards,
+    checklistTitle: '리더 고르기 체크리스트', related: ['/guide/price-ranking', '/guide/card-types', STARTER_DECKS_PATH],
+    cta: { eyebrow: '카드 시세', title: '리더 카드 시세를 자세히 보려면', description: '카드번호로 Single·PSA10 최근 거래를 확인합니다.', href: '/prices', label: '시세 보기' }
+  }
+};
 const GUIDE_RELATED_LABELS = {
   '/guide/booster-comparison': ['부스터별 히트 카드 비교', 'OP01~OP16 망가·SP·고가 카드 분포를 비교합니다.'],
   '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
   '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
   '/guide/release-schedule': ['신작·발매 일정', '일본판·한국판 발매일과 한국 발매 간격을 봅니다.'],
   '/guide/box-prices': ['박스 가격 한눈에', '일본판 박스 등록 최저가와 1팩 정가를 봅니다.'],
+  [RULES_PATH]: ['룰 한눈에', '승리 조건, 덱 구성, 턴 진행과 배틀 순서를 봅니다.'],
+  [GLOSSARY_PATH]: ['용어 사전', '블로커·속공·카운터·두웅!! 같은 카드 용어 뜻을 봅니다.'],
+  [STARTER_DECKS_PATH]: ['스타트 덱 고르기', '한글판 스타트 덱 종류와 색별 정리를 봅니다.'],
+  [LEADER_CARDS_PATH]: ['리더 카드 정리', '색별 리더 수와 비싼 리더 카드를 봅니다.'],
   ...Object.fromEntries(REGION_SHOP_PAGES.map((region) => [`/guide/shops/${region.slug}`, [`${region.label} 원피스카드 매장`, `${region.label}의 공식 공인점포·취급점포 목록을 봅니다.`]])),
   '/guide/getting-started': ['원피스 카드게임 입문', '상품 종류와 한글판·일본판 차이, 시작 순서를 봅니다.'],
   '/guide/price-ranking': ['비싼 카드 순위', '일본판 Single·PSA10 가격 순위와 비싼 이유를 봅니다.'],
@@ -3365,6 +3401,10 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     const editorial = buildRegionShopEditorial(officialShopsData, regionShop.slug);
     return { title: seo.title, h1: editorial.heading, description: seo.description, keywords: seo.keywords, body: editorial.paragraphs[0] };
   }
+  if (STATIC_EDITORIAL_GUIDES[path]) {
+    const { editorial, seo } = STATIC_EDITORIAL_GUIDES[path];
+    return { title: seo.title, h1: editorial.heading, description: seo.description, keywords: seo.keywords, body: editorial.paragraphs[0] };
+  }
   if (path === '/guide/box-prices') {
     const editorial = getBoxPricesEditorial();
     return { title: BOX_PRICES_SEO.title, h1: editorial.heading, description: BOX_PRICES_SEO.description, keywords: BOX_PRICES_SEO.keywords, body: editorial.paragraphs[0] };
@@ -3738,6 +3778,22 @@ const STATIC_INFO_PAGES = {
         body: [
           'Card Pone는 BANDAI 및 ONE PIECE CARD GAME의 공식 서비스가 아니며 카드와 상품의 권리는 각 권리자에게 있습니다.',
           '광고 또는 제휴 여부는 도감 수록, 시세 표시, 구매처 검색 결과와 데이터 정정 기준에 영향을 주지 않습니다.'
+        ]
+      },
+      {
+        title: '데이터 출처와 갱신',
+        body: [
+          '카드 정보·발매 일정·공인점포: 한국·일본 원피스 카드게임 공식 사이트 공개 자료',
+          '카드 시세: SNKRDUNK 일본판 거래 기록, Single과 PSA10을 나눠 하루 여러 번 수집',
+          '박스 가격: SNKRDUNK 일본판 박스 등록 최저가, 매일 갱신',
+          '공식 소식: 공식 사이트 공지를 매일 확인해 원문 링크와 함께 정리'
+        ]
+      },
+      {
+        title: '가이드 작성 방식',
+        body: [
+          '가이드는 Card Pone이 모은 도감·시세 데이터를 직접 집계해 작성하고, 글마다 검수일과 데이터 기준일을 표시합니다.',
+          '수치는 데이터가 바뀌면 다시 계산하며, 가격은 과거 거래 기록이라 앞으로의 가격을 보장하지 않습니다.'
         ]
       },
       {
@@ -7024,6 +7080,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isCardTypesGuide = initialPath === '/guide/card-types';
   const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
   const isBoxPricesGuide = initialPath === '/guide/box-prices';
+  const staticEditorialGuide = STATIC_EDITORIAL_GUIDES[initialPath] || null;
   const regionShopSlug = REGION_SHOP_PAGES.find((region) => initialPath === `/guide/shops/${region.slug}`)?.slug || '';
   const boosterPreview = getBoosterPreview(initialPath);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
@@ -7343,7 +7400,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !isBoxPricesGuide && !regionShopSlug && !boosterPreview && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !isBoxPricesGuide && !staticEditorialGuide && !regionShopSlug && !boosterPreview && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7392,6 +7449,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isReleaseScheduleGuide ? <RenewReleaseScheduleGuide /> : null}
       {isBoxPricesGuide ? <RenewBoxPricesGuide /> : null}
       {regionShopSlug ? <RenewRegionShopGuide slug={regionShopSlug} /> : null}
+      {staticEditorialGuide ? <RenewStaticEditorialGuide config={staticEditorialGuide} /> : null}
       {boosterPreview ? <RenewBoosterPreview preview={boosterPreview} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
@@ -8503,6 +8561,12 @@ function RenewRegionShopGuide({ slug }) {
     related: ['/shops', '/guide/shops', ...REGION_SHOP_PAGES.filter((region) => region.slug !== slug).map((region) => `/guide/shops/${region.slug}`)]
   }), [slug]);
   return <RenewEditorialGuide guide={guide} guideKey="regionShop" details={details} headingId="region-shop-guide-heading" cta={{ eyebrow: '구매처 찾기', title: '지도와 내 주변순으로 보려면', description: '구매처 찾기에서 매장 위치와 지도 바로가기를 확인합니다.', href: '/shops', label: '구매처 찾기' }} />;
+}
+
+function RenewStaticEditorialGuide({ config }) {
+  const guide = useMemo(() => toEditorialGuide(config.editorial), [config]);
+  const details = useMemo(() => ({ checklistTitle: config.checklistTitle, faq: config.faq, related: config.related }), [config]);
+  return <RenewEditorialGuide guide={guide} guideKey={config.key} details={details} headingId={`${config.key}-guide-heading`} cta={config.cta} />;
 }
 
 function RenewBoxPricesGuide() {

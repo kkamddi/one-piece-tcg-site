@@ -75,9 +75,12 @@ function getBoxSeriesEntries() {
     const code = getSeriesCode(seriesId);
     const seriesSlug = seriesId.toLowerCase();
     const releaseDate = item.releaseDate || '';
+    // Before release there are no prices or pulls to compare, so keep the page out of the index until then.
+    const upcoming = releaseDate > new Date().toISOString().slice(0, 10);
     return [{
       pathname: `/guide/box-recommendation/series/${code.toLowerCase()}`,
       seo: {
+        ...(upcoming ? { robots: 'noindex,follow' } : {}),
         title: `${code} 박스 추천·가격 가이드 | Card Pone`,
         description: `${code} 원피스카드 박스의 현재 가격, 최고가 수록 카드, 가격 중앙값과 유효 히트를 최신 시세 데이터로 확인합니다.`,
         keywords: `${code} 박스 추천, ${code} 박스 가격, 원피스카드 박스 추천, 원피스카드 박스 시세`,
