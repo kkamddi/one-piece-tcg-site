@@ -53,6 +53,23 @@ const targets = {
     minimumCardCount: 80
   }
 };
+// Korean starter decks STK-23~29, named as the official card list's series option.
+[['23', '적 샹크스'], ['24', '녹 쥬얼리 보니'], ['25', '청 버기'], ['26', '자흑 몽키 D. 루피'], ['27', '흑 마샬 D. 티치'], ['28', '녹황 야마토'], ['29', 'EGGHEAD']]
+  .forEach(([number, title]) => {
+    targets[`ST${number}`] = {
+      seriesId: `KR-ST${number}`,
+      baseSeriesId: `ST${number}`,
+      optionCode: `STK-${number}`,
+      koName: `스타트 덱 ${title}`,
+      enName: `스타트 덱 ${title}`,
+      kindKo: '스타트 덱',
+      kindEn: 'STARTER DECK',
+      officialSeriesKeyword: `ST-${number}`,
+      description: '공식 한글 카드 리스트 기준 카드 라인',
+      insertAfter: `KR-ST${Number(number) - 1}`,
+      minimumCardCount: 15
+    };
+  });
 const targetKey = String(process.argv[2] || 'OP13').trim().toUpperCase();
 const target = targets[targetKey];
 if (!target) {

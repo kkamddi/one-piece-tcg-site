@@ -1,0 +1,42 @@
+name: D1 apply card patch
+
+# Applies one reviewed SQL file from data/d1-patches/ to the public card database.
+# Run by hand only; the card snapshot in R2 picks the change up within an hour.
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Patch file under data/d1-patches/ (e.g. data/d1-patches/2026-10-12-kr-starters-st23-st29.sql)"
+        required: true
+
+concurrency:
+  group: d1-apply-patch
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply patch
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ed82677cb22fd8679792f6cff73a00d6
+          PATCH_FILE: ${{ inputs.file }}
+        run: |
+          set -euo pipefail
+          case "$PATCH_FILE" in
+            data/d1-patches/*.sql) ;;
+            *) echo "Only files under data/d1-patches/ can be applied."; exit 1 ;;
+          esac
+          if [ ! -f "$PATCH_FILE" ]; then
+            echo "Patch file not found: $PATCH_FILE"
+            exit 1
+          fi
+          npx --yes wrangler@4.112.0 d1 execute optcgkorea-public-shadow --remote --yes --file "$PATCH_FILE"
