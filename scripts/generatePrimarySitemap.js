@@ -56,6 +56,8 @@ const paths = [
   '/guide/glossary',
   '/guide/starter-decks',
   '/guide/leader-cards',
+  '/guide/colors',
+  '/guide/events',
   '/guide/shops/seoul',
   '/guide/shops/gyeonggi',
   '/guide/shops/busan',

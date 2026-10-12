@@ -79,10 +79,12 @@ test('rules, glossary, starter deck and leader guides are routed, pre-rendered, 
     import('./rulesSeo.js').then((m) => m.getRulesEntries()),
     import('./glossarySeo.js').then((m) => m.getGlossaryEntries()),
     import('./starterDecksSeo.js').then((m) => m.getStarterDecksEntries()),
-    import('./leaderCardsSeo.js').then((m) => m.getLeaderCardsEntries())
+    import('./leaderCardsSeo.js').then((m) => m.getLeaderCardsEntries()),
+    import('./colorsSeo.js').then((m) => m.getColorsEntries()),
+    import('./eventsSeo.js').then((m) => m.getEventsEntries())
   ]);
   const entries = sources.flat();
-  assert.deepEqual(entries.map((entry) => entry.pathname), ['/guide/rules', '/guide/glossary', '/guide/starter-decks', '/guide/leader-cards']);
+  assert.deepEqual(entries.map((entry) => entry.pathname), ['/guide/rules', '/guide/glossary', '/guide/starter-decks', '/guide/leader-cards', '/guide/colors', '/guide/events']);
   for (const { pathname, seo } of entries) {
     assert.match(sitemap, new RegExp(`'${pathname}'`));
     assert.match(search, new RegExp(`href: '${pathname}'`));

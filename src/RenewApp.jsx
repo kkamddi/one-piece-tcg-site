@@ -42,6 +42,8 @@ import { RULES_EDITORIAL, RULES_PATH, RULES_SEO } from '../lib/rules-editorial.j
 import { GLOSSARY_EDITORIAL, GLOSSARY_PATH, GLOSSARY_SEO } from '../lib/glossary-editorial.js';
 import { LEADER_CARDS_EDITORIAL, LEADER_CARDS_PATH, LEADER_CARDS_SEO } from '../lib/leader-cards-editorial.js';
 import { STARTER_DECKS_PATH } from '../lib/starter-decks-editorial.js';
+import { EVENTS_PATH, EVENTS_SEO, buildEventsEditorial, getEventsFaq } from '../lib/events-editorial.js';
+import { COLORS_EDITORIAL, COLORS_PATH, COLORS_SEO } from '../lib/colors-editorial.js';
 import { BOOSTER_PREVIEWS, BOOSTER_PREVIEW_PATH, formatPreviewYen, getBoosterPreview, getPreviewCards, groupPreviewCards } from '../lib/booster-preview.js';
 import { SHOP_GUIDE_EDITORIAL } from '../lib/shop-guide-editorial.js';
 import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recommendation-editorial.js';
@@ -50,7 +52,7 @@ import { GUIDE_ARTICLE_FAQ } from '../lib/guide-article-faq.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
 import { MARKET_REPORT_PATH, formatReportWon, getMarketReportHighlights, getMarketReportKpis, getMarketReportMethod, reportConditionLabel } from '../lib/market-report.js';
 import MARKET_REPORT_INDEX from './data/market-reports/index.json';
-import { MANGA_COLLECTION_GROUPS } from './data/collection-guide';
+import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS } from './data/collection-guide';
 import boxMarketItems from './data/box-market-items';
 import { findSealedBox, boxSeries, boxQuote, BOX_QUOTE_MAX_AGE_MS } from './box-portfolio';
 import { confirmedCardShows, cardShowSources } from './data/card-show-events';
@@ -776,6 +778,8 @@ const GUIDE_HUB_COLLECTIONS = [
       { href: RULES_PATH, title: '룰 한눈에', meta: '승리 조건·턴 진행·배틀 순서' },
       { href: GLOSSARY_PATH, title: '용어 사전', meta: '블로커·속공·카운터·두웅!! 뜻' },
       { href: STARTER_DECKS_PATH, title: '스타트 덱 고르기', meta: '한글판 스타트 덱 종류·색별 정리' },
+      { href: COLORS_PATH, title: '색깔별 특징', meta: '6색 카드 수·키워드·효과 비교' },
+      { href: EVENTS_PATH, title: '대회·이벤트 참가', meta: '플래그십 배틀·참가 방법·카드쇼 일정' },
       { href: '/guide/card-catalog', title: '도감에서 카드 찾기', meta: '번호·이름·시리즈 구분' },
       { href: '/guide/shops', title: '구매처 확인하기', meta: '공인점포·지역·지도 확인' },
       { href: '/guide/release-schedule', title: '신작·발매 일정', meta: '일본판·한국판 발매일' },
@@ -884,8 +888,19 @@ const GUIDE_ARTICLE_DETAILS = {
     related: ['/guide/box-recommendation', '/guide/release-schedule', '/guide/shops']
   }
 };
-// Guides whose content is fixed at build time: one entry drives routing, client SEO and the article view.
+const getEventsArgs = () => [confirmedCardShows(), topicsData, { flagship: FLAGSHIP_COLLECTION_GROUPS, championship: CHAMPIONSHIP_COLLECTION_GROUPS }, getKstDateKey(Date.now())];
+// One entry per guide drives routing, client SEO and the article view; editorial/faq may be getters for dated content.
 const STATIC_EDITORIAL_GUIDES = {
+  [COLORS_PATH]: {
+    key: 'colors', editorial: COLORS_EDITORIAL, seo: COLORS_SEO, faq: GUIDE_ARTICLE_FAQ.colors,
+    checklistTitle: '색 고르기 체크리스트', related: [LEADER_CARDS_PATH, STARTER_DECKS_PATH, GLOSSARY_PATH],
+    cta: { eyebrow: '덱 만들기', title: '색을 골랐다면 덱을 짜 보세요', description: '리더 색에 맞는 카드로 50장 덱을 구성합니다.', href: '/lab/decks/builder', label: '덱 빌더 열기' }
+  },
+  [EVENTS_PATH]: {
+    key: 'events', editorial: () => buildEventsEditorial(...getEventsArgs()), seo: EVENTS_SEO, faq: () => getEventsFaq(...getEventsArgs()),
+    checklistTitle: '참가 전 체크리스트', related: ['/guide/rules', '/guide/collection/flagship', '/guide/shops'],
+    cta: { eyebrow: '매장 찾기', title: '대회가 열리는 매장을 찾으려면', description: '가까운 공인점포와 취급점포를 지역별로 찾습니다.', href: '/shops', label: '구매처 찾기' }
+  },
   [RULES_PATH]: {
     key: 'rules', editorial: RULES_EDITORIAL, seo: RULES_SEO, faq: GUIDE_ARTICLE_FAQ.rules,
     checklistTitle: '룰 체크리스트', related: ['/guide/getting-started', GLOSSARY_PATH, STARTER_DECKS_PATH],
@@ -916,6 +931,8 @@ const GUIDE_RELATED_LABELS = {
   [RULES_PATH]: ['룰 한눈에', '승리 조건, 덱 구성, 턴 진행과 배틀 순서를 봅니다.'],
   [GLOSSARY_PATH]: ['용어 사전', '블로커·속공·카운터·두웅!! 같은 카드 용어 뜻을 봅니다.'],
   [STARTER_DECKS_PATH]: ['스타트 덱 고르기', '한글판 스타트 덱 종류와 색별 정리를 봅니다.'],
+  [COLORS_PATH]: ['색깔별 특징', '6색의 카드 수, 키워드와 효과 경향을 비교합니다.'],
+  [EVENTS_PATH]: ['대회·이벤트 정리', '공식 대회 종류와 참가 방법, 카드쇼 일정을 봅니다.'],
   [LEADER_CARDS_PATH]: ['리더 카드 정리', '색별 리더 수와 비싼 리더 카드를 봅니다.'],
   ...Object.fromEntries(REGION_SHOP_PAGES.map((region) => [`/guide/shops/${region.slug}`, [`${region.label} 원피스카드 매장`, `${region.label}의 공식 공인점포·취급점포 목록을 봅니다.`]])),
   '/guide/getting-started': ['원피스 카드게임 입문', '상품 종류와 한글판·일본판 차이, 시작 순서를 봅니다.'],
@@ -3402,7 +3419,8 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     return { title: seo.title, h1: editorial.heading, description: seo.description, keywords: seo.keywords, body: editorial.paragraphs[0] };
   }
   if (STATIC_EDITORIAL_GUIDES[path]) {
-    const { editorial, seo } = STATIC_EDITORIAL_GUIDES[path];
+    const { seo } = STATIC_EDITORIAL_GUIDES[path];
+    const editorial = resolveGuideValue(STATIC_EDITORIAL_GUIDES[path].editorial);
     return { title: seo.title, h1: editorial.heading, description: seo.description, keywords: seo.keywords, body: editorial.paragraphs[0] };
   }
   if (path === '/guide/box-prices') {
@@ -8563,9 +8581,11 @@ function RenewRegionShopGuide({ slug }) {
   return <RenewEditorialGuide guide={guide} guideKey="regionShop" details={details} headingId="region-shop-guide-heading" cta={{ eyebrow: '구매처 찾기', title: '지도와 내 주변순으로 보려면', description: '구매처 찾기에서 매장 위치와 지도 바로가기를 확인합니다.', href: '/shops', label: '구매처 찾기' }} />;
 }
 
+const resolveGuideValue = (value) => (typeof value === 'function' ? value() : value);
+
 function RenewStaticEditorialGuide({ config }) {
-  const guide = useMemo(() => toEditorialGuide(config.editorial), [config]);
-  const details = useMemo(() => ({ checklistTitle: config.checklistTitle, faq: config.faq, related: config.related }), [config]);
+  const guide = useMemo(() => toEditorialGuide(resolveGuideValue(config.editorial)), [config]);
+  const details = useMemo(() => ({ checklistTitle: config.checklistTitle, faq: resolveGuideValue(config.faq), related: config.related }), [config]);
   return <RenewEditorialGuide guide={guide} guideKey={config.key} details={details} headingId={`${config.key}-guide-heading`} cta={config.cta} />;
 }
 

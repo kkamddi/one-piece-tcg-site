@@ -8,6 +8,7 @@ import { getBoxPricesEntries } from './boxPricesSeo.js';
 import { getRulesEntries } from './rulesSeo.js';
 import { getGlossaryEntries } from './glossarySeo.js';
 import { getLeaderCardsEntries } from './leaderCardsSeo.js';
+import { getColorsEntries } from './colorsSeo.js';
 import { GUIDE_FAQ_PATHS } from '../lib/guide-article-faq.js';
 
 const read = file => readFile(new URL(file, import.meta.url), 'utf8');
@@ -21,7 +22,7 @@ test('llms.txt only links to pages the site publishes', async () => {
   for (const path of paths) assert.ok(sitemap.includes(`'${path}'`) || path === '/market-report', path);
 });
 
-const NEW_GUIDE_SEO = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getLeaderCardsEntries()].map((entry) => [entry.pathname, entry.seo]));
+const NEW_GUIDE_SEO = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getLeaderCardsEntries(), ...getColorsEntries()].map((entry) => [entry.pathname, entry.seo]));
 
 test('editorial guides pre-render their FAQ as text and FAQPage next to the Article', async () => {
   const html = await read('../index.html');

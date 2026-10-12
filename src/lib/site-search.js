@@ -27,6 +27,8 @@ export const SEARCH_PAGES = [
   { title: '원피스카드 용어 사전', href: '/guide/glossary', keywords: ['용어', '뜻', '블로커', '속공', '러시', '카운터', '트리거', '두웅', '돈'], description: '블로커·속공·카운터·두웅!! 같은 카드 용어의 뜻을 정리했습니다.' },
   { title: '원피스카드 스타트 덱 정리', href: '/guide/starter-decks', keywords: ['스타트 덱', '스타터', '스타트덱 추천', '입문 덱', 'STK'], description: '한글판 스타트 덱 종류와 색별 정리, 고르는 기준입니다.' },
   { title: '원피스카드 리더 카드 정리', href: '/guide/leader-cards', keywords: ['리더', '리더 카드', '리더 종류', '리더 추천', '리더 시세'], description: '색별 리더 수, 2색 조합, 비싼 리더 카드 TOP 10입니다.' },
+  { title: '원피스카드 색깔별 특징', href: '/guide/colors', keywords: ['색', '색깔', '빨강', '초록', '파랑', '보라', '검정', '노랑', '색 추천'], description: '6색의 카드 수, 키워드 비율과 효과 경향을 비교합니다.' },
+  { title: '원피스카드 대회·이벤트 정리', href: '/guide/events', keywords: ['대회', '플래그십', '플래그쉽', '스탠다드 배틀', '교류회', '챔피언십', '카드쇼', 'PLAYGO', '이벤트'], description: '공식 대회 종류와 참가 방법, 다가오는 카드쇼 일정입니다.' },
   { title: '서울 원피스카드 매장', href: '/guide/shops/seoul', keywords: ['서울', '마포', '강남', '홍대', '용산', '서울 매장'], description: '서울 공식 공인점포·취급점포 목록' },
   { title: '경기 원피스카드 매장', href: '/guide/shops/gyeonggi', keywords: ['경기', '부천', '성남', '분당', '평택', '수원', '경기 매장'], description: '경기 공식 공인점포·취급점포 목록' },
   { title: '부산 원피스카드 매장', href: '/guide/shops/busan', keywords: ['부산', '동래', '서면', '부산진', '부산 매장'], description: '부산 공식 공인점포·취급점포 목록' },

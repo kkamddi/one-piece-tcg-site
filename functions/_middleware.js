@@ -844,7 +844,9 @@ const STATIC_LINK_LABELS = {
   '/guide/rules': '원피스카드 룰 한눈에',
   '/guide/glossary': '원피스카드 용어 사전',
   '/guide/starter-decks': '원피스카드 스타트 덱 정리',
-  '/guide/leader-cards': '원피스카드 리더 카드 정리'
+  '/guide/leader-cards': '원피스카드 리더 카드 정리',
+  '/guide/colors': '원피스카드 색깔별 특징',
+  '/guide/events': '원피스카드 대회·이벤트 정리'
 };
 
 const SERVER_PAGE_CONTENT = {
@@ -1015,7 +1017,7 @@ const SERVER_PAGE_CONTENT = {
       '각 가이드는 실제 도감과 시세 화면으로 이어지며 카드 상태, 언어판, 최근 거래 기록과 계산 결과의 범위를 구분해 안내합니다.'
     ],
     sections: qaSections('guide'),
-    links: ['/guide/getting-started', '/guide/rules', '/guide/glossary', '/guide/starter-decks', '/guide/leader-cards', '/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
+    links: ['/guide/getting-started', '/guide/rules', '/guide/glossary', '/guide/starter-decks', '/guide/leader-cards', '/guide/colors', '/guide/events', '/guide/collection', '/guide/card-catalog', '/guide/card-price', '/guide/card-storage', '/guide/shops', '/guide/box-recommendation', '/guides/centering', '/guides/pack-simulator', '/guides/deck-builder']
   },
   '/guide/collection': {
     heading: '원피스카드 수집 가이드 - 망가·챔피언십·플래그십·프로모',
