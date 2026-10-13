@@ -24,7 +24,7 @@ test('series-hit-cards.json keeps a compact, fixed shape', async () => {
     assert.deepEqual(Object.keys(set.counts).sort(), ['manga', 'parallel', 'sp']);
     Object.values(set.counts).forEach((count) => assert.ok(Number.isInteger(count) && count >= 0));
     for (const card of set.hitCards) {
-      assert.deepEqual(Object.keys(card), ['code', 'name', 'nameJp', 'version', 'image', 'singleJpy', 'singleDate', 'psa10Jpy']);
+      assert.deepEqual(Object.keys(card), ['apparelId', 'code', 'name', 'nameJp', 'version', 'image', 'singleJpy', 'singleDate', 'psa10Jpy']);
       assert.match(card.code, /^[A-Z]+\d{2}-\d{3}$/);
       assert.ok(card.name && card.nameJp && card.version, `${id} ${card.code}`);
       assert.ok(Number.isInteger(card.singleJpy) && card.singleJpy > 0);

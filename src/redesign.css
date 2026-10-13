@@ -770,3 +770,8 @@
   .renew-app .renew-guide-hub-set-row > div::-webkit-scrollbar { display: none; }
   .renew-app .renew-guide-hub-set-row button { flex: 0 0 auto; }
 }
+
+/* JP 정보: the lab card (no top tab now) lines up with the official news column below it. */
+@media (min-width: 561px) {
+  .renew-app .renew-news-hub { grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr); gap: 14px; }
+}

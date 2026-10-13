@@ -2001,7 +2001,8 @@ const NAV_ITEMS = [
   { id: 'prices', labelKey: 'navPrices' },
   ...(MARKETPLACE_TAB_VISIBLE ? [{ id: 'marketplace', labelKey: 'navMarketplace' }] : []),
   { id: 'news', labelKey: 'navNews' },
-  { id: 'lab', labelKey: 'navLab' },
+  // The lab is reached from the 정보 page shortcuts, as on mobile; it stays here for page titles.
+  { id: 'lab', labelKey: 'navLab', topNav: false },
   { id: 'shops', labelKey: 'navShops' }
 ];
 const VISIBLE_RENEW_HOME_UPDATES = RENEW_HOME_UPDATES.filter((item) => MARKETPLACE_ENABLED || item.id !== '2026-06-19-marketplace');
@@ -4447,12 +4448,12 @@ function RenewHeader({ activePage, onNavigate, onMobileNews, onScan, isDark, onT
         </a>
 
         <nav className="renew-tabs" aria-label="주요 메뉴">
-          {NAV_ITEMS.map((item, index) => (
+          {NAV_ITEMS.filter((item) => item.topNav !== false).map((item, index) => (
             <React.Fragment key={item.id}>
               {index > 0 ? <span className="renew-tab-divider" aria-hidden="true">|</span> : null}
               <a
                 href={getLocalizedPagePath(item.id, uiLang)}
-                className={`renew-tab ${(item.id === 'lab' ? isLabActive : activePage === item.id) ? 'is-active' : ''}`}
+                className={`renew-tab ${(activePage === item.id || (item.id === 'news' && isLabActive)) ? 'is-active' : ''}`}
                 onClick={(event) => { event.preventDefault(); onNavigate(item.id); }}
               >
                 {t(item.labelKey)}
@@ -7171,9 +7172,9 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
     event.preventDefault();
     onNavigate(href);
   }
-  // Mobile reaches the lab from here; desktop keeps it in the top navigation.
+  // The lab has no top tab: the Korean overview links it in the shortcut row, the Japanese page through this card.
   const labHubCard = (
-    <button type="button" className="renew-news-hub-card is-mobile-only" onClick={onOpenLab}>
+    <button type="button" className="renew-news-hub-card" onClick={onOpenLab}>
       <strong>{getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}</strong>
       <small>{getLocaleText(uiLang, '센터링 측정, 팩 시뮬레이터, 덱 빌더', 'Centering, pack simulator, deck builder', 'センタリング測定・パック開封・デッキビルダー')}</small>
       <b aria-hidden="true">›</b>
@@ -7242,7 +7243,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
 
       {newsFilter === 'cardshows' && <React.Suspense fallback={<div className="renew-empty" aria-busy="true" />}><CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} /></React.Suspense>}
 
-      {isJp && newsFilter === 'all' ? <section className="renew-news-hub is-mobile-only" aria-label={getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}>{labHubCard}</section> : null}
+      {isJp && newsFilter === 'all' ? <section className="renew-news-hub" aria-label={getLocaleText(uiLang, '실험실', 'Lab', 'ラボ')}>{labHubCard}</section> : null}
 
       {showOverview ? (
         <div className="renew-news-home">
