@@ -7239,6 +7239,17 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
             {item.label}
           </a>
         ))}
+        {/* The lab has no top tab, so it sits with the 정보 sections on mobile and desktop. */}
+        <a
+          href={getLocalizedPagePath('lab', uiLang)}
+          onClick={(event) => {
+            if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            onOpenLab();
+          }}
+        >
+          실험실
+        </a>
       </div> : null}
 
       {newsFilter === 'cardshows' && <React.Suspense fallback={<div className="renew-empty" aria-busy="true" />}><CardShows search={typeof window !== 'undefined' ? window.location.search : ''} onNavigate={onNavigate} onOpenCalendar={onOpenCalendar} /></React.Suspense>}

@@ -775,3 +775,9 @@
 @media (min-width: 561px) {
   .renew-app .renew-news-hub { grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.85fr); gap: 14px; }
 }
+
+/* 정보 chips: the 실험실 chip keeps the row on one line down to 360px phones. */
+@media (max-width: 380px) {
+  .renew-app .renew-news-filter-tabs { gap: 4px; }
+  .renew-app .renew-news-filter-tabs :is(button, a) { padding: 0 7px; }
+}
