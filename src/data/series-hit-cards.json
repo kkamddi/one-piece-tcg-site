@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-13",
+  "updatedAt": "2026-10-14",
   "basis": "snkrdunk_latest_trade_day_median",
   "source": "https://www.optcgkorea.com/api/market?summary=trade-latest",
   "sets": {
@@ -17,7 +17,7 @@
         {"apparelId":183375,"code":"EB01-049","name":"T본","nameJp":"Tボーン","version":"R 패러렐","image":"https://cards.optcgkorea.com/cards/JP/EB01-049_p1.webp","singleJpy":2170,"singleDate":"2026-06-02","psa10Jpy":11286}
       ],
       "counts": {"manga":1,"sp":0,"parallel":18},
-      "box": {"basis":"listing","priceUsd":120,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":114,"date":"2026-10-14"}
     },
     "EB02": {
       "hitCards": [
@@ -33,7 +33,7 @@
         {"apparelId":503451,"code":"OP05-001","name":"사보","nameJp":"サボ","version":"리더 SP","image":null,"singleJpy":47058,"singleDate":"2026-08-13","psa10Jpy":60295}
       ],
       "counts": {"manga":1,"sp":24,"parallel":15},
-      "box": {"basis":"listing","priceUsd":180,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":178,"date":"2026-10-14"}
     },
     "EB03": {
       "hitCards": [
@@ -49,7 +49,7 @@
         {"apparelId":714423,"code":"EB03-053","name":"나미","nameJp":"ナミ","version":"SR 패러렐","image":"https://cards.optcgkorea.com/cards/JP/EB03-053_p1.webp","singleJpy":7440,"singleDate":"2026-08-27","psa10Jpy":7935}
       ],
       "counts": {"manga":1,"sp":9,"parallel":18},
-      "box": {"basis":"listing","priceUsd":90,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":90,"date":"2026-10-14"}
     },
     "EB04": {
       "hitCards": [
@@ -65,7 +65,7 @@
         {"apparelId":755030,"code":"EB04-058","name":"볼사리노","nameJp":"ボルサリーノ","version":"SR","image":"https://cards.optcgkorea.com/cards/JP/EB04-058.webp","singleJpy":5365,"singleDate":"2026-10-01","psa10Jpy":19375}
       ],
       "counts": {"manga":1,"sp":6,"parallel":16},
-      "box": {"basis":"listing","priceUsd":82,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":82,"date":"2026-10-14"}
     },
     "OP01": {
       "hitCards": [
@@ -81,7 +81,7 @@
         {"apparelId":94872,"code":"OP01-060","name":"돈키호테 도플라밍고","nameJp":"ドンキホーテ・ドフラミンゴ","version":"리더 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP01-060_p1.webp","singleJpy":6854,"singleDate":"2026-07-17","psa10Jpy":20925}
       ],
       "counts": {"manga":1,"sp":0,"parallel":25},
-      "box": {"basis":"listing","priceUsd":237,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":222,"date":"2026-10-14"}
     },
     "OP02": {
       "hitCards": [
@@ -97,7 +97,7 @@
         {"apparelId":102439,"code":"OP02-114","name":"볼사리노","nameJp":"ボルサリーノ","version":"SR 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP02-114_p1.webp","singleJpy":2945,"singleDate":"2026-06-02","psa10Jpy":11625}
       ],
       "counts": {"manga":1,"sp":0,"parallel":31},
-      "box": {"basis":"listing","priceUsd":114,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":114,"date":"2026-10-14"}
     },
     "OP03": {
       "hitCards": [
@@ -113,7 +113,7 @@
         {"apparelId":112959,"code":"OP03-076","name":"로브 루치","nameJp":"ロブ・ルッチ","version":"리더 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP03-076_p1.webp","singleJpy":2635,"singleDate":"2026-09-08","psa10Jpy":14725}
       ],
       "counts": {"manga":1,"sp":4,"parallel":22},
-      "box": {"basis":"listing","priceUsd":113,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":113,"date":"2026-10-14"}
     },
     "OP04": {
       "hitCards": [
@@ -129,7 +129,7 @@
         {"apparelId":126103,"code":"OP04-058","name":"크로커다일","nameJp":"クロコダイル","version":"리더 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP04-058_p1.webp","singleJpy":4312,"singleDate":"2026-07-27","psa10Jpy":16653}
       ],
       "counts": {"manga":1,"sp":5,"parallel":18},
-      "box": {"basis":"listing","priceUsd":108,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":102,"date":"2026-10-14"}
     },
     "OP05": {
       "hitCards": [
@@ -145,7 +145,7 @@
         {"apparelId":135444,"code":"OP04-044","name":"카이도","nameJp":"カイドウ","version":"SR SP","image":"https://cards.optcgkorea.com/cards/JP/OP04-044_p2.webp","singleJpy":9108,"singleDate":"2026-10-10","psa10Jpy":15725}
       ],
       "counts": {"manga":3,"sp":6,"parallel":25},
-      "box": {"basis":"listing","priceUsd":316,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":304,"date":"2026-10-14"}
     },
     "OP06": {
       "hitCards": [
@@ -161,7 +161,7 @@
         {"apparelId":158401,"code":"OP03-114","name":"샬롯 링링","nameJp":"シャーロット・リンリン","version":"SR SP","image":"https://cards.optcgkorea.com/cards/JP/OP03-114_p2.webp","singleJpy":4918,"singleDate":"2026-10-10","psa10Jpy":20460}
       ],
       "counts": {"manga":1,"sp":6,"parallel":22},
-      "box": {"basis":"listing","priceUsd":114,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":126,"date":"2026-10-14"}
     },
     "OP07": {
       "hitCards": [
@@ -177,7 +177,7 @@
         {"apparelId":202957,"code":"OP07-097","name":"베가펑크","nameJp":"ベガパンク","version":"리더 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP07-097_p1.webp","singleJpy":4099,"singleDate":"2026-10-11","psa10Jpy":23250}
       ],
       "counts": {"manga":1,"sp":6,"parallel":24},
-      "box": {"basis":"listing","priceUsd":95,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":95,"date":"2026-10-14"}
     },
     "OP08": {
       "hitCards": [
@@ -193,7 +193,7 @@
         {"apparelId":265740,"code":"OP08-112","name":"S-스네이크","nameJp":"S-スネーク","version":"SR 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP08-112_p1.webp","singleJpy":3565,"singleDate":"2026-09-04","psa10Jpy":13662}
       ],
       "counts": {"manga":1,"sp":6,"parallel":22},
-      "box": {"basis":"listing","priceUsd":56,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":56,"date":"2026-10-14"}
     },
     "OP09": {
       "hitCards": [
@@ -209,7 +209,7 @@
         {"apparelId":349419,"code":"OP09-004","name":"샹크스","nameJp":"シャンクス","version":"SR SP","image":"https://cards.optcgkorea.com/cards/JP/OP09-004_p3.webp","singleJpy":20460,"singleDate":"2026-09-14","psa10Jpy":35956}
       ],
       "counts": {"manga":5,"sp":10,"parallel":22},
-      "box": {"basis":"listing","priceUsd":114,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":111,"date":"2026-10-14"}
     },
     "OP10": {
       "hitCards": [
@@ -225,7 +225,7 @@
         {"apparelId":442281,"code":"OP10-005","name":"상디","nameJp":"サンジ","version":"SR 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP10-005_p1.webp","singleJpy":2945,"singleDate":"2026-06-15","psa10Jpy":22165}
       ],
       "counts": {"manga":1,"sp":6,"parallel":23},
-      "box": {"basis":"listing","priceUsd":64,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":64,"date":"2026-10-14"}
     },
     "OP11": {
       "hitCards": [
@@ -241,7 +241,7 @@
         {"apparelId":520533,"code":"OP06-119","name":"상디","nameJp":"サンジ","version":"SEC SP","image":"https://cards.optcgkorea.com/cards/JP/OP06-119_p2.webp","singleJpy":11160,"singleDate":"2026-08-26","psa10Jpy":23184}
       ],
       "counts": {"manga":1,"sp":8,"parallel":25},
-      "box": {"basis":"listing","priceUsd":184,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":190,"date":"2026-10-14"}
     },
     "OP12": {
       "hitCards": [
@@ -257,7 +257,7 @@
         {"apparelId":583592,"code":"OP12-020","name":"롤로노아 조로","nameJp":"ロロノア・ゾロ","version":"리더 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP12-020_p1.webp","singleJpy":6956,"singleDate":"2026-09-27","psa10Jpy":10532}
       ],
       "counts": {"manga":1,"sp":8,"parallel":23},
-      "box": {"basis":"listing","priceUsd":92,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":92,"date":"2026-10-14"}
     },
     "OP13": {
       "hitCards": [
@@ -273,7 +273,7 @@
         {"apparelId":676062,"code":"OP13-083","name":"제이가르시아 새턴 성","nameJp":"ジェイガルシア・サターン聖","version":"R 패러렐","image":null,"singleJpy":24180,"singleDate":"2026-09-11","psa10Jpy":41385}
       ],
       "counts": {"manga":6,"sp":11,"parallel":35},
-      "box": {"basis":"listing","priceUsd":109,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":117,"date":"2026-10-14"}
     },
     "OP14": {
       "hitCards": [
@@ -289,7 +289,7 @@
         {"apparelId":728126,"code":"OP06-093","name":"페로나","nameJp":"ペローナ","version":"SR SP","image":"https://cards.optcgkorea.com/cards/JP/OP06-093_p3.webp","singleJpy":7612,"singleDate":"2026-09-21","psa10Jpy":18048}
       ],
       "counts": {"manga":1,"sp":8,"parallel":24},
-      "box": {"basis":"listing","priceUsd":55,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":55,"date":"2026-10-14"}
     },
     "OP15": {
       "hitCards": [
@@ -305,7 +305,7 @@
         {"apparelId":758751,"code":"OP15-098","name":"몽키 D. 루피","nameJp":"モンキー・Ｄ・ルフィ","version":"리더 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP15-098_p1.webp","singleJpy":3663,"singleDate":"2026-10-06","psa10Jpy":12387}
       ],
       "counts": {"manga":1,"sp":5,"parallel":23},
-      "box": {"basis":"listing","priceUsd":52,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":54,"date":"2026-10-14"}
     },
     "OP16": {
       "hitCards": [
@@ -321,7 +321,7 @@
         {"apparelId":822581,"code":"OP14-029","name":"타시기","nameJp":"たしぎ","version":"R SP","image":"https://cards.optcgkorea.com/cards/JP/OP14-029_p1.webp","singleJpy":5037,"singleDate":"2026-10-06","psa10Jpy":19689}
       ],
       "counts": {"manga":3,"sp":6,"parallel":26},
-      "box": {"basis":"listing","priceUsd":57,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":60,"date":"2026-10-14"}
     },
     "OP17": {
       "hitCards": [
@@ -337,7 +337,7 @@
         {"apparelId":871070,"code":"OP13-028","name":"샹크스","nameJp":"シャンクス","version":"SR SP","image":"https://cards.optcgkorea.com/cards/JP/OP13-028_p2.webp","singleJpy":21063,"singleDate":"2026-10-06","psa10Jpy":null}
       ],
       "counts": {"manga":4,"sp":8,"parallel":34},
-      "box": {"basis":"listing","priceUsd":73,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":76,"date":"2026-10-14"}
     },
     "PRB01": {
       "hitCards": [
@@ -353,7 +353,7 @@
         {"apparelId":328398,"code":"OP01-024","name":"몽키 D. 루피","nameJp":"モンキー・D・ルフィ","version":"SR 패러렐","image":"https://cards.optcgkorea.com/cards/JP/OP01-024_p2.webp","singleJpy":3160,"singleDate":"2026-08-17","psa10Jpy":9250}
       ],
       "counts": {"manga":3,"sp":0,"parallel":30},
-      "box": {"basis":"listing","priceUsd":139,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":127,"date":"2026-10-14"}
     },
     "PRB02": {
       "hitCards": [
@@ -369,7 +369,7 @@
         {"apparelId":656346,"code":"PRB02-017","name":"보아 행콕","nameJp":"ボア・ハンコック","version":"SR 패러렐","image":"https://cards.optcgkorea.com/cards/JP/PRB02-017_p1.webp","singleJpy":4757,"singleDate":"2026-09-20","psa10Jpy":12599}
       ],
       "counts": {"manga":1,"sp":6,"parallel":27},
-      "box": {"basis":"listing","priceUsd":60,"date":"2026-10-13"}
+      "box": {"basis":"listing","priceUsd":61,"date":"2026-10-14"}
     }
   }
 }
