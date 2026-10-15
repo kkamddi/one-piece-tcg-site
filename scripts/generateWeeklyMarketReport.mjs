@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { FX_FALLBACK, fetchFxRates } from '../lib/fx-rates.js';
 import { buildWeeklyMarketReport, getMarketReportSummary, getMarketReportTitle, getReportWeek, kstDateKey, weeklyReportSql } from '../lib/market-report.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -79,7 +80,12 @@ const boxes = sealedBoxes
   .sort((x, y) => releaseOf(y).localeCompare(releaseOf(x)))
   .slice(0, 8);
 
-const report = buildWeeklyMarketReport({ week, rows, dailyRows, products, boxes, boxPrices, previousBoxSnapshot: previousReport?.boxSnapshot || null });
+// The won figures use the ECB rate of the day the report is generated; the fixed fallback only if that fails.
+const fx = await fetchFxRates().catch((error) => {
+  console.warn(`FX rate unavailable, using ${FX_FALLBACK.krwPerJpy}: ${error.message}`);
+  return FX_FALLBACK;
+});
+const report = buildWeeklyMarketReport({ week, rows, dailyRows, products, boxes, boxPrices, previousBoxSnapshot: previousReport?.boxSnapshot || null, krwPerJpy: fx.krwPerJpy });
 const existingPath = path.join(reportsDir, `${report.id}.json`);
 // Re-running a week keeps any editor notes written into the earlier file.
 if (fs.existsSync(existingPath)) report.notes = JSON.parse(fs.readFileSync(existingPath, 'utf8')).notes || [];

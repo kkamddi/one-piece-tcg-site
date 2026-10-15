@@ -13,6 +13,7 @@ const RATE_LIMITS = {
   shopsIndex: 120,
   shopsRegions: 120,
   series: 120,
+  fx: 120,
   cardImage: 240,
   cardThumb: 300,
   cardWorldCup: 12,
@@ -202,6 +203,7 @@ function routeApi(pathParts) {
   if (first === 'shops' && !second) return { key: 'shopsIndex' };
   if (first === 'shops' && second === 'regions') return { key: 'shopsRegions' };
   if (first === 'series') return { key: 'series' };
+  if (first === 'fx') return { key: 'fx' };
   if (first === 'card-image') return { key: 'cardImage' };
   if (first === 'card-thumb') return { key: 'cardThumb' };
   if (first === 'deck-lab') return { key: 'deckLab' };
@@ -234,6 +236,7 @@ function getPublicCacheTtl(request, route, url) {
   if (['cardsIndex', 'cardsSearch'].includes(route.key)) return 3600;
   if (route.key === 'cardsId') return 900;
   if (['shopsIndex', 'shopsRegions', 'series'].includes(route.key)) return 21600;
+  if (route.key === 'fx') return 3600;
   if (['cardImage', 'cardThumb'].includes(route.key)) return 86400;
   if (route.key === 'deckLab') return 300;
   if (route.key === 'cardWorldCup') return 0;
@@ -253,6 +256,7 @@ async function loadHandler(key) {
   if (key === 'shopsIndex') return (await import('../../api/shops/index.js')).default;
   if (key === 'shopsRegions') return (await import('../../api/shops/regions.js')).default;
   if (key === 'series') return (await import('../../api/series.js')).default;
+  if (key === 'fx') return (await import('../../api/fx.js')).default;
   if (key === 'cardImage') return (await import('../../api/card-image.js')).default;
   if (key === 'cardThumb') return (await import('../../api/card-thumb.js')).default;
   if (key === 'deckLab') return (await import('../../api/deck-lab.js')).default;

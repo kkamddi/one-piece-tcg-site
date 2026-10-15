@@ -158,9 +158,27 @@ const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
 const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-25-lab-tools';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
+// Stored prices are yen; won follows the day's ECB rate from /api/fx (lib/fx-rates.js), applied by applyFxRates()
+// once it loads. The last rate seen is kept, so a returning visitor starts with it instead of the 9.4 fallback.
+// USD -> yen stays 155: SNKRDUNK prices its USD listings with its own rate, not the market's.
 const MARKET_USD_TO_JPY = 155;
-const MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * 9.4;
-const PORTFOLIO_RATES = { krwPerJpy: MARKET_USD_TO_KRW / MARKET_USD_TO_JPY, jpyPerUsd: MARKET_USD_TO_JPY };
+const FX_STORAGE_KEY = 'card-pone:fx-rates';
+let MARKET_KRW_PER_JPY = 9.4;
+let MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * MARKET_KRW_PER_JPY;
+let PORTFOLIO_RATES = { krwPerJpy: MARKET_KRW_PER_JPY, jpyPerUsd: MARKET_USD_TO_JPY };
+function applyFxRates(rates) {
+  const krwPerJpy = Number(rates?.krwPerJpy);
+  if (!(krwPerJpy > 1 && krwPerJpy < 30)) return false;
+  MARKET_KRW_PER_JPY = krwPerJpy;
+  MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * krwPerJpy;
+  PORTFOLIO_RATES = { krwPerJpy, jpyPerUsd: MARKET_USD_TO_JPY };
+  return true;
+}
+try {
+  if (typeof window !== 'undefined') applyFxRates(JSON.parse(window.localStorage.getItem(FX_STORAGE_KEY) || 'null'));
+} catch {
+  // Storage can be unavailable in strict privacy modes.
+}
 const RECENT_SALES_VISIBLE_MS = 1000 * 60 * 60 * 24 * 365;
 const MARKETPLACE_TAB_VISIBLE = false;
 const MARKETPLACE_ENABLED = false;
@@ -1654,14 +1672,14 @@ function convertPortfolioUnitPriceToJpy(value, currency = 'KRW') {
   if (!amount) return 0;
   if (currency === 'USD') return Math.round(amount * MARKET_USD_TO_JPY);
   if (currency === 'JPY') return Math.round(amount);
-  return Math.round(amount / (MARKET_USD_TO_KRW / MARKET_USD_TO_JPY));
+  return Math.round(amount / MARKET_KRW_PER_JPY);
 }
 
 function formatSignedWonFromYen(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount === 0) return '₩0';
   const sign = amount > 0 ? '+' : '-';
-  return `${sign}₩${Math.round(Math.abs(amount) * (MARKET_USD_TO_KRW / MARKET_USD_TO_JPY)).toLocaleString('ko-KR')}`;
+  return `${sign}₩${Math.round(Math.abs(amount) * MARKET_KRW_PER_JPY).toLocaleString('ko-KR')}`;
 }
 
 function formatSignedYen(value) {
@@ -4096,7 +4114,7 @@ function RenewPriceAlertModal({ item, defaultCondition = 'a', currentPrices = {}
   const [pushStatus, setPushStatus] = useState('loading');
   const [pushBusy, setPushBusy] = useState(false);
   const apparelId = Number(item?.apparelId || 0);
-  const jpyToKrw = MARKET_USD_TO_KRW / MARKET_USD_TO_JPY;
+  const jpyToKrw = MARKET_KRW_PER_JPY;
   const currentPrice = Number(resolvedPrices?.[conditionKey] || 0);
 
   const loadRules = useCallback(async () => {
@@ -16475,6 +16493,24 @@ export default function RenewApp() {
   const [activePage, setActivePage] = useState(initialPage);
   const [scannerOpen, setScannerOpen] = useState(false);
   useEffect(() => { if (activePage !== 'prices') setScannerOpen(false); }, [activePage]);
+  // Re-render once the day's won rate arrives; price formatters read it at call time.
+  const [, setFxVersion] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(resolveApiUrl('/api/fx'))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((rates) => {
+        if (cancelled || !applyFxRates(rates)) return;
+        try {
+          window.localStorage.setItem(FX_STORAGE_KEY, JSON.stringify(rates));
+        } catch {
+          // Storage can be unavailable in strict privacy modes.
+        }
+        setFxVersion((version) => version + 1);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.localStorage.getItem(THEME_STORAGE_KEY) === 'dark';
@@ -17378,7 +17414,7 @@ export default function RenewApp() {
             if (card.id) query.set('cardId', card.id);
             navigatePage('prices', { query: query.toString() });
           }}
-          rates={{ krwPerJpy: MARKET_USD_TO_KRW / MARKET_USD_TO_JPY, jpyPerUsd: MARKET_USD_TO_JPY }}
+          rates={PORTFOLIO_RATES}
         />
       ) : activePage === 'portfolioCalculatorGuide' ? (
         <PortfolioCalculatorGuide uiLang={uiLang} onOpenCalculator={() => navigatePage('portfolioCalculator')} />
