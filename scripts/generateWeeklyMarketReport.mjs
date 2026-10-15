@@ -85,7 +85,7 @@ const fx = await fetchFxRates().catch((error) => {
   console.warn(`FX rate unavailable, using ${FX_FALLBACK.krwPerJpy}: ${error.message}`);
   return FX_FALLBACK;
 });
-const report = buildWeeklyMarketReport({ week, rows, dailyRows, products, boxes, boxPrices, previousBoxSnapshot: previousReport?.boxSnapshot || null, krwPerJpy: fx.krwPerJpy });
+const report = buildWeeklyMarketReport({ week, rows, dailyRows, products, boxes, boxPrices, previousBoxSnapshot: previousReport?.boxSnapshot || null, krwPerJpy: fx.krwPerJpy, jpyPerUsd: fx.jpyPerUsd });
 const existingPath = path.join(reportsDir, `${report.id}.json`);
 // Re-running a week keeps any editor notes written into the earlier file.
 if (fs.existsSync(existingPath)) report.notes = JSON.parse(fs.readFileSync(existingPath, 'utf8')).notes || [];
