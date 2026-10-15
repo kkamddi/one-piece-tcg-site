@@ -28,8 +28,9 @@ on:
         required: false
         default: ""
   schedule:
-    # Every 6 hours from 09:00 KST (GitHub often starts it 3-4 hours late), so new trades show up the same day.
-    - cron: "0 0,6,12,18 * * *"
+    # 09:00 and 21:00 KST (GitHub often starts it 3-4 hours late). Twice a day keeps the load on SNKRDUNK low;
+    # the daily chart is complete whatever the interval, only the 20-trade list can miss trades of very busy cards.
+    - cron: "0 0,12 * * *"
 
 concurrency:
   group: daily-market-trading-history
@@ -224,7 +225,7 @@ jobs:
           else
             reason="Some cards could not be collected; see the run log."
           fi
-          next="The next run (every 6 hours) collects every card again."
+          next="The next run (09:00/21:00 KST) collects every card again."
           message="Daily market trading history failed.
           Shards: ${failed:-unknown}
           Reason: ${reason}
