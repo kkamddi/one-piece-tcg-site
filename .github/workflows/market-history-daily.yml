@@ -89,7 +89,8 @@ jobs:
     needs: budget
     if: ${{ needs.budget.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # The first full rebuild writes every card's whole chart; later runs only write the days that changed.
+    timeout-minutes: 330
     strategy:
       fail-fast: false
       max-parallel: 4
