@@ -16,9 +16,9 @@ on:
         required: false
         default: "20"
       recent_days:
-        description: Recent days retained and rebuilt during this run
+        description: Days of SNKRDUNK's daily chart rebuilt during this run (3650 = all)
         required: false
-        default: "2"
+        default: "3650"
       delay_ms:
         description: Delay between SNKRDUNK requests
         required: false
@@ -28,10 +28,8 @@ on:
         required: false
         default: ""
   schedule:
-    # 09:00 KST (GitHub often starts it 3-4 hours late).
-    - cron: "0 0 * * *"
-    # 17:00 KST retry: reruns only the shards that failed in today's earlier run, and nothing if it succeeded.
-    - cron: "0 8 * * *"
+    # Every 6 hours from 09:00 KST (GitHub often starts it 3-4 hours late), so new trades show up the same day.
+    - cron: "0 0,6,12,18 * * *"
 
 concurrency:
   group: daily-market-trading-history
@@ -144,8 +142,10 @@ jobs:
           BACKFILL_START_INDEX: ${{ matrix.shard_start }}
           BACKFILL_CARD_LIMIT: ${{ matrix.shard_limit }}
           BACKFILL_MODE: aggregate
-          BACKFILL_RECENT_RAW_DAYS: ${{ github.event.inputs.recent_days || '2' }}
-          BACKFILL_DAILY_DAYS: ${{ github.event.inputs.recent_days || '2' }}
+          # The latest 20 trades per grade are kept as recent trades; the daily chart is rebuilt whole each run,
+          # because SNKRDUNK returns it in one response.
+          BACKFILL_RECENT_RAW_DAYS: "45"
+          BACKFILL_DAILY_DAYS: ${{ github.event.inputs.recent_days || '3650' }}
           BACKFILL_REPLACE_DAILY_WINDOW: "1"
           BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
@@ -202,8 +202,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_TOKEN: ${{ github.token }}
-          IS_RETRY: ${{ github.event_name == 'schedule' && github.event.schedule == '0 8 * * *' }}
-          IS_MORNING: ${{ github.event_name == 'schedule' && github.event.schedule == '0 0 * * *' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "Telegram secrets are not configured; skipping notification."
@@ -225,13 +223,7 @@ jobs:
           else
             reason="Some cards could not be collected; see the run log."
           fi
-          if [ "$IS_MORNING" = "true" ]; then
-            next="The failed shards are retried automatically in the afternoon (17:00 KST schedule)."
-          elif [ "$IS_RETRY" = "true" ]; then
-            next="This was the afternoon retry; tomorrow's run also re-collects the last 2 days."
-          else
-            next=""
-          fi
+          next="The next run (every 6 hours) collects every card again."
           message="Daily market trading history failed.
           Shards: ${failed:-unknown}
           Reason: ${reason}

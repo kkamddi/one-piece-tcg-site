@@ -491,12 +491,17 @@ async function fetchProductCatalogId(apparelId) {
   return productCatalogId;
 }
 
-async function fetchJpTradingHistory(productCatalogId, condition) {
+async function fetchJpTradingHistory(productCatalogId, condition, variantId = 0) {
   const params = new URLSearchParams({ range: 'all', condition_code: JP_CONDITION_CODES[condition] });
+  if (variantId) params.set('variant_id', String(variantId));
   const data = await fetchJsonWithRetry(`${SNKRDUNK_BASE}/v3/products/${productCatalogId}/trading-history?${params.toString()}`, {
     headers: snkrdunkJsonHeaders(false),
   });
-  return Array.isArray(data?.trades) ? data.trades : [];
+  return {
+    trades: Array.isArray(data?.trades) ? data.trades : [],
+    points: Array.isArray(data?.chart?.lines?.[0]?.points) ? data.chart.lines[0].points : [],
+    oneCardVariantId: Number(data?.filters?.variants?.options?.find((option) => option?.name === '1枚')?.id || 0),
+  };
 }
 
 function nextDateKey(dateKey) {
@@ -950,6 +955,125 @@ async function backfillTradingHistoryItem(item, options) {
   return result;
 }
 
+// SNKRDUNK's chart has one point per trading day (JST) at the mean of that day's trades. The site stores
+// that value as the day's price so both charts agree. Trade counts come from the trade list, which only
+// holds the latest 20 trades: with all 20 returned, counts are known from the day after the oldest one.
+function jpDailyRows(item, condition, points, trades, countedFrom, cutoffDate) {
+  const pricesByDay = new Map();
+  for (const trade of trades) {
+    const day = tradeDateKey(trade?.soldAt);
+    const price = Number(trade?.price || 0);
+    if (!day || !(price > 0)) continue;
+    pricesByDay.set(day, [...(pricesByDay.get(day) || []), price]);
+  }
+  return points.map((point) => {
+    const day = marketDateKeyFromTimestamp(point?.timestamp);
+    const price = Math.round(Number(point?.price || 0));
+    if (!day || day < cutoffDate || !(price > 0)) return null;
+    const prices = !countedFrom || day >= countedFrom ? pricesByDay.get(day) || [] : [];
+    return {
+      source: 'snkrdunk',
+      apparel_id: Number(item.apparelId),
+      locale: String(item.locale || 'JP').toUpperCase(),
+      code: item.code || '',
+      condition_key: condition,
+      point_date: day,
+      median_price_jpy: price,
+      min_price_jpy: prices.length ? Math.min(...prices) : price,
+      max_price_jpy: prices.length ? Math.max(...prices) : price,
+      // null: not in the trade list; the stored count is kept (see finalizeJpHistory).
+      trade_count: prices.length || null,
+      source_count: prices.length || null,
+    };
+  }).filter(Boolean);
+}
+
+async function finalizeJpHistory(item, dailyRows, chartedConditions, recentHistory, result, options) {
+  result.dailyRowsPrepared = dailyRows.length;
+  result.recentHistoryPrepared = recentHistory.length;
+  const conditionKeys = [...chartedConditions];
+  const existingRows = conditionKeys.length ? await queryD1(
+    `select condition_key, point_date, median_price_jpy, min_price_jpy, max_price_jpy, trade_count, source_count
+     from market_chart_daily_points
+     where source = 'snkrdunk'
+       and apparel_id = ?
+       and condition_key in (${conditionKeys.map(() => '?').join(',')})
+       and point_date >= ?`,
+    [Number(item.apparelId), ...conditionKeys, options.dailyCutoffDate],
+  ) : [];
+  const keyOf = (row) => `${row.condition_key}|${row.point_date}`;
+  const existingByKey = new Map(existingRows.map((row) => [keyOf(row), row]));
+  const now = new Date().toISOString();
+  const rows = dailyRows.map((row) => {
+    const stored = existingByKey.get(keyOf(row));
+    return {
+      ...row,
+      trade_count: row.trade_count || Number(stored?.trade_count || 0) || 1,
+      source_count: row.source_count || Number(stored?.source_count || 0) || 1,
+      updated_at: now,
+    };
+  });
+  const changedRows = rows.filter((row) => {
+    const stored = existingByKey.get(keyOf(row));
+    return !stored || ['median_price_jpy', 'min_price_jpy', 'max_price_jpy', 'trade_count', 'source_count']
+      .some((column) => Number(stored[column]) !== Number(row[column]));
+  });
+  // Days SNKRDUNK has no trades for (e.g. trades of another grade stored under this one) are removed.
+  const candidateKeys = new Set(rows.map(keyOf));
+  const staleRows = existingRows.filter((row) => !candidateKeys.has(keyOf(row)));
+  let maxMedianChangePercent = 0;
+  for (const row of changedRows) {
+    const stored = Number(existingByKey.get(keyOf(row))?.median_price_jpy || 0);
+    if (stored > 0) maxMedianChangePercent = Math.max(maxMedianChangePercent, Math.abs(row.median_price_jpy / stored - 1) * 100);
+  }
+  const storedChanged = changedRows.filter((row) => existingByKey.has(keyOf(row)));
+  result.audit = {
+    candidateRows: rows.length,
+    existingRows: existingRows.length,
+    unchangedRows: rows.length - changedRows.length,
+    priceChangedRows: storedChanged
+      .filter((row) => Number(existingByKey.get(keyOf(row)).median_price_jpy) !== row.median_price_jpy).length,
+    tradeCountChangedRows: storedChanged
+      .filter((row) => Number(existingByKey.get(keyOf(row)).trade_count) !== row.trade_count).length,
+    missingStoredRows: rows.length - (rows.length - changedRows.length) - storedChanged.length,
+    missingCandidateRows: staleRows.length,
+    maxMedianChangePercent: Number(maxMedianChangePercent.toFixed(2)),
+  };
+  if (options.dryRun) return;
+
+  result.dailyPointsUpdated = await upsertDailyRows(changedRows);
+  if (options.replaceDailyWindow) {
+    for (const condition of conditionKeys) {
+      const dates = staleRows.filter((row) => row.condition_key === condition).map((row) => row.point_date);
+      for (let start = 0; start < dates.length; start += 40) {
+        const chunk = dates.slice(start, start + 40);
+        await queryD1(
+          `delete from market_chart_daily_points
+           where source = 'snkrdunk' and apparel_id = ? and condition_key = ? and point_date in (${chunk.map(() => '?').join(',')})`,
+          [Number(item.apparelId), condition, ...chunk],
+        );
+      }
+    }
+    result.dailyPointsPruned = staleRows.length;
+    // Trades first stored from the English API were converted from won or dollars at a fixed rate and can be
+    // of another grade; SNKRDUNK's yen trades (posted below) replace them.
+    if (conditionKeys.length) {
+      await queryD1(
+        `delete from market_recent_trades
+         where source = 'snkrdunk' and apparel_id = ? and condition_key in (${conditionKeys.map(() => '?').join(',')})
+           and (price_text like '%₩%' or price_text like '%$%' or upper(price_text) like 'KRW%' or upper(price_text) like 'USD%')`,
+        [Number(item.apparelId), ...conditionKeys],
+      );
+    }
+  }
+  if (recentHistory.length) {
+    const posted = await postHistoryChunks(item, recentHistory, { ...options, rawOnly: true });
+    result.historyPosted += recentHistory.length;
+    result.tradesSeen += Number(posted?.tradesSeen || 0);
+    result.tradesStored += Number(posted?.tradesStored || 0);
+  }
+}
+
 async function backfillJpTradingHistoryItem(item, options) {
   const result = {
     apparelId: Number(item.apparelId),
@@ -974,37 +1098,39 @@ async function backfillJpTradingHistoryItem(item, options) {
   result.productCatalogId = productCatalogId;
   result.pagesFetched += 1;
 
-  // With a full 20 trades inside the window, the oldest trade's day may be only partly listed, so the
-  // daily window for this card starts the day after it; the days that remain are complete.
-  let windowStart = options.dailyCutoffDate;
+  const dailyRows = [];
+  const chartedConditions = new Set();
   const rows = [];
   for (const condition of Object.keys(JP_CONDITION_CODES)) {
     if (!options.allowedConditions.has(condition)) continue;
     if (options.delayMs) await sleep(options.delayMs);
-    const trades = await fetchJpTradingHistory(productCatalogId, condition);
+    let data = await fetchJpTradingHistory(productCatalogId, condition);
     result.pagesFetched += 1;
+    // Bundles of 2-10 cards are priced for the bundle; ask again for single cards only when any are listed.
+    if (data.trades.some((trade) => trade?.label && trade.label !== '1枚') && data.oneCardVariantId) {
+      if (options.delayMs) await sleep(options.delayMs);
+      data = await fetchJpTradingHistory(productCatalogId, condition, data.oneCardVariantId);
+      result.pagesFetched += 1;
+    }
+    const trades = data.trades.filter((trade) => !trade?.label || trade.label === '1枚');
     result.listingsSeen += trades.length;
     result.soldSeen += trades.length;
     const days = trades.map((trade) => tradeDateKey(trade?.soldAt)).filter(Boolean).sort();
-    if (trades.length >= JP_TRADES_PER_REQUEST && days[0] && days[0] >= windowStart) {
-      windowStart = nextDateKey(days[0]);
-      result.capped = true;
-    }
+    const countedFrom = data.trades.length >= JP_TRADES_PER_REQUEST && days[0] ? nextDateKey(days[0]) : '';
+    if (countedFrom) result.capped = true;
+    // An empty chart could be a bad answer, so a condition without points never removes stored days.
+    if (data.points.length) chartedConditions.add(condition);
+    dailyRows.push(...jpDailyRows(item, condition, data.points, trades, countedFrom, options.dailyCutoffDate));
     for (const trade of trades) {
-      // Bundles of 2-10 cards are priced for the bundle.
-      if (trade?.label && trade.label !== '1枚') continue;
       rows.push({ tradedAt: trade?.soldAt, condition: trade?.title, priceFormat: `¥${Number(trade?.price || 0)}` });
     }
   }
 
-  result.windowStart = windowStart;
   result.dailyWindowComplete = true;
   const history = historyFromTradingHistories(rows, options.allowedConditions);
-  const dailyBuckets = new Map();
-  addDailyHistory(dailyBuckets, item, history.filter((trade) => isRecentHistoryItem(trade, windowStart)));
   const recentHistory = history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate));
   if (options.aggregateMode) {
-    await finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, { ...options, dailyCutoffDate: windowStart });
+    await finalizeJpHistory(item, dailyRows, chartedConditions, recentHistory, result, options);
   } else if (!options.dryRun && history.length) {
     const posted = await postHistoryChunks(item, history, options);
     result.historyPosted += history.length;

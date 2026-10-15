@@ -174,45 +174,109 @@ test('workflows without a recovery allowance keep their existing page limit', as
   assert.equal(result.capped, true);
 });
 
-async function backfillJp(tradesByCondition, overrides = {}) {
+async function backfillJp(responses, overrides = {}) {
   const saved = [];
+  const requested = [];
   const module = await loadModule('../scripts/backfillSnkrdunkSoldListings.js', `
     export { backfillJpTradingHistoryItem };
     export function setJpDependencies(catalogId, fetchTrades, finalize) {
       fetchProductCatalogId = catalogId;
       fetchJpTradingHistory = fetchTrades;
-      finalizeAggregateHistory = finalize;
+      finalizeJpHistory = finalize;
     }
   `);
-  module.setJpDependencies(async () => 780929, async (id, condition) => tradesByCondition[condition] || [],
-    async (item, buckets, history, result, options) => saved.push({ buckets, history, windowStart: options.dailyCutoffDate }));
+  module.setJpDependencies(async () => 780929, async (id, condition, variantId = 0) => {
+    requested.push(`${condition}:${variantId}`);
+    const response = responses[condition] || {};
+    return (variantId ? response.singles : response.all) || response.all || { trades: [], points: [], oneCardVariantId: 0 };
+  }, async (item, dailyRows, chartedConditions, history) => saved.push({ dailyRows, chartedConditions, history }));
   const result = await module.backfillJpTradingHistoryItem({ apparelId: 676003 }, {
-    aggregateMode: true, requireCompleteDailyWindow: true, allowedConditions: new Set(['a', 'psa10']),
+    aggregateMode: true, allowedConditions: new Set(['a', 'psa10']),
     dailyCutoffDate: '2026-10-01', recentRawCutoffDate: '2026-10-01', delayMs: 0,
     ...overrides,
   });
-  return { result, saved };
+  return { result, saved, requested };
 }
 
 const jpTrade = (soldAt, price, title = 'PSA10', label = '1枚') => ({ soldAt, price, title, label });
+// Chart points are stamped at midnight JST.
+const jpPoint = (day, price) => ({ timestamp: Date.parse(`${day}T00:00:00+09:00`), price });
 
-test('yen trades from the Japanese API keep single cards only and the yen price as is', async () => {
-  const { result, saved } = await backfillJp({
-    a: [jpTrade('2026-10-05T03:00:00Z', 1900000, 'A'), jpTrade('2026-10-05T04:00:00Z', 2000, 'A', '4枚')],
-    psa10: [jpTrade('2026-10-07T03:00:00Z', 2798000)],
+test('the daily price is SNKRDUNK chart value in yen, asked again for single cards when bundles are listed', async () => {
+  const { result, saved, requested } = await backfillJp({
+    a: {
+      all: { trades: [jpTrade('2026-10-05T03:00:00Z', 1900000, 'A'), jpTrade('2026-10-05T04:00:00Z', 2000, 'A', '4枚')], points: [], oneCardVariantId: 9248047 },
+      singles: { trades: [jpTrade('2026-10-05T03:00:00Z', 1900000, 'A'), jpTrade('2026-10-05T05:00:00Z', 1700000, 'A')], points: [jpPoint('2026-09-20', 1500000), jpPoint('2026-10-05', 1800000)] },
+    },
+    psa10: { all: { trades: [jpTrade('2026-10-07T03:00:00Z', 2798000)], points: [jpPoint('2026-10-07', 2798000)], oneCardVariantId: 9248047 } },
   });
+  assert.deepEqual(requested, ['a:0', 'a:9248047', 'psa10:0']);
   assert.equal(result.historySource, 'jp-trading-history');
-  assert.equal(result.dailyWindowComplete, true);
-  assert.equal(saved[0].windowStart, '2026-10-01');
   // Array.from builds the array in this realm; the module runs in its own vm context.
+  const rows = Array.from(saved[0].dailyRows, (row) => [row.condition_key, row.point_date, row.median_price_jpy, row.min_price_jpy, row.max_price_jpy, row.trade_count]);
+  assert.deepEqual(rows, [
+    ['a', '2026-10-05', 1800000, 1700000, 1900000, 2],
+    ['psa10', '2026-10-07', 2798000, 2798000, 2798000, 1],
+  ], 'days before the window are left alone');
   const prices = Array.from(saved[0].history, (trade) => `${trade.conditionKey}:${trade.priceJpy}`).sort();
-  assert.deepEqual(prices, ['a:1900000', 'psa10:2798000']);
+  assert.deepEqual(prices, ['a:1700000', 'a:1900000', 'psa10:2798000']);
 });
 
-test('a card with 20 trades inside the window only rewrites the days fully listed', async () => {
+test('with 20 listed trades the counts are only known from the day after the oldest one', async () => {
   const busy = Array.from({ length: 20 }, (_, index) => jpTrade(`2026-10-${String(14 - Math.floor(index / 5)).padStart(2, '0')}T03:00:00Z`, 1000 + index));
-  const { result, saved } = await backfillJp({ psa10: busy });
+  const points = ['2026-10-03', '2026-10-11', '2026-10-12'].map((day) => jpPoint(day, 1000));
+  const { result, saved } = await backfillJp({ psa10: { all: { trades: busy, points } } });
   assert.equal(result.capped, true);
-  assert.equal(saved[0].windowStart, '2026-10-12', 'the oldest listed day (10/11) may be partial');
-  assert.ok([...saved[0].buckets.keys()].every((key) => key.split('|')[1] >= '2026-10-12'));
+  const counts = Object.fromEntries(Array.from(saved[0].dailyRows, (row) => [row.point_date, row.trade_count]));
+  assert.deepEqual(counts, { '2026-10-03': null, '2026-10-11': null, '2026-10-12': 5 });
+});
+
+async function finalizeJp(dailyRows, chartedConditions, storedRows, overrides = {}) {
+  const queries = [];
+  const module = await loadModule('../scripts/backfillSnkrdunkSoldListings.js', `
+    export { finalizeJpHistory };
+    export function setQuery(fn) { queryD1 = fn; }
+  `);
+  module.setQuery(async (sql, params) => {
+    queries.push({ sql: sql.replace(/\s+/g, ' ').trim(), params });
+    return sql.trim().startsWith('select') ? storedRows : [];
+  });
+  const result = { historyPosted: 0, tradesSeen: 0, tradesStored: 0 };
+  await module.finalizeJpHistory({ apparelId: 676003 }, dailyRows, new Set(chartedConditions), [], result, {
+    dailyCutoffDate: '2000-01-01', replaceDailyWindow: true, ...overrides,
+  });
+  return { result, queries };
+}
+
+const dailyRow = (condition, day, price, count = null) => ({
+  source: 'snkrdunk', apparel_id: 676003, locale: 'JP', code: '', condition_key: condition, point_date: day,
+  median_price_jpy: price, min_price_jpy: price, max_price_jpy: price, trade_count: count, source_count: count,
+});
+const storedRow = (condition, day, price, count) => ({
+  condition_key: condition, point_date: day, median_price_jpy: price, min_price_jpy: price, max_price_jpy: price, trade_count: count, source_count: count,
+});
+
+test('stored days SNKRDUNK does not list are removed, unknown counts are kept, unchanged days are not written', async () => {
+  const { result, queries } = await finalizeJp(
+    [dailyRow('a', '2026-08-01', 2300000), dailyRow('a', '2026-10-05', 1900000, 1)],
+    ['a'],
+    [storedRow('a', '2026-08-01', 2269830, 3), storedRow('a', '2026-09-13', 2139620, 1), storedRow('a', '2026-10-05', 1900000, 1)],
+  );
+  assert.equal(result.audit.priceChangedRows, 1);
+  assert.equal(result.audit.unchangedRows, 1);
+  assert.equal(result.audit.missingCandidateRows, 1);
+  const insert = queries.find((query) => query.sql.startsWith('insert'));
+  assert.ok(insert.params.includes('2026-08-01') && !insert.params.includes('2026-10-05'));
+  assert.equal(insert.params[insert.params.indexOf('2026-08-01') + 4], 3, 'stored trade count is kept');
+  const [removeDay, removeConverted] = queries.filter((query) => query.sql.startsWith('delete'));
+  assert.deepEqual(Array.from(removeDay.params), [676003, 'a', '2026-09-13']);
+  assert.match(removeConverted.sql, /from market_recent_trades .*price_text like '%₩%'/);
+  assert.deepEqual(Array.from(removeConverted.params), [676003, 'a']);
+});
+
+test('a dry run only audits and a condition without chart points keeps its stored days', async () => {
+  const { result, queries } = await finalizeJp([dailyRow('psa10', '2026-10-07', 2798000, 1)], ['psa10'], [], { dryRun: true });
+  assert.equal(result.audit.missingStoredRows, 1);
+  assert.equal(queries.length, 1);
+  assert.ok(!queries[0].params.includes('a'), 'only charted conditions are read and pruned');
 });

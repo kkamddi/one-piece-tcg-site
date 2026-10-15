@@ -158,18 +158,20 @@ const VISITOR_TOKEN_KEY = 'one-piece-tcg-visitor-token';
 const MARKET_INTEREST_STORAGE_PREFIX = 'one-piece-tcg-market-interest-';
 const RENEWAL_NOTICE_KEY = 'one-piece-tcg-news-notice-2026-07-25-lab-tools';
 const PORTFOLIO_IMAGE_CACHE_KEY = 'one-piece-tcg-portfolio-image-cache-v2';
-// Stored prices are yen; won follows the day's ECB rate from /api/fx (lib/fx-rates.js), applied by applyFxRates()
-// once it loads. The last rate seen is kept, so a returning visitor starts with it instead of the 9.4 fallback.
-// USD -> yen stays 155: SNKRDUNK prices its USD listings with its own rate, not the market's.
-const MARKET_USD_TO_JPY = 155;
+// Stored prices are yen; won and dollars follow the day's ECB rate from /api/fx (lib/fx-rates.js), applied by
+// applyFxRates() once it loads. SNKRDUNK converts its won and dollar prices at about the same rate.
+// The last rate seen is kept, so a returning visitor starts with it instead of the fallback.
 const FX_STORAGE_KEY = 'card-pone:fx-rates';
+let MARKET_USD_TO_JPY = 155;
 let MARKET_KRW_PER_JPY = 9.4;
 let MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * MARKET_KRW_PER_JPY;
 let PORTFOLIO_RATES = { krwPerJpy: MARKET_KRW_PER_JPY, jpyPerUsd: MARKET_USD_TO_JPY };
 function applyFxRates(rates) {
   const krwPerJpy = Number(rates?.krwPerJpy);
+  const jpyPerUsd = Number(rates?.jpyPerUsd);
   if (!(krwPerJpy > 1 && krwPerJpy < 30)) return false;
   MARKET_KRW_PER_JPY = krwPerJpy;
+  if (jpyPerUsd > 50 && jpyPerUsd < 500) MARKET_USD_TO_JPY = jpyPerUsd;
   MARKET_USD_TO_KRW = MARKET_USD_TO_JPY * krwPerJpy;
   PORTFOLIO_RATES = { krwPerJpy, jpyPerUsd: MARKET_USD_TO_JPY };
   return true;

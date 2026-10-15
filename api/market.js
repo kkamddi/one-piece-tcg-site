@@ -3,14 +3,22 @@ import { marketDateTimeLabelFromTimestamp } from '../lib/market-trade-date.js';
 import { readThroughR2Json } from '../lib/r2-json-cache.js';
 import priceChartingMarketLinks from '../src/data/pricecharting-market-links.js';
 import { readTradeQuotes } from '../lib/market-trade-quotes.js';
+import { FX_FALLBACK, readFxRates } from '../lib/fx-rates.js';
 
 const MARKET_API_ORIGIN = (process.env.MARKET_API_ORIGIN || '').trim();
 const SNKRDUNK_BASE = 'https://snkrdunk.com';
 const PRICECHARTING_BASE = 'https://www.pricecharting.com';
 const CACHE_SECONDS = 60 * 30;
 const PRICECHARTING_CACHE_SECONDS = 60 * 60 * 12;
-const USD_TO_JPY = 155;
-const KRW_PER_JPY = Number(process.env.KRW_PER_JPY || 9.3);
+// SNKRDUNK's English API prices in the caller's currency (dollars from US data centres, won from Korea),
+// converted from yen at about the day's market rate, so it is converted back at the day's ECB rate.
+let fxRates = FX_FALLBACK;
+let fxRatesReadAt = 0;
+async function refreshFxRates() {
+  if (Date.now() - fxRatesReadAt < 30 * 60 * 1000) return;
+  fxRates = await readFxRates();
+  if (fxRates.source !== 'fallback') fxRatesReadAt = Date.now();
+}
 const COMMUNITY_TABLE = process.env.SUPABASE_COMMUNITY_TABLE || 'community_posts';
 const SNAPSHOT_BOARD_ID = '__market_price_snapshot__';
 const SNAPSHOT_INTERVAL_MS = 6 * 60 * 60 * 1000;
@@ -116,13 +124,13 @@ function normalizeParams(query) {
 function usdToJpy(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount <= 0) return 0;
-  return Math.round(amount * USD_TO_JPY);
+  return Math.round(amount * fxRates.jpyPerUsd);
 }
 
 function jpyToUsd(value) {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount) || amount <= 0) return 0;
-  return amount / USD_TO_JPY;
+  return amount / fxRates.jpyPerUsd;
 }
 
 function centsToJpy(value) {
@@ -153,7 +161,7 @@ function marketRawPriceToJpy(raw) {
   if (!Number.isFinite(amount) || amount <= 0) return 0;
   const currency = marketRawPriceCurrency(raw);
   if (currency === 'JPY') return Math.round(amount);
-  if (currency === 'KRW') return Math.round(amount / KRW_PER_JPY);
+  if (currency === 'KRW') return Math.round(amount / fxRates.krwPerJpy);
   return usdToJpy(amount);
 }
 
@@ -1287,16 +1295,21 @@ function saneCurrentPrice(currentPrice = 0, historyPoints = [], fallbackPrice = 
 
 async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot = false } = {}) {
   const storedTrades = await readStoredMarketTrades(item?.apparelId);
+  const dailyPoints = await readStoredMarketChartPoints(item?.apparelId);
   const listingFloorPoints = await readListingFloorChartPoints(item?.apparelId);
   if (persistSnapshot) await saveMarketSnapshots(item, conditionPrices);
   const aTradeHistory = filterChartOutliers(storedTrades.a);
   const psa10TradeHistory = filterChartOutliers(storedTrades.psa10);
+  // The chart uses the stored daily prices, which follow SNKRDUNK's own chart; the recent trades
+  // only hold the latest ones.
+  const aChartHistory = dailyPoints.a.length ? dailyPoints.a : aTradeHistory;
+  const psa10ChartHistory = dailyPoints.psa10.length ? dailyPoints.psa10 : psa10TradeHistory;
   const aListingHistory = filterChartOutliers(listingFloorPoints.a || []);
   const psa10ListingHistory = filterChartOutliers(listingFloorPoints.psa10 || []);
   const aCurrentPrice = getConditionPrice(conditionPrices, 'a');
   const psa10CurrentPrice = getConditionPrice(conditionPrices, 'psa10');
-  const aHistory = aTradeHistory.length ? aTradeHistory : aListingHistory;
-  const psa10History = psa10TradeHistory.length ? psa10TradeHistory : psa10ListingHistory;
+  const aHistory = aChartHistory.length ? aChartHistory : aListingHistory;
+  const psa10History = psa10ChartHistory.length ? psa10ChartHistory : psa10ListingHistory;
   const aPrice = saneCurrentPrice(aCurrentPrice, aHistory, latestPointPrice(aHistory));
   const psa10Price = saneCurrentPrice(psa10CurrentPrice, psa10History, latestPointPrice(psa10History));
   const latestByCondition = {};
@@ -1322,8 +1335,8 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
       { key: '1y', label: '1Y' }
     ],
     series: {
-      a: buildSeries(aTradeHistory, 0, 'snkrdunk_trade_history', { includeCurrent: false }),
-      psa10: buildSeries(psa10TradeHistory, 0, 'snkrdunk_trade_history', { includeCurrent: false })
+      a: buildSeries(aChartHistory, 0, 'snkrdunk_trade_history', { includeCurrent: false }),
+      psa10: buildSeries(psa10ChartHistory, 0, 'snkrdunk_trade_history', { includeCurrent: false })
     },
     listingSeriesByCondition: {
       a: buildSeries(aListingHistory, aCurrentPrice, 'snkrdunk_listing_floor'),
@@ -1339,6 +1352,7 @@ async function buildFallbackDetail(item, conditionPrices = [], { persistSnapshot
 
 export async function collectMarketSnapshot(item, options = {}) {
   if (!item?.apparelId) return { ok: false, error: 'missing_apparel_id' };
+  await refreshFxRates();
   const conditionPrices = await fetchConditionPrices(item.apparelId);
   await saveMarketSnapshots(item, conditionPrices);
   await saveMarketStorageSnapshot(item, conditionPrices, {
@@ -1528,6 +1542,7 @@ export default async function handler(request, response) {
   if (!['GET', 'HEAD'].includes(request.method)) {
     return response.status(405).json({ error: 'method_not_allowed' });
   }
+  await refreshFxRates();
 
   const params = normalizeParams(request.query);
   const summaryMode = String(params.get('summary') || '').toLowerCase();
