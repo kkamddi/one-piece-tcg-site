@@ -173,3 +173,46 @@ test('workflows without a recovery allowance keep their existing page limit', as
   assert.deepEqual(requested, [1, 2]);
   assert.equal(result.capped, true);
 });
+
+async function backfillJp(tradesByCondition, overrides = {}) {
+  const saved = [];
+  const module = await loadModule('../scripts/backfillSnkrdunkSoldListings.js', `
+    export { backfillJpTradingHistoryItem };
+    export function setJpDependencies(catalogId, fetchTrades, finalize) {
+      fetchProductCatalogId = catalogId;
+      fetchJpTradingHistory = fetchTrades;
+      finalizeAggregateHistory = finalize;
+    }
+  `);
+  module.setJpDependencies(async () => 780929, async (id, condition) => tradesByCondition[condition] || [],
+    async (item, buckets, history, result, options) => saved.push({ buckets, history, windowStart: options.dailyCutoffDate }));
+  const result = await module.backfillJpTradingHistoryItem({ apparelId: 676003 }, {
+    aggregateMode: true, requireCompleteDailyWindow: true, allowedConditions: new Set(['a', 'psa10']),
+    dailyCutoffDate: '2026-10-01', recentRawCutoffDate: '2026-10-01', delayMs: 0,
+    ...overrides,
+  });
+  return { result, saved };
+}
+
+const jpTrade = (soldAt, price, title = 'PSA10', label = '1枚') => ({ soldAt, price, title, label });
+
+test('yen trades from the Japanese API keep single cards only and the yen price as is', async () => {
+  const { result, saved } = await backfillJp({
+    a: [jpTrade('2026-10-05T03:00:00Z', 1900000, 'A'), jpTrade('2026-10-05T04:00:00Z', 2000, 'A', '4枚')],
+    psa10: [jpTrade('2026-10-07T03:00:00Z', 2798000)],
+  });
+  assert.equal(result.historySource, 'jp-trading-history');
+  assert.equal(result.dailyWindowComplete, true);
+  assert.equal(saved[0].windowStart, '2026-10-01');
+  // Array.from builds the array in this realm; the module runs in its own vm context.
+  const prices = Array.from(saved[0].history, (trade) => `${trade.conditionKey}:${trade.priceJpy}`).sort();
+  assert.deepEqual(prices, ['a:1900000', 'psa10:2798000']);
+});
+
+test('a card with 20 trades inside the window only rewrites the days fully listed', async () => {
+  const busy = Array.from({ length: 20 }, (_, index) => jpTrade(`2026-10-${String(14 - Math.floor(index / 5)).padStart(2, '0')}T03:00:00Z`, 1000 + index));
+  const { result, saved } = await backfillJp({ psa10: busy });
+  assert.equal(result.capped, true);
+  assert.equal(saved[0].windowStart, '2026-10-12', 'the oldest listed day (10/11) may be partial');
+  assert.ok([...saved[0].buckets.keys()].every((key) => key.split('|')[1] >= '2026-10-12'));
+});

@@ -405,6 +405,10 @@ async function writeImmediateAlert(report) {
   await fs.writeFile(outputPath, message);
 }
 
+// Workers Paid: 25 billion reads and 50 million writes a month are included (over that is billed, not blocked),
+// so the rolling 24 hours is measured against a day's share. The free plan's 5M/100K a day would block queries.
+const D1_DAILY_READ_ALLOWANCE = 25_000_000_000 / 30;
+const D1_DAILY_WRITE_ALLOWANCE = 50_000_000 / 30;
 const d1Info = await readD1Info();
 const hasD1Info = Boolean(d1Info);
 const rowsRead = asNumber(d1Info?.rows_read_24h);
@@ -412,15 +416,15 @@ const rowsWritten = asNumber(d1Info?.rows_written_24h);
 const storageBytes = asNumber(d1Info?.database_size);
 const d1 = {
   status: hasD1Info ? worstStatus(
-    usageStatus(percent(rowsRead, 5_000_000)),
-    usageStatus(percent(rowsWritten, 100_000)),
+    usageStatus(percent(rowsRead, D1_DAILY_READ_ALLOWANCE)),
+    usageStatus(percent(rowsWritten, D1_DAILY_WRITE_ALLOWANCE)),
     usageStatus(percent(storageBytes, 5 * 1024 * 1024 * 1024))
   ) : 'unknown',
   rowsRead,
   rowsWritten,
   storageBytes,
-  readPercent: percent(rowsRead, 5_000_000),
-  writePercent: percent(rowsWritten, 100_000),
+  readPercent: percent(rowsRead, D1_DAILY_READ_ALLOWANCE),
+  writePercent: percent(rowsWritten, D1_DAILY_WRITE_ALLOWANCE),
   storagePercent: percent(storageBytes, 5 * 1024 * 1024 * 1024)
 };
 

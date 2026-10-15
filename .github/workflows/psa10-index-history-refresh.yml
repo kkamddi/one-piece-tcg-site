@@ -71,6 +71,8 @@ jobs:
           BACKFILL_MODE: aggregate
           BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
+          # Yen from the Japanese site API, no SNKRDUNK login (the /en/v1 session expired on 10/13).
+          BACKFILL_TRADING_HISTORY_SOURCE: jp
           TRADING_HISTORY_PER_PAGE: "12"
           BACKFILL_CONDITIONS: psa10
           BACKFILL_DELAY_MS: "750"
@@ -142,7 +144,7 @@ jobs:
           message="PSA10 index history refresh failed.
           Workflow: $GITHUB_WORKFLOW
           Run: $RUN_URL
-          Check SNKRDUNK_COOKIE if the error is 401/403."
+          It reads the Japanese SNKRDUNK API without login; see the run log."
           curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
             -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \

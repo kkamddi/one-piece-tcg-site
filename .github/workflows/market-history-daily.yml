@@ -149,6 +149,8 @@ jobs:
           BACKFILL_REPLACE_DAILY_WINDOW: "1"
           BACKFILL_REQUIRE_COMPLETE_DAILY_WINDOW: "1"
           BACKFILL_TRADING_HISTORIES: "1"
+          # Yen from the Japanese site API, no SNKRDUNK login (the /en/v1 session expired on 10/13).
+          BACKFILL_TRADING_HISTORY_SOURCE: jp
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.per_page || '50' }}
           TRADING_HISTORY_MAX_PAGES: ${{ github.event.inputs.max_pages || '20' }}
           BACKFILL_CONDITIONS: ${{ github.event.inputs.conditions || 'a,psa10' }}
@@ -166,10 +168,6 @@ jobs:
           fi
           if [ -z "$MARKET_COLLECTOR_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
             echo "Required collector or Cloudflare secret is missing."
-            exit 1
-          fi
-          if [ -z "$SNKRDUNK_COOKIE" ] && [ -z "$SNKRDUNK_AUTHORIZATION" ]; then
-            echo "SNKRDUNK trading-history authentication is missing."
             exit 1
           fi
           utc_day=$((10#$(date -u +%s) / 86400))

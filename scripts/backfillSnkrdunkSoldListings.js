@@ -138,8 +138,9 @@ async function fetchJsonWithRetry(url, options = {}, attempts = 4) {
 }
 
 function isMissingProductError(error) {
+  if (error?.missingProduct) return true;
   return error?.status === 404
-    && /\/products\/[^/]+\/trading-histories(?:\?|$)/.test(String(error?.url || ''));
+    && /\/(?:products\/[^/]+\/trading-histories|apparels\/\d+)(?:\?|$)/.test(String(error?.url || ''));
 }
 
 function isAuthenticationError(error) {
@@ -466,6 +467,42 @@ async function fetchTradingHistoriesPage(apparelId, page, perPage) {
     data?.trading_histories,
     data?.items,
   ].find(Array.isArray) || [];
+}
+
+// The Japanese site's API returns trades in yen and needs no login, unlike /en/v1 (USD or KRW by the
+// caller's region, and an expiring session). It only returns the 20 most recent trades per condition.
+const JP_CONDITION_CODES = {
+  a: 'trading_card_single_nearly_unused',
+  psa10: 'trading_card_single_psa10',
+};
+const JP_TRADES_PER_REQUEST = 20;
+
+async function fetchProductCatalogId(apparelId) {
+  const url = `${SNKRDUNK_BASE}/v1/apparels/${Number(apparelId)}`;
+  const data = await fetchJsonWithRetry(url, { headers: snkrdunkJsonHeaders(false) });
+  const productCatalogId = Number(data?.productCatalogId || 0);
+  if (!productCatalogId) {
+    const error = new Error('404:no productCatalogId');
+    error.status = 404;
+    error.url = url;
+    error.missingProduct = true;
+    throw error;
+  }
+  return productCatalogId;
+}
+
+async function fetchJpTradingHistory(productCatalogId, condition) {
+  const params = new URLSearchParams({ range: 'all', condition_code: JP_CONDITION_CODES[condition] });
+  const data = await fetchJsonWithRetry(`${SNKRDUNK_BASE}/v3/products/${productCatalogId}/trading-history?${params.toString()}`, {
+    headers: snkrdunkJsonHeaders(false),
+  });
+  return Array.isArray(data?.trades) ? data.trades : [];
+}
+
+function nextDateKey(dateKey) {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
 }
 
 function historyFromListings(listings, allowedConditions) {
@@ -913,7 +950,75 @@ async function backfillTradingHistoryItem(item, options) {
   return result;
 }
 
+async function backfillJpTradingHistoryItem(item, options) {
+  const result = {
+    apparelId: Number(item.apparelId),
+    code: item.code || '',
+    historySource: 'jp-trading-history',
+    pagesFetched: 0,
+    recoveryPagesFetched: 0,
+    listingsSeen: 0,
+    soldSeen: 0,
+    dailyRowsPrepared: 0,
+    recentHistoryPrepared: 0,
+    historyPosted: 0,
+    tradesSeen: 0,
+    tradesStored: 0,
+    dailyPointsUpdated: 0,
+    dailyPointsPruned: 0,
+    capped: false,
+    stoppedAtDailyCutoff: false,
+    dailyWindowComplete: false,
+  };
+  const productCatalogId = await fetchProductCatalogId(item.apparelId);
+  result.productCatalogId = productCatalogId;
+  result.pagesFetched += 1;
+
+  // With a full 20 trades inside the window, the oldest trade's day may be only partly listed, so the
+  // daily window for this card starts the day after it; the days that remain are complete.
+  let windowStart = options.dailyCutoffDate;
+  const rows = [];
+  for (const condition of Object.keys(JP_CONDITION_CODES)) {
+    if (!options.allowedConditions.has(condition)) continue;
+    if (options.delayMs) await sleep(options.delayMs);
+    const trades = await fetchJpTradingHistory(productCatalogId, condition);
+    result.pagesFetched += 1;
+    result.listingsSeen += trades.length;
+    result.soldSeen += trades.length;
+    const days = trades.map((trade) => tradeDateKey(trade?.soldAt)).filter(Boolean).sort();
+    if (trades.length >= JP_TRADES_PER_REQUEST && days[0] && days[0] >= windowStart) {
+      windowStart = nextDateKey(days[0]);
+      result.capped = true;
+    }
+    for (const trade of trades) {
+      // Bundles of 2-10 cards are priced for the bundle.
+      if (trade?.label && trade.label !== '1枚') continue;
+      rows.push({ tradedAt: trade?.soldAt, condition: trade?.title, priceFormat: `¥${Number(trade?.price || 0)}` });
+    }
+  }
+
+  result.windowStart = windowStart;
+  result.dailyWindowComplete = true;
+  const history = historyFromTradingHistories(rows, options.allowedConditions);
+  const dailyBuckets = new Map();
+  addDailyHistory(dailyBuckets, item, history.filter((trade) => isRecentHistoryItem(trade, windowStart)));
+  const recentHistory = history.filter((trade) => isRecentHistoryItem(trade, options.recentRawCutoffDate));
+  if (options.aggregateMode) {
+    await finalizeAggregateHistory(item, dailyBuckets, recentHistory, result, { ...options, dailyCutoffDate: windowStart });
+  } else if (!options.dryRun && history.length) {
+    const posted = await postHistoryChunks(item, history, options);
+    result.historyPosted += history.length;
+    result.tradesSeen += Number(posted?.tradesSeen || 0);
+    result.tradesStored += Number(posted?.tradesStored || 0);
+    result.dailyPointsUpdated += Number(posted?.dailyPointsUpdated || 0);
+  }
+  return result;
+}
+
 async function backfillItem(item, options) {
+  if (options.useTradingHistories && options.tradingHistorySource === 'jp') {
+    return backfillJpTradingHistoryItem(item, options);
+  }
   if (options.useTradingHistories) {
     return backfillTradingHistoryItem(item, options);
   }
@@ -1006,11 +1111,14 @@ async function main() {
   const dailyCutoff = dailyStartDate || recentRawCutoffDate(dailyDays);
   const { maxPages, requestedAll } = parsePageLimit(process.env.SOLD_LISTING_MAX_PAGES || process.env.MAX_PAGES);
   const hasTradingHistoryAuth = hasSnkrdunkTradingHistoryAuth();
-  const useTradingHistories = parseEnabled(process.env.BACKFILL_TRADING_HISTORIES, hasTradingHistoryAuth);
-  if (useTradingHistories && !hasTradingHistoryAuth) {
-    throw new Error('BACKFILL_TRADING_HISTORIES requires SNKRDUNK_COOKIE or SNKRDUNK_AUTHORIZATION');
+  // jp: Japanese site API in yen, no login, 20 most recent trades per condition (the daily refreshes).
+  // en (default): the /en/v1 API, logged in, priced in USD, paged deep enough for backfills.
+  const tradingHistorySource = String(process.env.BACKFILL_TRADING_HISTORY_SOURCE || 'en').trim().toLowerCase() === 'jp' ? 'jp' : 'en';
+  const useTradingHistories = parseEnabled(process.env.BACKFILL_TRADING_HISTORIES, tradingHistorySource === 'jp' || hasTradingHistoryAuth);
+  if (useTradingHistories && tradingHistorySource === 'en' && !hasTradingHistoryAuth) {
+    throw new Error('BACKFILL_TRADING_HISTORY_SOURCE=en requires SNKRDUNK_COOKIE or SNKRDUNK_AUTHORIZATION');
   }
-  const historySource = useTradingHistories ? 'trading-histories' : 'used-listings';
+  const historySource = !useTradingHistories ? 'used-listings' : tradingHistorySource === 'jp' ? 'jp-trading-history' : 'trading-histories';
   const tradingHistoryPerPage = positiveInt(
     process.env.TRADING_HISTORY_PER_PAGE,
     DEFAULT_TRADING_HISTORY_PER_PAGE,
@@ -1114,6 +1222,7 @@ async function main() {
         dryRun,
         replaceDailyWindow,
         useTradingHistories,
+        tradingHistorySource,
         tradingHistoryMaxPages,
         tradingHistoryRecoveryMaxPages,
         requireCompleteDailyWindow,
