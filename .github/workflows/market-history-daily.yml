@@ -28,12 +28,18 @@ on:
         required: false
         default: ""
   schedule:
-    # 09:00 KST.
+    # 09:00 KST (GitHub often starts it 3-4 hours late).
     - cron: "0 0 * * *"
+    # 17:00 KST retry: reruns only the shards that failed in today's earlier run, and nothing if it succeeded.
+    - cron: "0 8 * * *"
 
 concurrency:
   group: daily-market-trading-history
   cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   budget:
@@ -41,8 +47,39 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       profile: ${{ steps.budget.outputs.profile }}
+      retry_shards: ${{ steps.retry.outputs.shards }}
+      skip: ${{ steps.retry.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
+      - id: retry
+        name: Pick shards for the afternoon retry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IS_RETRY: ${{ github.event_name == 'schedule' && github.event.schedule == '0 8 * * *' }}
+        run: |
+          if [ "$IS_RETRY" != "true" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          today=$(date -u +%F)
+          earlier=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow market-history-daily.yml --created ">=$today" --limit 20 \
+            --json databaseId,conclusion,status --jq "[.[] | select(.databaseId != ${GITHUB_RUN_ID} and .status == \"completed\")] | first // empty | \"\\(.databaseId) \\(.conclusion)\"")
+          if [ -z "$earlier" ]; then
+            echo "No earlier run today; running every shard."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          read -r run_id conclusion <<< "$earlier"
+          if [ "$conclusion" = "success" ]; then
+            echo "Run $run_id already succeeded today; nothing to retry."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          shards=$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json jobs \
+            --jq '[.jobs[] | select(.conclusion != "success" and (.name | startswith("Collect history"))) | .name | capture("\\((?<s>[^)]+)\\)").s] | join(",")')
+          echo "Retrying shards from run $run_id: ${shards:-all}"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "shards=$shards" >> "$GITHUB_OUTPUT"
       - id: budget
         uses: ./.github/actions/d1-budget
         with:
@@ -52,6 +89,7 @@ jobs:
   collect:
     name: Collect history (${{ matrix.shard_name }})
     needs: budget
+    if: ${{ needs.budget.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -119,7 +157,13 @@ jobs:
           BACKFILL_PROGRESS_PATH: daily-market-history-${{ matrix.shard_start }}.jsonl
           D1_BUDGET_PROFILE: ${{ needs.budget.outputs.profile }}
           SHARD_ORDINAL: ${{ strategy.job-index }}
+          SHARD_NAME: ${{ matrix.shard_name }}
+          RETRY_SHARDS: ${{ needs.budget.outputs.retry_shards }}
         run: |
+          if [ -n "$RETRY_SHARDS" ] && [[ ",$RETRY_SHARDS," != *",$SHARD_NAME,"* ]]; then
+            echo "Shard $SHARD_NAME succeeded in today's earlier run; not retried."
+            exit 0
+          fi
           if [ -z "$MARKET_COLLECTOR_TOKEN" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
             echo "Required collector or Cloudflare secret is missing."
             exit 1
@@ -135,7 +179,7 @@ jobs:
             critical) divisor=4; slot=$((utc_day % 4)) ;;
             protect|*) divisor=8; slot=$((utc_day % 8)) ;;
           esac
-          if [ $((10#$SHARD_ORDINAL % divisor)) -ne "$slot" ]; then
+          if [ -z "$RETRY_SHARDS" ] && [ $((10#$SHARD_ORDINAL % divisor)) -ne "$slot" ]; then
             echo "D1 ${D1_BUDGET_PROFILE} profile: history shard ${SHARD_ORDINAL} is deferred (slot ${slot}/${divisor})."
             exit 0
           fi
@@ -150,7 +194,7 @@ jobs:
 
   notify:
     name: Notify failed collection
-    if: ${{ always() && needs.collect.result != 'success' }}
+    if: ${{ always() && needs.budget.outputs.skip != 'true' && needs.collect.result != 'success' }}
     needs: [budget, collect]
     runs-on: ubuntu-latest
     steps:
@@ -159,13 +203,41 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+          IS_RETRY: ${{ github.event_name == 'schedule' && github.event.schedule == '0 8 * * *' }}
+          IS_MORNING: ${{ github.event_name == 'schedule' && github.event.schedule == '0 0 * * *' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "Telegram secrets are not configured; skipping notification."
             exit 0
           fi
+          failed=$(gh run view "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --json jobs \
+            --jq '[.jobs[] | select(.conclusion == "failure" and (.name | startswith("Collect history"))) | .name | capture("\\((?<s>[^)]+)\\)").s] | join(", ")' || true)
+          # The run is still in progress here, so read each failed collect job's own log.
+          job_ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?per_page=50" \
+            --jq '.jobs[] | select(.conclusion == "failure" and (.name | startswith("Collect history"))) | .id' || true)
+          secrets_expired=false
+          for job_id in $job_ids; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" 2>/dev/null | grep -q "Refresh the GitHub Actions authentication secrets"; then
+              secrets_expired=true
+            fi
+          done
+          if [ "$secrets_expired" = "true" ]; then
+            reason="SNKRDUNK login rejected for many cards in a row: the SNKRDUNK secrets need refreshing."
+          else
+            reason="Some cards could not be collected; see the run log."
+          fi
+          if [ "$IS_MORNING" = "true" ]; then
+            next="The failed shards are retried automatically in the afternoon (17:00 KST schedule)."
+          elif [ "$IS_RETRY" = "true" ]; then
+            next="This was the afternoon retry; tomorrow's run also re-collects the last 2 days."
+          else
+            next=""
+          fi
           message="Daily market trading history failed.
-          Scope: all JP cards + curated EN cards / Single + PSA10 / recent page
+          Shards: ${failed:-unknown}
+          Reason: ${reason}
+          ${next}
           Run: ${RUN_URL}"
           curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
             -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \

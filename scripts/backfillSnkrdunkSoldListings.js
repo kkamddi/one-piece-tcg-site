@@ -1083,13 +1083,25 @@ async function main() {
   console.log(JSON.stringify({ event: 'start', ...summary }));
 
   // SNKRDUNK answers 401 for some single cards while the same session works for the rest (OP13-016 on 10/15,
-  // twice, while the other 7 shards and a browser session read it fine). An isolated 401 skips that card;
-  // only a run of them means the secrets really expired.
+  // twice, while the other 7 shards and a browser session read it fine). A card that fails is tried once more
+  // after the rest of the shard; a 401 that repeats then skips only that card. A run of 401s still stops the
+  // shard, because that means the secrets really expired.
   const AUTH_FAILURE_LIMIT = 5;
+  const RETRY_PAUSE_MS = 30000;
   let consecutiveAuthFailures = 0;
+  const queue = targets.map((_, index) => index);
+  const retried = new Set();
+  let retryPauseDone = false;
 
-  for (let index = 0; index < targets.length; index += 1) {
+  for (let position = 0; position < queue.length; position += 1) {
+    const index = queue[position];
     const item = targets[index];
+    const isRetry = retried.has(index);
+    if (isRetry && !retryPauseDone) {
+      retryPauseDone = true;
+      console.log(JSON.stringify({ event: 'retry_pass', cards: queue.length - position, pauseMs: RETRY_PAUSE_MS }));
+      await sleep(RETRY_PAUSE_MS);
+    }
     try {
       const result = await backfillItem(item, {
         collectorUrl,
@@ -1155,7 +1167,18 @@ async function main() {
         await appendProgress(progressPath, payload);
         continue;
       }
-      if (isAuthenticationError(error) && ++consecutiveAuthFailures < AUTH_FAILURE_LIMIT) {
+      const authError = isAuthenticationError(error);
+      if (authError && !isRetry && ++consecutiveAuthFailures >= AUTH_FAILURE_LIMIT) {
+        throw new Error(`SNKRDUNK authentication rejected (${error.status}) for ${AUTH_FAILURE_LIMIT} cards in a row. Refresh the GitHub Actions authentication secrets.`);
+      }
+      if (!isRetry) {
+        retried.add(index);
+        queue.push(index);
+        console.warn(JSON.stringify({ event: 'card_retry_later', index: startIndex + index, apparelId: Number(item?.apparelId || 0), code: item?.code || '', error: error?.message || 'failed' }));
+        await sleep(2000);
+        continue;
+      }
+      if (authError) {
         summary.authSkipped += 1;
         const payload = {
           event: 'card_skipped',
@@ -1184,9 +1207,6 @@ async function main() {
       };
       console.error(JSON.stringify(payload));
       await appendProgress(progressPath, payload);
-      if (isAuthenticationError(error)) {
-        throw new Error(`SNKRDUNK authentication rejected (${error.status}). Refresh the GitHub Actions authentication secrets.`);
-      }
       await sleep(2000);
     }
   }
