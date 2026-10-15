@@ -1066,6 +1066,7 @@ async function main() {
     dailyWindowsComplete: 0,
     dailyWindowsIncomplete: 0,
     missingProducts: 0,
+    authSkipped: 0,
     failed: 0,
     capped: 0,
     stoppedAtDailyCutoff: 0,
@@ -1080,6 +1081,12 @@ async function main() {
   };
 
   console.log(JSON.stringify({ event: 'start', ...summary }));
+
+  // SNKRDUNK answers 401 for some single cards while the same session works for the rest (OP13-016 on 10/15,
+  // twice, while the other 7 shards and a browser session read it fine). An isolated 401 skips that card;
+  // only a run of them means the secrets really expired.
+  const AUTH_FAILURE_LIMIT = 5;
+  let consecutiveAuthFailures = 0;
 
   for (let index = 0; index < targets.length; index += 1) {
     const item = targets[index];
@@ -1127,6 +1134,7 @@ async function main() {
       }
       if (result.capped) summary.capped += 1;
       if (result.stoppedAtDailyCutoff) summary.stoppedAtDailyCutoff += 1;
+      consecutiveAuthFailures = 0;
       const payload = { event: 'card', index: startIndex + index, selectedIndex: index, ...result };
       console.log(JSON.stringify(payload));
       await appendProgress(progressPath, payload);
@@ -1145,6 +1153,23 @@ async function main() {
         };
         console.warn(JSON.stringify(payload));
         await appendProgress(progressPath, payload);
+        continue;
+      }
+      if (isAuthenticationError(error) && ++consecutiveAuthFailures < AUTH_FAILURE_LIMIT) {
+        summary.authSkipped += 1;
+        const payload = {
+          event: 'card_skipped',
+          reason: 'auth_rejected',
+          index: startIndex + index,
+          selectedIndex: index,
+          apparelId: Number(item?.apparelId || 0),
+          code: item?.code || '',
+          historySource,
+          error: error?.message || '401:Unauthorized',
+        };
+        console.warn(JSON.stringify(payload));
+        await appendProgress(progressPath, payload);
+        await sleep(2000);
         continue;
       }
       summary.failed += 1;
