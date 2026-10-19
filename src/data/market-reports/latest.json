@@ -1,91 +1,91 @@
 {
-  "id": "2026-10-11",
-  "weekStart": "2026-10-05",
-  "weekEnd": "2026-10-11",
-  "title": "원피스카드 주간 시세 리포트 (10월 5일~10월 11일)",
-  "krwPerJpy": 9.4,
+  "id": "2026-10-18",
+  "weekStart": "2026-10-12",
+  "weekEnd": "2026-10-18",
+  "title": "원피스카드 주간 시세 리포트 (10월 12일~10월 18일)",
+  "krwPerJpy": 8.4299,
   "kpis": [
     {
       "key": "psa10",
       "label": "PSA10 거래",
-      "value": "1,578건",
-      "change": -48.2
+      "value": "2,221건",
+      "change": -23
     },
     {
       "key": "a",
       "label": "Single 거래",
-      "value": "443건",
-      "change": 2.8
+      "value": "794건",
+      "change": -9.8
     },
     {
       "key": "value",
       "label": "총 거래액",
-      "value": "₩9.7억",
-      "change": -39.4
+      "value": "₩10.5억",
+      "change": -36.7
     }
   ],
   "gainers": [
     {
-      "label": "보아 행콕 ST17-004",
-      "code": "ST17-004",
-      "cardId": "",
+      "label": "골 D. 로저 OP09-118 (패러렐)",
+      "code": "OP09-118",
+      "cardId": "JP::OP09-118_p1",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-ST17-004-20241101-of.webp?size=m",
-      "apparelId": 435343,
-      "price": 30791,
-      "change": 39.2
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240830024703-0.webp?size=m",
+      "apparelId": 349471,
+      "price": 13640,
+      "change": 34.6
     },
     {
-      "label": "쵸파 ST01-006",
-      "code": "ST01-006",
+      "label": "타시기 EB03-018",
+      "code": "EB03-018",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/ST01-006-1112.webp?size=m",
-      "apparelId": 157937,
-      "price": 33606,
-      "change": 39.1
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-10-10-EB03-018-of.webp?size=m",
+      "apparelId": 710428,
+      "price": 22466,
+      "change": 22.3
     },
     {
-      "label": "몽키 D. 루피 ST01-012",
-      "code": "ST01-012",
+      "label": "롤로노아 조로 OP01-001 (패러렐 · 기념판)",
+      "code": "OP01-001",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240717073504-0.webp?size=m",
-      "apparelId": 161040,
-      "price": 13245,
-      "change": 38.8
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20220830083510-0.webp?size=m",
+      "apparelId": 94915,
+      "price": 10240,
+      "change": 18.2
     }
   ],
   "losers": [
     {
-      "label": "몽키 D. 루피 EB02-061 (패러렐)",
-      "code": "EB02-061",
-      "cardId": "JP::EB02-061_p1",
+      "label": "Monkey.D.Luffy P-159 (프로모)",
+      "code": "P-159",
+      "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250122090034-11.webp?size=m",
-      "apparelId": 503506,
-      "price": 12421,
-      "change": -21.7
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/0bb3034a-3114-4814-bcc9-722ba1e351a7.webp?size=m",
+      "apparelId": 854923,
+      "price": 9278,
+      "change": -25.7
     },
     {
-      "label": "몽키 D. 루피 P-043",
-      "code": "P-043",
-      "cardId": "JP::P-043",
+      "label": "Nami OP15-086 (패러렐)",
+      "code": "OP15-086",
+      "cardId": "JP::OP15-086_p1",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20231208102838-0.webp?size=m",
-      "apparelId": 167350,
-      "price": 17863,
-      "change": -13.8
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260227054651-0.webp?size=m",
+      "apparelId": 764629,
+      "price": 40219,
+      "change": -24.6
     },
     {
-      "label": "빈스모크 레이주 OP06-042 (패러렐)",
-      "code": "OP06-042",
-      "cardId": "JP::OP06-042_p1",
+      "label": "몽키 D. 루피 OP05-119",
+      "code": "OP05-119",
+      "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20231124035242-0.webp?size=m",
-      "apparelId": 158341,
-      "price": 7315,
-      "change": -10.7
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260126083744-0.webp?size=m",
+      "apparelId": 328579,
+      "price": 5687,
+      "change": -22.9
     }
   ]
 }
