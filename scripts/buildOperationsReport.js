@@ -133,8 +133,11 @@ async function fetchGitHubRuns() {
     const recentRuns = (payload.workflow_runs || []).filter((run) => (
       new Date(run.created_at).getTime() >= cutoff
     ));
+    // A skipped run did not run (the index refresh skips when its upstream run failed), so the freshness check
+    // looks at the last run that did; a refresh that keeps skipping still turns stale after its freshness hours.
     const latestByName = new Map();
     for (const run of payload.workflow_runs || []) {
+      if (run.conclusion === 'skipped') continue;
       if (!latestByName.has(run.name)) latestByName.set(run.name, run);
     }
     const workflows = Object.entries(WORKFLOW_LABELS).map(([name, label]) => {
