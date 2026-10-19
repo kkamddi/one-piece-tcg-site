@@ -158,6 +158,9 @@ jobs:
           SOLD_LISTING_MAX_PAGES: ${{ github.event.inputs.max_pages || 'all' }}
           SOLD_LISTING_SAFETY_MAX_PAGES: ${{ github.event.inputs.safety_max_pages || '1000' }}
           BACKFILL_TRADING_HISTORIES: '1'
+          # Yen from the Japanese site API like the daily run; the /en/v1 login expired on 10/13 and its prices were
+          # converted from won or dollars.
+          BACKFILL_TRADING_HISTORY_SOURCE: jp
           TRADING_HISTORY_PER_PAGE: ${{ github.event.inputs.trading_history_per_page || '12' }}
           BACKFILL_DELAY_MS: ${{ github.event.inputs.delay_ms || '1000' }}
           BACKFILL_HISTORY_CHUNK_SIZE: ${{ github.event.inputs.history_chunk_size || '10' }}
@@ -178,7 +181,7 @@ jobs:
           message="SNKRDUNK backfill failed.
           Workflow: $GITHUB_WORKFLOW
           Run: $RUN_URL
-          Check SNKRDUNK_COOKIE if the error is 401/403."
+          A run of 401/403 means SNKRDUNK refused this runner for a while; the next run collects again."
           curl -fsS --retry 3 --retry-delay 5 --retry-all-errors --connect-timeout 10 --max-time 30 \
             -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \

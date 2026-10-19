@@ -215,13 +215,20 @@ jobs:
           job_ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?per_page=50" \
             --jq '.jobs[] | select(.conclusion == "failure" and (.name | startswith("Collect history"))) | .id' || true)
           secrets_expired=false
+          blocked=false
           for job_id in $job_ids; do
-            if gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" 2>/dev/null | grep -q "Refresh the GitHub Actions authentication secrets"; then
+            log=$(gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" 2>/dev/null || true)
+            if grep -q "Refresh the GitHub Actions authentication secrets" <<< "$log"; then
               secrets_expired=true
+            fi
+            if grep -q "SNKRDUNK is blocking this runner" <<< "$log"; then
+              blocked=true
             fi
           done
           if [ "$secrets_expired" = "true" ]; then
             reason="SNKRDUNK login rejected for many cards in a row: the SNKRDUNK secrets need refreshing."
+          elif [ "$blocked" = "true" ]; then
+            reason="SNKRDUNK refused one GitHub runner (403) for a while; nothing to fix, the cards are collected on the next run."
           else
             reason="Some cards could not be collected; see the run log."
           fi

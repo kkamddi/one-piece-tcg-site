@@ -1320,8 +1320,14 @@ async function main() {
   // twice, while the other 7 shards and a browser session read it fine). A card that fails is tried once more
   // after the rest of the shard; a 401 that repeats then skips only that card. A run of 401s still stops the
   // shard, because that means the secrets really expired.
+  // The Japanese API needs no login, so a run of 401/403s there means SNKRDUNK is refusing this runner for a
+  // while (one of 8 shards on 10/19, the others fine). The shard pauses and carries on instead of stopping.
   const AUTH_FAILURE_LIMIT = 5;
   const RETRY_PAUSE_MS = 30000;
+  const usesLogin = historySource !== 'jp-trading-history';
+  const BLOCK_PAUSE_MS = 3 * 60 * 1000;
+  const BLOCK_PAUSE_LIMIT = 3;
+  let blockPauses = 0;
   let consecutiveAuthFailures = 0;
   const queue = targets.map((_, index) => index);
   const retried = new Set();
@@ -1404,7 +1410,18 @@ async function main() {
       }
       const authError = isAuthenticationError(error);
       if (authError && !isRetry && ++consecutiveAuthFailures >= AUTH_FAILURE_LIMIT) {
-        throw new Error(`SNKRDUNK authentication rejected (${error.status}) for ${AUTH_FAILURE_LIMIT} cards in a row. Refresh the GitHub Actions authentication secrets.`);
+        if (usesLogin) {
+          throw new Error(`SNKRDUNK authentication rejected (${error.status}) for ${AUTH_FAILURE_LIMIT} cards in a row. Refresh the GitHub Actions authentication secrets.`);
+        }
+        if (blockPauses >= BLOCK_PAUSE_LIMIT) {
+          throw new Error(`SNKRDUNK refused requests (${error.status}) for ${AUTH_FAILURE_LIMIT} cards in a row after ${BLOCK_PAUSE_LIMIT} pauses: SNKRDUNK is blocking this runner. The next scheduled run collects every card again.`);
+        }
+        blockPauses += 1;
+        consecutiveAuthFailures = 0;
+        console.warn(JSON.stringify({ event: 'blocked_pause', index: startIndex + index, pause: blockPauses, pauseMs: BLOCK_PAUSE_MS, error: error?.message || '' }));
+        await sleep(BLOCK_PAUSE_MS);
+        position -= 1;
+        continue;
       }
       if (!isRetry) {
         retried.add(index);
