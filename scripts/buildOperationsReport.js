@@ -133,11 +133,12 @@ async function fetchGitHubRuns() {
     const recentRuns = (payload.workflow_runs || []).filter((run) => (
       new Date(run.created_at).getTime() >= cutoff
     ));
-    // A skipped run did not run (the index refresh skips when its upstream run failed), so the freshness check
-    // looks at the last run that did; a refresh that keeps skipping still turns stale after its freshness hours.
+    // Each workflow is judged by its last finished run. A skipped run did not run (the index refresh skips when
+    // its upstream run failed) and a run in progress has no result yet (the trade history run takes about two
+    // hours); a workflow that keeps skipping or never finishes still turns stale after its freshness hours.
     const latestByName = new Map();
     for (const run of payload.workflow_runs || []) {
-      if (run.conclusion === 'skipped') continue;
+      if (run.status !== 'completed' || run.conclusion === 'skipped') continue;
       if (!latestByName.has(run.name)) latestByName.set(run.name, run);
     }
     const workflows = Object.entries(WORKFLOW_LABELS).map(([name, label]) => {
@@ -337,9 +338,10 @@ function buildTelegramMessage(report) {
     `D1 읽기  <code>${d1.readPercent.toFixed(1)}%</code> · ${d1.rowsRead.toLocaleString('en-US')}행`,
     `D1 쓰기  <code>${d1.writePercent.toFixed(1)}%</code> · ${d1.rowsWritten.toLocaleString('en-US')}행`,
     `D1 저장  <code>${d1.storagePercent.toFixed(1)}%</code>`,
-    report.services.cloudflare.workers
-      ? `Functions <code>${report.services.cloudflare.workers.requests.toLocaleString('en-US')}</code>회 · 오류 ${report.services.cloudflare.workers.errors.toLocaleString('en-US')}`
-      : 'Functions <code>집계 권한 확인 필요</code>',
+    // Shown only when the API token may read account analytics; it never affects the overall status.
+    ...(report.services.cloudflare.workers
+      ? [`Functions <code>${report.services.cloudflare.workers.requests.toLocaleString('en-US')}</code>회 · 오류 ${report.services.cloudflare.workers.errors.toLocaleString('en-US')}`]
+      : []),
     '',
     '<b>[데이터 최신성]</b>',
     ...freshness.map((item) => `${item.label}  ${statusLabel(item.status)} · ${formatKst(item.updatedAt)}`),

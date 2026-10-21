@@ -3,8 +3,9 @@ name: Operations daily report
 on:
   workflow_dispatch:
   schedule:
-    # 09:10 KST
-    - cron: "10 0 * * *"
+    # 05:10 KST: GitHub starts scheduled runs about 4 hours late here (13:16-13:45 KST for a 09:10 schedule),
+    # so the report lands in the morning, after the overnight trade history run has finished.
+    - cron: "10 20 * * *"
 
 concurrency:
   group: operations-daily-report
