@@ -204,6 +204,18 @@
     "baseSeriesId": "EB03"
   },
   {
+    "id": "KR-EB04",
+    "koName": "엑스트라 부스터 팩 EGGHEAD CRISIS",
+    "enName": "EGGHEAD CRISIS",
+    "kindKo": "엑스트라 부스터",
+    "kindEn": "EXTRA BOOSTER",
+    "queryLabel": "[EBK-04] 엑스트라 부스터 팩 EGGHEAD CRISIS",
+    "officialSeriesKeyword": "EB-04",
+    "description": "공식 한글 카드 리스트 기준 엑스트라 부스터 카드",
+    "locale": "KR",
+    "baseSeriesId": "EB04"
+  },
+  {
     "id": "KR-ST01",
     "koName": "밀짚모자 일당",
     "enName": "Straw Hat Crew",
@@ -537,6 +549,18 @@
     "kindEn": "BOOSTER PACK",
     "queryLabel": "ブースターパック 謀略の王国【OP-04】",
     "officialSeriesKeyword": "550104",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-EB05",
+    "locale": "JP",
+    "baseSeriesId": "EB05",
+    "koName": "エクストラブースター ONE PIECE Heroines Edition vol.2",
+    "enName": "エクストラブースター ONE PIECE Heroines Edition vol.2",
+    "kindKo": "엑스트라 부스터",
+    "kindEn": "EXTRA BOOSTER",
+    "queryLabel": "エクストラブースター ONE PIECE Heroines Edition vol.2【EB-05】",
+    "officialSeriesKeyword": "550205",
     "description": "일본 공식 카드 리스트 기준 카드 라인"
   },
   {

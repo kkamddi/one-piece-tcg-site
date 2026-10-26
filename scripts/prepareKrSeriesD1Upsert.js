@@ -8,7 +8,7 @@ const rootDir = path.resolve(__dirname, '..');
 const dataDir = path.join(rootDir, 'src/data');
 const targetSeriesId = String(process.argv.find((arg) => arg.startsWith('--series=')) || '').slice('--series='.length).trim();
 
-if (!/^KR-[A-Z0-9]+$/.test(targetSeriesId)) {
+if (!/^(KR|JP)-[A-Z0-9]+$/.test(targetSeriesId)) {
   throw new Error('Usage: node scripts/prepareKrSeriesD1Upsert.js --series=KR-EB03');
 }
 
@@ -62,7 +62,7 @@ function toSeriesRow(series, cardCount) {
   return {
     id: series.id,
     locale: series.locale || 'KR',
-    base_series_id: series.baseSeriesId || series.id.replace(/^KR-/, ''),
+    base_series_id: series.baseSeriesId || series.id.replace(/^(KR|JP)-/, ''),
     name: series.koName || series.name || series.id,
     name_en: series.enName || series.koName || series.id,
     kind_ko: series.kindKo || null,
@@ -88,9 +88,9 @@ function toCardRow(card) {
     card_no_base: cardNoBase,
     variant_key: variantKey(cardNo, card.id),
     series_id: card.series,
-    base_series_id: card.baseSeriesId || card.series.replace(/^KR-/, ''),
+    base_series_id: card.baseSeriesId || card.series.replace(/^(KR|JP)-/, ''),
     origin_series_id: card.originSeries || card.series,
-    origin_base_series_id: card.originBaseSeriesId || String(card.originSeries || card.series).replace(/^KR-/, ''),
+    origin_base_series_id: card.originBaseSeriesId || String(card.originSeries || card.series).replace(/^(KR|JP)-/, ''),
     name: card.name || cardNo,
     name_en: card.nameEn || null,
     name_normalized: normalizeSearch(card.name || cardNo),
@@ -128,7 +128,8 @@ const [seriesList, cards] = await Promise.all([
   JSON.parse(await readFile(path.join(dataDir, 'cards.json'), 'utf8'))
 ]);
 const series = seriesList.find((item) => item.id === targetSeriesId);
-const targetCards = cards.filter((card) => card.series === targetSeriesId && card.locale === 'KR');
+const targetLocale = targetSeriesId.slice(0, 2);
+const targetCards = cards.filter((card) => card.series === targetSeriesId && (card.locale || 'KR') === targetLocale);
 if (!series || !targetCards.length) {
   throw new Error(`No source data found for ${targetSeriesId}`);
 }

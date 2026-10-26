@@ -51,6 +51,19 @@ const targets = {
     description: '공식 한글 카드 리스트 기준 엑스트라 부스터 카드',
     insertAfter: 'KR-EB02',
     minimumCardCount: 80
+  },
+  EB04: {
+    seriesId: 'KR-EB04',
+    baseSeriesId: 'EB04',
+    optionCode: 'EBK-04',
+    koName: '엑스트라 부스터 팩 EGGHEAD CRISIS',
+    enName: 'EGGHEAD CRISIS',
+    kindKo: '엑스트라 부스터',
+    kindEn: 'EXTRA BOOSTER',
+    officialSeriesKeyword: 'EB-04',
+    description: '공식 한글 카드 리스트 기준 엑스트라 부스터 카드',
+    insertAfter: 'KR-EB03',
+    minimumCardCount: 80
   }
 };
 // Korean starter decks STK-23~29, named as the official card list's series option.
