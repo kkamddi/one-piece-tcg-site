@@ -1,19 +1,19 @@
 {
-  "updatedAt": "2026-10-28T05:45:28.720Z",
+  "updatedAt": "2026-10-29T05:51:02.511Z",
   "items": {
     "93992": {
       "minPrice": 9,
       "minPriceFormat": "US $9",
       "priceCurrency": "USD",
-      "listingCount": 38,
+      "listingCount": 39,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/39dd9a57-330f-4656-ba7a-9229d986d4fa.webp?size=s",
       "releaseDate": ""
     },
     "96205": {
-      "minPrice": 61,
-      "minPriceFormat": "US $61",
+      "minPrice": 60,
+      "minPriceFormat": "US $60",
       "priceCurrency": "USD",
-      "listingCount": 404,
+      "listingCount": 407,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/a2527a36-f717-4f72-8caa-667fbc9529af.webp?size=s",
       "releaseDate": "2022-07-23"
     },
@@ -21,15 +21,15 @@
       "minPrice": 222,
       "minPriceFormat": "US $222",
       "priceCurrency": "USD",
-      "listingCount": 52,
+      "listingCount": 51,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/f3b600c7-2df8-4173-911d-ffc2fc0bb4bb.webp?size=s",
       "releaseDate": "2022-07-22"
     },
     "136032": {
-      "minPrice": 113,
-      "minPriceFormat": "US $113",
+      "minPrice": 115,
+      "minPriceFormat": "US $115",
       "priceCurrency": "USD",
-      "listingCount": 32,
+      "listingCount": 31,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/90ad7e8b-830e-4621-9b5d-160c34570eb9.webp?size=s",
       "releaseDate": "2022-11-04"
     },
@@ -50,10 +50,10 @@
       "releaseDate": "2023-05-27"
     },
     "136035": {
-      "minPrice": 340,
-      "minPriceFormat": "US $340",
+      "minPrice": 337,
+      "minPriceFormat": "US $337",
       "priceCurrency": "USD",
-      "listingCount": 84,
+      "listingCount": 85,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/3b8d6f68-e859-4bc8-87fb-83682017543b.webp?size=s",
       "releaseDate": "2023-08-09"
     },
@@ -66,18 +66,18 @@
       "releaseDate": "2023-11-25"
     },
     "151822": {
-      "minPrice": 63,
-      "minPriceFormat": "US $63",
+      "minPrice": 60,
+      "minPriceFormat": "US $60",
       "priceCurrency": "USD",
       "listingCount": 65,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/1d27b270-a5a9-430e-af2c-0f0e2c22d76e.webp?size=s",
       "releaseDate": "2023-06-16"
     },
     "159944": {
-      "minPrice": 200,
-      "minPriceFormat": "US $200",
+      "minPrice": 191,
+      "minPriceFormat": "US $191",
       "priceCurrency": "USD",
-      "listingCount": 57,
+      "listingCount": 56,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/bc3bd0fc-87df-4ed7-94f8-a17e4ea3b738.webp?size=s",
       "releaseDate": ""
     },
@@ -90,10 +90,10 @@
       "releaseDate": ""
     },
     "165849": {
-      "minPrice": 121,
-      "minPriceFormat": "US $121",
+      "minPrice": 126,
+      "minPriceFormat": "US $126",
       "priceCurrency": "USD",
-      "listingCount": 29,
+      "listingCount": 30,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/ed904cb3-492f-4b96-89f5-f3e1a9d958c8.webp?size=s",
       "releaseDate": "2024-01-27"
     },
@@ -101,7 +101,7 @@
       "minPrice": 99,
       "minPriceFormat": "US $99",
       "priceCurrency": "USD",
-      "listingCount": 56,
+      "listingCount": 57,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/d9074173-862e-4488-a55a-b1041ee4b936.webp?size=s",
       "releaseDate": "2024-02-24"
     },
@@ -130,10 +130,10 @@
       "releaseDate": "2024-08-31"
     },
     "315877": {
-      "minPrice": 39,
-      "minPriceFormat": "US $39",
+      "minPrice": 40,
+      "minPriceFormat": "US $40",
       "priceCurrency": "USD",
-      "listingCount": 107,
+      "listingCount": 106,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/e41b7050-1d15-4f4c-a055-21f964d2779f.webp?size=s",
       "releaseDate": "2024-08-10"
     },
@@ -141,7 +141,7 @@
       "minPrice": 72,
       "minPriceFormat": "US $72",
       "priceCurrency": "USD",
-      "listingCount": 44,
+      "listingCount": 45,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/e205f611-93d3-4785-a605-88138be3055a.webp?size=s",
       "releaseDate": "2024-11-30"
     },
@@ -162,10 +162,10 @@
       "releaseDate": "2025-03-01"
     },
     "542574": {
-      "minPrice": 107,
-      "minPriceFormat": "US $107",
+      "minPrice": 106,
+      "minPriceFormat": "US $106",
       "priceCurrency": "USD",
-      "listingCount": 47,
+      "listingCount": 48,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/e35748bd-2f5e-4bad-af51-948442cc00cc.webp?size=s",
       "releaseDate": "2025-05-31"
     },
@@ -173,15 +173,15 @@
       "minPrice": 66,
       "minPriceFormat": "US $66",
       "priceCurrency": "USD",
-      "listingCount": 78,
+      "listingCount": 76,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/36196953-2b96-4e88-8bc3-8fbb54c94b60.webp?size=s",
       "releaseDate": "2025-07-26"
     },
     "548909": {
-      "minPrice": 110,
-      "minPriceFormat": "US $110",
+      "minPrice": 109,
+      "minPriceFormat": "US $109",
       "priceCurrency": "USD",
-      "listingCount": 292,
+      "listingCount": 290,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/9b92497a-a7d1-4027-80f6-93efad7eebdc.webp?size=s",
       "releaseDate": "2025-08-23"
     },
@@ -194,10 +194,10 @@
       "releaseDate": "2025-09-01"
     },
     "549031": {
-      "minPrice": 54,
-      "minPriceFormat": "US $54",
+      "minPrice": 45,
+      "minPriceFormat": "US $45",
       "priceCurrency": "USD",
-      "listingCount": 94,
+      "listingCount": 96,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/0bb833b3-f369-4a17-85f3-8cb8b6f77c05.webp?size=s",
       "releaseDate": "2025-04-01"
     },
@@ -210,16 +210,16 @@
       "releaseDate": ""
     },
     "686249": {
-      "minPrice": 102,
-      "minPriceFormat": "US $102",
+      "minPrice": 96,
+      "minPriceFormat": "US $96",
       "priceCurrency": "USD",
-      "listingCount": 95,
+      "listingCount": 96,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/15a5cafe-79d3-4a99-9f4d-91946c1c35c1.webp?size=s",
       "releaseDate": "2025-08-09"
     },
     "691521": {
-      "minPrice": 84,
-      "minPriceFormat": "US $84",
+      "minPrice": 82,
+      "minPriceFormat": "US $82",
       "priceCurrency": "USD",
       "listingCount": 131,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/a4b51140-9dac-4ef8-a0f9-47dae8c0e41a.webp?size=s",
@@ -237,15 +237,15 @@
       "minPrice": 58,
       "minPriceFormat": "US $58",
       "priceCurrency": "USD",
-      "listingCount": 136,
+      "listingCount": 133,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/ad98e7cd-0028-4261-a22f-9c054c55fdfa.webp?size=s",
       "releaseDate": "2025-11-22"
     },
     "730900": {
-      "minPrice": 37,
-      "minPriceFormat": "US $37",
+      "minPrice": 36,
+      "minPriceFormat": "US $36",
       "priceCurrency": "USD",
-      "listingCount": 269,
+      "listingCount": 272,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/1be789fe-5887-4dea-9f1d-6272caa64dd9.webp?size=s",
       "releaseDate": "2025-12-05"
     },
@@ -253,7 +253,7 @@
       "minPrice": 20,
       "minPriceFormat": "US $20",
       "priceCurrency": "USD",
-      "listingCount": 389,
+      "listingCount": 393,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/4fd34c7e-1241-404f-b0c1-60eea5c39b3e.webp?size=s",
       "releaseDate": ""
     },
@@ -261,15 +261,15 @@
       "minPrice": 89,
       "minPriceFormat": "US $89",
       "priceCurrency": "USD",
-      "listingCount": 73,
+      "listingCount": 76,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/7b8afbf6-b2f4-4a6b-a7f8-da83d318a039.webp?size=s",
       "releaseDate": "2026-01-31"
     },
     "755874": {
-      "minPrice": 235,
-      "minPriceFormat": "US $235",
+      "minPrice": 229,
+      "minPriceFormat": "US $229",
       "priceCurrency": "USD",
-      "listingCount": 78,
+      "listingCount": 79,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/0d4106a5-5fec-4fb7-99c2-3955e829bd40.webp?size=s",
       "releaseDate": "2026-02-22"
     },
@@ -277,7 +277,7 @@
       "minPrice": 54,
       "minPriceFormat": "US $54",
       "priceCurrency": "USD",
-      "listingCount": 201,
+      "listingCount": 197,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/6536b127-6073-4862-a435-f2e416e0271f.webp?size=s",
       "releaseDate": "2026-02-28"
     },
@@ -285,7 +285,7 @@
       "minPrice": 29,
       "minPriceFormat": "US $29",
       "priceCurrency": "USD",
-      "listingCount": 40,
+      "listingCount": 38,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/39783655-cc81-4dac-8bf2-1e72a4ad08a5.webp?size=s",
       "releaseDate": "2026-04-17"
     },
@@ -293,13 +293,13 @@
       "minPrice": 54,
       "minPriceFormat": "US $54",
       "priceCurrency": "USD",
-      "listingCount": 282,
+      "listingCount": 285,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/ce510978-f1a0-41d2-ae19-2e10ea9444d3.webp?size=s",
       "releaseDate": "2026-05-30"
     },
     "818461": {
-      "minPrice": 19,
-      "minPriceFormat": "US $19",
+      "minPrice": 18,
+      "minPriceFormat": "US $18",
       "priceCurrency": "USD",
       "listingCount": 233,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/03f2ccbb-4a06-4cc2-a2fc-06651dfdba48.webp?size=s",
@@ -309,7 +309,7 @@
       "minPrice": 7,
       "minPriceFormat": "US $7",
       "priceCurrency": "USD",
-      "listingCount": 190,
+      "listingCount": 188,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/b4057c88-772e-4769-8186-9e8c52b8cdcb.webp?size=s",
       "releaseDate": "2026-07-11"
     },
@@ -317,7 +317,7 @@
       "minPrice": 7,
       "minPriceFormat": "US $7",
       "priceCurrency": "USD",
-      "listingCount": 63,
+      "listingCount": 61,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/8231dac4-80c8-4b4d-8bee-0e177a134eaa.webp?size=s",
       "releaseDate": "2026-07-11"
     },
@@ -349,31 +349,31 @@
       "minPrice": 7,
       "minPriceFormat": "US $7",
       "priceCurrency": "USD",
-      "listingCount": 54,
+      "listingCount": 53,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/fb1e52e2-82c0-476e-a754-b583e3ef7391.webp?size=s",
       "releaseDate": "2026-07-11"
     },
     "854157": {
-      "minPrice": 7,
-      "minPriceFormat": "US $7",
+      "minPrice": 8,
+      "minPriceFormat": "US $8",
       "priceCurrency": "USD",
-      "listingCount": 454,
+      "listingCount": 445,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/0716f23b-9ac3-41cd-a629-29313ae11561.webp?size=s",
       "releaseDate": "2026-07-18"
     },
     "860463": {
-      "minPrice": 13,
-      "minPriceFormat": "US $13",
+      "minPrice": 14,
+      "minPriceFormat": "US $14",
       "priceCurrency": "USD",
-      "listingCount": 331,
+      "listingCount": 330,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/661f7923-cd5a-4b32-ac4a-c6e31effde55.webp?size=s",
       "releaseDate": "2026-08-20"
     },
     "864495": {
-      "minPrice": 67,
-      "minPriceFormat": "US $67",
+      "minPrice": 66,
+      "minPriceFormat": "US $66",
       "priceCurrency": "USD",
-      "listingCount": 532,
+      "listingCount": 542,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/fcdf199a-485a-421b-8efa-9724e0ca6df6.webp?size=s",
       "releaseDate": "2026-08-22"
     },
@@ -381,7 +381,7 @@
       "minPrice": 17,
       "minPriceFormat": "US $17",
       "priceCurrency": "USD",
-      "listingCount": 13,
+      "listingCount": 12,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/488ba399-5e0c-4811-8d36-a6e525226dbe.webp?size=s",
       "releaseDate": "2026-08-22"
     },
@@ -389,7 +389,7 @@
       "minPrice": 17,
       "minPriceFormat": "US $17",
       "priceCurrency": "USD",
-      "listingCount": 29,
+      "listingCount": 28,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/e9711ac2-5da9-4c9c-b189-6c2e77e8641c.webp?size=s",
       "releaseDate": "2026-08-22"
     },
@@ -397,7 +397,7 @@
       "minPrice": 17,
       "minPriceFormat": "US $17",
       "priceCurrency": "USD",
-      "listingCount": 15,
+      "listingCount": 16,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/91d497bc-3938-4c50-9cb6-de69c9de225a.webp?size=s",
       "releaseDate": "2026-08-22"
     },
@@ -413,7 +413,7 @@
       "minPrice": 7,
       "minPriceFormat": "US $7",
       "priceCurrency": "USD",
-      "listingCount": 294,
+      "listingCount": 295,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/cd3cc5df-665a-4d2a-bff4-115a7cb1b727.webp?size=s",
       "releaseDate": "2026-08-22"
     },
@@ -482,10 +482,10 @@
       "releaseDate": "2026-09-01"
     },
     "887443": {
-      "minPrice": 276,
-      "minPriceFormat": "US $276",
+      "minPrice": 279,
+      "minPriceFormat": "US $279",
       "priceCurrency": "USD",
-      "listingCount": 55,
+      "listingCount": 54,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/aea445c4-c131-4ae3-be79-fe5652764882.webp?size=s",
       "releaseDate": "2026-09-01"
     },
@@ -501,7 +501,7 @@
       "minPrice": 66,
       "minPriceFormat": "US $66",
       "priceCurrency": "USD",
-      "listingCount": 35,
+      "listingCount": 36,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/c436762f-0bda-4ade-b9b2-18309d412e00.webp?size=s",
       "releaseDate": "2026-09-04"
     },
@@ -578,10 +578,10 @@
       "releaseDate": "2026-10-24"
     },
     "910479": {
-      "minPrice": 86,
-      "minPriceFormat": "US $86",
+      "minPrice": 85,
+      "minPriceFormat": "US $85",
       "priceCurrency": "USD",
-      "listingCount": 119,
+      "listingCount": 138,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/946f3236-1a32-4c20-bdaa-7a9484dde258.webp?size=s",
       "releaseDate": "2026-10-31"
     },
@@ -594,10 +594,10 @@
       "releaseDate": "2026-10-31"
     },
     "912021": {
-      "minPrice": 0,
-      "minPriceFormat": "",
+      "minPrice": 64,
+      "minPriceFormat": "US $64",
       "priceCurrency": "USD",
-      "listingCount": 0,
+      "listingCount": 1,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/d025ff66-4312-4809-bc28-404a1d0bd273.webp?size=s",
       "releaseDate": "2026-10-31"
     },
@@ -613,7 +613,7 @@
       "minPrice": 178,
       "minPriceFormat": "US $178",
       "priceCurrency": "USD",
-      "listingCount": 1,
+      "listingCount": 6,
       "previewImageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/6064c65e-633e-478c-be80-30427eaa5fdd.webp?size=s",
       "releaseDate": "2026-10-31"
     },
