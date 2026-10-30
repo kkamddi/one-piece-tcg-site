@@ -27958,6 +27958,1680 @@ const cardMarketLinks = [
     "apparelId": 871074,
     "status": "approved",
     "note": "OP17 auto approved: Kouzuki Oden SR-SPC :Conqueror's Haki Special Card [ST32-002](Booster Pack \"THE WORLD’S STRONGEST WARRIORS\")"
+  },
+  {
+    "cardId": "JP::EB03-001_p2",
+    "cardNo": "EB03-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-001",
+    "cardNo": "EB05-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925473,
+    "status": "approved",
+    "note": "EB05 auto approved: Jewelry Bonney SR [EB05-001](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-001_p1",
+    "cardNo": "EB05-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911898,
+    "status": "approved",
+    "note": "EB05 auto approved: Jewelry Bonney SR-P [EB05-001](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-002",
+    "cardNo": "EB05-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925474,
+    "status": "approved",
+    "note": "EB05 auto approved: Doll R [EB05-002](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-003",
+    "cardNo": "EB05-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925475,
+    "status": "approved",
+    "note": "EB05 auto approved: Pasia C [EB05-003](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-004",
+    "cardNo": "EB05-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925476,
+    "status": "approved",
+    "note": "EB05 auto approved: Baby 5 R [EB05-004](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-004_p1",
+    "cardNo": "EB05-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911899,
+    "status": "approved",
+    "note": "EB05 auto approved: Baby 5 R-P [EB05-004](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-005",
+    "cardNo": "EB05-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925477,
+    "status": "approved",
+    "note": "EB05 auto approved: Belo Betty C [EB05-005](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-006",
+    "cardNo": "EB05-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925478,
+    "status": "approved",
+    "note": "EB05 auto approved: Miss Buckingham Stussy SR [EB05-006](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-006_p1",
+    "cardNo": "EB05-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911901,
+    "status": "approved",
+    "note": "EB05 auto approved: Miss Buckingham Stussy SR-P [EB05-006](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-006_p2",
+    "cardNo": "EB05-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911900,
+    "status": "approved",
+    "note": "EB05 auto approved: Miss Buckingham Stussy SR-SPC [EB05-006](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-007",
+    "cardNo": "EB05-007",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-008",
+    "cardNo": "EB05-008",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925480,
+    "status": "approved",
+    "note": "EB05 auto approved: Luffy, Now's Your Chance C [EB05-008](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-009",
+    "cardNo": "EB05-009",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925481,
+    "status": "approved",
+    "note": "EB05 auto approved: Fight and Die with Me!!! R [EB05-009](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-010",
+    "cardNo": "EB05-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925482,
+    "status": "approved",
+    "note": "EB05 auto approved: Nico Robin L [EB05-010](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-010_p1",
+    "cardNo": "EB05-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-010_p2",
+    "cardNo": "EB05-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-011",
+    "cardNo": "EB05-011",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925483,
+    "status": "approved",
+    "note": "EB05 auto approved: Otohime C [EB05-011](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-012",
+    "cardNo": "EB05-012",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925484,
+    "status": "approved",
+    "note": "EB05 auto approved: Camie R [EB05-012](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-013",
+    "cardNo": "EB05-013",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925485,
+    "status": "approved",
+    "note": "EB05 auto approved: Shirley C [EB05-013](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-014",
+    "cardNo": "EB05-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925486,
+    "status": "approved",
+    "note": "EB05 auto approved: Shirahoshi SR [EB05-014](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-014_p1",
+    "cardNo": "EB05-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911905,
+    "status": "approved",
+    "note": "EB05 auto approved: Shirahoshi SR-P [EB05-014](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-014_p2",
+    "cardNo": "EB05-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911904,
+    "status": "approved",
+    "note": "EB05 auto approved: Shirahoshi SR-SP (Manga Alt Art) [EB05-014](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-015",
+    "cardNo": "EB05-015",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925487,
+    "status": "approved",
+    "note": "EB05 auto approved: Tashigi C [EB05-015](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-016",
+    "cardNo": "EB05-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925488,
+    "status": "approved",
+    "note": "EB05 auto approved: Nico Robin SR [EB05-016](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-016_p1",
+    "cardNo": "EB05-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911907,
+    "status": "approved",
+    "note": "EB05 auto approved: Nico Robin SR-P [EB05-016](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-016_p2",
+    "cardNo": "EB05-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911906,
+    "status": "approved",
+    "note": "EB05 auto approved: Nico Robin SR-SPC [EB05-016](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-017",
+    "cardNo": "EB05-017",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925489,
+    "status": "approved",
+    "note": "EB05 auto approved: Mermaid Cafe Dancers C [EB05-017](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-018",
+    "cardNo": "EB05-018",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925490,
+    "status": "approved",
+    "note": "EB05 auto approved: Rebecca R [EB05-018](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-018_p1",
+    "cardNo": "EB05-018",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911908,
+    "status": "approved",
+    "note": "EB05 auto approved: Rebecca R-P [EB05-018](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-019",
+    "cardNo": "EB05-019",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925491,
+    "status": "approved",
+    "note": "EB05 auto approved: I Choose to Open This Country to the World!! I Want to Fight on Your Side!!! C [EB05-019](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-020",
+    "cardNo": "EB05-020",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925492,
+    "status": "approved",
+    "note": "EB05 auto approved: My name is Shirahoshi!! R [EB05-020](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-021",
+    "cardNo": "EB05-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925493,
+    "status": "approved",
+    "note": "EB05 auto approved: Alvida SR [EB05-021](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-021_p1",
+    "cardNo": "EB05-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911909,
+    "status": "approved",
+    "note": "EB05 auto approved: Alvida SR-P [EB05-021](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-022",
+    "cardNo": "EB05-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925494,
+    "status": "approved",
+    "note": "EB05 auto approved: Octopako C [EB05-022](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-023",
+    "cardNo": "EB05-023",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925495,
+    "status": "approved",
+    "note": "EB05 auto approved: Osome C [EB05-023](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-024",
+    "cardNo": "EB05-024",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925496,
+    "status": "approved",
+    "note": "EB05 auto approved: Little Sadi R [EB05-024](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-025",
+    "cardNo": "EB05-025",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925497,
+    "status": "approved",
+    "note": "EB05 auto approved: Domino C [EB05-025](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-026",
+    "cardNo": "EB05-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925498,
+    "status": "approved",
+    "note": "EB05 auto approved: Hina C [EB05-026](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-027",
+    "cardNo": "EB05-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925499,
+    "status": "approved",
+    "note": "EB05 auto approved: Hibari R [EB05-027](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-028",
+    "cardNo": "EB05-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925500,
+    "status": "approved",
+    "note": "EB05 auto approved: Boa Hancock R [EB05-028](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-028_p1",
+    "cardNo": "EB05-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911910,
+    "status": "approved",
+    "note": "EB05 auto approved: Boa Hancock R-P [EB05-028](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-029",
+    "cardNo": "EB05-029",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925501,
+    "status": "approved",
+    "note": "EB05 auto approved: Kimono Sleeve Cage C [EB05-029](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-030",
+    "cardNo": "EB05-030",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925502,
+    "status": "approved",
+    "note": "EB05 auto approved: Take Care, Everybody. ♡ R [EB05-030](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-031",
+    "cardNo": "EB05-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925503,
+    "status": "approved",
+    "note": "EB05 auto approved: Vinsmoke Reiju R [EB05-031](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-031_p1",
+    "cardNo": "EB05-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911911,
+    "status": "approved",
+    "note": "EB05 auto approved: Vinsmoke Reiju R-SPC [EB05-031](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-032",
+    "cardNo": "EB05-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925504,
+    "status": "approved",
+    "note": "EB05 auto approved: Ulti C [EB05-032](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-033",
+    "cardNo": "EB05-033",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925505,
+    "status": "approved",
+    "note": "EB05 auto approved: Nico Robin R [EB05-033](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-034",
+    "cardNo": "EB05-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925506,
+    "status": "approved",
+    "note": "EB05 auto approved: Sugar SR [EB05-034](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-034_p1",
+    "cardNo": "EB05-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911912,
+    "status": "approved",
+    "note": "EB05 auto approved: Sugar SR-P [EB05-034](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-035",
+    "cardNo": "EB05-035",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925507,
+    "status": "approved",
+    "note": "EB05 auto approved: Speed C [EB05-035](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-036",
+    "cardNo": "EB05-036",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925508,
+    "status": "approved",
+    "note": "EB05 auto approved: Tsuru C [EB05-036](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-037",
+    "cardNo": "EB05-037",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925509,
+    "status": "approved",
+    "note": "EB05 auto approved: Black Maria R [EB05-037](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-037_p1",
+    "cardNo": "EB05-037",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911913,
+    "status": "approved",
+    "note": "EB05 auto approved: Black Maria R-P [EB05-037](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-038",
+    "cardNo": "EB05-038",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925510,
+    "status": "approved",
+    "note": "EB05 auto approved: Russian C [EB05-038](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-039",
+    "cardNo": "EB05-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925511,
+    "status": "approved",
+    "note": "EB05 auto approved: Pink Hornet C [EB05-039](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-040",
+    "cardNo": "EB05-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925512,
+    "status": "approved",
+    "note": "EB05 auto approved: You Need Me, Don't You?!!♡ R [EB05-040](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-041",
+    "cardNo": "EB05-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925513,
+    "status": "approved",
+    "note": "EB05 auto approved: Koala C [EB05-041](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-042",
+    "cardNo": "EB05-042",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925514,
+    "status": "approved",
+    "note": "EB05 auto approved: Shinobu C [EB05-042](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-043",
+    "cardNo": "EB05-043",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-043_p1",
+    "cardNo": "EB05-043",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911914,
+    "status": "approved",
+    "note": "EB05 auto approved: Perona R-P [EB05-043](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-044",
+    "cardNo": "EB05-044",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-045",
+    "cardNo": "EB05-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-046",
+    "cardNo": "EB05-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925518,
+    "status": "approved",
+    "note": "EB05 auto approved: Yamato SR [EB05-046](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-046_p1",
+    "cardNo": "EB05-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911915,
+    "status": "approved",
+    "note": "EB05 auto approved: Yamato SR-P [EB05-046](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-047",
+    "cardNo": "EB05-047",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-048",
+    "cardNo": "EB05-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-049",
+    "cardNo": "EB05-049",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-050",
+    "cardNo": "EB05-050",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-051",
+    "cardNo": "EB05-051",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-052",
+    "cardNo": "EB05-052",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925524,
+    "status": "approved",
+    "note": "EB05 auto approved: Gloriosa SR [EB05-052](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-052_p1",
+    "cardNo": "EB05-052",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911916,
+    "status": "approved",
+    "note": "EB05 auto approved: Gloriosa SR-P [EB05-052](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-053",
+    "cardNo": "EB05-053",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925525,
+    "status": "approved",
+    "note": "EB05 auto approved: Charlotte Praline C [EB05-053](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-054",
+    "cardNo": "EB05-054",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925526,
+    "status": "approved",
+    "note": "EB05 auto approved: Charlotte Brulee C [EB05-054](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-055",
+    "cardNo": "EB05-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925527,
+    "status": "approved",
+    "note": "EB05 auto approved: Nami SR [EB05-055](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-055_p1",
+    "cardNo": "EB05-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-055_p2",
+    "cardNo": "EB05-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-055_p3",
+    "cardNo": "EB05-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-056",
+    "cardNo": "EB05-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925528,
+    "status": "approved",
+    "note": "EB05 auto approved: Nico Olvia C [EB05-056](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-057",
+    "cardNo": "EB05-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925529,
+    "status": "approved",
+    "note": "EB05 auto approved: Nojiko R [EB05-057](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-057_p1",
+    "cardNo": "EB05-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911920,
+    "status": "approved",
+    "note": "EB05 auto approved: Nojiko R-P [EB05-057](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-058",
+    "cardNo": "EB05-058",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-059",
+    "cardNo": "EB05-059",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB05-060",
+    "cardNo": "EB05-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925532,
+    "status": "approved",
+    "note": "EB05 auto approved: Take Care of Lilith!!! C [EB05-060](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-061",
+    "cardNo": "EB05-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 925533,
+    "status": "approved",
+    "note": "EB05 auto approved: Nami SEC [EB05-061](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::EB05-061_p1",
+    "cardNo": "EB05-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 1 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-022_p2",
+    "cardNo": "OP11-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-041_p2",
+    "cardNo": "OP11-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-100_p2",
+    "cardNo": "OP13-100",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP14-041_p2",
+    "cardNo": "OP14-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911927,
+    "status": "approved",
+    "note": "EB05 auto approved: Boa Hancock L [OP14-041](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::OP15-039_p3",
+    "cardNo": "OP15-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP01-016_p9",
+    "cardNo": "OP01-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP14-033_p3",
+    "cardNo": "OP14-033",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911926,
+    "status": "approved",
+    "note": "EB05 auto approved: Perona SR-SPC [OP14-033](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::OP17-081_p1",
+    "cardNo": "OP17-081",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-109_p1",
+    "cardNo": "OP17-109",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 911930,
+    "status": "approved",
+    "note": "EB05 auto approved: Charlotte Pudding R-SPC [OP17-109](Extra Booster \"Heroines Edition Vol.2\")"
+  },
+  {
+    "cardId": "JP::ST17-004_p3",
+    "cardNo": "ST17-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "EB05 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP10-099_p2",
+    "cardNo": "OP10-099",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855399,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Eustass\"Captain\"Kid L [OP10-099](Start Deck \"Yellow Eustass.Kid\")"
+  },
+  {
+    "cardId": "JP::OP10-101_r1",
+    "cardNo": "OP10-101",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP10-103_r1",
+    "cardNo": "OP10-103",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP10-109_r2",
+    "cardNo": "OP10-109",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP10-111_r1",
+    "cardNo": "OP10-111",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP10-114_r2",
+    "cardNo": "OP10-114",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-113_r1",
+    "cardNo": "OP12-113",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-116_r1",
+    "cardNo": "OP13-116",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::P-085_r2",
+    "cardNo": "P-085",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::P-088_r2",
+    "cardNo": "P-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST36-001",
+    "cardNo": "ST36-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855400,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Cavendish C [ST36-001](Start Deck \"Yellow Eustass.Kid\")"
+  },
+  {
+    "cardId": "JP::ST36-002",
+    "cardNo": "ST36-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855401,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Killer SR [ST36-002](Start Deck \"Yellow Eustass.Kid\")"
+  },
+  {
+    "cardId": "JP::ST36-003",
+    "cardNo": "ST36-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855402,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Scratchmen Apoo C [ST36-003](Start Deck \"Yellow Eustass.Kid\")"
+  },
+  {
+    "cardId": "JP::ST36-004",
+    "cardNo": "ST36-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855403,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Bartolomeo C [ST36-004](Start Deck \"Yellow Eustass.Kid\")"
+  },
+  {
+    "cardId": "JP::ST36-005",
+    "cardNo": "ST36-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855404,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Eustass\"Captain\"Kid SR [ST36-005](Start Deck \"Yellow Eustass.Kid\")"
+  },
+  {
+    "cardId": "JP::OP12-090_r1",
+    "cardNo": "OP12-090",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-093_r1",
+    "cardNo": "OP12-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-098_r1",
+    "cardNo": "OP12-098",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-004_p2",
+    "cardNo": "OP13-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855393,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Sabo L [OP13-004](Start Deck \"Red Black Sabo\")"
+  },
+  {
+    "cardId": "JP::OP13-005_r1",
+    "cardNo": "OP13-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-008_r1",
+    "cardNo": "OP13-008",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-017_r1",
+    "cardNo": "OP13-017",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-019_p2",
+    "cardNo": "OP13-019",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-081_r1",
+    "cardNo": "OP13-081",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::P-105_r1",
+    "cardNo": "P-105",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST35-001",
+    "cardNo": "ST35-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855394,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Hack C [ST35-001](Start Deck \"Red Black Sabo\")"
+  },
+  {
+    "cardId": "JP::ST35-002",
+    "cardNo": "ST35-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855395,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Lindbergh C [ST35-002](Start Deck \"Red Black Sabo\")"
+  },
+  {
+    "cardId": "JP::ST35-003",
+    "cardNo": "ST35-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855396,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Karasu C [ST35-003](Start Deck \"Red Black Sabo\")"
+  },
+  {
+    "cardId": "JP::ST35-004",
+    "cardNo": "ST35-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855397,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Koala SR [ST35-004](Start Deck \"Red Black Sabo\")"
+  },
+  {
+    "cardId": "JP::ST35-005",
+    "cardNo": "ST35-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855398,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Bartholomew Kuma SR [ST35-005](Start Deck \"Red Black Sabo\")"
+  },
+  {
+    "cardId": "JP::EB03-032_r1",
+    "cardNo": "EB03-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB03-035_r1",
+    "cardNo": "EB03-035",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-062_p2",
+    "cardNo": "OP11-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855387,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Charlotte Katakuri L [OP11-062](Start Deck \"Purple Charlotte Katakuri\")"
+  },
+  {
+    "cardId": "JP::OP11-065_r1",
+    "cardNo": "OP11-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-066_r1",
+    "cardNo": "OP11-066",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-068_r1",
+    "cardNo": "OP11-068",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-071_r1",
+    "cardNo": "OP11-071",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-079_r1",
+    "cardNo": "OP11-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-081_r1",
+    "cardNo": "OP11-081",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::P-090_r1",
+    "cardNo": "P-090",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST34-001",
+    "cardNo": "ST34-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855388,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Charlotte Katakuri SR [ST34-001](Start Deck \"Purple Charlotte Katakuri\")"
+  },
+  {
+    "cardId": "JP::ST34-002",
+    "cardNo": "ST34-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855389,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Charlotte Cracker C [ST34-002](Start Deck \"Purple Charlotte Katakuri\")"
+  },
+  {
+    "cardId": "JP::ST34-003",
+    "cardNo": "ST34-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855390,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Charlotte Brulee C [ST34-003](Start Deck \"Purple Charlotte Katakuri\")"
+  },
+  {
+    "cardId": "JP::ST34-004",
+    "cardNo": "ST34-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855391,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Charlotte Linlin SR [ST34-004](Start Deck \"Purple Charlotte Katakuri\")"
+  },
+  {
+    "cardId": "JP::ST34-005",
+    "cardNo": "ST34-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855392,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Baron Tamago & Pekoms C [ST34-005](Start Deck \"Purple Charlotte Katakuri\")"
+  },
+  {
+    "cardId": "JP::EB04-026_r1",
+    "cardNo": "EB04-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::EB04-028_p2",
+    "cardNo": "EB04-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-040_p2",
+    "cardNo": "OP12-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855381,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Kuzan L [OP12-040](Start Deck \"Blue Kuzan\")"
+  },
+  {
+    "cardId": "JP::OP12-043_r1",
+    "cardNo": "OP12-043",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-045_r1",
+    "cardNo": "OP12-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-046_r1",
+    "cardNo": "OP12-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-047_r1",
+    "cardNo": "OP12-047",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-050_r1",
+    "cardNo": "OP12-050",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-052_r1",
+    "cardNo": "OP12-052",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-057_r1",
+    "cardNo": "OP12-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST33-001",
+    "cardNo": "ST33-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855382,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Koby C [ST33-001](Start Deck \"Blue Kuzan\")"
+  },
+  {
+    "cardId": "JP::ST33-002",
+    "cardNo": "ST33-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855383,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Sakazuki C [ST33-002](Start Deck \"Blue Kuzan\")"
+  },
+  {
+    "cardId": "JP::ST33-003",
+    "cardNo": "ST33-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855384,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Smoker C [ST33-003](Start Deck \"Blue Kuzan\")"
+  },
+  {
+    "cardId": "JP::ST33-004",
+    "cardNo": "ST33-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855385,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Borsalino SR [ST33-004](Start Deck \"Blue Kuzan\")"
+  },
+  {
+    "cardId": "JP::ST33-005",
+    "cardNo": "ST33-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855386,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Monkey.D.Garp SR [ST33-005](Start Deck \"Blue Kuzan\")"
+  },
+  {
+    "cardId": "JP::OP10-036_r1",
+    "cardNo": "OP10-036",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-020_p4",
+    "cardNo": "OP12-020",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855375,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Roronoa Zoro L [OP12-020](Start Deck \"Green Roronoa Zoro\")"
+  },
+  {
+    "cardId": "JP::OP12-023_r1",
+    "cardNo": "OP12-023",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-026_r1",
+    "cardNo": "OP12-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-027_r1",
+    "cardNo": "OP12-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-028_r1",
+    "cardNo": "OP12-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-031_r1",
+    "cardNo": "OP12-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP12-039_p1",
+    "cardNo": "OP12-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP15-036_r1",
+    "cardNo": "OP15-036",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST24-005_r1",
+    "cardNo": "ST24-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST32-001",
+    "cardNo": "ST32-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855376,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Kin'emon C [ST32-001](Start Deck \"Green Roronoa Zoro\")"
+  },
+  {
+    "cardId": "JP::ST32-002",
+    "cardNo": "ST32-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855377,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Kouzuki Oden SR [ST32-002](Start Deck \"Green Roronoa Zoro\")"
+  },
+  {
+    "cardId": "JP::ST32-003",
+    "cardNo": "ST32-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855378,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Dracule Mihawk SR [ST32-003](Start Deck \"Green Roronoa Zoro\")"
+  },
+  {
+    "cardId": "JP::ST32-004",
+    "cardNo": "ST32-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855379,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Silvers Rayleigh C [ST32-004](Start Deck \"Green Roronoa Zoro\")"
+  },
+  {
+    "cardId": "JP::ST32-005",
+    "cardNo": "ST32-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855380,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Roronoa Zoro C [ST32-005](Start Deck \"Green Roronoa Zoro\")"
+  },
+  {
+    "cardId": "JP::OP01-016_p8",
+    "cardNo": "OP01-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP04-016_p3",
+    "cardNo": "OP04-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-003_r1",
+    "cardNo": "OP11-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-009_r1",
+    "cardNo": "OP11-009",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP11-012_r1",
+    "cardNo": "OP11-012",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-021_r1",
+    "cardNo": "OP13-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855336,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Gum-Gum Gatling Gun C [OP13-021](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::OP14-015_r1",
+    "cardNo": "OP14-015",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::P-101_r1",
+    "cardNo": "P-101",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST21-001_r1",
+    "cardNo": "ST21-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855339,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Monkey.D.Luffy L [ST21-001](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::ST23-004_r1",
+    "cardNo": "ST23-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "ST31-36 pending: 0 candidate(s)"
+  },
+  {
+    "cardId": "JP::ST31-001",
+    "cardNo": "ST31-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855341,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Sanji SR [ST31-001](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::ST31-002",
+    "cardNo": "ST31-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855342,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Jinbe C [ST31-002](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::ST31-003",
+    "cardNo": "ST31-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855343,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Brook C [ST31-003](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::ST31-004",
+    "cardNo": "ST31-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855344,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Monkey.D.Luffy SR [ST31-004](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::ST31-005",
+    "cardNo": "ST31-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 855345,
+    "status": "approved",
+    "note": "ST31-36 auto approved: Thousand Sunny C [ST31-005](Start Deck \"Red Monkey.D.Luffy\")"
   }
 ];
 

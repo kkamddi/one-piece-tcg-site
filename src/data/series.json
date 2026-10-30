@@ -1750,5 +1750,77 @@
     "queryLabel": "STARTER DECK -Egghead- [ST-29]",
     "officialSeriesKeyword": "569029",
     "description": "영문 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-ST36",
+    "locale": "JP",
+    "baseSeriesId": "ST36",
+    "koName": "スタートデッキ 黄 ユースタス・キッド",
+    "enName": "スタートデッキ 黄 ユースタス・キッド",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "スタートデッキ 黄 ユースタス・キッド【ST-36】",
+    "officialSeriesKeyword": "550036",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-ST35",
+    "locale": "JP",
+    "baseSeriesId": "ST35",
+    "koName": "スタートデッキ 赤黒 サボ",
+    "enName": "スタートデッキ 赤黒 サボ",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "スタートデッキ 赤黒 サボ【ST-35】",
+    "officialSeriesKeyword": "550035",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-ST34",
+    "locale": "JP",
+    "baseSeriesId": "ST34",
+    "koName": "スタートデッキ 紫 シャーロット・カタクリ",
+    "enName": "スタートデッキ 紫 シャーロット・カタクリ",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "スタートデッキ 紫 シャーロット・カタクリ【ST-34】",
+    "officialSeriesKeyword": "550034",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-ST33",
+    "locale": "JP",
+    "baseSeriesId": "ST33",
+    "koName": "スタートデッキ 青 クザン",
+    "enName": "スタートデッキ 青 クザン",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "スタートデッキ 青 クザン【ST-33】",
+    "officialSeriesKeyword": "550033",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-ST32",
+    "locale": "JP",
+    "baseSeriesId": "ST32",
+    "koName": "スタートデッキ 緑 ロロノア・ゾロ",
+    "enName": "スタートデッキ 緑 ロロノア・ゾロ",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "スタートデッキ 緑 ロロノア・ゾロ【ST-32】",
+    "officialSeriesKeyword": "550032",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-ST31",
+    "locale": "JP",
+    "baseSeriesId": "ST31",
+    "koName": "スタートデッキ 赤 モンキー・D・ルフィ",
+    "enName": "スタートデッキ 赤 モンキー・D・ルフィ",
+    "kindKo": "스타트 덱",
+    "kindEn": "STARTER DECK",
+    "queryLabel": "スタートデッキ 赤 モンキー・D・ルフィ【ST-31】",
+    "officialSeriesKeyword": "550031",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
   }
 ]

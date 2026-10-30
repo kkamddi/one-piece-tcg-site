@@ -10,6 +10,7 @@ const args = process.argv.slice(2);
 const shouldWrite = args.includes('--write');
 const seriesPattern = new RegExp(args.find((arg) => arg.startsWith('--series-pattern='))?.slice(17) || 'WORLD.?S STRONGEST WARRIORS|世界最強の戦士', 'i');
 const officialSeriesPattern = new RegExp(args.find((arg) => arg.startsWith('--official-series-pattern='))?.slice(26) || '世界最強の戦士', 'i');
+const label = args.find((arg) => arg.startsWith('--label='))?.slice(8) || 'OP17';
 const maxPages = Number(args.find((arg) => arg.startsWith('--max-pages='))?.split('=')[1] || 8);
 const KRW_PER_USD = 1457;
 const JPY_PER_USD = 155;
@@ -121,11 +122,19 @@ function serializeLinks(value) {
 async function main() {
   const fetched = [];
   for (let page = 1; page <= maxPages; page += 1) fetched.push(...await fetchPage(page));
-  const seriesItems = fetched
-    .filter((item) => seriesPattern.test(normalize(item.name)))
-    .filter((item) => !/\[(EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/i.test(normalize(item.name)))
-    .filter((item) => Number(item.id) > 0 && normalize(item.productNumber))
-    .map(toMarketCard);
+  // Catalog pages can repeat an item when the release order shifts between requests.
+  // Items older than the fetched pages are taken from the stored catalog.
+  const catalogItems = marketCards
+    .filter((item) => item.locale === 'JP' && seriesPattern.test(normalize(item.name)))
+    .filter((item) => !/\[(EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/i.test(normalize(item.name)));
+  const seriesItems = [...new Map([
+    ...catalogItems.map((item) => [Number(item.apparelId), item]),
+    ...fetched
+      .filter((item) => seriesPattern.test(normalize(item.name)))
+      .filter((item) => !/\[(EN|FR|CN|KR|TW|TH|ID|ES|DE|IT|PT)\]/i.test(normalize(item.name)))
+      .filter((item) => Number(item.id) > 0 && normalize(item.productNumber))
+      .map((item) => [Number(item.id), toMarketCard(item)])
+  ]).values()];
 
   const byId = new Map(marketCards.map((item) => [Number(item.apparelId), item]));
   for (const item of seriesItems) byId.set(item.apparelId, { ...(byId.get(item.apparelId) || {}), ...item });
@@ -158,13 +167,14 @@ async function main() {
         variantKey: '',
         apparelId: match?.apparelId || null,
         status: match ? 'approved' : 'pending',
-        note: match ? `OP17 auto approved: ${match.name}` : `OP17 pending: ${candidates.length} candidate(s)`
+        note: match ? `${label} auto approved: ${match.name}` : `${label} pending: ${candidates.length} candidate(s)`
       });
     }
   }
   const officialIds = new Set(officialCards.map((card) => card.id));
   const nextLinks = [...cardMarketLinks.filter((link) => !officialIds.has(link.cardId)), ...generated];
 
+  if (process.env.DEBUG_PENDING) console.error(generated.filter((link) => link.status === "pending").map((link) => link.cardId + " " + link.note).join("\n"));
   if (shouldWrite) {
     fs.writeFileSync(MARKET_PATH, serializeCompact(nextMarketCards));
     fs.writeFileSync(LINKS_PATH, serializeLinks(nextLinks));
