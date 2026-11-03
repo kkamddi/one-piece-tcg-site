@@ -15,19 +15,11 @@
   ],
   "failures": [
     {
-      "key": "JP-365645",
-      "message": "card_region_not_found"
-    },
-    {
       "key": "JP-365647",
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-365644",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-365649",
+      "key": "JP-365645",
       "message": "card_region_not_found"
     },
     {
@@ -39,7 +31,11 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-129623",
+      "key": "JP-365649",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-365644",
       "message": "card_region_not_found"
     },
     {
@@ -51,19 +47,7 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-882455",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "EN-412560",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-882458",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-882457",
+      "key": "JP-129623",
       "message": "card_region_not_found"
     },
     {
@@ -71,7 +55,27 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-129615",
+      "key": "EN-412560",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-882455",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-882457",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-882456",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-882458",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "EN-309934",
       "message": "card_region_not_found"
     },
     {
@@ -83,15 +87,11 @@
       "message": "card_region_not_found"
     },
     {
+      "key": "JP-185184",
+      "message": "card_region_not_found"
+    },
+    {
       "key": "JP-250564",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-882456",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-818468",
       "message": "card_region_not_found"
     },
     {
@@ -99,15 +99,15 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "EN-309934",
+      "key": "JP-818471",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-337742",
       "message": "card_region_not_found"
     },
     {
       "key": "JP-129613",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-185184",
       "message": "card_region_not_found"
     },
     {
@@ -123,6 +123,10 @@
       "message": "card_region_not_found"
     },
     {
+      "key": "JP-129617",
+      "message": "card_region_not_found"
+    },
+    {
       "key": "JP-129622",
       "message": "card_region_not_found"
     },
@@ -131,19 +135,15 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-818471",
-      "message": "card_region_not_found"
-    },
-    {
       "key": "JP-129614",
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-337742",
+      "key": "JP-129615",
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-129617",
+      "key": "JP-818468",
       "message": "card_region_not_found"
     },
     {
@@ -163,12 +163,12 @@
       "message": "HTTP_404"
     },
     {
-      "key": "EN-221706",
-      "message": "HTTP_404"
-    },
-    {
       "key": "JP-871044",
       "message": "card_region_not_found"
+    },
+    {
+      "key": "EN-221706",
+      "message": "HTTP_404"
     },
     {
       "key": "EN-906384",
