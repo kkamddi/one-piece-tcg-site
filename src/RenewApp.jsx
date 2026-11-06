@@ -50,6 +50,7 @@ import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recomm
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { GUIDE_ARTICLE_FAQ } from '../lib/guide-article-faq.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
+import { ARTICLES_PATH, ARTICLES_SEO, articlePath, buildArticlesHubEditorial, getArticleSlug, getPublishedArticleMetas } from '../lib/articles.js';
 import { MARKET_REPORT_PATH, formatReportWon, getMarketReportHighlights, getMarketReportKpis, getMarketReportMethod, reportConditionLabel } from '../lib/market-report.js';
 import MARKET_REPORT_INDEX from './data/market-reports/index.json';
 import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS } from './data/collection-guide';
@@ -788,6 +789,12 @@ const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsDa
 // The box price table is rebuilt from the bundled daily SNKRDUNK box listing snapshot.
 const getBoxPricesEditorial = () => buildBoxPricesEditorial(boxMarketItems, boxMarketPrices, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
+// Articles go live on their publishAt date (KST). Only their meta is bundled; each body loads on its own page.
+const ARTICLE_METAS = Object.values(import.meta.glob('./data/articles/*.json', { eager: true, query: '?meta', import: 'default' }));
+const ARTICLE_LOADERS = import.meta.glob('./data/articles/*.json');
+const getPublishedArticles = () => getPublishedArticleMetas(ARTICLE_METAS, getKstDateKey(Date.now()));
+const findPublishedArticle = (slug) => (slug ? getPublishedArticles().find((meta) => meta.slug === slug) || null : null);
+const ARTICLE_HUB_LINK_COUNT = 6;
 const GUIDE_HUB_COLLECTIONS = [
   {
     id: 'start',
@@ -840,7 +847,16 @@ const GUIDE_HUB_COLLECTIONS = [
       { href: '/guides/deck-builder', title: '덱 빌더 사용법', meta: '리더 색상·50장·규칙 검사' },
       { href: '/guides/portfolio-calculator', title: '수익률 계산 기준', meta: '매입가·평가손익·수수료 범위' }
     ]
-  }
+  },
+  ...(getPublishedArticles().length ? [{
+    id: 'articles',
+    title: '새로 올라온 글',
+    description: '도감과 실제 거래 기록으로 매일 정리하는 덱·신상품·시세 글입니다.',
+    links: [
+      { href: ARTICLES_PATH, title: '읽을거리 전체', meta: '날짜순·주제별 글 목록' },
+      ...getPublishedArticles().slice(0, ARTICLE_HUB_LINK_COUNT).map((meta) => ({ href: articlePath(meta.slug), title: meta.label, meta: meta.summary }))
+    ]
+  }] : [])
 ];
 const GUIDE_ARTICLE_DETAILS = {
   storage: {
@@ -939,6 +955,7 @@ const STATIC_EDITORIAL_GUIDES = {
   }
 };
 const GUIDE_RELATED_LABELS = {
+  [ARTICLES_PATH]: ['원피스카드 읽을거리', '덱·신상품·시세 분석 글을 날짜순으로 봅니다.'],
   '/guide/booster-comparison': ['부스터별 히트 카드 비교', 'OP01~OP16 망가·SP·고가 카드 분포를 비교합니다.'],
   '/guide/character-cards': ['캐릭터별 카드 시세', '캐릭터별 고가 카드와 버전별 가격 차이를 봅니다.'],
   '/guide/psa-grading': ['PSA 그레이딩 가이드', '레어도와 연식에 따른 PSA10 가격 차이를 봅니다.'],
@@ -971,6 +988,7 @@ const GUIDE_RELATED_LABELS = {
   '/cards': ['카드 도감', '한글판과 일본판 수록 카드를 검색합니다.'],
   '/data-policy': ['데이터 운영 정책', '가격과 카드 정보의 기준과 한계를 확인합니다.']
 };
+ARTICLE_METAS.forEach((meta) => { GUIDE_RELATED_LABELS[articlePath(meta.slug)] = [meta.label, meta.summary]; });
 const HOME_NEWS_LINKS = [
   {
     label: '히로인즈2 응모',
@@ -3436,6 +3454,14 @@ function getClientRouteSeo(page, uiLang = 'KR') {
     const seo = getRegionShopSeo(officialShopsData, regionShop.slug);
     const editorial = buildRegionShopEditorial(officialShopsData, regionShop.slug);
     return { title: seo.title, h1: editorial.heading, description: seo.description, keywords: seo.keywords, body: editorial.paragraphs[0] };
+  }
+  if (path === ARTICLES_PATH) {
+    const editorial = buildArticlesHubEditorial(getPublishedArticles());
+    return { title: ARTICLES_SEO.title, h1: editorial.heading, description: ARTICLES_SEO.description, keywords: ARTICLES_SEO.keywords, body: editorial.paragraphs[0] };
+  }
+  const articleMeta = findPublishedArticle(getArticleSlug(path));
+  if (articleMeta) {
+    return { title: articleMeta.title, h1: articleMeta.label, description: articleMeta.description, keywords: articleMeta.keywords, body: articleMeta.description };
   }
   if (STATIC_EDITORIAL_GUIDES[path]) {
     const { seo } = STATIC_EDITORIAL_GUIDES[path];
@@ -7123,6 +7149,8 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
   const isReleaseScheduleGuide = initialPath === '/guide/release-schedule';
   const isBoxPricesGuide = initialPath === '/guide/box-prices';
   const staticEditorialGuide = STATIC_EDITORIAL_GUIDES[initialPath] || null;
+  const isArticlesHub = initialPath === ARTICLES_PATH;
+  const articleSlug = getArticleSlug(initialPath);
   const regionShopSlug = REGION_SHOP_PAGES.find((region) => initialPath === `/guide/shops/${region.slug}`)?.slug || '';
   const boosterPreview = getBoosterPreview(initialPath);
   const isBoxRecommendationGuide = initialPath.startsWith('/guide/box-recommendation');
@@ -7453,7 +7481,7 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       </section>
       ) : null}
 
-      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !isBoxPricesGuide && !staticEditorialGuide && !regionShopSlug && !boosterPreview && !isBoxRecommendationGuide ? (
+      {showGuide && !isCardStorageGuide && !isShopBuyingGuide && !isCardPriceGuide && !isCardCatalogGuide && !isBoosterComparisonGuide && !isCharacterCardsGuide && !isPsaGradingGuide && !isGettingStartedGuide && !isPriceRankingGuide && !isCardTypesGuide && !isReleaseScheduleGuide && !isBoxPricesGuide && !staticEditorialGuide && !isArticlesHub && !articleSlug && !regionShopSlug && !boosterPreview && !isBoxRecommendationGuide ? (
       <section className="renew-panel renew-news-panel renew-news-guide-panel" aria-labelledby="guide-qa-heading">
         <div className="renew-section-head">
           <div>
@@ -7503,6 +7531,8 @@ function RenewNews({ uiLang, onOpenCalendar, onOpenLab, onNavigate }) {
       {isBoxPricesGuide ? <RenewBoxPricesGuide /> : null}
       {regionShopSlug ? <RenewRegionShopGuide slug={regionShopSlug} /> : null}
       {staticEditorialGuide ? <RenewStaticEditorialGuide config={staticEditorialGuide} /> : null}
+      {isArticlesHub ? <RenewArticlesHub /> : null}
+      {articleSlug ? <RenewArticleGuide slug={articleSlug} /> : null}
       {boosterPreview ? <RenewBoosterPreview preview={boosterPreview} /> : null}
       {isBoxRecommendationGuide ? <RenewBoxRecommendationGuide /> : null}
 
@@ -8362,15 +8392,15 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta, details: details
           </article>
         ))}
       </div>
-      <div className="renew-card-storage-checklist">
+      {guide.checklist?.length ? <div className="renew-card-storage-checklist">
         <h3>{details.checklistTitle}</h3>
         <ul>
           {guide.checklist.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-      </div>
-      <section className="renew-editorial-guide-faq" aria-labelledby={`${guideKey}-faq-heading`}>
+      </div> : null}
+      {details.faq?.length ? <section className="renew-editorial-guide-faq" aria-labelledby={`${guideKey}-faq-heading`}>
         <h2 id={`${guideKey}-faq-heading`}>자주 묻는 질문</h2>
         <div>
           {details.faq.map(([question, answer]) => (
@@ -8380,8 +8410,8 @@ function RenewEditorialGuide({ guide, guideKey, headingId, cta, details: details
             </details>
           ))}
         </div>
-      </section>
-      {!(Capacitor.getPlatform() === 'android' && cta.href === '/news/supplies') ? <div className="renew-card-storage-cta">
+      </section> : null}
+      {cta && !(Capacitor.getPlatform() === 'android' && cta.href === '/news/supplies') ? <div className="renew-card-storage-cta">
         <div>
           <span>{cta.eyebrow}</span>
           <strong>{cta.title}</strong>
@@ -8785,6 +8815,39 @@ function RenewStaticEditorialGuide({ config }) {
   const guide = useMemo(() => toEditorialGuide(resolveGuideValue(config.editorial)), [config]);
   const details = useMemo(() => ({ checklistTitle: config.checklistTitle, faq: resolveGuideValue(config.faq), related: config.related }), [config]);
   return <RenewEditorialGuide guide={guide} guideKey={config.key} details={details} headingId={`${config.key}-guide-heading`} cta={config.cta} />;
+}
+
+function RenewArticlesHub() {
+  const guide = useMemo(() => toEditorialGuide(buildArticlesHubEditorial(getPublishedArticles())), []);
+  return <RenewEditorialGuide guide={guide} guideKey="articles" headingId="articles-hub-heading" details={{ checklistTitle: '', faq: [], related: ['/guide/price-ranking', '/guide/release-schedule', '/guide/getting-started'] }} />;
+}
+
+// An article that is not live yet (or does not exist) shows the same not-found text as other missing guides.
+function RenewArticleGuide({ slug }) {
+  const meta = useMemo(() => findPublishedArticle(slug), [slug]);
+  const [article, setArticle] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    const load = meta ? ARTICLE_LOADERS[`./data/articles/${meta.slug}.json`] : null;
+    if (!load) return undefined;
+    load().then((module) => { if (alive) setArticle(module.default || module); }).catch(() => { if (alive) setArticle(false); });
+    return () => { alive = false; };
+  }, [meta]);
+  const guide = useMemo(() => (article ? toEditorialGuide({ ...article.editorial, checklist: article.editorial.checklist || [] }) : null), [article]);
+  if (!meta || article === false) {
+    return (
+      <section className="renew-panel renew-news-panel" aria-labelledby="article-missing-heading">
+        <h1 id="article-missing-heading">글을 찾을 수 없습니다</h1>
+        <p>주소가 바뀌었거나 아직 공개되지 않은 글입니다. <a href={ARTICLES_PATH}>읽을거리 목록</a>에서 다른 글을 확인해 주세요.</p>
+      </section>
+    );
+  }
+  if (!guide) return <section className="renew-panel renew-news-panel" aria-busy="true"><p>글을 불러오는 중입니다.</p></section>;
+  // Related cards show a title, so only pages with a known label are listed (others stay as in-text links).
+  const hubHrefs = new Set(GUIDE_HUB_COLLECTIONS.flatMap((collection) => collection.links.map((link) => link.href)));
+  const related = [ARTICLES_PATH, ...(meta.related || [])].filter((href) => GUIDE_RELATED_LABELS[href] || hubHrefs.has(href));
+  const details = { checklistTitle: '체크리스트', faq: article.faq || [], related };
+  return <RenewEditorialGuide guide={guide} guideKey={`article-${meta.slug}`} headingId="article-heading" details={details} cta={meta.cta} />;
 }
 
 function RenewBoxPricesGuide() {

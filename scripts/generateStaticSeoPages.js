@@ -15,6 +15,7 @@ import { getLeaderCardsEntries } from './leaderCardsSeo.js';
 import { getColorsEntries } from './colorsSeo.js';
 import { getEventsEntries } from './eventsSeo.js';
 import { getBoosterPreviewEntries } from './boosterPreviewSeo.js';
+import { getArticleEntries } from './articlesSeo.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(rootDir, 'dist');
@@ -130,7 +131,7 @@ const marketReportSeo = new Map(getMarketReportEntries().map((entry) => [entry.p
 const releaseScheduleSeo = new Map(getReleaseScheduleEntries().map((entry) => [entry.pathname, entry.seo]));
 const boxPricesSeo = new Map(getBoxPricesEntries().map((entry) => [entry.pathname, entry.seo]));
 const regionShopSeo = new Map(getRegionShopEntries().map((entry) => [entry.pathname, entry.seo]));
-const newGuideSeo = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getStarterDecksEntries(), ...getLeaderCardsEntries(), ...getColorsEntries(), ...getEventsEntries()].map((entry) => [entry.pathname, entry.seo]));
+const newGuideSeo = new Map([...getRulesEntries(), ...getGlossaryEntries(), ...getStarterDecksEntries(), ...getLeaderCardsEntries(), ...getColorsEntries(), ...getEventsEntries(), ...getArticleEntries()].map((entry) => [entry.pathname, entry.seo]));
 const boosterPreviewSeo = new Map(getBoosterPreviewEntries().map((entry) => [entry.pathname, entry.seo]));
 for (const pathname of marketReportSeo.keys()) routePaths.add(pathname);
 // Unreleased box guides stay out of the sitemap but still need their noindex HTML.
