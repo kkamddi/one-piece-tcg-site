@@ -59,6 +59,16 @@ test('slugs are unique and at most three articles share a day, each with its own
   }
 });
 
+test('article images point at dex cards', () => {
+  const cardIds = new Set(JSON.parse(fs.readFileSync(path.join(articlesDir, '../cards.json'), 'utf8')).map((card) => card.id));
+  for (const { meta, editorial } of articles) {
+    for (const image of editorial.sections.flatMap((section) => section.images || [])) {
+      const match = String(image.src).match(/key=cards\/(KR|JP)\/(.+)\.webp$/);
+      assert.ok(match && cardIds.has(`${match[1]}::${decodeURIComponent(match[2])}`), `${meta.slug}: ${image.src}`);
+    }
+  }
+});
+
 test('links to other articles point at articles that exist', () => {
   const slugs = new Set(articles.map((article) => article.meta.slug));
   for (const { meta } of articles) {
