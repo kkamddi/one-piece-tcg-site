@@ -2,10 +2,11 @@ name: Daily article publish
 on:
   workflow_dispatch:
   schedule:
-    # 00:10 KST, right after the day's articles go live on the site. GitHub can drop scheduled runs
-    # at busy times, so a second run at 07:10 KST redeploys again; deploying twice is harmless.
-    - cron: '10 15 * * *'
-    - cron: '10 22 * * *'
+    # 07:05, 12:05 and 18:05 KST, just after each article slot in lib/articles.js (ARTICLE_SLOT_TIMES).
+    # GitHub can delay or drop scheduled runs; the next run catches up, and deploying twice is harmless.
+    - cron: '5 22 * * *'
+    - cron: '5 3 * * *'
+    - cron: '5 9 * * *'
 permissions:
   contents: read
 concurrency:
@@ -24,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # Articles become live by date alone; this redeploy refreshes their pre-rendered HTML and the sitemap.
+      # Articles become live by date and slot time alone; this redeploy refreshes their pre-rendered HTML and the sitemap.
       - name: Find articles due today
         id: due
         shell: bash

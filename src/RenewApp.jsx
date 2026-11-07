@@ -50,7 +50,7 @@ import { BOX_GUIDE_COPY, BOX_RECOMMENDATION_CATEGORIES } from '../lib/box-recomm
 import { GUIDE_QA_GROUPS } from '../lib/guide-qa.js';
 import { GUIDE_ARTICLE_FAQ } from '../lib/guide-article-faq.js';
 import { CARD_STORAGE_EDITORIAL } from '../lib/card-storage-editorial.js';
-import { ARTICLES_PATH, ARTICLES_SEO, articlePath, buildArticlesHubEditorial, getArticleSlug, getPublishedArticleMetas } from '../lib/articles.js';
+import { ARTICLES_PATH, ARTICLES_SEO, articlePath, buildArticlesHubEditorial, getArticleSlug, getKstMinuteKeyFor, getPublishedArticleMetas } from '../lib/articles.js';
 import { MARKET_REPORT_PATH, formatReportWon, getMarketReportHighlights, getMarketReportKpis, getMarketReportMethod, reportConditionLabel } from '../lib/market-report.js';
 import MARKET_REPORT_INDEX from './data/market-reports/index.json';
 import { CHAMPIONSHIP_COLLECTION_GROUPS, FLAGSHIP_COLLECTION_GROUPS, MANGA_COLLECTION_GROUPS } from './data/collection-guide';
@@ -789,10 +789,10 @@ const getReleaseScheduleEditorial = () => buildReleaseScheduleEditorial(topicsDa
 // The box price table is rebuilt from the bundled daily SNKRDUNK box listing snapshot.
 const getBoxPricesEditorial = () => buildBoxPricesEditorial(boxMarketItems, boxMarketPrices, getKstDateKey(Date.now()));
 const GUIDE_REVIEWED_AT = '2026-08-25';
-// Articles go live on their publishAt date (KST). Only their meta is bundled; each body loads on its own page.
+// Articles go live at their publishAt date and slot time (KST). Only their meta is bundled; each body loads on its own page.
 const ARTICLE_METAS = Object.values(import.meta.glob('./data/articles/*.json', { eager: true, query: '?meta', import: 'default' }));
 const ARTICLE_LOADERS = import.meta.glob('./data/articles/*.json');
-const getPublishedArticles = () => getPublishedArticleMetas(ARTICLE_METAS, getKstDateKey(Date.now()));
+const getPublishedArticles = () => getPublishedArticleMetas(ARTICLE_METAS, getKstMinuteKeyFor(Date.now()));
 const findPublishedArticle = (slug) => (slug ? getPublishedArticles().find((meta) => meta.slug === slug) || null : null);
 const ARTICLE_HUB_LINK_COUNT = 6;
 const GUIDE_HUB_COLLECTIONS = [

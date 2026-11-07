@@ -3,7 +3,7 @@ import test from 'node:test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ARTICLES_PATH, ARTICLE_CATEGORIES, getArticleSlug, getPublishedArticleMetas } from '../lib/articles.js';
+import { ARTICLES_PATH, ARTICLE_CATEGORIES, getArticleSlug, getKstMinuteKeyFor, getPublishedArticleMetas } from '../lib/articles.js';
 import { getArticleEntries, readArticles } from './articlesSeo.js';
 
 const articlesDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/data/articles');
@@ -21,6 +21,7 @@ test('every article file has the fields the page, SEO and hub read', () => {
     assert.match(meta.slug, /^[a-z0-9-]+$/, `${where}: slug`);
     assert.match(meta.publishAt, DATE, `${where}: publishAt`);
     assert.ok([1, 2, 3].includes(meta.order), `${where}: order 1-3`);
+    if (meta.publishTime !== undefined) assert.match(meta.publishTime, /^([01]\d|2[0-3]):[0-5]\d$/, `${where}: publishTime`);
     assert.ok(ARTICLE_CATEGORIES[meta.category], `${where}: category`);
     assert.ok(len(meta.label) >= 6 && len(meta.label) <= 40, `${where}: label length ${len(meta.label)}`);
     assert.ok(len(meta.summary) >= 10 && len(meta.summary) <= 60, `${where}: summary length ${len(meta.summary)}`);
@@ -67,14 +68,20 @@ test('links to other articles point at articles that exist', () => {
   }
 });
 
-test('only articles dated today or earlier are published, newest first', () => {
+test('articles go live at their slot time (KST), newest first', () => {
   const metas = [
     { slug: 'a', publishAt: '2026-11-06', order: 2 },
     { slug: 'b', publishAt: '2026-11-06', order: 1 },
     { slug: 'c', publishAt: '2026-11-07', order: 1 },
-    { slug: 'd', publishAt: '2026-11-05', order: 1 }
+    { slug: 'd', publishAt: '2026-11-05', order: 3 },
+    { slug: 'e', publishAt: '2026-11-06', order: 3, publishTime: '00:00' }
   ];
-  assert.deepEqual(getPublishedArticleMetas(metas, '2026-11-06').map((meta) => meta.slug), ['b', 'a', 'd']);
+  const live = (nowKey) => getPublishedArticleMetas(metas, nowKey).map((meta) => meta.slug);
+  assert.deepEqual(live('2026-11-06T06:59'), ['e', 'd']);
+  assert.deepEqual(live('2026-11-06T07:00'), ['b', 'e', 'd']);
+  assert.deepEqual(live('2026-11-06T12:30'), ['a', 'b', 'e', 'd']);
+  assert.deepEqual(live('2026-11-06'), ['a', 'b', 'e', 'd']);
+  assert.equal(getKstMinuteKeyFor(Date.UTC(2026, 10, 5, 22, 0)), '2026-11-06T07:00');
   assert.equal(getArticleSlug('/guide/articles/st31-st36-starter-decks'), 'st31-st36-starter-decks');
   assert.equal(getArticleSlug('/guide/articles'), '');
 });

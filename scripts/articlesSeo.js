@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ARTICLES_PATH, ARTICLES_SEO, articlePath, buildArticlesHubEditorial, getArticleSeoContent, getKstDateKeyFor, getPublishedArticleMetas } from '../lib/articles.js';
+import { ARTICLES_PATH, ARTICLES_SEO, articlePath, buildArticlesHubEditorial, getArticleSeoContent, getKstMinuteKeyFor, getPublishedArticleMetas } from '../lib/articles.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const articlesDir = path.join(rootDir, 'src', 'data', 'articles');
@@ -13,8 +13,8 @@ export function readArticles() {
     .map((name) => JSON.parse(fs.readFileSync(path.join(articlesDir, name), 'utf8')));
 }
 
-// ARTICLES_TODAY (YYYY-MM-DD) lets a build preview a later day; otherwise today's KST date decides what is live.
-export function getArticleEntries({ today = process.env.ARTICLES_TODAY || getKstDateKeyFor() } = {}) {
+// ARTICLES_TODAY (YYYY-MM-DD, or YYYY-MM-DDTHH:MM) lets a build preview a later day; otherwise the KST build time decides what is live.
+export function getArticleEntries({ today = process.env.ARTICLES_TODAY || getKstMinuteKeyFor() } = {}) {
   const articles = readArticles();
   const published = getPublishedArticleMetas(articles.map((article) => article.meta), today);
   if (!published.length) return [];
