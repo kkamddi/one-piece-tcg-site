@@ -1,71 +1,71 @@
 {
-  "id": "2026-11-01",
-  "weekStart": "2026-10-26",
-  "weekEnd": "2026-11-01",
-  "title": "원피스카드 주간 시세 리포트 (10월 26일~11월 1일)",
-  "krwPerJpy": 8.4913,
+  "id": "2026-11-08",
+  "weekStart": "2026-11-02",
+  "weekEnd": "2026-11-08",
+  "title": "원피스카드 주간 시세 리포트 (11월 2일~11월 8일)",
+  "krwPerJpy": 8.5819,
   "kpis": [
     {
       "key": "psa10",
       "label": "PSA10 거래",
-      "value": "2,667건",
-      "change": -2.9
+      "value": "2,564건",
+      "change": -3
     },
     {
       "key": "a",
       "label": "Single 거래",
-      "value": "1,475건",
-      "change": 88.1
+      "value": "2,015건",
+      "change": 46.4
     },
     {
       "key": "value",
       "label": "총 거래액",
-      "value": "₩13.7억",
-      "change": 8.8
+      "value": "₩16.7억",
+      "change": 27
     }
   ],
   "gainers": [
     {
-      "label": "마샬 D. 티치 OP09-081 (기념판)",
-      "code": "OP09-081",
+      "label": "Prisoner of Impel Down OP16-042",
+      "code": "OP16-042",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20251225044922-6.webp?size=m",
-      "apparelId": 744854,
-      "price": 18700,
-      "change": 19.8
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/885245b6-e231-41dd-8cab-241c66455674.webp?size=m",
+      "apparelId": 822594,
+      "price": 13567,
+      "change": 31.2
     },
     {
-      "label": "덤벼라…!!! 우리가 상대를 해주마!!! OP09-020 (패러렐)",
-      "code": "OP09-020",
-      "cardId": "",
+      "label": "야마토 OP04-112",
+      "code": "OP04-112",
+      "cardId": "JP::OP04-112_p2",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250728015928-0.webp?size=m",
-      "apparelId": 656318,
-      "price": 42583,
-      "change": 11.1
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240801083243-0.webp?size=m",
+      "apparelId": 282726,
+      "price": 24643,
+      "change": 21.6
     },
     {
-      "label": "롤로노아 조로 OP12-020 (프로모)",
-      "code": "OP12-020",
+      "label": "몽키 D. 루피 ST21-014 (프로모)",
+      "code": "ST21-014",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2025-10-10-OPM-vol4-of.webp?size=m",
-      "apparelId": 710532,
-      "price": 36260,
-      "change": 11
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20251005093907-0.webp?size=m",
+      "apparelId": 706813,
+      "price": 27837,
+      "change": 18.9
     }
   ],
   "losers": [
     {
-      "label": "DON!! Card : Tony Tony.Chopper OPCD-109",
-      "code": "OPCD-109",
+      "label": "롤로노아 조로 PRB02-006 (프로모)",
+      "code": "PRB02-006",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-007-of.webp?size=m",
-      "apparelId": 755883,
-      "price": 6780,
-      "change": -29.2
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/d3c2475c-f7ef-4763-97fa-6d13e21d19fd.webp?size=m",
+      "apparelId": 854159,
+      "price": 11980,
+      "change": -34
     },
     {
       "label": "Monkey.D.Luffy OP16-095 (프로모)",
@@ -74,18 +74,18 @@
       "locale": "JP",
       "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/a96b0a08-728c-4758-bcec-c7fbd4736f6b.webp?size=m",
       "apparelId": 854158,
-      "price": 21833,
-      "change": -23.2
+      "price": 16548,
+      "change": -24.2
     },
     {
-      "label": "롤로노아 조로 PRB02-006 (프로모)",
-      "code": "PRB02-006",
+      "label": "나미 OP11-041",
+      "code": "OP11-041",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/d3c2475c-f7ef-4763-97fa-6d13e21d19fd.webp?size=m",
-      "apparelId": 854159,
-      "price": 14570,
-      "change": -22.4
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-OP11-041-of.webp?size=m",
+      "apparelId": 743994,
+      "price": 14817,
+      "change": -18.5
     }
   ]
 }
