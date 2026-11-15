@@ -19,7 +19,7 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-365647",
+      "key": "JP-129611",
       "message": "card_region_not_found"
     },
     {
@@ -27,7 +27,7 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-129611",
+      "key": "JP-365647",
       "message": "card_region_not_found"
     },
     {
@@ -79,6 +79,10 @@
       "message": "card_region_not_found"
     },
     {
+      "key": "JP-938663",
+      "message": "card_region_not_found"
+    },
+    {
       "key": "JP-938651",
       "message": "card_region_not_found"
     },
@@ -87,11 +91,11 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-938644",
+      "key": "EN-412560",
       "message": "card_region_not_found"
     },
     {
-      "key": "EN-412560",
+      "key": "JP-938644",
       "message": "card_region_not_found"
     },
     {
@@ -103,15 +107,11 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-882457",
-      "message": "card_region_not_found"
-    },
-    {
       "key": "JP-882458",
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-938673",
+      "key": "JP-882457",
       "message": "card_region_not_found"
     },
     {
@@ -119,7 +119,15 @@
       "message": "card_region_not_found"
     },
     {
+      "key": "JP-938673",
+      "message": "card_region_not_found"
+    },
+    {
       "key": "EN-309934",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-129615",
       "message": "card_region_not_found"
     },
     {
@@ -144,6 +152,10 @@
     },
     {
       "key": "JP-818476",
+      "message": "card_region_not_found"
+    },
+    {
+      "key": "JP-818468",
       "message": "card_region_not_found"
     },
     {
@@ -179,19 +191,7 @@
       "message": "card_region_not_found"
     },
     {
-      "key": "JP-938663",
-      "message": "card_region_not_found"
-    },
-    {
       "key": "JP-129614",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-129615",
-      "message": "card_region_not_found"
-    },
-    {
-      "key": "JP-818468",
       "message": "card_region_not_found"
     },
     {
@@ -259,15 +259,15 @@
       "message": "card_region_not_found"
     },
     {
+      "key": "EN-221706",
+      "message": "HTTP_404"
+    },
+    {
       "key": "EN-221705",
       "message": "HTTP_404"
     },
     {
       "key": "EN-906384",
-      "message": "HTTP_404"
-    },
-    {
-      "key": "EN-221706",
       "message": "HTTP_404"
     }
   ]
