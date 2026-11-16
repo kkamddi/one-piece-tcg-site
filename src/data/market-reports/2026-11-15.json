@@ -1,0 +1,1040 @@
+{
+  "id": "2026-11-15",
+  "weekStart": "2026-11-09",
+  "weekEnd": "2026-11-15",
+  "prevStart": "2026-11-02",
+  "prevEnd": "2026-11-08",
+  "generatedAt": "2026-11-16T11:33:00.822Z",
+  "krwPerJpy": 8.3572,
+  "totals": {
+    "a": {
+      "trades": 916,
+      "prevTrades": 1812,
+      "value": 26651521,
+      "prevValue": 54156808,
+      "products": 236,
+      "prevProducts": 263
+    },
+    "psa10": {
+      "trades": 2122,
+      "prevTrades": 2544,
+      "value": 100533277,
+      "prevValue": 132905448,
+      "products": 519,
+      "prevProducts": 533
+    }
+  },
+  "daily": [
+    {
+      "date": "2026-11-02",
+      "psa10": 409,
+      "a": 398
+    },
+    {
+      "date": "2026-11-03",
+      "psa10": 520,
+      "a": 331
+    },
+    {
+      "date": "2026-11-04",
+      "psa10": 338,
+      "a": 327
+    },
+    {
+      "date": "2026-11-05",
+      "psa10": 364,
+      "a": 233
+    },
+    {
+      "date": "2026-11-06",
+      "psa10": 434,
+      "a": 184
+    },
+    {
+      "date": "2026-11-07",
+      "psa10": 239,
+      "a": 178
+    },
+    {
+      "date": "2026-11-08",
+      "psa10": 240,
+      "a": 161
+    },
+    {
+      "date": "2026-11-09",
+      "psa10": 269,
+      "a": 134
+    },
+    {
+      "date": "2026-11-10",
+      "psa10": 254,
+      "a": 137
+    },
+    {
+      "date": "2026-11-11",
+      "psa10": 386,
+      "a": 141
+    },
+    {
+      "date": "2026-11-12",
+      "psa10": 325,
+      "a": 143
+    },
+    {
+      "date": "2026-11-13",
+      "psa10": 325,
+      "a": 153
+    },
+    {
+      "date": "2026-11-14",
+      "psa10": 261,
+      "a": 119
+    },
+    {
+      "date": "2026-11-15",
+      "psa10": 302,
+      "a": 89
+    }
+  ],
+  "movers": {
+    "psa10": {
+      "gainers": [
+        {
+          "apparelId": 158400,
+          "condition": "psa10",
+          "code": "OP05-091",
+          "label": "레베카 OP05-091",
+          "set": "OP05",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250405061949-1.webp?size=m",
+          "price": 22867,
+          "prevPrice": 18460,
+          "trades": 3,
+          "prevTrades": 5,
+          "change": 23.9
+        },
+        {
+          "apparelId": 112979,
+          "condition": "psa10",
+          "code": "OP03-122",
+          "label": "저격왕 OP03-122 (망가)",
+          "set": "OP03",
+          "cardId": "JP::OP03-122_p2",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260126092703-0.webp?size=m",
+          "price": 136000,
+          "prevPrice": 110000,
+          "trades": 3,
+          "prevTrades": 10,
+          "change": 23.6
+        },
+        {
+          "apparelId": 755882,
+          "condition": "psa10",
+          "code": "OPCD-108",
+          "label": "DON!! Card : Sanji OPCD-108",
+          "set": "프로모·기타",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-006-of.webp?size=m",
+          "price": 5398,
+          "prevPrice": 4383,
+          "trades": 6,
+          "prevTrades": 6,
+          "change": 23.2
+        },
+        {
+          "apparelId": 755880,
+          "condition": "psa10",
+          "code": "OPCD-106",
+          "label": "DON!! Card : Nami OPCD-106",
+          "set": "프로모·기타",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-004-of.webp?size=m",
+          "price": 6950,
+          "prevPrice": 6012,
+          "trades": 18,
+          "prevTrades": 18,
+          "change": 15.6
+        },
+        {
+          "apparelId": 764515,
+          "condition": "psa10",
+          "code": "OP14-033",
+          "label": "페로나 OP14-033 (프로모)",
+          "set": "OP14",
+          "cardId": "JP::OP14-033_p2",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-02-16-010-of.webp?size=m",
+          "price": 15833,
+          "prevPrice": 14000,
+          "trades": 3,
+          "prevTrades": 4,
+          "change": 13.1
+        },
+        {
+          "apparelId": 126080,
+          "condition": "psa10",
+          "code": "OP04-039",
+          "label": "레베카 OP04-039 (패러렐)",
+          "set": "OP04",
+          "cardId": "JP::OP04-039_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/TCG-OPC-OP04-1831.webp?size=m",
+          "price": 10333,
+          "prevPrice": 9217,
+          "trades": 3,
+          "prevTrades": 6,
+          "change": 12.1
+        },
+        {
+          "apparelId": 676025,
+          "condition": "psa10",
+          "code": "OP13-119",
+          "label": "포트거스 D. 에이스 OP13-119 (패러렐)",
+          "set": "OP13",
+          "cardId": "JP::OP13-119_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250822052033-21.webp?size=m",
+          "price": 11933,
+          "prevPrice": 10734,
+          "trades": 3,
+          "prevTrades": 13,
+          "change": 11.2
+        },
+        {
+          "apparelId": 676011,
+          "condition": "psa10",
+          "code": "OP13-120",
+          "label": "사보 OP13-120 (수배서)",
+          "set": "OP13",
+          "cardId": "JP::OP13-120_p4",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2025-08-15-12-of.webp?size=m",
+          "price": 23425,
+          "prevPrice": 21200,
+          "trades": 4,
+          "prevTrades": 4,
+          "change": 10.5
+        },
+        {
+          "apparelId": 158307,
+          "condition": "psa10",
+          "code": "OP06-001",
+          "label": "우타 OP06-001 (패러렐)",
+          "set": "OP06",
+          "cardId": "JP::OP06-001_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20231123085928-1.webp?size=m",
+          "price": 12267,
+          "prevPrice": 11323,
+          "trades": 3,
+          "prevTrades": 4,
+          "change": 8.3
+        },
+        {
+          "apparelId": 93514,
+          "condition": "psa10",
+          "code": "OP01-025",
+          "label": "롤로노아 조로 OP01-025 (패러렐)",
+          "set": "OP01",
+          "cardId": "JP::OP01-025_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20220903004530-0.webp?size=m",
+          "price": 15233,
+          "prevPrice": 14200,
+          "trades": 3,
+          "prevTrades": 10,
+          "change": 7.3
+        }
+      ],
+      "losers": [
+        {
+          "apparelId": 315323,
+          "condition": "psa10",
+          "code": "P-080",
+          "label": "Monkey.D.Luffy P-080 (프로모)",
+          "set": "프로모·기타",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240707030508-0.webp?size=m",
+          "price": 11225,
+          "prevPrice": 15618,
+          "trades": 6,
+          "prevTrades": 4,
+          "change": -28.1
+        },
+        {
+          "apparelId": 819283,
+          "condition": "psa10",
+          "code": "EB03-006",
+          "label": "나미 EB03-006 (프로모)",
+          "set": "EB03",
+          "cardId": "JP::EB03-006_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-05-08-EB03-006-of.webp?size=m",
+          "price": 16060,
+          "prevPrice": 21883,
+          "trades": 3,
+          "prevTrades": 12,
+          "change": -26.6
+        },
+        {
+          "apparelId": 764629,
+          "condition": "psa10",
+          "code": "OP15-086",
+          "label": "Nami OP15-086 (패러렐)",
+          "set": "OP15",
+          "cardId": "JP::OP15-086_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260227054651-0.webp?size=m",
+          "price": 37256,
+          "prevPrice": 48533,
+          "trades": 9,
+          "prevTrades": 22,
+          "change": -23.2
+        },
+        {
+          "apparelId": 743994,
+          "condition": "psa10",
+          "code": "OP11-041",
+          "label": "나미 OP11-041",
+          "set": "OP11",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-OP11-041-of.webp?size=m",
+          "price": 12383,
+          "prevPrice": 14990,
+          "trades": 13,
+          "prevTrades": 10,
+          "change": -17.4
+        },
+        {
+          "apparelId": 755878,
+          "condition": "psa10",
+          "code": "OPCD-104",
+          "label": "DON!! Card : Kumamon & Luffy OPCD-104",
+          "set": "프로모·기타",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-002-of.webp?size=m",
+          "price": 28212,
+          "prevPrice": 33853,
+          "trades": 24,
+          "prevTrades": 29,
+          "change": -16.7
+        },
+        {
+          "apparelId": 735753,
+          "condition": "psa10",
+          "code": "P-106",
+          "label": "Monkey.D.Luffy P-106 (프로모)",
+          "set": "프로모·기타",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2025-12-04-007-of.webp?size=m",
+          "price": 6680,
+          "prevPrice": 7815,
+          "trades": 5,
+          "prevTrades": 26,
+          "change": -14.5
+        },
+        {
+          "apparelId": 167350,
+          "condition": "psa10",
+          "code": "P-043",
+          "label": "몽키 D. 루피 P-043",
+          "set": "프로모·기타",
+          "cardId": "JP::P-043",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20231208102838-0.webp?size=m",
+          "price": 13948,
+          "prevPrice": 16296,
+          "trades": 42,
+          "prevTrades": 32,
+          "change": -14.4
+        },
+        {
+          "apparelId": 328579,
+          "condition": "psa10",
+          "code": "OP05-119",
+          "label": "몽키 D. 루피 OP05-119",
+          "set": "OP05",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260126083744-0.webp?size=m",
+          "price": 4005,
+          "prevPrice": 4676,
+          "trades": 18,
+          "prevTrades": 19,
+          "change": -14.3
+        },
+        {
+          "apparelId": 763301,
+          "condition": "psa10",
+          "code": "OP13-001",
+          "label": "몽키 D. 루피 OP13-001 (프로모)",
+          "set": "OP13",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260214025836-0.webp?size=m",
+          "price": 6500,
+          "prevPrice": 7562,
+          "trades": 12,
+          "prevTrades": 49,
+          "change": -14
+        },
+        {
+          "apparelId": 764512,
+          "condition": "psa10",
+          "code": "OP15-060",
+          "label": "Enel OP15-060 (프로모)",
+          "set": "OP15",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-02-16-007-of.webp?size=m",
+          "price": 10090,
+          "prevPrice": 11665,
+          "trades": 10,
+          "prevTrades": 6,
+          "change": -13.5
+        }
+      ]
+    },
+    "a": {
+      "gainers": [
+        {
+          "apparelId": 911926,
+          "condition": "a",
+          "code": "OP14-033",
+          "label": "페로나 OP14-033",
+          "set": "OP14",
+          "cardId": "JP::OP14-033_p3",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/92db54ca-0300-499d-8b79-3d85ff87ee3c.webp?size=m",
+          "price": 13943,
+          "prevPrice": 9993,
+          "trades": 7,
+          "prevTrades": 35,
+          "change": 39.5
+        },
+        {
+          "apparelId": 911907,
+          "condition": "a",
+          "code": "EB05-016",
+          "label": "Nico Robin EB05-016 (패러렐)",
+          "set": "EB05",
+          "cardId": "JP::EB05-016_p1",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/8fe2889e-f59b-4e7b-bf62-1fe7fed5141b.webp?size=m",
+          "price": 1521,
+          "prevPrice": 1129,
+          "trades": 9,
+          "prevTrades": 14,
+          "change": 34.7
+        },
+        {
+          "apparelId": 911919,
+          "condition": "a",
+          "code": "EB05-055",
+          "label": "Nami EB05-055 (패러렐)",
+          "set": "EB05",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/c96cc6eb-bd8e-4d18-b91c-d00eea5f5663.webp?size=m",
+          "price": 1642,
+          "prevPrice": 1391,
+          "trades": 7,
+          "prevTrades": 22,
+          "change": 18
+        },
+        {
+          "apparelId": 871038,
+          "condition": "a",
+          "code": "OP17-022",
+          "label": "Shanks OP17-022 (패러렐)",
+          "set": "OP17",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/4ff4d35e-a9bd-4658-ab33-bf2c847bdeb5.webp?size=m",
+          "price": 1495,
+          "prevPrice": 1284,
+          "trades": 10,
+          "prevTrades": 6,
+          "change": 16.4
+        },
+        {
+          "apparelId": 911924,
+          "condition": "a",
+          "code": "OP11-041",
+          "label": "나미 OP11-041",
+          "set": "OP11",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-OP11-041-of.webp?size=m",
+          "price": 7846,
+          "prevPrice": 6750,
+          "trades": 23,
+          "prevTrades": 56,
+          "change": 16.2
+        }
+      ],
+      "losers": [
+        {
+          "apparelId": 917940,
+          "condition": "a",
+          "code": "OPC-TCG-SDB-2026-11-DON",
+          "label": "DON!! Card OPC-TCG-SDB-2026-11-DON (프로모)",
+          "set": "프로모·기타",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/45e9193b-e5b3-4fe3-9184-34ac97085e5c.webp?size=m",
+          "price": 1222,
+          "prevPrice": 1701,
+          "trades": 7,
+          "prevTrades": 18,
+          "change": -28.2
+        },
+        {
+          "apparelId": 911917,
+          "condition": "a",
+          "code": "EB05-055",
+          "label": "Nami EB05-055 (패러렐)",
+          "set": "EB05",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-EB05-055P_YBK-of.webp?size=m",
+          "price": 9168,
+          "prevPrice": 11818,
+          "trades": 41,
+          "prevTrades": 77,
+          "change": -22.4
+        },
+        {
+          "apparelId": 925533,
+          "condition": "a",
+          "code": "EB05-061",
+          "label": "Nami EB05-061",
+          "set": "EB05",
+          "cardId": "JP::EB05-061",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/099284d2-3993-4235-91cd-2e20ae2c7286.webp?size=m",
+          "price": 1032,
+          "prevPrice": 1320,
+          "trades": 14,
+          "prevTrades": 49,
+          "change": -21.8
+        },
+        {
+          "apparelId": 871077,
+          "condition": "a",
+          "code": "OP16-098",
+          "label": "Yamato OP16-098",
+          "set": "OP16",
+          "cardId": "JP::OP16-098_p2",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/0bedf805-7b95-4d74-9fbc-a4fe3e212e76.webp?size=m",
+          "price": 12500,
+          "prevPrice": 15260,
+          "trades": 4,
+          "prevTrades": 5,
+          "change": -18.1
+        },
+        {
+          "apparelId": 911922,
+          "condition": "a",
+          "code": "OP01-016",
+          "label": "나미 OP01-016",
+          "set": "OP01",
+          "cardId": "",
+          "locale": "JP",
+          "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-OP01-016SPC-of.webp?size=m",
+          "price": 27625,
+          "prevPrice": 32518,
+          "trades": 16,
+          "prevTrades": 49,
+          "change": -15
+        }
+      ]
+    }
+  },
+  "mostTraded": {
+    "psa10": [
+      {
+        "apparelId": 167350,
+        "condition": "psa10",
+        "code": "P-043",
+        "label": "몽키 D. 루피 P-043",
+        "set": "프로모·기타",
+        "cardId": "JP::P-043",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20231208102838-0.webp?size=m",
+        "price": 13948,
+        "prevPrice": 16296,
+        "trades": 42,
+        "prevTrades": 32
+      },
+      {
+        "apparelId": 706813,
+        "condition": "psa10",
+        "code": "ST21-014",
+        "label": "몽키 D. 루피 ST21-014 (프로모)",
+        "set": "ST21",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20251005093907-0.webp?size=m",
+        "price": 30231,
+        "prevPrice": 32725,
+        "trades": 32,
+        "prevTrades": 54
+      },
+      {
+        "apparelId": 854923,
+        "condition": "psa10",
+        "code": "P-159",
+        "label": "Monkey.D.Luffy P-159 (프로모)",
+        "set": "프로모·기타",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/0bb3034a-3114-4814-bcc9-722ba1e351a7.webp?size=m",
+        "price": 6335,
+        "prevPrice": 6777,
+        "trades": 32,
+        "prevTrades": 39
+      },
+      {
+        "apparelId": 94918,
+        "condition": "psa10",
+        "code": "OP01-016",
+        "label": "나미 OP01-016 (패러렐 · 기념판)",
+        "set": "OP01",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20220830084300-0.webp?size=m",
+        "price": 5927,
+        "prevPrice": 6613,
+        "trades": 29,
+        "prevTrades": 16
+      },
+      {
+        "apparelId": 135440,
+        "condition": "psa10",
+        "code": "ST01-012",
+        "label": "몽키 D. 루피 ST01-012",
+        "set": "ST01",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20230829094840-0.webp?size=m",
+        "price": 11564,
+        "prevPrice": 11949,
+        "trades": 28,
+        "prevTrades": 34
+      },
+      {
+        "apparelId": 435343,
+        "condition": "psa10",
+        "code": "ST17-004",
+        "label": "보아 행콕 ST17-004",
+        "set": "ST17",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-ST17-004-20241101-of.webp?size=m",
+        "price": 17553,
+        "prevPrice": 17924,
+        "trades": 25,
+        "prevTrades": 48
+      },
+      {
+        "apparelId": 755878,
+        "condition": "psa10",
+        "code": "OPCD-104",
+        "label": "DON!! Card : Kumamon & Luffy OPCD-104",
+        "set": "프로모·기타",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-002-of.webp?size=m",
+        "price": 28212,
+        "prevPrice": 33853,
+        "trades": 24,
+        "prevTrades": 29
+      },
+      {
+        "apparelId": 752859,
+        "condition": "psa10",
+        "code": "P-055",
+        "label": "몽키 D. 루피 P-055 (프로모)",
+        "set": "프로모·기타",
+        "cardId": "",
+        "locale": "EN",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-EN-TCG-2026-01-19-001-of.webp?size=m",
+        "price": 40618,
+        "prevPrice": 45368,
+        "trades": 22,
+        "prevTrades": 27
+      },
+      {
+        "apparelId": 135438,
+        "condition": "psa10",
+        "code": "OP05-119",
+        "label": "몽키 D. 루피 OP05-119 (패러렐)",
+        "set": "OP05",
+        "cardId": "JP::OP05-119_p1",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20230829095831-0.webp?size=m",
+        "price": 30698,
+        "prevPrice": 34450,
+        "trades": 22,
+        "prevTrades": 17
+      },
+      {
+        "apparelId": 854158,
+        "condition": "psa10",
+        "code": "OP16-095",
+        "label": "Monkey.D.Luffy OP16-095 (프로모)",
+        "set": "OP16",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/a96b0a08-728c-4758-bcec-c7fbd4736f6b.webp?size=m",
+        "price": 17495,
+        "prevPrice": 16546,
+        "trades": 22,
+        "prevTrades": 39
+      }
+    ],
+    "a": [
+      {
+        "apparelId": 911917,
+        "condition": "a",
+        "code": "EB05-055",
+        "label": "Nami EB05-055 (패러렐)",
+        "set": "EB05",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-EB05-055P_YBK-of.webp?size=m",
+        "price": 9168,
+        "prevPrice": 11818,
+        "trades": 41,
+        "prevTrades": 77
+      },
+      {
+        "apparelId": 911927,
+        "condition": "a",
+        "code": "OP14-041",
+        "label": "보아 행콕 OP14-041",
+        "set": "OP14",
+        "cardId": "JP::OP14-041_p2",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/b6e3f17b-0293-450e-ba89-7bc32a6c7a2c.webp?size=m",
+        "price": 13255,
+        "prevPrice": 13102,
+        "trades": 31,
+        "prevTrades": 57
+      },
+      {
+        "apparelId": 854158,
+        "condition": "a",
+        "code": "OP16-095",
+        "label": "Monkey.D.Luffy OP16-095 (프로모)",
+        "set": "OP16",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/a96b0a08-728c-4758-bcec-c7fbd4736f6b.webp?size=m",
+        "price": 4504,
+        "prevPrice": 4973,
+        "trades": 29,
+        "prevTrades": 25
+      },
+      {
+        "apparelId": 911931,
+        "condition": "a",
+        "code": "ST17-004",
+        "label": "보아 행콕 ST17-004",
+        "set": "ST17",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-ST17-004SPC-of.webp?size=m",
+        "price": 75688,
+        "prevPrice": 75429,
+        "trades": 24,
+        "prevTrades": 64
+      },
+      {
+        "apparelId": 911924,
+        "condition": "a",
+        "code": "OP11-041",
+        "label": "나미 OP11-041",
+        "set": "OP11",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-OP11-041-of.webp?size=m",
+        "price": 7846,
+        "prevPrice": 6750,
+        "trades": 23,
+        "prevTrades": 56
+      },
+      {
+        "apparelId": 911906,
+        "condition": "a",
+        "code": "EB05-016",
+        "label": "Nico Robin EB05-016",
+        "set": "EB05",
+        "cardId": "JP::EB05-016_p2",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/eb835e78-7e4c-41b6-b4ff-33136739b7e4.webp?size=m",
+        "price": 23520,
+        "prevPrice": 23098,
+        "trades": 19,
+        "prevTrades": 44
+      },
+      {
+        "apparelId": 911911,
+        "condition": "a",
+        "code": "EB05-031",
+        "label": "Vinsmoke Reiju EB05-031",
+        "set": "EB05",
+        "cardId": "JP::EB05-031_p1",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/57595efc-d56f-47ff-888c-c2383ded6b4d.webp?size=m",
+        "price": 22259,
+        "prevPrice": 22265,
+        "trades": 19,
+        "prevTrades": 52
+      },
+      {
+        "apparelId": 854160,
+        "condition": "a",
+        "code": "ST129-008",
+        "label": "Nami ST129-008 (프로모)",
+        "set": "ST129",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/ddb4f08d-d9fa-4b04-9dfa-d89cc425e286.webp?size=m",
+        "price": 2047,
+        "prevPrice": 2020,
+        "trades": 18,
+        "prevTrades": 17
+      },
+      {
+        "apparelId": 854159,
+        "condition": "a",
+        "code": "PRB02-006",
+        "label": "롤로노아 조로 PRB02-006 (프로모)",
+        "set": "PRB02",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/d3c2475c-f7ef-4763-97fa-6d13e21d19fd.webp?size=m",
+        "price": 2022,
+        "prevPrice": 2266,
+        "trades": 18,
+        "prevTrades": 9
+      },
+      {
+        "apparelId": 911922,
+        "condition": "a",
+        "code": "OP01-016",
+        "label": "나미 OP01-016",
+        "set": "OP01",
+        "cardId": "",
+        "locale": "JP",
+        "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-10-05-OP01-016SPC-of.webp?size=m",
+        "price": 27625,
+        "prevPrice": 32518,
+        "trades": 16,
+        "prevTrades": 49
+      }
+    ]
+  },
+  "topPrice": [
+    {
+      "apparelId": 676003,
+      "condition": "psa10",
+      "code": "OP13-118",
+      "label": "몽키 D. 루피 OP13-118 (망가)",
+      "set": "OP13",
+      "cardId": "JP::OP13-118_p3",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2025-08-15-4-of.webp?size=m",
+      "price": 2900000,
+      "prevPrice": null,
+      "trades": 1,
+      "prevTrades": 0
+    },
+    {
+      "apparelId": 864498,
+      "condition": "psa10",
+      "code": "OP13-002",
+      "label": "포트거스 D. 에이스 OP13-002 (프로모)",
+      "set": "OP13",
+      "cardId": "",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-07-22-OP13-002-of.webp?size=m",
+      "price": 2580000,
+      "prevPrice": null,
+      "trades": 1,
+      "prevTrades": 0
+    },
+    {
+      "apparelId": 676003,
+      "condition": "a",
+      "code": "OP13-118",
+      "label": "몽키 D. 루피 OP13-118 (망가)",
+      "set": "OP13",
+      "cardId": "JP::OP13-118_p3",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2025-08-15-4-of.webp?size=m",
+      "price": 2000000,
+      "prevPrice": 2200000,
+      "trades": 1,
+      "prevTrades": 1
+    },
+    {
+      "apparelId": 515455,
+      "condition": "psa10",
+      "code": "OP05-119",
+      "label": "몽키 D. 루피 OP05-119 (금색 배경 · 기념판)",
+      "set": "OP05",
+      "cardId": "",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250301022214-2.webp?size=m",
+      "price": 1920000,
+      "prevPrice": null,
+      "trades": 2,
+      "prevTrades": 0
+    },
+    {
+      "apparelId": 871034,
+      "condition": "psa10",
+      "code": "EB04-061",
+      "label": "몽키 D. 루피 EB04-061 (망가)",
+      "set": "EB04",
+      "cardId": "JP::EB04-061_p3",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/96d53107-5908-4b4b-82e3-e11c4dbfb1c4.webp?size=m",
+      "price": 1845000,
+      "prevPrice": 2000000,
+      "trades": 2,
+      "prevTrades": 4
+    }
+  ],
+  "series": [
+    {
+      "set": "프로모·기타",
+      "trades": 533
+    },
+    {
+      "set": "EB05",
+      "trades": 227
+    },
+    {
+      "set": "OP01",
+      "trades": 171
+    },
+    {
+      "set": "OP13",
+      "trades": 167
+    },
+    {
+      "set": "OP09",
+      "trades": 139
+    },
+    {
+      "set": "OP17",
+      "trades": 125
+    },
+    {
+      "set": "OP16",
+      "trades": 123
+    },
+    {
+      "set": "OP14",
+      "trades": 116
+    }
+  ],
+  "boxes": [
+    {
+      "apparelId": 910479,
+      "code": "OPC-TCG-EB-05",
+      "name": "ONE PIECE Card Game Extra Booster \"Heroines Edition Vol.2\" Box",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/946f3236-1a32-4c20-bdaa-7a9484dde258.webp?size=l",
+      "price": 11840,
+      "prevPrice": 12824,
+      "change": -7.7
+    },
+    {
+      "apparelId": 864495,
+      "code": "OPC-TCG-OP-17",
+      "name": "ONE PIECE Card Game Booster Pack \"THE WORLD’S STRONGEST WARRIORS\" Box",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/067ebb9d-ffc2-49c7-9abc-3eb7eb863388.webp?size=l",
+      "price": 9440,
+      "prevPrice": 9658,
+      "change": -2.3
+    },
+    {
+      "apparelId": 816932,
+      "code": "OP-16",
+      "name": "ONE PIECE Card Game Booster Pack THE TIME OF BATTLE Box",
+      "imageUrl": "https://cards.optcgkorea.com/series/OP-16.webp",
+      "price": 8960,
+      "prevPrice": 8550,
+      "change": 4.8
+    },
+    {
+      "apparelId": 755998,
+      "code": "OP-15",
+      "name": "ONE PIECE Card Game Booster Pack \"Adventure on KAMI's Island\" Box",
+      "imageUrl": "https://cards.optcgkorea.com/series/OP-15.webp",
+      "price": 8160,
+      "prevPrice": 7916,
+      "change": 3.1
+    },
+    {
+      "apparelId": 751287,
+      "code": "EB-04",
+      "name": "ONE PIECE Card Game Extra Booster \"EGGHEAD CRISIS\" Box",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260130074117-0.webp?size=l",
+      "price": 12800,
+      "prevPrice": 13141,
+      "change": -2.6
+    },
+    {
+      "apparelId": 725356,
+      "code": "OP-14",
+      "name": "ONE PIECE Card Game Booster Pack \"THE AZURE SEA'S SEVEN\" Box",
+      "imageUrl": "https://cards.optcgkorea.com/series/OP-14.webp",
+      "price": 8320,
+      "prevPrice": 8550,
+      "change": -2.7
+    },
+    {
+      "apparelId": 691521,
+      "code": "EB-03",
+      "name": "ONE PIECE Card Game Extra Booster \"ONE PIECE Heroines edition\" Box",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20251022082902-1.webp?size=l",
+      "price": 11520,
+      "prevPrice": 12191,
+      "change": -5.5
+    },
+    {
+      "apparelId": 548909,
+      "code": "OP-13",
+      "name": "ONE PIECE Card Game Booster Pack \"CARRYING ON HIS WILL\" Box",
+      "imageUrl": "https://cards.optcgkorea.com/series/OP-13.webp",
+      "price": 17120,
+      "prevPrice": 17257,
+      "change": -0.8
+    }
+  ],
+  "boxSnapshot": {
+    "548909": 17120,
+    "691521": 11520,
+    "725356": 8320,
+    "751287": 12800,
+    "755998": 8160,
+    "816932": 8960,
+    "864495": 9440,
+    "910479": 11840
+  },
+  "notes": []
+}

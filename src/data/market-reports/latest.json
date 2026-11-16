@@ -1,91 +1,91 @@
 {
-  "id": "2026-11-08",
-  "weekStart": "2026-11-02",
-  "weekEnd": "2026-11-08",
-  "title": "원피스카드 주간 시세 리포트 (11월 2일~11월 8일)",
-  "krwPerJpy": 8.5819,
+  "id": "2026-11-15",
+  "weekStart": "2026-11-09",
+  "weekEnd": "2026-11-15",
+  "title": "원피스카드 주간 시세 리포트 (11월 9일~11월 15일)",
+  "krwPerJpy": 8.3572,
   "kpis": [
     {
       "key": "psa10",
       "label": "PSA10 거래",
-      "value": "2,564건",
-      "change": -3
+      "value": "2,122건",
+      "change": -16.6
     },
     {
       "key": "a",
       "label": "Single 거래",
-      "value": "2,015건",
-      "change": 46.4
+      "value": "916건",
+      "change": -49.4
     },
     {
       "key": "value",
       "label": "총 거래액",
-      "value": "₩16.7억",
-      "change": 27
+      "value": "₩10.6억",
+      "change": -32
     }
   ],
   "gainers": [
     {
-      "label": "Prisoner of Impel Down OP16-042",
-      "code": "OP16-042",
+      "label": "레베카 OP05-091",
+      "code": "OP05-091",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/885245b6-e231-41dd-8cab-241c66455674.webp?size=m",
-      "apparelId": 822594,
-      "price": 13567,
-      "change": 31.2
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250405061949-1.webp?size=m",
+      "apparelId": 158400,
+      "price": 22867,
+      "change": 23.9
     },
     {
-      "label": "야마토 OP04-112",
-      "code": "OP04-112",
-      "cardId": "JP::OP04-112_p2",
+      "label": "저격왕 OP03-122 (망가)",
+      "code": "OP03-122",
+      "cardId": "JP::OP03-122_p2",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240801083243-0.webp?size=m",
-      "apparelId": 282726,
-      "price": 24643,
-      "change": 21.6
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260126092703-0.webp?size=m",
+      "apparelId": 112979,
+      "price": 136000,
+      "change": 23.6
     },
     {
-      "label": "몽키 D. 루피 ST21-014 (프로모)",
-      "code": "ST21-014",
+      "label": "DON!! Card : Sanji OPCD-108",
+      "code": "OPCD-108",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20251005093907-0.webp?size=m",
-      "apparelId": 706813,
-      "price": 27837,
-      "change": 18.9
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-006-of.webp?size=m",
+      "apparelId": 755882,
+      "price": 5398,
+      "change": 23.2
     }
   ],
   "losers": [
     {
-      "label": "롤로노아 조로 PRB02-006 (프로모)",
-      "code": "PRB02-006",
+      "label": "Monkey.D.Luffy P-080 (프로모)",
+      "code": "P-080",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/d3c2475c-f7ef-4763-97fa-6d13e21d19fd.webp?size=m",
-      "apparelId": 854159,
-      "price": 11980,
-      "change": -34
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240707030508-0.webp?size=m",
+      "apparelId": 315323,
+      "price": 11225,
+      "change": -28.1
     },
     {
-      "label": "Monkey.D.Luffy OP16-095 (프로모)",
-      "code": "OP16-095",
-      "cardId": "",
+      "label": "나미 EB03-006 (프로모)",
+      "code": "EB03-006",
+      "cardId": "JP::EB03-006_p1",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/a96b0a08-728c-4758-bcec-c7fbd4736f6b.webp?size=m",
-      "apparelId": 854158,
-      "price": 16548,
-      "change": -24.2
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-05-08-EB03-006-of.webp?size=m",
+      "apparelId": 819283,
+      "price": 16060,
+      "change": -26.6
     },
     {
-      "label": "나미 OP11-041",
-      "code": "OP11-041",
-      "cardId": "",
+      "label": "Nami OP15-086 (패러렐)",
+      "code": "OP15-086",
+      "cardId": "JP::OP15-086_p1",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-OP11-041-of.webp?size=m",
-      "apparelId": 743994,
-      "price": 14817,
-      "change": -18.5
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260227054651-0.webp?size=m",
+      "apparelId": 764629,
+      "price": 37256,
+      "change": -23.2
     }
   ]
 }
