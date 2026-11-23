@@ -2,10 +2,13 @@ import { readFile, writeFile } from 'node:fs/promises';
 import boxMarketItems from '../src/data/box-market-items.js';
 
 const OUTPUT_URL = new URL('../src/data/box-market-prices.json', import.meta.url);
-const PRODUCT_API_BASE = 'https://snkrdunk.com/en/v1/products/SW---';
+// The English product API (en/v1/products/SW---<id>) started returning 404 on 2026-11-19; the Japanese apparel API
+// still serves the same listing data, priced in yen.
+const PRODUCT_API_BASE = 'https://snkrdunk.com/v1/apparels/';
+const FX_URL = 'https://www.optcgkorea.com/api/fx';
 const CONCURRENCY = 5;
 const MAX_ATTEMPTS = 3;
-const USD_TO_JPY = 155;
+let USD_TO_JPY = 155;
 const JPY_TO_KRW = 9.4;
 
 function normalizeReleaseDate(value) {
@@ -52,15 +55,16 @@ async function fetchPrice(item) {
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      const sourceCurrency = String(data?.currency || data?.productRetail?.currency || 'USD').toUpperCase();
-      const minPrice = normalizePriceToUsd(data?.minPrice, sourceCurrency);
+      // Single DON!! cards are listed as "used"; the English API counted both kinds of listing.
+      const yenPrices = [data?.minPrice, data?.usedMinPrice].map(Number).filter((value) => value > 0);
+      const minPrice = normalizePriceToUsd(yenPrices.length ? Math.min(...yenPrices) : 0, 'JPY');
       return {
         minPrice,
         minPriceFormat: minPrice > 0 ? `US $${minPrice.toLocaleString('en-US')}` : '',
         priceCurrency: 'USD',
-        listingCount: Number(data?.listingCount) || 0,
-        previewImageUrl: String(data?.product?.thumbnailUrl || ''),
-        releaseDate: normalizeReleaseDate(data?.productRetail?.releaseDate)
+        listingCount: (Number(data?.listingCount) || 0) + (Number(data?.usedListingCount) || 0),
+        previewImageUrl: data?.primaryMedia?.imageUrl ? `${data.primaryMedia.imageUrl}?size=s` : '',
+        releaseDate: normalizeReleaseDate(data?.releasedAt)
       };
     } catch (error) {
       if (attempt === MAX_ATTEMPTS) throw error;
@@ -70,7 +74,18 @@ async function fetchPrice(item) {
   return null;
 }
 
+async function loadUsdToJpy() {
+  try {
+    const response = await fetch(FX_URL, { signal: AbortSignal.timeout(15000) });
+    const rate = Number((await response.json())?.jpyPerUsd);
+    if (rate > 50 && rate < 500) USD_TO_JPY = rate;
+  } catch (error) {
+    console.warn(`[box-price] fx unavailable, using JPY ${USD_TO_JPY}/USD: ${error.message}`);
+  }
+}
+
 async function main() {
+  await loadUsdToJpy();
   const previous = await readPreviousSnapshot();
   const nextItems = { ...(previous.items || {}) };
   let cursor = 0;
