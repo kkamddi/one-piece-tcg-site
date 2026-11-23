@@ -1,6 +1,6 @@
 import specialPromoCards from '../data/special-promo-cards';
 const API_BASE = '/api/cards';
-const CARD_CATALOG_REVISION = '2026-10-30-jp-eb05-st31-36';
+const CARD_CATALOG_REVISION = '2026-11-23-kr-op15-jp-op18';
 const CARD_API_CACHE_TTL_MS = 5 * 60 * 1000;
 let cardsFallbackPromise;
 const responseCache = new Map();

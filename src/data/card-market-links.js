@@ -29632,6 +29632,1437 @@ const cardMarketLinks = [
     "apparelId": 855345,
     "status": "approved",
     "note": "ST31-36 auto approved: Thousand Sunny C [ST31-005](Start Deck \"Red Monkey.D.Luffy\")"
+  },
+  {
+    "cardId": "JP::OP17-119_p2",
+    "cardNo": "OP17-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP17-119_p3",
+    "cardNo": "OP17-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-001",
+    "cardNo": "OP18-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945231,
+    "status": "approved",
+    "note": "OP18 auto approved: Karoo L [OP18-001](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-001_p1",
+    "cardNo": "OP18-001",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938668,
+    "status": "approved",
+    "note": "OP18 auto approved: Karoo L-P [OP18-001](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-002",
+    "cardNo": "OP18-002",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945232,
+    "status": "approved",
+    "note": "OP18 auto approved: Igaram UC [OP18-002](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-003",
+    "cardNo": "OP18-003",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945233,
+    "status": "approved",
+    "note": "OP18 auto approved: Sea cat C [OP18-003](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-004",
+    "cardNo": "OP18-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945234,
+    "status": "approved",
+    "note": "OP18 auto approved: Karoo R [OP18-004](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-004_p1",
+    "cardNo": "OP18-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938667,
+    "status": "approved",
+    "note": "OP18 auto approved: Karoo R-P [OP18-004](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-005",
+    "cardNo": "OP18-005",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945235,
+    "status": "approved",
+    "note": "OP18 auto approved: Kung Fu Jugon C [OP18-005](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-006",
+    "cardNo": "OP18-006",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945236,
+    "status": "approved",
+    "note": "OP18 auto approved: Koza C [OP18-006](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-007",
+    "cardNo": "OP18-007",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945237,
+    "status": "approved",
+    "note": "OP18 auto approved: Smoker C [OP18-007](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-008",
+    "cardNo": "OP18-008",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945238,
+    "status": "approved",
+    "note": "OP18 auto approved: Chaka R [OP18-008](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-009",
+    "cardNo": "OP18-009",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945239,
+    "status": "approved",
+    "note": "OP18 auto approved: Super Spot-Billed Duck Troops R [OP18-009](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-010",
+    "cardNo": "OP18-010",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945240,
+    "status": "approved",
+    "note": "OP18 auto approved: Tony Tony.Chopper UC [OP18-010](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-011",
+    "cardNo": "OP18-011",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945241,
+    "status": "approved",
+    "note": "OP18 auto approved: Nefeltari Vivi SR [OP18-011](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-011_p1",
+    "cardNo": "OP18-011",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938666,
+    "status": "approved",
+    "note": "OP18 auto approved: Nefeltari Vivi SR-P [OP18-011](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-012",
+    "cardNo": "OP18-012",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945242,
+    "status": "approved",
+    "note": "OP18 auto approved: Pincers UC [OP18-012](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-013",
+    "cardNo": "OP18-013",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945243,
+    "status": "approved",
+    "note": "OP18 auto approved: Pell R [OP18-013](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-014",
+    "cardNo": "OP18-014",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945244,
+    "status": "approved",
+    "note": "OP18 auto approved: Portgas.D.Ace C [OP18-014](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-015",
+    "cardNo": "OP18-015",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945245,
+    "status": "approved",
+    "note": "OP18 auto approved: Eyelashes UC [OP18-015](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-016",
+    "cardNo": "OP18-016",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945246,
+    "status": "approved",
+    "note": "OP18 auto approved: Monkey.D.Luffy C [OP18-016](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-017",
+    "cardNo": "OP18-017",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945247,
+    "status": "approved",
+    "note": "OP18 auto approved: Roronoa Zoro C [OP18-017](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-018",
+    "cardNo": "OP18-018",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945248,
+    "status": "approved",
+    "note": "OP18 auto approved: Let's Go, Karoo!! C [OP18-018](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-019",
+    "cardNo": "OP18-019",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945249,
+    "status": "approved",
+    "note": "OP18 auto approved: Quack!!! R [OP18-019](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-020",
+    "cardNo": "OP18-020",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945250,
+    "status": "approved",
+    "note": "OP18 auto approved: Stop Fighting!!! UC [OP18-020](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-021",
+    "cardNo": "OP18-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945251,
+    "status": "approved",
+    "note": "OP18 auto approved: Franky L [OP18-021](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-021_p1",
+    "cardNo": "OP18-021",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 937303,
+    "status": "approved",
+    "note": "OP18 auto approved: Franky L-P [OP18-021](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-022",
+    "cardNo": "OP18-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945252,
+    "status": "approved",
+    "note": "OP18 auto approved: Monkey.D.Luffy L [OP18-022](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-022_p1",
+    "cardNo": "OP18-022",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938665,
+    "status": "approved",
+    "note": "OP18 auto approved: Monkey.D.Luffy L-P [OP18-022](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-023",
+    "cardNo": "OP18-023",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945253,
+    "status": "approved",
+    "note": "OP18 auto approved: Gaimon C [OP18-023](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-024",
+    "cardNo": "OP18-024",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945254,
+    "status": "approved",
+    "note": "OP18 auto approved: Kokoro C [OP18-024](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-025",
+    "cardNo": "OP18-025",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945255,
+    "status": "approved",
+    "note": "OP18 auto approved: Gonbe C [OP18-025](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-026",
+    "cardNo": "OP18-026",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945256,
+    "status": "approved",
+    "note": "OP18 auto approved: Sanji R [OP18-026](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-027",
+    "cardNo": "OP18-027",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945257,
+    "status": "approved",
+    "note": "OP18 auto approved: Zoro & Sogeking R [OP18-027](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-028",
+    "cardNo": "OP18-028",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945258,
+    "status": "approved",
+    "note": "OP18 auto approved: Chimney C [OP18-028](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-029",
+    "cardNo": "OP18-029",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945259,
+    "status": "approved",
+    "note": "OP18 auto approved: Tony Tony.Chopper R [OP18-029](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-029_p1",
+    "cardNo": "OP18-029",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938664,
+    "status": "approved",
+    "note": "OP18 auto approved: Tony Tony.Chopper R-P [OP18-029](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-030",
+    "cardNo": "OP18-030",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945260,
+    "status": "approved",
+    "note": "OP18 auto approved: Nami UC [OP18-030](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-031",
+    "cardNo": "OP18-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945261,
+    "status": "approved",
+    "note": "OP18 auto approved: Nico Robin SR [OP18-031](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-031_p1",
+    "cardNo": "OP18-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938663,
+    "status": "approved",
+    "note": "OP18 auto approved: Nico Robin SR-P [OP18-031](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-031_p2",
+    "cardNo": "OP18-031",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 937302,
+    "status": "approved",
+    "note": "OP18 auto approved: Nico Robin SR-SP (Manga Alt Art) [OP18-031](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-032",
+    "cardNo": "OP18-032",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945262,
+    "status": "approved",
+    "note": "OP18 auto approved: Buggy UC [OP18-032](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-033",
+    "cardNo": "OP18-033",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945263,
+    "status": "approved",
+    "note": "OP18 auto approved: Banban C [OP18-033](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-034",
+    "cardNo": "OP18-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945264,
+    "status": "approved",
+    "note": "OP18 auto approved: Franky SR [OP18-034](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-034_p1",
+    "cardNo": "OP18-034",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938662,
+    "status": "approved",
+    "note": "OP18 auto approved: Franky SR-P [OP18-034](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-035",
+    "cardNo": "OP18-035",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945265,
+    "status": "approved",
+    "note": "OP18 auto approved: Michael & Hoichael C [OP18-035](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-036",
+    "cardNo": "OP18-036",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945266,
+    "status": "approved",
+    "note": "OP18 auto approved: Monkey.D.Luffy UC [OP18-036](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-037",
+    "cardNo": "OP18-037",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945267,
+    "status": "approved",
+    "note": "OP18 auto approved: Yokozuna UC [OP18-037](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-038",
+    "cardNo": "OP18-038",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945268,
+    "status": "approved",
+    "note": "OP18 auto approved: Shoot Down That Flag. UC [OP18-038](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-039",
+    "cardNo": "OP18-039",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945269,
+    "status": "approved",
+    "note": "OP18 auto approved: Gum-Gum Giant Axe R [OP18-039](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-040",
+    "cardNo": "OP18-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945270,
+    "status": "approved",
+    "note": "OP18 auto approved: Diable Jambe Flambé Shot C [OP18-040](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-041",
+    "cardNo": "OP18-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945271,
+    "status": "approved",
+    "note": "OP18 auto approved: Ms. All Sunday L [OP18-041](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-041_p1",
+    "cardNo": "OP18-041",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938661,
+    "status": "approved",
+    "note": "OP18 auto approved: Ms. All Sunday L-P [OP18-041](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-042",
+    "cardNo": "OP18-042",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945272,
+    "status": "approved",
+    "note": "OP18 auto approved: Hack C [OP18-042](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-043",
+    "cardNo": "OP18-043",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945273,
+    "status": "approved",
+    "note": "OP18 auto approved: Accelegator C [OP18-043](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-044",
+    "cardNo": "OP18-044",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945274,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.Beans & Miss.Katherina C [OP18-044](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-045",
+    "cardNo": "OP18-045",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945275,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.Prince C [OP18-045](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-046",
+    "cardNo": "OP18-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945276,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.0&Miss All Sunday SR [OP18-046](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-046_p1",
+    "cardNo": "OP18-046",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938660,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.0&Miss All Sunday SR-P [OP18-046](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-047",
+    "cardNo": "OP18-047",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945277,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.1(Daz.Bonez) UC [OP18-047](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-048",
+    "cardNo": "OP18-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945278,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.1&Miss Doublefinger SR [OP18-048](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-048_p1",
+    "cardNo": "OP18-048",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938659,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.1&Miss Doublefinger SR-P [OP18-048](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-049",
+    "cardNo": "OP18-049",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945279,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.2.Bon.Kurei(Bentham) R [OP18-049](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-050",
+    "cardNo": "OP18-050",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945280,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.3 & Miss.Goldenweek R [OP18-050](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-051",
+    "cardNo": "OP18-051",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945281,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.4 & Miss.MerryChristmas R [OP18-051](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-051_p1",
+    "cardNo": "OP18-051",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938658,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.4& Miss Merry Christmas R-P [OP18-051](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-052",
+    "cardNo": "OP18-052",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945282,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.5 & Miss.Valentine UC [OP18-052](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-053",
+    "cardNo": "OP18-053",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945283,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.7 & Miss.Father'sDay UC [OP18-053](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-054",
+    "cardNo": "OP18-054",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945284,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.8 & Ms. Monday UC [OP18-054](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-055",
+    "cardNo": "OP18-055",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945285,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.9 & Ms. Wednesday C [OP18-055](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-056",
+    "cardNo": "OP18-056",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945286,
+    "status": "approved",
+    "note": "OP18 auto approved: Mr.13 & Ms.Friday C [OP18-056](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-057",
+    "cardNo": "OP18-057",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945287,
+    "status": "approved",
+    "note": "OP18 auto approved: Atomic Dicer UC [OP18-057](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-058",
+    "cardNo": "OP18-058",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945288,
+    "status": "approved",
+    "note": "OP18 auto approved: This Kingdom is Doomed. You Can't Save It! C [OP18-058](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-059",
+    "cardNo": "OP18-059",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945289,
+    "status": "approved",
+    "note": "OP18 auto approved: I Pray For Your Success. R [OP18-059](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-060",
+    "cardNo": "OP18-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945290,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko L [OP18-060](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-060_p1",
+    "cardNo": "OP18-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 937301,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko L-P [OP18-060](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-060_p2",
+    "cardNo": "OP18-060",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938657,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko L-SP (Manga Alt Art) [OP18-060](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-061",
+    "cardNo": "OP18-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945291,
+    "status": "approved",
+    "note": "OP18 auto approved: Iceburg SR [OP18-061](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-061_p1",
+    "cardNo": "OP18-061",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938656,
+    "status": "approved",
+    "note": "OP18 auto approved: Iceburg SR-P [OP18-061](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-062",
+    "cardNo": "OP18-062",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945292,
+    "status": "approved",
+    "note": "OP18 auto approved: Oimo & Kashii C [OP18-062](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-063",
+    "cardNo": "OP18-063",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945293,
+    "status": "approved",
+    "note": "OP18 auto approved: Kiwi & Mozu UC [OP18-063](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-064",
+    "cardNo": "OP18-064",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-064_p1",
+    "cardNo": "OP18-064",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 2 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-065",
+    "cardNo": "OP18-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945295,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko SR [OP18-065](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-065_p1",
+    "cardNo": "OP18-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938654,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko SR-P [OP18-065](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-065_p2",
+    "cardNo": "OP18-065",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 937300,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko SR-SP (Manga Alt Art) :Knights Of God Super Parallel [OP18-065](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-066",
+    "cardNo": "OP18-066",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945296,
+    "status": "approved",
+    "note": "OP18 auto approved: Zambai C [OP18-066](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-067",
+    "cardNo": "OP18-067",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945297,
+    "status": "approved",
+    "note": "OP18 auto approved: Charlotte Smoothie C [OP18-067](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-068",
+    "cardNo": "OP18-068",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945298,
+    "status": "approved",
+    "note": "OP18 auto approved: Senor Pink C [OP18-068](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-069",
+    "cardNo": "OP18-069",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945299,
+    "status": "approved",
+    "note": "OP18 auto approved: Sodomu & Gomora C [OP18-069](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-070",
+    "cardNo": "OP18-070",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945300,
+    "status": "approved",
+    "note": "OP18 auto approved: Tom R [OP18-070](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-071",
+    "cardNo": "OP18-071",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945301,
+    "status": "approved",
+    "note": "OP18 auto approved: Trebol C [OP18-071](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-072",
+    "cardNo": "OP18-072",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945302,
+    "status": "approved",
+    "note": "OP18 auto approved: The Franky Family R [OP18-072](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-073",
+    "cardNo": "OP18-073",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945303,
+    "status": "approved",
+    "note": "OP18 auto approved: T-Bone C [OP18-073](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-074",
+    "cardNo": "OP18-074",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945304,
+    "status": "approved",
+    "note": "OP18 auto approved: Can You Please Sail on the Ship I Made?! R [OP18-074](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-075",
+    "cardNo": "OP18-075",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945305,
+    "status": "approved",
+    "note": "OP18 auto approved: Thousand Sunny R [OP18-075](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-076",
+    "cardNo": "OP18-076",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945306,
+    "status": "approved",
+    "note": "OP18 auto approved: Shark Submerge 3 UC [OP18-076](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-077",
+    "cardNo": "OP18-077",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945307,
+    "status": "approved",
+    "note": "OP18 auto approved: White Hobby Horse 1 UC [OP18-077](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-078",
+    "cardNo": "OP18-078",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945308,
+    "status": "approved",
+    "note": "OP18 auto approved: Mini-Merry UC [OP18-078](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-079",
+    "cardNo": "OP18-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945309,
+    "status": "approved",
+    "note": "OP18 auto approved: Spandam L [OP18-079](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-079_p1",
+    "cardNo": "OP18-079",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938653,
+    "status": "approved",
+    "note": "OP18 auto approved: Spandam L-P [OP18-079](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-080",
+    "cardNo": "OP18-080",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945310,
+    "status": "approved",
+    "note": "OP18 auto approved: Van Augur UC [OP18-080](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-081",
+    "cardNo": "OP18-081",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945311,
+    "status": "approved",
+    "note": "OP18 auto approved: Oars C [OP18-081](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-082",
+    "cardNo": "OP18-082",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945312,
+    "status": "approved",
+    "note": "OP18 auto approved: Catarina Devon C [OP18-082](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-083",
+    "cardNo": "OP18-083",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945313,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gillingham R [OP18-083](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-083_p1",
+    "cardNo": "OP18-083",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938652,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Killingham R-P [OP18-083](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-084",
+    "cardNo": "OP18-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945314,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko SR [OP18-084](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-084_p1",
+    "cardNo": "OP18-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938651,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko SR-P [OP18-084](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-084_p2",
+    "cardNo": "OP18-084",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938650,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Gunko SR-SPC [OP18-084](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-085",
+    "cardNo": "OP18-085",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945315,
+    "status": "approved",
+    "note": "OP18 auto approved: Cerberus UC [OP18-085](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-086",
+    "cardNo": "OP18-086",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945316,
+    "status": "approved",
+    "note": "OP18 auto approved: Goldberg C [OP18-086](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-087",
+    "cardNo": "OP18-087",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945317,
+    "status": "approved",
+    "note": "OP18 auto approved: Stansen C [OP18-087](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-088",
+    "cardNo": "OP18-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945318,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Sommers R [OP18-088](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-088_p1",
+    "cardNo": "OP18-088",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938649,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Sommers R-P [OP18-088](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-089",
+    "cardNo": "OP18-089",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945319,
+    "status": "approved",
+    "note": "OP18 auto approved: Dorry C [OP18-089](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-090",
+    "cardNo": "OP18-090",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945320,
+    "status": "approved",
+    "note": "OP18 auto approved: Brook C [OP18-090](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-091",
+    "cardNo": "OP18-091",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945321,
+    "status": "approved",
+    "note": "OP18 auto approved: Brogy C [OP18-091](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-092",
+    "cardNo": "OP18-092",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945322,
+    "status": "approved",
+    "note": "OP18 auto approved: Roronoa Zoro UC [OP18-092](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-093",
+    "cardNo": "OP18-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-093_p1",
+    "cardNo": "OP18-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-093_p2",
+    "cardNo": "OP18-093",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-094",
+    "cardNo": "OP18-094",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945326,
+    "status": "approved",
+    "note": "OP18 auto approved: Hee Hee Hee!! I Smell Adventure!! C [OP18-094](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-095",
+    "cardNo": "OP18-095",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945327,
+    "status": "approved",
+    "note": "OP18 auto approved: I'm Late, I'm Very Late!! UC [OP18-095](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-096",
+    "cardNo": "OP18-096",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945328,
+    "status": "approved",
+    "note": "OP18 auto approved: I'll Make the Call R [OP18-096](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-096_p1",
+    "cardNo": "OP18-096",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 937306,
+    "status": "approved",
+    "note": "OP18 auto approved: I'll Make the Call R-P [OP18-096](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-097",
+    "cardNo": "OP18-097",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945329,
+    "status": "approved",
+    "note": "OP18 auto approved: Abyss Pentagram UC [OP18-097](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-098",
+    "cardNo": "OP18-098",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945330,
+    "status": "approved",
+    "note": "OP18 auto approved: Onigumo C [OP18-098](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-099",
+    "cardNo": "OP18-099",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945331,
+    "status": "approved",
+    "note": "OP18 auto approved: Kaku R [OP18-099](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-099_p1",
+    "cardNo": "OP18-099",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938648,
+    "status": "approved",
+    "note": "OP18 auto approved: Kaku R-P [OP18-099](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-100",
+    "cardNo": "OP18-100",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945332,
+    "status": "approved",
+    "note": "OP18 auto approved: Kalifa SR [OP18-100](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-100_p1",
+    "cardNo": "OP18-100",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938647,
+    "status": "approved",
+    "note": "OP18 auto approved: Kalifa SR-P [OP18-100](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-101",
+    "cardNo": "OP18-101",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945333,
+    "status": "approved",
+    "note": "OP18 auto approved: Kumadori UC [OP18-101](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-102",
+    "cardNo": "OP18-102",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945334,
+    "status": "approved",
+    "note": "OP18 auto approved: Jerry C [OP18-102](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-103",
+    "cardNo": "OP18-103",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945335,
+    "status": "approved",
+    "note": "OP18 auto approved: Jabra R [OP18-103](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-104",
+    "cardNo": "OP18-104",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945336,
+    "status": "approved",
+    "note": "OP18 auto approved: Strawberry C [OP18-104](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-105",
+    "cardNo": "OP18-105",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945337,
+    "status": "approved",
+    "note": "OP18 auto approved: Spandam R [OP18-105](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-106",
+    "cardNo": "OP18-106",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945338,
+    "status": "approved",
+    "note": "OP18 auto approved: Doberman C [OP18-106](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-107",
+    "cardNo": "OP18-107",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945339,
+    "status": "approved",
+    "note": "OP18 auto approved: Nero UC [OP18-107](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-108",
+    "cardNo": "OP18-108",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945340,
+    "status": "approved",
+    "note": "OP18 auto approved: Funkfreed UC [OP18-108](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-109",
+    "cardNo": "OP18-109",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945341,
+    "status": "approved",
+    "note": "OP18 auto approved: Fukurou UC [OP18-109](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-110",
+    "cardNo": "OP18-110",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945342,
+    "status": "approved",
+    "note": "OP18 auto approved: Blueno R [OP18-110](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-111",
+    "cardNo": "OP18-111",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945343,
+    "status": "approved",
+    "note": "OP18 auto approved: Momonga C [OP18-111](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-112",
+    "cardNo": "OP18-112",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945344,
+    "status": "approved",
+    "note": "OP18 auto approved: Yamakaji C [OP18-112](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-113",
+    "cardNo": "OP18-113",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945345,
+    "status": "approved",
+    "note": "OP18 auto approved: Rob Lucci SR [OP18-113](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-113_p1",
+    "cardNo": "OP18-113",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938646,
+    "status": "approved",
+    "note": "OP18 auto approved: Rob Lucci SR-P [OP18-113](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-114",
+    "cardNo": "OP18-114",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945346,
+    "status": "approved",
+    "note": "OP18 auto approved: Wanze C [OP18-114](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-115",
+    "cardNo": "OP18-115",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945347,
+    "status": "approved",
+    "note": "OP18 auto approved: Ten Finger Pistol UC [OP18-115](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-116",
+    "cardNo": "OP18-116",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945348,
+    "status": "approved",
+    "note": "OP18 auto approved: Iron Body Empty Tree C [OP18-116](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-117",
+    "cardNo": "OP18-117",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945349,
+    "status": "approved",
+    "note": "OP18 auto approved: Buster Call R [OP18-117](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-118",
+    "cardNo": "OP18-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945350,
+    "status": "approved",
+    "note": "OP18 auto approved: Monkey.D.Luffy SEC [OP18-118](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-118_p1",
+    "cardNo": "OP18-118",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938645,
+    "status": "approved",
+    "note": "OP18 auto approved: Monkey.D.Luffy SEC-P [OP18-118](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-119",
+    "cardNo": "OP18-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 945351,
+    "status": "approved",
+    "note": "OP18 auto approved: Saint Shamrock SEC [OP18-119](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP18-119_p1",
+    "cardNo": "OP18-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP18-119_p2",
+    "cardNo": "OP18-119",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": null,
+    "status": "pending",
+    "note": "OP18 pending: 3 candidate(s)"
+  },
+  {
+    "cardId": "JP::OP13-012_p2",
+    "cardNo": "OP13-012",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938672,
+    "status": "approved",
+    "note": "OP18 auto approved: Nefeltari Vivi R-SPC [OP13-012](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP13-113_p2",
+    "cardNo": "OP13-113",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938671,
+    "status": "approved",
+    "note": "OP18 auto approved: Lilith R-SPC [OP13-113](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::OP17-040_p1",
+    "cardNo": "OP17-040",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938670,
+    "status": "approved",
+    "note": "OP18 auto approved: Edward.Newgate R-SPC [OP17-040](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::ST24-004_p1",
+    "cardNo": "ST24-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938643,
+    "status": "approved",
+    "note": "OP18 auto approved: Law & Bepo SR-SPC [ST24-004](Booster Pack \"DOMINANCE OF GOD\")"
+  },
+  {
+    "cardId": "JP::ST34-004_p1",
+    "cardNo": "ST34-004",
+    "locale": "JP",
+    "variantKey": "",
+    "apparelId": 938642,
+    "status": "approved",
+    "note": "OP18 auto approved: Charlotte Linlin SR-SPC [ST34-004](Booster Pack \"DOMINANCE OF GOD\")"
   }
 ];
 

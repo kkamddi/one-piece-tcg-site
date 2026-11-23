@@ -168,6 +168,18 @@
     "baseSeriesId": "OP14"
   },
   {
+    "id": "KR-OP15",
+    "koName": "신의 섬 모험",
+    "enName": "ADVENTURE ON KAMI'S ISLAND",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "[OPK-15] 부스터 팩 신의 섬 모험",
+    "officialSeriesKeyword": "OP-15",
+    "description": "공식 한글 카드 리스트 기준 부스터 팩 시리즈",
+    "locale": "KR",
+    "baseSeriesId": "OP15"
+  },
+  {
     "id": "KR-EB01",
     "koName": "메모리얼 컬렉션",
     "enName": "MEMORIAL COLLECTION",
@@ -705,6 +717,18 @@
     "kindEn": "BOOSTER PACK",
     "queryLabel": "ブースターパック 世界最強の戦士【OP-17】",
     "officialSeriesKeyword": "550117",
+    "description": "일본 공식 카드 리스트 기준 카드 라인"
+  },
+  {
+    "id": "JP-OP18",
+    "locale": "JP",
+    "baseSeriesId": "OP18",
+    "koName": "ブースターパック 神の支配",
+    "enName": "ブースターパック 神の支配",
+    "kindKo": "부스터 팩",
+    "kindEn": "BOOSTER PACK",
+    "queryLabel": "ブースターパック 神の支配【OP-18】",
+    "officialSeriesKeyword": "550118",
     "description": "일본 공식 카드 리스트 기준 카드 라인"
   },
   {

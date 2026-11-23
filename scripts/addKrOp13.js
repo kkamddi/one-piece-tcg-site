@@ -13,6 +13,19 @@ const countsPath = path.join(rootDir, 'src/data/series-card-counts.json');
 const OFFICIAL_BASE = 'https://onepiece-cardgame.kr';
 const CARD_LIST_URL = `${OFFICIAL_BASE}/cardlist.do`;
 const targets = {
+  OP15: {
+    seriesId: 'KR-OP15',
+    baseSeriesId: 'OP15',
+    optionCode: 'OPK-15',
+    koName: '신의 섬 모험',
+    enName: "ADVENTURE ON KAMI'S ISLAND",
+    kindKo: '부스터 팩',
+    kindEn: 'BOOSTER PACK',
+    officialSeriesKeyword: 'OP-15',
+    description: '공식 한글 카드 리스트 기준 부스터 팩 시리즈',
+    insertAfter: 'KR-OP14',
+    minimumCardCount: 100
+  },
   OP14: {
     seriesId: 'KR-OP14',
     baseSeriesId: 'OP14',
