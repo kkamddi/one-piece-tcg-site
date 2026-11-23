@@ -1,91 +1,91 @@
 {
-  "id": "2026-11-15",
-  "weekStart": "2026-11-09",
-  "weekEnd": "2026-11-15",
-  "title": "원피스카드 주간 시세 리포트 (11월 9일~11월 15일)",
-  "krwPerJpy": 8.3572,
+  "id": "2026-11-22",
+  "weekStart": "2026-11-16",
+  "weekEnd": "2026-11-22",
+  "title": "원피스카드 주간 시세 리포트 (11월 16일~11월 22일)",
+  "krwPerJpy": 8.443,
   "kpis": [
     {
       "key": "psa10",
       "label": "PSA10 거래",
-      "value": "2,122건",
-      "change": -16.6
+      "value": "1,758건",
+      "change": -15.8
     },
     {
       "key": "a",
       "label": "Single 거래",
-      "value": "916건",
-      "change": -49.4
+      "value": "1,121건",
+      "change": 38.9
     },
     {
       "key": "value",
       "label": "총 거래액",
-      "value": "₩10.6억",
-      "change": -32
+      "value": "₩8.0억",
+      "change": -19.9
     }
   ],
   "gainers": [
     {
-      "label": "레베카 OP05-091",
-      "code": "OP05-091",
-      "cardId": "",
+      "label": "몽키 D. 루피 EB02-061 (패러렐)",
+      "code": "EB02-061",
+      "cardId": "JP::EB02-061_p1",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250405061949-1.webp?size=m",
-      "apparelId": 158400,
-      "price": 22867,
-      "change": 23.9
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20250122090034-11.webp?size=m",
+      "apparelId": 503506,
+      "price": 14349,
+      "change": 56.6
     },
     {
-      "label": "저격왕 OP03-122 (망가)",
-      "code": "OP03-122",
-      "cardId": "JP::OP03-122_p2",
-      "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260126092703-0.webp?size=m",
-      "apparelId": 112979,
-      "price": 136000,
-      "change": 23.6
-    },
-    {
-      "label": "DON!! Card : Sanji OPCD-108",
-      "code": "OPCD-108",
+      "label": "DON!! Card : Jinbe OPCD-113",
+      "code": "OPCD-113",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-006-of.webp?size=m",
-      "apparelId": 755882,
-      "price": 5398,
-      "change": 23.2
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-01-27-011-of.webp?size=m",
+      "apparelId": 755887,
+      "price": 4733,
+      "change": 18.1
+    },
+    {
+      "label": "니코 로빈 EB03-054 (프로모)",
+      "code": "EB03-054",
+      "cardId": "",
+      "locale": "JP",
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/5359b58b-4ebf-42d6-9f50-eb3dd8a784b3.webp?size=m",
+      "apparelId": 854164,
+      "price": 10837,
+      "change": 15.5
     }
   ],
   "losers": [
     {
-      "label": "Monkey.D.Luffy P-080 (프로모)",
-      "code": "P-080",
+      "label": "Monkey.D.Luffy P-154 (프로모)",
+      "code": "P-154",
       "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20240707030508-0.webp?size=m",
-      "apparelId": 315323,
-      "price": 11225,
-      "change": -28.1
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/45353938-3883-4d67-9493-01cf4504483b.webp?size=m",
+      "apparelId": 860466,
+      "price": 11435,
+      "change": -34.3
     },
     {
-      "label": "나미 EB03-006 (프로모)",
-      "code": "EB03-006",
-      "cardId": "JP::EB03-006_p1",
+      "label": "토니토니 쵸파 EB02-003 (프로모)",
+      "code": "EB02-003",
+      "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-05-08-EB03-006-of.webp?size=m",
-      "apparelId": 819283,
-      "price": 16060,
-      "change": -26.6
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/OPC-TCG-2026-0501-EB02-003-ot.webp?size=m",
+      "apparelId": 816214,
+      "price": 3992,
+      "change": -25.6
     },
     {
-      "label": "Nami OP15-086 (패러렐)",
-      "code": "OP15-086",
-      "cardId": "JP::OP15-086_p1",
+      "label": "Kaido OP17-062 (패러렐)",
+      "code": "OP17-062",
+      "cardId": "",
       "locale": "JP",
-      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/20260227054651-0.webp?size=m",
-      "apparelId": 764629,
-      "price": 37256,
-      "change": -23.2
+      "imageUrl": "https://cdn.snkrdunk.com/upload_bg_removed/2810a622-6731-4a16-8a24-348df874c4e3.webp?size=m",
+      "apparelId": 871051,
+      "price": 32467,
+      "change": -25.5
     }
   ]
 }
