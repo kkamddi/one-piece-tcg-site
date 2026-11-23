@@ -29638,18 +29638,18 @@ const cardMarketLinks = [
     "cardNo": "OP17-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 2 candidate(s)"
+    "apparelId": 938669,
+    "status": "approved",
+    "note": "OP18 image-checked: Loki (Yoshitaka Amano) SEC [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP17-119_p3",
     "cardNo": "OP17-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 2 candidate(s)"
+    "apparelId": 937304,
+    "status": "approved",
+    "note": "OP18 image-checked: Loki (Yoshitaka Amano) SEC :Foil Stamped [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-001",
@@ -30367,18 +30367,18 @@ const cardMarketLinks = [
     "cardNo": "OP18-064",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 2 candidate(s)"
+    "apparelId": 945294,
+    "status": "approved",
+    "note": "OP18 image-checked: Saint Killingham UC [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-064_p1",
     "cardNo": "OP18-064",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 2 candidate(s)"
+    "apparelId": 938655,
+    "status": "approved",
+    "note": "OP18 image-checked: Saint Killingham UC-TR [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-065",
@@ -30700,27 +30700,27 @@ const cardMarketLinks = [
     "cardNo": "OP18-093",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 3 candidate(s)"
+    "apparelId": 945323,
+    "status": "approved",
+    "note": "OP18 image-checked: Sleeptids (Speech Bubble: 恐れている世界!!!) R [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-093_p1",
     "cardNo": "OP18-093",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 3 candidate(s)"
+    "apparelId": 945324,
+    "status": "approved",
+    "note": "OP18 image-checked: Sleeptids (Speech Bubble: None) R [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-093_p2",
     "cardNo": "OP18-093",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 3 candidate(s)"
+    "apparelId": 945325,
+    "status": "approved",
+    "note": "OP18 image-checked: Sleeptids (Speech Bubble: これは子供達が一番) R [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-094",
@@ -31006,18 +31006,18 @@ const cardMarketLinks = [
     "cardNo": "OP18-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 3 candidate(s)"
+    "apparelId": 938644,
+    "status": "approved",
+    "note": "OP18 image-checked: Saint Shamrock (Yoshitaka Amano) SEC-P [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP18-119_p2",
     "cardNo": "OP18-119",
     "locale": "JP",
     "variantKey": "",
-    "apparelId": null,
-    "status": "pending",
-    "note": "OP18 pending: 3 candidate(s)"
+    "apparelId": 937305,
+    "status": "approved",
+    "note": "OP18 image-checked: Saint Shamrock (Yoshitaka Amano) SEC-P :Foil Stamped [DOMINANCE OF GOD]"
   },
   {
     "cardId": "JP::OP13-012_p2",
