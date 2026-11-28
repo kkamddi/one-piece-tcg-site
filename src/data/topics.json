@@ -16,7 +16,7 @@
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
-    "id": "calendar-jp-event-2027-03-06-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fbcgfest26-27.html-20",
+    "id": "calendar-jp-event-2027-03-06-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fbcgfest26-27.html-22",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -30,7 +30,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/bcgfest26-27.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/05/w5ovIciz5EeI3UUa/thumbnail_Tokyo.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/05/w5ovIciz5EeI3UUa/thumbnail_Tokyo.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2027-02-27-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fop19.html",
@@ -49,6 +49,23 @@
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
+    "id": "calendar-jp-event-2027-01-31-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Ffriendtag-2027.html-4",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "EVENTS",
+    "title": "フレンドタッグ交流会​",
+    "date": "2027-01-31",
+    "scheduleDate": "2027-01-31",
+    "endDate": "2027-02-28",
+    "scheduleLabel": "2027年1月31日(日) ～ 2月28日(日)",
+    "calendarKind": "event",
+    "calendarPriority": "low",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/events/friendtag-2027.html",
+    "titleKo": "교류회",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/22/nVcenE93RrpYqGxp/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
+  },
+  {
     "id": "calendar-jp-release-2027-01-30-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Feb06.html",
     "locale": "JP",
     "source": "JP_OFFICIAL",
@@ -65,7 +82,7 @@
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
-    "id": "calendar-jp-event-2027-01-16-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2FExtra3on3_2027.html-16",
+    "id": "calendar-jp-event-2027-01-16-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2FExtra3on3_2027.html-18",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -79,7 +96,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/Extra3on3_2027.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/18/9iGy0MgZP87PEFkX/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/18/9iGy0MgZP87PEFkX/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-event-2027-01-01-events%2Fview.do%3Fbrdno%3D6932-0",
@@ -130,7 +147,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20261127_152232_56b0064d5eed4f5798cdccc1b7cc729c"
   },
   {
-    "id": "calendar-jp-event-2026-12-27-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fflagshipex-202612.html-17",
+    "id": "calendar-jp-event-2026-12-27-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fflagshipex-202612.html-19",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -143,7 +160,24 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/flagshipex-202612.html",
     "titleKo": "플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/XpbQQC7AbO02MsPZ/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/XpbQQC7AbO02MsPZ/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
+  },
+  {
+    "id": "calendar-jp-event-2026-12-26-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Frelease-event-st37-junior.html-5",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "EVENTS",
+    "title": "【小中学生限定】スタートデッキ ST-37・38 発売記念イベント",
+    "date": "2026-12-26",
+    "scheduleDate": "2026-12-26",
+    "endDate": "2026-12-30",
+    "scheduleLabel": "2026年12月26日[土] ～ 2026年12月30日[水]",
+    "calendarKind": "event",
+    "calendarPriority": "low",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/events/release-event-st37-junior.html",
+    "titleKo": "ST-37 발매 기념 이벤트",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/25/3c3g9slcgLiEQwTr/ST3738%E7%99%BA%E5%A3%B2%E8%A8%98%E5%BF%B5%E3%82%B5%E3%83%A0%E3%83%8D.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-12-19-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fsleeve047.html",
@@ -194,7 +228,7 @@
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
-    "id": "calendar-jp-event-2026-12-19-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Frelease-event-op18-junior.html-4",
+    "id": "calendar-jp-event-2026-12-19-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Frelease-event-op18-junior.html-6",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -208,7 +242,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-op18-junior.html",
     "titleKo": "OP-18 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/13/EPjpL7Ruc6pij2ni/thumbnail_junior.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/13/EPjpL7Ruc6pij2ni/thumbnail_junior.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-12-13-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Ffanfest-2026.html-2",
@@ -224,7 +258,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/fanfest-2026.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/U5cQGkbgyzfC96im/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/U5cQGkbgyzfC96im/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-event-2026-12-12-events%2Fview.do%3Fbrdno%3D6716-4",
@@ -287,7 +321,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20261016_172925_3d590e2c2c9f401fa03556f459b4ae0c"
   },
   {
-    "id": "calendar-jp-event-2026-12-12-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fcrew_battle_op18.html-5",
+    "id": "calendar-jp-event-2026-12-12-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fcrew_battle_op18.html-7",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -300,7 +334,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/crew_battle_op18.html",
     "titleKo": "크루 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/12/oH7atPfqpHKBc3ll/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/11/12/oH7atPfqpHKBc3ll/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-event-2026-12-01-events%2Fview.do%3Fbrdno%3D6710-2",
@@ -351,24 +385,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20261030_122216_675f27c3b17340a6ab2113c3a8e21de2"
   },
   {
-    "id": "calendar-jp-event-2026-12-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202612.html-6",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "EVENTS",
-    "title": "交流会 12月",
-    "date": "2026-12-01",
-    "scheduleDate": "2026-12-01",
-    "endDate": "2026-12-31",
-    "scheduleLabel": "2026年12月1日[火] ～ 31日[木]",
-    "calendarKind": "event",
-    "calendarPriority": "low",
-    "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/meetup-202612.html",
-    "titleKo": "12월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/gkZkob32E1ttverX/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_12%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
-  },
-  {
-    "id": "calendar-jp-event-2026-12-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202612.html-7",
+    "id": "calendar-jp-event-2026-12-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202612.html-8",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -382,10 +399,27 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202612.html",
     "titleKo": "12월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/iFSerIqhyxAEw6PL/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_12%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/iFSerIqhyxAEw6PL/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_12%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-12-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202612.html-18",
+    "id": "calendar-jp-event-2026-12-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202612.html-9",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "EVENTS",
+    "title": "交流会 12月",
+    "date": "2026-12-01",
+    "scheduleDate": "2026-12-01",
+    "endDate": "2026-12-31",
+    "scheduleLabel": "2026年12月1日[火] ～ 31日[木]",
+    "calendarKind": "event",
+    "calendarPriority": "low",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/events/meetup-202612.html",
+    "titleKo": "12월 교류회",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/gkZkob32E1ttverX/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_12%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
+  },
+  {
+    "id": "calendar-jp-event-2026-12-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202612.html-20",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -399,7 +433,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/8packs-battle-202612.html",
     "titleKo": "12월 8팩 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/27/Pnm1xeB7w0g0ugYt/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/27/Pnm1xeB7w0g0ugYt/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-event-2026-11-28-events%2Fview.do%3Fbrdno%3D6755-3",
@@ -482,7 +516,7 @@
     "calendarPriority": "low",
     "date": "2026-11-24",
     "url": "https://www.onepiece-cardgame.com/events/Extra3on3_2027.html",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/24/llNcEsNmN59hAvtB/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/24/llNcEsNmN59hAvtB/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-11-21-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fop18.html",
@@ -515,7 +549,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-op18.html",
     "titleKo": "OP-18 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/16/JkmO6gEYKve4RRfl/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/16/JkmO6gEYKve4RRfl/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "kr-2026-11-20-4-한국어판 원피스 카드게임 블록 아이콘 제도 적용 시기에 대한 안내",
@@ -537,7 +571,7 @@
     "calendarPriority": "high",
     "date": "2026-11-20",
     "url": "https://www.onepiece-cardgame.com/cardlist/?series=550118",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/19/TQZGheYqHlMRrAOx/thumbnail_cardlist2.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/19/TQZGheYqHlMRrAOx/thumbnail_cardlist2.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "jp-2026-11-20-2-「ブースターパック 神の支配【OP-18】」収録カードを使用したおすすめデッキを紹介！",
@@ -549,7 +583,7 @@
     "calendarPriority": "high",
     "date": "2026-11-20",
     "url": "https://www.onepiece-cardgame.com/feature/deck/?tags=OP-18",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/19/yBsnZwfF7H8w903W/thumbnail_feature_deck.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/19/yBsnZwfF7H8w903W/thumbnail_feature_deck.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "jp-2026-11-20-3-アンケートに答えてプレイシートをダウンロード！",
@@ -561,7 +595,7 @@
     "calendarPriority": "low",
     "date": "2026-11-20",
     "url": "https://join.carddass.com/jp/survey/products/detail/758",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/19/VoBBWFIfqE4p8Yxh/thumbnail_enquete.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/19/VoBBWFIfqE4p8Yxh/thumbnail_enquete.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-11-20-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-1",
@@ -578,7 +612,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "11월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/tg6FAQA0ocxqzGzV/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_11%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/tg6FAQA0ocxqzGzV/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_11%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "jp-2026-11-17-4-禁止・制限カードが変更になります。必ずご覧ください。",
@@ -590,10 +624,10 @@
     "calendarPriority": "low",
     "date": "2026-11-17",
     "url": "https://www.onepiece-cardgame.com/news/restriction-2611.html",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/03/16/g3Qj0Lj6W1rslVin/thumbnail_important-notice.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/03/16/g3Qj0Lj6W1rslVin/thumbnail_important-notice.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-11-15-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fcs26-27-junior.html-8",
+    "id": "calendar-jp-event-2026-11-15-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fcs26-27-junior.html-10",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -607,7 +641,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/cs26-27-junior.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/16/pwf4tpX8lICrFgly/thumbnail_shop.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/16/pwf4tpX8lICrFgly/thumbnail_shop.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "jp-2026-11-13-5-「ブースターパック 神の支配【OP-18】」収録カードをチェック！",
@@ -619,7 +653,7 @@
     "calendarPriority": "high",
     "date": "2026-11-13",
     "url": "https://www.onepiece-cardgame.com/cardlist/?series=550118",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/12/162HfAhnIPJMR6Za/thumbnail_cardlist.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/12/162HfAhnIPJMR6Za/thumbnail_cardlist.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "jp-2026-11-13-6-「ブースターパック 神の支配【OP-18】」のQ&Aを公開しました。",
@@ -631,10 +665,10 @@
     "calendarPriority": "high",
     "date": "2026-11-13",
     "url": "https://www.onepiece-cardgame.com/rules/qa.php?tab=cardqa&type=1&series=ブースターパック 神の支配【OP-18】",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/12/15Pgtm8Y5FfzFU8V/thumbnail_qa.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/history/2026/11/12/15Pgtm8Y5FfzFU8V/thumbnail_qa.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-11-07-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fheroines-cup-3on3_2026.html-19",
+    "id": "calendar-jp-event-2026-11-07-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fheroines-cup-3on3_2026.html-21",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -648,7 +682,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/heroines-cup-3on3_2026.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/24/OsQBvWUeVtgjzL2A/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/24/OsQBvWUeVtgjzL2A/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-11-07-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Frelease-event-eb05-junior.html-0",
@@ -665,7 +699,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-eb05-junior.html",
     "titleKo": "EB-05 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/25/AfxjkulueQbeB3K5/thumbnail_junior.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/25/AfxjkulueQbeB3K5/thumbnail_junior.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-11-06-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-1",
@@ -682,10 +716,10 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "11월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/tg6FAQA0ocxqzGzV/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_11%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/10/15/tg6FAQA0ocxqzGzV/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_11%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-11-03-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_s2_area_matching.html-9",
+    "id": "calendar-jp-event-2026-11-03-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_s2_area_matching.html-11",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -699,10 +733,10 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-27_s2_area_matching.html",
     "titleKo": "매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/16/j98AElf41HhNHNyP/S2%E3%83%9E%E3%83%83%E3%83%81%E3%83%B3%E3%82%B0%20thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/16/j98AElf41HhNHNyP/S2%E3%83%9E%E3%83%83%E3%83%81%E3%83%B3%E3%82%B0%20thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-11-03-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_s2_area_flagship.html-14",
+    "id": "calendar-jp-event-2026-11-03-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_s2_area_flagship.html-16",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -716,7 +750,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-27_s2_area_flagship.html",
     "titleKo": "플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/16/gxHog504gn3lHamM/S2%E3%83%95%E3%83%A9%E3%82%B7EX%20thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/16/gxHog504gn3lHamM/S2%E3%83%95%E3%83%A9%E3%82%B7EX%20thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-event-2026-11-01-events%2Fview.do%3Fbrdno%3D6594-1",
@@ -781,10 +815,10 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/howtoplay-class011.html",
     "titleKo": "11월 초보자 체험 교실",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-11-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202611.html-10",
+    "id": "calendar-jp-event-2026-11-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202611.html-12",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -798,10 +832,10 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202611.html",
     "titleKo": "11월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/bebJfBb5EovJ9T1y/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_11%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/bebJfBb5EovJ9T1y/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_11%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-11-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202611.html-11",
+    "id": "calendar-jp-event-2026-11-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202611.html-13",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -815,7 +849,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202611.html",
     "titleKo": "11월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/VbVslmG8XEcWzCxm/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_11%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/VbVslmG8XEcWzCxm/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_11%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-10-31-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Feb05.html",
@@ -864,7 +898,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-eb05.html",
     "titleKo": "EB-05 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/25/Xiupg06XchAVXGzU/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/25/Xiupg06XchAVXGzU/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-10-23-products%2Fview.do%3Fbrdno%3D6599",
@@ -896,7 +930,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "10월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/MZxzbziOSIIuFBtc/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_10%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/MZxzbziOSIIuFBtc/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_10%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-17-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fcrew_battle_op17.html-3",
@@ -912,7 +946,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/crew_battle_op17.html",
     "titleKo": "크루 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/07/CRe8BV1JFLOz0G68/thumbnail%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%90%E3%83%88%E3%83%ABOP17.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/07/CRe8BV1JFLOz0G68/thumbnail%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%90%E3%83%88%E3%83%ABOP17.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-11-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Frookies_battle2.html-4",
@@ -929,7 +963,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/rookies_battle2.html",
     "titleKo": "교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/17/jcUXGXJaUwtiLKjS/thumbnail_%E3%83%AB%E3%83%BC%E3%82%AD%E3%83%BC%E3%82%BA%E3%83%90%E3%83%88%E3%83%AB_%E4%BA%A4%E6%B5%81%E4%BC%9A.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/17/jcUXGXJaUwtiLKjS/thumbnail_%E3%83%AB%E3%83%BC%E3%82%AD%E3%83%BC%E3%82%BA%E3%83%90%E3%83%88%E3%83%AB_%E4%BA%A4%E6%B5%81%E4%BC%9A.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-10-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_s2_autumn_matching.html-5",
@@ -945,7 +979,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-27_s2_autumn_matching.html",
     "titleKo": "매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/16/0EMtrqzoKlra2XfZ/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/16/0EMtrqzoKlra2XfZ/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-10-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_Season2_3on3.html-6",
@@ -961,7 +995,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-27_Season2_3on3.html",
     "titleKo": "챔피언십 26-27 Season 2",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/17/VnYsYHbqcxUbN52y/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/17/VnYsYHbqcxUbN52y/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-10-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_season2_junior-cup.html-7",
@@ -977,7 +1011,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-27_season2_junior-cup.html",
     "titleKo": "챔피언십 26-27 Season 2",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/17/fTcVfIp9aoSSXlWI/thumbnail_jfc.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/17/fTcVfIp9aoSSXlWI/thumbnail_jfc.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-10-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fcrew_battle2610.html-8",
@@ -993,7 +1027,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/crew_battle2610.html",
     "titleKo": "10월 크루 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/03/OEKO4F9NHJLPRw1E/thumbnail_%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%90%E3%83%88%E3%83%AB26%E5%B9%B410%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/03/OEKO4F9NHJLPRw1E/thumbnail_%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%90%E3%83%88%E3%83%AB26%E5%B9%B410%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-10-09-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fbaseshop-binder001.html",
@@ -1026,7 +1060,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "10월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/MZxzbziOSIIuFBtc/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_10%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/09/14/MZxzbziOSIIuFBtc/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_10%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-04-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fhowtoplay-class010.html-1",
@@ -1043,7 +1077,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/howtoplay-class010.html",
     "titleKo": "10월 초보자 체험 교실",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-10-03-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fplaymat_flame-flame-fruit.html",
@@ -1140,7 +1174,7 @@
     "calendarOnly": true,
     "url": "http://cp.onepiece-cardgame.com/flame-flame-fruit/",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/18/ribKXUQHYoHezWzN/event_W640_H360.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/18/ribKXUQHYoHezWzN/event_W640_H360.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-event-2026-10-01-events%2Fview.do%3Fbrdno%3D6553-4",
@@ -1159,7 +1193,7 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=20260914_122708_70f0c82094d248a3a4e04c1b78d496cc"
   },
   {
-    "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fflagship-battle-202610.html-15",
+    "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fflagship-battle-202610.html-17",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -1173,10 +1207,10 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/flagship-battle-202610.html",
     "titleKo": "플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/31/zI9ZOQ63cRE4XQMe/thumbnail_jp.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/31/zI9ZOQ63cRE4XQMe/thumbnail_jp.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fextra-grand-battle-202610.html-21",
+    "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fextra-grand-battle-202610.html-23",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -1190,7 +1224,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/extra-grand-battle-202610.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/31/v928irbtIXTTv2aP/thumbnail_jp%20%E3%82%A8%E3%82%AF%E3%83%90.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/31/v928irbtIXTTv2aP/thumbnail_jp%20%E3%82%A8%E3%82%AF%E3%83%90.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202610.html-2",
@@ -1207,7 +1241,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/8packs-battle-202610.html",
     "titleKo": "10월 8팩 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/27/Pnm1xeB7w0g0ugYt/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/27/Pnm1xeB7w0g0ugYt/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202610.html-3",
@@ -1224,7 +1258,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202610.html",
     "titleKo": "10월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/94ZxaSiqZujScr2E/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_10%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/94ZxaSiqZujScr2E/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_10%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-10-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202610.html-4",
@@ -1241,7 +1275,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202610.html",
     "titleKo": "10월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/tVAoCEK4b3HEiKhW/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_10%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/tVAoCEK4b3HEiKhW/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_10%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-22-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-corporatesummitbattle.html-5",
@@ -1257,7 +1291,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-corporatesummitbattle.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/30/bj4qQJml29qNQ6fl/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/30/bj4qQJml29qNQ6fl/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-20-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-amazon-junior-2026.html-7",
@@ -1273,7 +1307,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-amazon-junior-2026.html",
     "titleKo": "교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/24/QNvuN3J1v3CkCGEm/thumbnail_meetup-amazon-junior.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/24/QNvuN3J1v3CkCGEm/thumbnail_meetup-amazon-junior.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-09-18-products%2Fview.do%3Fbrdno%3D6536",
@@ -1305,7 +1339,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "9월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/ml5auhYWyPRZEhow/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_9%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/ml5auhYWyPRZEhow/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_9%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-05-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fhowtoplay-class09.html-9",
@@ -1322,7 +1356,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/howtoplay-class09.html",
     "titleKo": "9월 초보자 체험 교실",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-09-04-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fcardcase005.html",
@@ -1355,7 +1389,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "9월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/ml5auhYWyPRZEhow/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_9%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/20/ml5auhYWyPRZEhow/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_9%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F26-27_season2_shop.html-0",
@@ -1372,7 +1406,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/26-27_season2_shop.html",
     "titleKo": "챔피언십 26-27 Season 2",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/27/Y6hKV3zfli5rgbSj/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/27/Y6hKV3zfli5rgbSj/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202609.html-1",
@@ -1389,7 +1423,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202609.html",
     "titleKo": "9월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/23/E6vA5iAg6i1MRBHm/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_9%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/23/E6vA5iAg6i1MRBHm/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_9%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202609.html-2",
@@ -1406,7 +1440,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/8packs-battle-202609.html",
     "titleKo": "9월 8팩 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/hQvWcZY2OBMKQ6WJ/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/hQvWcZY2OBMKQ6WJ/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-09-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202609.html-3",
@@ -1423,7 +1457,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202609.html",
     "titleKo": "9월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/23/m2b4w1h5Nok1HhOf/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_9%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/23/m2b4w1h5Nok1HhOf/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_9%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-08-29-products%2Fview.do%3Fbrdno%3D6458",
@@ -1455,7 +1489,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/3on3-limitedbattle.html",
     "titleKo": "3대3 리미티드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/07/20AeEZVMqa0Lwr8H/3on3%20thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/07/20AeEZVMqa0Lwr8H/3on3%20thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-29-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmetaverselobby-OP17.html-5",
@@ -1472,7 +1506,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/metaverselobby-OP17.html",
     "titleKo": "OP-17 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/11/zxSL9orXStwmsMml/%E3%83%A1%E3%82%BF%E3%83%90%E3%83%BC%E3%82%B9%E3%83%AD%E3%83%93%E3%83%BCOP17%E7%99%BA%E5%A3%B2%E8%A8%98%E5%BF%B5thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/11/zxSL9orXStwmsMml/%E3%83%A1%E3%82%BF%E3%83%90%E3%83%BC%E3%82%B9%E3%83%AD%E3%83%93%E3%83%BCOP17%E7%99%BA%E5%A3%B2%E8%A8%98%E5%BF%B5thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-08-22-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fsleeve042.html",
@@ -1521,7 +1555,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-op17.html",
     "titleKo": "OP-17 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/03/CcGurO0bsF9kNOtb/%E3%82%B5%E3%83%A0%E3%83%8D%E3%82%A4%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/03/CcGurO0bsF9kNOtb/%E3%82%B5%E3%83%A0%E3%83%8D%E3%82%A4%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-08-21-products%2Fview.do%3Fbrdno%3D6231",
@@ -1553,7 +1587,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-op17-junior.html",
     "titleKo": "OP-17 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/21/yY1ih1ORSK0VqGOg/thumbnail%E5%B0%8F%E4%B8%AD%E5%AD%A6%E7%94%9F%E7%99%BA%E5%A3%B2%E8%A8%98%E5%BF%B516.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/21/yY1ih1ORSK0VqGOg/thumbnail%E5%B0%8F%E4%B8%AD%E5%AD%A6%E7%94%9F%E7%99%BA%E5%A3%B2%E8%A8%98%E5%BF%B516.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-21-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-1",
@@ -1570,7 +1604,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "8월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/24/voAs9C6laRiUnvLZ/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_8%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/24/voAs9C6laRiUnvLZ/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_8%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-16-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fseason1-extra-matching.html-7",
@@ -1586,7 +1620,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-extra-matching.html",
     "titleKo": "매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/22/e7MZSAfyz0r25vC9/ex%20thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/22/e7MZSAfyz0r25vC9/ex%20thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-16-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fseason1-extra.html-9",
@@ -1602,7 +1636,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-extra.html",
     "titleKo": "챔피언십 26-27 Season 1",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/06/SJn0cmmyuLiQVPwE/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/08/06/SJn0cmmyuLiQVPwE/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-15-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fseason1-final-matching.html-8",
@@ -1618,7 +1652,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-final-matching.html",
     "titleKo": "매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/22/SHkAo3mwUPR2UXGf/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/22/SHkAo3mwUPR2UXGf/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-15-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fseason1-final-flagship.html-9",
@@ -1634,7 +1668,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-final-flagship.html",
     "titleKo": "플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/02/ZwNKyqsYg88W1GGT/%E3%82%A8%E3%83%AA%E3%82%A2%E6%B1%BA%E5%8B%9D%20%E3%83%95%E3%83%A9%E3%82%B7%20%E3%82%B5%E3%83%A0%E3%83%8D%E3%82%A4%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/02/ZwNKyqsYg88W1GGT/%E3%82%A8%E3%83%AA%E3%82%A2%E6%B1%BA%E5%8B%9D%20%E3%83%95%E3%83%A9%E3%82%B7%20%E3%82%B5%E3%83%A0%E3%83%8D%E3%82%A4%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-07-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-0",
@@ -1651,7 +1685,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "8월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/24/voAs9C6laRiUnvLZ/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_8%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/24/voAs9C6laRiUnvLZ/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_8%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-07-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fsummer-meetup2026.html-1",
@@ -1668,10 +1702,10 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/summer-meetup2026.html",
     "titleKo": "교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/22/bXuBE9OycZOZiUGZ/thumbnail%E5%A4%8F%E4%BC%91%E3%81%BF%E4%BA%A4%E6%B5%81%E4%BC%9A.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/22/bXuBE9OycZOZiUGZ/thumbnail%E5%A4%8F%E4%BC%91%E3%81%BF%E4%BA%A4%E6%B5%81%E4%BC%9A.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fextra-championship-26-27.html-23",
+    "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fextra-championship-26-27.html-25",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -1685,7 +1719,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/extra-championship-26-27.html",
     "titleKo": "챔피언십 26-27",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/r0betJxzglyNLthy/cs26-27-extra.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/r0betJxzglyNLthy/cs26-27-extra.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fhowtoplay-class08.html-2",
@@ -1702,7 +1736,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/howtoplay-class08.html",
     "titleKo": "8월 초보자 체험 교실",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Ftsutaya-matching.html-3",
@@ -1719,7 +1753,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/tsutaya-matching.html",
     "titleKo": "매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/07/HKatZ54guckCr1Rr/TSUTAYA%20thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/07/HKatZ54guckCr1Rr/TSUTAYA%20thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202608.html-4",
@@ -1736,7 +1770,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202608.html",
     "titleKo": "8월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/23/KV5AmsWOWHv7qAVA/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_8%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/23/KV5AmsWOWHv7qAVA/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_8%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202608.html-5",
@@ -1753,7 +1787,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202608.html",
     "titleKo": "8월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/23/BAb1yAukftOKEzZi/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_8%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/23/BAb1yAukftOKEzZi/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_8%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-08-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fsummer-teaching2026.html-6",
@@ -1770,7 +1804,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/summer-teaching2026.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/29/hOIfQCY8sGmbZHwG/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/29/hOIfQCY8sGmbZHwG/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-07-24-products%2Fview.do%3Fbrdno%3D6057",
@@ -1817,7 +1851,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/howtoplay-class07.html",
     "titleKo": "7월 초보자 체험 교실",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-07-11-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fst36.html",
@@ -1946,7 +1980,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/rookies_battle.html",
     "titleKo": "루키즈 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/03/ZZ6Tc7k1CH03aMB5/thumbnail_%E3%83%AB%E3%83%BC%E3%82%AD%E3%83%BC%E3%82%BA%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/03/ZZ6Tc7k1CH03aMB5/thumbnail_%E3%83%AB%E3%83%BC%E3%82%AD%E3%83%BC%E3%82%BA%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-07-10-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fplaymat-baseshop02.html",
@@ -1978,7 +2012,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/crew_battle.html",
     "titleKo": "크루 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/04/ObWzZQvHk8msYIjf/thumbnail_%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/04/ObWzZQvHk8msYIjf/thumbnail_%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fflagship-battle-202607.html-7",
@@ -1995,14 +2029,14 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/flagship-battle-202607.html",
     "titleKo": "9월 플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/05/29/9VxC1GAEnnCrVOPf/%E3%82%B5%E3%83%A0%E3%83%8D.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/05/29/9VxC1GAEnnCrVOPf/%E3%82%B5%E3%83%A0%E3%83%8D.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202607.html-9",
+    "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202607.html-9",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
-    "title": "スタンダードバトル 7月",
+    "title": "8パックバトル 7月",
     "date": "2026-07-01",
     "scheduleDate": "2026-07-01",
     "endDate": "2026-07-31",
@@ -2010,29 +2044,12 @@
     "calendarKind": "event",
     "calendarPriority": "low",
     "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/standardbattle-202607.html",
-    "titleKo": "7월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/05/28/mn2Jr0x6b2XZQInq/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_7%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "url": "https://www.onepiece-cardgame.com/events/8packs-battle-202607.html",
+    "titleKo": "7월 8팩 배틀",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/hQvWcZY2OBMKQ6WJ/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202607.html-0",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "EVENTS",
-    "title": "スタンダードバトル 7月",
-    "date": "2026-07-01",
-    "scheduleDate": "2026-07-01",
-    "endDate": "2026-07-31",
-    "scheduleLabel": "2026年7月1日[水] ～ 31日[金]​",
-    "calendarKind": "event",
-    "calendarPriority": "low",
-    "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/standardbattle-202607.html",
-    "titleKo": "7월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/05/28/mn2Jr0x6b2XZQInq/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_7%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
-  },
-  {
-    "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202607.html-1",
+    "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202607.html-0",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -2046,7 +2063,24 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202607.html",
     "titleKo": "7월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/05/28/SW6ACZ9pZ3gMrpaf/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_7%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/05/28/SW6ACZ9pZ3gMrpaf/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_7%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
+  },
+  {
+    "id": "calendar-jp-event-2026-07-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202607.html-1",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "EVENTS",
+    "title": "8パックバトル 7月",
+    "date": "2026-07-01",
+    "scheduleDate": "2026-07-01",
+    "endDate": "2026-07-31",
+    "scheduleLabel": "2026年7月1日[水] ～ 31日[金]​",
+    "calendarKind": "event",
+    "calendarPriority": "low",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/events/8packs-battle-202607.html",
+    "titleKo": "7월 8팩 배틀",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/hQvWcZY2OBMKQ6WJ/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-06-26-products%2Fview.do%3Fbrdno%3D5777",
@@ -2077,7 +2111,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/fathersday-matching.html",
     "titleKo": "부모·자녀 매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/02/iw6mfjgBmo5kEM3j/mv.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/02/iw6mfjgBmo5kEM3j/mv.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-06-21-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fhowtoplay-class.html-8",
@@ -2094,7 +2128,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/howtoplay-class.html",
     "titleKo": "6월 초보자 체험 교실",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/31/BeTXos42F4NcS93w/thumbnail06.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-06-19-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-1",
@@ -2111,7 +2145,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "6월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/01/leHN8Tc2YNfaYZvM/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_6%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/01/leHN8Tc2YNfaYZvM/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_6%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-06-05-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-5",
@@ -2128,7 +2162,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "6월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/01/leHN8Tc2YNfaYZvM/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_6%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/06/01/leHN8Tc2YNfaYZvM/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_6%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-06-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F8packs-battle-202606.html-6",
@@ -2145,7 +2179,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/8packs-battle-202606.html",
     "titleKo": "6월 8팩 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/hQvWcZY2OBMKQ6WJ/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/hQvWcZY2OBMKQ6WJ/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-06-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202606.html-7",
@@ -2162,7 +2196,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202606.html",
     "titleKo": "6월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/PreWu5oA4T9CU1Ej/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_6%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/PreWu5oA4T9CU1Ej/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_6%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-06-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202606.html-8",
@@ -2179,7 +2213,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202606.html",
     "titleKo": "6월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/9eWgQOXiCzcPXpRI/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_6%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/9eWgQOXiCzcPXpRI/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_6%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-05-30-products%2Fview.do%3Fbrdno%3D5638",
@@ -2243,7 +2277,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-area.html",
     "titleKo": "챔피언십 26-27 Season 1",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/24/MBFoJrpOCwis8pL9/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/24/MBFoJrpOCwis8pL9/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-05-30-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fseason1-area-flagship.html-1",
@@ -2260,7 +2294,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-area-flagship.html",
     "titleKo": "플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/07/Gjc8ILhS2mImgoBO/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/07/Gjc8ILhS2mImgoBO/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-05-30-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fseason1-area-matching.html-2",
@@ -2277,7 +2311,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/season1-area-matching.html",
     "titleKo": "매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/09/4FAJHtb5ILct5rzp/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/07/09/4FAJHtb5ILct5rzp/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-05-30-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Frelease-event-op16.html-3",
@@ -2294,7 +2328,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/release-event-op16.html",
     "titleKo": "OP-16 발매 기념 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/07/wBuF1vOIruuqBNgF/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/07/wBuF1vOIruuqBNgF/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-05-22-products%2Fview.do%3Fbrdno%3D5631",
@@ -2401,7 +2435,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "5월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/LFOzfejwRxb9SFI5/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_5%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/LFOzfejwRxb9SFI5/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_5%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-05-08-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-4",
@@ -2418,7 +2452,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "5월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/LFOzfejwRxb9SFI5/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_5%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/27/LFOzfejwRxb9SFI5/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_5%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-05-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeetup-202605.html-5",
@@ -2435,7 +2469,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meetup-202605.html",
     "titleKo": "5월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/byll80gUipvmXxLg/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_5%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/byll80gUipvmXxLg/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_5%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-05-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fstandardbattle-202605.html-6",
@@ -2452,7 +2486,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/standardbattle-202605.html",
     "titleKo": "5월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/vw1AC33hCWZ79gmr/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_5%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/vw1AC33hCWZ79gmr/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_5%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-04-25-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fmeet-up-2on2.html-7",
@@ -2469,7 +2503,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/meet-up-2on2.html",
     "titleKo": "교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/08/wrpNCqf8LHkehkz0/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/04/08/wrpNCqf8LHkehkz0/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-04-24-products%2Fview.do%3Fbrdno%3D5147",
@@ -2532,7 +2566,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "4월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/27/kMYT1i4rmSBxL7m7/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_4%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/27/kMYT1i4rmSBxL7m7/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_4%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-04-11-products%2Fview.do%3Fbrdno%3D5141",
@@ -2596,7 +2630,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/friendtag-meetup/",
     "titleKo": "교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/1zCEWhYRljGnRuEV/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/1zCEWhYRljGnRuEV/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-04-10-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-9",
@@ -2613,7 +2647,7 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "4월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/27/kMYT1i4rmSBxL7m7/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_4%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/27/kMYT1i4rmSBxL7m7/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_4%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Fmeetup%2F-0",
@@ -2630,24 +2664,24 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/meetup/",
     "titleKo": "4월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/n9Lshr1aC0gWrUvl/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/n9Lshr1aC0gWrUvl/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1-shop.php-1",
+    "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2F8packs-battle%2F-1",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
-    "title": "チャンピオンシップ26-27 Season 1 店舗予選",
+    "title": "8パックバトル 4月",
     "date": "2026-04-01",
     "scheduleDate": "2026-04-01",
     "endDate": "2026-04-30",
-    "scheduleLabel": "2026年4月1日[水] ～ 4月30日[木]",
+    "scheduleLabel": "2026年4月1日[水] ～ 30日[木]​",
     "calendarKind": "event",
     "calendarPriority": "low",
     "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1-shop.php",
-    "titleKo": "챔피언십 26-27 Season 1",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/Mvxuyn4ROZHvu0Q8/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/8packs-battle/",
+    "titleKo": "4월 8팩 배틀",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/InNXK8Q7lscwZnPo/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Fstandardbattle%2F-2",
@@ -2664,24 +2698,24 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/standardbattle/",
     "titleKo": "4월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/M8gX8laYrM6SyAeF/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/M8gX8laYrM6SyAeF/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2F8packs-battle%2F-3",
+    "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1-shop.php-3",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
-    "title": "8パックバトル 4月",
+    "title": "チャンピオンシップ26-27 Season 1 店舗予選",
     "date": "2026-04-01",
     "scheduleDate": "2026-04-01",
     "endDate": "2026-04-30",
-    "scheduleLabel": "2026年4月1日[水] ～ 30日[木]​",
+    "scheduleLabel": "2026年4月1日[水] ～ 4月30日[木]",
     "calendarKind": "event",
     "calendarPriority": "low",
     "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/8packs-battle/",
-    "titleKo": "4월 8팩 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/InNXK8Q7lscwZnPo/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1-shop.php",
+    "titleKo": "챔피언십 26-27 Season 1",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/18/Mvxuyn4ROZHvu0Q8/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fextra-grand-battle-202604.html-4",
@@ -2698,7 +2732,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/extra-grand-battle-202604.html",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/tTuJyhxUSvmVF5Cm/thumbnail_%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9%E3%82%B0%E3%83%A9%E3%83%B3%E3%83%89%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/tTuJyhxUSvmVF5Cm/thumbnail_%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9%E3%82%B0%E3%83%A9%E3%83%B3%E3%83%89%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-04-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fflagship-battle-202604.html-5",
@@ -2715,7 +2749,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/flagship-battle-202604.html",
     "titleKo": "6월 플래그십 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/ToLelSLc55mcFZFE/thumbnail_%E3%83%95%E3%83%A9%E3%83%83%E3%82%B0%E3%82%B7%E3%83%83%E3%83%97.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/26/ToLelSLc55mcFZFE/thumbnail_%E3%83%95%E3%83%A9%E3%83%83%E3%82%B0%E3%82%B7%E3%83%83%E3%83%97.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-release-2026-03-28-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fofficial-9poket-binder001.php",
@@ -2763,26 +2797,10 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "3월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/mmbQ3O1K9E05W8Ya/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_3%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/mmbQ3O1K9E05W8Ya/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_3%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-03-21-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1_junior-friendly-cup.php-6",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "EVENTS",
-    "title": "Season 1 ジュニアフレンドリーカップ",
-    "date": "2026-03-21",
-    "scheduleDate": "2026-03-21",
-    "scheduleLabel": "2026年3月21日[土]",
-    "calendarKind": "event",
-    "calendarPriority": "low",
-    "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1_junior-friendly-cup.php",
-    "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/LXG69hmM4gMZNFlr/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
-  },
-  {
-    "id": "calendar-jp-event-2026-03-21-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1_bcgfest.php-7",
+    "id": "calendar-jp-event-2026-03-21-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1_bcgfest.php-6",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -2795,10 +2813,42 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1_bcgfest.php",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/2NGNMatmZvM0nA7J/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/2NGNMatmZvM0nA7J/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-03-20-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2025%2Fofficialevents%2Fbcgfest25-26%2Ftokyo.php-8",
+    "id": "calendar-jp-event-2026-03-21-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1_junior-friendly-cup.php-7",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "EVENTS",
+    "title": "Season 1 ジュニアフレンドリーカップ",
+    "date": "2026-03-21",
+    "scheduleDate": "2026-03-21",
+    "scheduleLabel": "2026年3月21日[土]",
+    "calendarKind": "event",
+    "calendarPriority": "low",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1_junior-friendly-cup.php",
+    "titleKo": "일본 공식 이벤트",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/LXG69hmM4gMZNFlr/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
+  },
+  {
+    "id": "calendar-jp-event-2026-03-20-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1_3on3.php-8",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "EVENTS",
+    "title": "Season 1 3on3 Spring",
+    "date": "2026-03-20",
+    "scheduleDate": "2026-03-20",
+    "scheduleLabel": "2026年3月20日[金・祝]",
+    "calendarKind": "event",
+    "calendarPriority": "low",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1_3on3.php",
+    "titleKo": "일본 공식 이벤트",
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/sgh2mbULLWLB7A7m/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
+  },
+  {
+    "id": "calendar-jp-event-2026-03-20-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2025%2Fofficialevents%2Fbcgfest25-26%2Ftokyo.php-9",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -2812,23 +2862,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/2025/officialevents/bcgfest25-26/tokyo.php",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/16/PMCxiWeWjmlUQgLv/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
-  },
-  {
-    "id": "calendar-jp-event-2026-03-20-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2026%2Fofficialevents%2Fchampionship%2Fseason1_3on3.php-9",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "EVENTS",
-    "title": "Season 1 3on3 Spring",
-    "date": "2026-03-20",
-    "scheduleDate": "2026-03-20",
-    "scheduleLabel": "2026年3月20日[金・祝]",
-    "calendarKind": "event",
-    "calendarPriority": "low",
-    "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/events/2026/officialevents/championship/season1_3on3.php",
-    "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/sgh2mbULLWLB7A7m/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/16/PMCxiWeWjmlUQgLv/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-06-https%3A%2F%2Fbandaicardgames-metaverselobby.com%2Fweekend%2Fonepiece%2F-1",
@@ -2845,10 +2879,10 @@
     "calendarOnly": true,
     "url": "https://bandaicardgames-metaverselobby.com/weekend/onepiece/",
     "titleKo": "3월 메타버스 로비 주말 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/mmbQ3O1K9E05W8Ya/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_3%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/mmbQ3O1K9E05W8Ya/%E3%83%A1%E3%82%BF%E3%83%AD%E3%83%93WE_3%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fchampionship-26-27.html-22",
+    "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fchampionship-26-27.html-24",
     "locale": "JP",
     "source": "JP_OFFICIAL",
     "category": "EVENTS",
@@ -2862,7 +2896,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/championship-26-27.html",
     "titleKo": "챔피언십 26-27",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/16/MRCtt8cC1biTHJqK/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/16/MRCtt8cC1biTHJqK/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Fstandardbattle%2F-2",
@@ -2879,7 +2913,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/standardbattle/",
     "titleKo": "3월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/vnIJtmzlxCNm1TKh/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_3%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/vnIJtmzlxCNm1TKh/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_3%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Fstandardbattle%2F-3",
@@ -2896,7 +2930,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/standardbattle/",
     "titleKo": "3월 스탠다드 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/gz86NQ7UEgkBA4rS/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_3%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/gz86NQ7UEgkBA4rS/thumbnail_%E3%82%B9%E3%82%BF%E3%83%B3%E3%83%80%E3%83%BC%E3%83%89%E3%83%90%E3%83%88%E3%83%AB_3%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2F2025%2Fofficialevents%2F8packs-battle_02%2F-4",
@@ -2913,7 +2947,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/2025/officialevents/8packs-battle_02/",
     "titleKo": "3월 8팩 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/LaC2I63zcXFBjNgI/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/LaC2I63zcXFBjNgI/thumbnail_8%E3%83%91%E3%83%83%E3%82%AF%E3%83%90%E3%83%88%E3%83%AB.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Fmeetup%2F-5",
@@ -2930,7 +2964,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/meetup/",
     "titleKo": "3월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/QmUa06vNeA7l3f0P/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_3%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/QmUa06vNeA7l3f0P/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_3%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Fmeetup%2F-6",
@@ -2947,7 +2981,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/meetup/",
     "titleKo": "3월 교류회",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/QmUa06vNeA7l3f0P/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_3%E6%9C%88.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/23/QmUa06vNeA7l3f0P/thumbnail_%E4%BA%A4%E6%B5%81%E4%BC%9A_3%E6%9C%88.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-jp-event-2026-03-01-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fevents%2Fofficialevents%2Ffamily-matching-battle%2F-7",
@@ -2964,7 +2998,7 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/events/officialevents/family-matching-battle/",
     "titleKo": "부모·자녀 매칭 배틀",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/16/3fMCf7TbEoBOmSwt/thumbnail.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/16/3fMCf7TbEoBOmSwt/thumbnail.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
     "id": "calendar-kr-release-2026-02-28-products%2Fview.do%3Fbrdno%3D4759",
@@ -3383,22 +3417,22 @@
     "calendarOnly": true,
     "url": "https://onepiece-cardgame.com/events/2025/officialevents/bcgfest25-26/",
     "titleKo": "일본 공식 이벤트",
-    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/yF7ujKsIWnAc0f6e/bnr_bcgfest25-26.webp?_=bf4844823ffa4b49e4bbada268690c02"
+    "imageUrl": "https://www.onepiece-cardgame.com/onepiececg/bccard/jp/news/2026/03/17/yF7ujKsIWnAc0f6e/bnr_bcgfest25-26.webp?_=4fb77a802cf561b65e10b2d4306ae9ba"
   },
   {
-    "id": "calendar-jp-release-2025-08-23-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fsleeve027.php",
+    "id": "calendar-jp-release-2025-08-23-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fboosters%2Fop13%2F",
     "locale": "JP",
     "source": "JP_OFFICIAL",
-    "category": "その他",
-    "title": "オフィシャルカードスリーブ 公認店エディションVol.5",
+    "category": "ブースター",
+    "title": "ブースターパック 受け継がれる意志【OP-13】",
     "date": "2025-08-23",
     "scheduleDate": "2025-08-23",
     "scheduleLabel": "2025-08-23",
     "calendarKind": "release",
-    "calendarPriority": "medium",
+    "calendarPriority": "high",
     "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/products/other/sleeve027.php",
-    "titleKo": "오피셜 카드 슬리브",
+    "url": "https://www.onepiece-cardgame.com/products/boosters/op13/",
+    "titleKo": "부스터 팩 [OP-13]",
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
@@ -3418,19 +3452,19 @@
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
-    "id": "calendar-jp-release-2025-08-23-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fboosters%2Fop13%2F",
+    "id": "calendar-jp-release-2025-08-23-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fsleeve027.php",
     "locale": "JP",
     "source": "JP_OFFICIAL",
-    "category": "ブースター",
-    "title": "ブースターパック 受け継がれる意志【OP-13】",
+    "category": "その他",
+    "title": "オフィシャルカードスリーブ 公認店エディションVol.5",
     "date": "2025-08-23",
     "scheduleDate": "2025-08-23",
     "scheduleLabel": "2025-08-23",
     "calendarKind": "release",
-    "calendarPriority": "high",
+    "calendarPriority": "medium",
     "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/products/boosters/op13/",
-    "titleKo": "부스터 팩 [OP-13]",
+    "url": "https://www.onepiece-cardgame.com/products/other/sleeve027.php",
+    "titleKo": "오피셜 카드 슬리브",
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
@@ -4506,22 +4540,6 @@
     "imageUrl": "https://onepiece-cardgame.kr/fileDownload?downname=202402291142502115"
   },
   {
-    "id": "calendar-jp-release-2024-02-24-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fstorage004.php",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "その他",
-    "title": "オフィシャルストレージボックス プレミアムエディション",
-    "date": "2024-02-24",
-    "scheduleDate": "2024-02-24",
-    "scheduleLabel": "2024-02-24",
-    "calendarKind": "release",
-    "calendarPriority": "high",
-    "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/products/other/storage004.php",
-    "titleKo": "오피셜 스토리지 박스",
-    "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
-  },
-  {
     "id": "calendar-jp-release-2024-02-24-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fboosters%2Fop07.php",
     "locale": "JP",
     "source": "JP_OFFICIAL",
@@ -4551,6 +4569,22 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/products/other/sleeve009.php",
     "titleKo": "오피셜 카드 슬리브",
+    "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
+  },
+  {
+    "id": "calendar-jp-release-2024-02-24-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fstorage004.php",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "その他",
+    "title": "オフィシャルストレージボックス プレミアムエディション",
+    "date": "2024-02-24",
+    "scheduleDate": "2024-02-24",
+    "scheduleLabel": "2024-02-24",
+    "calendarKind": "release",
+    "calendarPriority": "high",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/products/other/storage004.php",
+    "titleKo": "오피셜 스토리지 박스",
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
@@ -4842,22 +4876,6 @@
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
-    "id": "calendar-jp-release-2023-04-29-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fplaymat001.php",
-    "locale": "JP",
-    "source": "JP_OFFICIAL",
-    "category": "その他",
-    "title": "オフィシャルプレイマット",
-    "date": "2023-04-29",
-    "scheduleDate": "2023-04-29",
-    "scheduleLabel": "2023-04-29",
-    "calendarKind": "release",
-    "calendarPriority": "medium",
-    "calendarOnly": true,
-    "url": "https://www.onepiece-cardgame.com/products/other/playmat001.php",
-    "titleKo": "오피셜 플레이매트",
-    "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
-  },
-  {
     "id": "calendar-jp-release-2023-04-29-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fdecks%2Ffamilydeckset.php",
     "locale": "JP",
     "source": "JP_OFFICIAL",
@@ -4871,6 +4889,22 @@
     "calendarOnly": true,
     "url": "https://www.onepiece-cardgame.com/products/decks/familydeckset.php",
     "titleKo": "일본 공식 상품",
+    "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
+  },
+  {
+    "id": "calendar-jp-release-2023-04-29-https%3A%2F%2Fwww.onepiece-cardgame.com%2Fproducts%2Fother%2Fplaymat001.php",
+    "locale": "JP",
+    "source": "JP_OFFICIAL",
+    "category": "その他",
+    "title": "オフィシャルプレイマット",
+    "date": "2023-04-29",
+    "scheduleDate": "2023-04-29",
+    "scheduleLabel": "2023-04-29",
+    "calendarKind": "release",
+    "calendarPriority": "medium",
+    "calendarOnly": true,
+    "url": "https://www.onepiece-cardgame.com/products/other/playmat001.php",
+    "titleKo": "오피셜 플레이매트",
     "imageUrl": "https://www.onepiece-cardgame.com/renewal/images/common/thumbnail/img_thumbnail_sq.webp"
   },
   {
